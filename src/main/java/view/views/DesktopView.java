@@ -45,15 +45,16 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package clinicpms.view.views;
+package view.views;
 
-//import clinicpms.controller.ViewController.DesktopViewControllerActionEvent;
-import clinicpms.controller.DesktopViewController;
-import clinicpms.controller.ViewController;
-//import clinicpms.controller.DesktopViewController.DesktopViewControllerActionEvent;
-//import clinicpms.controller.DesktopViewController.DesktopViewControllerPropertyChangeEvent;
-import clinicpms.controller.Descriptor;
-import clinicpms.view.View;
+//import controller.ViewController.DesktopViewControllerActionEvent;
+import controller.DesktopViewController;
+import controller.ViewController;
+//import controller.DesktopViewController.DesktopViewControllerActionEvent;
+//import controller.DesktopViewController.DesktopViewControllerPropertyChangeEvent;
+import controller.Descriptor;
+import view.View;
+import view.views.view_support_classes.*;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -94,7 +95,7 @@ public class DesktopView extends javax.swing.JFrame implements PropertyChangeLis
     private JDesktopPane desktop;
     private DesktopViewScrollPane desktopScrollPane;
     private JPanel clinicLogoPane;
-    private final String clinicLogo = "/images/xclinic3.jpg";
+    private final String clinicLogo = "/xclinic3.jpg";
     private Boolean isPMSStoreDefined = null;
     private Descriptor entityDescriptor = null;
     private final String SELECT_VIEW_MENU_TITLE = "View";
@@ -321,6 +322,7 @@ public class DesktopView extends javax.swing.JFrame implements PropertyChangeLis
 
         //prepare for CLINIC_LOGO_VIEW
         ImageIcon icon = new ImageIcon(this.getClass().getResource(clinicLogo));
+        
         JLabel label = new JLabel();
         label.setIcon(icon);
         label.setPreferredSize(new Dimension(357, 92));//400 x 122
@@ -575,6 +577,10 @@ public class DesktopView extends javax.swing.JFrame implements PropertyChangeLis
         /**
          * Menu request to close view is routed to the view controller
          */
+        
+        ImageIcon icon = new ImageIcon(this.getClass().getResource(clinicLogo));
+        new MailMerger();
+        new Emailer("abc");
         ActionEvent actionEvent = new ActionEvent(this, 
                 ActionEvent.ACTION_PERFORMED,
                 DesktopViewController.DesktopViewControllerActionEvent.VIEW_CLOSE_REQUEST.toString());

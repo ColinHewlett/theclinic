@@ -3,11 +3,11 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package clinicpms.controller;
-import clinicpms.model.Entity;
-import clinicpms.model.Appointment;
-import clinicpms.view.views.view_support_classes.renderers.TableHeaderCellBorderRenderer;
-import clinicpms.repository.StoreException;
+package controller;
+import model.Entity;
+import model.Appointment;
+import view.views.view_support_classes.renderers.TableHeaderCellBorderRenderer;
+import repository.StoreException;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionListener;

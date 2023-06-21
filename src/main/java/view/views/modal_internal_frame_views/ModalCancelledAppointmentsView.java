@@ -2,19 +2,19 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package clinicpms.view.views.modal_internal_frame_views;
+package view.views.modal_internal_frame_views;
 
-import clinicpms.view.views.view_support_classes.renderers.AppointmentsTableDurationRenderer;
-import clinicpms.view.views.view_support_classes.renderers.AppointmentsTableLocalDateRenderer;
-import clinicpms.view.views.view_support_classes.renderers.AppointmentsTablePatientRenderer;
-import clinicpms.controller.Descriptor;
-import clinicpms.controller.ViewController;
-import clinicpms.model.Appointment;
-import clinicpms.model.Patient;
-import clinicpms.view.views.view_support_classes.renderers.TableHeaderCellBorderRenderer;
-import clinicpms.view.views.view_support_classes.models.Appointments6ColumnTableModel;
-import clinicpms.view.View;
-import clinicpms.view.views.view_support_classes.models.Appointments5ColumnTableModel;
+import view.views.view_support_classes.renderers.AppointmentsTableDurationRenderer;
+import view.views.view_support_classes.renderers.AppointmentsTableLocalDateRenderer;
+import view.views.view_support_classes.renderers.AppointmentsTablePatientRenderer;
+import controller.Descriptor;
+import controller.ViewController;
+import model.Appointment;
+import model.Patient;
+import view.views.view_support_classes.renderers.TableHeaderCellBorderRenderer;
+import view.views.view_support_classes.models.Appointments6ColumnTableModel;
+import view.View;
+import view.views.view_support_classes.models.Appointments5ColumnTableModel;
 import java.awt.AWTEvent;
 import java.awt.ActiveEvent;
 import java.awt.Color;

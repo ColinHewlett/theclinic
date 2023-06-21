@@ -3,11 +3,11 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package clinicpms.view.views.view_support_classes.models;
+package view.views.view_support_classes.models;
 
-//import clinicpms.view.views.schedule_contact_details_view.*;
-import clinicpms.model.Notification;
-import clinicpms.controller.Descriptor;
+//import view.views.schedule_contact_details_view.*;
+import model.Notification;
+import controller.Descriptor;
 import java.time.format.DateTimeFormatter;
 import java.time.LocalDate;
 import java.util.ArrayList;

@@ -3,11 +3,11 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package clinicpms.view.views.modal_internal_frame_views;
+package view.views.modal_internal_frame_views;
 
-import clinicpms.controller.Descriptor;
-import clinicpms.controller.ViewController;
-import clinicpms.view.View;
+import controller.Descriptor;
+import controller.ViewController;
+import view.View;
 import java.awt.AWTEvent;
 import java.awt.ActiveEvent;
 import java.awt.Component;

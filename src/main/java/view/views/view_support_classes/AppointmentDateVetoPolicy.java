@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package clinicpms.view.views.view_support_classes;
+package view.views.view_support_classes;
 import com.github.lgooddatepicker.optionalusertools.DateVetoPolicy;
 import java.time.DayOfWeek;
 import java.time.LocalDate;

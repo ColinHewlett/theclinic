@@ -2,14 +2,14 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package clinicpms.controller;
+package controller;
 
-import static clinicpms.controller.ViewController.displayErrorMessage;
-import clinicpms.model.Appointment;
-import clinicpms.model.Entity;
-import clinicpms.view.views.DesktopView;
-import clinicpms.repository.StoreException;//01/03/2023
-import clinicpms.view.View;
+import static controller.ViewController.displayErrorMessage;
+import model.Appointment;
+import model.Entity;
+import view.views.DesktopView;
+import repository.StoreException;//01/03/2023
+import view.View;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;

@@ -3,10 +3,10 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package clinicpms.controller;
+package controller;
 
-import clinicpms.model.Notification;
-import clinicpms.model.Entity.Scope;
+import model.Notification;
+import model.Entity.Scope;
 import java.beans.PropertyVetoException;
 /**
  * ThePatient is used temporarily to start a refactored and restructured Patient process
@@ -14,11 +14,11 @@ import java.beans.PropertyVetoException;
  * -- this removes the need for a separate Patients class
  * -- thus EntityDescriptor.thePatient is also being updated to an ArrayList<ThePatient>
  */
-import clinicpms.model.Patient;
+import model.Patient;
 
-import clinicpms.repository.StoreException;//01/03/2023
-import clinicpms.view.views.DesktopView;
-import clinicpms.view.View;
+import repository.StoreException;//01/03/2023
+import view.views.DesktopView;
+import view.View;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;

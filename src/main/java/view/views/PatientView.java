@@ -3,18 +3,18 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package clinicpms.view.views;
+package view.views;
 
-import clinicpms.view.views.view_support_classes.models.Appointments3ColumnTableModel;
-import clinicpms.view.views.view_support_classes.renderers.AppointmentsTableLocalDateTimeRenderer;
-import clinicpms.view.views.view_support_classes.renderers.AppointmentsTableDurationRenderer;
-import clinicpms.controller.Descriptor;
-import clinicpms.controller.ViewController;
-import clinicpms.view.View;
-import clinicpms.model.Patient;
-import clinicpms.model.Appointment;
-import clinicpms.model.Entity;
-import clinicpms.view.views.exceptions.CrossCheckErrorException; 
+import view.views.view_support_classes.models.Appointments3ColumnTableModel;
+import view.views.view_support_classes.renderers.AppointmentsTableLocalDateTimeRenderer;
+import view.views.view_support_classes.renderers.AppointmentsTableDurationRenderer;
+import controller.Descriptor;
+import controller.ViewController;
+import view.View;
+import model.Patient;
+import model.Appointment;
+import model.Entity;
+import view.views.exceptions.CrossCheckErrorException; 
 import com.github.lgooddatepicker.components.DatePicker;
 import com.github.lgooddatepicker.components.DatePickerSettings;
 import com.github.lgooddatepicker.optionalusertools.DateChangeListener;
@@ -35,6 +35,8 @@ import java.util.Iterator;
 //import javax.swing.JInternalFrame;
 import javax.swing.JOptionPane;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.InternalFrameAdapter;
@@ -131,7 +133,15 @@ public class PatientView extends View{
         this.cmbPatientSelector.addActionListener((ActionEvent e) -> cmbPatientSelectorActionPerformed(e));
         DatePickerSettings settings = new DatePickerSettings();
         dobDatePicker.addDateChangeListener((new PatientView.DOBDatePickerDateChangeListener()));
-        recallDatePicker.addDateChangeListener(new PatientView.RecallDatePickerDateChangeListener());       
+        recallDatePicker.addDateChangeListener(new PatientView.RecallDatePickerDateChangeListener()); 
+        
+        ImageIcon icon = new ImageIcon(this.getClass().getResource("/datepickerbutton1.png"));
+        JButton datePickerButton = dobDatePicker.getComponentToggleCalendarButton();
+        datePickerButton.setText("");
+        datePickerButton.setIcon(icon);
+        datePickerButton = recallDatePicker.getComponentToggleCalendarButton();
+        datePickerButton.setText("");
+        datePickerButton.setIcon(icon);
     }
     
     public void initialiseView(){        
@@ -935,7 +945,7 @@ public class PatientView extends View{
         jTextField1 = new javax.swing.JTextField();
         jLabel4 = new javax.swing.JLabel();
         pnlGuardianDetails = new javax.swing.JPanel();
-        cmbSelectGuardian = new javax.swing.JComboBox<clinicpms.model.Patient>();
+        cmbSelectGuardian = new javax.swing.JComboBox<model.Patient>();
         lblGuardianPatientName = new javax.swing.JLabel();
         lblGuardianIsAPatient = new javax.swing.JLabel();
         cmbIsGuardianAPatient = new javax.swing.JComboBox<YesNoItem>();
@@ -1199,7 +1209,7 @@ public class PatientView extends View{
 
         cmbSelectGuardian.addItemListener(itemSelectGuardianListener);
         cmbSelectGuardian.setEditable(false);
-        cmbSelectGuardian.setModel(new DefaultComboBoxModel<clinicpms.model.Patient>());
+        cmbSelectGuardian.setModel(new DefaultComboBoxModel<model.Patient>());
         cmbSelectGuardian.setMinimumSize(new java.awt.Dimension(175, 22));
         cmbSelectGuardian.setPreferredSize(new java.awt.Dimension(194, 22));
         cmbSelectGuardian.addActionListener(new java.awt.event.ActionListener() {
@@ -1717,7 +1727,7 @@ public class PatientView extends View{
     private javax.swing.JComboBox<GenderItem> cmbGender;
     private javax.swing.JComboBox<YesNoItem> cmbIsGuardianAPatient;
     private javax.swing.JComboBox<Patient> cmbPatientSelector;
-    private javax.swing.JComboBox<clinicpms.model.Patient> cmbSelectGuardian;
+    private javax.swing.JComboBox<model.Patient> cmbSelectGuardian;
     private javax.swing.JComboBox<TitleItem> cmbTitle;
     private com.github.lgooddatepicker.components.DatePicker dobDatePicker;
     private javax.swing.JLabel jLabel1;

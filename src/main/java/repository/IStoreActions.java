@@ -3,13 +3,13 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package clinicpms.repository;
+package repository;
 
-import clinicpms.model.Appointment;
-import clinicpms.model.Entity;
-import clinicpms.model.Notification;
-import clinicpms.model.Patient;
-import clinicpms.model.SurgeryDaysAssignment;
+import model.Appointment;
+import model.Entity;
+import model.Notification;
+import model.Patient;
+import model.SurgeryDaysAssignment;
 import java.awt.Point;
 import java.util.List;
 

@@ -3,11 +3,11 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package clinicpms.view.views;
+package view.views;
 
-import clinicpms.controller.Descriptor;
-import clinicpms.controller.ViewController;
-import clinicpms.view.View;
+import controller.Descriptor;
+import controller.ViewController;
+import view.View;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;

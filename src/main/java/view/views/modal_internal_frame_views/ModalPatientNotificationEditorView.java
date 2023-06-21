@@ -3,16 +3,16 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package clinicpms.view.views.modal_internal_frame_views;
+package view.views.modal_internal_frame_views;
 
-import clinicpms.view.views.view_support_classes.models.PatientNotificationView2ColumnTableModel;
-import clinicpms.view.views.view_support_classes.renderers.PatientNotificationEditorTableLocalDateRenderer;
-import clinicpms.controller.Descriptor;
-import clinicpms.controller.ViewController;
-import clinicpms.model.Patient;
-import clinicpms.model.Notification;
-import clinicpms.view.views.view_support_classes.renderers.TableHeaderCellBorderRenderer;
-import clinicpms.view.View;
+import view.views.view_support_classes.models.PatientNotificationView2ColumnTableModel;
+import view.views.view_support_classes.renderers.PatientNotificationEditorTableLocalDateRenderer;
+import controller.Descriptor;
+import controller.ViewController;
+import model.Patient;
+import model.Notification;
+import view.views.view_support_classes.renderers.TableHeaderCellBorderRenderer;
+import view.View;
 //import com.github.lgooddatepicker.components.DatePicker;
 import com.github.lgooddatepicker.components.DatePickerSettings;
 //import com.github.lgooddatepicker.optionalusertools.DateChangeListener;
@@ -292,7 +292,7 @@ public class ModalPatientNotificationEditorView extends View {
 
         buttonGroup1 = new javax.swing.ButtonGroup();
         jPanel1 = new javax.swing.JPanel();
-        cmbSelectPatient = new javax.swing.JComboBox<clinicpms.model.Patient>();
+        cmbSelectPatient = new javax.swing.JComboBox<model.Patient>();
         jPanel2 = new javax.swing.JPanel();
         jLabel2 = new javax.swing.JLabel();
         dpNotificationDate = new com.github.lgooddatepicker.components.DatePicker();
@@ -315,7 +315,7 @@ public class ModalPatientNotificationEditorView extends View {
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Select patient", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 1, 11))); // NOI18N
 
-        cmbSelectPatient.setModel(new javax.swing.DefaultComboBoxModel<clinicpms.model.Patient>());
+        cmbSelectPatient.setModel(new javax.swing.DefaultComboBoxModel<model.Patient>());
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -591,7 +591,7 @@ public class ModalPatientNotificationEditorView extends View {
     private javax.swing.JButton btnCloseView;
     private javax.swing.JButton btnCreateUpdatePatientNotification;
     private javax.swing.ButtonGroup buttonGroup1;
-    private javax.swing.JComboBox<clinicpms.model.Patient> cmbSelectPatient;
+    private javax.swing.JComboBox<model.Patient> cmbSelectPatient;
     private com.github.lgooddatepicker.components.DatePicker dpNotificationDate;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;

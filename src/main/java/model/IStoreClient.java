@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package clinicpms.model;
+package model;
 
 /**
  * Interface simply defines the type of an object which can access persistent store methods in the concrete store class 

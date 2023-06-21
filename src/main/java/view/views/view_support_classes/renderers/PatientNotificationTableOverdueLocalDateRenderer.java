@@ -3,9 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package clinicpms.view.views.view_support_classes.renderers;
-import clinicpms.model.Notification;
-import clinicpms.view.views.view_support_classes.models.PatientNotificationView4ColumnTableModel;
+package view.views.view_support_classes.renderers;
+import model.Notification;
+import view.views.view_support_classes.models.PatientNotificationView4ColumnTableModel;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;

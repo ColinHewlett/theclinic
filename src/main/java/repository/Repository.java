@@ -2,15 +2,15 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package clinicpms.repository;
+package repository;
 
-import static clinicpms.controller.ViewController.displayErrorMessage;
-import clinicpms.model.Appointment;
-import clinicpms.model.Entity;
-import clinicpms.model.IStoreClient;
-import clinicpms.model.Patient;
-import clinicpms.model.Notification;
-import clinicpms.model.SurgeryDaysAssignment;
+import static controller.ViewController.displayErrorMessage;
+import model.Appointment;
+import model.Entity;
+import model.IStoreClient;
+import model.Patient;
+import model.Notification;
+import model.SurgeryDaysAssignment;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.DatabaseBuilder;
 import java.awt.Point;
@@ -717,11 +717,11 @@ public class Repository implements IStoreActions {
     private void doUpdateAppointment(String sql, Entity entity)throws StoreException{
         if (entity != null){
             if (entity.getIsAppointment()){
-                clinicpms.repository.AppointmentDelegate delegate = (clinicpms.repository.AppointmentDelegate)entity;
+                repository.AppointmentDelegate delegate = (repository.AppointmentDelegate)entity;
                 try{
                     PreparedStatement preparedStatement = getPMSStoreConnection().prepareStatement(sql);
                     if (delegate.getPatient() != null) {
-                        preparedStatement.setInt(1, ((clinicpms.repository.PatientDelegate)delegate.getPatient()).getPatientKey());
+                        preparedStatement.setInt(1, ((repository.PatientDelegate)delegate.getPatient()).getPatientKey());
                     }
                     preparedStatement.setTimestamp(2, Timestamp.valueOf(delegate.getStart()));
                     preparedStatement.setLong(3, delegate.getDuration().toMinutes());

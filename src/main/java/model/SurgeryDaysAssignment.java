@@ -3,12 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package clinicpms.model;
+package model;
 
 //<editor-fold defaultstate="collapsed" desc="Imports">
-import clinicpms.repository.Repository;
-import clinicpms.repository.StoreException;//01/03/2023
-import clinicpms._system_environment_variables.SystemDefinitions;
+import repository.Repository;
+import repository.StoreException;//01/03/2023
+import _system_environment_variables.SystemDefinitions;
 import java.awt.Point;
 import java.time.DayOfWeek;
 import java.util.HashMap;

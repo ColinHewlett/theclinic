@@ -3,12 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package clinicpms.view.views.factory_methods;
+package view.views.factory_methods;
 
-import clinicpms.view.views.AppointmentRemindersView;
-import clinicpms.view.views.DesktopView;
-import clinicpms.controller.Descriptor;
-import clinicpms.view.*;
+import view.views.AppointmentRemindersView;
+import view.views.DesktopView;
+import controller.Descriptor;
+import view.*;
 import java.awt.event.ActionListener;
 /**
  *

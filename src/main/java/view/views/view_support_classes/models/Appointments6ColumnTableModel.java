@@ -2,10 +2,10 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package clinicpms.view.views.view_support_classes.models;
+package view.views.view_support_classes.models;
 
-import clinicpms.model.Appointment;
-import clinicpms.model.Patient;
+import model.Appointment;
+import model.Patient;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.LocalTime;

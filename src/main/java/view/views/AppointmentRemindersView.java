@@ -3,15 +3,15 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package clinicpms.view.views;
+package view.views;
 
-import clinicpms.view.views.view_support_classes.models.AppointmentRemindersView6ColumnTableModel;
-import clinicpms.view.views.view_support_classes.renderers.TableHeaderCellBorderRenderer;
-import clinicpms.view.views.view_support_classes.renderers.AppointmentsTableDurationRenderer;
-import clinicpms.controller.Descriptor;
-import clinicpms.controller.ViewController;
-import clinicpms.model.Appointment;
-import clinicpms.view.View;
+import view.views.view_support_classes.models.AppointmentRemindersView6ColumnTableModel;
+import view.views.view_support_classes.renderers.TableHeaderCellBorderRenderer;
+import view.views.view_support_classes.renderers.AppointmentsTableDurationRenderer;
+import controller.Descriptor;
+import controller.ViewController;
+import model.Appointment;
+import view.View;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;

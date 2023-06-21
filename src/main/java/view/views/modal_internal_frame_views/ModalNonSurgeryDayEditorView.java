@@ -3,12 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package clinicpms.view.views.modal_internal_frame_views;
+package view.views.modal_internal_frame_views;
 
-import clinicpms.view.views.view_support_classes.AppointmentDateVetoPolicy;
-import clinicpms.controller.Descriptor;
-import clinicpms.controller.ViewController;
-import clinicpms.view.View;
+import view.views.view_support_classes.AppointmentDateVetoPolicy;
+import controller.Descriptor;
+import controller.ViewController;
+import view.View;
 import com.github.lgooddatepicker.components.DatePickerSettings;
 import java.awt.AWTEvent;
 import java.awt.ActiveEvent;

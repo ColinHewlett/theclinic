@@ -3,17 +3,17 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package clinicpms.controller;
+package controller;
 
-import static clinicpms.controller.ViewController.displayErrorMessage;
-import static clinicpms.controller.ViewController.ViewControllers;
-import clinicpms.model.Entity;
-import clinicpms.model.Entity.Scope;
-import clinicpms._system_environment_variables.SystemDefinitions;
+import static controller.ViewController.displayErrorMessage;
+import static controller.ViewController.ViewControllers;
+import model.Entity;
+import model.Entity.Scope;
+import _system_environment_variables.SystemDefinitions;
 import org.apache.commons.io.FilenameUtils;
-import clinicpms.model.*;
-import clinicpms.repository.StoreException;//01/03/2023
-import clinicpms.view.views.DesktopView;
+import model.*;
+import repository.StoreException;//01/03/2023
+import view.views.DesktopView;
 import java.awt.event.ActionEvent;
 import java.awt.Point;
 import java.beans.PropertyChangeEvent;
@@ -529,7 +529,7 @@ public class DesktopViewController extends ViewController{
             avc.getView().setIconifiable(true);
             avc.getView().setResizable(false);
             avc.getView().setSelected(true);
-            avc.getView().setSize(800,560);
+            avc.getView().setSize(769,548);
             }
         catch (StoreException ex){
             displayErrorMessage(ex.getMessage(),"DesktopViewController error",JOptionPane.WARNING_MESSAGE);

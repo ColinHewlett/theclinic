@@ -3,12 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package clinicpms.controller;
+package controller;
 
-import clinicpms.model.Appointment;
-import clinicpms.model.Patient;
-import clinicpms.model.Notification;
-import clinicpms.model.SurgeryDaysAssignment;
+import model.Appointment;
+import model.Patient;
+import model.Notification;
+import model.SurgeryDaysAssignment;
 import java.awt.Point;
 import java.util.ArrayList;
 import java.time.Duration;

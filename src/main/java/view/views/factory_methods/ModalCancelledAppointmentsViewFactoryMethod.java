@@ -2,12 +2,12 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package clinicpms.view.views.factory_methods;
+package view.views.factory_methods;
 
-import clinicpms.controller.Descriptor;
-import clinicpms.view.View;
-import clinicpms.view.views.DesktopView;
-import clinicpms.view.views.modal_internal_frame_views.ModalCancelledAppointmentsView;
+import controller.Descriptor;
+import view.View;
+import view.views.DesktopView;
+import view.views.modal_internal_frame_views.ModalCancelledAppointmentsView;
 import java.awt.event.ActionListener;
 
 /**

@@ -3,9 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package clinicpms.model;
+package model;
 
-import clinicpms.repository.StoreException;//01/03/2023
+import repository.StoreException;//01/03/2023
 import java.awt.Point;
 
 /**

@@ -3,24 +3,24 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package clinicpms.view;
+package view;
 
-import clinicpms.view.views.factory_methods.PatientFactoryMethod;
-import clinicpms.view.views.factory_methods.ModalPatientSelectionViewFactoryMethod;
-import clinicpms.view.views.factory_methods.ModalAppointmentCreatorEditorFactoryMethod;
-import clinicpms.view.views.factory_methods.ModalNonSurgeryDayEditorFactoryMethod;
-import clinicpms.view.views.factory_methods.PatientNotificationFactoryMethod;
-import clinicpms.view.views.factory_methods.AppointmentScheduleFactoryMethod;
-import clinicpms.view.views.factory_methods.ModalSurgeryDaysEditorFactoryMethod;
-import clinicpms.view.views.factory_methods.ModalPatientNotificationEditorFactoryMethod;
-import clinicpms.view.views.factory_methods.AppointmentRemindersFactoryMethod;
-import clinicpms.view.views.factory_methods.ImportProgressFactoryMethod;
-import clinicpms.view.views.factory_methods.ModalEmptySlotScannerFactoryMethod;
-import clinicpms.view.views.factory_methods.ModalCancelledAppointmentsViewFactoryMethod;
-import clinicpms.view.views.DesktopView;
-import clinicpms.controller.Descriptor;
-import clinicpms.view.views.interfaces.IView;
-import clinicpms.view.views.interfaces.IViewInternalFrameListener;
+import view.views.factory_methods.PatientFactoryMethod;
+import view.views.factory_methods.ModalPatientSelectionViewFactoryMethod;
+import view.views.factory_methods.ModalAppointmentCreatorEditorFactoryMethod;
+import view.views.factory_methods.ModalNonSurgeryDayEditorFactoryMethod;
+import view.views.factory_methods.PatientNotificationFactoryMethod;
+import view.views.factory_methods.AppointmentScheduleFactoryMethod;
+import view.views.factory_methods.ModalSurgeryDaysEditorFactoryMethod;
+import view.views.factory_methods.ModalPatientNotificationEditorFactoryMethod;
+import view.views.factory_methods.AppointmentRemindersFactoryMethod;
+import view.views.factory_methods.ImportProgressFactoryMethod;
+import view.views.factory_methods.ModalEmptySlotScannerFactoryMethod;
+import view.views.factory_methods.ModalCancelledAppointmentsViewFactoryMethod;
+import view.views.DesktopView;
+import controller.Descriptor;
+import view.views.interfaces.IView;
+import view.views.interfaces.IViewInternalFrameListener;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeListener;
 import java.time.format.DateTimeFormatter;

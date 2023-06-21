@@ -2,12 +2,12 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package clinicpms.view.views.modal_internal_frame_views;
+package view.views.modal_internal_frame_views;
 
-import clinicpms.controller.Descriptor;
-import clinicpms.controller.ViewController;
-import clinicpms.model.Patient;
-import clinicpms.view.View;
+import controller.Descriptor;
+import controller.ViewController;
+import model.Patient;
+import view.View;
 import java.awt.AWTEvent;
 import java.awt.ActiveEvent;
 import java.awt.Component;

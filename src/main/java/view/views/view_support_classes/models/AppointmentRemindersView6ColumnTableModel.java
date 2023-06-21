@@ -3,11 +3,11 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package clinicpms.view.views.view_support_classes.models;
+package view.views.view_support_classes.models;
 
-import clinicpms.model.Appointment;
-import clinicpms.model.Patient;
-import clinicpms.controller.Descriptor;
+import model.Appointment;
+import model.Patient;
+import controller.Descriptor;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.LocalTime;

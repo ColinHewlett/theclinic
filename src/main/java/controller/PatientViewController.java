@@ -3,18 +3,18 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package clinicpms.controller;
+package controller;
 
-//import clinicpms.controller.DesktopViewController.DesktopViewControllerActionEvent;
-import clinicpms.model.Entity;
-import clinicpms.model.Patient;
-import clinicpms.model.Appointment;
-import clinicpms.model.Entity.Scope;
-import clinicpms.view.views.DesktopView;
-import clinicpms.view.View;
-import clinicpms.view.views.interfaces.IView;
-import clinicpms.repository.StoreException;//01/03/2023
-import static clinicpms.controller.ViewController.displayErrorMessage;
+//import controller.DesktopViewController.DesktopViewControllerActionEvent;
+import model.Entity;
+import model.Patient;
+import model.Appointment;
+import model.Entity.Scope;
+import view.views.DesktopView;
+import view.View;
+import view.views.interfaces.IView;
+import repository.StoreException;//01/03/2023
+import static controller.ViewController.displayErrorMessage;
 import java.beans.PropertyChangeSupport;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;

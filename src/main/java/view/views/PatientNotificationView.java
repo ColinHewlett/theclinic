@@ -3,15 +3,15 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package clinicpms.view.views;
+package view.views;
 
-import clinicpms.view.views.view_support_classes.models.PatientNotificationView4ColumnTableModel;
-import clinicpms.view.views.view_support_classes.renderers.PatientNotificationTableOverdueLocalDateRenderer;
-import clinicpms.view.View;
-//import clinicpms.view.views.appontment_schedule_view.AppointmentsTableLocalDateTimeRenderer;
-import clinicpms.controller.Descriptor;
-import clinicpms.controller.ViewController;
-import clinicpms.model.Notification;
+import view.views.view_support_classes.models.PatientNotificationView4ColumnTableModel;
+import view.views.view_support_classes.renderers.PatientNotificationTableOverdueLocalDateRenderer;
+import view.View;
+//import view.views.appontment_schedule_view.AppointmentsTableLocalDateTimeRenderer;
+import controller.Descriptor;
+import controller.ViewController;
+import model.Notification;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Point;

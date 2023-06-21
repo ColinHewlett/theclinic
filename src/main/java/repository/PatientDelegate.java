@@ -3,10 +3,10 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package clinicpms.repository;
+package repository;
 
 
-import clinicpms.model.Patient;
+import model.Patient;
 
 /**
  *

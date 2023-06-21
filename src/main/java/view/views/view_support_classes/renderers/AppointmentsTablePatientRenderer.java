@@ -3,9 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package clinicpms.view.views.view_support_classes.renderers;
+package view.views.view_support_classes.renderers;
 
-import clinicpms.model.Patient;
+import model.Patient;
 import java.awt.Component;
 import java.awt.Font;
 import javax.swing.JLabel;
