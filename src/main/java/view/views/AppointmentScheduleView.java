@@ -722,6 +722,11 @@ public class AppointmentScheduleView extends View{
         mnuOptions.add(jSeparator2);
 
         mniPrintSchedule.setText("Print schedule");
+        mniPrintSchedule.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                mniPrintScheduleActionPerformed(evt);
+            }
+        });
         mnuOptions.add(mniPrintSchedule);
         mnuOptions.add(jSeparator3);
 
@@ -904,6 +909,10 @@ public class AppointmentScheduleView extends View{
     private void btnCancelSelectedAppointment1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelSelectedAppointment1ActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_btnCancelSelectedAppointment1ActionPerformed
+
+    private void mniPrintScheduleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mniPrintScheduleActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_mniPrintScheduleActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
