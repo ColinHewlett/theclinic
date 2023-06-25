@@ -46,7 +46,7 @@ import javax.swing.JPanel;
  *
  * @author colin
  */
-public class ModelAppointmentEditorView extends View {
+public class ModalAppointmentEditorView extends View {
     private View.Viewer myViewType = null;
     private Descriptor entityDescriptor = null;
     private ActionListener myController = null;
@@ -59,7 +59,7 @@ public class ModelAppointmentEditorView extends View {
     /**
      * Creates new form AppointmentEditorInternalFrame
      */
-    public ModelAppointmentEditorView(View.Viewer myViewType, ActionListener myController,
+    public ModalAppointmentEditorView(View.Viewer myViewType, ActionListener myController,
             Descriptor entityDescriptor, 
             JDesktopPane desktop) {//ViewMode arg
         super("Appointment configuration view");
@@ -505,18 +505,18 @@ public class ModelAppointmentEditorView extends View {
             if (OKToSaveAppointment==JOptionPane.YES_OPTION){
                 switch (getViewMode()){
                     case CREATE:
-                        evt = new ActionEvent(ModelAppointmentEditorView.this,
+                        evt = new ActionEvent(ModalAppointmentEditorView.this,
                             ActionEvent.ACTION_PERFORMED,
                             ViewController.AppointmentScheduleViewControllerActionEvent.
                             APPOINTMENT_EDITOR_CREATE_REQUEST.toString());
-                        ModelAppointmentEditorView.this.getMyController().actionPerformed(evt);
+                        ModalAppointmentEditorView.this.getMyController().actionPerformed(evt);
                         break;
                     case UPDATE:
-                        evt = new ActionEvent(ModelAppointmentEditorView.this,
+                        evt = new ActionEvent(ModalAppointmentEditorView.this,
                             ActionEvent.ACTION_PERFORMED,
                             ViewController.AppointmentScheduleViewControllerActionEvent.
                             APPOINTMENT_EDITOR_UPDATE_REQUEST.toString());
-                        ModelAppointmentEditorView.this.getMyController().actionPerformed(evt);
+                        ModalAppointmentEditorView.this.getMyController().actionPerformed(evt);
                         break;
                 }
             }

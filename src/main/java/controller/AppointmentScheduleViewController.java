@@ -5,6 +5,7 @@
  */
 package controller;
 
+import _system_environment_variables.SystemDefinitions;
 import static controller.ViewController.displayErrorMessage;
 import model.Entity.Scope;
 import model.Appointment;
@@ -185,7 +186,12 @@ public class AppointmentScheduleViewController extends ViewController{
                 Patient patient = appointment.getPatient();
                 getControllerDescriptor().getControllerDescription().setPatient(patient);
                 LocalDate day = appointment.getStart().toLocalDate();
-                appointment.cancel();
+                String test = patient.toString();
+                if (patient.toString().equals(SystemDefinitions.APPOINTMENT_UNBOOKABILITY_MARKER)) {
+                    appointment.setScope(Scope.SINGLE);
+                    appointment.delete();
+                }
+                else appointment.cancel();
                 if (day.equals(getControllerDescriptor().getControllerDescription().getAppointmentScheduleDay())){
                     appointment = new Appointment();
                     appointment.setStart(day.atStartOfDay());
@@ -288,6 +294,22 @@ public class AppointmentScheduleViewController extends ViewController{
             String message = ex.getMessage();
             displayErrorMessage(message,"AppointmentViewController error",JOptionPane.WARNING_MESSAGE);
         }
+    }
+    
+    private void doUnbookableAppointmentSlotEditorViewRequest(){
+        initialiseNewEntityDescriptor();
+        getControllerDescriptor().getControllerDescription().setAppointment(new Appointment());
+        View.setViewer(View.Viewer.UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_VIEW);
+        this.view2 = View.factory(this, getControllerDescriptor(), this.desktopView);
+        /**
+         * ENABLE_CONTROLS_REQUEST requests DesktopViewController to enable menu options in its view
+         * -- note: View.factory when opening a modal JInternalFrame does not return until the JInternalFrame has been closed
+         * -- at which stage its appropriate to re-enable the View menu on the Desktop View Controller's view
+         */
+        ActionEvent actionEvent = new ActionEvent(
+               this,ActionEvent.ACTION_PERFORMED,
+               ViewController.DesktopViewControllerActionEvent.MODAL_VIEWER_CLOSED.toString());
+        this.myController.actionPerformed(actionEvent);
     }
     
     private void doAppointmentUpdateViewRequest(){
@@ -527,6 +549,9 @@ public class AppointmentScheduleViewController extends ViewController{
                         getControllerDescriptor()
                 );
                 break;
+            case UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_VIEW_REQUEST:
+                doUnbookableAppointmentSlotEditorViewRequest();
+                break;
             case APPOINTMENT_CREATE_VIEW_REQUEST:
                 doAppointmentCreateViewRequest();
                 break;
@@ -586,6 +611,10 @@ public class AppointmentScheduleViewController extends ViewController{
         switch(this.view2.getMyViewType()){
             case CANCELLED_APPOINTMENTS_VIEW:
                 doCancelledAppointmentsViewAction(e);
+                break;
+            case UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_VIEW:
+                doUnbookableAppointmentSlotEditorAction(e);
+                resetEmptySlotScannerSettings();
                 break;
             case APPOINTMENT_CREATOR_EDITOR_VIEW:
                 doAppointmentCreatorEditorViewAction(e);
@@ -955,6 +984,52 @@ public class AppointmentScheduleViewController extends ViewController{
                 
                 break;
             }
+        }
+    }
+    
+    private void doUnbookableAppointmentSlotEditorAction(ActionEvent e){
+        Appointment result;
+        Appointment changedSlotRequest = 
+                getControllerDescriptor().getControllerDescription().getAppointment();   
+        changedSlotRequest.setPatient(new Patient(1));
+        LocalDate day = changedSlotRequest.getStart().toLocalDate();
+        ViewController.AppointmentScheduleViewControllerActionEvent actionCommand =
+               ViewController.AppointmentScheduleViewControllerActionEvent.valueOf(e.getActionCommand());        
+        switch (actionCommand){
+            case UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_CREATE_REQUEST:
+                setScheduleReport(new ScheduleReport());
+                result = doAppointmentCreateRequest(e, changedSlotRequest);
+                if (result!=null){
+                    try{
+                        this.view2.setClosed(true);
+                    }
+                    catch (PropertyVetoException ex){
+                    }
+                    doAppointmentForDayRequest(day);
+                    //getControllerDescriptor().getControllerDescription().setAppointment(result);
+                    //getControllerDescriptor().getControllerDescription().setAppointments(result.get());
+                    getControllerDescriptor().getControllerDescription().setPatient(result.getPatient());
+                    
+                    firePropertyChangeEvent(
+                            ViewController.DesktopViewControllerPropertyChangeEvent.
+                                    APPOINTMENT_SCHEDULE_VIEW_CONTROLLER_CHANGE_NOTIFICATION.toString(),
+                            (DesktopViewController)getMyController(),
+                            this,
+                            null,
+                            getControllerDescriptor()
+                    );
+                }
+                else {
+                    sendErrorToAppointmentCreatorEditorView();
+                    //02/12/2022
+                    /**
+                     * update forces a refresh of the appt schedule for the day to its original state prior to the erroneous create/update attempt
+                     * -- necessary because repaint which occurs on schedule can repaint the incorrect new appt
+                     * -- ditto for the update case below
+                     */
+                    doAppointmentForDayRequest(day);
+                }
+                break;
         }
     }
     

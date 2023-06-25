@@ -17,6 +17,7 @@ import view.views.factory_methods.AppointmentRemindersFactoryMethod;
 import view.views.factory_methods.ImportProgressFactoryMethod;
 import view.views.factory_methods.ModalEmptySlotScannerFactoryMethod;
 import view.views.factory_methods.ModalCancelledAppointmentsViewFactoryMethod;
+import view.views.factory_methods.ModalUnbookableAppointmentSlotEditorFactoryMethod;
 import view.views.DesktopView;
 import controller.Descriptor;
 import view.views.interfaces.IView;
@@ -70,7 +71,8 @@ public abstract class View extends JInternalFrame
         PATIENT_NOTIFICATION_VIEW,
         PATIENT_NOTIFICATION_EDITOR_VIEW,
         UNACTIONED_PATIENT_NOTIFICATION_VIEW,
-        SURGERY_DAY_EDITOR_VIEW
+        SURGERY_DAY_EDITOR_VIEW,
+        UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_VIEW
     }
     
     protected Boolean getViewStatus(){
@@ -136,6 +138,9 @@ public abstract class View extends JInternalFrame
                 break;
             case SURGERY_DAY_EDITOR_VIEW:
                 result = new ModalSurgeryDaysEditorFactoryMethod(controller, ed, dtView).makeView(viewer);
+                break;
+            case UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_VIEW:
+                result = new ModalUnbookableAppointmentSlotEditorFactoryMethod(controller, ed, dtView).makeView(viewer);
                 break;
             default:
                 JOptionPane.showMessageDialog(dtView, 

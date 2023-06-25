@@ -529,7 +529,7 @@ public class DesktopViewController extends ViewController{
             avc.getView().setIconifiable(true);
             avc.getView().setResizable(false);
             avc.getView().setSelected(true);
-            avc.getView().setSize(769,548);
+            avc.getView().setSize(766,548);
             }
         catch (StoreException ex){
             displayErrorMessage(ex.getMessage(),"DesktopViewController error",JOptionPane.WARNING_MESSAGE);

@@ -73,6 +73,7 @@ public class Descriptor {
     }
     
     public class ControllerDescription{
+        private Boolean isAppointmentUnbookable = false;
         private Point appointeeRemindersCountForDay = null;
         private Appointment appointment = null;
         private Duration emptySlotMinimumDuration = null;
@@ -92,6 +93,13 @@ public class Descriptor {
         ArrayList<Notification> patientNotifications = null;
         ArrayList<Patient> patients = null;
         private Point tableRowCount = null;
+        
+        public Boolean getIsAppointmentUnbookable(){
+            return isAppointmentUnbookable; 
+        }
+        public void setIsAppointmentUnbookable(Boolean value){
+            isAppointmentUnbookable = value;
+        }
         
         public ArrayList<Appointment> getAppointmentCancellations(){
             return appointmentCancellations;

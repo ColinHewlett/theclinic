@@ -5,7 +5,7 @@
  */
 package view.views.factory_methods;
 
-import view.views.modal_internal_frame_views.ModelAppointmentEditorView;
+import view.views.modal_internal_frame_views.ModalAppointmentEditorView;
 import view.views.DesktopView;
 import controller.Descriptor;
 import view.*;
@@ -16,13 +16,14 @@ import java.awt.event.ActionListener;
  * @author colin
  */
 public class ModalAppointmentCreatorEditorFactoryMethod extends ViewFactoryMethod{
-    public ModalAppointmentCreatorEditorFactoryMethod(ActionListener controller, Descriptor ed, DesktopView dtView){
+    public ModalAppointmentCreatorEditorFactoryMethod(
+            ActionListener controller, Descriptor ed, DesktopView dtView){
         initialiseView(controller, ed, dtView);
     }
     
     @Override
     public View makeView(View.Viewer myViewType){
-        return new ModelAppointmentEditorView(myViewType, this.getViewController(), 
+        return new ModalAppointmentEditorView(myViewType, this.getViewController(), 
                 this.getDescriptor(), getDesktopView().getDeskTop());
         
     }

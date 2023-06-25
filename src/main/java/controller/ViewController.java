@@ -4,6 +4,8 @@
  * and open the template in the editor.
  */
 package controller;
+
+import _system_environment_variables.SystemDefinitions;
 import model.Entity;
 import model.Appointment;
 import view.views.view_support_classes.renderers.TableHeaderCellBorderRenderer;
@@ -80,6 +82,7 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         NON_SURGERY_DAY_SCHEDULE_VIEW_REQUEST,
         SURGERY_DAYS_EDITOR_VIEW_REQUEST,
         EMPTY_SLOT_SCAN_CONFIGURATION_VIEW_REQUEST,
+        UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_VIEW_REQUEST,
         //view action requests
         APPOINTMENT_CANCEL_REQUEST,
         APPOINTMENT_FOR_DAY_REQUEST,
@@ -96,7 +99,9 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         APPOINTMENT_EDITOR_UPDATE_REQUEST,
         EMPTY_SLOTS_FROM_DAY_REQUEST,
         MODAL_VIEWER_ACTIVATED,
-        SURGERY_DAYS_EDIT_REQUEST
+        SURGERY_DAYS_EDIT_REQUEST,
+        UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_CREATE_REQUEST
+        
     }
     
     public static enum AppointmentScheduleViewControllerPropertyChangeEvent{
@@ -401,10 +406,18 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
                             }
                             else{
                                 scheduleReport.setState(RequestedAppointmentState.COLLISION);
-                                scheduleReport.setError(
+                                if (requestedSlot.getPatient().toString().
+                                                equals(SystemDefinitions.APPOINTMENT_UNBOOKABILITY_MARKER)){
+                                scheduleReport.setError(        
+                                    "The new appointment for " + requestedSlot.getAppointeeName()
+                                        + " overwrites an unBookable appointment slot" 
+                                        + nextScheduledSlot.getAppointeeNamePlusSlotStartTime());
+                                }else{
+                                scheduleReport.setError(       
                                     "The new appointment for " + requestedSlot.getAppointeeName()
                                         + " overwrites existing appointment for " 
                                         + nextScheduledSlot.getAppointeeNamePlusSlotStartTime());
+                                }
                             }
                             break;
                         case UNDEFINED:
@@ -419,10 +432,19 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
                             }
                             else if (!requestedSlot.getSlotStartTime().isAfter(nextScheduledSlot.getSlotEndTime())){
                                 scheduleReport.setState(RequestedAppointmentState.COLLISION);
-                                scheduleReport.setError(
+
+                                if (requestedSlot.getPatient().toString().
+                                                equals(SystemDefinitions.APPOINTMENT_UNBOOKABILITY_MARKER)){
+                                    scheduleReport.setError(        
+                                        "The new appointment for " + requestedSlot.getAppointeeName()
+                                            + " overwrites an unBookable appointment slot" 
+                                            + nextScheduledSlot.getAppointeeNamePlusSlotStartTime());
+                                }else{
+                                    scheduleReport.setError(
                                     "The new appointment for " + requestedSlot.getAppointeeName()
                                         + " overwrites existing appointment for " 
                                         + nextScheduledSlot.getAppointeeNamePlusSlotStartTime());
+                                }
                             }
                     }
                     break;

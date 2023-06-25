@@ -60,7 +60,7 @@ public class Repository implements IStoreActions {
                                 COUNT_APPOINTMENTS_FOR_PATIENT,
                                 COUNT_APPOINTMENTS_FROM_DAY,
                                 CREATE_APPOINTMENT_TABLE,
-                                //DELETE_APPOINTMENT,
+                                DELETE_APPOINTMENT, // was commented out
                                 DELETE_APPOINTMENTS_FOR_PATIENT,
                                 DELETE_APPOINTMENTS,
                                 DROP_APPOINTMENT_TABLE,
@@ -380,6 +380,7 @@ public class Repository implements IStoreActions {
                     StoreException.ExceptionType.UNEXPECTED_DATA_TYPE_ENCOUNTERED);
         }
     }
+    
     /**
      * Multiple persistent store operation contained in a single transaction
      * -- delete the included collection  of appointments
@@ -2228,13 +2229,13 @@ public class Repository implements IStoreActions {
     public void delete(Appointment appointment, Integer key) throws StoreException {
         AppointmentDelegate delegate = new AppointmentDelegate(appointment);
         switch(appointment.getScope()){
-            /*
+            
             case SINGLE:
                 delegate.setAppointmentKey(key);
                 runSQL(Repository.EntitySQL.APPOINTMENT, 
                         Repository.PMSSQL.DELETE_APPOINTMENT, appointment);
                 break;
-            */
+            
             case ALL:
                 runSQL(Repository.EntitySQL.APPOINTMENT, 
                         Repository.PMSSQL.DELETE_APPOINTMENTS, null);

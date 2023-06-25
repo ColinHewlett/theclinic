@@ -236,8 +236,16 @@ public class Patient extends Entity implements IEntityStoreActions {
             this.setIsPatient(true);
     } 
     
+    /** 
+     * @return collection of patients in persistent store less patient with a key = 1
+     */
     public ArrayList<Patient> get(){
-        return collection;
+        ArrayList<Patient> patients = new ArrayList<>();
+        for(Patient patient : collection){
+            if (patient.getKey()!=1)
+                patients.add(patient);  
+        }
+        return patients;
     }
 
     public void set(ArrayList<Patient> value){
@@ -499,6 +507,9 @@ public class Patient extends Entity implements IEntityStoreActions {
      */
     public String toString(){
         String cappedName = null;
+        if (getKey() == 1){
+            return SystemDefinitions.APPOINTMENT_UNBOOKABILITY_MARKER;
+        }
         if (!getName().getSurname().isEmpty()){
             //if (getData().getSurname().strip().contains("-")) 
             if (getName().getSurname().contains("-"))
