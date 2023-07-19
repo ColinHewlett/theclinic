@@ -90,6 +90,16 @@ public class Appointment extends Entity implements IEntityStoreActions{
         result = result + " which starts at " + start.format(DateTimeFormatter.ofPattern("HH:mm"));
         return result;
     }
+    
+    public boolean getIsUnbookableSlot(){
+        return getPatient().getKey() == SystemDefinitions.UNBOOKABLE_APPOINTMENT_SLOT;
+    }
+    
+    
+    public String getUnbookableSlotStartTime(){
+        LocalTime start = getStart().toLocalTime();
+        return start.format(DateTimeFormatter.ofPattern("HH:mm"));
+    }
   
     /**
      * 
@@ -179,6 +189,7 @@ public class Appointment extends Entity implements IEntityStoreActions{
      * @return 
      */
     public Boolean getHasPatientBeenContacted(){
+        if (hasPatientBeenContacted == null) hasPatientBeenContacted = Boolean.FALSE;
         return hasPatientBeenContacted;
     }
     

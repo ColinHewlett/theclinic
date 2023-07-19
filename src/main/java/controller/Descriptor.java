@@ -73,6 +73,7 @@ public class Descriptor {
     }
     
     public class ControllerDescription{
+        ViewController.ViewMode viewMode = null;
         private Boolean isAppointmentUnbookable = false;
         private Point appointeeRemindersCountForDay = null;
         private Appointment appointment = null;
@@ -99,6 +100,13 @@ public class Descriptor {
         }
         public void setIsAppointmentUnbookable(Boolean value){
             isAppointmentUnbookable = value;
+        }
+        
+        public ViewController.ViewMode getViewMode(){
+            return viewMode; 
+        }
+        public void setViewMode(ViewController.ViewMode value){
+            viewMode = value;
         }
         
         public ArrayList<Appointment> getAppointmentCancellations(){
@@ -257,6 +265,7 @@ public class Descriptor {
     }
     
     public class ViewDescription {
+        ViewController.ViewMode viewMode = null;
         private Appointment appointment = null;
         private Patient thePatient = null;
         private Patient theGuardian = null;
@@ -278,6 +287,13 @@ public class Descriptor {
             duration = Duration.ZERO; 
             HashMap<DayOfWeek,Boolean> surgeryDaysAssignmentValue = new HashMap<>();
             
+        }
+        
+        public ViewController.ViewMode getViewMode(){
+            return viewMode; 
+        }
+        public void setViewMode(ViewController.ViewMode value){
+            viewMode = value;
         }
         
         public Patient getTheGuardian(){

@@ -20,6 +20,7 @@ import view.views.factory_methods.ModalCancelledAppointmentsViewFactoryMethod;
 import view.views.factory_methods.ModalUnbookableAppointmentSlotEditorFactoryMethod;
 import view.views.DesktopView;
 import controller.Descriptor;
+import controller.ViewController;
 import view.views.interfaces.IView;
 import view.views.interfaces.IViewInternalFrameListener;
 import java.awt.event.ActionListener;
@@ -34,6 +35,7 @@ import javax.swing.JOptionPane;
  */
 public abstract class View extends JInternalFrame
                            implements PropertyChangeListener,IView, IViewInternalFrameListener{
+    private ViewController.ViewMode viewMode;
     private static Viewer viewer = null;
     private Boolean viewChangedSinceLastSaved = false;
     private Boolean isViewInitialised = false;
@@ -49,7 +51,7 @@ public abstract class View extends JInternalFrame
     protected void setIsViewInitialised(Boolean value){
         isViewInitialised = value;
     }
-    
+
     public View(String title){
         super(title,true,true,true,true); 
     }

@@ -263,6 +263,7 @@ public class PatientView extends View{
         selector.setSelectedIndex(-1);
     }
     
+    /*
     private PatientView.ViewMode getViewMode(){
         return viewMode;
     }
@@ -270,6 +271,7 @@ public class PatientView extends View{
         viewMode = value;
         //this.btnCreateUpdatePatient.setText(value.toString().replace('_',' '));
     }
+    */
   
     /**
      * Method processes the PropertyChangeEvent its received from the view
@@ -322,7 +324,7 @@ public class PatientView extends View{
                 break;
             case NULL_PATIENT_RECEIVED:
                 setViewDescriptor((Descriptor)e.getNewValue());
-                setViewMode(PatientView.ViewMode.Create_new_patient);
+                //setViewMode(PatientView.ViewMode.Create_new_patient);
                 initialisePatientViewComponentFromED();
                 populatePatientSelector(this.cmbPatientSelector);
                 populatePatientSelector(this.cmbSelectGuardian);

@@ -47,6 +47,8 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
     }
     
     public enum RequestedAppointmentState{ 
+                                            MERGED,
+                                            UNMERGED,
                                             REQUESTED_SLOT_STATE_UNDEFINED,
                                             REQUESTED_SLOT_STARTS_AFTER_PREVIOUS_SCHEDULED_SLOT,
                                             REQUESTED_SLOT_END_TIME_UPDATED_TO_LATER_TIME,
@@ -100,8 +102,8 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         EMPTY_SLOTS_FROM_DAY_REQUEST,
         MODAL_VIEWER_ACTIVATED,
         SURGERY_DAYS_EDIT_REQUEST,
-        UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_CREATE_REQUEST
-        
+        UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_CREATE_REQUEST,
+        UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_UPDATE_REQUEST    
     }
     
     public static enum AppointmentScheduleViewControllerPropertyChangeEvent{
@@ -249,6 +251,8 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         Create,
         UPDATE,
         Update,
+        SLOT_SELECTED,
+        SLOT_UNSELECTED,
         NO_ACTION
     } 
     
@@ -387,6 +391,7 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
     private ScheduleReport doAppointmentCollisionCheckOnScheduleChangeRequest(
             Appointment requestedSlot,
             ArrayList<Appointment> appointments, ViewMode mode){
+        String error = null;
         getScheduleReport().setState(RequestedAppointmentState.UNDEFINED);
         Iterator<Appointment> appointmentsForDay = appointments.iterator();
         while (appointmentsForDay.hasNext()){
@@ -395,9 +400,7 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
                 case CREATE:
                 case NO_ACTION:
                     switch(scheduleReport.getState()){
-                        
-                    //2/12/2022
-                    case SLOT_START_OK:
+                        case SLOT_START_OK:
                             /**
                              * In CREATE new appointment mode checks if requested slot overlaps the next scheduled slot 
                              */
@@ -406,45 +409,95 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
                             }
                             else{
                                 scheduleReport.setState(RequestedAppointmentState.COLLISION);
-                                if (requestedSlot.getPatient().toString().
-                                                equals(SystemDefinitions.APPOINTMENT_UNBOOKABILITY_MARKER)){
-                                scheduleReport.setError(        
-                                    "The new appointment for " + requestedSlot.getAppointeeName()
-                                        + " overwrites an unBookable appointment slot" 
-                                        + nextScheduledSlot.getAppointeeNamePlusSlotStartTime());
+                                if (requestedSlot.getIsUnbookableSlot()){
+                                    error = "The new unbookable slot overwrites ";
+                                    if (nextScheduledSlot.getIsUnbookableSlot()){
+                                        error = error + "another unbookable appointment slot which starts at ";
+                                        error = error + nextScheduledSlot.getUnbookableSlotStartTime();
+                                    }
+                                    else {
+                                        error = error + "existing appointment for " + nextScheduledSlot.getAppointeeNamePlusSlotStartTime();
+                                    }
+                                    
                                 }else{
-                                scheduleReport.setError(       
-                                    "The new appointment for " + requestedSlot.getAppointeeName()
-                                        + " overwrites existing appointment for " 
-                                        + nextScheduledSlot.getAppointeeNamePlusSlotStartTime());
+                                    error =  "The new appointment for " 
+                                            + requestedSlot.getAppointeeName() 
+                                            + " overwrites ";
+                                    if (nextScheduledSlot.getIsUnbookableSlot()){
+                                        error = error + "an unBookable appointment slot which starts at ";
+                                        error = error + nextScheduledSlot.getUnbookableSlotStartTime(); 
+                                    }
+                                    else {
+                                        error = error + "existing appointment for " + nextScheduledSlot.getAppointeeNamePlusSlotStartTime();
+                                    }  
                                 }
                             }
+                            scheduleReport.setError(error);
                             break;
                         case UNDEFINED:
                             if (requestedSlot.getSlotStartTime().isBefore(nextScheduledSlot.getSlotStartTime())){
                                 scheduleReport.setState(RequestedAppointmentState.SLOT_START_OK);
                                 if (!requestedSlot.getSlotEndTime().isAfter(nextScheduledSlot.getSlotStartTime()))
                                     scheduleReport.setState(RequestedAppointmentState.NO_COLLISION);
-                                else scheduleReport.setState(RequestedAppointmentState.COLLISION);
+                                else if (!requestedSlot.getSlotEndTime().isAfter(nextScheduledSlot.getSlotStartTime())){
+                                    scheduleReport.setState(RequestedAppointmentState.NO_COLLISION);
+                                }
+                                else{
+                                    scheduleReport.setState(RequestedAppointmentState.COLLISION);
+                                    if (requestedSlot.getIsUnbookableSlot()){
+                                        error = "The new unbookable slot overwrites ";
+                                        if (nextScheduledSlot.getIsUnbookableSlot()){
+                                            error = error + "another unbookable appointment slot which starts at ";
+                                            error = error + nextScheduledSlot.getUnbookableSlotStartTime();
+                                        }
+                                        else {
+                                            error = error + "existing appointment for " + nextScheduledSlot.getAppointeeNamePlusSlotStartTime();
+                                        }
+
+                                    }else{
+                                        error =  "The new appointment for " 
+                                                + requestedSlot.getAppointeeName() 
+                                                + " overwrites ";
+                                        if (nextScheduledSlot.getIsUnbookableSlot()){
+                                            error = error + "an unBookable appointment slot which starts at ";
+                                            error = error + nextScheduledSlot.getUnbookableSlotStartTime(); 
+                                        }
+                                        else {
+                                            error = error + "existing appointment for " + nextScheduledSlot.getAppointeeNamePlusSlotStartTime();
+                                        }  
+                                    } 
+                                    scheduleReport.setError(error);
+                                }
+                                
                             }
                             else if (requestedSlot.getSlotStartTime().isEqual(nextScheduledSlot.getSlotEndTime())){
                                 scheduleReport.setState(RequestedAppointmentState.SLOT_START_OK);
                             }
                             else if (!requestedSlot.getSlotStartTime().isAfter(nextScheduledSlot.getSlotEndTime())){
                                 scheduleReport.setState(RequestedAppointmentState.COLLISION);
-
-                                if (requestedSlot.getPatient().toString().
-                                                equals(SystemDefinitions.APPOINTMENT_UNBOOKABILITY_MARKER)){
-                                    scheduleReport.setError(        
-                                        "The new appointment for " + requestedSlot.getAppointeeName()
-                                            + " overwrites an unBookable appointment slot" 
-                                            + nextScheduledSlot.getAppointeeNamePlusSlotStartTime());
+                                if (requestedSlot.getIsUnbookableSlot()){
+                                    error = "The new unbookable slot overwrites ";
+                                    if (nextScheduledSlot.getIsUnbookableSlot()){
+                                        error = error + "another unbookable appointment slot which starts at ";
+                                        error = error + nextScheduledSlot.getUnbookableSlotStartTime();
+                                    }
+                                    else {
+                                        error = error + "existing appointment for " + nextScheduledSlot.getAppointeeNamePlusSlotStartTime();
+                                    }
+                                    
                                 }else{
-                                    scheduleReport.setError(
-                                    "The new appointment for " + requestedSlot.getAppointeeName()
-                                        + " overwrites existing appointment for " 
-                                        + nextScheduledSlot.getAppointeeNamePlusSlotStartTime());
+                                    error =  "The new appointment for " 
+                                            + requestedSlot.getAppointeeName() 
+                                            + " overwrites ";
+                                    if (nextScheduledSlot.getIsUnbookableSlot()){
+                                        error = error + "an unbookable appointment slot which starts at ";
+                                        error = error + nextScheduledSlot.getUnbookableSlotStartTime(); 
+                                    }
+                                    else {
+                                        error = error + "existing appointment for " + nextScheduledSlot.getAppointeeNamePlusSlotStartTime();
+                                    }  
                                 }
+                                scheduleReport.setError(error);
                             }
                     }
                     break;
@@ -460,10 +513,29 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
                                 scheduleReport.setState(RequestedAppointmentState.NO_COLLISION);
                             else {
                                 scheduleReport.setState(RequestedAppointmentState.COLLISION);
-                                scheduleReport.setError(
-                                    "The new appointment for " + requestedSlot.getAppointeeName()
-                                        + " overwrites existing appointment for " 
-                                        + nextScheduledSlot.getAppointeeNamePlusSlotStartTime());
+                                if (requestedSlot.getIsUnbookableSlot()){
+                                    error = "The updated unbookable slot overwrites ";
+                                    if (nextScheduledSlot.getIsUnbookableSlot()){
+                                        error = error + "another unbookable appointment slot which starts at ";
+                                        error = error + nextScheduledSlot.getUnbookableSlotStartTime();
+                                    }
+                                    else {
+                                        error = error + "existing appointment for " + nextScheduledSlot.getAppointeeNamePlusSlotStartTime();
+                                    }
+                                    
+                                }else{
+                                    error =  "The new appointment for " 
+                                            + requestedSlot.getAppointeeName() 
+                                            + " overwrites ";
+                                    if (nextScheduledSlot.getIsUnbookableSlot()){
+                                        error = error + "an unBookable appointment slot which starts at ";
+                                        error = error + nextScheduledSlot.getUnbookableSlotStartTime(); 
+                                    }
+                                    else {
+                                        error = error + "existing appointment for " + nextScheduledSlot.getAppointeeNamePlusSlotStartTime();
+                                    }  
+                                }
+                                scheduleReport.setError(error);
                             }
                             break;
                         case UNDEFINED:
@@ -487,20 +559,41 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
                                 }
                                 else{//collides with an appointment for a different patient
                                     scheduleReport.setState(RequestedAppointmentState.COLLISION);
-                                    scheduleReport.setError(
-                                            "The updated appointment for " + requestedSlot.getAppointeeName()
+                                    if (requestedSlot.getIsUnbookableSlot()){
+                                        scheduleReport.setError(        
+                                            "The updated unbookable appointment slot"
                                                 + " overwrites existing appointment for " 
-                                                + nextScheduledSlot.getAppointeeNamePlusSlotStartTime());
+                                            + nextScheduledSlot.getAppointeeNamePlusSlotStartTime());
+                                    }else if (nextScheduledSlot.getIsUnbookableSlot()){
+                                        scheduleReport.setError(
+                                        "The updated appointment for " + requestedSlot.getAppointeeName()
+                                            + " overwrites an unbookable appointment slot which starts at " 
+                                            + nextScheduledSlot.getUnbookableSlotStartTime());
+                                    }else{
+                                        scheduleReport.setError(
+                                        "The updated appointment for " + requestedSlot.getAppointeeName()
+                                            + " overwrites an existing appointment for " 
+                                            + nextScheduledSlot.getAppointeeNamePlusSlotStartTime());
+                                    }
                                 }
                             }
                             else{
                                 if (requestedSlot.getSlotStartTime().isBefore(nextScheduledSlot.getSlotEndTime())){
                                     if (!requestedSlot.getPatient().equals(nextScheduledSlot.getPatient())){
                                         scheduleReport.setState(RequestedAppointmentState.COLLISION); 
-                                        scheduleReport.setError(
-                                                "The updated appointment for " + requestedSlot.getAppointeeName()
+                                     
+                                        if (requestedSlot.getIsUnbookableSlot()){
+                                            scheduleReport.setError(        
+                                                "The updated unbookable appointment slot"
                                                     + " overwrites existing appointment for " 
-                                                    + nextScheduledSlot.getAppointeeNamePlusSlotStartTime());
+                                                + nextScheduledSlot.getAppointeeNamePlusSlotStartTime());
+                     
+                                        }else if (nextScheduledSlot.getIsUnbookableSlot()){
+                                            scheduleReport.setError(
+                                            "The updated appointment for " + requestedSlot.getAppointeeName()
+                                                + " overwrites the unbookable slot which starts at " 
+                                                + nextScheduledSlot.getUnbookableSlotStartTime());
+                                        }
                                     }
                                     else scheduleReport.setState(RequestedAppointmentState.SLOT_START_OK);
                                 }
@@ -541,5 +634,59 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         
     public void setScheduleReport(ScheduleReport value){
         scheduleReport = value;
+    }
+    
+    public void mergeScheduleSlotsIfPossible(LocalDate day){
+        Appointment appointment = new Appointment();
+        appointment.setStart(day.atStartOfDay());
+        appointment.setScope(Entity.Scope.FOR_DAY);
+        setScheduleReport(new ScheduleReport());
+        getScheduleReport().setState(RequestedAppointmentState.MERGED);
+        while(getScheduleReport().getState().equals(RequestedAppointmentState.MERGED)){
+            try{
+                appointment.read();
+                ArrayList<Appointment> appointments = appointment.get();
+                doMergeCheck(appointments);
+            }catch(StoreException ex){
+
+            }
+        }
+    }
+    
+    private void doMergeCheck(ArrayList<Appointment> appointments){
+        getScheduleReport().setState(RequestedAppointmentState.UNMERGED);
+        try{
+            for (int i = 0; i < appointments.size()-1; i++){
+                if (appointments.size() == 1) break;
+                else {
+                    if (attemptMerge(appointments.get(i), appointments.get(i+1))){
+                        getScheduleReport().setState(RequestedAppointmentState.MERGED);
+                        break;
+                    }
+                }
+            }
+        }catch (Exception ex){
+            displayErrorMessage("Raised in ViewController.doMergeCheck()\n" + ex.getMessage(),
+                    "View controller error", JOptionPane.WARNING_MESSAGE);
+        }
+    }
+    
+    private boolean attemptMerge(Appointment first, Appointment second){
+        boolean result = false;
+        if (first.getSlotEndTime().isEqual(second.getSlotStartTime())){
+            if (first.getPatient().equals(second.getPatient())){
+                //merge first and second appointments
+                first.setDuration(first.getDuration().plus(second.getDuration()));
+                try{
+                    first.update();
+                    second.setScope(Entity.Scope.SINGLE);
+                    second.delete();
+                }catch(StoreException ex){
+                    
+                }
+                result = true;
+            }
+        }
+        return result;
     }
 }

@@ -30,6 +30,8 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.Point;
 import java.awt.print.PrinterJob;
 import java.awt.print.PageFormat;
@@ -60,14 +62,13 @@ import java.time.Month;
 import java.util.ArrayList;
 import java.util.Iterator;
 import javax.swing.ImageIcon;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 import javax.swing.ListSelectionModel;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumnModel;
 import javax.swing.SwingUtilities;
-
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 
 /**
@@ -307,22 +308,46 @@ public class AppointmentScheduleView extends View{
             }
         });
     }
-    
+
+    private boolean tableValueChangedListenerActivated = false;
+
     private void setAppointmentTableListener(){
         this.tblAppointments.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         ListSelectionModel lsm = this.tblAppointments.getSelectionModel();
         lsm.addListSelectionListener(new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent e) {
-                //Ignore extra messages.
-                /*
-                if (e.getValueIsAdjusting()) return;
-
-                ListSelectionModel lsm = (ListSelectionModel)e.getSource();
-                if (!lsm.isSelectionEmpty()) {
-                    int selectedRow = lsm.getMinSelectionIndex();
-                    doEmptySlotAvailabilityTableRowSelection(selectedRow);
+                if (!e.getValueIsAdjusting()) {   // Ensure the event is not fired multiple times
+                    int selectedRow = tblAppointments.getSelectedRow();
+                    if (selectedRow!=-1)tableValueChangedListenerActivated = true;
+                    /*
+                    if (previousRowSelected!=null){
+                        if (selectedRow != -1){
+                            if (selectedRow == previousRowSelected){
+                                tblAppointments.getSelectionModel().
+                                        removeSelectionInterval(selectedRow, selectedRow);
+                                previousRowSelected = null;
+                            }else previousRowSelected = selectedRow;
+                        }
+                    }else previousRowSelected = selectedRow;
+                    */
                 }
+            }
+        });
+        tblAppointments.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (!tableValueChangedListenerActivated){
+                    int selectedRow = tblAppointments.rowAtPoint(e.getPoint());
+                    if (selectedRow!=-1 && tblAppointments.isRowSelected(selectedRow))
+                    tblAppointments.clearSelection(); // Deselect the clicked row
+                }else tableValueChangedListenerActivated = false;
+  
+                // Check if the clicked row is already selected
+                /*
+                if (tblAppointments.isRowSelected(selectedRow)) {
+                    tblAppointments.clearSelection(); // Deselect the clicked row
+                } 
                 */
             }
         });
@@ -430,9 +455,8 @@ public class AppointmentScheduleView extends View{
         btnUpdateAppointment = new javax.swing.JButton();
         btnCancelSelectedAppointment = new javax.swing.JButton();
         btnMarkSlotUnbookable = new javax.swing.JButton();
-        jPanel4 = new javax.swing.JPanel();
-        btnCloseView = new javax.swing.JButton();
         btnPrintSchedule = new javax.swing.JButton();
+        btnCloseView = new javax.swing.JButton();
         jMenuBar1 = new javax.swing.JMenuBar();
         mnuOptions = new javax.swing.JMenu();
         mniScheduleContactList = new javax.swing.JMenuItem();
@@ -459,7 +483,7 @@ public class AppointmentScheduleView extends View{
             .addGroup(pnlAppointmentScheduleForDayLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(scrAppointmentsForDayTable, javax.swing.GroupLayout.PREFERRED_SIZE, 700, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(10, 10, 10))
+                .addGap(12, 12, 12))
         );
         pnlAppointmentScheduleForDayLayout.setVerticalGroup(
             pnlAppointmentScheduleForDayLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -589,6 +613,7 @@ public class AppointmentScheduleView extends View{
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Appointment schedule operations", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Segoe UI", 1, 12))); // NOI18N
 
         btnCreateAppointment.setText("Create");
+        btnCreateAppointment.setToolTipText("create new appointment");
         btnCreateAppointment.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnCreateAppointmentActionPerformed(evt);
@@ -596,6 +621,7 @@ public class AppointmentScheduleView extends View{
         });
 
         btnUpdateAppointment.setText("Update");
+        btnUpdateAppointment.setToolTipText("update selected appointment");
         btnUpdateAppointment.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnUpdateAppointmentActionPerformed(evt);
@@ -603,13 +629,15 @@ public class AppointmentScheduleView extends View{
         });
 
         btnCancelSelectedAppointment.setText("Cancel ");
+        btnCancelSelectedAppointment.setToolTipText("cancel selected appointment");
         btnCancelSelectedAppointment.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnCancelSelectedAppointmentActionPerformed(evt);
             }
         });
 
-        btnMarkSlotUnbookable.setText("Mark appointment slot as unbookable");
+        btnMarkSlotUnbookable.setText("Mark  slot as unbookable");
+        btnMarkSlotUnbookable.setToolTipText("make a slot unbookable");
         btnMarkSlotUnbookable.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnMarkSlotUnbookableActionPerformed(evt);
@@ -622,14 +650,14 @@ public class AppointmentScheduleView extends View{
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(btnCreateAppointment)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(btnUpdateAppointment)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(btnCreateAppointment, javax.swing.GroupLayout.PREFERRED_SIZE, 97, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(btnUpdateAppointment, javax.swing.GroupLayout.PREFERRED_SIZE, 97, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
                 .addComponent(btnCancelSelectedAppointment)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(btnMarkSlotUnbookable)
-                .addGap(13, 13, 13))
+                .addGap(87, 87, 87)
+                .addComponent(btnMarkSlotUnbookable, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -643,7 +671,12 @@ public class AppointmentScheduleView extends View{
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        jPanel4.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        btnPrintSchedule.setText("Print schedule");
+        btnPrintSchedule.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnPrintScheduleActionPerformed(evt);
+            }
+        });
 
         btnCloseView.setText("Close view");
         btnCloseView.addActionListener(new java.awt.event.ActionListener() {
@@ -651,31 +684,6 @@ public class AppointmentScheduleView extends View{
                 btnCloseViewActionPerformed(evt);
             }
         });
-
-        btnPrintSchedule.setText("Print schedule");
-
-        javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
-        jPanel4.setLayout(jPanel4Layout);
-        jPanel4Layout.setHorizontalGroup(
-            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel4Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel4Layout.createSequentialGroup()
-                        .addGap(10, 10, 10)
-                        .addComponent(btnCloseView))
-                    .addComponent(btnPrintSchedule))
-                .addContainerGap())
-        );
-        jPanel4Layout.setVerticalGroup(
-            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel4Layout.createSequentialGroup()
-                .addGap(5, 5, 5)
-                .addComponent(btnPrintSchedule)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btnCloseView)
-                .addGap(5, 5, 5))
-        );
 
         mnuOptions.setText("Actions");
 
@@ -730,12 +738,20 @@ public class AppointmentScheduleView extends View{
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(30, 30, 30)
+                                .addComponent(btnCloseView))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(18, 18, 18)
+                                .addComponent(btnPrintSchedule)))
+                        .addGap(17, 17, 17))
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(pnlAppointmentScheduleForDay, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(pnlAppointmentScheduleForDay, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 0, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -752,17 +768,37 @@ public class AppointmentScheduleView extends View{
                 .addGap(10, 10, 10)
                 .addComponent(pnlAppointmentScheduleForDay, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 72, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(6, 6, 6)
+                        .addComponent(btnPrintSchedule)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnCloseView)))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-
+    /**
+     * Responsibilities
+     * -- initialise the Descriptor.ViewDescription.ViewMode property appropriately
+     * -- if SLOT_SELECTED view mode
+     * ---- initialise Descriptor.ViewDescription property with details extracted from the selected appointment slot
+     * @param evt 
+     */
     private void btnCreateAppointmentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCreateAppointmentActionPerformed
-         ActionEvent actionEvent = new ActionEvent(this,
+        int row = this.tblAppointments.getSelectedRow();
+        if (row == -1) {
+            getViewDescriptor().getViewDescription().
+                    setViewMode(ViewController.ViewMode.SLOT_UNSELECTED);
+        }else{
+            getViewDescriptor().getViewDescription().
+                    setViewMode(ViewController.ViewMode.SLOT_SELECTED);
+            getViewDescriptor().getViewDescription().
+                    setAppointment(tableModel.getElementAt(row));
+        }
+        ActionEvent actionEvent = new ActionEvent(this,
                 ActionEvent.ACTION_PERFORMED,
                 ViewController.AppointmentScheduleViewControllerActionEvent.APPOINTMENT_CREATE_VIEW_REQUEST.toString());
         this.getMyController().actionPerformed(actionEvent);
@@ -782,7 +818,9 @@ public class AppointmentScheduleView extends View{
         else if (SystemDefinitions.APPOINTMENT_UNBOOKABILITY_MARKER.equals(
                     ((Appointments5ColumnTableModel)this.tblAppointments.getModel()).
                             getElementAt(row).getPatient().toString())){
-            initialiseEDRequestFromView(row);
+            getViewDescriptor().getViewDescription().
+                    setViewMode(ViewController.ViewMode.UPDATE);
+            getViewDescriptor().getViewDescription().setAppointment(tableModel.getElementAt(row));
             ActionEvent actionEvent = new ActionEvent(this, 
                     ActionEvent.ACTION_PERFORMED,
                     ViewController.AppointmentScheduleViewControllerActionEvent.
@@ -836,19 +874,23 @@ public class AppointmentScheduleView extends View{
     
     private void btnCancelSelectedAppointmentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelSelectedAppointmentActionPerformed
         //DateTimeFormatter format24Hour = DateTimeFormatter.ofPattern("HH:mm");
+        boolean isError = false;
         String name = null;
         LocalDateTime start = null;
         LocalTime from = null;
         Long duration;
         int row = this.tblAppointments.getSelectedRow();
+        
         if (row == -1){
             JOptionPane.showMessageDialog(this, "An appointment has not been selected for cancellation");
+            isError = true;
         }
         //30/07/2022 09:26
-        else if (!((Appointments5ColumnTableModel)this.tblAppointments.getModel()).getElementAt(row).getPatient().getIsKeyDefined()){
-            JOptionPane.showMessageDialog(this, "An appointment has not been selected for cancellation");
-        }
-        else{
+        if (!isError){
+            if ((((Appointments5ColumnTableModel)this.tblAppointments.getModel()).getElementAt(row).getPatient()==null)){
+                JOptionPane.showMessageDialog(this, "An appointment has not been selected for cancellation");
+            }   
+        }else{
             int OKToCancelAppointment;
             initialiseEDRequestFromView(row);
             start = getViewDescriptor().getViewDescription().getAppointment().getStart();
@@ -857,23 +899,22 @@ public class AppointmentScheduleView extends View{
             //duration = getViewDescriptor().getViewDescription().getAppointment().getData().getDuration().toMinutes();
             duration = getViewDescriptor().getViewDescription().getAppointment().getDuration().toMinutes();
             LocalTime to = from.plusMinutes(duration);
-            /**
-             * 09/11/2021 16:53 [1.f]log notes -> update below because getRequest().getPatient() no longer initialised 
-             * with appointee details; instead request.appointment.appointee.data is
-             */
-            //20/07/2022 08:16 update
-            //name = getViewDescriptor().getViewDescription().getAppointment().getAppointee().getData().getForenames();
-            name = getViewDescriptor().getViewDescription().getAppointment().getPatient().getName().getForenames();
-            //name = getViewDescriptor().getViewDescription().getPatient().getData().getForenames();
-            if (!name.isEmpty())name = name + " ";
-            //20/07/2022 08:16 update
-            //name = name + getViewDescriptor().getViewDescription().getAppointment().getAppointee().getData().getSurname();
-            name = name + getViewDescriptor().getViewDescription().getAppointment().getPatient().getName().getSurname();
+            
+            String message;
+            if (getViewDescriptor().getViewDescription().getAppointment().getPatient().toString().
+                    equals(SystemDefinitions.APPOINTMENT_UNBOOKABILITY_MARKER)){
+                message = "Are you sure you want to cancel the unbookable appointment slot";
+            }
+            else {
+                name = getViewDescriptor().getViewDescription().getAppointment().getPatient().getName().getForenames();
+                if (!name.isEmpty())name = name + " ";
+                name = name + getViewDescriptor().getViewDescription().getAppointment().getPatient().getName().getSurname();
+                message = "Are you sure you want to cancel the appointment for patient " + name; 
+            }
             from.format(DateTimeFormatter.ofPattern("HH:mm"));
             String[] options = {"Yes", "No"};
             OKToCancelAppointment = JOptionPane.showOptionDialog(this,
-                            "Are you sure you want to cancel the appointment for patient "
-                                    + name + " from " + from.format(DateTimeFormatter.ofPattern("HH:mm")) 
+                            message + " from " + from.format(DateTimeFormatter.ofPattern("HH:mm")) 
                                     + " to " + to.format(DateTimeFormatter.ofPattern("HH:mm"))
                                     + ".",null,
                             JOptionPane.YES_NO_OPTION,
@@ -914,6 +955,19 @@ public class AppointmentScheduleView extends View{
     }//GEN-LAST:event_mniViewCancelledAppointmentsActionPerformed
 
     private void btnMarkSlotUnbookableActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnMarkSlotUnbookableActionPerformed
+        Appointment appointment = null;
+        int row = this.tblAppointments.getSelectedRow();
+        if (row != -1){
+            getViewDescriptor().getViewDescription().
+                    setViewMode(ViewController.ViewMode.SLOT_SELECTED);
+            appointment = ((Appointments5ColumnTableModel)this.tblAppointments.getModel()).getElementAt(row);
+            getViewDescriptor().getViewDescription().setAppointment(appointment); 
+        }
+        else {
+            getViewDescriptor().getViewDescription().
+                    setViewMode(ViewController.ViewMode.SLOT_UNSELECTED);
+            getViewDescriptor().getViewDescription().setAppointment(null);
+        }
         ActionEvent actionEvent = new ActionEvent(this,
                 ActionEvent.ACTION_PERFORMED,
                 ViewController.AppointmentScheduleViewControllerActionEvent.UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_VIEW_REQUEST.toString());
@@ -923,6 +977,90 @@ public class AppointmentScheduleView extends View{
     private void mniPrintScheduleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mniPrintScheduleActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_mniPrintScheduleActionPerformed
+
+    public static String centreString (int width, String s) {
+        return String.format("%-" + width  + "s", String.format("%" + (s.length() + (width - s.length()) / 2) + "s", s));
+    }
+    
+    public static String leftAlignString(int width, String s){
+        return String.format("%-" + width + "s", s);
+    }
+    
+    private void btnPrintScheduleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPrintScheduleActionPerformed
+        int PATIENT_WIDTH = 36;
+        int FROM_WIDTH = 8;
+        int TO_WIDTH = 8;
+        int NOTES_WIDTH = 20;
+        int patientColumn = 0;
+        int fromColumn = 1;
+        int toColumn = 2;
+        int durationColumn = 3;
+        int notesColumn = 4;
+        String patient;
+        String from;
+        String to;
+        String duration;
+        String contact;
+        String stringToPrint;
+        if (this.tblAppointments!=null){
+            TableModel model = tblAppointments.getModel();
+            stringToPrint = getViewDescriptor().getControllerDescription().getAppointmentScheduleDay().
+                    format(DateTimeFormatter.ofPattern("dd/MM/yy"));
+            stringToPrint = stringToPrint + " Appointment Schedule" +"\n\n";
+            stringToPrint = stringToPrint + String.format(centreString(PATIENT_WIDTH,"Patient") +
+                    centreString(FROM_WIDTH,"From") 
+                    + centreString(TO_WIDTH, "To")
+                    + centreString(NOTES_WIDTH, "Notes"));
+            stringToPrint = stringToPrint +"\n";
+ 
+            for (int row = 0; row < tblAppointments.getRowCount(); row++) {
+                from = ((LocalTime)model.getValueAt(row, fromColumn)).format(DateTimeFormatter.ofPattern("HH:mm"));
+                to = ((LocalTime)model.getValueAt(row, toColumn)).format(DateTimeFormatter.ofPattern("HH:mm"));
+                Patient p = (Patient)model.getValueAt(row, patientColumn);
+                String notes = (String)model.getValueAt(row, notesColumn);
+                //if (model.getValueAt(row, patientColumn)==null) {
+                if (p==null){
+                    patient = "AVAILABLE SLOT";
+                    stringToPrint = stringToPrint + String.format(
+                        centreString(PATIENT_WIDTH, patient) +
+                        centreString(FROM_WIDTH, from) +
+                        centreString(TO_WIDTH, to) +
+                        leftAlignString(NOTES_WIDTH, notes));
+                }else if(p.toString().equals(SystemDefinitions.APPOINTMENT_UNBOOKABILITY_MARKER)){
+                    patient = "<< U N B O O K A B L E  S L O T >>";
+                    stringToPrint = stringToPrint + String.format(
+                        centreString(PATIENT_WIDTH, patient) +
+                        centreString(FROM_WIDTH, from) +
+                        centreString(TO_WIDTH, to) +
+                        leftAlignString(NOTES_WIDTH, notes));   
+                }else {
+                    patient = model.getValueAt(row,patientColumn).toString();
+                    stringToPrint = stringToPrint + String.format(
+                        leftAlignString(PATIENT_WIDTH, patient) +
+                        centreString(FROM_WIDTH, from) +
+                        centreString(TO_WIDTH, to) +
+                        leftAlignString(NOTES_WIDTH, notes));
+                }
+                stringToPrint = stringToPrint + "\n";
+            }
+            
+            PrinterJob job = PrinterJob.getPrinterJob();
+            job.setPrintable(new OutputPrinter(stringToPrint));
+            boolean doPrint = job.printDialog();
+            if (doPrint)
+            { 
+                try 
+                {
+                    job.print();
+                }
+                catch (PrinterException ex)
+                {
+                    int test = 0;
+                    // Print job did not complete.
+                }
+            }
+        }
+    }//GEN-LAST:event_btnPrintScheduleActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -943,7 +1081,6 @@ public class AppointmentScheduleView extends View{
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
-    private javax.swing.JPanel jPanel4;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JPopupMenu.Separator jSeparator1;
     private javax.swing.JPopupMenu.Separator jSeparator2;
@@ -1054,7 +1191,7 @@ public class AppointmentScheduleView extends View{
         while (it.hasNext()){
             tableModel.addElement(it.next());
         }
-        
+       
         this.tblAppointments.setDefaultRenderer(Duration.class, new AppointmentsTableDurationRenderer());
         this.tblAppointments.setDefaultRenderer(LocalDateTime.class, new AppointmentsTableLocalDateTimeRenderer());
         this.tblAppointments.setDefaultRenderer(Patient.class, new AppointmentsTablePatientRenderer());
@@ -1075,7 +1212,12 @@ public class AppointmentScheduleView extends View{
         JTableHeader tableHeader = this.tblAppointments.getTableHeader();
         tableHeader.setBackground(new Color(220,220,220));
         tableHeader.setOpaque(true);
+        
+        
+        
     }
+    
+
     
     public class OutputPrinter implements Printable {
         private String printData;
@@ -1144,15 +1286,9 @@ public class AppointmentScheduleView extends View{
         }
     } 
     
-    public static String centreString (int width, String s) {
-        return String.format("%-" + width  + "s", String.format("%" + (s.length() + (width - s.length()) / 2) + "s", s));
-    }
     
-    public static String leftAlignString(int width, String s){
-        return String.format("%-" + width + "s", s);
-    }
     
-    private void btnPrintScheduleActionPerformed(ActionEvent e){
+    private void btnPrintScheduleActionPerformedx(ActionEvent e){
         int patientColumn = 0;
         int fromColumn = 1;
         int toColumn = 2;

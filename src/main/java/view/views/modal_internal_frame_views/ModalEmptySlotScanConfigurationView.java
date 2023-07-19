@@ -189,7 +189,6 @@ public class ModalEmptySlotScanConfigurationView extends View {
         jLabel2.setText("  Slot duration");
 
         cmbSelectSlotDuration.setModel(new javax.swing.DefaultComboBoxModel<>(new Duration[] {
-            Duration.ofMinutes(0),
             Duration.ofMinutes(5),
             Duration.ofMinutes(10),
             Duration.ofMinutes(15),
@@ -328,7 +327,7 @@ cmbSelectSlotDuration.addActionListener(new java.awt.event.ActionListener() {
             this.rdbSelectMonths.setEnabled(false);
             this.rdbSelectWeeks.setEnabled(false);
             this.spnSlotSearchOffset.setEnabled(false);
-            this.cmbSelectSlotDuration.setForeground(Color.red);
+            //this.cmbSelectSlotDuration.setForeground(Color.red);
         }
         else{
 

@@ -260,7 +260,8 @@ public class ModalPatientNotificationEditorView extends View {
     private ViewController.ViewMode getViewMode(){
         return this.viewMode;
     }
-    private void setViewMode(ViewController.ViewMode value){
+
+    public void setViewMode(ViewController.ViewMode value){
         this.viewMode = value;
         switch (viewMode){
             case Create:

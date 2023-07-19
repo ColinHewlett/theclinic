@@ -13,11 +13,11 @@ import model.Patient;
  * @author colin
  */
 final class PatientDelegate extends Patient {
-    
+    /*
     protected PatientDelegate(){
         super();
     }
-    
+    */
     protected PatientDelegate(Integer key){
         super();
         setPatientKey(key);

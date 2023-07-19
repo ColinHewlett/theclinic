@@ -12,6 +12,7 @@ import model.Notification;
  * @author colin
  */
 public class PatientNotificationDelegate extends Notification {
+    int test = 0;
     
     protected PatientNotificationDelegate(){
         super();

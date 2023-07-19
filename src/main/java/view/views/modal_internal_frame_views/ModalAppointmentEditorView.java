@@ -31,6 +31,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Iterator;
 import javax.swing.DefaultComboBoxModel;
@@ -39,14 +40,28 @@ import javax.swing.JDesktopPane;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.JInternalFrame;
 import javax.swing.JLayeredPane;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JSeparator;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+
 
 /**
  *
  * @author colin
  */
 public class ModalAppointmentEditorView extends View {
+    private final String SETTINGS = "Settings";
+    private final String FIRST_APPOINTMENT_START_TIME = "First appointment start time";
+    private final String LAST_APPOINTMENT_START_TIME = "Last appointment start time";
+    private final String EXIT_VIEW = "Close view";
+    private JMenuBar mbrView = null;
+    private JMenu mnuSelectSettings = null; 
+    private JMenuItem mniFirstAppointmentStartTime = null;
+    private JMenuItem mniLastAppointmentStartTime = null;
+    private JMenuItem mniExitView = null;
     private View.Viewer myViewType = null;
     private Descriptor entityDescriptor = null;
     private ActionListener myController = null;
@@ -66,37 +81,91 @@ public class ModalAppointmentEditorView extends View {
         setViewDescriptor(entityDescriptor);
         setMyController(myController);
         setMyViewType(myViewType);
-        initComponents();
+        initComponents(desktop);
         initialiseViewMode();
         
-        desktop.add(this);
+        //desktop.add(this);
         this.setLayer(JLayeredPane.MODAL_LAYER);
-        centreViewOnDesktop(desktop.getParent(),this);
+        centreViewOnDesktop(desktop.getParent());
         this.initialiseView();
         this.setVisible(true);
-        
-        startModal(this);
+        makeSelectSettingsMenu();
+        mbrView = new JMenuBar();
+        mbrView.add(this.mnuSelectSettings);
+        setJMenuBar(mbrView);
+        startModal();
     }
     
-    private void startModal(JInternalFrame f) {
+    private void makeSelectSettingsMenu(){
+        this.mnuSelectSettings = new JMenu(SETTINGS);
+        this.mniFirstAppointmentStartTime = new JMenuItem(FIRST_APPOINTMENT_START_TIME);
+        this.mniLastAppointmentStartTime = new JMenuItem(LAST_APPOINTMENT_START_TIME);
+        mniExitView = new JMenuItem(EXIT_VIEW);
+        mnuSelectSettings.add(mniFirstAppointmentStartTime);
+        mnuSelectSettings.add(mniLastAppointmentStartTime);
+        mnuSelectSettings.add(new JSeparator());
+        mnuSelectSettings.add(mniExitView);
+   
+        mniFirstAppointmentStartTime.addActionListener((ActionEvent e) -> mniFirstAppointmentStartTimeActionPerformed());
+        mniLastAppointmentStartTime.addActionListener((ActionEvent e) -> mniLastAppointmentStartTimeActionPerformed());
+        mniExitView.addActionListener((ActionEvent e) -> mniExitViewActionPerformed());
+    }
+    
+    private boolean isNumeric(String s){
+        return s.matches("-?\\d+(\\.\\d+)?");
+    }
+    
+    private void mniFirstAppointmentStartTimeActionPerformed(){
+        Integer minutes = null;
+        LocalTime firstSlotStartTime = null;
+        String message ="Specify number of minutes prior to the normal first "
+                + "appointment slot start time for the day";
+        String reply = JOptionPane.showInternalInputDialog(this, message);
+        if (isNumeric(reply)){
+            minutes = Integer.valueOf(reply);
+            firstSlotStartTime = 
+                    ViewController.FIRST_APPOINTMENT_SLOT.minusMinutes(minutes);
+            LocalDate day = getViewDescriptor().getViewDescription().getDay();
+            LocalDateTime localDateTime = LocalDateTime.of(day,firstSlotStartTime);
+            this.cmbSelectStartTime.
+                    insertItemAt(localDateTime, 0);
+            cmbSelectStartTime.setSelectedIndex(0);
+        }
+
+    }
+    
+    private void mniLastAppointmentStartTimeActionPerformed(){
+        
+    }
+    
+    private void mniExitViewActionPerformed(){
+        try{
+            this.setClosed(true);
+        }
+        catch (PropertyVetoException ex){
+            
+        }
+    }
+    
+    private void startModal() {
         // We need to add an additional glasspane-like component directly
         // below the frame, which intercepts all mouse events that are not
         // directed at the frame itself.
         JPanel modalInterceptor = new JPanel();
         modalInterceptor.setOpaque(false);
-        JLayeredPane lp = JLayeredPane.getLayeredPaneAbove(f);
+        JLayeredPane lp = JLayeredPane.getLayeredPaneAbove(this);
         lp.setLayer(modalInterceptor, JLayeredPane.MODAL_LAYER.intValue());
         modalInterceptor.setBounds(0, 0, lp.getWidth(), lp.getHeight());
         modalInterceptor.addMouseListener(new MouseAdapter(){});
         modalInterceptor.addMouseMotionListener(new MouseMotionAdapter(){});
         lp.add(modalInterceptor);
-        f.toFront();
+        this.toFront();
 
         // We need to explicitly dispatch events when we are blocking the event
         // dispatch thread.
         EventQueue queue = Toolkit.getDefaultToolkit().getSystemEventQueue();
         try {
-            while (! f.isClosed())       {
+            while (! this.isClosed())       {
                 if (EventQueue.isDispatchThread())    {
                     // The getNextEventMethod() issues wait() when no
                     // event is available, so we don't need do explicitly wait().
@@ -124,12 +193,13 @@ public class ModalAppointmentEditorView extends View {
 
             // Remove the internal frame from its parent, so it is no longer
             // lurking around and clogging memory.
-            Container parent = f.getParent();
-            if (parent != null) parent.remove(f);
+            Container parent = this.getParent();
+            if (parent != null) parent.remove(this);
         }
     }
     
-    private void centreViewOnDesktop(Container desktopView, JInternalFrame view){
+    private void centreViewOnDesktop(Container desktopView){
+        JInternalFrame view = this;
         Insets insets = desktopView.getInsets();
         Dimension deskTopViewDimension = desktopView.getSize();
         Dimension myViewDimension = view.getSize();
@@ -183,35 +253,21 @@ public class ModalAppointmentEditorView extends View {
         populateSelectStartTime(day);
         populatePatientSelector(this.cmbSelectPatient);
         this.cmbSelectPatient.setEditable(false);
-        if (getViewMode().equals(ViewController.ViewMode.UPDATE)){
-            this.cmbSelectStartTime.setSelectedItem(
-                    getViewDescriptor().getControllerDescription().getAppointment().getStart());
-            this.spnDurationHours.setValue(getHoursFromDuration(getViewDescriptor().getControllerDescription().getAppointment().getDuration().toMinutes()));
-            this.spnDurationMinutes.setValue(getMinutesFromDuration(getViewDescriptor().getControllerDescription().getAppointment().getDuration().toMinutes()));
-            this.txaNotes.setText(getViewDescriptor().getControllerDescription().getAppointment().getNotes());
-            this.cmbSelectPatient.setSelectedItem(getViewDescriptor().getControllerDescription().getAppointment().getPatient());
-        }
-        
-        else this.cmbSelectStartTime.setSelectedIndex(0);
-        //else this.cmbSelectStartTime.setSelectedIndex(0);
-        this.setTitle("Appointment editor for " + day.format(ddMMyyyyFormat));
+        this.cmbSelectStartTime.setSelectedItem(
+                getViewDescriptor().getControllerDescription().getAppointment().getStart());
+        this.spnDurationHours.setValue(getHoursFromDuration(getViewDescriptor().getControllerDescription().getAppointment().getDuration().toMinutes()));
+        this.spnDurationMinutes.setValue(getMinutesFromDuration(getViewDescriptor().getControllerDescription().getAppointment().getDuration().toMinutes()));
+        this.txaNotes.setText(getViewDescriptor().getControllerDescription().getAppointment().getNotes());
+        this.cmbSelectPatient.setSelectedItem(getViewDescriptor().getControllerDescription().getAppointment().getPatient());
+
+        this.setTitle("Apppointment editor for " + day.format(ddMMyyyyFormat));
     }
-   
-    private ViewController.ViewMode getViewMode(){
-        return this.viewMode;
-    }
-    private void setViewMode(ViewController.ViewMode value){
-        this.viewMode = value;
-    }
+
     private void initialiseViewMode(){
-        if (getViewDescriptor().getControllerDescription().getAppointment().getIsKeyDefined()){
-            setViewMode(ViewController.ViewMode.UPDATE);
+        if (getViewDescriptor().getControllerDescription().getViewMode().
+                equals(ViewController.ViewMode.UPDATE))
             this.btnCreateUpdateAppointment.setText(UPDATE_BUTTON);
-        }
-        else{
-            setViewMode(ViewController.ViewMode.CREATE);
-            this.btnCreateUpdateAppointment.setText(CREATE_BUTTON);
-        }
+        else this.btnCreateUpdateAppointment.setText(CREATE_BUTTON);
     }
     /**
      * the method process
@@ -283,8 +339,8 @@ public class ModalAppointmentEditorView extends View {
      */
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
-    private void initComponents() {
-
+    private void initComponents(JDesktopPane desktop) {
+        desktop.add(this);
         pnlAppointmentDetails = new javax.swing.JPanel();
         lblDialogForAppointmentDefinitionTitle1 = new javax.swing.JLabel();
         lblDialogForAppointmentDefinitionTitle2 = new javax.swing.JLabel();
@@ -313,7 +369,6 @@ public class ModalAppointmentEditorView extends View {
         jLabel1.setText("hours");
 
         jLabel2.setText("minutes");
-
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
@@ -485,7 +540,7 @@ public class ModalAppointmentEditorView extends View {
         * check if a non zero duration value has been defined
         * check if no notes have been defined if still ok to save appointment
         */
-        if (getViewDescriptor().getViewDescription().getPatient()== null){
+        if (getViewDescriptor().getViewDescription().getAppointment().getPatient()== null){
             JOptionPane.showMessageDialog(this, "A patient has not been selected for this appointment");
         }
         else if (getViewDescriptor().getControllerDescription().getAppointment().getDuration().isZero()){
@@ -503,7 +558,7 @@ public class ModalAppointmentEditorView extends View {
                     null);
             }
             if (OKToSaveAppointment==JOptionPane.YES_OPTION){
-                switch (getViewMode()){
+                switch (getViewDescriptor().getControllerDescription().getViewMode()){
                     case CREATE:
                         evt = new ActionEvent(ModalAppointmentEditorView.this,
                             ActionEvent.ACTION_PERFORMED,
