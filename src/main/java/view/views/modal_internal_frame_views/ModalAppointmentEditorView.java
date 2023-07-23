@@ -116,20 +116,39 @@ public class ModalAppointmentEditorView extends View {
     }
     
     private void mniFirstAppointmentStartTimeActionPerformed(){
-        Integer minutes = null;
-        LocalTime firstSlotStartTime = null;
-        String message ="Specify number of minutes prior to the normal first "
+        boolean isError = false;
+        String reply;
+        String message;
+        Integer minutes;
+        LocalDateTime firstSlotStartTime = null;
+        if (getViewDescriptor().getControllerDescription().getAppointmentEarlyStart()!=null){
+            firstSlotStartTime = getViewDescriptor().
+                    getControllerDescription().getAppointmentEarlyStart();
+            message ="Specify number of minutes prior to the first "
                 + "appointment slot start time for the day";
-        String reply = JOptionPane.showInternalInputDialog(this, message);
-        if (isNumeric(reply)){
-            minutes = Integer.valueOf(reply);
-            firstSlotStartTime = 
-                    ViewController.FIRST_APPOINTMENT_SLOT.minusMinutes(minutes);
-            LocalDate day = getViewDescriptor().getViewDescription().getDay();
-            LocalDateTime localDateTime = LocalDateTime.of(day,firstSlotStartTime);
+            reply = JOptionPane.showInternalInputDialog(this, message);
+            if (isNumeric(reply)){
+                minutes = Integer.valueOf(reply);
+                firstSlotStartTime = 
+                    firstSlotStartTime.minusMinutes(minutes);
+            }else isError = true;
+        }else{
+            message ="Specify number of minutes prior to the normal first "
+                + "appointment slot start time for the day";
+            reply = JOptionPane.showInternalInputDialog(this, message);
+            if (isNumeric(reply)){
+                minutes = Integer.valueOf(reply);
+                LocalDate day = getViewDescriptor().getViewDescription().getDay();
+                firstSlotStartTime =  LocalDateTime.of(
+                        day,ViewController.FIRST_APPOINTMENT_SLOT).minusMinutes(minutes);  
+            }else isError = true;
+        }
+        if (!isError){
             this.cmbSelectStartTime.
-                    insertItemAt(localDateTime, 0);
+                    insertItemAt(firstSlotStartTime, 0);
             cmbSelectStartTime.setSelectedIndex(0);
+        }else{
+            JOptionPane.showMessageDialog(this, "an invalid number of minutes specified");
         }
 
     }
@@ -235,13 +254,39 @@ public class ModalAppointmentEditorView extends View {
         }
     }
     
+    /**
+     * method checks if an early appointment slot exists (i.e a slot which starts prior to the FIRST_APPOINTMENT_SLOT start time)
+     * -- yes -> enter the start time first in the list displayed
+     * -- no -> first start time in list is FIRST_APPOINTMENT_SLOT
+     * also checks if a late appointment slot exists (after LAST_APPOINTMENT_SLOT start time)
+     * In either event the list of available times at view initialisation can be lengthened in either direction
+     * @param day; LocalDate represents the schedule day 
+     */
     private void populateSelectStartTime(LocalDate day){
         DefaultComboBoxModel<LocalDateTime> model = new DefaultComboBoxModel<>();
-        LocalDateTime value = day.atTime(ViewController.FIRST_APPOINTMENT_SLOT);
+        LocalDateTime value;
+        if (getViewDescriptor().getControllerDescription().getAppointmentEarlyStart()!=null){
+            value = getViewDescriptor().getControllerDescription().getAppointmentEarlyStart();
+            do{
+                model.addElement(value);
+                value = value.plusMinutes(5);   
+            }while(value.isBefore(day.atTime(ViewController.FIRST_APPOINTMENT_SLOT)));
+        }
+        value = day.atTime(ViewController.FIRST_APPOINTMENT_SLOT);
         do{
             model.addElement(value);
             value = value.plusMinutes(5);   
         }while(!value.isAfter(day.atTime(ViewController.LAST_APPOINTMENT_SLOT)));
+        if (getViewDescriptor().getControllerDescription().getAppointmentLateStart()!=null){
+            if (getViewDescriptor().getControllerDescription().getAppointmentLateStart().
+                    isAfter(day.atTime(ViewController.LAST_APPOINTMENT_SLOT))){
+                do{
+                    model.addElement(value);
+                    value = value.plusMinutes(5);  
+                }while(!value.isAfter(getViewDescriptor().
+                        getControllerDescription().getAppointmentLateStart()));
+            }
+        }        
         this.cmbSelectStartTime.setModel(model);
     }
     
@@ -278,13 +323,7 @@ public class ModalAppointmentEditorView extends View {
         //get the appointment with  which the view was initialised (in particular the appointment key)
         getViewDescriptor().getViewDescription().setAppointment(
                     getViewDescriptor().getControllerDescription().getAppointment());
-        //update this from current state of view
-        
-        //24/07/2022 13:42 (1c)
-        /*
-        getViewDescriptor().getViewDescription().setThePatient(
-                (Patient)this.cmbSelectPatient.getSelectedItem());
-        */
+
         getViewDescriptor().getViewDescription().getAppointment().setPatient((Patient)this.cmbSelectPatient.getSelectedItem());
         
         getViewDescriptor().getViewDescription().getAppointment().

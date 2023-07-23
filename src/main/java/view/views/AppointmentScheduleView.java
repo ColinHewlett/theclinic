@@ -9,7 +9,7 @@ import _system_environment_variables.SystemDefinitions;
 import view.views.view_support_classes.renderers.AppointmentsTableDurationRenderer;
 import view.views.view_support_classes.renderers.AppointmentsTableLocalDateTimeRenderer;
 import view.views.view_support_classes.renderers.AppointmentsTablePatientRenderer;
-import view.views.view_support_classes.models.Appointments5ColumnTableModel;
+import view.views.view_support_classes.models.AppointmentsScheduleTableModel;
 import model.Appointment;
 import model.Patient;
 import controller.ViewController;
@@ -69,6 +69,9 @@ import javax.swing.table.TableColumnModel;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
+import view.views.view_support_classes.models.AppointmentRemindersView6ColumnTableModel;
 
 
 /**
@@ -77,7 +80,7 @@ import javax.swing.event.ListSelectionListener;
  */
 public class AppointmentScheduleView extends View{
     private enum COLUMN{From,Duration,ThePatient,Notes};
-    private Appointments5ColumnTableModel tableModel = null;
+    private AppointmentsScheduleTableModel tableModel = null;
     private InternalFrameAdapter internalFrameAdapter = null;
     private DatePickerSettings settings = null;
     private ArrayList<Appointment> appointments = null;
@@ -110,6 +113,7 @@ public class AppointmentScheduleView extends View{
         switch (propertyName){
             case APPOINTMENTS_FOR_DAY_RECEIVED:
                 populateAppointmentsForDayTable();
+                tblAppointments.clearSelection();
                 break;
             case SURGERY_DAYS_ASSIGNMENT_RECEIVED:
                 updateDatePickerSettings();
@@ -314,26 +318,24 @@ public class AppointmentScheduleView extends View{
     private void setAppointmentTableListener(){
         this.tblAppointments.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         ListSelectionModel lsm = this.tblAppointments.getSelectionModel();
+        
         lsm.addListSelectionListener(new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent e) {
                 if (!e.getValueIsAdjusting()) {   // Ensure the event is not fired multiple times
                     int selectedRow = tblAppointments.getSelectedRow();
-                    if (selectedRow!=-1)tableValueChangedListenerActivated = true;
-                    /*
-                    if (previousRowSelected!=null){
-                        if (selectedRow != -1){
-                            if (selectedRow == previousRowSelected){
-                                tblAppointments.getSelectionModel().
-                                        removeSelectionInterval(selectedRow, selectedRow);
-                                previousRowSelected = null;
-                            }else previousRowSelected = selectedRow;
-                        }
-                    }else previousRowSelected = selectedRow;
-                    */
+                    if (selectedRow!=-1){
+                        tableValueChangedListenerActivated = true;
+                        Patient patient = (Patient)tblAppointments.getModel().getValueAt(selectedRow, 0);
+                        doDisplayPhoneNumbersFor(patient);
+                    }
+                    else doDisplayPhoneNumbersFor(null);
+                    
+                    
                 }
             }
         });
+        
         tblAppointments.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -342,15 +344,9 @@ public class AppointmentScheduleView extends View{
                     if (selectedRow!=-1 && tblAppointments.isRowSelected(selectedRow))
                     tblAppointments.clearSelection(); // Deselect the clicked row
                 }else tableValueChangedListenerActivated = false;
-  
-                // Check if the clicked row is already selected
-                /*
-                if (tblAppointments.isRowSelected(selectedRow)) {
-                    tblAppointments.clearSelection(); // Deselect the clicked row
-                } 
-                */
             }
         });
+        
     }
     private void refreshAppointmentTableWithCurrentlySelectedDate(){
         ActionEvent actionEvent = new ActionEvent(AppointmentScheduleView.this, 
@@ -386,8 +382,8 @@ public class AppointmentScheduleView extends View{
      * 
      */
     private void populateAppointmentsForDayTable(){
-        doDisplayAppointmentTableForDayTitle();
-        configureAppointmentsForDayTable();
+        configureAppointmentsForDayTable();;
+        doDisplayPhoneNumbersFor(null);
         setTitle(getViewDescriptor().getControllerDescription().getAppointmentScheduleDay().
                 format(DateTimeFormatter.ofPattern("dd/MM/yy")) + " Appointment schedule");
         ActionEvent actionEvent = new ActionEvent(
@@ -809,14 +805,13 @@ public class AppointmentScheduleView extends View{
         if (row == -1){
             JOptionPane.showMessageDialog(this, "An appointment has not been selected for update");
         }
-        else if(((Appointments5ColumnTableModel)this.tblAppointments.getModel()).getElementAt(row).getPatient()==null){
+        else if(((AppointmentsScheduleTableModel)this.tblAppointments.getModel()).getElementAt(row).getPatient()==null){
             JOptionPane.showMessageDialog(this, "An appointment has not been selected for update");
         }
-        else if (!((Appointments5ColumnTableModel)this.tblAppointments.getModel()).getElementAt(row).getPatient().getIsKeyDefined()){
+        else if (!((AppointmentsScheduleTableModel)this.tblAppointments.getModel()).getElementAt(row).getPatient().getIsKeyDefined()){
             JOptionPane.showMessageDialog(this, "An appointment has not been selected for update");
         }
-        else if (SystemDefinitions.APPOINTMENT_UNBOOKABILITY_MARKER.equals(
-                    ((Appointments5ColumnTableModel)this.tblAppointments.getModel()).
+        else if (SystemDefinitions.APPOINTMENT_UNBOOKABILITY_MARKER.equals(((AppointmentsScheduleTableModel)this.tblAppointments.getModel()).
                             getElementAt(row).getPatient().toString())){
             getViewDescriptor().getViewDescription().
                     setViewMode(ViewController.ViewMode.UPDATE);
@@ -887,47 +882,46 @@ public class AppointmentScheduleView extends View{
         }
         //30/07/2022 09:26
         if (!isError){
-            if ((((Appointments5ColumnTableModel)this.tblAppointments.getModel()).getElementAt(row).getPatient()==null)){
+            if ((((AppointmentsScheduleTableModel)this.tblAppointments.getModel()).getElementAt(row).getPatient()==null)){
                 JOptionPane.showMessageDialog(this, "An appointment has not been selected for cancellation");
             }   
-        }else{
-            int OKToCancelAppointment;
-            initialiseEDRequestFromView(row);
-            start = getViewDescriptor().getViewDescription().getAppointment().getStart();
-            from = start.toLocalTime();
-            //20/07/2022 08:16 update
-            //duration = getViewDescriptor().getViewDescription().getAppointment().getData().getDuration().toMinutes();
-            duration = getViewDescriptor().getViewDescription().getAppointment().getDuration().toMinutes();
-            LocalTime to = from.plusMinutes(duration);
-            
-            String message;
-            if (getViewDescriptor().getViewDescription().getAppointment().getPatient().toString().
-                    equals(SystemDefinitions.APPOINTMENT_UNBOOKABILITY_MARKER)){
-                message = "Are you sure you want to cancel the unbookable appointment slot";
-            }
-            else {
-                name = getViewDescriptor().getViewDescription().getAppointment().getPatient().getName().getForenames();
-                if (!name.isEmpty())name = name + " ";
-                name = name + getViewDescriptor().getViewDescription().getAppointment().getPatient().getName().getSurname();
-                message = "Are you sure you want to cancel the appointment for patient " + name; 
-            }
-            from.format(DateTimeFormatter.ofPattern("HH:mm"));
-            String[] options = {"Yes", "No"};
-            OKToCancelAppointment = JOptionPane.showOptionDialog(this,
-                            message + " from " + from.format(DateTimeFormatter.ofPattern("HH:mm")) 
-                                    + " to " + to.format(DateTimeFormatter.ofPattern("HH:mm"))
-                                    + ".",null,
-                            JOptionPane.YES_NO_OPTION,
-                            JOptionPane.INFORMATION_MESSAGE,
-                            null,
-                            options,
-                            null);
-            if (OKToCancelAppointment==JOptionPane.YES_OPTION){
-                ActionEvent actionEvent = new ActionEvent(this, 
-                        ActionEvent.ACTION_PERFORMED,
-                        ViewController.AppointmentScheduleViewControllerActionEvent.APPOINTMENT_CANCEL_REQUEST.toString());
-                this.getMyController().actionPerformed(actionEvent);
-            }
+        }
+        int OKToCancelAppointment;
+        initialiseEDRequestFromView(row);
+        start = getViewDescriptor().getViewDescription().getAppointment().getStart();
+        from = start.toLocalTime();
+        //20/07/2022 08:16 update
+        //duration = getViewDescriptor().getViewDescription().getAppointment().getData().getDuration().toMinutes();
+        duration = getViewDescriptor().getViewDescription().getAppointment().getDuration().toMinutes();
+        LocalTime to = from.plusMinutes(duration);
+
+        String message;
+        if (getViewDescriptor().getViewDescription().getAppointment().getPatient().toString().
+                equals(SystemDefinitions.APPOINTMENT_UNBOOKABILITY_MARKER)){
+            message = "Are you sure you want to cancel the unbookable appointment slot";
+        }
+        else {
+            name = getViewDescriptor().getViewDescription().getAppointment().getPatient().getName().getForenames();
+            if (!name.isEmpty())name = name + " ";
+            name = name + getViewDescriptor().getViewDescription().getAppointment().getPatient().getName().getSurname();
+            message = "Are you sure you want to cancel the appointment for patient " + name; 
+        }
+        from.format(DateTimeFormatter.ofPattern("HH:mm"));
+        String[] options = {"Yes", "No"};
+        OKToCancelAppointment = JOptionPane.showOptionDialog(this,
+                        message + " from " + from.format(DateTimeFormatter.ofPattern("HH:mm")) 
+                                + " to " + to.format(DateTimeFormatter.ofPattern("HH:mm"))
+                                + ".",null,
+                        JOptionPane.YES_NO_OPTION,
+                        JOptionPane.INFORMATION_MESSAGE,
+                        null,
+                        options,
+                        null);
+        if (OKToCancelAppointment==JOptionPane.YES_OPTION){
+            ActionEvent actionEvent = new ActionEvent(this, 
+                    ActionEvent.ACTION_PERFORMED,
+                    ViewController.AppointmentScheduleViewControllerActionEvent.APPOINTMENT_CANCEL_REQUEST.toString());
+            this.getMyController().actionPerformed(actionEvent);
         }
     }//GEN-LAST:event_btnCancelSelectedAppointmentActionPerformed
 
@@ -960,7 +954,7 @@ public class AppointmentScheduleView extends View{
         if (row != -1){
             getViewDescriptor().getViewDescription().
                     setViewMode(ViewController.ViewMode.SLOT_SELECTED);
-            appointment = ((Appointments5ColumnTableModel)this.tblAppointments.getModel()).getElementAt(row);
+            appointment = ((AppointmentsScheduleTableModel)this.tblAppointments.getModel()).getElementAt(row);
             getViewDescriptor().getViewDescription().setAppointment(appointment); 
         }
         else {
@@ -1103,6 +1097,7 @@ public class AppointmentScheduleView extends View{
         public void dateChanged(DateChangeEvent event) {
             //LocalDate date = event.getNewDate();
             getViewDescriptor().getViewDescription().setDay(AppointmentScheduleView.this.dayDatePicker.getDate());
+            tblAppointments.clearSelection();
             ActionEvent actionEvent = new ActionEvent(AppointmentScheduleView.this, 
                     ActionEvent.ACTION_PERFORMED,
                     ViewController.AppointmentScheduleViewControllerActionEvent.APPOINTMENTS_FOR_DAY_REQUEST.toString());
@@ -1175,7 +1170,11 @@ public class AppointmentScheduleView extends View{
                             patient = "patients";
                             has = "have";
                     }
-                    tableTitle = tableTitle + "       <<" + String.valueOf(reminderCount) + " " + patient + " of " + String.valueOf(appointeeCount) + " " + has + " had an appointment reminder>>";
+                    tableTitle = tableTitle + "       <<" 
+                            + String.valueOf(reminderCount) + " " 
+                            + patient + " of " 
+                            + String.valueOf(appointeeCount) 
+                            + " " + has + " had an appointment reminder>>";
                 }
             }
             TitledBorder titledBorder = (TitledBorder)this.pnlAppointmentScheduleForDay.getBorder();
@@ -1184,8 +1183,51 @@ public class AppointmentScheduleView extends View{
         
     }
     
+    private void doDisplayPhoneNumbersFor(Patient appointee){
+        String tableTitle = "Appointment schedule for " 
+                + dayDatePicker.getDate().format(appointmentScheduleFormat);
+        if ((appointee!=null) &&
+                (!appointee.toString().equals(SystemDefinitions.UNBOOKABLE_APPOINTMENT_SLOT))){
+            tableTitle = tableTitle 
+                    + "              <selected patient phone(s) "
+                    + appointee.getPhone1();
+            if (!appointee.getPhone2().isEmpty())
+                tableTitle = tableTitle + "; "
+                        + appointee.getPhone2(); 
+            tableTitle = tableTitle + ">";   
+        }
+        TitledBorder titledBorder = (TitledBorder)pnlAppointmentScheduleForDay.getBorder();
+        titledBorder.setTitle(tableTitle);
+        pnlAppointmentScheduleForDay.repaint();
+    }
+    
     private void configureAppointmentsForDayTable(){
-        if (tableModel == null) tableModel = new Appointments5ColumnTableModel();
+        if (tableModel == null) {
+            tableModel = new AppointmentsScheduleTableModel();
+            tableModel.addTableModelListener(new TableModelListener(){
+                Appointment appointment = null;
+                @Override
+                public void tableChanged(TableModelEvent e) {
+                    int row = e.getFirstRow();
+                    int column = e.getColumn();
+                    AppointmentsScheduleTableModel model =  
+                            (AppointmentsScheduleTableModel)e.getSource();
+                    Boolean value = (Boolean)model.getValueAt(row, column);
+                    appointment = model.getElementAt(row);
+                    appointment.setHasPatientBeenContacted(value);
+                    getViewDescriptor().getViewDescription().setAppointment(appointment);
+                    tblAppointments.clearSelection();
+                    /*
+                    ActionEvent actionEvent = new ActionEvent(
+                            AppointmentRemindersView.this,ActionEvent.ACTION_PERFORMED,
+                            ViewController.AppointmentRemindersViewControllerActionEvent.
+                                    APPOINTEE_CONTACT_DETAILS_FOR_SCHEDULE_VIEW_CHANGE_NOTIFICATION.toString());
+                    getMyController().actionPerformed(actionEvent);
+                */
+                }
+            });
+            this.tblAppointments.setModel(tableModel);
+        }
         tableModel.removeAllElements();
         Iterator<Appointment> it = getViewDescriptor().getControllerDescription().getAppointmentSlotsForDay().iterator();
         while (it.hasNext()){
@@ -1195,20 +1237,23 @@ public class AppointmentScheduleView extends View{
         this.tblAppointments.setDefaultRenderer(Duration.class, new AppointmentsTableDurationRenderer());
         this.tblAppointments.setDefaultRenderer(LocalDateTime.class, new AppointmentsTableLocalDateTimeRenderer());
         this.tblAppointments.setDefaultRenderer(Patient.class, new AppointmentsTablePatientRenderer());
-        this.tblAppointments.setModel(tableModel);
+        //this.tblAppointments.setModel(tableModel);
+        //this.tblAppointments.setRowSelectionAllowed(false);
         this.tblAppointments.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
         
         TableColumnModel columnModel = this.tblAppointments.getColumnModel();
         columnModel.getColumn(0).setPreferredWidth(190);
         columnModel.getColumn(0).setHeaderRenderer(new TableHeaderCellBorderRenderer(Color.LIGHT_GRAY));
-        columnModel.getColumn(1).setPreferredWidth(60);
+        columnModel.getColumn(1).setPreferredWidth(36);
         columnModel.getColumn(1).setHeaderRenderer(new TableHeaderCellBorderRenderer(Color.LIGHT_GRAY));
-        columnModel.getColumn(2).setPreferredWidth(60);
+        columnModel.getColumn(2).setPreferredWidth(36);
         columnModel.getColumn(2).setHeaderRenderer(new TableHeaderCellBorderRenderer(Color.LIGHT_GRAY));
-        columnModel.getColumn(3).setPreferredWidth(105);
+        columnModel.getColumn(3).setPreferredWidth(96);
         columnModel.getColumn(3).setHeaderRenderer(new TableHeaderCellBorderRenderer(Color.LIGHT_GRAY));
-        columnModel.getColumn(4).setMinWidth(283);
+        columnModel.getColumn(4).setMinWidth(248);
         columnModel.getColumn(4).setHeaderRenderer(new TableHeaderCellBorderRenderer(Color.LIGHT_GRAY));
+        columnModel.getColumn(5).setMinWidth(20);
+        columnModel.getColumn(5).setHeaderRenderer(new TableHeaderCellBorderRenderer(Color.LIGHT_GRAY));
         JTableHeader tableHeader = this.tblAppointments.getTableHeader();
         tableHeader.setBackground(new Color(220,220,220));
         tableHeader.setOpaque(true);

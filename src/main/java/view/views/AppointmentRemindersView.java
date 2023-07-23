@@ -8,6 +8,8 @@ package view.views;
 import view.views.view_support_classes.models.AppointmentRemindersView6ColumnTableModel;
 import view.views.view_support_classes.renderers.TableHeaderCellBorderRenderer;
 import view.views.view_support_classes.renderers.AppointmentsTableDurationRenderer;
+import view.views.view_support_classes.renderers.AppointmentReminderTableCellRenderer;
+import javax.swing.table.TableCellRenderer;
 import controller.Descriptor;
 import controller.ViewController;
 import model.Appointment;
@@ -24,6 +26,8 @@ import java.util.Iterator;
 import java.util.ArrayList;
 import javax.swing.JInternalFrame;
 import javax.swing.JTable;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
 import javax.swing.event.TableModelEvent;
@@ -120,9 +124,10 @@ public class AppointmentRemindersView extends View {
             this.scrPatientAppointmentContactView.remove(this.tblPatientAppointmentContacts);   
         }
         this.tblPatientAppointmentContacts = new JTable(new AppointmentRemindersView6ColumnTableModel());
-        this.tblPatientAppointmentContacts.setRowSelectionAllowed(false);
+        //this.tblPatientAppointmentContacts.setRowSelectionAllowed(false);
+
         scrPatientAppointmentContactView.setViewportView(this.tblPatientAppointmentContacts);
-        this.tblPatientAppointmentContacts.setDefaultRenderer(Duration.class, new AppointmentsTableDurationRenderer());
+        //this.tblPatientAppointmentContacts.setDefaultRenderer(Duration.class, new AppointmentsTableDurationRenderer());
         JTableHeader tableHeader = this.tblPatientAppointmentContacts.getTableHeader();
         tableHeader.setBackground(new Color(220,220,220));
         tableHeader.setOpaque(true);
@@ -140,7 +145,7 @@ public class AppointmentRemindersView extends View {
         columnModel.getColumn(4).setHeaderRenderer(new TableHeaderCellBorderRenderer(Color.LIGHT_GRAY));
         columnModel.getColumn(5).setPreferredWidth(75);
         columnModel.getColumn(5).setHeaderRenderer(new TableHeaderCellBorderRenderer(Color.LIGHT_GRAY));
-        
+        //columnModel.getColumn(5).setCellRenderer(renderer);
         model = (AppointmentRemindersView6ColumnTableModel)this.tblPatientAppointmentContacts.getModel();
         model.removeAllElements();
         Iterator<Appointment> it = a.iterator();
@@ -159,6 +164,8 @@ public class AppointmentRemindersView extends View {
                 ViewController.AppointmentRemindersViewControllerActionEvent.
                         VIEW_CHANGED_NOTIFICATION.toString());
         this.getMyController().actionPerformed(actionEvent);
+        
+        
         model.addTableModelListener(new TableModelListener(){
             Appointment appointment = null;
             @Override
@@ -178,7 +185,17 @@ public class AppointmentRemindersView extends View {
                 getMyController().actionPerformed(actionEvent);
             }
         });  
+
+        tblPatientAppointmentContacts.getSelectionModel().addListSelectionListener(new ListSelectionListener(){
+            @Override
+            public void valueChanged(ListSelectionEvent e){
+                //int test = 0;
+            }
+        });
+          
+            
     }
+
 
     /**
      * This method is called from within the constructor to initialize the form.

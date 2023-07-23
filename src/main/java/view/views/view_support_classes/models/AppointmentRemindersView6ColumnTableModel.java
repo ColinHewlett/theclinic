@@ -32,7 +32,7 @@ public class AppointmentRemindersView6ColumnTableModel extends DefaultTableModel
     
     public AppointmentRemindersView6ColumnTableModel(){
         appointments = new ArrayList<>();
-        //appointments = new ArrayList<PatientAppointmentContactView6ColumnTableModel.AppointmentPlus>();
+        
     }
     
     public ArrayList<Appointment> getAppointments(){
@@ -45,7 +45,6 @@ public class AppointmentRemindersView6ColumnTableModel extends DefaultTableModel
     
     public void removeAllElements(){
         appointments.clear();
-        //this.fireTableDataChanged();
     }
     
     public Appointment getElementAt(int row){

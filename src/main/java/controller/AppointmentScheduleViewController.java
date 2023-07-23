@@ -201,37 +201,9 @@ public class AppointmentScheduleViewController extends ViewController{
                     getControllerDescriptor().getControllerDescription().setAppointments(appointment.get());
                     getControllerDescriptor().getControllerDescription().setAppointmentScheduleDay(day);
                     doAppointeeReminderCount(appointment.get());
-                    getUpdatedAppointmentSlotsForDay(appointment);
-                    firePropertyChangeEvent(
-                           ViewController.AppointmentScheduleViewControllerPropertyChangeEvent.
-                                   APPOINTMENTS_FOR_DAY_RECEIVED.toString(),
-                           this.view,//event target/listener
-                           this,//event sender
-                           null,
-                           getControllerDescriptor()//event related data        
-                    );
+                    getUpdatedAppointmentSlotsForDay(appointment);   
                 }
-                if (getControllerDescriptor().getControllerDescription().getEmptySlotFromDay()!=null){
-                    firePropertyChangeEvent(
-                           ViewController.AppointmentScheduleViewControllerPropertyChangeEvent.
-                                   NO_APPOINTMENT_SLOTS_FROM_DAY_RECEIVED.toString(),
-                           this.view,//event target/listener
-                           this,//event sender
-                           null,
-                           getControllerDescriptor()//event related data        
-                    );
-                }
-                /**
-                 * send APPOINTMENT_SCHEDULE_CHANGE_NOTIFICATION to DesktopVC
-                 */
-                firePropertyChangeEvent(
-                        ViewController.DesktopViewControllerPropertyChangeEvent.
-                                APPOINTMENT_SCHEDULE_VIEW_CONTROLLER_CHANGE_NOTIFICATION.toString(),
-                        (DesktopViewController)getMyController(),//event target
-                        this,//event source
-                        null,
-                        getControllerDescriptor()//event related data    
-                );
+             
             }
             catch (StoreException ex){
                String message = ex.getMessage();
@@ -389,7 +361,7 @@ public class AppointmentScheduleViewController extends ViewController{
                 patient = new Patient();
                 patient.setScope(Scope.ALL);
                 patient.read();
-                initialiseNewEntityDescriptor();
+                //initialiseNewEntityDescriptor();
                 getControllerDescriptor().getControllerDescription().setAppointment(appointment);
                 getControllerDescriptor().getControllerDescription().setPatients(patient.get());
                 getControllerDescriptor().getControllerDescription().setViewMode(ViewMode.UPDATE);
@@ -434,6 +406,23 @@ public class AppointmentScheduleViewController extends ViewController{
         appointment.setScope(Scope.FOR_DAY);
         try{
             appointment.read();
+            if (!appointment.get().isEmpty()){
+                if (appointment.get().get(0).getStart().
+                        isBefore(day.atTime(ViewController.FIRST_APPOINTMENT_SLOT))){
+                    getControllerDescriptor().getControllerDescription().
+                            setAppointmentEarlyStart(appointment.get().get(0).getStart());
+                }else getControllerDescriptor().getControllerDescription().
+                            setAppointmentEarlyStart(null);
+            }
+            if (!appointment.get().isEmpty()){
+                if (appointment.get().get(appointment.get().size()-1).getStart().
+                        isAfter(day.atTime(ViewController.LAST_APPOINTMENT_SLOT))){
+                    getControllerDescriptor().getControllerDescription().
+                            setAppointmentLateStart(appointment.get().
+                                    get(appointment.get().size()-1).getStart());
+                }else getControllerDescriptor().getControllerDescription().
+                            setAppointmentLateStart(null);
+            }
             getControllerDescriptor().getControllerDescription().setAppointments(appointment.get());
             getControllerDescriptor().getControllerDescription().setAppointmentScheduleDay(day);
             doAppointeeReminderCount(appointment.get());
@@ -599,6 +588,30 @@ public class AppointmentScheduleViewController extends ViewController{
                 break; 
             case APPOINTMENT_CANCEL_REQUEST:
                 doAppointmentCancelRequest();
+                
+                mergeScheduleSlotsIfPossible(getAppointmentScheduleDay());
+                doAppointmentForDayRequest(getAppointmentScheduleDay());
+                
+                firePropertyChangeEvent(
+                        ViewController.AppointmentScheduleViewControllerPropertyChangeEvent.
+                                APPOINTMENTS_FOR_DAY_RECEIVED.toString(),
+                        this.view,//event target/listener
+                        this,//event sender
+                        null,
+                        getControllerDescriptor()//event related data        
+                );
+                
+                if (getControllerDescriptor().getControllerDescription().getEmptySlotFromDay()!=null){
+                    firePropertyChangeEvent(
+                           ViewController.AppointmentScheduleViewControllerPropertyChangeEvent.
+                                   NO_APPOINTMENT_SLOTS_FROM_DAY_RECEIVED.toString(),
+                           this.view,//event target/listener
+                           this,//event sender
+                           null,
+                           getControllerDescriptor()//event related data        
+                    );
+                }
+                
                 firePropertyChangeEvent(
                         ViewController.DesktopViewControllerPropertyChangeEvent.
                                 APPOINTMENT_SCHEDULE_VIEW_CONTROLLER_CHANGE_NOTIFICATION.toString(),
@@ -1021,6 +1034,10 @@ public class AppointmentScheduleViewController extends ViewController{
                             getControllerDescriptor().getControllerDescription().setAppointments(appointment.get());
                             doAppointeeReminderCount(appointment.get());
                             getUpdatedAppointmentSlotsForDay(appointment);
+                
+                            mergeScheduleSlotsIfPossible(getAppointmentScheduleDay());
+                            doAppointmentForDayRequest(getAppointmentScheduleDay());
+                            
                             firePropertyChangeEvent(
                                    ViewController.AppointmentScheduleViewControllerPropertyChangeEvent.
                                            APPOINTMENTS_FOR_DAY_RECEIVED.toString(),

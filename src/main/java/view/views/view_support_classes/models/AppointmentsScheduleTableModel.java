@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.DefaultTableModel;
 
 
 /**
@@ -25,15 +26,23 @@ import javax.swing.table.AbstractTableModel;
  * -- replaces -> public static ArrayList<Descriptor.Appointment> appointments = null;
  -- with -> public ArrayList<Descriptor.Appointment> appointments = new ArrayList<>();
  */
-public class Appointments5ColumnTableModel extends AbstractTableModel{
-    public ArrayList<Appointment> appointments = new ArrayList<>();
-    private enum COLUMN{ThePatient, From,To,Duration,Notes};
+//public class AppointmentsScheduleTableModel extends AbstractTableModel{
+public class AppointmentsScheduleTableModel extends DefaultTableModel{
+    //public ArrayList<Appointment> appointments = new ArrayList<>();
+    private ArrayList<Appointment> appointments = null;
+    private enum COLUMN{ThePatient, From,To,Duration,Notes,Reminded};
     private final Class[] columnClass = new Class[] {
         Patient.class,
         LocalTime.class, 
         LocalTime.class, 
         Duration.class, 
-        String.class};
+        String.class,
+        Boolean.class};
+
+    public AppointmentsScheduleTableModel(){
+        appointments = new ArrayList<>();
+        
+    }
     
     public ArrayList<Appointment> getAppointments(){
         return this.appointments;
@@ -45,7 +54,7 @@ public class Appointments5ColumnTableModel extends AbstractTableModel{
     
     public void removeAllElements(){
         appointments.clear();
-        this.fireTableDataChanged();
+        //this.fireTableDataChanged();
     }
     
     public Appointment getElementAt(int row){
@@ -54,7 +63,10 @@ public class Appointments5ColumnTableModel extends AbstractTableModel{
 
     @Override
     public int getRowCount(){
-        return getAppointments().size();
+        int result;
+        if (appointments!=null) result = appointments.size();
+        else result = 0;
+        return result;
     }
 
     @Override
@@ -67,6 +79,8 @@ public class Appointments5ColumnTableModel extends AbstractTableModel{
         for (COLUMN column: COLUMN.values()){
             if (column.ordinal() == columnIndex){
                 result = column.toString();
+                if (result.equals("Reminded"))
+                    result = result +" ?";
                 break;
             }
         }
@@ -75,6 +89,36 @@ public class Appointments5ColumnTableModel extends AbstractTableModel{
     @Override
     public Class<?> getColumnClass(int columnIndex){
         return columnClass[columnIndex];
+    }
+    
+    /**
+     * 
+     * @param value the update the user made to the "Contact?" column content
+     * -- the method determines the value of the cell before the update (true or false)
+     * -- this is got by reading the source of this value that was read from persistent store
+     * -- depending the value read from persistent store the cell value in the table is toggled
+     * -- lastly an event is fired to inform listeners of the update; thus fireTableCellUpdated(row, col);
+     * @param row defines the row which includes the cell
+     * @param col defines the column which includes the cell
+     */
+    
+    @Override
+    public void setValueAt(Object value, int row, int col) {
+        if (col==5){
+            Appointment appointment = appointments.get(row);
+            //checkslot is booked out to a patient
+            if (appointment.getPatient()!=null){
+                if (!appointment.getIsUnbookableSlot()){
+                    if (appointment.getHasPatientBeenContacted()){
+                        appointment.setHasPatientBeenContacted(Boolean.FALSE);
+                    }
+                    else{
+                        appointment.setHasPatientBeenContacted(Boolean.TRUE);
+                    }
+                    fireTableCellUpdated(row, col);
+                }
+            }
+        }    
     }
 
     @Override
@@ -93,6 +137,7 @@ public class Appointments5ColumnTableModel extends AbstractTableModel{
                     LocalDateTime start = appointment.getStart();
                     long minutes = appointment.getDuration().toMinutes();
                     Duration duration = appointment.getDuration();
+                    Boolean contactStatus = appointment.getHasPatientBeenContacted();
                     switch (column){
                         case ThePatient:
                             result = appointment.getPatient();
@@ -108,6 +153,9 @@ public class Appointments5ColumnTableModel extends AbstractTableModel{
                             break;
                         case Notes:
                             result = appointment.getNotes(); 
+                            break;
+                        case Reminded:
+                            result = contactStatus;
                             break;
                     }
                     break;

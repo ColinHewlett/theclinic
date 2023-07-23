@@ -13,6 +13,7 @@ import java.awt.Point;
 import java.util.ArrayList;
 import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.DayOfWeek;
 import java.util.HashMap;
 
@@ -74,6 +75,8 @@ public class Descriptor {
     
     public class ControllerDescription{
         ViewController.ViewMode viewMode = null;
+        private LocalDateTime appointmentEarlyStart = null;
+        private LocalDateTime appointmentLateStart = null;
         private Boolean isAppointmentUnbookable = false;
         private Point appointeeRemindersCountForDay = null;
         private Appointment appointment = null;
@@ -94,6 +97,20 @@ public class Descriptor {
         ArrayList<Notification> patientNotifications = null;
         ArrayList<Patient> patients = null;
         private Point tableRowCount = null;
+        
+        public LocalDateTime getAppointmentEarlyStart(){
+            return appointmentEarlyStart; 
+        }
+        public void setAppointmentEarlyStart(LocalDateTime value){
+            appointmentEarlyStart = value;
+        }
+        
+        public LocalDateTime getAppointmentLateStart(){
+            return appointmentLateStart; 
+        }
+        public void setAppointmentLateStart(LocalDateTime value){
+            appointmentLateStart = value;
+        }
         
         public Boolean getIsAppointmentUnbookable(){
             return isAppointmentUnbookable; 

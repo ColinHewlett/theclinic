@@ -14,7 +14,6 @@ import model.Patient;
 import view.views.view_support_classes.renderers.TableHeaderCellBorderRenderer;
 import view.views.view_support_classes.models.Appointments6ColumnTableModel;
 import view.View;
-import view.views.view_support_classes.models.Appointments5ColumnTableModel;
 import java.awt.AWTEvent;
 import java.awt.ActiveEvent;
 import java.awt.Color;
