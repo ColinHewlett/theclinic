@@ -71,7 +71,6 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
-import view.views.view_support_classes.models.AppointmentRemindersView6ColumnTableModel;
 
 
 /**
@@ -87,15 +86,6 @@ public class AppointmentScheduleView extends View{
     //private final DateTimeFormatter emptySlotStartFormat = DateTimeFormatter.ofPattern("dd/MM/yy HH:mm (EEE)");
     private final DateTimeFormatter appointmentScheduleFormat = DateTimeFormatter.ofPattern("EEEE, MMMM dd yyyy ");
     private AppointmentDateVetoPolicy vetoPolicy = null;
-    private boolean displayAppointeeReminderCount = true;
-    
-    private boolean getDisplayAppointeeReminderCount(){
-        return displayAppointeeReminderCount;
-    }
-    
-    private void setDisplayAppointeeReminderCount(boolean value){
-        displayAppointeeReminderCount = value;
-    }
     
     /**
      * 
@@ -180,16 +170,7 @@ public class AppointmentScheduleView extends View{
         DatePickerSettings dps = dayDatePicker.getSettings();
         dps.setVetoPolicy(vetoPolicy);
         dps.setHighlightPolicy(new LeaveEditor());
-       
-        /**
-         * -- Valid date?
-         * ---- yes: 
-         * ------> proceed as normal
-         * ---- no: 
-         * ------> temporarily make all days surgery days
-         * ----  
-         */
-        //LocalDate day = vetoPolicy.getNowDateOrClosestAvailableAfterNow();
+      
         LocalDate day = getViewDescriptor().getViewDescription().getDay();
         if (!vetoPolicy.isDateAllowed(day)){
             HashMap<DayOfWeek, Boolean> allDaysSurgeryDays = new HashMap<>();
@@ -215,20 +196,6 @@ public class AppointmentScheduleView extends View{
     }  
     
     /**
-     * adds a suffix to the title border of panel which contains list of appointments for selected day
-     * -- suffix of the format "X patients of Y reminded about appointments"
-     */
-    private void doDisplayAppointeeReminderCount(){
-        Point appointeeReminderCount = getViewDescriptor().getControllerDescription().getAppointeeRemindersCountForDay();
-        TitledBorder titledBorder = (TitledBorder)this.pnlAppointmentScheduleForDay.getBorder();
-        titledBorder.setTitle("Appointment schedule for " 
-                + dayDatePicker.getDate().format(appointmentScheduleFormat)
-                + " (" + appointeeReminderCount.x + " patients reminded of appointment from " 
-                + appointeeReminderCount.y + ")");
-        
-    }
-    
-    /**
      * The abstract table model includes a getElementAt(int row) method which returns the element at the row defined index of an ArrayList<Descriptor.Appointment> maintained in the table model
      * @param row selected row in table
      * update 30/07/2021 19:53
@@ -252,12 +219,8 @@ public class AppointmentScheduleView extends View{
         dayDatePicker.addDateChangeListener(new DayDatePickerChangeListener());
         setEmptySlotAvailabilityTableListener();
         setAppointmentTableListener();
-        mniScheduleContactList.addActionListener((ActionEvent e) -> mniScheduleContactListActionPerformed(e));
-        //this.mniPrintAppointmentDayList.addActionListener((ActionEvent e) -> mniPrintAppointmentDayListActionPerformed(e));
         this.mniCloseView.addActionListener((ActionEvent e) -> mniCloseViewActionPerformed(e));
         this.mniSelectNonSurgeryDay.addActionListener((ActionEvent e) -> mniSelectNonSurgeryDayActionPerformed(e)); 
-        //this.dayDatePicker.setDate(LocalDate.of(2022,9,7));
-        //this.dayDatePicker.getSettings().setHighlightPolicy(new LeaveEditor());
     }
     
     private void mniCloseViewActionPerformed(ActionEvent e){
@@ -280,22 +243,14 @@ public class AppointmentScheduleView extends View{
                     ViewController.AppointmentScheduleViewControllerActionEvent.SURGERY_DAYS_EDITOR_VIEW_REQUEST.toString());
         this.getMyController().actionPerformed(actionEvent);
     }
-    
-    private void mniScheduleContactListActionPerformed(ActionEvent e){
-        LocalDate day = this.dayDatePicker.getDate();
-        getViewDescriptor().getViewDescription().setDay(day);
-        ActionEvent actionEvent = new ActionEvent(this, 
-                ActionEvent.ACTION_PERFORMED,
-                ViewController.AppointmentScheduleViewControllerActionEvent.APPOINTMENT_REMINDERS_VIEW_REQUEST.toString());
-        this.getMyController().actionPerformed(actionEvent);
-    }
-    
+
     private void mniSelectNonSurgeryDayActionPerformed(ActionEvent e){
         ActionEvent actionEvent = new ActionEvent(this, 
                 ActionEvent.ACTION_PERFORMED,
                 ViewController.AppointmentScheduleViewControllerActionEvent.NON_SURGERY_DAY_SCHEDULE_VIEW_REQUEST.toString());
         this.getMyController().actionPerformed(actionEvent);
     }
+    
     private void setEmptySlotAvailabilityTableListener(){
         this.tblEmptySlotAvailability.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         ListSelectionModel lsm = this.tblEmptySlotAvailability.getSelectionModel();
@@ -327,9 +282,9 @@ public class AppointmentScheduleView extends View{
                     if (selectedRow!=-1){
                         tableValueChangedListenerActivated = true;
                         Patient patient = (Patient)tblAppointments.getModel().getValueAt(selectedRow, 0);
-                        doDisplayPhoneNumbersFor(patient);
+                        doScheduleTitleRefresh(patient);
                     }
-                    else doDisplayPhoneNumbersFor(null);
+                    else doScheduleTitleRefresh(null);
                     
                     
                 }
@@ -383,7 +338,7 @@ public class AppointmentScheduleView extends View{
      */
     private void populateAppointmentsForDayTable(){
         configureAppointmentsForDayTable();;
-        doDisplayPhoneNumbersFor(null);
+        doScheduleTitleRefresh(null);
         setTitle(getViewDescriptor().getControllerDescription().getAppointmentScheduleDay().
                 format(DateTimeFormatter.ofPattern("dd/MM/yy")) + " Appointment schedule");
         ActionEvent actionEvent = new ActionEvent(
@@ -455,13 +410,12 @@ public class AppointmentScheduleView extends View{
         btnCloseView = new javax.swing.JButton();
         jMenuBar1 = new javax.swing.JMenuBar();
         mnuOptions = new javax.swing.JMenu();
-        mniScheduleContactList = new javax.swing.JMenuItem();
         mniViewCancelledAppointments = new javax.swing.JMenuItem();
         jSeparator1 = new javax.swing.JPopupMenu.Separator();
         mniSurgeryDaysEditor = new javax.swing.JMenuItem();
         mniSelectNonSurgeryDay = new javax.swing.JMenuItem();
         jSeparator2 = new javax.swing.JPopupMenu.Separator();
-        mniPrintSchedule = new javax.swing.JMenuItem();
+        mniClearScheduleSelection = new javax.swing.JMenuItem();
         jSeparator3 = new javax.swing.JPopupMenu.Separator();
         mniCloseView = new javax.swing.JMenuItem();
 
@@ -683,14 +637,6 @@ public class AppointmentScheduleView extends View{
 
         mnuOptions.setText("Actions");
 
-        mniScheduleContactList.setText("View appointee contact details");
-        mniScheduleContactList.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                mniScheduleContactListActionPerformed(evt);
-            }
-        });
-        mnuOptions.add(mniScheduleContactList);
-
         mniViewCancelledAppointments.setText("View cancelled appointments");
         mniViewCancelledAppointments.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -712,13 +658,13 @@ public class AppointmentScheduleView extends View{
         mnuOptions.add(mniSelectNonSurgeryDay);
         mnuOptions.add(jSeparator2);
 
-        mniPrintSchedule.setText("Print schedule");
-        mniPrintSchedule.addActionListener(new java.awt.event.ActionListener() {
+        mniClearScheduleSelection.setText("Clear schedule selection");
+        mniClearScheduleSelection.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                mniPrintScheduleActionPerformed(evt);
+                mniClearScheduleSelectionActionPerformed(evt);
             }
         });
-        mnuOptions.add(mniPrintSchedule);
+        mnuOptions.add(mniClearScheduleSelection);
         mnuOptions.add(jSeparator3);
 
         mniCloseView.setText("Close view");
@@ -935,11 +881,7 @@ public class AppointmentScheduleView extends View{
         // TODO add your handling code here:
     }//GEN-LAST:event_mniSurgeryDaysEditorActionPerformed
 */
-/*
-    private void mniScheduleContactListActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mniScheduleContactListActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_mniScheduleContactListActionPerformed
-*/
+/**/
     private void mniViewCancelledAppointmentsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mniViewCancelledAppointmentsActionPerformed
         ActionEvent actionEvent = new ActionEvent(this, 
                         ActionEvent.ACTION_PERFORMED,
@@ -968,9 +910,10 @@ public class AppointmentScheduleView extends View{
         this.getMyController().actionPerformed(actionEvent);
     }//GEN-LAST:event_btnMarkSlotUnbookableActionPerformed
 
-    private void mniPrintScheduleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mniPrintScheduleActionPerformed
+    private void mniClearScheduleSelectionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mniClearScheduleSelectionActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_mniPrintScheduleActionPerformed
+        this.tblAppointments.clearSelection();
+    }//GEN-LAST:event_mniClearScheduleSelectionActionPerformed
 
     public static String centreString (int width, String s) {
         return String.format("%-" + width  + "s", String.format("%" + (s.length() + (width - s.length()) / 2) + "s", s));
@@ -1079,9 +1022,8 @@ public class AppointmentScheduleView extends View{
     private javax.swing.JPopupMenu.Separator jSeparator1;
     private javax.swing.JPopupMenu.Separator jSeparator2;
     private javax.swing.JPopupMenu.Separator jSeparator3;
+    private javax.swing.JMenuItem mniClearScheduleSelection;
     private javax.swing.JMenuItem mniCloseView;
-    private javax.swing.JMenuItem mniPrintSchedule;
-    private javax.swing.JMenuItem mniScheduleContactList;
     private javax.swing.JMenuItem mniSelectNonSurgeryDay;
     private javax.swing.JMenuItem mniSurgeryDaysEditor;
     private javax.swing.JMenuItem mniViewCancelledAppointments;
@@ -1138,58 +1080,14 @@ public class AppointmentScheduleView extends View{
         columnModel.getColumn(1).setHeaderRenderer(new TableHeaderCellBorderRenderer(Color.LIGHT_GRAY));
     }
     
-    /**
-     * method displays a title for the appointment schedule table for the day
- -- a summary of patient appointment reminders made is added to the title 
- -- the title is only displayed if the following value is not null
- ---- Descriptor::getAppointeeRemindersCountForDay()
- -- the patient appointment reminder total is only included in the title if enabled by 
- ---- AppointmentScheduleView::getViewDescriptor().getAppointeeRemindersCountForDay()
- ---- disabling display of patient appointment reminders is not implemented currently 
-     */
-    private void doDisplayAppointmentTableForDayTitle(){
-        int reminderCount;
-        int appointeeCount;
-        String patient;
-        String has;
-        
-        String tableTitle = "Appointment schedule for " 
-                + dayDatePicker.getDate().format(appointmentScheduleFormat);
-        if (getViewDescriptor().getControllerDescription().
-                getAppointeeRemindersCountForDay()!=null){
-            if (getDisplayAppointeeReminderCount()){
-                reminderCount = getViewDescriptor().getControllerDescription().getAppointeeRemindersCountForDay().x;
-                appointeeCount = getViewDescriptor().getControllerDescription().getAppointeeRemindersCountForDay().y;
-                if (appointeeCount > 0){
-                    switch (reminderCount){
-                        case 1:
-                            patient = "patient";
-                            has = "has";
-                            break;
-                        default:
-                            patient = "patients";
-                            has = "have";
-                    }
-                    tableTitle = tableTitle + "       <<" 
-                            + String.valueOf(reminderCount) + " " 
-                            + patient + " of " 
-                            + String.valueOf(appointeeCount) 
-                            + " " + has + " had an appointment reminder>>";
-                }
-            }
-            TitledBorder titledBorder = (TitledBorder)this.pnlAppointmentScheduleForDay.getBorder();
-            titledBorder.setTitle(tableTitle);
-        }
-        
-    }
-    
-    private void doDisplayPhoneNumbersFor(Patient appointee){
+    private void doScheduleTitleRefresh(Patient appointee){
         String tableTitle = "Appointment schedule for " 
                 + dayDatePicker.getDate().format(appointmentScheduleFormat);
         if ((appointee!=null) &&
-                (!appointee.toString().equals(SystemDefinitions.UNBOOKABLE_APPOINTMENT_SLOT))){
-            tableTitle = tableTitle 
-                    + "              <selected patient phone(s) "
+                (!appointee.toString().equals(SystemDefinitions.UNBOOKABLE_APPOINTMENT_SLOT.toString()))){
+            tableTitle = tableTitle + "          <"
+                    + appointee.getName().getForenames() +  " " 
+                    + appointee.getName().getSurname() + "'s contact "
                     + appointee.getPhone1();
             if (!appointee.getPhone2().isEmpty())
                 tableTitle = tableTitle + "; "
@@ -1217,13 +1115,6 @@ public class AppointmentScheduleView extends View{
                     appointment.setHasPatientBeenContacted(value);
                     getViewDescriptor().getViewDescription().setAppointment(appointment);
                     tblAppointments.clearSelection();
-                    /*
-                    ActionEvent actionEvent = new ActionEvent(
-                            AppointmentRemindersView.this,ActionEvent.ACTION_PERFORMED,
-                            ViewController.AppointmentRemindersViewControllerActionEvent.
-                                    APPOINTEE_CONTACT_DETAILS_FOR_SCHEDULE_VIEW_CHANGE_NOTIFICATION.toString());
-                    getMyController().actionPerformed(actionEvent);
-                */
                 }
             });
             this.tblAppointments.setModel(tableModel);

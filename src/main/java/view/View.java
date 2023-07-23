@@ -13,7 +13,6 @@ import view.views.factory_methods.PatientNotificationFactoryMethod;
 import view.views.factory_methods.AppointmentScheduleFactoryMethod;
 import view.views.factory_methods.ModalSurgeryDaysEditorFactoryMethod;
 import view.views.factory_methods.ModalPatientNotificationEditorFactoryMethod;
-import view.views.factory_methods.AppointmentRemindersFactoryMethod;
 import view.views.factory_methods.ImportProgressFactoryMethod;
 import view.views.factory_methods.ModalEmptySlotScannerFactoryMethod;
 import view.views.factory_methods.ModalCancelledAppointmentsViewFactoryMethod;
@@ -106,9 +105,6 @@ public abstract class View extends JInternalFrame
                 break;
             case APPOINTMENT_EDITOR_VIEW:
                 result = null;
-                break;
-            case APPOINTMENT_REMINDERS_VIEW:
-                result = new AppointmentRemindersFactoryMethod(controller, ed, dtView).makeView(viewer);
                 break;
             case EMPTY_SLOT_SCAN_CONFIGURATION_VIEW:
                 result = new ModalEmptySlotScannerFactoryMethod(controller, ed, dtView).makeView(viewer);

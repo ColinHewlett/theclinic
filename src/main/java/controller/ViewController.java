@@ -38,7 +38,6 @@ import javax.swing.table.TableColumn;
 public abstract class ViewController implements ActionListener, PropertyChangeListener{
     
     public enum ViewControllers {
-        AppointmentRemindersViewController,
         AppointmentScheduleViewController,
         DesktopViewController,
         ImportProgressViewController,
@@ -58,19 +57,7 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
                                             NO_COLLISION,
                                             SLOT_START_OK,
                                             UNDEFINED}
-    
-    public static enum AppointeeContactDetailsForScheduleViewControllerPropertyChangeEvent{
-        APPOINTEE_CONTACT_DETAILS_FOR_SCHEDULE_VIEW_REFRESH_RECEIVED
-        
-    }
-    
-    public static enum AppointmentRemindersViewControllerActionEvent{
-        APPOINTEE_CONTACT_DETAILS_FOR_SCHEDULE_VIEW_CHANGE_NOTIFICATION,
-        APPOINTMENT_SCHEDULE_VIEW_CLOSE_NOTIFICATION,
-        VIEW_CLOSE_NOTIFICATION,
-        VIEW_CONTROLLER_CLOSE_NOTIFICATION,
-        VIEW_CHANGED_NOTIFICATION
-    }
+  
     
     public static enum AppointmentScheduleViewControllerActionEvent{
         /**

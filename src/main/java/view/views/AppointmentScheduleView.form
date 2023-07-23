@@ -11,14 +11,6 @@
             <Property name="text" type="java.lang.String" value="Actions"/>
           </Properties>
           <SubComponents>
-            <MenuItem class="javax.swing.JMenuItem" name="mniScheduleContactList">
-              <Properties>
-                <Property name="text" type="java.lang.String" value="View appointee contact details"/>
-              </Properties>
-              <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="mniScheduleContactListActionPerformed"/>
-              </Events>
-            </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="mniViewCancelledAppointments">
               <Properties>
                 <Property name="text" type="java.lang.String" value="View cancelled appointments"/>
@@ -44,12 +36,12 @@
             </MenuItem>
             <MenuItem class="javax.swing.JPopupMenu$Separator" name="jSeparator2">
             </MenuItem>
-            <MenuItem class="javax.swing.JMenuItem" name="mniPrintSchedule">
+            <MenuItem class="javax.swing.JMenuItem" name="mniClearScheduleSelection">
               <Properties>
-                <Property name="text" type="java.lang.String" value="Print schedule"/>
+                <Property name="text" type="java.lang.String" value="Clear schedule selection"/>
               </Properties>
               <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="mniPrintScheduleActionPerformed"/>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="mniClearScheduleSelectionActionPerformed"/>
               </Events>
             </MenuItem>
             <MenuItem class="javax.swing.JPopupMenu$Separator" name="jSeparator3">
