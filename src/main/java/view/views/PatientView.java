@@ -97,11 +97,7 @@ public class PatientView extends View{
     DateTimeFormatter dmyhhmmFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy hh:mm");
     DateTimeFormatter recallFormat = DateTimeFormatter.ofPattern("MMMM/yyyy");
     DefaultTableModel appointmentHistoryModel = new DefaultTableModel();
-    
-    //private Descriptor entityDescriptor = null;
     private ActionListener myController = null;
-    //private JTable tblAppointmentsForDay = null;
-    //private Appointments3ColumnTableModel tableModel = null;
     private InternalFrameAdapter internalFrameAdapter = null;
     private View.Viewer myViewType = null;
 
@@ -112,13 +108,16 @@ public class PatientView extends View{
      */
 
     /**
-     * Creates new form NewJInternalFrame
+     * 
+     * @param myViewType
+     * @param myController
+     * @param ed 
      */
-    public PatientView(View.Viewer myViewType, ActionListener myController, Descriptor ed) {
+    public PatientView(View.Viewer myViewType, ViewController myController, Descriptor ed) {
         super("Patient view");
         setMyViewType(myViewType);
         setMyController(myController);
-        setViewDescriptor(ed);
+        //setViewDescriptor(ed);
         initComponents();
         btnFetchScheduleForSelectedAppointment.setText(
                 "<html>Fetch schedule<br><center>for selected appointment</center></html>");
@@ -209,7 +208,7 @@ public class PatientView extends View{
                 if (tblAppointmentHistory.getRowCount() > 0){ //ensures there are rows in the table
                     int row = tblAppointmentHistory.getSelectedRow();
                     LocalDate day = ((LocalDateTime)tblAppointmentHistory.getValueAt(row,0)).toLocalDate();
-                    getViewDescriptor().getViewDescription().setDay(day);
+                    getMyController().getDescriptor().getViewDescription().setDay(day);
                     ActionEvent actionEvent = new ActionEvent(
                             PatientView.this,ActionEvent.ACTION_PERFORMED,
                             ViewController.PatientViewControllerActionEvent.APPOINTMENT_VIEW_CONTROLLER_REQUEST.toString());
@@ -253,7 +252,7 @@ public class PatientView extends View{
         DefaultComboBoxModel<Patient> model = 
                 new DefaultComboBoxModel<>();
         ArrayList<Patient> patients = 
-                getViewDescriptor().getControllerDescription().getPatients();
+                getMyController().getDescriptor().getControllerDescription().getPatients();
         Iterator<Patient> it = patients.iterator();
         while (it.hasNext()){
             Patient patient = it.next();
@@ -262,27 +261,17 @@ public class PatientView extends View{
         selector.setModel(model);
         selector.setSelectedIndex(-1);
     }
-    
-    /*
-    private PatientView.ViewMode getViewMode(){
-        return viewMode;
-    }
-    private void setViewMode(PatientView.ViewMode value){
-        viewMode = value;
-        //this.btnCreateUpdatePatient.setText(value.toString().replace('_',' '));
-    }
-    */
   
     /**
      * Method processes the PropertyChangeEvent its received from the view
      * controller
      * @param e PropertyChangeEvent
- -- PATIENT_RECORDS_RECEIVED the received Descriptor.Collection object 
- contains the collection of all the patients recorded on the system
- -- PATIENT_RECORD_RECEIVED the new Descriptor.Patient contains the 
- full details of a patient as a result of the view controller having
- received a request from the view to either create a new patient, update 
- an existing patient, or fetch the details of a newly selected patient. 
+     *   -- PATIENT_RECORDS_RECEIVED the received Descriptor.Collection object 
+     *   contains the collection of all the patients recorded on the system
+     *   -- PATIENT_RECORD_RECEIVED the new Descriptor.Patient contains the 
+     *   full details of a patient as a result of the view controller having
+     *   received a request from the view to either create a new patient, update 
+     *   an existing patient, or fetch the details of a newly selected patient. 
      */
     @Override
     public void propertyChange(PropertyChangeEvent e){
@@ -290,15 +279,15 @@ public class PatientView extends View{
                 ViewController.PatientViewControllerPropertyChangeEvent.valueOf(e.getPropertyName());
         switch (propertyName){
             case PATIENT_VIEW_CONTROLLER_ERROR_RECEIVED:
-                setViewDescriptor((Descriptor)e.getNewValue());
+                //setViewDescriptor((Descriptor)e.getNewValue());
                 ViewController.displayErrorMessage(
-                        getViewDescriptor().getControllerDescription().getError(),
+                        getMyController().getDescriptor().getControllerDescription().getError(),
                         "Patient vew error", JOptionPane.WARNING_MESSAGE);
                 break;
             case PATIENT_RECEIVED:
-                setViewDescriptor((Descriptor)e.getNewValue());
+                //setViewDescriptor((Descriptor)e.getNewValue());
                 initialisePatientViewComponentFromED(); 
-                String frameTitle = getViewDescriptor().getControllerDescription().getPatient().toString();
+                String frameTitle = getMyController().getDescriptor().getControllerDescription().getPatient().toString();
                 this.setTitle(frameTitle);
                 /**
                  * disable "Create new patient" menu item
@@ -323,7 +312,7 @@ public class PatientView extends View{
                 this.getMyController().actionPerformed(actionEvent);
                 break;
             case NULL_PATIENT_RECEIVED:
-                setViewDescriptor((Descriptor)e.getNewValue());
+                //setViewDescriptor((Descriptor)e.getNewValue());
                 //setViewMode(PatientView.ViewMode.Create_new_patient);
                 initialisePatientViewComponentFromED();
                 populatePatientSelector(this.cmbPatientSelector);
@@ -350,7 +339,7 @@ public class PatientView extends View{
                 this.getMyController().actionPerformed(actionEvent);
                 break;
             case PATIENTS_RECEIVED:
-                setViewDescriptor((Descriptor)e.getNewValue());
+                //setViewDescriptor((Descriptor)e.getNewValue());
                 populatePatientSelector(this.cmbPatientSelector);
                 populatePatientSelector(this.cmbSelectGuardian);
                 break;
@@ -595,7 +584,7 @@ public class PatientView extends View{
      * -- note update 30/07/2021 09:05 applied
      */
     private void initialisePatientGuardianViewComponent(){
-        Descriptor ed = getViewDescriptor();
+        //Descriptor ed = getViewDescriptor();
         
         this.cmbIsGuardianAPatient.setEnabled(true);
         boolean test = this.cmbIsGuardianAPatient.getSelectedItem().equals(PatientView.YesNoItem.Yes);
@@ -604,8 +593,10 @@ public class PatientView extends View{
             this.cmbSelectGuardian.setEnabled(true);
             
             if (this.cmbSelectGuardian.getSelectedIndex()==-1){
-                if (getViewDescriptor().getControllerDescription().getPatient().getIsGuardianAPatient()){
-                    this.cmbSelectGuardian.setSelectedItem(getViewDescriptor().getControllerDescription().getPatient().getGuardian());
+                if (getMyController().getDescriptor().
+                        getControllerDescription().getPatient().getIsGuardianAPatient()){
+                    this.cmbSelectGuardian.setSelectedItem(
+                            getMyController().getDescriptor().getControllerDescription().getPatient().getGuardian());
                 }   
             }
         }
@@ -646,7 +637,8 @@ public class PatientView extends View{
      * current entity state
      */
     private void initialisePatientViewComponentFromED(){  
-        Patient patient = getViewDescriptor().getControllerDescription().getPatient();
+        Patient patient = getMyController().getDescriptor().
+                getControllerDescription().getPatient();
         if (patient.getIsKeyDefined())
             //this.cmbSelectPatient.setSelectedItem(patient);
         this.setTitle(getSurname()); //Internal frame title
@@ -667,8 +659,10 @@ public class PatientView extends View{
         setDOB(patient.getDOB());
         setIsGuardianAPatient(patient.getIsGuardianAPatient());
         //update 30/07/2021 09:05 applied
-        if(getViewDescriptor().getControllerDescription().getPatient().getGuardian()!=null)
-                this.cmbSelectGuardian.setSelectedItem(getViewDescriptor().getControllerDescription().getPatient().getGuardian());
+        if(getMyController().getDescriptor().getControllerDescription().
+                getPatient().getGuardian()!=null)
+                this.cmbSelectGuardian.setSelectedItem(getMyController().
+                        getDescriptor().getControllerDescription().getPatient().getGuardian());
         else this.cmbSelectGuardian.setSelectedIndex(-1); 
         //following is new statement
         populateAppointmentsHistoryTable(patient);
@@ -1563,7 +1557,7 @@ public class PatientView extends View{
         else{
             int row = this.tblAppointmentHistory.getSelectedRow();
             LocalDate day = ((LocalDateTime)this.tblAppointmentHistory.getValueAt(row,0)).toLocalDate();
-            getViewDescriptor().getViewDescription().setDay(day);
+            getMyController().getDescriptor().getViewDescription().setDay(day);
             ActionEvent actionEvent = new ActionEvent(
                     this,ActionEvent.ACTION_PERFORMED,
                     ViewController.PatientViewControllerActionEvent.APPOINTMENT_VIEW_CONTROLLER_REQUEST.toString());
@@ -1573,8 +1567,8 @@ public class PatientView extends View{
 
     private void mniDeleteSelectedPatientActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mniDeleteSelectedPatientActionPerformed
         int response;
-        Patient patient = getViewDescriptor().getControllerDescription().getPatient();
-        getViewDescriptor().getViewDescription().setPatient(patient);
+        Patient patient = getMyController().getDescriptor().getControllerDescription().getPatient();
+        getMyController().getDescriptor().getViewDescription().setPatient(patient);
         if (patient.getIsKeyDefined()){
             String message ="Are you sure you want to delete patient " + patient.toString() + "'s details?";
             response = JOptionPane.showConfirmDialog(this,message, "Action selected patient notifications", JOptionPane.YES_NO_OPTION);
@@ -1591,9 +1585,9 @@ public class PatientView extends View{
     }//GEN-LAST:event_mniDeleteSelectedPatientActionPerformed
 
     private void mniCreateNewPatientActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mniCreateNewPatientActionPerformed
-        if (!getViewDescriptor().getControllerDescription().getPatient().getIsKeyDefined()){
+        if (!getMyController().getDescriptor().getControllerDescription().getPatient().getIsKeyDefined()){
             if (this.validateMinimumPatientDetails()){
-                getViewDescriptor().getViewDescription().setPatient(initialisePatientFromView(null));
+                getMyController().getDescriptor().getViewDescription().setPatient(initialisePatientFromView(null));
                 ActionEvent actionEvent = new ActionEvent(
                         this,ActionEvent.ACTION_PERFORMED,
                         ViewController.PatientViewControllerActionEvent.PATIENT_CREATE_REQUEST.toString());
@@ -1608,11 +1602,11 @@ public class PatientView extends View{
     private void mniUpdateSelectedPatientActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mniUpdateSelectedPatientActionPerformed
         Patient patient = null;
         
-        if (getViewDescriptor().getControllerDescription().getPatient().getIsKeyDefined()){
+        if (getMyController().getDescriptor().getControllerDescription().getPatient().getIsKeyDefined()){
             
             if (this.validateMinimumPatientDetails()){
-                patient = getViewDescriptor().getControllerDescription().getPatient();
-                getViewDescriptor().getViewDescription().setPatient(
+                patient = getMyController().getDescriptor().getControllerDescription().getPatient();
+                getMyController().getDescriptor().getViewDescription().setPatient(
                         initialisePatientFromView(patient));
                 ActionEvent actionEvent = new ActionEvent(
                         this,ActionEvent.ACTION_PERFORMED,
@@ -1691,7 +1685,8 @@ public class PatientView extends View{
 
     private void mniRecoverDeletedPatientActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mniRecoverDeletedPatientActionPerformed
         int response;
-        Patient patient = getViewDescriptor().getControllerDescription().getPatient();
+        Patient patient = getMyController().getDescriptor().
+                getControllerDescription().getPatient();
         if (!patient.getIsKeyDefined()){
             ActionEvent actionEvent = new ActionEvent(
                 this,ActionEvent.ACTION_PERFORMED,
@@ -1705,7 +1700,7 @@ public class PatientView extends View{
 
     private void cmbPatientSelectorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbPatientSelectorActionPerformed
         if (cmbPatientSelector.getSelectedIndex()!=-1){
-            getViewDescriptor().getViewDescription().
+            getMyController().getDescriptor().getViewDescription().
                     setPatient((Patient)cmbPatientSelector.getSelectedItem());
             ActionEvent actionEvent = new ActionEvent(
                     this,ActionEvent.ACTION_PERFORMED, 
@@ -1715,7 +1710,7 @@ public class PatientView extends View{
     }//GEN-LAST:event_cmbPatientSelectorActionPerformed
 
     private void btnClearSelectionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClearSelectionActionPerformed
-        getViewDescriptor().getViewDescription().setPatient(new Patient());
+        getMyController().getDescriptor().getViewDescription().setPatient(new Patient());
         this.cmbPatientSelector.setSelectedIndex(-1);
         ActionEvent actionEvent = new ActionEvent(
                 this,ActionEvent.ACTION_PERFORMED,

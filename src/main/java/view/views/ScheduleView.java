@@ -77,7 +77,7 @@ import javax.swing.event.TableModelListener;
  *
  * @author colin
  */
-public class AppointmentScheduleView extends View{
+public class ScheduleView extends View{
     private enum COLUMN{From,Duration,ThePatient,Notes};
     private AppointmentsScheduleTableModel tableModel = null;
     private InternalFrameAdapter internalFrameAdapter = null;
@@ -99,7 +99,7 @@ public class AppointmentScheduleView extends View{
         TitledBorder titledBorder = (TitledBorder)this.SlotAvailabilityPanel.getBorder();
         ViewController.AppointmentScheduleViewControllerPropertyChangeEvent propertyName = 
                 ViewController.AppointmentScheduleViewControllerPropertyChangeEvent.valueOf(e.getPropertyName());
-        setViewDescriptor((Descriptor)e.getNewValue());
+        //setViewDescriptor((Descriptor)e.getNewValue());
         switch (propertyName){
             case APPOINTMENTS_FOR_DAY_RECEIVED:
                 populateAppointmentsForDayTable();
@@ -109,7 +109,7 @@ public class AppointmentScheduleView extends View{
                 updateDatePickerSettings();
                 break;
             case NON_SURGERY_DAY_EDIT_RECEIVED:
-                temporarilySuspendDatePickerDateVetoPolicy(getViewDescriptor().getViewDescription().getDay());
+                temporarilySuspendDatePickerDateVetoPolicy(getMyController().getDescriptor().getViewDescription().getDay());
                 break;
             case NO_APPOINTMENT_SLOTS_FROM_DAY_RECEIVED://instruction to clear list
                 titledBorder.setTitle("Available appointment slots");
@@ -117,23 +117,24 @@ public class AppointmentScheduleView extends View{
                 break;
             case APPOINTMENT_SLOTS_FROM_DAY_RECEIVED:
                 tableTitleDuration = new AppointmentsTableDurationRenderer().renderDuration(
-                        getViewDescriptor().getControllerDescription().
+                        getMyController().getDescriptor().getControllerDescription().
                                 getEmptySlotMinimumDuration());
-                tableTitleDay = getViewDescriptor().getControllerDescription().
+                tableTitleDay = getMyController().getDescriptor().getControllerDescription().
                                 getEmptySlotFromDay().format(DateTimeFormatter.ofPattern("dd/MM/yy"));
                         //getAppointment().getStart().format(DateTimeFormatter.ofPattern("dd/MM/yy"));
                 titledBorder = (TitledBorder)this.SlotAvailabilityPanel.getBorder();
                 titledBorder.setTitle("Slot availability from " + tableTitleDay 
                         + " for a duration of " + tableTitleDuration);
-                populateEmptySlotAvailabilityTable(getViewDescriptor().getControllerDescription().getAppointmentSlots());
+                populateEmptySlotAvailabilityTable(
+                        getMyController().getDescriptor().getControllerDescription().getAppointmentSlots());
                 /**
                  * without the next lines the appointments table is unconscious of being selected?!)
                  */
-                getViewDescriptor().getViewDescription().setDay(dayDatePicker.getDate());
+                getMyController().getDescriptor().getViewDescription().setDay(dayDatePicker.getDate());
                 //refreshAppointmentTableWithCurrentlySelectedDate();
                 break;
             case APPOINTMENT_SCHEDULE_ERROR_RECEIVED:
-                populateEmptySlotAvailabilityTable(getViewDescriptor().getControllerDescription().getAppointments());
+                populateEmptySlotAvailabilityTable(getMyController().getDescriptor().getControllerDescription().getAppointments());
                 break;
                 
         }
@@ -141,7 +142,7 @@ public class AppointmentScheduleView extends View{
     
     private void updateDatePickerSettings(){
         DatePickerSettings dps = null;
-        this.vetoPolicy = new AppointmentDateVetoPolicy(getViewDescriptor().getViewDescription().getSurgeryDaysAssignmentValue());
+        this.vetoPolicy = new AppointmentDateVetoPolicy(getMyController().getDescriptor().getViewDescription().getSurgeryDaysAssignmentValue());
         dps = dayDatePicker.getSettings();
         dps.setVetoPolicy(vetoPolicy);
     }
@@ -166,12 +167,12 @@ public class AppointmentScheduleView extends View{
         TitledBorder titledBorder = (TitledBorder)this.SlotAvailabilityPanel.getBorder();
         titledBorder.setTitle("Unscheduled appointment slots");
         //following action invokes call to controller via DateChange\Listener
-        this.vetoPolicy = new AppointmentDateVetoPolicy(getViewDescriptor().getControllerDescription().getSurgeryDaysAssignment());
+        this.vetoPolicy = new AppointmentDateVetoPolicy(getMyController().getDescriptor().getControllerDescription().getSurgeryDaysAssignment());
         DatePickerSettings dps = dayDatePicker.getSettings();
         dps.setVetoPolicy(vetoPolicy);
         dps.setHighlightPolicy(new LeaveEditor());
       
-        LocalDate day = getViewDescriptor().getViewDescription().getDay();
+        LocalDate day = getMyController().getDescriptor().getViewDescription().getDay();
         if (!vetoPolicy.isDateAllowed(day)){
             HashMap<DayOfWeek, Boolean> allDaysSurgeryDays = new HashMap<>();
             allDaysSurgeryDays.put(DayOfWeek.MONDAY, true);
@@ -201,7 +202,7 @@ public class AppointmentScheduleView extends View{
      * update 30/07/2021 19:53
      */
     private void initialiseEDRequestFromView(int row){
-        getViewDescriptor().getViewDescription().setAppointment(tableModel.getElementAt(row));    
+        getMyController().getDescriptor().getViewDescription().setAppointment(tableModel.getElementAt(row));    
     }
 
     /**
@@ -210,11 +211,11 @@ public class AppointmentScheduleView extends View{
      * @param controller
      * @param ed 
      */
-    public AppointmentScheduleView(View.Viewer myViewType, ActionListener controller, Descriptor ed) {
+    public ScheduleView(View.Viewer myViewType, ViewController controller, Descriptor ed) {
         super("Appointment schedule");
         this.setMyViewType(myViewType);
-        setMyController(controller);
-        this.setViewDescriptor(ed);
+        setMyController(controller); 
+        //this.setViewDescriptor(ed);
         initComponents();
         dayDatePicker.addDateChangeListener(new DayDatePickerChangeListener());
         setEmptySlotAvailabilityTableListener();
@@ -304,15 +305,15 @@ public class AppointmentScheduleView extends View{
         
     }
     private void refreshAppointmentTableWithCurrentlySelectedDate(){
-        ActionEvent actionEvent = new ActionEvent(AppointmentScheduleView.this, 
+        ActionEvent actionEvent = new ActionEvent(ScheduleView.this, 
                 ActionEvent.ACTION_PERFORMED,
                 ViewController.AppointmentScheduleViewControllerActionEvent.APPOINTMENTS_FOR_DAY_REQUEST.toString());
-        AppointmentScheduleView.this.getMyController().actionPerformed(actionEvent);
+        ScheduleView.this.getMyController().actionPerformed(actionEvent);
         SwingUtilities.invokeLater(new Runnable() 
         {
           public void run()
           {
-            AppointmentScheduleView.this.setTitle(AppointmentScheduleView.this.getViewDescriptor().getViewDescription().getDay().format(DateTimeFormatter.ofPattern("dd/MM/yy")) + " Appointment schedule");
+            ScheduleView.this.setTitle(ScheduleView.this.getMyController().getDescriptor().getViewDescription().getDay().format(DateTimeFormatter.ofPattern("dd/MM/yy")) + " Appointment schedule");
             setIsViewInitialised(true);       
           }
         });
@@ -339,7 +340,7 @@ public class AppointmentScheduleView extends View{
     private void populateAppointmentsForDayTable(){
         configureAppointmentsForDayTable();;
         doScheduleTitleRefresh(null);
-        setTitle(getViewDescriptor().getControllerDescription().getAppointmentScheduleDay().
+        setTitle(getMyController().getDescriptor().getControllerDescription().getAppointmentScheduleDay().
                 format(DateTimeFormatter.ofPattern("dd/MM/yy")) + " Appointment schedule");
         ActionEvent actionEvent = new ActionEvent(
                 this,ActionEvent.ACTION_PERFORMED,
@@ -360,7 +361,7 @@ public class AppointmentScheduleView extends View{
             @Override  
             public void internalFrameClosing(InternalFrameEvent e) {
                 ActionEvent actionEvent = new ActionEvent(
-                        AppointmentScheduleView.this,ActionEvent.ACTION_PERFORMED,
+                        ScheduleView.this,ActionEvent.ACTION_PERFORMED,
                         ViewController.AppointmentScheduleViewControllerActionEvent.
                                 VIEW_CLOSE_NOTIFICATION.toString());
                 getMyController().actionPerformed(actionEvent);
@@ -369,7 +370,7 @@ public class AppointmentScheduleView extends View{
             @Override
             public void internalFrameActivated(InternalFrameEvent e){
                 ActionEvent actionEvent = new ActionEvent(
-                        AppointmentScheduleView.this,ActionEvent.ACTION_PERFORMED,
+                        ScheduleView.this,ActionEvent.ACTION_PERFORMED,
                         ViewController.AppointmentScheduleViewControllerActionEvent.
                                 VIEW_ACTIVATED_NOTIFICATION.toString());
                 getMyController().actionPerformed(actionEvent);
@@ -732,12 +733,12 @@ public class AppointmentScheduleView extends View{
     private void btnCreateAppointmentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCreateAppointmentActionPerformed
         int row = this.tblAppointments.getSelectedRow();
         if (row == -1) {
-            getViewDescriptor().getViewDescription().
+            getMyController().getDescriptor().getViewDescription().
                     setViewMode(ViewController.ViewMode.SLOT_UNSELECTED);
         }else{
-            getViewDescriptor().getViewDescription().
+            getMyController().getDescriptor().getViewDescription().
                     setViewMode(ViewController.ViewMode.SLOT_SELECTED);
-            getViewDescriptor().getViewDescription().
+            getMyController().getDescriptor().getViewDescription().
                     setAppointment(tableModel.getElementAt(row));
         }
         ActionEvent actionEvent = new ActionEvent(this,
@@ -759,9 +760,9 @@ public class AppointmentScheduleView extends View{
         }
         else if (SystemDefinitions.APPOINTMENT_UNBOOKABILITY_MARKER.equals(((AppointmentsScheduleTableModel)this.tblAppointments.getModel()).
                             getElementAt(row).getPatient().toString())){
-            getViewDescriptor().getViewDescription().
+            getMyController().getDescriptor().getViewDescription().
                     setViewMode(ViewController.ViewMode.UPDATE);
-            getViewDescriptor().getViewDescription().setAppointment(tableModel.getElementAt(row));
+            getMyController().getDescriptor().getViewDescription().setAppointment(tableModel.getElementAt(row));
             ActionEvent actionEvent = new ActionEvent(this, 
                     ActionEvent.ACTION_PERFORMED,
                     ViewController.AppointmentScheduleViewControllerActionEvent.
@@ -804,7 +805,7 @@ public class AppointmentScheduleView extends View{
     private void btnScanForEmptySlotsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnScanForEmptySlotsActionPerformed
         // TODO add your handling code here:
         LocalDate searchStartDate = dayDatePicker.getDate();
-        getViewDescriptor().getViewDescription().setDay(searchStartDate);
+        getMyController().getDescriptor().getViewDescription().setDay(searchStartDate);
         ActionEvent actionEvent = new ActionEvent(this, 
                     ActionEvent.ACTION_PERFORMED,
                     ViewController.AppointmentScheduleViewControllerActionEvent.
@@ -834,22 +835,22 @@ public class AppointmentScheduleView extends View{
         }
         int OKToCancelAppointment;
         initialiseEDRequestFromView(row);
-        start = getViewDescriptor().getViewDescription().getAppointment().getStart();
+        start = getMyController().getDescriptor().getViewDescription().getAppointment().getStart();
         from = start.toLocalTime();
         //20/07/2022 08:16 update
         //duration = getViewDescriptor().getViewDescription().getAppointment().getData().getDuration().toMinutes();
-        duration = getViewDescriptor().getViewDescription().getAppointment().getDuration().toMinutes();
+        duration = getMyController().getDescriptor().getViewDescription().getAppointment().getDuration().toMinutes();
         LocalTime to = from.plusMinutes(duration);
 
         String message;
-        if (getViewDescriptor().getViewDescription().getAppointment().getPatient().toString().
+        if (getMyController().getDescriptor().getViewDescription().getAppointment().getPatient().toString().
                 equals(SystemDefinitions.APPOINTMENT_UNBOOKABILITY_MARKER)){
             message = "Are you sure you want to cancel the unbookable appointment slot";
         }
         else {
-            name = getViewDescriptor().getViewDescription().getAppointment().getPatient().getName().getForenames();
+            name = getMyController().getDescriptor().getViewDescription().getAppointment().getPatient().getName().getForenames();
             if (!name.isEmpty())name = name + " ";
-            name = name + getViewDescriptor().getViewDescription().getAppointment().getPatient().getName().getSurname();
+            name = name + getMyController().getDescriptor().getViewDescription().getAppointment().getPatient().getName().getSurname();
             message = "Are you sure you want to cancel the appointment for patient " + name; 
         }
         from.format(DateTimeFormatter.ofPattern("HH:mm"));
@@ -894,15 +895,15 @@ public class AppointmentScheduleView extends View{
         Appointment appointment = null;
         int row = this.tblAppointments.getSelectedRow();
         if (row != -1){
-            getViewDescriptor().getViewDescription().
+            getMyController().getDescriptor().getViewDescription().
                     setViewMode(ViewController.ViewMode.SLOT_SELECTED);
             appointment = ((AppointmentsScheduleTableModel)this.tblAppointments.getModel()).getElementAt(row);
-            getViewDescriptor().getViewDescription().setAppointment(appointment); 
+            getMyController().getDescriptor().getViewDescription().setAppointment(appointment); 
         }
         else {
-            getViewDescriptor().getViewDescription().
+            getMyController().getDescriptor().getViewDescription().
                     setViewMode(ViewController.ViewMode.SLOT_UNSELECTED);
-            getViewDescriptor().getViewDescription().setAppointment(null);
+            getMyController().getDescriptor().getViewDescription().setAppointment(null);
         }
         ActionEvent actionEvent = new ActionEvent(this,
                 ActionEvent.ACTION_PERFORMED,
@@ -941,7 +942,7 @@ public class AppointmentScheduleView extends View{
         String stringToPrint;
         if (this.tblAppointments!=null){
             TableModel model = tblAppointments.getModel();
-            stringToPrint = getViewDescriptor().getControllerDescription().getAppointmentScheduleDay().
+            stringToPrint = getMyController().getDescriptor().getControllerDescription().getAppointmentScheduleDay().
                     format(DateTimeFormatter.ofPattern("dd/MM/yy"));
             stringToPrint = stringToPrint + " Appointment Schedule" +"\n\n";
             stringToPrint = stringToPrint + String.format(centreString(PATIENT_WIDTH,"Patient") +
@@ -1038,18 +1039,18 @@ public class AppointmentScheduleView extends View{
         @Override
         public void dateChanged(DateChangeEvent event) {
             //LocalDate date = event.getNewDate();
-            getViewDescriptor().getViewDescription().setDay(AppointmentScheduleView.this.dayDatePicker.getDate());
+            getMyController().getDescriptor().getViewDescription().setDay(ScheduleView.this.dayDatePicker.getDate());
             tblAppointments.clearSelection();
-            ActionEvent actionEvent = new ActionEvent(AppointmentScheduleView.this, 
+            ActionEvent actionEvent = new ActionEvent(ScheduleView.this, 
                     ActionEvent.ACTION_PERFORMED,
                     ViewController.AppointmentScheduleViewControllerActionEvent.APPOINTMENTS_FOR_DAY_REQUEST.toString());
-            AppointmentScheduleView.this.getMyController().actionPerformed(actionEvent);
+            ScheduleView.this.getMyController().actionPerformed(actionEvent);
             //getMyController().actionPerformed(actionEvent);
             SwingUtilities.invokeLater(new Runnable() 
             {
               public void run()
               {
-                AppointmentScheduleView.this.setTitle(AppointmentScheduleView.this.dayDatePicker.getDate().format(DateTimeFormatter.ofPattern("dd/MM/yy")) + " schedule");
+                ScheduleView.this.setTitle(ScheduleView.this.dayDatePicker.getDate().format(DateTimeFormatter.ofPattern("dd/MM/yy")) + " schedule");
               }
             });
         }
@@ -1113,14 +1114,14 @@ public class AppointmentScheduleView extends View{
                     Boolean value = (Boolean)model.getValueAt(row, column);
                     appointment = model.getElementAt(row);
                     appointment.setHasPatientBeenContacted(value);
-                    getViewDescriptor().getViewDescription().setAppointment(appointment);
+                    getMyController().getDescriptor().getViewDescription().setAppointment(appointment);
                     tblAppointments.clearSelection();
                 }
             });
             this.tblAppointments.setModel(tableModel);
         }
         tableModel.removeAllElements();
-        Iterator<Appointment> it = getViewDescriptor().getControllerDescription().getAppointmentSlotsForDay().iterator();
+        Iterator<Appointment> it = getMyController().getDescriptor().getControllerDescription().getAppointmentSlotsForDay().iterator();
         while (it.hasNext()){
             tableModel.addElement(it.next());
         }
@@ -1238,7 +1239,7 @@ public class AppointmentScheduleView extends View{
         String stringToPrint;
         if (this.tblAppointments!=null){
             TableModel model = tblAppointments.getModel();
-            stringToPrint = getViewDescriptor().getControllerDescription().getAppointmentScheduleDay().
+            stringToPrint = getMyController().getDescriptor().getControllerDescription().getAppointmentScheduleDay().
                     format(DateTimeFormatter.ofPattern("dd/MM/yy"));
             stringToPrint = stringToPrint + " Appointment Schedule" +"\n\n";
             stringToPrint = stringToPrint + String.format(centreString(40,"Patient") +

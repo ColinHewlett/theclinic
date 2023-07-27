@@ -43,11 +43,11 @@ public class ModalPatientSelectionView extends View{
     
     public ModalPatientSelectionView(
             View.Viewer myViewType,
-            ActionListener myController,
+            ViewController myController,
             Descriptor entityDescriptor, 
             JDesktopPane desktop){ 
         super("Patient selector view");
-        setViewDescriptor(entityDescriptor);
+        //setViewDescriptor(entityDescriptor);
         setMyController(myController);
         setMyViewType(myViewType);
         initComponents(); 
@@ -138,14 +138,16 @@ public class ModalPatientSelectionView extends View{
         DefaultComboBoxModel<Patient> model = 
                 new DefaultComboBoxModel<>();
         ArrayList<Patient> patients = 
-                getViewDescriptor().getControllerDescription().getPatients();
+                getMyController().getDescriptor().
+                        getControllerDescription().getPatients();
         Iterator<Patient> it = patients.iterator();
         while (it.hasNext()){
             Patient patient = it.next();
             model.addElement(patient);
         }
         this.cmbPatientSelector.setModel(model);
-        Patient patient = getViewDescriptor().getControllerDescription().getPatient();
+        Patient patient = getMyController().getDescriptor().
+                getControllerDescription().getPatient();
         if (patient!=null){
             if (patient.getIsKeyDefined())
                 this.cmbPatientSelector.setSelectedItem(patient);
@@ -239,7 +241,7 @@ public class ModalPatientSelectionView extends View{
     private void cmbPatientSelectorActionPerformed(java.awt.event.ActionEvent evt) {
         ViewController.PatientViewControllerActionEvent action = null;
         if (this.cmbPatientSelector.getSelectedIndex()!=-1){
-            getViewDescriptor().getViewDescription().setPatient(
+            getMyController().getDescriptor().getViewDescription().setPatient(
                     (Patient)this.cmbPatientSelector.getSelectedItem());
             switch(getMyViewType()){
                 /*
@@ -262,7 +264,7 @@ public class ModalPatientSelectionView extends View{
     }  
     
     private void btnClearSelectionActionPerformed(){
-        getViewDescriptor().getViewDescription().setPatient(new Patient());
+        getMyController().getDescriptor().getViewDescription().setPatient(new Patient());
         this.cmbPatientSelector.setSelectedIndex(-1);
         ActionEvent actionEvent = new ActionEvent(
                 this,ActionEvent.ACTION_PERFORMED,

@@ -42,12 +42,11 @@ public class ModalNonSurgeryDayEditorView extends View {
     /**
      * Creates new form NonSurgeryDayEditorModalViewer
      */
-    public ModalNonSurgeryDayEditorView(View.Viewer myViewType, ActionListener myController,
+    public ModalNonSurgeryDayEditorView(View.Viewer myViewType, ViewController myController,
             Descriptor entityDescriptor, 
             JDesktopPane desktop) {//ViewMode arg
         super("Surgery days editor");
         setMyViewType(myViewType);
-        setViewDescriptor(entityDescriptor);
         setMyController(myController);
         
         initComponents();
@@ -210,11 +209,11 @@ public class ModalNonSurgeryDayEditorView extends View {
     private void btnSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSaveActionPerformed
         // TODO add your handling code here:
         if (dayDatePicker.getDate()!=null){
-            getViewDescriptor().getViewDescription().setDay(dayDatePicker.getDate());
+            getMyController().getDescriptor().getViewDescription().setDay(dayDatePicker.getDate());
             ActionEvent actionEvent = new ActionEvent(this, 
                     ActionEvent.ACTION_PERFORMED,
                     ViewController.AppointmentScheduleViewControllerActionEvent.APPOINTMENTS_FOR_NON_SURGERY_DAY_REQUEST.toString());
-            this.getMyController().actionPerformed(actionEvent);
+            getMyController().actionPerformed(actionEvent);
         }
         else{
             JOptionPane.showMessageDialog(this, "A date has not yet been selected");
@@ -243,7 +242,8 @@ public class ModalNonSurgeryDayEditorView extends View {
      * -- the new (toggled) version of the settings is then used to initialise the DatePickerSettings
      */
     public void initialiseView(){
-        HashMap<DayOfWeek, Boolean> surgeryDays = getViewDescriptor().getControllerDescription().getSurgeryDaysAssignment();
+        HashMap<DayOfWeek, Boolean> surgeryDays = getMyController().getDescriptor().
+                getControllerDescription().getSurgeryDaysAssignment();
         HashMap<DayOfWeek,Boolean> nonSurgeryDays = new HashMap<DayOfWeek,Boolean>();
         for(Map.Entry<DayOfWeek,Boolean> entry : surgeryDays.entrySet()){
             if (entry.getValue()) nonSurgeryDays.put(entry.getKey(), Boolean.FALSE);

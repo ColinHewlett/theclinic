@@ -6,6 +6,7 @@ package view.views.modal_internal_frame_views;
 
 import controller.Descriptor;
 import controller.ViewController;
+import model.Appointment;
 import _system_environment_variables.SystemDefinitions;
 import java.awt.AWTEvent;
 import java.awt.ActiveEvent;
@@ -44,32 +45,30 @@ import view.View;
 import view.views.view_support_classes.renderers.SelectStartTimeLocalDateTimeRenderer;
 
 /**
- *
+ * 
  * @author colin
  */
 public class ModalUnbookableAppointmentSlotEditorView extends View {
     private View.Viewer myViewType = null;
-    private Descriptor entityDescriptor = null;
-    private ActionListener myController = null;
     private DateTimeFormatter appointmentScheduleFormat = DateTimeFormatter.ofPattern("EEEE, MMMM dd yyyy ");
     private DateTimeFormatter ddMMyyyyFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy");
     /**
-     * Creates new form NewJInternalFrame
+     * 
+     * @param myViewType; either CREATE or UPDATE view mode 
+     * @param myController; basses down to view a reference to its view controller
+     * @param desktop; parent JDesktopPane to which this internal frame is added
      */
     public ModalUnbookableAppointmentSlotEditorView (
-            View.Viewer myViewType, ActionListener myController,
-            Descriptor entityDescriptor, 
+            View.Viewer myViewType, ViewController myController,
+            //Descriptor entityDescriptor, 
             JDesktopPane desktop) {
         super("Appointment configuration view");
-        setViewDescriptor(entityDescriptor);
         setMyController(myController);
         setMyViewType(myViewType);
+        setDesktop(desktop);
         initComponents();
 
-        LocalDate day = getViewDescriptor().getViewDescription().getDay();
-        this.cmbSelectStartTime.setMaximumRowCount(20);
-        this.cmbSelectStartTime.setRenderer(new SelectStartTimeLocalDateTimeRenderer());
-        populateSelectStartTime(day);
+        
         
         chkIsAllDay.addItemListener(new ItemListener() {
             @Override
@@ -91,22 +90,31 @@ public class ModalUnbookableAppointmentSlotEditorView extends View {
                 }
             }
         });
-        
+        /*
         this.setTitle("Unbookable slot editor (" + day.format(ddMMyyyyFormat) + ")");
-        if (getViewDescriptor().getControllerDescription().getAppointment().getPatient()==null){
-            getViewDescriptor().getControllerDescription().getAppointment().setStart(LocalDateTime.of(day, LocalTime.of(9,0)));
-            getViewDescriptor().getControllerDescription().getAppointment().setDuration(Duration.ofHours(8));
-            this.chkIsAllDay.setSelected(true);
-        }   
-        else if ((getViewDescriptor().getControllerDescription().getViewMode().equals(ViewController.ViewMode.UPDATE))
-                ||(getViewDescriptor().getControllerDescription().getAppointment().getPatient()==null)){
+        Appointment appointment = getMyController().getDescriptor().getControllerDescription().getAppointment();
+        if (appointment.getPatient()==null){
+            if (appointment.getStart()==null){
+                appointment.setStart(LocalDateTime.of(day, LocalTime.of(9,0)));
+                appointment.setDuration(Duration.ofHours(8));
+                this.chkIsAllDay.setSelected(true);
+            }
+            else{
+                this.chkIsAllDay.setSelected(false);
+                this.cmbSelectStartTime.setSelectedItem(appointment.getStart());
+                this.spnDurationHours.setValue(getHoursFromDuration(appointment.getDuration().toHours()));
+                this.spnDurationMinutes.setValue(getMinutesFromDuration(appointment.getDuration().toMinutes()));
+            }
+
+        }  
+        else if (getMyController().getDescriptor().getControllerDescription().getViewMode().equals(ViewController.ViewMode.UPDATE)){    
             this.cmbSelectStartTime.setSelectedItem(
-                getViewDescriptor().getControllerDescription().getAppointment().getStart());
-            this.spnDurationHours.setValue(getHoursFromDuration(getViewDescriptor().
+                getMyController().getDescriptor().getControllerDescription().getAppointment().getStart());
+            this.spnDurationHours.setValue(getHoursFromDuration(getMyController().getDescriptor().
+                    getControllerDescription().getAppointment().getDuration().toHours()));
+            this.spnDurationMinutes.setValue(getMinutesFromDuration(getMyController().getDescriptor().
                     getControllerDescription().getAppointment().getDuration().toMinutes()));
-            this.spnDurationMinutes.setValue(getMinutesFromDuration(getViewDescriptor().
-                    getControllerDescription().getAppointment().getDuration().toMinutes()));
-            this.txaNotes.setText(getViewDescriptor().getControllerDescription().getAppointment().getNotes());
+            this.txaNotes.setText(getMyController().getDescriptor().getControllerDescription().getAppointment().getNotes());
             this.chkIsAllDay.setSelected(false);
         }
         else this.chkIsAllDay.setSelected(true);
@@ -118,6 +126,7 @@ public class ModalUnbookableAppointmentSlotEditorView extends View {
         this.setVisible(true);
         
         startModal(this);
+        */
     }
     
     private void startModal(JInternalFrame f) {
@@ -218,27 +227,69 @@ public class ModalUnbookableAppointmentSlotEditorView extends View {
         this.cmbSelectStartTime.setModel(model);
     }
     
+    private void initialiseStartTimeAndDurationControls(){
+        this.cmbSelectStartTime.setSelectedItem(
+            getMyController().getDescriptor().getControllerDescription().
+                    getAppointment().getStart());
+        this.spnDurationHours.setValue(getHoursFromDuration(
+                getMyController().getDescriptor().
+                getControllerDescription().getAppointment().getDuration().toHours()));
+        this.spnDurationMinutes.setValue(getMinutesFromDuration(
+                getMyController().getDescriptor().
+                getControllerDescription().getAppointment().getDuration().toMinutes()));
+    }
+    
     @Override
     public void initialiseView(){
-        LocalDate day = getViewDescriptor().getViewDescription().getDay();
+        LocalDate day = getMyController().getDescriptor().getViewDescription().getDay();
         this.cmbSelectStartTime.setMaximumRowCount(20);
         this.cmbSelectStartTime.setRenderer(new SelectStartTimeLocalDateTimeRenderer());
         populateSelectStartTime(day);
-        if (getViewDescriptor().getControllerDescription().getAppointment().getPatient().toString().
-                equals(SystemDefinitions.APPOINTMENT_UNBOOKABILITY_MARKER)){
-            this.cmbSelectStartTime.setSelectedItem(
-                getViewDescriptor().getControllerDescription().getAppointment().getStart());
-            this.spnDurationHours.setValue(getHoursFromDuration(getViewDescriptor().
-                    getControllerDescription().getAppointment().getDuration().toMinutes()));
-            this.spnDurationMinutes.setValue(getMinutesFromDuration(getViewDescriptor().
-                    getControllerDescription().getAppointment().getDuration().toMinutes()));
+
+        this.setTitle("Unbookable slot editor (" + day.format(ddMMyyyyFormat) + ")");
+        Appointment appointment = getMyController().getDescriptor().getControllerDescription().getAppointment();
+        if (appointment.getPatient()==null){
+            if (appointment.getStart()==null){
+                appointment.setStart(LocalDateTime.of(day, LocalTime.of(9,0)));
+                appointment.setDuration(Duration.ofHours(8));
+                this.chkIsAllDay.setSelected(true);
+            }
+            else{
+                this.chkIsAllDay.setSelected(false);
+                this.cmbSelectStartTime.setSelectedItem(appointment.getStart());
+                this.spnDurationHours.setValue(getHoursFromDuration(appointment.getDuration().toHours()));
+                this.spnDurationMinutes.setValue(getMinutesFromDuration(appointment.getDuration().toMinutes()));
+            }
+
+        }  
+        else if (getMyController().getDescriptor().getControllerDescription().getViewMode().equals(ViewController.ViewMode.UPDATE)){    
+            initialiseStartTimeAndDurationControls();    
+            this.chkIsAllDay.setSelected(false);
         }
-        this.txaNotes.setText(getViewDescriptor().getControllerDescription().getAppointment().getNotes());
+        else this.chkIsAllDay.setSelected(true);
+        
+        /*
+        if (getMyController().getDescriptor().getControllerDescription().
+                getAppointment().getPatient().toString().
+                equals(SystemDefinitions.APPOINTMENT_UNBOOKABILITY_MARKER)){
+            initialiseStartTimeAndDurationControls();
+        }
+        this.txaNotes.setText(getMyController().getDescriptor().
+                getControllerDescription().getAppointment().getNotes());
+        
+        */
+        
+        
+        //this.cmbSelectStartTime.setSelectedIndex(0);
+        this.setTitle("Unbookable slot editor (" + day.format(ddMMyyyyFormat) + ")");
 
         
-        this.cmbSelectStartTime.setSelectedIndex(0);
-        //else this.cmbSelectStartTime.setSelectedIndex(0);
-        this.setTitle("Unbookable slot editor (" + day.format(ddMMyyyyFormat) + ")");
+        getDesktop().add(this);
+        this.setLayer(JLayeredPane.MODAL_LAYER);
+        centreViewOnDesktop(getDesktop().getParent(),this);
+        this.setVisible(true);
+        
+        startModal(this);  
     }
     
     private Integer getHoursFromDuration(long duration){
@@ -429,10 +480,12 @@ public class ModalUnbookableAppointmentSlotEditorView extends View {
         initialiseEntityDescriptorFromView();
 
         //if (getViewDescriptor().getControllerDescription().getAppointment().getDuration().isZero())
-        if (getViewDescriptor().getViewDescription().getAppointment().getDuration().isZero())
+        if (getMyController().getDescriptor().getViewDescription().
+                getAppointment().getDuration().isZero())
             JOptionPane.showMessageDialog(this, "Duration for unbookable slot undefined ((equals zero minutes)");
         else {
-            if (getViewDescriptor().getViewDescription().getAppointment().getNotes().isEmpty()){
+            if (getMyController().getDescriptor().
+                    getViewDescription().getAppointment().getNotes().isEmpty()){
                 String[] options = {"Yes", "No"};
                 OKToSaveAppointment = JOptionPane.showOptionDialog(this,
                     "No notes defined for appointment. Save anyway?",null,
@@ -444,7 +497,8 @@ public class ModalUnbookableAppointmentSlotEditorView extends View {
             }
         }
         ViewController.AppointmentScheduleViewControllerActionEvent action = null;
-        switch(getViewDescriptor().getControllerDescription().getViewMode()){
+        switch(getMyController().getDescriptor().
+                getControllerDescription().getViewMode()){
             case CREATE:
                 action = ViewController.AppointmentScheduleViewControllerActionEvent.
                     UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_CREATE_REQUEST;
@@ -496,13 +550,14 @@ public class ModalUnbookableAppointmentSlotEditorView extends View {
     }
     
     private void initialiseEntityDescriptorFromView(){
-        getViewDescriptor().getViewDescription().setAppointment(
-                    getViewDescriptor().getControllerDescription().getAppointment());
-        getViewDescriptor().getViewDescription().getAppointment().
+        getMyController().getDescriptor().getViewDescription().setAppointment(
+                    getMyController().getDescriptor().getControllerDescription().
+                            getAppointment());
+        getMyController().getDescriptor().getViewDescription().getAppointment().
                 setStart((LocalDateTime)this.cmbSelectStartTime.getSelectedItem());
-        getViewDescriptor().getViewDescription().getAppointment().
+        getMyController().getDescriptor().getViewDescription().getAppointment().
                 setDuration(getDurationFromView());
-        getViewDescriptor().getViewDescription().getAppointment().
+        getMyController().getDescriptor().getViewDescription().getAppointment().
                 setNotes(this.txaNotes.getText());
     }
 }

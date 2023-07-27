@@ -316,7 +316,7 @@ public class DesktopView extends javax.swing.JFrame implements PropertyChangeLis
         
         desktop = new javax.swing.JDesktopPane();
         desktop.setSize(this.getWidth(), this.getHeight()-30);
-        System.out.println("desktopView = " + this.getWidth());
+        //System.out.println("desktopView = " + this.getWidth());
         desktopScrollPane = new DesktopViewScrollPane(desktop, this);
         desktop.setBackground(Color.BLACK);
 

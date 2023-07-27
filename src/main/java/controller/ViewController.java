@@ -38,7 +38,7 @@ import javax.swing.table.TableColumn;
 public abstract class ViewController implements ActionListener, PropertyChangeListener{
     
     public enum ViewControllers {
-        AppointmentScheduleViewController,
+        ScheduleViewController,
         DesktopViewController,
         ImportProgressViewController,
         PatientNotificationViewController,
@@ -255,6 +255,7 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
     private Descriptor entityDescriptorFromView = null;
     private Descriptor controllerDescriptor = null;
     private ScheduleReport scheduleReport = null;
+    private ActionListener actionListener = null;
     
     public void firePropertyChangeEvent(
                                         String pcEventName,
@@ -304,26 +305,27 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
                 (int)((deskTopViewDimension.getHeight()-insets.top) - myViewDimension.getHeight())/2);
         
         view.setLocation(point);
-        System.out.println("Location = " + point);
-        System.out.println("Desktop size = " + desktopView.getSize());
-        System.out.println("Internal frame size = " + view.getSize());
-        System.out.println("2 x point x = " + desktopView.getWidth()+ "-" + view.getWidth());
-        /*
-        view.setLocation(new Point(
-                (int)(deskTopViewDimension.getWidth() - (myViewDimension.getWidth()))/2,
-                (int)((deskTopViewDimension.getHeight()-insets.top) - myViewDimension.getHeight())/2));
-        */
+        
     }
     
     public static void displayErrorMessage(String message, String title, int messageType){
         JOptionPane.showMessageDialog(null,new ErrorMessagePanel(message),title,messageType);
     }
     
-    public Descriptor getControllerDescriptor(){
+    public Descriptor getDescriptor(){
+        if (controllerDescriptor==null) setDescriptor(new Descriptor());
         return controllerDescriptor;
     }
     
-    public void setControllerDescriptor(Descriptor value){
+    protected ActionListener getMyController(){
+        return actionListener;
+    }
+    
+    protected void setMyController(ActionListener value){
+        actionListener = value;
+    }
+    
+    public void setDescriptor(Descriptor value){
         controllerDescriptor = value;
     }
     
@@ -335,10 +337,11 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         controllerDescriptor = value;
     }
     
+    /*
     public Descriptor getDescriptorFromView(){
         return entityDescriptorFromView;
     }
-
+    */
     protected Appointment doChangeAppointmentScheduleForDayRequest(ViewMode mode, Appointment rSlot) throws StoreException{
         Appointment result = null;
         
@@ -350,11 +353,11 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         setScheduleReport(doAppointmentCollisionCheckOnScheduleChangeRequest(
                     rSlot, appointment.get(), mode));
         if (getScheduleReport().getState().equals(RequestedAppointmentState.COLLISION)){
-            getControllerDescriptor().getControllerDescription().setError(scheduleReport.getError());
+            getDescriptor().getControllerDescription().setError(scheduleReport.getError());
             result = null;
         }
         else{
-            getControllerDescriptor().getControllerDescription().setError(null);
+            getDescriptor().getControllerDescription().setError(null);
             switch (mode){//one or more appointments already exist so check the CREATE or UPGRADE make sense
                 case CREATE:
                     rSlot.insert(); 
@@ -411,7 +414,7 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
                                             + requestedSlot.getAppointeeName() 
                                             + " overwrites ";
                                     if (nextScheduledSlot.getIsUnbookableSlot()){
-                                        error = error + "an unBookable appointment slot which starts at ";
+                                        error = error + "an unbookable appointment slot which starts at ";
                                         error = error + nextScheduledSlot.getUnbookableSlotStartTime(); 
                                     }
                                     else {

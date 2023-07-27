@@ -40,7 +40,6 @@ import javax.swing.table.TableCellRenderer;
  */
 public class PatientNotificationView extends View implements ItemListener {
     private View.Viewer myViewType = null;
-    private Descriptor entityDescriptor = null;
     private InternalFrameAdapter internalFrameAdapter = null;
     private JTable tblPatientNotifications = null;
     private TableCellRenderer patientNotificationTableDefaultRenderer = null;
@@ -86,12 +85,12 @@ public class PatientNotificationView extends View implements ItemListener {
      * @param value 
      */
     public PatientNotificationView(View.Viewer myViewType, 
-            ActionListener myController, 
+            ViewController myController, 
             Descriptor value, JDesktopPane desktop) {
         super("Outstanding patient notifications");
         this.setMyViewType(myViewType);
         setMyController(myController);
-        setViewDescriptor(value);
+        //setViewDescriptor(value);
         initComponents(); 
         //addInternalFrameActivatedListener();
         desktop.add(this);
@@ -160,7 +159,6 @@ public class PatientNotificationView extends View implements ItemListener {
                         PatientNotificationView.this,ActionEvent.ACTION_PERFORMED,
                         ViewController.PatientNotificationViewControllerActionEvent.
                                 VIEW_ACTIVATED_NOTIFICATION.toString());
-                Object test = getMyController();
                 getMyController().actionPerformed(actionEvent);
             }
         };
@@ -175,7 +173,7 @@ public class PatientNotificationView extends View implements ItemListener {
      */
     @Override
     public void propertyChange(PropertyChangeEvent e){
-        setViewDescriptor((Descriptor)e.getNewValue());
+        //setViewDescriptor((Descriptor)e.getNewValue());
         ViewController.
                 PatientNotificationViewControllerPropertyChangeEvent
                 propertyName = ViewController.
@@ -184,13 +182,13 @@ public class PatientNotificationView extends View implements ItemListener {
         switch (propertyName){
             case RECEIVED_PATIENT_NOTIFICATIONS:
                 populatePatientNotificationTable(
-                        getViewDescriptor().getControllerDescription().getPatientNotifications(),false);
+                        getMyController().getDescriptor().getControllerDescription().getPatientNotifications(),false);
                 setTitle(getUITitle());
                 this.tblPatientNotifications.clearSelection();
                 break;
                case RECEIVED_UNACTIONED_NOTIFICATIONS:
                 populatePatientNotificationTable(
-                        getViewDescriptor().getControllerDescription().getPatientNotifications(),true);
+                        getMyController().getDescriptor().getControllerDescription().getPatientNotifications(),true);
                 setTitle(getUITitle());
                 this.tblPatientNotifications.clearSelection();
                 this.rdbDisplayUnactionedNotifications.setSelected(true);
@@ -230,16 +228,7 @@ public class PatientNotificationView extends View implements ItemListener {
         this.rdbDisplayUnactionedNotifications.addItemListener(this);
         this.tblPatientNotifications = new JTable(new PatientNotificationView4ColumnTableModel());
         createPatientNotificationTable();
-        /*
-        setPatientNotificationTableDefaultRenderer(this.tblPatientNotifications.getDefaultRenderer(LocalDate.class));
-        scrPatientNotificationView.setViewportView(this.tblPatientNotifications);
-        ViewController.setJTableColumnProperties(
-                tblPatientNotifications, 
-                scrPatientNotificationView.getPreferredSize().width, 
-                12,23,15,50);
-        this.tblPatientNotifications.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-        //this.tblPatientNotifications.setAutoCreateRowSorter(true);
-        */
+
         ActionEvent actionEvent = new ActionEvent(
             this,ActionEvent.ACTION_PERFORMED,
             ViewController.PatientNotificationViewControllerActionEvent.UNACTIONED_PATIENT_NOTIFICATIONS_REQUEST.toString());
@@ -527,7 +516,7 @@ public class PatientNotificationView extends View implements ItemListener {
                     Notification patientNotification = (Notification)model.getPatientNotifications().get(row);
                     patientNotifications.add(patientNotification);
                 }
-                getViewDescriptor().getViewDescription().setPatientNotifications(patientNotifications);
+                getMyController().getDescriptor().getViewDescription().setPatientNotifications(patientNotifications);
                 ActionEvent actionEvent = new ActionEvent(
                     this,ActionEvent.ACTION_PERFORMED,
                     ViewController.PatientNotificationViewControllerActionEvent.ACTION_PATIENT_NOTIFICATION_REQUEST.toString());
@@ -558,7 +547,7 @@ public class PatientNotificationView extends View implements ItemListener {
         if (!isError){
             PatientNotificationView4ColumnTableModel model = 
                 (PatientNotificationView4ColumnTableModel)this.tblPatientNotifications.getModel();
-            getViewDescriptor().getViewDescription().setPatientNotification(
+            getMyController().getDescriptor().getViewDescription().setPatientNotification(
                     model.getElementAt(this.tblPatientNotifications.getSelectedRow()));
             ActionEvent actionEvent = new ActionEvent(
                     this,ActionEvent.ACTION_PERFORMED,
@@ -580,7 +569,7 @@ public class PatientNotificationView extends View implements ItemListener {
             int row = this.tblPatientNotifications.getSelectedRow();
             PatientNotificationView4ColumnTableModel model = 
                 (PatientNotificationView4ColumnTableModel)this.tblPatientNotifications.getModel();
-            getViewDescriptor().getViewDescription().setPatientNotification(model.getElementAt(row));
+            getMyController().getDescriptor().getViewDescription().setPatientNotification(model.getElementAt(row));
             ActionEvent actionEvent = new ActionEvent(
                 this,ActionEvent.ACTION_PERFORMED,
                 ViewController.PatientNotificationViewControllerActionEvent.

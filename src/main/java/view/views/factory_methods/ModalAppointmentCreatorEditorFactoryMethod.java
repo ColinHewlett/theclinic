@@ -8,6 +8,7 @@ package view.views.factory_methods;
 import view.views.modal_internal_frame_views.ModalAppointmentEditorView;
 import view.views.DesktopView;
 import controller.Descriptor;
+import controller.ViewController;
 import view.*;
 import java.awt.event.ActionListener;
 
@@ -18,7 +19,7 @@ import java.awt.event.ActionListener;
  */
 public class ModalAppointmentCreatorEditorFactoryMethod extends ViewFactoryMethod{
     public ModalAppointmentCreatorEditorFactoryMethod(
-            ActionListener controller, Descriptor ed, DesktopView dtView){
+            ViewController controller, Descriptor ed, DesktopView dtView){
         initialiseView(controller, ed, dtView);
     }
     
@@ -29,7 +30,7 @@ public class ModalAppointmentCreatorEditorFactoryMethod extends ViewFactoryMetho
         
     }
     
-    private void initialiseView(ActionListener controller, Descriptor ed, DesktopView dtView){
+    private void initialiseView(ViewController controller, Descriptor ed, DesktopView dtView){
         this.setDesktopView(dtView);
         this.setDescriptor(ed);
         this.setViewController(controller);

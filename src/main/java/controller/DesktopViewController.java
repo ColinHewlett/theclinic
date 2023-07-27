@@ -40,7 +40,7 @@ public class DesktopViewController extends ViewController{
     private boolean isDesktopPendingClosure = false;
     private DesktopView view = null;
     //private ArrayList<AppointmentRemindersViewController> appointmentRemindersViewControllers = null;
-    private ArrayList<AppointmentScheduleViewController>appointmentScheduleViewControllers = null;
+    private ArrayList<ScheduleViewController>appointmentScheduleViewControllers = null;
     private ArrayList<PatientNotificationViewController> patientNotificationViewControllers = null;
     private ArrayList<PatientViewController> patientViewControllers = null;
     private ArrayList<ImportProgressViewController> importProgressViewControllers = null;
@@ -51,13 +51,13 @@ public class DesktopViewController extends ViewController{
     private int recordCount = 0;      
     
     private DesktopViewController(){
-               setControllerDescriptor(new Descriptor());
+               setDescriptor(new Descriptor());
         /**
          * Constructor for DesktopView takes two arguments
          * -- object reference to view controller (this)
          * -- Boolean signifying whether view enables data migration functions
          */
-        view = new DesktopView(this, isDataMigrationOptionEnabled, getControllerDescriptor() );
+        view = new DesktopView(this, isDataMigrationOptionEnabled, getDescriptor() );
         //view.setSize(1020, 650);
         //view.setVisible(true);
         setView(view);
@@ -139,8 +139,8 @@ public class DesktopViewController extends ViewController{
      * -- VIEW_CLOSED_NOTIFICATION
      * @param e:ActionEvent received; indicates which ActionCommand from above list was sent
      */
-    private void doActionEventForAppointmentScheduleViewController(ActionEvent e){
-        AppointmentScheduleViewController avc = (AppointmentScheduleViewController)e.getSource();
+    private void doActionEventForScheduleViewController(ActionEvent e){
+        ScheduleViewController avc = (ScheduleViewController)e.getSource();
         ViewController.DesktopViewControllerActionEvent actionCommand =
                     ViewController.DesktopViewControllerActionEvent.valueOf(e.getActionCommand());
         switch(actionCommand){
@@ -155,7 +155,7 @@ public class DesktopViewController extends ViewController{
                 );
                 break;
             case VIEW_CONTROLLER_CLOSE_NOTIFICATION:{
-                Iterator<AppointmentScheduleViewController> viewControllerIterator = 
+                Iterator<ScheduleViewController> viewControllerIterator = 
                         this.appointmentScheduleViewControllers.iterator();
                 while(viewControllerIterator.hasNext()){
                     avc = viewControllerIterator.next();
@@ -244,7 +244,7 @@ public class DesktopViewController extends ViewController{
                  * -- the appointment date is used in the construction of a new AppointmentVC and associated appointment schedule view which includes the selected patient's appointment
                  */
                 PatientViewController patientViewController = (PatientViewController)e.getSource();
-                Optional<Descriptor> ed = Optional.of(patientViewController.getDescriptorFromView());
+                Optional<Descriptor> ed = Optional.of(patientViewController.getDescriptor());
                 createNewAppointmentScheduleViewController(ed);
                 break;
         }
@@ -344,50 +344,50 @@ public class DesktopViewController extends ViewController{
                 
                 case COUNT_APPOINTMENT_TABLE_REQUEST:
                     theCount = doRequestCountForAppointmentTable();
-                    getControllerDescriptor().getControllerDescription().setTableRowCount(theCount);
+                    getDescriptor().getControllerDescription().setTableRowCount(theCount);
                     firePropertyChangeEvent(
                             ViewController.DesktopViewControllerPropertyChangeEvent.
                                     APPOINTMENT_TABLE_COUNT_RECEIVED.toString(),
                             (PropertyChangeListener)e.getSource(),
                             this,
                             null,
-                            getControllerDescriptor()   
+                            getDescriptor()   
                     );
                     break;
                 case COUNT_PATIENT_TABLE_REQUEST:
                     theCount = doRequestCountForPatientTable();
-                    getControllerDescriptor().getControllerDescription().setTableRowCount(theCount);
+                    getDescriptor().getControllerDescription().setTableRowCount(theCount);
                     firePropertyChangeEvent(
                             ViewController.DesktopViewControllerPropertyChangeEvent.
                                     PATIENT_TABLE_COUNT_RECEIVED.toString(),
                             (PropertyChangeListener)e.getSource(),
                             this,
                             null,
-                            getControllerDescriptor()
+                            getDescriptor()
                     );
                     break;
                 case COUNT_PATIENT_NOTIFICATION_TABLE_REQUEST:
                     theCount = doRequestCountForPatientNotificationTable();
-                    getControllerDescriptor().getControllerDescription().setTableRowCount(theCount);
+                    getDescriptor().getControllerDescription().setTableRowCount(theCount);
                     firePropertyChangeEvent(
                             ViewController.DesktopViewControllerPropertyChangeEvent.
                                     PATIENT_NOTIFICATION_TABLE_COUNT_RECEIVED.toString(),
                             (PropertyChangeListener)e.getSource(),
                             this,
                             null,
-                            getControllerDescriptor()
+                            getDescriptor()
                     );
                     break;
                 case COUNT_SURGERY_DAYS_ASSIGNMENT_TABLE_REQUEST:
                     theCount = doRequestCountForSurgeryDaysAssignmentTable();
-                    getControllerDescriptor().getControllerDescription().setTableRowCount(theCount);
+                    getDescriptor().getControllerDescription().setTableRowCount(theCount);
                     firePropertyChangeEvent(
                             ViewController.DesktopViewControllerPropertyChangeEvent.
                                     SURGERY_DAYS_ASSIGNMENT_TABLE_COUNT_RECEIVED.toString(),
                             (PropertyChangeListener)e.getSource(),
                             this,
                             null,
-                            getControllerDescriptor()
+                            getDescriptor()
                     );
                     break;
                 case PATIENT_NOTIFICATION_VIEW_CONTROLLER_REQUEST:
@@ -444,9 +444,9 @@ public class DesktopViewController extends ViewController{
         }
         
         if (!this.appointmentScheduleViewControllers.isEmpty()){
-            Iterator<AppointmentScheduleViewController> avcIterator = appointmentScheduleViewControllers.iterator();
+            Iterator<ScheduleViewController> avcIterator = appointmentScheduleViewControllers.iterator();
             while(avcIterator.hasNext()){
-                AppointmentScheduleViewController avc = avcIterator.next();
+                ScheduleViewController avc = avcIterator.next();
                 ActionEvent actionEvent = new ActionEvent(
                         this,ActionEvent.ACTION_PERFORMED,
                         ViewController.DesktopViewControllerActionEvent.VIEW_CONTROLLER_CLOSE_NOTIFICATION.toString());
@@ -463,8 +463,8 @@ public class DesktopViewController extends ViewController{
 
     private void createNewAppointmentScheduleViewController(Optional<Descriptor> ed){
         try{
-            AppointmentScheduleViewController avc =
-                    new AppointmentScheduleViewController(this, getView(),ed);
+            ScheduleViewController avc =
+                    new ScheduleViewController(this, getView(),ed);
 
             if (getDesktopViewMode().equals(DesktopViewMode.CLINIC_LOGO)){
                 doSetupDesktopViewMode();
@@ -524,7 +524,7 @@ public class DesktopViewController extends ViewController{
     private void doRequestForImportProgressViewController(){
         if (importProgressViewControllers.isEmpty()){
             importProgressViewControllers.add(
-                                    new ImportProgressViewController(this, getView(), getControllerDescriptor()));
+                                    new ImportProgressViewController(this, getView(), getDescriptor()));
             ImportProgressViewController evc = importProgressViewControllers.get(importProgressViewControllers.size()-1);
             if (getDesktopViewMode().equals(DesktopViewMode.CLINIC_LOGO)){
                     doSetupDesktopViewMode();
@@ -791,7 +791,7 @@ public class DesktopViewController extends ViewController{
         pcSupport.addPropertyChangeListener(view);
         PropertyChangeEvent pcEvent = new PropertyChangeEvent(
                 this,event.toString(),
-                null,getControllerDescriptor());
+                null,getDescriptor());
         pcSupport.firePropertyChange(pcEvent);
         //pcSupport.removePropertyChangeListener(view);
     }
@@ -812,13 +812,13 @@ public class DesktopViewController extends ViewController{
         switch(actionCommand){
             case GET_APPOINTMENT_CSV_PATH_REQUEST:
                 path = SystemDefinitions.getPMSImportedAppointmentData();
-                getControllerDescriptor().getControllerDescription().setPathForAppointmentCSVData(path);
+                getDescriptor().getControllerDescription().setPathForAppointmentCSVData(path);
                 propertyChangeEvent = 
                         DesktopViewControllerPropertyChangeEvent.APPOINTMENT_CSV_PATH_RECEIVED;
                 break;
             case GET_PATIENT_CSV_PATH_REQUEST:
                 path = SystemDefinitions.getPMSImportedPatientData();
-                getControllerDescriptor().getControllerDescription().setPathForPatientCSVData(path);
+                getDescriptor().getControllerDescription().setPathForPatientCSVData(path);
                 propertyChangeEvent = 
                         DesktopViewControllerPropertyChangeEvent.PATIENT_CSV_PATH_RECEIVED;
                 break;
@@ -826,7 +826,7 @@ public class DesktopViewController extends ViewController{
                 if (SystemDefinitions.PMSStoreType().equals("ACCESS"))
                     path = SystemDefinitions.getPMSStoreAccessURL();
                 else path = SystemDefinitions.getPMSStorePostgresURL();
-                getControllerDescriptor().getControllerDescription().setPathForPMSStore(path);
+                getDescriptor().getControllerDescription().setPathForPMSStore(path);
                 propertyChangeEvent = 
                         DesktopViewControllerPropertyChangeEvent.PMS_STORE_PATH_RECEIVED;
                 break;
@@ -839,7 +839,7 @@ public class DesktopViewController extends ViewController{
         pcSupport.addPropertyChangeListener(view);
         PropertyChangeEvent pcEvent = new PropertyChangeEvent(this,
             DesktopViewController.DesktopViewControllerPropertyChangeEvent.MIGRATION_ACTION_COMPLETE.toString(),
-            null,getControllerDescriptor());
+            null,getDescriptor());
         pcSupport.firePropertyChange(pcEvent);
         pcSupport.removePropertyChangeListener(view);
     }
@@ -930,7 +930,7 @@ public class DesktopViewController extends ViewController{
                     doActionEventForDesktopView(e);
                      break;
                 case "AppointmentScheduleViewController":
-                    doActionEventForAppointmentScheduleViewController(e);
+                    doActionEventForScheduleViewController(e);
                     break;
                 case "PatientNotificationViewController":
                     doActionEventForPatientNotificationViewController(e);
@@ -1012,7 +1012,7 @@ public class DesktopViewController extends ViewController{
                         valueOf(e.getPropertyName());
         switch(propertyName){
             case PATIENT_VIEW_CONTROLLER_CHANGE_NOTIFICATION:
-                for(AppointmentScheduleViewController asvc: this.appointmentScheduleViewControllers){
+                for(ScheduleViewController asvc: this.appointmentScheduleViewControllers){
                     ActionEvent actionEvent = new ActionEvent(
                             this,ActionEvent.ACTION_PERFORMED,
                             ViewController.DesktopViewControllerActionEvent.
@@ -1031,7 +1031,7 @@ public class DesktopViewController extends ViewController{
     }
     
     /**
-     * handles the following property change events received from an AppointmentScheduleViewController
+     * handles the following property change events received from an ScheduleViewController
  -- APPOINTMENT_SCHEDULE_VIEW_CONTROLLER_CHANGE_NOTIFICATION
  ---- fires an APPOINTEE_CONTACT_DETAILS_FOR_SCHEDULE_VIEW_REFRESH_RECEIVED property change event to each AppointeeContactDetailsForscheduleVC (assumes there could be more than one)
  ---- on entry event newValue is an Descriptor whose Appointment, Appointments and Day properties represent the current state in the AppointmentScheduleView sender  
@@ -1040,13 +1040,13 @@ public class DesktopViewController extends ViewController{
  --
      * @param e 
      */
-    private void doPropertyChangeEventAppointmentScheduleViewController(PropertyChangeEvent e){
+    private void doPropertyChangeEventScheduleViewController(PropertyChangeEvent e){
         ViewController.DesktopViewControllerPropertyChangeEvent propertyName = 
                 ViewController.DesktopViewControllerPropertyChangeEvent.
                         valueOf(e.getPropertyName());
         switch(propertyName){
             case APPOINTMENT_SCHEDULE_VIEW_CONTROLLER_CHANGE_NOTIFICATION:{
-                setControllerDescriptor((Descriptor)e.getNewValue());
+                setDescriptor((Descriptor)e.getNewValue());
                 for(PatientViewController pvc: this.patientViewControllers){
                     firePropertyChangeEvent(
                             ViewController.PatientViewControllerPropertyChangeEvent.
@@ -1054,7 +1054,7 @@ public class DesktopViewController extends ViewController{
                             pvc,
                             this,
                             null,
-                            getControllerDescriptor()       
+                            getDescriptor()       
                     ); 
                 }
                 break;
@@ -1065,8 +1065,8 @@ public class DesktopViewController extends ViewController{
     public void propertyChange(PropertyChangeEvent e){
         String viewController = e.getSource().getClass().getSimpleName();
         switch(ViewControllers.valueOf(viewController)){
-            case AppointmentScheduleViewController:
-                doPropertyChangeEventAppointmentScheduleViewController(e);
+            case ScheduleViewController:
+                doPropertyChangeEventScheduleViewController(e);
                 break;
             case DesktopViewController:
                 break;

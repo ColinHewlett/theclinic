@@ -6,6 +6,7 @@
 package view.views.factory_methods;
 
 import controller.Descriptor;
+import controller.ViewController;
 import view.views.ImportProgressView;
 import view.View;
 import view.views.DesktopView;
@@ -17,7 +18,7 @@ import java.awt.event.ActionListener;
  */
 public class ImportProgressFactoryMethod extends ViewFactoryMethod{
     
-    public ImportProgressFactoryMethod(ActionListener controller, Descriptor ed, DesktopView dtView){
+    public ImportProgressFactoryMethod(ViewController controller, Descriptor ed, DesktopView dtView){
         initialiseView(controller, ed, dtView);
     }
     
@@ -28,7 +29,7 @@ public class ImportProgressFactoryMethod extends ViewFactoryMethod{
         
     }
     
-    private void initialiseView(ActionListener controller, Descriptor ed, DesktopView dtView){
+    private void initialiseView(ViewController controller, Descriptor ed, DesktopView dtView){
         this.setDesktopView(dtView);
         this.setDescriptor(ed);
         this.setViewController(controller);

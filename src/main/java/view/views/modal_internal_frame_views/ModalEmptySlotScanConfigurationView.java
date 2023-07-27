@@ -8,7 +8,6 @@ package view.views.modal_internal_frame_views;
 import controller.Descriptor;
 import controller.ViewController;
 import view.View;
-import view.View;
 import view.views.view_support_classes.renderers.SelectSlotDurationRenderer;
 import java.awt.AWTEvent;
 import java.awt.ActiveEvent;
@@ -49,14 +48,18 @@ public class ModalEmptySlotScanConfigurationView extends View {
 
 
     /**
-     * Creates new form AppointmentEditorInternalFrame
+     * 
+     * @param myViewType
+     * @param myController
+     * @param entityDescriptor
+     * @param desktop 
      */
-    public ModalEmptySlotScanConfigurationView(View.Viewer myViewType,ActionListener myController,
+    public ModalEmptySlotScanConfigurationView(View.Viewer myViewType,ViewController myController,
             Descriptor entityDescriptor, 
             JDesktopPane desktop) {//ViewMode arg
         super("Appointment slot availability");
         setMyViewType(myViewType);
-        setViewDescriptor(entityDescriptor);
+        //setViewDescriptor(entityDescriptor);
         setMyController(myController);
         setTitle("Empty slot scanner" );
         initComponents();
@@ -159,7 +162,7 @@ public class ModalEmptySlotScanConfigurationView extends View {
     @Override
     public void propertyChange(PropertyChangeEvent e){
         
-        setViewDescriptor((Descriptor)e.getNewValue());
+        //setViewDescriptor((Descriptor)e.getNewValue());
     }
 
 
@@ -341,20 +344,21 @@ cmbSelectSlotDuration.addActionListener(new java.awt.event.ActionListener() {
     private void btnSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSaveActionPerformed
         // TODO add your handling code here:
         Duration duration = (Duration)this.cmbSelectSlotDuration.getSelectedItem();
-        LocalDate startScanDate = getViewDescriptor().getViewDescription().getDay();
+        LocalDate startScanDate = getMyController().getDescriptor().
+                getViewDescription().getDay();
         if (!duration.isZero()){
             if(this.rdbSelectWeeks.isSelected()){
                 startScanDate = startScanDate.plusWeeks((Integer)this.spnSlotSearchOffset.getValue());
             }
             else startScanDate = startScanDate.plusMonths((Integer)this.spnSlotSearchOffset.getValue());
 
-            getViewDescriptor().getViewDescription().setDay(startScanDate);
-            getViewDescriptor().getViewDescription().setDuration(duration);
+            getMyController().getDescriptor().getViewDescription().setDay(startScanDate);
+            getMyController().getDescriptor().getViewDescription().setDuration(duration);
             ActionEvent actionEvent = new ActionEvent(this,
                 ActionEvent.ACTION_PERFORMED,
                 ViewController.AppointmentScheduleViewControllerActionEvent.
                 EMPTY_SLOTS_FROM_DAY_REQUEST.toString());
-            this.getMyController().actionPerformed(actionEvent);
+            getMyController().actionPerformed(actionEvent);
         }
         //EmptySlotScanEditorModalViewer.this.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
         //this.dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));

@@ -74,11 +74,10 @@ public class ModalAppointmentEditorView extends View {
     /**
      * Creates new form AppointmentEditorInternalFrame
      */
-    public ModalAppointmentEditorView(View.Viewer myViewType, ActionListener myController,
+    public ModalAppointmentEditorView(View.Viewer myViewType, ViewController myController,
             Descriptor entityDescriptor, 
             JDesktopPane desktop) {//ViewMode arg
         super("Appointment configuration view");
-        setViewDescriptor(entityDescriptor);
         setMyController(myController);
         setMyViewType(myViewType);
         initComponents(desktop);
@@ -121,8 +120,8 @@ public class ModalAppointmentEditorView extends View {
         String message;
         Integer minutes;
         LocalDateTime firstSlotStartTime = null;
-        if (getViewDescriptor().getControllerDescription().getAppointmentEarlyStart()!=null){
-            firstSlotStartTime = getViewDescriptor().
+        if (getMyController().getDescriptor().getControllerDescription().getAppointmentEarlyStart()!=null){
+            firstSlotStartTime = getMyController().getDescriptor().
                     getControllerDescription().getAppointmentEarlyStart();
             message ="Specify number of minutes prior to the first "
                 + "appointment slot start time for the day";
@@ -138,7 +137,7 @@ public class ModalAppointmentEditorView extends View {
             reply = JOptionPane.showInternalInputDialog(this, message);
             if (isNumeric(reply)){
                 minutes = Integer.valueOf(reply);
-                LocalDate day = getViewDescriptor().getViewDescription().getDay();
+                LocalDate day = getMyController().getDescriptor().getViewDescription().getDay();
                 firstSlotStartTime =  LocalDateTime.of(
                         day,ViewController.FIRST_APPOINTMENT_SLOT).minusMinutes(minutes);  
             }else isError = true;
@@ -265,8 +264,10 @@ public class ModalAppointmentEditorView extends View {
     private void populateSelectStartTime(LocalDate day){
         DefaultComboBoxModel<LocalDateTime> model = new DefaultComboBoxModel<>();
         LocalDateTime value;
-        if (getViewDescriptor().getControllerDescription().getAppointmentEarlyStart()!=null){
-            value = getViewDescriptor().getControllerDescription().getAppointmentEarlyStart();
+        if (getMyController().getDescriptor().
+                getControllerDescription().getAppointmentEarlyStart()!=null){
+            value = getMyController().getDescriptor().
+                    getControllerDescription().getAppointmentEarlyStart();
             do{
                 model.addElement(value);
                 value = value.plusMinutes(5);   
@@ -277,13 +278,13 @@ public class ModalAppointmentEditorView extends View {
             model.addElement(value);
             value = value.plusMinutes(5);   
         }while(!value.isAfter(day.atTime(ViewController.LAST_APPOINTMENT_SLOT)));
-        if (getViewDescriptor().getControllerDescription().getAppointmentLateStart()!=null){
-            if (getViewDescriptor().getControllerDescription().getAppointmentLateStart().
+        if (getMyController().getDescriptor().getControllerDescription().getAppointmentLateStart()!=null){
+            if (getMyController().getDescriptor().getControllerDescription().getAppointmentLateStart().
                     isAfter(day.atTime(ViewController.LAST_APPOINTMENT_SLOT))){
                 do{
                     model.addElement(value);
                     value = value.plusMinutes(5);  
-                }while(!value.isAfter(getViewDescriptor().
+                }while(!value.isAfter(getMyController().getDescriptor().
                         getControllerDescription().getAppointmentLateStart()));
             }
         }        
@@ -292,24 +293,28 @@ public class ModalAppointmentEditorView extends View {
     
     @Override
     public void initialiseView(){
-        LocalDate day = getViewDescriptor().getViewDescription().getDay();
+        LocalDate day = getMyController().getDescriptor().getViewDescription().getDay();
         this.cmbSelectStartTime.setMaximumRowCount(20);
         this.cmbSelectStartTime.setRenderer(new SelectStartTimeLocalDateTimeRenderer());
         populateSelectStartTime(day);
         populatePatientSelector(this.cmbSelectPatient);
         this.cmbSelectPatient.setEditable(false);
         this.cmbSelectStartTime.setSelectedItem(
-                getViewDescriptor().getControllerDescription().getAppointment().getStart());
-        this.spnDurationHours.setValue(getHoursFromDuration(getViewDescriptor().getControllerDescription().getAppointment().getDuration().toMinutes()));
-        this.spnDurationMinutes.setValue(getMinutesFromDuration(getViewDescriptor().getControllerDescription().getAppointment().getDuration().toMinutes()));
-        this.txaNotes.setText(getViewDescriptor().getControllerDescription().getAppointment().getNotes());
-        this.cmbSelectPatient.setSelectedItem(getViewDescriptor().getControllerDescription().getAppointment().getPatient());
+                getMyController().getDescriptor().getControllerDescription().getAppointment().getStart());
+        this.spnDurationHours.setValue(getHoursFromDuration(getMyController().getDescriptor()
+                .getControllerDescription().getAppointment().getDuration().toMinutes()));
+        this.spnDurationMinutes.setValue(getMinutesFromDuration(getMyController().getDescriptor()
+                .getControllerDescription().getAppointment().getDuration().toMinutes()));
+        this.txaNotes.setText(getMyController().getDescriptor().
+                getControllerDescription().getAppointment().getNotes());
+        this.cmbSelectPatient.setSelectedItem(getMyController().getDescriptor()
+                .getControllerDescription().getAppointment().getPatient());
 
         this.setTitle("Apppointment editor for " + day.format(ddMMyyyyFormat));
     }
 
     private void initialiseViewMode(){
-        if (getViewDescriptor().getControllerDescription().getViewMode().
+        if (getMyController().getDescriptor().getControllerDescription().getViewMode().
                 equals(ViewController.ViewMode.UPDATE))
             this.btnCreateUpdateAppointment.setText(UPDATE_BUTTON);
         else this.btnCreateUpdateAppointment.setText(CREATE_BUTTON);
@@ -321,16 +326,17 @@ public class ModalAppointmentEditorView extends View {
      */
     private void initialiseEntityDescriptorFromView(){
         //get the appointment with  which the view was initialised (in particular the appointment key)
-        getViewDescriptor().getViewDescription().setAppointment(
-                    getViewDescriptor().getControllerDescription().getAppointment());
+        getMyController().getDescriptor().getViewDescription().setAppointment(
+                    getMyController().getDescriptor().
+                            getControllerDescription().getAppointment());
 
-        getViewDescriptor().getViewDescription().getAppointment().setPatient((Patient)this.cmbSelectPatient.getSelectedItem());
+        getMyController().getDescriptor().getViewDescription().getAppointment().setPatient((Patient)this.cmbSelectPatient.getSelectedItem());
         
-        getViewDescriptor().getViewDescription().getAppointment().
+        getMyController().getDescriptor().getViewDescription().getAppointment().
                 setStart((LocalDateTime)this.cmbSelectStartTime.getSelectedItem());
-        getViewDescriptor().getViewDescription().getAppointment().
+        getMyController().getDescriptor().getViewDescription().getAppointment().
                 setDuration(getDurationFromView());
-        getViewDescriptor().getViewDescription().getAppointment().
+        getMyController().getDescriptor().getViewDescription().getAppointment().
                 setNotes(this.txaNotes.getText());
     }
     private Duration getDurationFromView(){
@@ -344,12 +350,14 @@ public class ModalAppointmentEditorView extends View {
     private void initialiseViewFromED(){
         DateTimeFormatter hhmmFormat = DateTimeFormatter.ofPattern("HH:mm");
         //this.spnStartTime.setValue(getViewDescriptor().getAppointment().getData().getStart().format(hhmmFormat)); 
-        this.spnDurationHours.setValue(getHoursFromDuration(getViewDescriptor().getControllerDescription().getAppointment().getDuration().toMinutes()));
-        this.spnDurationMinutes.setValue(getMinutesFromDuration(getViewDescriptor().getControllerDescription().getAppointment().getDuration().toMinutes()));
-        this.txaNotes.setText(getViewDescriptor().getControllerDescription().getAppointment().getNotes());
+        this.spnDurationHours.setValue(getHoursFromDuration(getMyController().getDescriptor().getControllerDescription().getAppointment().getDuration().toMinutes()));
+        this.spnDurationMinutes.setValue(getMinutesFromDuration(getMyController().getDescriptor().getControllerDescription().getAppointment().getDuration().toMinutes()));
+        this.txaNotes.setText(getMyController().getDescriptor().getControllerDescription().getAppointment().getNotes());
         populatePatientSelector(this.cmbSelectPatient);
-        if (getViewDescriptor().getControllerDescription().getAppointment().getPatient().getIsKeyDefined()){
-            this.cmbSelectPatient.setSelectedItem(getViewDescriptor().getControllerDescription().getAppointment().getPatient());
+        if (getMyController().getDescriptor().getControllerDescription().
+                getAppointment().getPatient().getIsKeyDefined()){
+            this.cmbSelectPatient.setSelectedItem(getMyController().
+                    getDescriptor().getControllerDescription().getAppointment().getPatient());
         }
     }
     private Integer getHoursFromDuration(long duration){
@@ -362,7 +370,7 @@ public class ModalAppointmentEditorView extends View {
         DefaultComboBoxModel<Patient> model = 
                 new DefaultComboBoxModel<>();
         ArrayList<Patient> patients = 
-                getViewDescriptor().getControllerDescription().getPatients();
+                getMyController().getDescriptor().getControllerDescription().getPatients();
         Iterator<Patient> it = patients.iterator();
         while (it.hasNext()){
             Patient patient = it.next();
@@ -579,14 +587,14 @@ public class ModalAppointmentEditorView extends View {
         * check if a non zero duration value has been defined
         * check if no notes have been defined if still ok to save appointment
         */
-        if (getViewDescriptor().getViewDescription().getAppointment().getPatient()== null){
+        if (getMyController().getDescriptor().getViewDescription().getAppointment().getPatient()== null){
             JOptionPane.showMessageDialog(this, "A patient has not been selected for this appointment");
         }
-        else if (getViewDescriptor().getControllerDescription().getAppointment().getDuration().isZero()){
+        else if (getMyController().getDescriptor().getControllerDescription().getAppointment().getDuration().isZero()){
             JOptionPane.showMessageDialog(this, "Defined duration for appointment must be longer than zero minutes");
         }
         else {
-            if (getViewDescriptor().getViewDescription().getAppointment().getNotes().isEmpty()){
+            if (getMyController().getDescriptor().getViewDescription().getAppointment().getNotes().isEmpty()){
                 String[] options = {"Yes", "No"};
                 OKToSaveAppointment = JOptionPane.showOptionDialog(this,
                     "No notes defined for appointment. Save anyway?",null,
@@ -597,7 +605,7 @@ public class ModalAppointmentEditorView extends View {
                     null);
             }
             if (OKToSaveAppointment==JOptionPane.YES_OPTION){
-                switch (getViewDescriptor().getControllerDescription().getViewMode()){
+                switch (getMyController().getDescriptor().getControllerDescription().getViewMode()){
                     case CREATE:
                         evt = new ActionEvent(ModalAppointmentEditorView.this,
                             ActionEvent.ACTION_PERFORMED,

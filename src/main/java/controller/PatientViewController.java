@@ -31,22 +31,12 @@ import javax.swing.JOptionPane;
  * @author colin
  */
 public class PatientViewController extends ViewController {
-    private ActionListener myController = null;
     private PropertyChangeSupport pcSupportForView = null;
-    //private PropertyChangeSupport pcSupportForPatientSelector = null;
     private PropertyChangeEvent pcEvent = null;
     private View view = null;
     private View view2 = null;
     DesktopView desktopView = null;
-    private Descriptor oldEntityDescriptor = new Descriptor();
     private String message = null;
-
-    private Descriptor getOldEntityDescriptor(){
-        return this.oldEntityDescriptor;
-    }
-    private void setOldEntityDescriptor(Descriptor e){
-        this.oldEntityDescriptor = e;
-    }
 
     private void doPrimaryViewActionRequest(ActionEvent e){
         ActionEvent actionEvent = null;
@@ -58,14 +48,14 @@ public class PatientViewController extends ViewController {
                         this,ActionEvent.ACTION_PERFORMED,
                         ViewController.DesktopViewControllerActionEvent.
                                 VIEW_CONTROLLER_ACTIVATED_NOTIFICATION.toString());
-                this.myController.actionPerformed(actionEvent);
+                this.getMyController().actionPerformed(actionEvent);
                 break;
             case VIEW_CHANGED_NOTIFICATION:
                 actionEvent = new ActionEvent(
                         this,ActionEvent.ACTION_PERFORMED,
                         ViewController.DesktopViewControllerActionEvent.
                                 VIEW_CONTROLLER_CHANGED_NOTIFICATION.toString());
-                this.myController.actionPerformed(actionEvent);
+                this.getMyController().actionPerformed(actionEvent);
                 break;
             case APPOINTMENT_VIEW_CONTROLLER_REQUEST: //on selection of row in appointment history table
                 doAppointmentViewControllerRequest();
@@ -98,9 +88,9 @@ public class PatientViewController extends ViewController {
                     patient = new Patient();
                     patient.setScope(Scope.ALL);
                     patient.read();
-                    getControllerDescriptor().getControllerDescription().setPatients(patient.get());
+                    getDescriptor().getControllerDescription().setPatients(patient.get());
                     View.setViewer(View.Viewer.PATIENT_SELECTION_VIEW);
-                    this.view2 = View.factory(this, getControllerDescriptor(), this.desktopView);
+                    this.view2 = View.factory(this, getDescriptor(), this.desktopView);
                 }
                 catch (StoreException ex){
                     String message = ex.getMessage();
@@ -163,11 +153,11 @@ public class PatientViewController extends ViewController {
  -- the forwarded request references the Patient VC's EntityDescriptorFromView which contains details of the selected appointment for this patient; and thus the appointment schedule requested
      */
     private void doAppointmentViewControllerRequest(){  
-        setEntityDescriptorFromView(view.getViewDescriptor());
+        //setEntityDescriptorFromView(view.getViewDescriptor());
         ActionEvent actionEvent = new ActionEvent(
             this,ActionEvent.ACTION_PERFORMED,
             ViewController.PatientViewControllerActionEvent.APPOINTMENT_VIEW_CONTROLLER_REQUEST.toString());
-        getMyController().actionPerformed(actionEvent);
+        this.getMyController().actionPerformed(actionEvent);
     }
     
     /**
@@ -179,12 +169,12 @@ public class PatientViewController extends ViewController {
             this,ActionEvent.ACTION_PERFORMED,
             ViewController.DesktopViewControllerActionEvent.
                     VIEW_CONTROLLER_CLOSE_NOTIFICATION.toString());
-        getMyController().actionPerformed(actionEvent); 
+        this.getMyController().actionPerformed(actionEvent); 
     }
     
     private void doPatientCreateRequest(){
-        setEntityDescriptorFromView(view.getViewDescriptor());
-        Patient patient = getDescriptorFromView().getViewDescription().getPatient();
+        //setEntityDescriptorFromView(view.getViewDescriptor());
+        Patient patient = getDescriptor().getViewDescription().getPatient();
         if (!patient.getIsKeyDefined()){
             try{
                 patient.insert();
@@ -192,23 +182,23 @@ public class PatientViewController extends ViewController {
                 patient = patient.read();
                 patient.setScope(Entity.Scope.ALL);
                 patient.read();
-                getControllerDescriptor().getControllerDescription().setPatients(patient.get());
+                getDescriptor().getControllerDescription().setPatients(patient.get());
                 firePropertyChangeEvent(
                         ViewController.PatientViewControllerPropertyChangeEvent.
                             PATIENTS_RECEIVED.toString(),
                         view,
                         this,
                         null,
-                        getControllerDescriptor()
+                        null
                 );
-                getControllerDescriptor().getControllerDescription().setPatient(patient);
+                getDescriptor().getControllerDescription().setPatient(patient);
                 firePropertyChangeEvent(
                         ViewController.PatientViewControllerPropertyChangeEvent.
                             PATIENT_RECEIVED.toString(),
                         view,
                         this,
                         null,
-                        getControllerDescriptor()
+                        null
                 );
                 
             }catch (StoreException ex){
@@ -223,16 +213,16 @@ public class PatientViewController extends ViewController {
     }
     
     private void doPatientRecoverySelectionRequest(ActionEvent e){
-        setEntityDescriptorFromView(((View)e.getSource()).getViewDescriptor());
+        //setEntityDescriptorFromView(((View)e.getSource()).getViewDescriptor());
         Patient patient = null;
         ArrayList<Patient> patients = null;
         try{
             patient = new Patient();
             patient.setScope(Scope.DELETED);
             patient = patient.read();
-            getDescriptorFromView().getControllerDescription().setPatients(patient.get());
+            getDescriptor().getControllerDescription().setPatients(patient.get());
             View.setViewer(View.Viewer.PATIENT_RECOVERY_SELECTION_VIEW);
-            this.view2 = View.factory(this, getControllerDescriptor(), this.desktopView);
+            this.view2 = View.factory(this, getDescriptor(), this.desktopView);
         }
         catch (StoreException ex){
             String message = ex.getMessage();
@@ -241,8 +231,8 @@ public class PatientViewController extends ViewController {
     }
     
     private void doPatientDeleteRequest(){
-        setEntityDescriptorFromView(view.getViewDescriptor()); 
-        Patient patient = getDescriptorFromView().getViewDescription().getPatient();
+        //setEntityDescriptorFromView(view.getViewDescriptor()); 
+        Patient patient = getDescriptor().getViewDescription().getPatient();
         if (patient.getIsKeyDefined()){
             try{
                 patient.setScope(Scope.SINGLE);
@@ -269,8 +259,8 @@ public class PatientViewController extends ViewController {
     }
     
     private void doPatientUpdateRequest(){
-        setEntityDescriptorFromView(view.getViewDescriptor()); 
-        Patient patient = getDescriptorFromView().getViewDescription().getPatient();
+        //setEntityDescriptorFromView(view.getViewDescriptor()); 
+        Patient patient = getDescriptor().getViewDescription().getPatient();
         if (patient.getIsKeyDefined()){
             try{
                 patient.update();
@@ -278,23 +268,23 @@ public class PatientViewController extends ViewController {
                 patient.read();
                 patient.setScope(Entity.Scope.ALL);
                 patient.read();
-                getControllerDescriptor().getControllerDescription().setPatients(patient.get());
+                getDescriptor().getControllerDescription().setPatients(patient.get());
                 firePropertyChangeEvent(
                         ViewController.PatientViewControllerPropertyChangeEvent.
                             PATIENTS_RECEIVED.toString(),
                         view,
                         this,
                         null,
-                        getControllerDescriptor()
+                        getDescriptor()
                 );
-                getControllerDescriptor().getControllerDescription().setPatient(patient);
+                getDescriptor().getControllerDescription().setPatient(patient);
                 firePropertyChangeEvent(
                         ViewController.PatientViewControllerPropertyChangeEvent.
                             PATIENT_RECEIVED.toString(),
                         view,
                         this,
                         null,
-                        getControllerDescriptor()
+                        getDescriptor()
                 );
             }catch (StoreException ex){
                 displayErrorMessage(ex.getMessage() +"\n"
@@ -327,8 +317,8 @@ public class PatientViewController extends ViewController {
      */
     private void doPatientRecoverRequest(ActionEvent e){
         String errorLog = "";
-        setEntityDescriptorFromView(((View)e.getSource()).getViewDescriptor()); 
-        Patient patient = getDescriptorFromView().getViewDescription().getPatient();
+        //setEntityDescriptorFromView(((View)e.getSource()).getViewDescriptor()); 
+        Patient patient = getDescriptor().getViewDescription().getPatient();
         
         try{
             ((View)e.getSource()).setClosed(true);
@@ -368,39 +358,39 @@ public class PatientViewController extends ViewController {
                 patient.setScope(Scope.DELETED);
                 patient.recover();
                 if (collisionFromAppointmentRecovery) {
-                    getControllerDescriptor().getControllerDescription().setError(errorLog);
+                    getDescriptor().getControllerDescription().setError(errorLog);
                     firePropertyChangeEvent(
                             ViewController.PatientViewControllerPropertyChangeEvent.
                                     PATIENT_VIEW_CONTROLLER_ERROR_RECEIVED.toString(),
                             getView(),
                             this,
                             null,
-                            getControllerDescriptor()
+                            getDescriptor()
                     );
                 }
                 //fetch the recovered patient for the view
                 patient.setScope(Scope.SINGLE);
                 patient.read();
-                getControllerDescriptor().getControllerDescription().setPatient(patient);
+                getDescriptor().getControllerDescription().setPatient(patient);
                 firePropertyChangeEvent(
                        ViewController.PatientViewControllerPropertyChangeEvent.
                         PATIENT_RECEIVED.toString(),
                         view,
                         this,
                         null,
-                        getControllerDescriptor()
+                        getDescriptor()
                 );
                 //fetch the all the undeleted patients on the system for the view
                 patient.setScope(Scope.ALL);
                 patient.read();
-                getControllerDescriptor().getControllerDescription().setPatients(patient.get());
+                getDescriptor().getControllerDescription().setPatients(patient.get());
                 firePropertyChangeEvent(
                         ViewController.PatientViewControllerPropertyChangeEvent.
                                 PATIENTS_RECEIVED.toString(),
                         view,
                         this,
                         null,
-                        getControllerDescriptor()     
+                        getDescriptor()     
                 );
                 firePropertyChangeEvent(
                         ViewController.DesktopViewControllerPropertyChangeEvent.
@@ -420,20 +410,20 @@ public class PatientViewController extends ViewController {
     }
 
     private void doPatientRequest(ActionEvent e){
-        setEntityDescriptorFromView(((View)e.getSource()).getViewDescriptor());
-        Patient patient = getDescriptorFromView().getViewDescription().getPatient();
+        //setEntityDescriptorFromView(((View)e.getSource()).getViewDescriptor());
+        Patient patient = getDescriptor().getViewDescription().getPatient();
         if (patient.getIsKeyDefined()){
             try{
                 patient.setScope(Scope.SINGLE);
                 Patient p = patient.read();
-                getControllerDescriptor().getControllerDescription().setPatient(p);
+                getDescriptor().getControllerDescription().setPatient(p);
                 firePropertyChangeEvent(
                        ViewController.PatientViewControllerPropertyChangeEvent.
                         PATIENT_RECEIVED.toString(),
                         view,
                         this,
                         null,
-                        getControllerDescriptor()
+                        getDescriptor()
                 );
             }catch (StoreException ex){
                 displayErrorMessage(ex.getMessage() + "\n"
@@ -449,20 +439,20 @@ public class PatientViewController extends ViewController {
     }
     
     private void doNullPatientRequest(){
-        initialiseNewEntityDescriptor();
+        //initialiseNewEntityDescriptor();
         Patient patient = new Patient();
         patient.setScope(Scope.ALL);
         try{
             patient.read();
-            getControllerDescriptor().getControllerDescription().setPatient(patient);
-            getControllerDescriptor().getControllerDescription().setPatients(patient.get()); 
+            getDescriptor().getControllerDescription().setPatient(patient);
+            getDescriptor().getControllerDescription().setPatients(patient.get()); 
             firePropertyChangeEvent(
                     ViewController.PatientViewControllerPropertyChangeEvent.
                                 NULL_PATIENT_RECEIVED.toString(),
                     getView(),
                     this,
                     null,
-                    getControllerDescriptor()
+                    null
             );
         }catch(StoreException ex){
             String error = ex.getMessage() +"\n"
@@ -472,34 +462,17 @@ public class PatientViewController extends ViewController {
         }
     }
     
-    /**
-     * update old entity descriptor with previous new entity descriptor 
-     * re-initialise the new entity descriptor, but copy over the old selected day
-     */
-    private void initialiseNewEntityDescriptor(){
-        setOldEntityDescriptor(getControllerDescriptor());
-        setNewEntityDescriptor(new Descriptor());
-        getControllerDescriptor().getViewDescription().setDay(getOldEntityDescriptor().getViewDescription().getDay());
-    }
-    private ActionListener getMyController(){
-        return this.myController;
-    }
-    private void setMyController(ActionListener myController){
-        this.myController = myController;
-    }
-    
-    public PatientViewController(DesktopViewController controller, DesktopView desktopView)throws StoreException{
+    public PatientViewController(ActionListener controller, 
+            DesktopView desktopView)throws StoreException{
         this.desktopView = desktopView;
         setMyController(controller);
         pcSupportForView = new PropertyChangeSupport(this);
-        setNewEntityDescriptor(new Descriptor());
-        this.oldEntityDescriptor = new Descriptor();
         Patient patient = new Patient();
         patient.setScope(Scope.ALL);
         patient.read();
-        getControllerDescriptor().getControllerDescription().setPatients(patient.get());
+        getDescriptor().getControllerDescription().setPatients(patient.get());
         View.setViewer(View.Viewer.PATIENT_VIEW);
-        this.view = View.factory(this, getControllerDescriptor(), desktopView);
+        this.view = View.factory(this, getDescriptor(), desktopView);
         super.centreViewOnDesktop(desktopView, view);
         
         this.view.addInternalFrameListeners(); 
@@ -519,9 +492,9 @@ public class PatientViewController extends ViewController {
                     //Patient patient = entityDescriptor.getAppointment().getPatient();
                     Patient patient = descriptor.getControllerDescription().getPatient();
                     if (patient != null){
-                        if (getControllerDescriptor().getControllerDescription().getPatient()!=null){
-                            if (getControllerDescriptor().getControllerDescription().getPatient().getIsKeyDefined()){
-                                if (patient.equals(getControllerDescriptor().getControllerDescription().getPatient())){    
+                        if (getDescriptor().getControllerDescription().getPatient()!=null){
+                            if (getDescriptor().getControllerDescription().getPatient().getIsKeyDefined()){
+                                if (patient.equals(getDescriptor().getControllerDescription().getPatient())){    
                                         patient.setScope(Scope.SINGLE);
                                         descriptor.getControllerDescription().setPatient(patient.read());
                                         firePropertyChangeEvent(

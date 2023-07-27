@@ -6,6 +6,7 @@
 package view.views.factory_methods;
 
 import controller.Descriptor;
+import controller.ViewController;
 import view.views.DesktopView;
 import view.View;
 import view.views.modal_internal_frame_views.ModalPatientNotificationEditorView;
@@ -16,7 +17,7 @@ import java.awt.event.ActionListener;
  * @author colin
  */
 public class ModalPatientNotificationEditorFactoryMethod extends ViewFactoryMethod{
-    public ModalPatientNotificationEditorFactoryMethod(ActionListener controller, Descriptor ed, DesktopView dtView){
+    public ModalPatientNotificationEditorFactoryMethod(ViewController controller, Descriptor ed, DesktopView dtView){
         initialiseView(controller, ed, dtView);
     }
     
@@ -27,7 +28,7 @@ public class ModalPatientNotificationEditorFactoryMethod extends ViewFactoryMeth
         
     }
     
-    private void initialiseView(ActionListener controller, Descriptor ed, DesktopView dtView){
+    private void initialiseView(ViewController controller, Descriptor ed, DesktopView dtView){
         this.setDesktopView(dtView);
         this.setDescriptor(ed);
         this.setViewController(controller);

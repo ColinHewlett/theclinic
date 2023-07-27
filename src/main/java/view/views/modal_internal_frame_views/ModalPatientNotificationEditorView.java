@@ -53,8 +53,6 @@ import javax.swing.table.TableColumnModel;
  */
 public class ModalPatientNotificationEditorView extends View {
     private View.Viewer myViewType = null;
-    private Descriptor entityDescriptor = null;
-    private ActionListener myController = null;
     private ViewController.ViewMode viewMode = null;
     
     private void populatePatientNotificationHistoryTable(ArrayList<Notification> patientNotifications){
@@ -74,7 +72,7 @@ public class ModalPatientNotificationEditorView extends View {
      */
     private void doReceivedPatientNotifications(){
         ArrayList<Notification> patientNotifications =
-                getViewDescriptor().getControllerDescription().getPatientNotifications();
+                getMyController().getDescriptor().getControllerDescription().getPatientNotifications();
         populatePatientNotificationHistoryTable(patientNotifications);
     }
     
@@ -84,7 +82,7 @@ public class ModalPatientNotificationEditorView extends View {
      * 
      */
     private void doReceivedPatientNotification(){
-        Notification patientNotification = getViewDescriptor().getControllerDescription().getPatientNotification();
+        Notification patientNotification = getMyController().getDescriptor().getControllerDescription().getPatientNotification();
         if (patientNotification==null) {
             this.cmbSelectPatient.setSelectedIndex(-1);
             this.rdbNotificationUnactioned.setSelected(false);
@@ -107,7 +105,7 @@ public class ModalPatientNotificationEditorView extends View {
         DefaultComboBoxModel<Patient> model = 
                 new DefaultComboBoxModel<>();
         ArrayList<Patient> patients = 
-                getViewDescriptor().getControllerDescription().getPatients();
+                getMyController().getDescriptor().getControllerDescription().getPatients();
         Iterator<Patient> it = patients.iterator();
         while (it.hasNext()){
             Patient patient = it.next();
@@ -192,11 +190,10 @@ public class ModalPatientNotificationEditorView extends View {
      * @param entityDescriptor
      * @param desktop 
      */
-    public ModalPatientNotificationEditorView(View.Viewer myViewType, ActionListener myController,
+    public ModalPatientNotificationEditorView(View.Viewer myViewType, ViewController myController,
             Descriptor entityDescriptor, 
             JDesktopPane desktop) {//ViewMode arg
         super("Patient notification editor");
-        setViewDescriptor(entityDescriptor);
         setMyController(myController);
         setMyViewType(myViewType);
         initComponents();
@@ -233,7 +230,7 @@ public class ModalPatientNotificationEditorView extends View {
     
     @Override
     public void propertyChange(PropertyChangeEvent e){
-        setViewDescriptor((Descriptor)e.getNewValue());
+        //setViewDescriptor((Descriptor)e.getNewValue());
         ViewController.PatientNotificationViewControllerPropertyChangeEvent propertyName =
                 ViewController.PatientNotificationViewControllerPropertyChangeEvent.valueOf(e.getPropertyName());
         switch (propertyName){
@@ -578,14 +575,21 @@ public class ModalPatientNotificationEditorView extends View {
             if (getViewMode().equals(ViewController.ViewMode.Create))
                 patientNotification = new Notification();
             else
-                patientNotification = getViewDescriptor().getControllerDescription().getPatientNotification();
-            patientNotification.setPatient((Patient)this.cmbSelectPatient.getSelectedItem());
-            patientNotification.setNotificationDate(this.dpNotificationDate.getDate());
-            patientNotification.setNotificationText(this.txaNotificationText.getText());
-            patientNotification.setIsActioned(rdbNotificationActioned.isSelected());
-            getViewDescriptor().getViewDescription().setPatientNotification(patientNotification);
+                patientNotification = getMyController().
+                        getDescriptor().getControllerDescription().getPatientNotification();
+            patientNotification.setPatient(
+                    (Patient)this.cmbSelectPatient.getSelectedItem());
+            patientNotification.setNotificationDate(
+                    this.dpNotificationDate.getDate());
+            patientNotification.setNotificationText(
+                    this.txaNotificationText.getText());
+            patientNotification.setIsActioned(
+                    rdbNotificationActioned.isSelected());
+            getMyController().getDescriptor().getViewDescription().
+                    setPatientNotification(patientNotification);
         }
-        else getViewDescriptor().getViewDescription().setPatientNotification(null);
+        else getMyController().getDescriptor().getViewDescription().
+                setPatientNotification(null);
         return result;
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables

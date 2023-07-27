@@ -32,8 +32,6 @@ public class ImportProgressView extends View {
     
     
     private Mode mode = Mode.NONE;
-    private ActionListener myController = null;
-    private Descriptor entityDescriptor = null;
     private InternalFrameAdapter internalFrameAdapter = null;
     private View.Viewer myViewType = null;
     
@@ -149,7 +147,8 @@ public class ImportProgressView extends View {
         ActionEvent actionEvent = new ActionEvent(this, 
                 ActionEvent.ACTION_PERFORMED,
                 ViewController.ImportProgressViewControllerActionEvent.IMPORT_EXPORT_START_REQUEST.toString());
-        this.getMyController().actionPerformed(actionEvent);
+        getMyController().actionPerformed(actionEvent);
+        
 
     }//GEN-LAST:event_btnStartActionPerformed
 
@@ -181,11 +180,11 @@ public class ImportProgressView extends View {
      * @param entityDescriptor
      * @param desktopPane 
      */
-    public ImportProgressView(View.Viewer myViewType,ActionListener myController,
+    public ImportProgressView(View.Viewer myViewType,ViewController myController,
             Descriptor entityDescriptor, JDesktopPane desktopPane) {
         super("Data importer view");
         setMyViewType(myViewType);
-        setViewDescriptor(entityDescriptor);
+        //setViewDescriptor(entityDescriptor);
         setMyController(myController);
         initComponents();
         //centreViewOnDesktop(desktopPane,this);
@@ -224,12 +223,7 @@ public class ImportProgressView extends View {
         btnStart.setText(ImportProgressView.IMPORT_START_PROCESS_HEADER);
         this.setTitle(ImportProgressView.IMPORT_TITLE_HEADER);
     }
-    
-    @Override 
-    public Descriptor getViewDescriptor(){
-        return entityDescriptor;   
-    }
-    
+   
     @Override
     public View.Viewer getMyViewType(){
         return this.myViewType;

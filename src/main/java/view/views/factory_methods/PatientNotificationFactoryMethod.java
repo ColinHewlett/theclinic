@@ -6,6 +6,7 @@
 package view.views.factory_methods;
 
 import controller.Descriptor;
+import controller.ViewController;
 import view.views.DesktopView;
 import view.View;
 import view.views.PatientNotificationView;
@@ -16,7 +17,7 @@ import java.awt.event.ActionListener;
  * @author colin
  */
 public class PatientNotificationFactoryMethod extends ViewFactoryMethod{
-    public PatientNotificationFactoryMethod(ActionListener controller, 
+    public PatientNotificationFactoryMethod(ViewController controller, 
             Descriptor ed, 
             DesktopView dtView){   
         initialiseView(controller, ed, dtView);   
@@ -30,7 +31,7 @@ public class PatientNotificationFactoryMethod extends ViewFactoryMethod{
         
     }
     
-    private void initialiseView(ActionListener controller, 
+    private void initialiseView(ViewController controller, 
             Descriptor ed, 
             DesktopView dtView){
         this.setDesktopView(dtView);

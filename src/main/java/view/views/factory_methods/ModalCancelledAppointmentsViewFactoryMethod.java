@@ -5,6 +5,7 @@
 package view.views.factory_methods;
 
 import controller.Descriptor;
+import controller.ViewController;
 import view.View;
 import view.views.DesktopView;
 import view.views.modal_internal_frame_views.ModalCancelledAppointmentsView;
@@ -16,7 +17,7 @@ import java.awt.event.ActionListener;
  */
 public class ModalCancelledAppointmentsViewFactoryMethod extends ViewFactoryMethod{
     public ModalCancelledAppointmentsViewFactoryMethod(
-            ActionListener controller, 
+            ViewController controller, 
             Descriptor ed, 
             DesktopView dtView){
         initialiseView(controller, ed, dtView);
@@ -26,14 +27,14 @@ public class ModalCancelledAppointmentsViewFactoryMethod extends ViewFactoryMeth
     public View makeView(View.Viewer myViewType){
         return new ModalCancelledAppointmentsView(
                 myViewType, 
-                this.getViewController(), 
+                getViewController(), 
                 this.getDescriptor(), 
                 getDesktopView().getDeskTop());
         
     }
     
     private void initialiseView(
-            ActionListener controller, 
+            ViewController controller, 
             Descriptor ed, 
             DesktopView dtView){
         this.setDesktopView(dtView);

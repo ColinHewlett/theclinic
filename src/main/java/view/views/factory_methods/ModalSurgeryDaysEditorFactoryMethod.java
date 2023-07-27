@@ -8,6 +8,7 @@ package view.views.factory_methods;
 import view.views.modal_internal_frame_views.ModalSurgeryDaysEditorView;
 import view.views.DesktopView;
 import controller.Descriptor;
+import controller.ViewController;
 import view.*;
 import java.awt.event.ActionListener;
 /**
@@ -16,7 +17,7 @@ import java.awt.event.ActionListener;
  */
 public class ModalSurgeryDaysEditorFactoryMethod extends ViewFactoryMethod{
     
-    public ModalSurgeryDaysEditorFactoryMethod(ActionListener viewController, 
+    public ModalSurgeryDaysEditorFactoryMethod(ViewController viewController, 
             Descriptor ed, DesktopView dtView){
         initialiseView(viewController, ed, dtView);
     }
@@ -27,7 +28,7 @@ public class ModalSurgeryDaysEditorFactoryMethod extends ViewFactoryMethod{
                 getDescriptor(), getDesktopView().getDeskTop());
     }
     
-    private void initialiseView(ActionListener controller, Descriptor ed, DesktopView dtView){
+    private void initialiseView(ViewController controller, Descriptor ed, DesktopView dtView){
         this.setDesktopView(dtView);
         this.setDescriptor(ed);
         this.setViewController(controller);

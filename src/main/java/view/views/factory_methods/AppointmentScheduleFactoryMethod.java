@@ -6,8 +6,9 @@
 package view.views.factory_methods;
 
 import controller.Descriptor;
+import controller.ViewController;
 import view.views.DesktopView;
-import view.views.AppointmentScheduleView;
+import view.views.ScheduleView;
 import view.View;
 import java.awt.event.ActionListener;
 
@@ -17,16 +18,16 @@ import java.awt.event.ActionListener;
  */
 public class AppointmentScheduleFactoryMethod extends ViewFactoryMethod{
 
-    public AppointmentScheduleFactoryMethod(ActionListener controller, Descriptor ed, DesktopView dtView){
+    public AppointmentScheduleFactoryMethod(ViewController controller, Descriptor ed, DesktopView dtView){
         initialiseView(controller, ed, dtView);
     }
     
     @Override
     public View makeView(View.Viewer myViewType){
-        return new AppointmentScheduleView(myViewType, this.getViewController(), this.getDescriptor());
+        return new ScheduleView(myViewType, this.getViewController(), this.getDescriptor());
     }
     
-    private void initialiseView(ActionListener controller, Descriptor ed, DesktopView dtView){
+    private void initialiseView(ViewController controller, Descriptor ed, DesktopView dtView){
         this.setDesktopView(dtView);
         this.setDescriptor(ed);
         this.setViewController(controller);

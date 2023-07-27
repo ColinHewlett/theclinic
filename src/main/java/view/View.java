@@ -25,6 +25,7 @@ import view.views.interfaces.IViewInternalFrameListener;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeListener;
 import java.time.format.DateTimeFormatter;
+import javax.swing.JDesktopPane;
 import javax.swing.JInternalFrame;
 import javax.swing.JOptionPane;
 
@@ -34,13 +35,14 @@ import javax.swing.JOptionPane;
  */
 public abstract class View extends JInternalFrame
                            implements PropertyChangeListener,IView, IViewInternalFrameListener{
+    private JDesktopPane desktop = null;
     private ViewController.ViewMode viewMode;
     private static Viewer viewer = null;
     private Boolean viewChangedSinceLastSaved = false;
     private Boolean isViewInitialised = false;
     
     private Viewer myViewType = null;
-    private ActionListener myController = null;
+    private ViewController myController = null;
     private Descriptor viewDescriptor = null;
     
     public Boolean getIsViewInitialised(){
@@ -56,7 +58,7 @@ public abstract class View extends JInternalFrame
     }
     
     public static enum Viewer { 
-        APPOINTMENT_SCHEDULE_VIEW,
+        SCHEDULE_VIEW,
         APPOINTMENT_CREATOR_VIEW,
         APPOINTMENT_CREATOR_EDITOR_VIEW,
         APPOINTMENT_EDITOR_VIEW,
@@ -88,10 +90,10 @@ public abstract class View extends JInternalFrame
         viewer = value;
     }
 
-    public static View factory(ActionListener controller, Descriptor ed, DesktopView dtView){
+    public static View factory(ViewController controller, Descriptor ed, DesktopView dtView){
         View result = null;
         switch(viewer){
-            case APPOINTMENT_SCHEDULE_VIEW:
+            case SCHEDULE_VIEW:
                 result = new AppointmentScheduleFactoryMethod(controller, ed, dtView).makeView(viewer);
                 break;
             case CANCELLED_APPOINTMENTS_VIEW:
@@ -138,7 +140,7 @@ public abstract class View extends JInternalFrame
                 result = new ModalSurgeryDaysEditorFactoryMethod(controller, ed, dtView).makeView(viewer);
                 break;
             case UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_VIEW:
-                result = new ModalUnbookableAppointmentSlotEditorFactoryMethod(controller, ed, dtView).makeView(viewer);
+                result = new ModalUnbookableAppointmentSlotEditorFactoryMethod(controller, dtView).makeView(viewer);
                 break;
             default:
                 JOptionPane.showMessageDialog(dtView, 
@@ -153,24 +155,29 @@ public abstract class View extends JInternalFrame
         return myViewType;
     }
     
-    protected ActionListener getMyController(){
-        return myController;
+    public JDesktopPane getDesktop(){
+        return desktop;
     }
     
+    public void setDesktop(JDesktopPane value){
+        desktop = value;
+    }
+
+    /*
     public Descriptor getViewDescriptor(){
         return viewDescriptor;
     }
-    
+    */
     public void setMyViewType(Viewer value){
         myViewType = value;
     }
-    
-    protected void setMyController(ActionListener value){
-        myController = value;
+
+    protected ViewController getMyController(){
+        return myController;
     }
     
-    public void setViewDescriptor(Descriptor value){
-        viewDescriptor = value;
+    protected void setMyController(ViewController value){
+        myController = value;
     }
     
     public void initialiseView(){

@@ -6,6 +6,7 @@
 package view.views.factory_methods;
 
 import controller.Descriptor;
+import controller.ViewController;
 import view.views.DesktopView;
 import view.views.modal_internal_frame_views.ModalEmptySlotScanConfigurationView;
 import view.View;
@@ -15,7 +16,7 @@ import java.awt.event.ActionListener;
  * @author colin
  */
 public class ModalEmptySlotScannerFactoryMethod extends ViewFactoryMethod{
-    public ModalEmptySlotScannerFactoryMethod(ActionListener viewController, 
+    public ModalEmptySlotScannerFactoryMethod(ViewController viewController, 
             Descriptor ed, DesktopView dtView ){
         initialiseView(viewController, ed,dtView);  
     }
@@ -26,7 +27,7 @@ public class ModalEmptySlotScannerFactoryMethod extends ViewFactoryMethod{
         getDescriptor(), getDesktopView().getDeskTop());  
     }
     
-    private void initialiseView(ActionListener controller, Descriptor ed, DesktopView dtView){
+    private void initialiseView(ViewController controller, Descriptor ed, DesktopView dtView){
         this.setDesktopView(dtView);
         this.setDescriptor(ed);
         this.setViewController(controller);

@@ -52,18 +52,17 @@ import java.time.Duration;
 public class ModalCancelledAppointmentsView extends View{
     private final JScrollPane jScrollPane1 = new javax.swing.JScrollPane();
     private JTable tblCancelledAppointments = new JTable();
-    private JButton btnCloseCancelledAppointmentsView = new JButton("Close cancelled appointments view");
-    private JButton btnUncancelSelectedAppointment = new JButton("Uncancel selected appointment");
+    private final JButton btnCloseCancelledAppointmentsView = new JButton("Close cancelled appointments view");
+    private final JButton btnUncancelSelectedAppointment = new JButton("Uncancel selected appointment");
     
     public ModalCancelledAppointmentsView(
             View.Viewer myViewType, 
-            ActionListener myController, 
+            ViewController myController, 
             Descriptor entityDescriptor,
             JDesktopPane desktop){
 
             super("Cancelled appointment view");
-            setViewDescriptor(entityDescriptor);
-            this.setMyController(myController);
+            setMyController(myController);
             this.setMyViewType(myViewType);
             initComponents(); 
             this.populateCancelledAppointmentsTable();
@@ -144,7 +143,7 @@ public class ModalCancelledAppointmentsView extends View{
                 (Appointments6ColumnTableModel)tblCancelledAppointments.getModel();
         model.removeAllElements();
         Iterator<Appointment> it = 
-                getViewDescriptor().getControllerDescription().getAppointmentCancellations().iterator();
+                getMyController().getDescriptor().getControllerDescription().getAppointmentCancellations().iterator();
         while (it.hasNext()){
             model.addElement(it.next());
         }
@@ -165,7 +164,7 @@ public class ModalCancelledAppointmentsView extends View{
                         valueOf(e.getPropertyName());
         switch (event){
             case APPOINTMENTS_CANCELLED_RECEIVED:
-                setViewDescriptor((Descriptor)e.getNewValue());
+                //setViewDescriptor((Descriptor)e.getNewValue());
                 populateCancelledAppointmentsTable();
                 ActionEvent actionEvent = new ActionEvent(this, 
                 ActionEvent.ACTION_PERFORMED,
@@ -235,7 +234,7 @@ public class ModalCancelledAppointmentsView extends View{
     private void btnUncancelSelectedAppointmentActionPerformed(){
         int row = this.tblCancelledAppointments.getSelectedRow();
         if (row != -1){
-            getViewDescriptor().getViewDescription().setAppointment(
+            getMyController().getDescriptor().getViewDescription().setAppointment(
                     ((Appointments6ColumnTableModel)tblCancelledAppointments.
                             getModel()).getElementAt(row)); 
             ActionEvent actionEvent = new ActionEvent(this, 

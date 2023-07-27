@@ -45,12 +45,11 @@ public class ModalSurgeryDaysEditorView extends View {
     /**
      * Creates new form CalendarVetoPolicyEditorModalViewer
      */
-    public ModalSurgeryDaysEditorView(View.Viewer myViewType, ActionListener myController,
+    public ModalSurgeryDaysEditorView(View.Viewer myViewType, ViewController myController,
             Descriptor entityDescriptor, 
             JDesktopPane desktop) {//ViewMode arg
         super("Surgery days editor");
         setMyViewType(myViewType);
-        setViewDescriptor(entityDescriptor);
         setMyController(myController);
         
         initComponents();
@@ -133,7 +132,8 @@ public class ModalSurgeryDaysEditorView extends View {
     @Override
     public void initialiseView(){
         setTitle("Surgery days editor");
-        HashMap<DayOfWeek, Boolean> surgeryDays = getViewDescriptor().getControllerDescription().getSurgeryDaysAssignment();
+        HashMap<DayOfWeek, Boolean> surgeryDays = getMyController().
+                getDescriptor().getControllerDescription().getSurgeryDaysAssignment();
         for(Entry<DayOfWeek,Boolean> entry : surgeryDays.entrySet()){
             switch(entry.getKey()){
                 case MONDAY:
@@ -169,11 +169,12 @@ public class ModalSurgeryDaysEditorView extends View {
     
     @Override
     public void propertyChange(PropertyChangeEvent e){
-        setViewDescriptor((Descriptor)e.getNewValue());
+        //setViewDescriptor((Descriptor)e.getNewValue());
  
         if (e.getPropertyName().equals(
             ViewController.AppointmentScheduleViewControllerPropertyChangeEvent.APPOINTMENT_SCHEDULE_ERROR_RECEIVED.toString())){
-            ViewController.displayErrorMessage(getViewDescriptor().getControllerDescription().getError(),
+            ViewController.displayErrorMessage(getMyController().getDescriptor().
+                    getControllerDescription().getError(),
                                                "Appointment editor dialog error",
                                                JOptionPane.ERROR_MESSAGE);
         }
@@ -305,7 +306,8 @@ public class ModalSurgeryDaysEditorView extends View {
         surgeryDaysAssignmentValue.put(DayOfWeek.FRIDAY, this.chkFriday.isSelected());
         surgeryDaysAssignmentValue.put(DayOfWeek.SATURDAY, this.chkSaturday.isSelected()); 
         surgeryDaysAssignmentValue.put(DayOfWeek.SUNDAY, this.chkSunday.isSelected());
-        getViewDescriptor().getViewDescription().setSurgeryDaysAssignmentValue(surgeryDaysAssignmentValue);
+        getMyController().getDescriptor().getViewDescription().
+                setSurgeryDaysAssignmentValue(surgeryDaysAssignmentValue);
         
         ActionEvent actionEvent = new ActionEvent(this, 
                 ActionEvent.ACTION_PERFORMED,

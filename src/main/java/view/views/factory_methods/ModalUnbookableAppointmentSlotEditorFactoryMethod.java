@@ -5,6 +5,7 @@
 package view.views.factory_methods;
 
 import controller.Descriptor;
+import controller.ViewController;
 import java.awt.event.ActionListener;
 import view.View;
 import view.views.DesktopView;
@@ -17,23 +18,22 @@ import view.views.modal_internal_frame_views.ModalUnbookableAppointmentSlotEdito
 public class ModalUnbookableAppointmentSlotEditorFactoryMethod extends ViewFactoryMethod{
 
     public ModalUnbookableAppointmentSlotEditorFactoryMethod(
-            ActionListener controller, Descriptor ed, DesktopView dtView){
-        initialiseView(controller, ed, dtView);  
+            ViewController controller,DesktopView dtView){
+        factoryViewInitialisation(controller,dtView);  
     }
     
     @Override
     public View makeView(View.Viewer myViewType){
-        return new ModalUnbookableAppointmentSlotEditorView(
-                myViewType, 
-                this.getViewController(), 
-                this.getDescriptor(), 
-                getDesktopView().getDeskTop());
-        
+        View view = new ModalUnbookableAppointmentSlotEditorView(
+                        myViewType, 
+                        this.getViewController(), 
+                        getDesktopView().getDeskTop());
+        view.initialiseView();
+        return view;
     }
     
-    private void initialiseView(ActionListener controller, Descriptor ed, DesktopView dtView){
+    private void factoryViewInitialisation(ViewController controller, DesktopView dtView){
         this.setDesktopView(dtView);
-        this.setDescriptor(ed);
         this.setViewController(controller);
     }
     

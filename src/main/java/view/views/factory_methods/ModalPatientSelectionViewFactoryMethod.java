@@ -5,6 +5,7 @@
 package view.views.factory_methods;
 
 import controller.Descriptor;
+import controller.ViewController;
 import view.View;
 import view.views.modal_internal_frame_views.ModalPatientSelectionView;
 import view.views.DesktopView;
@@ -15,7 +16,7 @@ import java.awt.event.ActionListener;
  * @author colin
  */
 public class ModalPatientSelectionViewFactoryMethod extends ViewFactoryMethod{
-    public ModalPatientSelectionViewFactoryMethod(ActionListener controller, Descriptor ed, DesktopView dtView){
+    public ModalPatientSelectionViewFactoryMethod(ViewController controller, Descriptor ed, DesktopView dtView){
         initialiseView(controller, ed, dtView);
     }
     
@@ -26,7 +27,7 @@ public class ModalPatientSelectionViewFactoryMethod extends ViewFactoryMethod{
         
     }
     
-    private void initialiseView(ActionListener controller, Descriptor ed, DesktopView dtView){
+    private void initialiseView(ViewController controller, Descriptor ed, DesktopView dtView){
         this.setDesktopView(dtView);
         this.setDescriptor(ed);
         this.setViewController(controller);

@@ -19,14 +19,11 @@ import java.beans.PropertyChangeEvent;
 public class ImportProgressViewController extends ViewController{
     public static enum Entity{APPOINTMENT, PATIENT, NONE}
     private static enum Operation {EXPORT, IMPORT};
-    private Descriptor entityDescriptorFromView = null;
-    private Descriptor newEntityDescriptor = null;
     private View view = null;
     private Entity newEntity = Entity.NONE;
     private Entity oldEntity = Entity.NONE;
     private PropertyChangeSupport pcSupportForView = null;
     private PropertyChangeEvent pcEvent = null;
-    private ActionListener myController = null;
     private Operation operation = Operation.IMPORT;
     
     private Operation getOperation(){ 
@@ -52,19 +49,11 @@ public class ImportProgressViewController extends ViewController{
     private void setOldEntity(Entity entity){
         oldEntity = entity;
     }
-
-    private void setMyController(ActionListener myController){
-        this.myController = myController;
-    }
     
-    private ActionListener getMyController(){
-        return this.myController;
-    }
-    public ImportProgressViewController(DesktopViewController controller, DesktopView desktopView, Descriptor entityDescriptor){
+    public ImportProgressViewController(ActionListener controller, DesktopView desktopView, Descriptor entityDescriptor){
         View.setViewer(View.Viewer.EXPORT_PROGRESS_VIEW);
         this.setMyController(controller);
-        this.setNewEntityDescriptor(entityDescriptor);
-        this.view = View.factory(this, getControllerDescriptor(), desktopView);
+        this.view = View.factory(this, getDescriptor(), desktopView);
         this.view.addInternalFrameListeners();
         super.centreViewOnDesktop(desktopView, view);
         pcSupportForView = new PropertyChangeSupport(this);
@@ -74,11 +63,6 @@ public class ImportProgressViewController extends ViewController{
     @Override
     public void propertyChange(PropertyChangeEvent e){
         
-    }
-    
-    @Override
-    public Descriptor getDescriptorFromView(){
-        return entityDescriptorFromView;
     }
     
     private void doDesktopViewControllerAction(ActionEvent e){

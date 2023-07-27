@@ -6,6 +6,7 @@
 package view.views.factory_methods;
 
 import controller.Descriptor;
+import controller.ViewController;
 import view.views.DesktopView;
 import view.View;
 import java.awt.event.ActionListener;
@@ -15,16 +16,16 @@ import java.awt.event.ActionListener;
  * @author colin
  */
 public abstract class ViewFactoryMethod {
-    private ActionListener viewController = null;
+    private ViewController viewController = null;
     private Descriptor entityDescriptor = null;
     private DesktopView desktopView = null;
     protected abstract View makeView(View.Viewer viewType); 
 
-    public ActionListener getViewController(){
+    public ViewController getViewController(){
         return viewController;
     }
     
-    public void setViewController(ActionListener value){
+    public void setViewController(ViewController value){
         this.viewController = value;
     }
     
