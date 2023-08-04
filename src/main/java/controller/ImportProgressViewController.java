@@ -5,7 +5,7 @@
  */
 package controller;
 
-import view.views.DesktopView;
+import view.views.non_modal_views.DesktopView;
 import view.View;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -19,12 +19,16 @@ import java.beans.PropertyChangeEvent;
 public class ImportProgressViewController extends ViewController{
     public static enum Entity{APPOINTMENT, PATIENT, NONE}
     private static enum Operation {EXPORT, IMPORT};
-    private View view = null;
     private Entity newEntity = Entity.NONE;
     private Entity oldEntity = Entity.NONE;
     private PropertyChangeSupport pcSupportForView = null;
     private PropertyChangeEvent pcEvent = null;
     private Operation operation = Operation.IMPORT;
+    
+    @Override
+    public void propertyChange(PropertyChangeEvent ex){
+        
+    }
     
     private Operation getOperation(){ 
         return operation;
@@ -53,16 +57,7 @@ public class ImportProgressViewController extends ViewController{
     public ImportProgressViewController(ActionListener controller, DesktopView desktopView, Descriptor entityDescriptor){
         View.setViewer(View.Viewer.EXPORT_PROGRESS_VIEW);
         this.setMyController(controller);
-        this.view = View.factory(this, getDescriptor(), desktopView);
-        this.view.addInternalFrameListeners();
-        super.centreViewOnDesktop(desktopView, view);
-        pcSupportForView = new PropertyChangeSupport(this);
-        pcSupportForView.addPropertyChangeListener(getView());
-    }
-    
-    @Override
-    public void propertyChange(PropertyChangeEvent e){
-        
+        setDesktopView(desktopView);
     }
     
     private void doDesktopViewControllerAction(ActionEvent e){
@@ -74,11 +69,14 @@ public class ImportProgressViewController extends ViewController{
             case IMPORT_EXPORT_PATIENT_DATA_COMPLETED:
                 setOldEntity(getNewEntity());
                 setNewEntity(Entity.APPOINTMENT);
-                pcEvent = new PropertyChangeEvent(this,
-                            ViewController.ImportProgressViewControllerPropertyChangeEvent.
+                firePropertyChangeEvent(
+                        ImportProgressViewControllerPropertyChangeEvent.
                                     PREPARE_FOR_RECEIPT_OF_APPOINTMENT_PROGRESS.toString(),
-                            getOldEntity(),getNewEntity());
-                pcSupportForView.firePropertyChange(pcEvent);
+                        getView(),
+                        this,
+                        null,
+                        null
+                );
                 break;
                 
             case IMPORT_EXPORT_APPOINTMENT_DATA_COMPLETED:
@@ -89,11 +87,14 @@ public class ImportProgressViewController extends ViewController{
                 
                 setOldEntity(getNewEntity());
                 setNewEntity(Entity.NONE);
-                pcEvent = new PropertyChangeEvent(this,
-                            ViewController.ImportProgressViewControllerPropertyChangeEvent.
+                firePropertyChangeEvent(
+                        ImportProgressViewControllerPropertyChangeEvent.
                                     OPERATION_COMPLETED.toString(),
-                            getOldEntity(),getNewEntity());
-                pcSupportForView.firePropertyChange(pcEvent);
+                        getView(),
+                        this,
+                        null,
+                        null
+                );
                 break;
         }
     }
@@ -112,11 +113,14 @@ public class ImportProgressViewController extends ViewController{
                 case IMPORT_EXPORT_START_REQUEST:
                     setOldEntity(getNewEntity());
                     setNewEntity(Entity.PATIENT);
-                    pcEvent = new PropertyChangeEvent(this,
-                                ViewController.ImportProgressViewControllerPropertyChangeEvent.
+                    firePropertyChangeEvent(
+                            ImportProgressViewControllerPropertyChangeEvent.
                                         PREPARE_FOR_RECEIPT_OF_PATIENT_PROGRESS.toString(),
-                                getOldEntity(),getNewEntity());
-                    pcSupportForView.firePropertyChange(pcEvent);
+                            getView(),
+                            this,
+                            null,
+                            null
+                    );
                     break;
 
                 case READY_FOR_RECEIPT_OF_PATIENT_PROGRESS:
@@ -140,12 +144,6 @@ public class ImportProgressViewController extends ViewController{
                     getMyController().actionPerformed(actionEvent);
                     break;
             }
-        }
-        
-        
-    }
-    
-    public View getView( ){
-        return view;
+        }    
     }
 }

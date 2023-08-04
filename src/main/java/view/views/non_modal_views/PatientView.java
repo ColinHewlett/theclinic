@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package view.views;
+package view.views.non_modal_views;
 
 import view.views.view_support_classes.models.Appointments3ColumnTableModel;
 import view.views.view_support_classes.renderers.AppointmentsTableLocalDateTimeRenderer;
@@ -32,6 +32,7 @@ import java.time.LocalDateTime;
 import java.time.Period;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Optional;
 //import javax.swing.JInternalFrame;
 import javax.swing.JOptionPane;
 import javax.swing.DefaultComboBoxModel;
@@ -43,14 +44,12 @@ import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
 //import javax.swing.event.InternalFrameListener;
 import javax.swing.JComboBox;
+import javax.swing.JDesktopPane;
 import javax.swing.JInternalFrame;
 import javax.swing.JTable;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.JTextField;
-import javax.swing.ListSelectionModel;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 
 
 /**
@@ -109,16 +108,36 @@ public class PatientView extends View{
 
     /**
      * 
-     * @param myViewType
-     * @param myController
-     * @param ed 
+     * @param myViewType; View.Viewer  which identifies the type of view this view is
+     * -- enables the ViewController to identify which view is the sender of an ActionEvent to it
+     * @param myController; ViewController object responsible for this View
+     * -- enables access to the Descriptor settings created by the controller
+     * @param desktopView
      */
-    public PatientView(View.Viewer myViewType, ViewController myController, Descriptor ed) {
-        super("Patient view");
+    public PatientView(
+            View.Viewer myViewType, 
+            ViewController myController, DesktopView desktopView) {
+        setTitle("Patient view");
         setMyViewType(myViewType);
-        setMyController(myController);
-        //setViewDescriptor(ed);
+        setMyController(myController); 
+        setDesktopView(desktopView);
+    }
+    
+    @Override
+    public void initialiseView(){ 
         initComponents();
+        try{
+            setVisible(true);
+            setClosable(false);
+            setMaximizable(false);
+            setIconifiable(true);
+            setResizable(false);
+            setSelected(true);
+            setSize(700,560);
+        }catch(PropertyVetoException ex){
+            
+        }
+        this.addInternalFrameListeners();
         btnFetchScheduleForSelectedAppointment.setText(
                 "<html>Fetch schedule<br><center>for selected appointment</center></html>");
         //this.spnDentalRecallFrequency.setModel(new SpinnerNumberModel(6,0,12,3));
@@ -141,9 +160,6 @@ public class PatientView extends View{
         datePickerButton = recallDatePicker.getComponentToggleCalendarButton();
         datePickerButton.setText("");
         datePickerButton.setIcon(icon);
-    }
-    
-    public void initialiseView(){        
         ActionEvent actionEvent = new ActionEvent(
                 this,ActionEvent.ACTION_PERFORMED,
                 ViewController.PatientViewControllerActionEvent.NULL_PATIENT_REQUEST.toString());
@@ -164,7 +180,6 @@ public class PatientView extends View{
      * InternalFrameEvent.INTERNAL_FRAME_CLOSED event for the listener to let 
      * the view controller know what's happening
      */
-    @Override
     public void addInternalFrameListeners(){
         /**
          * Establish an InternalFrameListener for when the view is closed 
@@ -208,7 +223,7 @@ public class PatientView extends View{
                 if (tblAppointmentHistory.getRowCount() > 0){ //ensures there are rows in the table
                     int row = tblAppointmentHistory.getSelectedRow();
                     LocalDate day = ((LocalDateTime)tblAppointmentHistory.getValueAt(row,0)).toLocalDate();
-                    getMyController().getDescriptor().getViewDescription().setDay(day);
+                    getMyController().getDescriptor().getViewDescription().setScheduleDay(day);
                     ActionEvent actionEvent = new ActionEvent(
                             PatientView.this,ActionEvent.ACTION_PERFORMED,
                             ViewController.PatientViewControllerActionEvent.APPOINTMENT_VIEW_CONTROLLER_REQUEST.toString());
@@ -1557,7 +1572,7 @@ public class PatientView extends View{
         else{
             int row = this.tblAppointmentHistory.getSelectedRow();
             LocalDate day = ((LocalDateTime)this.tblAppointmentHistory.getValueAt(row,0)).toLocalDate();
-            getMyController().getDescriptor().getViewDescription().setDay(day);
+            getMyController().getDescriptor().getViewDescription().setScheduleDay(day);
             ActionEvent actionEvent = new ActionEvent(
                     this,ActionEvent.ACTION_PERFORMED,
                     ViewController.PatientViewControllerActionEvent.APPOINTMENT_VIEW_CONTROLLER_REQUEST.toString());

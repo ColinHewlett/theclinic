@@ -10,9 +10,8 @@ import model.Entity;
 import model.Patient;
 import model.Appointment;
 import model.Entity.Scope;
-import view.views.DesktopView;
+import view.views.non_modal_views.DesktopView;
 import view.View;
-import view.views.interfaces.IView;
 import repository.StoreException;//01/03/2023
 import static controller.ViewController.displayErrorMessage;
 import java.beans.PropertyChangeSupport;
@@ -26,6 +25,7 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import javax.swing.JOptionPane;
+import view.views.modal_views.ModalView;
 /**
  *
  * @author colin
@@ -33,10 +33,8 @@ import javax.swing.JOptionPane;
 public class PatientViewController extends ViewController {
     private PropertyChangeSupport pcSupportForView = null;
     private PropertyChangeEvent pcEvent = null;
-    private View view = null;
-    private View view2 = null;
-    DesktopView desktopView = null;
     private String message = null;
+
 
     private void doPrimaryViewActionRequest(ActionEvent e){
         ActionEvent actionEvent = null;
@@ -90,7 +88,11 @@ public class PatientViewController extends ViewController {
                     patient.read();
                     getDescriptor().getControllerDescription().setPatients(patient.get());
                     View.setViewer(View.Viewer.PATIENT_SELECTION_VIEW);
-                    this.view2 = View.factory(this, getDescriptor(), this.desktopView);
+                    //this.view2 = View.factory(this, getDescriptor(), this.desktopView);
+                    setView((ModalView)new View().make(
+                            View.Viewer.PATIENT_SELECTION_VIEW,
+                            this,
+                            this.getDesktopView()).getModalView());
                 }
                 catch (StoreException ex){
                     String message = ex.getMessage();
@@ -186,7 +188,7 @@ public class PatientViewController extends ViewController {
                 firePropertyChangeEvent(
                         ViewController.PatientViewControllerPropertyChangeEvent.
                             PATIENTS_RECEIVED.toString(),
-                        view,
+                        getView(),
                         this,
                         null,
                         null
@@ -195,7 +197,7 @@ public class PatientViewController extends ViewController {
                 firePropertyChangeEvent(
                         ViewController.PatientViewControllerPropertyChangeEvent.
                             PATIENT_RECEIVED.toString(),
-                        view,
+                        getView(),
                         this,
                         null,
                         null
@@ -222,7 +224,10 @@ public class PatientViewController extends ViewController {
             patient = patient.read();
             getDescriptor().getControllerDescription().setPatients(patient.get());
             View.setViewer(View.Viewer.PATIENT_RECOVERY_SELECTION_VIEW);
-            this.view2 = View.factory(this, getDescriptor(), this.desktopView);
+            setView((ModalView)new View().make(
+                    View.Viewer.PATIENT_RECOVERY_SELECTION_VIEW,
+                    this, 
+                    this.getDesktopView()).getModalView());
         }
         catch (StoreException ex){
             String message = ex.getMessage();
@@ -272,7 +277,7 @@ public class PatientViewController extends ViewController {
                 firePropertyChangeEvent(
                         ViewController.PatientViewControllerPropertyChangeEvent.
                             PATIENTS_RECEIVED.toString(),
-                        view,
+                        getView(),
                         this,
                         null,
                         getDescriptor()
@@ -281,7 +286,7 @@ public class PatientViewController extends ViewController {
                 firePropertyChangeEvent(
                         ViewController.PatientViewControllerPropertyChangeEvent.
                             PATIENT_RECEIVED.toString(),
-                        view,
+                        getView(),
                         this,
                         null,
                         getDescriptor()
@@ -375,7 +380,7 @@ public class PatientViewController extends ViewController {
                 firePropertyChangeEvent(
                        ViewController.PatientViewControllerPropertyChangeEvent.
                         PATIENT_RECEIVED.toString(),
-                        view,
+                        getView(),
                         this,
                         null,
                         getDescriptor()
@@ -387,7 +392,7 @@ public class PatientViewController extends ViewController {
                 firePropertyChangeEvent(
                         ViewController.PatientViewControllerPropertyChangeEvent.
                                 PATIENTS_RECEIVED.toString(),
-                        view,
+                        getView(),
                         this,
                         null,
                         getDescriptor()     
@@ -420,7 +425,7 @@ public class PatientViewController extends ViewController {
                 firePropertyChangeEvent(
                        ViewController.PatientViewControllerPropertyChangeEvent.
                         PATIENT_RECEIVED.toString(),
-                        view,
+                        getView(),
                         this,
                         null,
                         getDescriptor()
@@ -464,20 +469,20 @@ public class PatientViewController extends ViewController {
     
     public PatientViewController(ActionListener controller, 
             DesktopView desktopView)throws StoreException{
-        this.desktopView = desktopView;
+        setDesktopView(desktopView);
         setMyController(controller);
-        pcSupportForView = new PropertyChangeSupport(this);
+
         Patient patient = new Patient();
         patient.setScope(Scope.ALL);
         patient.read();
         getDescriptor().getControllerDescription().setPatients(patient.get());
         View.setViewer(View.Viewer.PATIENT_VIEW);
-        this.view = View.factory(this, getDescriptor(), desktopView);
-        super.centreViewOnDesktop(desktopView, view);
         
-        this.view.addInternalFrameListeners(); 
+        //super.centreViewOnDesktop(desktopView, view);
         
-        view.initialiseView();
+        //getView().addInternalFrameListeners(); 
+        
+        //view.initialiseView();
     }
     
     @Override
@@ -537,9 +542,4 @@ public class PatientViewController extends ViewController {
         }
         
     }
-    
-    public View getView( ){
-        return view;
-    }
-    
 }

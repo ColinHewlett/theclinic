@@ -45,7 +45,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package view.views;
+package view.views.non_modal_views;
 
 //import controller.ViewController.DesktopViewControllerActionEvent;
 import controller.DesktopViewController;

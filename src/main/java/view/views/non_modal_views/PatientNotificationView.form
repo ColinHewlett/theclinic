@@ -194,19 +194,19 @@
             </Component>
             <Component class="javax.swing.JLabel" name="lblRed">
               <Properties>
+                <Property name="text" type="java.lang.String" value=" "/>
                 <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor" postCode="lblRed.setBackground(java.awt.Color.RED);">
                   <Color blue="0" green="ff" id="yellow" palette="1" red="ff" type="palette"/>
                 </Property>
-                <Property name="text" type="java.lang.String" value=" "/>
                 <Property name="opaque" type="boolean" value="true"/>
               </Properties>
             </Component>
             <Component class="javax.swing.JLabel" name="lblBlue">
               <Properties>
+                <Property name="text" type="java.lang.String" value=" "/>
                 <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
                   <Color blue="0" green="ff" id="yellow" palette="1" red="ff" type="palette"/>
                 </Property>
-                <Property name="text" type="java.lang.String" value=" "/>
                 <Property name="opaque" type="boolean" value="true"/>
               </Properties>
               <AuxValues>
@@ -215,10 +215,10 @@
             </Component>
             <Component class="javax.swing.JLabel" name="lblGreen">
               <Properties>
+                <Property name="text" type="java.lang.String" value=" "/>
                 <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
                   <Color blue="0" green="ff" id="yellow" palette="1" red="ff" type="palette"/>
                 </Property>
-                <Property name="text" type="java.lang.String" value=" "/>
                 <Property name="opaque" type="boolean" value="true"/>
               </Properties>
               <AuxValues>

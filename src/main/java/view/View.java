@@ -5,45 +5,44 @@
  */
 package view;
 
-import view.views.factory_methods.PatientFactoryMethod;
-import view.views.factory_methods.ModalPatientSelectionViewFactoryMethod;
-import view.views.factory_methods.ModalAppointmentCreatorEditorFactoryMethod;
-import view.views.factory_methods.ModalNonSurgeryDayEditorFactoryMethod;
-import view.views.factory_methods.PatientNotificationFactoryMethod;
-import view.views.factory_methods.AppointmentScheduleFactoryMethod;
-import view.views.factory_methods.ModalSurgeryDaysEditorFactoryMethod;
-import view.views.factory_methods.ModalPatientNotificationEditorFactoryMethod;
-import view.views.factory_methods.ImportProgressFactoryMethod;
-import view.views.factory_methods.ModalEmptySlotScannerFactoryMethod;
-import view.views.factory_methods.ModalCancelledAppointmentsViewFactoryMethod;
-import view.views.factory_methods.ModalUnbookableAppointmentSlotEditorFactoryMethod;
-import view.views.DesktopView;
-import controller.Descriptor;
+
+import view.views.non_modal_views.*;
+import view.views.modal_views.*;
 import controller.ViewController;
+import java.awt.AWTEvent;
+import java.awt.ActiveEvent;
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.EventQueue;
+import java.awt.MenuComponent;
+import java.awt.Toolkit;
 import view.views.interfaces.IView;
 import view.views.interfaces.IViewInternalFrameListener;
-import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseMotionAdapter;
 import java.beans.PropertyChangeListener;
-import java.time.format.DateTimeFormatter;
-import javax.swing.JDesktopPane;
+import java.beans.PropertyChangeEvent;
 import javax.swing.JInternalFrame;
+import javax.swing.JLayeredPane;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 
 /**
  *
  * @author colin
  */
-public abstract class View extends JInternalFrame
+public class View extends JInternalFrame
                            implements PropertyChangeListener,IView, IViewInternalFrameListener{
-    private JDesktopPane desktop = null;
-    private ViewController.ViewMode viewMode;
+    private DesktopView desktopView = null;
     private static Viewer viewer = null;
     private Boolean viewChangedSinceLastSaved = false;
     private Boolean isViewInitialised = false;
     
     private Viewer myViewType = null;
     private ViewController myController = null;
-    private Descriptor viewDescriptor = null;
+    private View view = null;
+    private ModalView modalView = null;
+
     
     public Boolean getIsViewInitialised(){
         return isViewInitialised;
@@ -52,18 +51,80 @@ public abstract class View extends JInternalFrame
     protected void setIsViewInitialised(Boolean value){
         isViewInitialised = value;
     }
-
-    public View(String title){
-        super(title,true,true,true,true); 
-    }
     
+    /**
+     * 
+     * @param viewer
+     * @param controller
+     * @param desktopView
+     * @return; possible value returned
+     * -- View if the view created is non modal
+     * -- ModalView if the view created is modal
+     * -- null if a view was not created
+     */
+    public View make(
+            Viewer viewer,
+            ViewController controller,
+            DesktopView desktopView){
+        setView(null);
+        setModalView(null);
+        switch(viewer){
+            case EXPORT_PROGRESS_VIEW:
+                setView(makeView(new ImportProgressView(viewer, controller,desktopView)));
+                break;
+            case MIGRATION_MANAGER_VIEW:
+                setView(makeView(new ImportProgressView(viewer, controller, desktopView)));
+            case PATIENT_VIEW:
+                setView(makeView(new PatientView(viewer, controller, desktopView)));
+                break;
+            case PATIENT_NOTIFICATION_VIEW:
+                setView(makeView(new PatientNotificationView(viewer, controller, desktopView)));
+                break;
+            case SCHEDULE_VIEW:
+                setView(makeView(new ScheduleView(viewer, controller, desktopView)));
+                break;
+            case APPOINTMENTS_CANCELLED_VIEW:
+                //result = new ModalAppointmentsCancelledFactoryMethod(controller,dtView).makeView(viewer);
+                setModalView(makeView(new ModalAppointmentsCancelledView(viewer, controller, desktopView)));
+                break;
+            case APPOINTMENT_EDITOR_VIEW:
+                setModalView(makeView(new ModalAppointmentEditorView(viewer, controller, desktopView)));
+                break;
+            case EMPTY_SLOT_SCAN_CONFIGURATION_VIEW:
+                setModalView(makeView(new ModalEmptySlotScanConfigurationView(viewer, controller, desktopView)));
+                break;
+            case PATIENT_NOTIFICATION_EDITOR_VIEW:
+                setModalView(makeView(new ModalPatientNotificationEditorView(viewer, controller, desktopView)));
+                break;
+            case PATIENT_RECOVERY_SELECTION_VIEW:
+                setModalView(makeView(new ModalPatientSelectionView(viewer, controller, desktopView)));
+                break;
+            case NON_SURGERY_DAY_EDITOR_VIEW:
+                setModalView(makeView(new ModalNonSurgeryDayEditorView(viewer, controller, desktopView)));
+                break;
+            case SURGERY_DAY_EDITOR_VIEW:
+                setModalView(makeView(new ModalSurgeryDaysEditorView(viewer,controller,desktopView)));
+                break;
+            case UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_VIEW:
+                setModalView(makeView(new ModalUnbookableAppointmentSlotEditorView(viewer, controller, desktopView)));
+                break;
+            default:
+                JOptionPane.showMessageDialog(desktopView, 
+                        "Could not find the requested view (" + viewer.toString());
+                setView(null);
+                setModalView(null);
+                break;
+        }
+        if ((getView()==null)&&(getModalView()==null)) return null;
+        else if (getView()==null) return getModalView();
+        else return getView();
+    }
+
     public static enum Viewer { 
         SCHEDULE_VIEW,
         APPOINTMENT_CREATOR_VIEW,
-        APPOINTMENT_CREATOR_EDITOR_VIEW,
         APPOINTMENT_EDITOR_VIEW,
-        APPOINTMENT_REMINDERS_VIEW,
-        CANCELLED_APPOINTMENTS_VIEW,
+        APPOINTMENTS_CANCELLED_VIEW,
         EMPTY_SLOT_SCAN_CONFIGURATION_VIEW,
         EXPORT_PROGRESS_VIEW,
         MIGRATION_MANAGER_VIEW,
@@ -89,98 +150,140 @@ public abstract class View extends JInternalFrame
     public static void setViewer(Viewer value){
         viewer = value;
     }
-
-    public static View factory(ViewController controller, Descriptor ed, DesktopView dtView){
-        View result = null;
-        switch(viewer){
-            case SCHEDULE_VIEW:
-                result = new AppointmentScheduleFactoryMethod(controller, ed, dtView).makeView(viewer);
-                break;
-            case CANCELLED_APPOINTMENTS_VIEW:
-                result = new ModalCancelledAppointmentsViewFactoryMethod(controller, ed, dtView).makeView(viewer);
-                break;
-            case APPOINTMENT_CREATOR_VIEW:
-                result = null;
-                break;
-            case APPOINTMENT_CREATOR_EDITOR_VIEW:
-                result = new ModalAppointmentCreatorEditorFactoryMethod(controller, ed, dtView).makeView(viewer);
-                break;
-            case APPOINTMENT_EDITOR_VIEW:
-                result = null;
-                break;
-            case EMPTY_SLOT_SCAN_CONFIGURATION_VIEW:
-                result = new ModalEmptySlotScannerFactoryMethod(controller, ed, dtView).makeView(viewer);
-                break;
-            case EXPORT_PROGRESS_VIEW:
-                result = new ImportProgressFactoryMethod(controller, ed, dtView).makeView(viewer);
-                break;
-            case MIGRATION_MANAGER_VIEW:
-                result = new ImportProgressFactoryMethod(controller, ed, dtView).makeView(viewer);
-            case PATIENT_VIEW:
-                result = new PatientFactoryMethod(controller, ed, dtView).makeView(viewer);
-                break;
-            case PATIENT_NOTIFICATION_VIEW:
-                result = new PatientNotificationFactoryMethod(controller, ed, dtView).makeView(viewer);
-                break;
-            case PATIENT_NOTIFICATION_EDITOR_VIEW:
-                result = new ModalPatientNotificationEditorFactoryMethod(controller, ed, dtView).makeView(viewer);
-                break;
-                /*
-            case PATIENT_SELECTION_VIEW:
-                result = new ModalPatientSelectionViewFactoryMethod(controller, ed, dtView).makeView(viewer);
-                break;
-*/
-            case PATIENT_RECOVERY_SELECTION_VIEW:
-                result = new ModalPatientSelectionViewFactoryMethod(controller, ed, dtView).makeView(viewer);
-                break;
-            case NON_SURGERY_DAY_EDITOR_VIEW:
-                result = new ModalNonSurgeryDayEditorFactoryMethod(controller, ed, dtView).makeView(viewer);
-                break;
-            case SURGERY_DAY_EDITOR_VIEW:
-                result = new ModalSurgeryDaysEditorFactoryMethod(controller, ed, dtView).makeView(viewer);
-                break;
-            case UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_VIEW:
-                result = new ModalUnbookableAppointmentSlotEditorFactoryMethod(controller, dtView).makeView(viewer);
-                break;
-            default:
-                JOptionPane.showMessageDialog(dtView, 
-                        "Could not find the requested view (" + viewer.toString());
-                break;
-                
-        }
-        return result;
+    
+    public static Viewer getViewer(){
+        return viewer;
     }
+
+    
     
     public Viewer getMyViewType(){
         return myViewType;
     }
     
-    public JDesktopPane getDesktop(){
-        return desktop;
+    public DesktopView getDesktopView(){
+        return desktopView;
     }
     
-    public void setDesktop(JDesktopPane value){
-        desktop = value;
+    public void setDesktopView(DesktopView value){
+        desktopView = value;
     }
 
-    /*
-    public Descriptor getViewDescriptor(){
-        return viewDescriptor;
-    }
-    */
     public void setMyViewType(Viewer value){
         myViewType = value;
     }
 
-    protected ViewController getMyController(){
+    public ViewController getMyController(){
         return myController;
     }
     
-    protected void setMyController(ViewController value){
+    public void setMyController(ViewController value){
         myController = value;
     }
     
+    
+    
     public void initialiseView(){
+        
+    }
+    
+    //public abstract void startModal();
+    
+    protected final View makeView(View view){
+        view.getMyController().setView(view);
+        view.getMyController().getView().initialiseView();
+        view.getMyController().centreViewOnDesktop(view.getDesktopView(), view.getMyController().getView());
+        view.getDesktopView().getDeskTop().add(view.getMyController().getView());
+        view.toFront();
+        return view;
+    }
+    
+    protected final ModalView makeView(ModalView view){
+        view.getMyController().setModalView(view);
+        view.getMyController().getModalView().initialiseView();
+        view.getMyController().centreViewOnDesktop(view.getDesktopView(), view.getMyController().getModalView());
+        view.getDesktopView().getDeskTop().add(view.getMyController().getModalView());
+        view.setLayer(JLayeredPane.MODAL_LAYER);
+        view.toFront();
+        return view;
+    }
+    
+    protected void startModal(View view){
+        // We need to add an additional glasspane-like component directly
+        // below the frame, which intercepts all mouse events that are not
+        // directed at the frame itself.
+        JPanel modalInterceptor = new JPanel();
+        modalInterceptor.setOpaque(false);
+        JLayeredPane lp = JLayeredPane.getLayeredPaneAbove(view);
+        lp.setLayer(modalInterceptor, JLayeredPane.MODAL_LAYER.intValue());
+        modalInterceptor.setBounds(0, 0, lp.getWidth(), lp.getHeight());
+        modalInterceptor.addMouseListener(new MouseAdapter(){});
+        modalInterceptor.addMouseMotionListener(new MouseMotionAdapter(){});
+        lp.add(modalInterceptor);
+        view.toFront();
+
+        // We need to explicitly dispatch events when we are blocking the event
+        // dispatch thread.
+        EventQueue queue = Toolkit.getDefaultToolkit().getSystemEventQueue();
+        try {
+            while (! view.isClosed())       {
+                if (EventQueue.isDispatchThread())    {
+                    // The getNextEventMethod() issues wait() when no
+                    // event is available, so we don't need do explicitly wait().
+                    AWTEvent ev = queue.getNextEvent();
+                    // This mimics EventQueue.dispatchEvent(). We can't use
+                    // EventQueue.dispatchEvent() directly, because it is
+                    // protected, unfortunately.
+                    if (ev!=null){
+                        if (ev instanceof ActiveEvent )  ((ActiveEvent) ev).dispatch();
+                        //if (ev instanceof ActiveEvent event)  event.dispatch();
+                        //else if (ev.getSource() instanceof Component component)  component.dispatchEvent(ev);
+                        //else if (ev.getSource() instanceof MenuComponent menuComponent)  menuComponent.dispatchEvent(ev);
+                        else if (ev.getSource() instanceof Component)  ((Component) ev.getSource()).dispatchEvent(ev);
+                        else if (ev.getSource() instanceof MenuComponent)  ((MenuComponent) ev.getSource()).dispatchEvent(ev);
+                        // Other events are ignored as per spec in
+                        // EventQueue.dispatchEvent
+                    }
+                    
+                } else  {
+                    // Give other threads a chance to become active.
+                    Thread.yield();
+                }
+            }
+        }
+        catch (InterruptedException ex) {
+            // If we get interrupted, then leave the modal state.
+        }
+        finally {
+            // Clean up the modal interceptor.
+            lp.remove(modalInterceptor);
+
+            // Remove the internal frame from its parent, so it is no longer
+            // lurking around and clogging memory.
+            Container parent = view.getParent();
+            if (parent != null) parent.remove(view);
+        }
+    }
+    
+    public final View getView(){
+        return view;
+    }
+    
+    public final void setView(View value){
+        view = value;
+    }
+    
+
+    public  ModalView getModalView(){
+        return modalView;
+    }
+    
+    private final void setModalView(ModalView value){
+        modalView = value;
+    }
+
+    @Override
+    public void propertyChange(PropertyChangeEvent ex){
         
     }
 }

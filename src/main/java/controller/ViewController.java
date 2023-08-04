@@ -5,9 +5,11 @@
  */
 package controller;
 
-import _system_environment_variables.SystemDefinitions;
 import model.Entity;
 import model.Appointment;
+import view.View;
+import view.views.modal_views.ModalView;
+import view.views.non_modal_views.DesktopView;
 import view.views.view_support_classes.renderers.TableHeaderCellBorderRenderer;
 import repository.StoreException;
 import java.awt.Color;
@@ -36,6 +38,21 @@ import javax.swing.table.TableColumn;
  * V02_VCSuppliesDataOnDemandToView
  */
 public abstract class ViewController implements ActionListener, PropertyChangeListener{
+    public static final LocalTime FIRST_APPOINTMENT_SLOT = LocalTime.of(9,0);
+    public static final LocalTime LAST_APPOINTMENT_SLOT = LocalTime.of(17,0);
+    
+    public DateTimeFormatter dmyFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    public DateTimeFormatter dmyhhmmFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy hh:mm");
+    public DateTimeFormatter recallFormat = DateTimeFormatter.ofPattern("MMMM/yyyy");
+    public DateTimeFormatter startTime24Hour = DateTimeFormatter.ofPattern("HH:mm");
+    public DateTimeFormatter format24Hour = DateTimeFormatter.ofPattern("HH:mm");
+    
+    private Descriptor controllerDescriptor = null;
+    private ScheduleReport scheduleReport = null;
+    private ActionListener actionListener = null;
+    private DesktopView desktopView;
+    private View view = null;
+    private ModalView modalView = null;
     
     public enum ViewControllers {
         ScheduleViewController,
@@ -243,19 +260,7 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         NO_ACTION
     } 
     
-    public static final LocalTime FIRST_APPOINTMENT_SLOT = LocalTime.of(9,0);
-    public static final LocalTime LAST_APPOINTMENT_SLOT = LocalTime.of(17,0);
     
-    public DateTimeFormatter dmyFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-    public DateTimeFormatter dmyhhmmFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy hh:mm");
-    public DateTimeFormatter recallFormat = DateTimeFormatter.ofPattern("MMMM/yyyy");
-    public DateTimeFormatter startTime24Hour = DateTimeFormatter.ofPattern("HH:mm");
-    public DateTimeFormatter format24Hour = DateTimeFormatter.ofPattern("HH:mm");
-    
-    private Descriptor entityDescriptorFromView = null;
-    private Descriptor controllerDescriptor = null;
-    private ScheduleReport scheduleReport = null;
-    private ActionListener actionListener = null;
     
     public void firePropertyChangeEvent(
                                         String pcEventName,
@@ -296,7 +301,7 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         }
     }
     
-    protected void centreViewOnDesktop(Frame desktopView, JInternalFrame view){
+    public void centreViewOnDesktop(Frame desktopView, JInternalFrame view){
         Insets insets = desktopView.getInsets();
         Dimension deskTopViewDimension = desktopView.getSize();
         Dimension myViewDimension = view.getSize();
@@ -312,36 +317,27 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         JOptionPane.showMessageDialog(null,new ErrorMessagePanel(message),title,messageType);
     }
     
-    public Descriptor getDescriptor(){
+    public final Descriptor getDescriptor(){
         if (controllerDescriptor==null) setDescriptor(new Descriptor());
         return controllerDescriptor;
     }
     
-    protected ActionListener getMyController(){
+    protected final ActionListener getMyController(){
         return actionListener;
     }
     
-    protected void setMyController(ActionListener value){
+    protected final void setMyController(ActionListener value){
         actionListener = value;
     }
     
-    public void setDescriptor(Descriptor value){
+    public final void setDescriptor(Descriptor value){
         controllerDescriptor = value;
-    }
-    
-    public void setEntityDescriptorFromView(Descriptor value){
-        entityDescriptorFromView = value;
     }
     
     public void setNewEntityDescriptor(Descriptor value){
         controllerDescriptor = value;
     }
-    
-    /*
-    public Descriptor getDescriptorFromView(){
-        return entityDescriptorFromView;
-    }
-    */
+
     protected Appointment doChangeAppointmentScheduleForDayRequest(ViewMode mode, Appointment rSlot) throws StoreException{
         Appointment result = null;
         
@@ -679,4 +675,29 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         }
         return result;
     }
+
+    protected final void setDesktopView (DesktopView value){
+        desktopView = value;
+    }
+    
+    protected final DesktopView getDesktopView(){
+        return desktopView;
+    }
+    
+    public final void setView (View value){
+        view = value;
+    }
+    
+    public final View getView(){
+        return view;
+    }
+    
+    public final void setModalView (ModalView value){
+        modalView = value;
+    }
+    
+    public final ModalView getModalView(){
+        return modalView;
+    }
+
 }

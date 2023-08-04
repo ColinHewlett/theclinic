@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package view.views;
+package view.views.non_modal_views;
 
 import _system_environment_variables.SystemDefinitions;
 import view.views.view_support_classes.renderers.AppointmentsTableDurationRenderer;
@@ -49,6 +49,7 @@ import java.time.DayOfWeek;
 import java.time.format.DateTimeFormatter;
 import java.time.LocalTime;
 import java.util.HashMap;
+import javax.swing.JDesktopPane;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
 import javax.swing.JOptionPane;
@@ -109,7 +110,7 @@ public class ScheduleView extends View{
                 updateDatePickerSettings();
                 break;
             case NON_SURGERY_DAY_EDIT_RECEIVED:
-                temporarilySuspendDatePickerDateVetoPolicy(getMyController().getDescriptor().getViewDescription().getDay());
+                temporarilySuspendDatePickerDateVetoPolicy(getMyController().getDescriptor().getViewDescription().getScheduleDay());
                 break;
             case NO_APPOINTMENT_SLOTS_FROM_DAY_RECEIVED://instruction to clear list
                 titledBorder.setTitle("Available appointment slots");
@@ -130,7 +131,7 @@ public class ScheduleView extends View{
                 /**
                  * without the next lines the appointments table is unconscious of being selected?!)
                  */
-                getMyController().getDescriptor().getViewDescription().setDay(dayDatePicker.getDate());
+                getMyController().getDescriptor().getViewDescription().setScheduleDay(dayDatePicker.getDate());
                 //refreshAppointmentTableWithCurrentlySelectedDate();
                 break;
             case APPOINTMENT_SCHEDULE_ERROR_RECEIVED:
@@ -164,6 +165,27 @@ public class ScheduleView extends View{
     }
     @Override
     public void initialiseView(){
+        initComponents();
+        try{
+            setVisible(true);
+            setTitle("Appointments");
+            setClosable(false);
+            setMaximizable(false);
+            setIconifiable(true);
+            setResizable(false);
+            setSelected(true);
+            setSize(766,548);
+            toFront();
+        }catch (PropertyVetoException ex){
+            
+        }
+
+        setEmptySlotAvailabilityTableListener();
+        setAppointmentTableListener();
+        
+        dayDatePicker.addDateChangeListener(new DayDatePickerChangeListener());
+        this.mniCloseView.addActionListener((ActionEvent e) -> mniCloseViewActionPerformed(e));
+        this.mniSelectNonSurgeryDay.addActionListener((ActionEvent e) -> mniSelectNonSurgeryDayActionPerformed(e)); 
         TitledBorder titledBorder = (TitledBorder)this.SlotAvailabilityPanel.getBorder();
         titledBorder.setTitle("Unscheduled appointment slots");
         //following action invokes call to controller via DateChange\Listener
@@ -172,7 +194,7 @@ public class ScheduleView extends View{
         dps.setVetoPolicy(vetoPolicy);
         dps.setHighlightPolicy(new LeaveEditor());
       
-        LocalDate day = getMyController().getDescriptor().getViewDescription().getDay();
+        LocalDate day = getMyController().getDescriptor().getViewDescription().getScheduleDay();
         if (!vetoPolicy.isDateAllowed(day)){
             HashMap<DayOfWeek, Boolean> allDaysSurgeryDays = new HashMap<>();
             allDaysSurgeryDays.put(DayOfWeek.MONDAY, true);
@@ -207,21 +229,23 @@ public class ScheduleView extends View{
 
     /**
      * 
-     * @param myViewType
-     * @param controller
-     * @param ed 
+     * @param myViewType; View.Viewer  which identifies the type of view this view is
+     * -- enables the ViewController to identify which view is the sender of an ActionEvent to it
+     * @param controller; ViewController object responsible for this View
+     * -- enables access to the Descriptor settings created by the controller 
+     * @param desktopView; DesktopView reference enabling this view 
+     * -- to be added to the DesktopView object
+     * -- and be centred in the desktopView
      */
-    public ScheduleView(View.Viewer myViewType, ViewController controller, Descriptor ed) {
-        super("Appointment schedule");
+    public ScheduleView(
+            View.Viewer myViewType, 
+            ViewController controller, 
+            DesktopView desktopView) {
+        
+        setTitle("Appointment schedule");
         this.setMyViewType(myViewType);
         setMyController(controller); 
-        //this.setViewDescriptor(ed);
-        initComponents();
-        dayDatePicker.addDateChangeListener(new DayDatePickerChangeListener());
-        setEmptySlotAvailabilityTableListener();
-        setAppointmentTableListener();
-        this.mniCloseView.addActionListener((ActionEvent e) -> mniCloseViewActionPerformed(e));
-        this.mniSelectNonSurgeryDay.addActionListener((ActionEvent e) -> mniSelectNonSurgeryDayActionPerformed(e)); 
+        setDesktopView(desktopView);
     }
     
     private void mniCloseViewActionPerformed(ActionEvent e){
@@ -313,7 +337,7 @@ public class ScheduleView extends View{
         {
           public void run()
           {
-            ScheduleView.this.setTitle(ScheduleView.this.getMyController().getDescriptor().getViewDescription().getDay().format(DateTimeFormatter.ofPattern("dd/MM/yy")) + " Appointment schedule");
+            ScheduleView.this.setTitle(ScheduleView.this.getMyController().getDescriptor().getViewDescription().getScheduleDay().format(DateTimeFormatter.ofPattern("dd/MM/yy")) + " Appointment schedule");
             setIsViewInitialised(true);       
           }
         });
@@ -351,7 +375,6 @@ public class ScheduleView extends View{
         this.pnlAppointmentScheduleForDay.repaint();
     } 
 
-    @Override
     public void addInternalFrameListeners(){
         /**
          * Establish an InternalFrameListener for when the view is closed 
@@ -805,7 +828,7 @@ public class ScheduleView extends View{
     private void btnScanForEmptySlotsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnScanForEmptySlotsActionPerformed
         // TODO add your handling code here:
         LocalDate searchStartDate = dayDatePicker.getDate();
-        getMyController().getDescriptor().getViewDescription().setDay(searchStartDate);
+        getMyController().getDescriptor().getViewDescription().setScheduleDay(searchStartDate);
         ActionEvent actionEvent = new ActionEvent(this, 
                     ActionEvent.ACTION_PERFORMED,
                     ViewController.AppointmentScheduleViewControllerActionEvent.
@@ -1039,7 +1062,7 @@ public class ScheduleView extends View{
         @Override
         public void dateChanged(DateChangeEvent event) {
             //LocalDate date = event.getNewDate();
-            getMyController().getDescriptor().getViewDescription().setDay(ScheduleView.this.dayDatePicker.getDate());
+            getMyController().getDescriptor().getViewDescription().setScheduleDay(ScheduleView.this.dayDatePicker.getDate());
             tblAppointments.clearSelection();
             ActionEvent actionEvent = new ActionEvent(ScheduleView.this, 
                     ActionEvent.ACTION_PERFORMED,
@@ -1148,10 +1171,7 @@ public class ScheduleView extends View{
         columnModel.getColumn(5).setHeaderRenderer(new TableHeaderCellBorderRenderer(Color.LIGHT_GRAY));
         JTableHeader tableHeader = this.tblAppointments.getTableHeader();
         tableHeader.setBackground(new Color(220,220,220));
-        tableHeader.setOpaque(true);
-        
-        
-        
+        tableHeader.setOpaque(true);  
     }
     
 

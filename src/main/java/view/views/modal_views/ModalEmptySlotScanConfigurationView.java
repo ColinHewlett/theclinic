@@ -3,11 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package view.views.modal_internal_frame_views;
+package view.views.modal_views;
 
 import controller.Descriptor;
 import controller.ViewController;
 import view.View;
+import view.views.non_modal_views.DesktopView;
 import view.views.view_support_classes.renderers.SelectSlotDurationRenderer;
 import java.awt.AWTEvent;
 import java.awt.ActiveEvent;
@@ -40,10 +41,7 @@ import javax.swing.SpinnerNumberModel;
  *
  * @author colin
  */
-public class ModalEmptySlotScanConfigurationView extends View {
-    private View.Viewer myViewType = null;
-    private Descriptor entityDescriptor = null;
-    private ActionListener myController = null;
+public class ModalEmptySlotScanConfigurationView extends ModalView {
     private DateTimeFormatter appointmentScheduleFormat = DateTimeFormatter.ofPattern("EEEE, MMMM dd yyyy ");
 
 
@@ -51,106 +49,25 @@ public class ModalEmptySlotScanConfigurationView extends View {
      * 
      * @param myViewType
      * @param myController
-     * @param entityDescriptor
-     * @param desktop 
+     * @param desktopView 
      */
-    public ModalEmptySlotScanConfigurationView(View.Viewer myViewType,ViewController myController,
-            Descriptor entityDescriptor, 
-            JDesktopPane desktop) {//ViewMode arg
-        super("Appointment slot availability");
+    public ModalEmptySlotScanConfigurationView(
+            View.Viewer myViewType,ViewController myController, 
+            DesktopView desktopView) {
+        setTitle("Empty slot scanner");
         setMyViewType(myViewType);
-        //setViewDescriptor(entityDescriptor);
         setMyController(myController);
-        setTitle("Empty slot scanner" );
+        setDesktopView(desktopView);   
+    }
+    
+    @Override
+    public void initialiseView(){
         initComponents();
         this.cmbSelectSlotDuration.setRenderer(new SelectSlotDurationRenderer());
         this.buttonGroup1.add(this.rdbSelectMonths);
         this.buttonGroup1.add(this.rdbSelectWeeks);
         this.rdbSelectWeeks.setSelected(true);
-        
-        cmbSelectSlotDurationActionPerformed(null);
-        
-        desktop.add(this);
-        this.setLayer(JLayeredPane.MODAL_LAYER);
-        centreViewOnDesktop(desktop.getParent(),this);
-        this.initialiseView();
-        
-        
-        ActionEvent actionEvent = new ActionEvent(this,
-            ActionEvent.ACTION_PERFORMED,
-            ViewController.AppointmentScheduleViewControllerActionEvent.MODAL_VIEWER_ACTIVATED.toString());
-        this.getMyController().actionPerformed(actionEvent);
-        
-        startModal(this);
-        
-        
-    }
-    
-    private void startModal(JInternalFrame f) {
-        // We need to add an additional glasspane-like component directly
-        // below the frame, which intercepts all mouse events that are not
-        // directed at the frame itself.
-        JPanel modalInterceptor = new JPanel();
-        modalInterceptor.setOpaque(false);
-        JLayeredPane lp = JLayeredPane.getLayeredPaneAbove(f);
-        lp.setLayer(modalInterceptor, JLayeredPane.MODAL_LAYER.intValue());
-        modalInterceptor.setBounds(0, 0, lp.getWidth(), lp.getHeight());
-        modalInterceptor.addMouseListener(new MouseAdapter(){});
-        modalInterceptor.addMouseMotionListener(new MouseMotionAdapter(){});
-        lp.add(modalInterceptor);
-        f.toFront();
-
-        // We need to explicitly dispatch events when we are blocking the event
-        // dispatch thread.
-        EventQueue queue = Toolkit.getDefaultToolkit().getSystemEventQueue();
-        try {
-            while (! f.isClosed())       {
-                if (EventQueue.isDispatchThread())    {
-                    // The getNextEventMethod() issues wait() when no
-                    // event is available, so we don't need do explicitly wait().
-                    AWTEvent ev = queue.getNextEvent();
-                    // This mimics EventQueue.dispatchEvent(). We can't use
-                    // EventQueue.dispatchEvent() directly, because it is
-                    // protected, unfortunately.
-                    if (ev instanceof ActiveEvent)  ((ActiveEvent) ev).dispatch();
-                    else if (ev.getSource() instanceof Component)  ((Component) ev.getSource()).dispatchEvent(ev);
-                    else if (ev.getSource() instanceof MenuComponent)  ((MenuComponent) ev.getSource()).dispatchEvent(ev);
-                    // Other events are ignored as per spec in
-                    // EventQueue.dispatchEvent
-                } else  {
-                    // Give other threads a chance to become active.
-                    Thread.yield();
-                }
-            }
-        }
-        catch (InterruptedException ex) {
-            // If we get interrupted, then leave the modal state.
-        }
-        finally {
-            // Clean up the modal interceptor.
-            lp.remove(modalInterceptor);
-
-            // Remove the internal frame from its parent, so it is no longer
-            // lurking around and clogging memory.
-            Container parent = f.getParent();
-            if (parent != null) parent.remove(f);
-        }
-    }
-    
-    private void centreViewOnDesktop(Container desktopView, JInternalFrame view){
-        Insets insets = desktopView.getInsets();
-        Dimension deskTopViewDimension = desktopView.getSize();
-        Dimension myViewDimension = view.getSize();
-        view.setLocation(new Point(
-                (int)(deskTopViewDimension.getWidth() - (myViewDimension.getWidth()))/2,
-                (int)((deskTopViewDimension.getHeight()-insets.top) - myViewDimension.getHeight())/2));
-    }
-    
-    public void addInternalFrameListeners(){
-        
-    }
-    
-    public void initialiseView(){
+        cmbSelectSlotDurationActionPerformed(null);       
         this.setVisible(true);
         this.setClosable(true);
         //disallow any resizing including minimising to tak bar
@@ -345,14 +262,14 @@ cmbSelectSlotDuration.addActionListener(new java.awt.event.ActionListener() {
         // TODO add your handling code here:
         Duration duration = (Duration)this.cmbSelectSlotDuration.getSelectedItem();
         LocalDate startScanDate = getMyController().getDescriptor().
-                getViewDescription().getDay();
+                getViewDescription().getScheduleDay();
         if (!duration.isZero()){
             if(this.rdbSelectWeeks.isSelected()){
                 startScanDate = startScanDate.plusWeeks((Integer)this.spnSlotSearchOffset.getValue());
             }
             else startScanDate = startScanDate.plusMonths((Integer)this.spnSlotSearchOffset.getValue());
 
-            getMyController().getDescriptor().getViewDescription().setDay(startScanDate);
+            getMyController().getDescriptor().getViewDescription().setScheduleDay(startScanDate);
             getMyController().getDescriptor().getViewDescription().setDuration(duration);
             ActionEvent actionEvent = new ActionEvent(this,
                 ActionEvent.ACTION_PERFORMED,

@@ -2,12 +2,13 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package view.views.modal_internal_frame_views;
+package view.views.modal_views;
 
 import controller.Descriptor;
 import controller.ViewController;
 import model.Patient;
 import view.View;
+import view.views.non_modal_views.DesktopView;
 import java.awt.AWTEvent;
 import java.awt.ActiveEvent;
 import java.awt.Component;
@@ -37,39 +38,16 @@ import javax.swing.border.TitledBorder;
  *
  * @author colin
  */
-public class ModalPatientSelectionView extends View{
-    private ActionListener myController = null;
-    private Descriptor entityDescriptor = null;
+public class ModalPatientSelectionView extends ModalView{
     
     public ModalPatientSelectionView(
             View.Viewer myViewType,
-            ViewController myController,
-            Descriptor entityDescriptor, 
-            JDesktopPane desktop){ 
-        super("Patient selector view");
-        //setViewDescriptor(entityDescriptor);
+            ViewController myController, 
+            DesktopView desktopView){ 
+        setTitle("Patient selector view");
         setMyController(myController);
         setMyViewType(myViewType);
-        initComponents(); 
-        TitledBorder titledBorder = (TitledBorder)pnlPatientSelection.getBorder();
-        switch (getMyViewType()){
-            case PATIENT_SELECTION_VIEW:
-                titledBorder.setTitle("Select patient");
-                this.setTitle("Patient selection view");
-                break;
-            case PATIENT_RECOVERY_SELECTION_VIEW:
-                titledBorder.setTitle("Select patient to recover");
-                this.setTitle("Patient recovery selection view");
-                break;
-        }
         
-        populatePatientSelector();
-        desktop.add(this);
-        this.setLayer(JLayeredPane.MODAL_LAYER);
-        centreViewOnDesktop(desktop.getParent(),this);
-        this.setVisible(true);
-        
-        startModal(this);
     }
 
     private void startModal(JInternalFrame f) {
@@ -155,11 +133,6 @@ public class ModalPatientSelectionView extends View{
         }
         else this.cmbPatientSelector.setSelectedIndex(-1);
     }
-
-    @Override
-    public void addInternalFrameListeners(){
-        
-    }
     
     @Override
     public void propertyChange(PropertyChangeEvent e){
@@ -174,7 +147,21 @@ public class ModalPatientSelectionView extends View{
     
     @Override
     public void initialiseView(){
+        initComponents(); 
+        TitledBorder titledBorder = (TitledBorder)pnlPatientSelection.getBorder();
+        switch (getMyViewType()){
+            case PATIENT_SELECTION_VIEW:
+                titledBorder.setTitle("Select patient");
+                this.setTitle("Patient selection view");
+                break;
+            case PATIENT_RECOVERY_SELECTION_VIEW:
+                titledBorder.setTitle("Select patient to recover");
+                this.setTitle("Patient recovery selection view");
+                break;
+        }
         
+        populatePatientSelector();
+        this.setVisible(true);
     }
     
     private void initComponents() {

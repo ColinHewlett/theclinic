@@ -10,5 +10,5 @@ package view.views.interfaces;
  * @author colin
  */
 public interface IViewInternalFrameListener {
-    public void addInternalFrameListeners();
+    //public void addInternalFrameListeners();
 }

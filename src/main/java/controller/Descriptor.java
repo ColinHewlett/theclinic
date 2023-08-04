@@ -75,6 +75,7 @@ public class Descriptor {
     
     public class ControllerDescription{
         ViewController.ViewMode viewMode = null;
+        private LocalDate scheduleDay = null;
         private LocalDateTime appointmentEarlyStart = null;
         private LocalDateTime appointmentLateStart = null;
         private Boolean isAppointmentUnbookable = false;
@@ -97,6 +98,14 @@ public class Descriptor {
         ArrayList<Notification> patientNotifications = null;
         ArrayList<Patient> patients = null;
         private Point tableRowCount = null;
+        
+        public LocalDate getScheduleDay(){
+            return scheduleDay;
+        }
+        
+        public void setScheduleDay(LocalDate value){
+            this.scheduleDay = value;
+        }
         
         public LocalDateTime getAppointmentEarlyStart(){
             return appointmentEarlyStart; 
@@ -369,8 +378,12 @@ public class Descriptor {
             return databaseLocation;
         }
 
-        public LocalDate getDay(){
+        public LocalDate getScheduleDay(){
             return day;
+        }
+        
+        public void setScheduleDay(LocalDate value){
+            this.day = value;
         }
         
         public Duration getDuration(){
@@ -379,10 +392,6 @@ public class Descriptor {
         
         public void setDuration(Duration value){
             duration = value;
-        }
-        
-        public void setDay(LocalDate value){
-            this.day = value;
         }
     }
     

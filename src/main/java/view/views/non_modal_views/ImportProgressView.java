@@ -3,16 +3,13 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package view.views;
+package view.views.non_modal_views;
 
-import controller.Descriptor;
 import controller.ViewController;
 import view.View;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyVetoException;
-import javax.swing.JDesktopPane;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
 
@@ -24,16 +21,15 @@ public class ImportProgressView extends View {
     enum Mode {PATIENT, APPOINTMENT, NONE};
     enum Operation {EXPORT, IMPORT};
     
-    private boolean hasSystemGCed = false;
-    private static String IMPORT_TITLE_HEADER = "Import progress";
-    private static String IMPORT_APPOINTMENT_PROGRESS_HEADER = "Import appointment data from CSV source";
-    private static String IMPORT_PATIENT_PROGRESS_HEADER = "Import patient data from CSV source";
-    private static String IMPORT_START_PROCESS_HEADER = "Start import";
+    private final boolean hasSystemGCed = false;
+    private final static String IMPORT_TITLE_HEADER = "Import progress";
+    private final static String IMPORT_APPOINTMENT_PROGRESS_HEADER = "Import appointment data from CSV source";
+    private final static String IMPORT_PATIENT_PROGRESS_HEADER = "Import patient data from CSV source";
+    private final static String IMPORT_START_PROCESS_HEADER = "Start import";
     
     
     private Mode mode = Mode.NONE;
     private InternalFrameAdapter internalFrameAdapter = null;
-    private View.Viewer myViewType = null;
     
     private void setMode(Mode value){
         mode = value;
@@ -162,27 +158,17 @@ public class ImportProgressView extends View {
     private javax.swing.JLabel lblPatientsProgressBar;
     // End of variables declaration//GEN-END:variables
 
-    
-    /*
-    private void centreViewOnDesktop(JDesktopPane desktopPane, JInternalFrame view){
-        Insets insets = desktopPane.getInsets();
-        Dimension deskTopViewDimension = desktopPane.getSize();
-        Dimension myViewDimension = view.getSize();
-        view.setLocation(new Point(
-                (int)(deskTopViewDimension.getWidth() - (myViewDimension.getWidth()))/2,
-                (int)((deskTopViewDimension.getHeight()-insets.top) - myViewDimension.getHeight())/2));
-    }
-    */
     /**
      * 
      * @param myViewType
      * @param myController
-     * @param entityDescriptor
-     * @param desktopPane 
+     * @param desktopView 
      */
-    public ImportProgressView(View.Viewer myViewType,ViewController myController,
-            Descriptor entityDescriptor, JDesktopPane desktopPane) {
-        super("Data importer view");
+    public ImportProgressView(
+            View.Viewer myViewType,
+            ViewController myController,
+            DesktopView desktopView) {
+        setTitle("Data importer view");
         setMyViewType(myViewType);
         //setViewDescriptor(entityDescriptor);
         setMyController(myController);
@@ -193,10 +179,8 @@ public class ImportProgressView extends View {
         lblAppointmentsProgressBar.setText(ImportProgressView.IMPORT_APPOINTMENT_PROGRESS_HEADER);
         btnStart.setText(ImportProgressView.IMPORT_START_PROCESS_HEADER);
         this.setTitle(ImportProgressView.IMPORT_TITLE_HEADER);
-
     }
-    
-    @Override
+
     public void addInternalFrameListeners(){
         /**
          * Establish an InternalFrameListener for when the view is closed 
@@ -222,11 +206,6 @@ public class ImportProgressView extends View {
         lblAppointmentsProgressBar.setText(ImportProgressView.IMPORT_APPOINTMENT_PROGRESS_HEADER);
         btnStart.setText(ImportProgressView.IMPORT_START_PROCESS_HEADER);
         this.setTitle(ImportProgressView.IMPORT_TITLE_HEADER);
-    }
-   
-    @Override
-    public View.Viewer getMyViewType(){
-        return this.myViewType;
     }
     
     /**

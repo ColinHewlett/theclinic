@@ -3,9 +3,10 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package view.views.modal_internal_frame_views;
+package view.views.modal_views;
 
 import view.views.view_support_classes.renderers.SelectStartTimeLocalDateTimeRenderer;
+import view.views.non_modal_views.DesktopView;
 import controller.Descriptor;
 import controller.ViewController;
 import view.View;
@@ -52,7 +53,7 @@ import javax.swing.JPanel;
  *
  * @author colin
  */
-public class ModalAppointmentEditorView extends View {
+public class ModalAppointmentEditorView extends ModalView {
     private final String SETTINGS = "Settings";
     private final String FIRST_APPOINTMENT_START_TIME = "First appointment start time";
     private final String LAST_APPOINTMENT_START_TIME = "Last appointment start time";
@@ -72,27 +73,19 @@ public class ModalAppointmentEditorView extends View {
     private DateTimeFormatter ddMMyyyyFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy");
     
     /**
-     * Creates new form AppointmentEditorInternalFrame
+     * 
+     * @param myViewType
+     * @param myController
+     * @param desktopView 
      */
-    public ModalAppointmentEditorView(View.Viewer myViewType, ViewController myController,
-            Descriptor entityDescriptor, 
-            JDesktopPane desktop) {//ViewMode arg
-        super("Appointment configuration view");
+    public ModalAppointmentEditorView(
+            View.Viewer myViewType, 
+            ViewController myController,
+            DesktopView desktopView) {//ViewMode arg
+        setTitle("Appointment configuration view");
         setMyController(myController);
         setMyViewType(myViewType);
-        initComponents(desktop);
-        initialiseViewMode();
-        
-        //desktop.add(this);
-        this.setLayer(JLayeredPane.MODAL_LAYER);
-        centreViewOnDesktop(desktop.getParent());
-        this.initialiseView();
-        this.setVisible(true);
-        makeSelectSettingsMenu();
-        mbrView = new JMenuBar();
-        mbrView.add(this.mnuSelectSettings);
-        setJMenuBar(mbrView);
-        startModal();
+        setDesktopView(desktopView);  
     }
     
     private void makeSelectSettingsMenu(){
@@ -137,7 +130,7 @@ public class ModalAppointmentEditorView extends View {
             reply = JOptionPane.showInternalInputDialog(this, message);
             if (isNumeric(reply)){
                 minutes = Integer.valueOf(reply);
-                LocalDate day = getMyController().getDescriptor().getViewDescription().getDay();
+                LocalDate day = getMyController().getDescriptor().getViewDescription().getScheduleDay();
                 firstSlotStartTime =  LocalDateTime.of(
                         day,ViewController.FIRST_APPOINTMENT_SLOT).minusMinutes(minutes);  
             }else isError = true;
@@ -164,90 +157,15 @@ public class ModalAppointmentEditorView extends View {
             
         }
     }
-    
-    private void startModal() {
-        // We need to add an additional glasspane-like component directly
-        // below the frame, which intercepts all mouse events that are not
-        // directed at the frame itself.
-        JPanel modalInterceptor = new JPanel();
-        modalInterceptor.setOpaque(false);
-        JLayeredPane lp = JLayeredPane.getLayeredPaneAbove(this);
-        lp.setLayer(modalInterceptor, JLayeredPane.MODAL_LAYER.intValue());
-        modalInterceptor.setBounds(0, 0, lp.getWidth(), lp.getHeight());
-        modalInterceptor.addMouseListener(new MouseAdapter(){});
-        modalInterceptor.addMouseMotionListener(new MouseMotionAdapter(){});
-        lp.add(modalInterceptor);
-        this.toFront();
 
-        // We need to explicitly dispatch events when we are blocking the event
-        // dispatch thread.
-        EventQueue queue = Toolkit.getDefaultToolkit().getSystemEventQueue();
-        try {
-            while (! this.isClosed())       {
-                if (EventQueue.isDispatchThread())    {
-                    // The getNextEventMethod() issues wait() when no
-                    // event is available, so we don't need do explicitly wait().
-                    AWTEvent ev = queue.getNextEvent();
-                    // This mimics EventQueue.dispatchEvent(). We can't use
-                    // EventQueue.dispatchEvent() directly, because it is
-                    // protected, unfortunately.
-                    if (ev instanceof ActiveEvent)  ((ActiveEvent) ev).dispatch();
-                    else if (ev.getSource() instanceof Component)  ((Component) ev.getSource()).dispatchEvent(ev);
-                    else if (ev.getSource() instanceof MenuComponent)  ((MenuComponent) ev.getSource()).dispatchEvent(ev);
-                    // Other events are ignored as per spec in
-                    // EventQueue.dispatchEvent
-                } else  {
-                    // Give other threads a chance to become active.
-                    Thread.yield();
-                }
-            }
-        }
-        catch (InterruptedException ex) {
-            // If we get interrupted, then leave the modal state.
-        }
-        finally {
-            // Clean up the modal interceptor.
-            lp.remove(modalInterceptor);
-
-            // Remove the internal frame from its parent, so it is no longer
-            // lurking around and clogging memory.
-            Container parent = this.getParent();
-            if (parent != null) parent.remove(this);
-        }
-    }
-    
-    private void centreViewOnDesktop(Container desktopView){
-        JInternalFrame view = this;
-        Insets insets = desktopView.getInsets();
-        Dimension deskTopViewDimension = desktopView.getSize();
-        Dimension myViewDimension = view.getSize();
-        /*
-        view.setLocation(new Point(
-                (int)(deskTopViewDimension.getWidth() - (myViewDimension.getWidth()))/2,
-                (int)((deskTopViewDimension.getHeight()-insets.top) - myViewDimension.getHeight())/2));
-        */
-        Point point = new Point(
-                (int)((deskTopViewDimension.getWidth()) - (myViewDimension.getWidth()))/2,
-                (int)((deskTopViewDimension.getHeight()-insets.top) - myViewDimension.getHeight())/2);
-        
-        view.setLocation(point);
-        System.out.println("Location = " + point);
-        System.out.println("Desktop size = " + desktopView.getSize());
-        System.out.println("Internal frame size = " + view.getSize());
-        System.out.println("2 x point x = " + desktopView.getWidth()+ "-" + view.getWidth());
-    }
-
-    @Override
-    public void addInternalFrameListeners(){
-        
-    }
-    
     @Override
     public void propertyChange(PropertyChangeEvent e){
         if (e.getPropertyName().equals(
             ViewController.AppointmentScheduleViewControllerPropertyChangeEvent.APPOINTMENT_SCHEDULE_ERROR_RECEIVED.toString())){
-            Descriptor ed = (Descriptor)e.getNewValue();
-            ViewController.displayErrorMessage(ed.getControllerDescription().getError(),
+            //Descriptor ed = (Descriptor)e.getNewValue();
+            String error = getMyController().getDescriptor().
+                    getControllerDescription().getError();
+            ViewController.displayErrorMessage(error,
                                                "Appointment editor dialog error",
                                                JOptionPane.ERROR_MESSAGE);
         }
@@ -293,7 +211,16 @@ public class ModalAppointmentEditorView extends View {
     
     @Override
     public void initialiseView(){
-        LocalDate day = getMyController().getDescriptor().getViewDescription().getDay();
+        initComponents();
+        initialiseViewMode();
+        
+        this.setVisible(true);
+        makeSelectSettingsMenu();
+        mbrView = new JMenuBar();
+        mbrView.add(this.mnuSelectSettings);
+        setJMenuBar(mbrView);
+        
+        LocalDate day = getMyController().getDescriptor().getViewDescription().getScheduleDay();
         this.cmbSelectStartTime.setMaximumRowCount(20);
         this.cmbSelectStartTime.setRenderer(new SelectStartTimeLocalDateTimeRenderer());
         populateSelectStartTime(day);
@@ -311,6 +238,8 @@ public class ModalAppointmentEditorView extends View {
                 .getControllerDescription().getAppointment().getPatient());
 
         this.setTitle("Apppointment editor for " + day.format(ddMMyyyyFormat));
+        
+        this.setLayer(JLayeredPane.MODAL_LAYER);
     }
 
     private void initialiseViewMode(){
@@ -386,8 +315,7 @@ public class ModalAppointmentEditorView extends View {
      */
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
-    private void initComponents(JDesktopPane desktop) {
-        desktop.add(this);
+    private void initComponents() {
         pnlAppointmentDetails = new javax.swing.JPanel();
         lblDialogForAppointmentDefinitionTitle1 = new javax.swing.JLabel();
         lblDialogForAppointmentDefinitionTitle2 = new javax.swing.JLabel();

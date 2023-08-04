@@ -3,135 +3,49 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package view.views.modal_internal_frame_views;
+package view.views.modal_views;
 
-import controller.Descriptor;
 import controller.ViewController;
 import view.View;
-import java.awt.AWTEvent;
-import java.awt.ActiveEvent;
-import java.awt.Component;
-import java.awt.Container;
-import java.awt.Dimension;
-import java.awt.EventQueue;
-import java.awt.Insets;
-import java.awt.MenuComponent;
-import java.awt.Point;
-import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseMotionAdapter;
+import view.views.non_modal_views.DesktopView;
+
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyVetoException;
-import java.util.Dictionary;
-import java.util.Enumeration;
+import java.awt.event.ActionEvent;
 import java.util.HashMap;
 import java.util.Map.Entry;
-import javax.swing.JDesktopPane;
-import javax.swing.JInternalFrame;
-import javax.swing.JLayeredPane;
+
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
+
 import java.time.DayOfWeek;
 
 /**
  *
  * @author colin
  */
-public class ModalSurgeryDaysEditorView extends View {
-    private View.Viewer myViewType = null;
+public class ModalSurgeryDaysEditorView extends ModalView {
 
     /**
-     * Creates new form CalendarVetoPolicyEditorModalViewer
+     * 
+     * @param myViewType
+     * @param myController
+     * @param desktopView 
      */
-    public ModalSurgeryDaysEditorView(View.Viewer myViewType, ViewController myController,
-            Descriptor entityDescriptor, 
-            JDesktopPane desktop) {//ViewMode arg
-        super("Surgery days editor");
+    public ModalSurgeryDaysEditorView(
+            View.Viewer myViewType, 
+            ViewController myController, 
+            DesktopView  desktopView) {//ViewMode arg
+        setTitle("Surgery days editor");
         setMyViewType(myViewType);
         setMyController(myController);
-        
-        initComponents();
-        
-        desktop.add(this);
-        this.setLayer(JLayeredPane.MODAL_LAYER);
-        centreViewOnDesktop(desktop.getParent(),this);
-        //this.initialiseView();
-        this.setVisible(true);
-        this.setClosable(true);
-        
-        ActionEvent actionEvent = new ActionEvent(this,
-            ActionEvent.ACTION_PERFORMED,
-            ViewController.AppointmentScheduleViewControllerActionEvent.MODAL_VIEWER_ACTIVATED.toString());
-        this.getMyController().actionPerformed(actionEvent);
-        
-        startModal(this);
-    }
-
-    private void startModal(JInternalFrame f) {
-        // We need to add an additional glasspane-like component directly
-        // below the frame, which intercepts all mouse events that are not
-        // directed at the frame itself.
-        JPanel modalInterceptor = new JPanel();
-        modalInterceptor.setOpaque(false);
-        JLayeredPane lp = JLayeredPane.getLayeredPaneAbove(f);
-        lp.setLayer(modalInterceptor, JLayeredPane.MODAL_LAYER.intValue());
-        modalInterceptor.setBounds(0, 0, lp.getWidth(), lp.getHeight());
-        modalInterceptor.addMouseListener(new MouseAdapter(){});
-        modalInterceptor.addMouseMotionListener(new MouseMotionAdapter(){});
-        lp.add(modalInterceptor);
-        f.toFront();
-
-        // We need to explicitly dispatch events when we are blocking the event
-        // dispatch thread.
-        EventQueue queue = Toolkit.getDefaultToolkit().getSystemEventQueue();
-        try {
-            while (! f.isClosed())       {
-                if (EventQueue.isDispatchThread())    {
-                    // The getNextEventMethod() issues wait() when no
-                    // event is available, so we don't need do explicitly wait().
-                    AWTEvent ev = queue.getNextEvent();
-                    // This mimics EventQueue.dispatchEvent(). We can't use
-                    // EventQueue.dispatchEvent() directly, because it is
-                    // protected, unfortunately.
-                    if (ev instanceof ActiveEvent)  ((ActiveEvent) ev).dispatch();
-                    else if (ev.getSource() instanceof Component)  ((Component) ev.getSource()).dispatchEvent(ev);
-                    else if (ev.getSource() instanceof MenuComponent)  ((MenuComponent) ev.getSource()).dispatchEvent(ev);
-                    // Other events are ignored as per spec in
-                    // EventQueue.dispatchEvent
-                } else  {
-                    // Give other threads a chance to become active.
-                    Thread.yield();
-                }
-            }
-        }
-        catch (InterruptedException ex) {
-            // If we get interrupted, then leave the modal state.
-        }
-        finally {
-            // Clean up the modal interceptor.
-            lp.remove(modalInterceptor);
-
-            // Remove the internal frame from its parent, so it is no longer
-            // lurking around and clogging memory.
-            Container parent = f.getParent();
-            if (parent != null) parent.remove(f);
-        }
-    }
-    
-    private void centreViewOnDesktop(Container desktopView, JInternalFrame view){
-        Insets insets = desktopView.getInsets();
-        Dimension deskTopViewDimension = desktopView.getSize();
-        Dimension myViewDimension = view.getSize();
-        view.setLocation(new Point(
-                (int)(deskTopViewDimension.getWidth() - (myViewDimension.getWidth()))/2,
-                (int)((deskTopViewDimension.getHeight()-insets.top) - myViewDimension.getHeight())/2));
     }
     
     @Override
     public void initialiseView(){
-        setTitle("Surgery days editor");
+        initComponents();
+        this.setVisible(true);
+        this.setClosable(true);
+
         HashMap<DayOfWeek, Boolean> surgeryDays = getMyController().
                 getDescriptor().getControllerDescription().getSurgeryDaysAssignment();
         for(Entry<DayOfWeek,Boolean> entry : surgeryDays.entrySet()){
@@ -158,13 +72,7 @@ public class ModalSurgeryDaysEditorView extends View {
                     this.chkSunday.setSelected(surgeryDays.get(entry.getKey()));
                     break;
             }
-            
         }
-    }
-    
-    @Override
-    public void addInternalFrameListeners(){
-        
     }
     
     @Override

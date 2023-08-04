@@ -13,7 +13,7 @@ import _system_environment_variables.SystemDefinitions;
 import org.apache.commons.io.FilenameUtils;
 import model.*;
 import repository.StoreException;//01/03/2023
-import view.views.DesktopView;
+import view.views.non_modal_views.DesktopView;
 import java.awt.event.ActionEvent;
 import java.awt.Point;
 import java.beans.PropertyChangeEvent;
@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.Optional;
 import javax.swing.JOptionPane;
 import javax.swing.SwingWorker;
+import view.View;
 
 /**
  *
@@ -38,7 +39,7 @@ public class DesktopViewController extends ViewController{
     private boolean isFirstActionEventReceivedFromAppointmentScheduleViewController = true;
     private DesktopViewMode desktopViewMode;
     private boolean isDesktopPendingClosure = false;
-    private DesktopView view = null;
+    private DesktopView desktopView = null;
     //private ArrayList<AppointmentRemindersViewController> appointmentRemindersViewControllers = null;
     private ArrayList<ScheduleViewController>appointmentScheduleViewControllers = null;
     private ArrayList<PatientNotificationViewController> patientNotificationViewControllers = null;
@@ -48,7 +49,9 @@ public class DesktopViewController extends ViewController{
     private PropertyChangeSupport pcSupport = null;
     private Descriptor entityDescriptor = null;
     private int count = 0;
-    private int recordCount = 0;      
+    private int recordCount = 0;
+    
+   
     
     private DesktopViewController(){
                setDescriptor(new Descriptor());
@@ -57,10 +60,10 @@ public class DesktopViewController extends ViewController{
          * -- object reference to view controller (this)
          * -- Boolean signifying whether view enables data migration functions
          */
-        view = new DesktopView(this, isDataMigrationOptionEnabled, getDescriptor() );
+        DesktopView desktopView = new DesktopView(this, isDataMigrationOptionEnabled, getDescriptor() );
         //view.setSize(1020, 650);
         //view.setVisible(true);
-        setView(view);
+        setDesktopView(desktopView);
         
         
         //view.setContentPane(view);
@@ -73,7 +76,7 @@ public class DesktopViewController extends ViewController{
         boolean isPMSStoreDefined;
         if (isDataMigrationOptionEnabled) {
             notifyMigrationActionCompleted();
-            getView().initialiseView();
+            getDesktopView().initialiseView();
         }
         else{
             if ((SystemDefinitions.getPMSOperationMode()).equals("undefined")){
@@ -95,7 +98,7 @@ public class DesktopViewController extends ViewController{
                 firePropertyChangeEvent(
                         ViewController.DesktopViewControllerPropertyChangeEvent.
                                 DESKTOP_VIEW_CHANGED_NOTIFICATION.toString(),
-                        this.view,
+                        getDesktopView(),
                         this,
                         null,
                         null
@@ -148,7 +151,7 @@ public class DesktopViewController extends ViewController{
                 firePropertyChangeEvent(
                         ViewController.DesktopViewControllerPropertyChangeEvent.
                                 DESKTOP_VIEW_CHANGED_NOTIFICATION.toString(),
-                        getView(),
+                        getDesktopView(),
                         this,
                         null,
                         null
@@ -208,7 +211,7 @@ public class DesktopViewController extends ViewController{
                 firePropertyChangeEvent(
                         ViewController.DesktopViewControllerPropertyChangeEvent.
                                 DESKTOP_VIEW_CHANGED_NOTIFICATION.toString(),
-                        getView(),
+                        getDesktopView(),
                         this,
                         null,
                         null
@@ -319,7 +322,7 @@ public class DesktopViewController extends ViewController{
                     firePropertyChangeEvent(
                             ViewController.DesktopViewControllerPropertyChangeEvent.
                                     DESKTOP_VIEW_CHANGED_NOTIFICATION.toString(),
-                            getView(),
+                            getDesktopView(),
                             this,
                             null,
                             null
@@ -423,13 +426,6 @@ public class DesktopViewController extends ViewController{
             displayErrorMessage(ex.getMessage(), " Desktop ViewController error",JOptionPane.WARNING_MESSAGE);
         }          
     }
-
-    private DesktopView getView(){
-        return this.view;
-    }       
-    private void setView(DesktopView view){
-        this.view = view;
-    }
     
     private void requestViewControllersToCloseViews(){
         if (!this.patientViewControllers.isEmpty()){
@@ -455,7 +451,7 @@ public class DesktopViewController extends ViewController{
         }
         if ((appointmentScheduleViewControllers.isEmpty()) && (patientViewControllers.isEmpty())){
             if (this.isDesktopPendingClosure){
-                getView().dispose();
+                getDesktopView().dispose();
                 System.exit(0);
             }
         } 
@@ -464,30 +460,20 @@ public class DesktopViewController extends ViewController{
     private void createNewAppointmentScheduleViewController(Optional<Descriptor> ed){
         try{
             ScheduleViewController avc =
-                    new ScheduleViewController(this, getView(),ed);
+                    new ScheduleViewController(this, getDesktopView(),ed);
+            avc.setView(new View().make(
+                View.Viewer.SCHEDULE_VIEW,
+                avc, 
+                getDesktopView()));
+
 
             if (getDesktopViewMode().equals(DesktopViewMode.CLINIC_LOGO)){
                 doSetupDesktopViewMode();
             }
-            this.getView().getDeskTop().add(avc.getView());
-            avc.getView().setVisible(true);
-            avc.getView().setTitle("Appointments");
-            avc.getView().setClosable(false);
-            avc.getView().setMaximizable(false);
-            avc.getView().setIconifiable(true);
-            avc.getView().setResizable(false);
-            avc.getView().setSelected(true);
-            avc.getView().setSize(766,548);
-            }
+            
+        }
         catch (StoreException ex){
             displayErrorMessage(ex.getMessage(),"DesktopViewController error",JOptionPane.WARNING_MESSAGE);
-        }
-        catch (PropertyVetoException ex){
-            displayErrorMessage(ex.getMessage(),"DesktopViewController error",JOptionPane.WARNING_MESSAGE);
-            /*
-            JOptionPane.showMessageDialog(getView(),
-                                      new ErrorMessagePanel(ex.getMessage()));
-            */
         }
     }
 
@@ -498,7 +484,7 @@ public class DesktopViewController extends ViewController{
             message = "At least one patient or appointment view is active. Close application anyway?";
         }
         else {message = "Close The Clinic practice management system?";}
-        int close = JOptionPane.showOptionDialog(getView(),
+        int close = JOptionPane.showOptionDialog(getDesktopView(),
                         message,null,
                         JOptionPane.YES_NO_OPTION,
                         JOptionPane.INFORMATION_MESSAGE,
@@ -511,7 +497,7 @@ public class DesktopViewController extends ViewController{
                 requestViewControllersToCloseViews();
             }
             else {
-                getView().dispose();
+                getDesktopView().dispose();
                 System.exit(0);
             }    
         }
@@ -524,12 +510,16 @@ public class DesktopViewController extends ViewController{
     private void doRequestForImportProgressViewController(){
         if (importProgressViewControllers.isEmpty()){
             importProgressViewControllers.add(
-                                    new ImportProgressViewController(this, getView(), getDescriptor()));
-            ImportProgressViewController evc = importProgressViewControllers.get(importProgressViewControllers.size()-1);
+                                    new ImportProgressViewController(this, getDesktopView(), getDescriptor()));
+            ImportProgressViewController ipvc = importProgressViewControllers.get(importProgressViewControllers.size()-1);
+            ipvc.setView(new View().make(
+                View.Viewer.SCHEDULE_VIEW,
+                ipvc, 
+                getDesktopView()));
+            
             if (getDesktopViewMode().equals(DesktopViewMode.CLINIC_LOGO)){
                     doSetupDesktopViewMode();
-            }
-            this.getView().getDeskTop().add(evc.getView());
+            };
         }else{
             String message = "An export is currently in progress; hence "
                     + "the request for a new export process to start is ignored.";
@@ -545,19 +535,23 @@ public class DesktopViewController extends ViewController{
         if (patientNotificationViewControllers.isEmpty()){
             try{
                 patientNotificationViewControllers.add(
-                                            new PatientNotificationViewController(this,getView()));
+                                            new PatientNotificationViewController(this,getDesktopView()));
                 PatientNotificationViewController pnvc = 
                         patientNotificationViewControllers.get(patientNotificationViewControllers.size()-1);
+                pnvc.setView(new View().make(
+                        View.Viewer.SCHEDULE_VIEW,
+                        pnvc, 
+                        getDesktopView()));
+                
                 if (getDesktopViewMode().equals(DesktopViewMode.CLINIC_LOGO)){
                         doSetupDesktopViewMode();
                 }
-                //this.getView().getDeskTop().add(pnvc.getView());
-                pnvc.getView().initialiseView();
+                
 
 
             }catch (StoreException ex){
                 String message = ex.getMessage();
-                JOptionPane.showMessageDialog(this.getView(), 
+                JOptionPane.showMessageDialog(this.getDesktopView(), 
                         message, "Desktop View Controller error", JOptionPane.WARNING_MESSAGE);
             }
         }else {
@@ -567,25 +561,18 @@ public class DesktopViewController extends ViewController{
     private void doRequestForPatientViewController(){
         try{
             patientViewControllers.add(
-                                    new PatientViewController(this, getView()));
+                                    new PatientViewController(this, getDesktopView()));
             PatientViewController pvc = patientViewControllers.get(patientViewControllers.size()-1);
+            pvc.setView(new View().make(
+                View.Viewer.PATIENT_VIEW,
+                pvc, 
+                getDesktopView()));
+            
             if (getDesktopViewMode().equals(DesktopViewMode.CLINIC_LOGO)){
                     doSetupDesktopViewMode();
-            }
-            this.getView().getDeskTop().add(pvc.getView());
-            pvc.getView().setVisible(true);
-            pvc.getView().setClosable(false);
-            pvc.getView().setMaximizable(false);
-            pvc.getView().setIconifiable(true);
-            pvc.getView().setResizable(false);
-            pvc.getView().setSelected(true);
-            pvc.getView().setSize(700
-                    ,560);
+            } 
         }
         catch (StoreException ex){
-            displayErrorMessage(ex.getMessage(),"DesktopViewController error",JOptionPane.WARNING_MESSAGE);
-        }
-        catch (PropertyVetoException ex){
             displayErrorMessage(ex.getMessage(),"DesktopViewController error",JOptionPane.WARNING_MESSAGE);
         }
     }
@@ -836,12 +823,12 @@ public class DesktopViewController extends ViewController{
     
 
     private void notifyMigrationActionCompleted(){
-        pcSupport.addPropertyChangeListener(view);
+        pcSupport.addPropertyChangeListener(getDesktopView());
         PropertyChangeEvent pcEvent = new PropertyChangeEvent(this,
             DesktopViewController.DesktopViewControllerPropertyChangeEvent.MIGRATION_ACTION_COMPLETE.toString(),
             null,getDescriptor());
         pcSupport.firePropertyChange(pcEvent);
-        pcSupport.removePropertyChangeListener(view);
+        pcSupport.removePropertyChangeListener(getDesktopView());
     }
     
     private void setDesktopViewMode(DesktopViewMode mode){
@@ -853,13 +840,13 @@ public class DesktopViewController extends ViewController{
     }
     
     private void doSetupDesktopViewMode(){
-        pcSupport.addPropertyChangeListener(view);
+        pcSupport.addPropertyChangeListener(getDesktopView());
         PropertyChangeEvent pcEvent = new PropertyChangeEvent(this,
             DesktopViewController.
                     DesktopViewControllerPropertyChangeEvent.SET_DESKTOP_VIEW_MODE.toString(),
         null,new Descriptor());
         pcSupport.firePropertyChange(pcEvent);
-        pcSupport.removePropertyChangeListener(view);
+        pcSupport.removePropertyChangeListener(getDesktopView());
     }
     
     /**
@@ -916,7 +903,7 @@ public class DesktopViewController extends ViewController{
             firePropertyChangeEvent(
                         ViewController.DesktopViewControllerPropertyChangeEvent.
                                 DESKTOP_VIEW_CHANGED_NOTIFICATION.toString(),
-                        getView(),
+                        getDesktopView(),
                         this,
                         null,
                         null
@@ -974,6 +961,7 @@ public class DesktopViewController extends ViewController{
         }
         
         javax.swing.SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 new DesktopViewController();
             }
@@ -1137,8 +1125,5 @@ public class DesktopViewController extends ViewController{
     }
     
     enum DesktopViewMode {CLINIC_LOGO, DESKTOP};
-    
-    
-  
-    
+   
 }

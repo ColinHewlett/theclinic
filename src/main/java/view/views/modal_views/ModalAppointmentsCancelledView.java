@@ -2,44 +2,28 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package view.views.modal_internal_frame_views;
+package view.views.modal_views;
 
+import view.views.non_modal_views.DesktopView;
 import view.views.view_support_classes.renderers.AppointmentsTableDurationRenderer;
 import view.views.view_support_classes.renderers.AppointmentsTableLocalDateRenderer;
 import view.views.view_support_classes.renderers.AppointmentsTablePatientRenderer;
-import controller.Descriptor;
 import controller.ViewController;
 import model.Appointment;
 import model.Patient;
 import view.views.view_support_classes.renderers.TableHeaderCellBorderRenderer;
 import view.views.view_support_classes.models.Appointments6ColumnTableModel;
 import view.View;
-import java.awt.AWTEvent;
-import java.awt.ActiveEvent;
 import java.awt.Color;
-import java.awt.Component;
-import java.awt.Container;
-import java.awt.Dimension;
-import java.awt.EventQueue;
-import java.awt.Insets;
-import java.awt.MenuComponent;
-import java.awt.Point;
-import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseMotionAdapter;
 import java.beans.PropertyChangeEvent;
 import java.time.LocalDateTime;
 import java.util.Iterator;
 import javax.swing.JTable;
 import javax.swing.JScrollPane;
 import javax.swing.JButton;
-import javax.swing.JDesktopPane;
-import javax.swing.JInternalFrame;
 import javax.swing.JLayeredPane;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumnModel;
 import java.beans.PropertyVetoException;
@@ -49,92 +33,22 @@ import java.time.Duration;
  *
  * @author colin
  */
-public class ModalCancelledAppointmentsView extends View{
+public class ModalAppointmentsCancelledView extends ModalView{
     private final JScrollPane jScrollPane1 = new javax.swing.JScrollPane();
     private JTable tblCancelledAppointments = new JTable();
     private final JButton btnCloseCancelledAppointmentsView = new JButton("Close cancelled appointments view");
     private final JButton btnUncancelSelectedAppointment = new JButton("Uncancel selected appointment");
-    
-    public ModalCancelledAppointmentsView(
+
+    public ModalAppointmentsCancelledView(
             View.Viewer myViewType, 
             ViewController myController, 
-            Descriptor entityDescriptor,
-            JDesktopPane desktop){
+            DesktopView desktopView){
 
-            super("Cancelled appointment view");
+            setTitle("Cancelled appointment view");
             setMyController(myController);
-            this.setMyViewType(myViewType);
-            initComponents(); 
-            this.populateCancelledAppointmentsTable();
-            desktop.add(this);
-            this.setLayer(JLayeredPane.MODAL_LAYER);
-            centreViewOnDesktop(desktop.getParent(),this);
-            this.setVisible(true);
-
-            startModal(this);
+            setMyViewType(myViewType);
+            setDesktopView(desktopView);
         }
-    
-    private void startModal(JInternalFrame f) {
-        // We need to add an additional glasspane-like component directly
-        // below the frame, which intercepts all mouse events that are not
-        // directed at the frame itself.
-        JPanel modalInterceptor = new JPanel();
-        modalInterceptor.setOpaque(false);
-        JLayeredPane lp = JLayeredPane.getLayeredPaneAbove(f);
-        lp.setLayer(modalInterceptor, JLayeredPane.MODAL_LAYER.intValue());
-        modalInterceptor.setBounds(0, 0, lp.getWidth(), lp.getHeight());
-        modalInterceptor.addMouseListener(new MouseAdapter(){});
-        modalInterceptor.addMouseMotionListener(new MouseMotionAdapter(){});
-        lp.add(modalInterceptor);
-        f.toFront();
-
-        // We need to explicitly dispatch events when we are blocking the event
-        // dispatch thread.
-        EventQueue queue = Toolkit.getDefaultToolkit().getSystemEventQueue();
-        try {
-            while (! f.isClosed())       {
-                if (EventQueue.isDispatchThread())    {
-                    // The getNextEventMethod() issues wait() when no
-                    // event is available, so we don't need do explicitly wait().
-                    AWTEvent ev = queue.getNextEvent();
-                    // This mimics EventQueue.dispatchEvent(). We can't use
-                    // EventQueue.dispatchEvent() directly, because it is
-                    // protected, unfortunately.
-                    if (ev instanceof ActiveEvent)  ((ActiveEvent) ev).dispatch();
-                    else if (ev.getSource() instanceof Component)  ((Component) ev.getSource()).dispatchEvent(ev);
-                    else if (ev.getSource() instanceof MenuComponent)  ((MenuComponent) ev.getSource()).dispatchEvent(ev);
-                    // Other events are ignored as per spec in
-                    // EventQueue.dispatchEvent
-                } else  {
-                    // Give other threads a chance to become active.
-                    Thread.yield();
-                }
-            }
-        }
-        catch (InterruptedException ex) {
-            // If we get interrupted, then leave the modal state.
-        }
-        finally {
-            // Clean up the modal interceptor.
-            lp.remove(modalInterceptor);
-
-            // Remove the internal frame from its parent, so it is no longer
-            // lurking around and clogging memory.
-            Container parent = f.getParent();
-            if (parent != null) parent.remove(f);
-        }
-    }
-    
-    private void centreViewOnDesktop(Container desktopView, JInternalFrame view){
-        Insets insets = desktopView.getInsets();
-        Dimension deskTopViewDimension = desktopView.getSize();
-        Dimension myViewDimension = view.getSize();
-        Point point = new Point(
-                (int)((deskTopViewDimension.getWidth()) - (myViewDimension.getWidth()))/2,
-                (int)((deskTopViewDimension.getHeight()-insets.top) - myViewDimension.getHeight())/2);
-        
-        view.setLocation(point);
-    }
     
     private void populateCancelledAppointmentsTable(){
         if (tblCancelledAppointments.getModel() == null)
@@ -245,12 +159,12 @@ public class ModalCancelledAppointmentsView extends View{
             JOptionPane.showMessageDialog(this, "An appointment to uncancel has not been selected");
     }
     
-    public void initialiseView(){
-        
-    }
-    
     @Override
-    public void addInternalFrameListeners(){
+    public void initialiseView(){
+        initComponents(); 
+        this.populateCancelledAppointmentsTable();
+        this.setVisible(true);
         
     }
+
 }

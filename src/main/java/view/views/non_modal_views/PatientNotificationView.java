@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package view.views;
+package view.views.non_modal_views;
 
 import view.views.view_support_classes.models.PatientNotificationView4ColumnTableModel;
 import view.views.view_support_classes.renderers.PatientNotificationTableOverdueLocalDateRenderer;
@@ -81,20 +81,14 @@ public class PatientNotificationView extends View implements ItemListener {
     /**
      * 
      * @param myViewType
-     * @param myController
-     * @param value 
+     * @param myController 
+     * @param desktopView
      */
     public PatientNotificationView(View.Viewer myViewType, 
-            ViewController myController, 
-            Descriptor value, JDesktopPane desktop) {
-        super("Outstanding patient notifications");
+            ViewController myController, DesktopView desktopView) {
+        setTitle("Outstanding patient notifications");
         this.setMyViewType(myViewType);
-        setMyController(myController);
-        //setViewDescriptor(value);
-        initComponents(); 
-        //addInternalFrameActivatedListener();
-        desktop.add(this);
-        centreViewOnDesktop(desktop,this);
+        setMyController(myController);  
         
     }
     
@@ -139,7 +133,6 @@ public class PatientNotificationView extends View implements ItemListener {
      * InternalFrameEvent.INTERNAL_FRAME_CLOSED event for the listener to let 
      * the view controller know what's happening
      */
-    @Override
     public void addInternalFrameListeners(){
         /**
          * Establish an InternalFrameListener for when the view is closed 
@@ -208,6 +201,7 @@ public class PatientNotificationView extends View implements ItemListener {
      */
     @Override
     public void initialiseView(){
+        initComponents();
         try{
             setVisible(true);
             setTitle(getUITitle());
@@ -217,8 +211,8 @@ public class PatientNotificationView extends View implements ItemListener {
             setResizable(false);
             setSelected(true);
             setSize(800,530);
-            Dimension test1 = this.getPreferredSize();
-            test1 = test1;
+            
+            addInternalFrameListeners();
         }
         catch (PropertyVetoException ex){
             

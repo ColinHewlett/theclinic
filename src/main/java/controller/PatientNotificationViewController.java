@@ -17,7 +17,7 @@ import java.beans.PropertyVetoException;
 import model.Patient;
 
 import repository.StoreException;//01/03/2023
-import view.views.DesktopView;
+import view.views.non_modal_views.DesktopView;
 import view.View;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -25,18 +25,13 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeSupport;
 import javax.swing.JOptionPane;
 import java.util.ArrayList;
+import view.views.modal_views.ModalView;
 
 /**
  *
  * @author colin
  */
 public class PatientNotificationViewController extends ViewController{
-    private PropertyChangeSupport pcSupportForView = null;
-    private PropertyChangeEvent pcEvent = null;
-    private View view = null;
-    //private Descriptor oldEntityDescriptor = new Descriptor();
-    private DesktopView desktopView = null;
-    private View secondaryView = null;
     
     private PatientNotificationViewListState viewListState = null;
 
@@ -49,15 +44,7 @@ public class PatientNotificationViewController extends ViewController{
     private void setViewListState(PatientNotificationViewListState state){
         viewListState = state;
     }
-    
-    private View getSecondaryView(){
-        return secondaryView;
-    }
-    
-    private void setSecondaryView(View value){
-        secondaryView = value;
-    }
-    
+
     @Override
     public void propertyChange(PropertyChangeEvent e){
         
@@ -177,24 +164,26 @@ public class PatientNotificationViewController extends ViewController{
         sendPrimaryViewPatientNotifications(Notification.Scope.ALL);
     }
     
+    /*
     private void getPatientNotificationsFor(Notification notification){
         try{
             notification.read();
             getDescriptor().getControllerDescription().setPatientNotifications(
                     notification.get());
-            pcSupportForView.addPropertyChangeListener(this.view);
+            
+            pcSupportForView.addPropertyChangeListener(this.getView());
             pcEvent = new PropertyChangeEvent(this,
                ViewController.PatientNotificationViewControllerPropertyChangeEvent.RECEIVED_PATIENT_NOTIFICATIONS.toString(),
                null,getDescriptor());
             pcSupportForView.firePropertyChange(pcEvent);
-            pcSupportForView.removePropertyChangeListener(this.view);
+            pcSupportForView.removePropertyChangeListener(this.getView());
         }catch (StoreException ex){
             displayErrorMessage(ex.getMessage(),
                     "Patient notification controller error",
                     JOptionPane.WARNING_MESSAGE);
         }
     }
-
+*/
     private void doActionPatientNotificationRequest(){
         ArrayList<Notification> notifications = 
                 getDescriptor().getViewDescription().getPatientNotifications();
@@ -232,7 +221,10 @@ public class PatientNotificationViewController extends ViewController{
             //patientCollection.read();
             //getNewEntityDescriptor().setThePatients(patientCollection.get());
             View.setViewer(View.Viewer.PATIENT_NOTIFICATION_EDITOR_VIEW);
-            secondaryView = View.factory(this, getDescriptor(), desktopView);
+            setView((ModalView)new View().make(
+                    View.Viewer.PATIENT_NOTIFICATION_EDITOR_VIEW,
+                    this, 
+                    getDesktopView()).getModalView());
             //note: View.factory when opening a modal JInternalFrame does not return until the JInternalFrame has been closed
             ActionEvent actionEvent = new ActionEvent(
                    this,ActionEvent.ACTION_PERFORMED,
@@ -271,8 +263,11 @@ public class PatientNotificationViewController extends ViewController{
             //patientNotificationCollection.setScope(Scope.FOR_PATIENT);
             //patientNotificationCollection.read();
             //getNewEntityDescriptor().setPatientNotifications(patientNotificationCollection.get());
-            View.setViewer(View.Viewer.PATIENT_NOTIFICATION_EDITOR_VIEW);
-            secondaryView = View.factory(this, getDescriptor(), desktopView);
+            //View.setViewer(View.Viewer.PATIENT_NOTIFICATION_EDITOR_VIEW);
+            setView((ModalView)new View().make(
+                    View.Viewer.PATIENT_NOTIFICATION_EDITOR_VIEW,
+                    this,
+                    getDesktopView()).getModalView());
             //note: View.factory when opening a modal JInternalFrame does not return until the JInternalFrame has been closed
             ActionEvent actionEvent = new ActionEvent(
                    this,ActionEvent.ACTION_PERFORMED,
@@ -285,15 +280,14 @@ public class PatientNotificationViewController extends ViewController{
     }
 
     private void doSecondaryViewActionRequest(ActionEvent e)throws StoreException{
-        View the_view = (View)e.getSource();
-        setSecondaryView(the_view);
-        switch (the_view.getMyViewType()){
+        setModalView((ModalView)e.getSource());
+        switch (getModalView().getMyViewType()){
             case PATIENT_NOTIFICATION_EDITOR_VIEW:
                 ViewController.PatientNotificationViewControllerActionEvent actionCommand =
                ViewController.PatientNotificationViewControllerActionEvent.valueOf(e.getActionCommand());
                 switch (actionCommand){
                     case MODAL_VIEWER_ACTIVATED:
-                        getSecondaryView().initialiseView();
+                        //getSecondaryView().initialiseView();
                         break;
                     case PATIENT_NOTIFICATION_EDITOR_CREATE_NOTIFICATION_REQUEST:
                         doPatientNotificationEditorCreateNotificationRequest();
@@ -360,25 +354,24 @@ public class PatientNotificationViewController extends ViewController{
         patientNotification.setScope(scope);
         patientNotification.read();
         getDescriptor().getControllerDescription().setPatientNotifications(patientNotification.get());
-        pcSupportForView.addPropertyChangeListener(this.view);
-        if (scope.equals(Notification.Scope.UNACTIONED)){
-            pcEvent = new PropertyChangeEvent(this,
-                    ViewController.PatientNotificationViewControllerPropertyChangeEvent.RECEIVED_UNACTIONED_NOTIFICATIONS.toString(),
-                    null,getDescriptor());
-        }
-        else{
-            pcEvent = new PropertyChangeEvent(this,
-                    ViewController.PatientNotificationViewControllerPropertyChangeEvent.RECEIVED_PATIENT_NOTIFICATIONS.toString(),
-                    null,getDescriptor());
-        }
-        
-        pcSupportForView.firePropertyChange(pcEvent);
-        pcSupportForView.removePropertyChangeListener(this.view);  
+        String pcEventName;
+        if(scope.equals(Notification.Scope.UNACTIONED)) pcEventName = 
+                PatientNotificationViewControllerPropertyChangeEvent.
+                        RECEIVED_UNACTIONED_NOTIFICATIONS.toString();
+        else pcEventName = PatientNotificationViewControllerPropertyChangeEvent.
+                RECEIVED_PATIENT_NOTIFICATIONS.toString();       
+        firePropertyChangeEvent(
+                pcEventName,
+                getView(),
+                this,
+                null,
+                null
+        ); 
     }
     
     private void closeSecondaryView(){
         try{
-            getSecondaryView().setClosed(true);
+            getModalView().setClosed(true);
         }catch (PropertyVetoException ex){
 
         }
@@ -387,31 +380,13 @@ public class PatientNotificationViewController extends ViewController{
     private void doPatientNotificationEditorCloseViewRequest(){
         
     }
-
-    private void setDesktopView(DesktopView value){
-        desktopView = value;
-    }
     
     public PatientNotificationViewController(DesktopViewController controller, 
                                                 DesktopView desktopView)
                                                 throws StoreException{
         setMyController(controller);
         setDesktopView(desktopView);
-        pcSupportForView = new PropertyChangeSupport(this);
-        //setNewEntityDescriptor(new Descriptor());
-        //this.oldEntityDescriptor = new Descriptor();
-        /**
-         * -- construct a PatientNotification object
-         * -- initialise its Collection with the stored unactioned notifications on the system
-         * -- store the patient notification object in an EntityDescriptor object
-         */
-        View.setViewer(View.Viewer.PATIENT_NOTIFICATION_VIEW);
-        this.view = View.factory(this, getDescriptor(), desktopView);
-        this.view.addInternalFrameListeners();
     }
-    
-    public View getView(){
-        return view;
-    }
-    
+
+ 
 }

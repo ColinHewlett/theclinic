@@ -2,27 +2,14 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JInternalFrame.java to edit this template
  */
-package view.views.modal_internal_frame_views;
+package view.views.modal_views;
 
 import controller.Descriptor;
 import controller.ViewController;
 import model.Appointment;
-import _system_environment_variables.SystemDefinitions;
-import java.awt.AWTEvent;
-import java.awt.ActiveEvent;
-import java.awt.Component;
-import java.awt.Container;
-import java.awt.Dimension;
-import java.awt.EventQueue;
-import java.awt.Insets;
-import java.awt.MenuComponent;
-import java.awt.Point;
-import java.awt.Toolkit;
+import view.views.non_modal_views.DesktopView;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseMotionAdapter;
 import java.awt.event.ItemListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyVetoException;
@@ -32,15 +19,9 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import javax.swing.DefaultComboBoxModel;
-import javax.swing.JComboBox;
-import javax.swing.JDesktopPane;
-import javax.swing.JInternalFrame;
 import javax.swing.JLayeredPane;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JRadioButton;
 import javax.swing.SpinnerNumberModel;
-import model.Patient;
 import view.View;
 import view.views.view_support_classes.renderers.SelectStartTimeLocalDateTimeRenderer;
 
@@ -48,162 +29,23 @@ import view.views.view_support_classes.renderers.SelectStartTimeLocalDateTimeRen
  * 
  * @author colin
  */
-public class ModalUnbookableAppointmentSlotEditorView extends View {
-    private View.Viewer myViewType = null;
-    private DateTimeFormatter appointmentScheduleFormat = DateTimeFormatter.ofPattern("EEEE, MMMM dd yyyy ");
-    private DateTimeFormatter ddMMyyyyFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+public class ModalUnbookableAppointmentSlotEditorView extends ModalView {
+    private final DateTimeFormatter ddMMyyyyFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy");
     /**
      * 
      * @param myViewType; either CREATE or UPDATE view mode 
      * @param myController; basses down to view a reference to its view controller
-     * @param desktop; parent JDesktopPane to which this internal frame is added
+     * @param desktopView; 
      */
     public ModalUnbookableAppointmentSlotEditorView (
-            View.Viewer myViewType, ViewController myController,
-            //Descriptor entityDescriptor, 
-            JDesktopPane desktop) {
-        super("Appointment configuration view");
+            View.Viewer myViewType, 
+            ViewController myController, 
+            DesktopView desktopView) {
         setMyController(myController);
         setMyViewType(myViewType);
-        setDesktop(desktop);
-        initComponents();
-
-        
-        
-        chkIsAllDay.addItemListener(new ItemListener() {
-            @Override
-            public void itemStateChanged(ItemEvent e) {
-                if (e.getStateChange()== ItemEvent.SELECTED){
-                    spnDurationHours.setValue(8);
-                    spnDurationMinutes.setValue(0);
-                    spnDurationHours.setEnabled(false);
-                    spnDurationMinutes.setEnabled(false);
-                    cmbSelectStartTime.setEnabled(false);
-                    cmbSelectStartTime.setSelectedIndex(0);
-                }
-                else{
-                    spnDurationHours.setValue(0);
-                    spnDurationMinutes.setValue(0);
-                    spnDurationHours.setEnabled(true);
-                    spnDurationMinutes.setEnabled(true);
-                    cmbSelectStartTime.setEnabled(true);
-                }
-            }
-        });
-        /*
-        this.setTitle("Unbookable slot editor (" + day.format(ddMMyyyyFormat) + ")");
-        Appointment appointment = getMyController().getDescriptor().getControllerDescription().getAppointment();
-        if (appointment.getPatient()==null){
-            if (appointment.getStart()==null){
-                appointment.setStart(LocalDateTime.of(day, LocalTime.of(9,0)));
-                appointment.setDuration(Duration.ofHours(8));
-                this.chkIsAllDay.setSelected(true);
-            }
-            else{
-                this.chkIsAllDay.setSelected(false);
-                this.cmbSelectStartTime.setSelectedItem(appointment.getStart());
-                this.spnDurationHours.setValue(getHoursFromDuration(appointment.getDuration().toHours()));
-                this.spnDurationMinutes.setValue(getMinutesFromDuration(appointment.getDuration().toMinutes()));
-            }
-
-        }  
-        else if (getMyController().getDescriptor().getControllerDescription().getViewMode().equals(ViewController.ViewMode.UPDATE)){    
-            this.cmbSelectStartTime.setSelectedItem(
-                getMyController().getDescriptor().getControllerDescription().getAppointment().getStart());
-            this.spnDurationHours.setValue(getHoursFromDuration(getMyController().getDescriptor().
-                    getControllerDescription().getAppointment().getDuration().toHours()));
-            this.spnDurationMinutes.setValue(getMinutesFromDuration(getMyController().getDescriptor().
-                    getControllerDescription().getAppointment().getDuration().toMinutes()));
-            this.txaNotes.setText(getMyController().getDescriptor().getControllerDescription().getAppointment().getNotes());
-            this.chkIsAllDay.setSelected(false);
-        }
-        else this.chkIsAllDay.setSelected(true);
-
-        
-        desktop.add(this);
-        this.setLayer(JLayeredPane.MODAL_LAYER);
-        centreViewOnDesktop(desktop.getParent(),this);
-        this.setVisible(true);
-        
-        startModal(this);
-        */
-    }
-    
-    private void startModal(JInternalFrame f) {
-        // We need to add an additional glasspane-like component directly
-        // below the frame, which intercepts all mouse events that are not
-        // directed at the frame itself.
-        JPanel modalInterceptor = new JPanel();
-        modalInterceptor.setOpaque(false);
-        JLayeredPane lp = JLayeredPane.getLayeredPaneAbove(f);
-        lp.setLayer(modalInterceptor, JLayeredPane.MODAL_LAYER.intValue());
-        modalInterceptor.setBounds(0, 0, lp.getWidth(), lp.getHeight());
-        modalInterceptor.addMouseListener(new MouseAdapter(){});
-        modalInterceptor.addMouseMotionListener(new MouseMotionAdapter(){});
-        lp.add(modalInterceptor);
-        f.toFront();
-
-        // We need to explicitly dispatch events when we are blocking the event
-        // dispatch thread.
-        EventQueue queue = Toolkit.getDefaultToolkit().getSystemEventQueue();
-        try {
-            while (! f.isClosed())       {
-                if (EventQueue.isDispatchThread())    {
-                    // The getNextEventMethod() issues wait() when no
-                    // event is available, so we don't need do explicitly wait().
-                    AWTEvent ev = queue.getNextEvent();
-                    // This mimics EventQueue.dispatchEvent(). We can't use
-                    // EventQueue.dispatchEvent() directly, because it is
-                    // protected, unfortunately.
-                    if (ev instanceof ActiveEvent)  ((ActiveEvent) ev).dispatch();
-                    else if (ev.getSource() instanceof Component)  ((Component) ev.getSource()).dispatchEvent(ev);
-                    else if (ev.getSource() instanceof MenuComponent)  ((MenuComponent) ev.getSource()).dispatchEvent(ev);
-                    // Other events are ignored as per spec in
-                    // EventQueue.dispatchEvent
-                } else  {
-                    // Give other threads a chance to become active.
-                    Thread.yield();
-                }
-            }
-        }
-        catch (InterruptedException ex) {
-            // If we get interrupted, then leave the modal state.
-        }
-        finally {
-            // Clean up the modal interceptor.
-            lp.remove(modalInterceptor);
-
-            // Remove the internal frame from its parent, so it is no longer
-            // lurking around and clogging memory.
-            Container parent = f.getParent();
-            if (parent != null) parent.remove(f);
-        }
-    }
-    
-    private void centreViewOnDesktop(Container desktopView, JInternalFrame view){
-        Insets insets = desktopView.getInsets();
-        Dimension deskTopViewDimension = desktopView.getSize();
-        Dimension myViewDimension = view.getSize();
-        /*
-        view.setLocation(new Point(
-                (int)(deskTopViewDimension.getWidth() - (myViewDimension.getWidth()))/2,
-                (int)((deskTopViewDimension.getHeight()-insets.top) - myViewDimension.getHeight())/2));
-        */
-        Point point = new Point(
-                (int)((deskTopViewDimension.getWidth()) - (myViewDimension.getWidth()))/2,
-                (int)((deskTopViewDimension.getHeight()-insets.top) - myViewDimension.getHeight())/2);
-        
-        view.setLocation(point);
-        System.out.println("Location = " + point);
-        System.out.println("Desktop size = " + desktopView.getSize());
-        System.out.println("Internal frame size = " + view.getSize());
-        System.out.println("2 x point x = " + desktopView.getWidth()+ "-" + view.getWidth());
+        setDesktopView(desktopView);
     }
 
-    @Override
-    public void addInternalFrameListeners(){
-        
-    }
     
     @Override
     public void propertyChange(PropertyChangeEvent e){
@@ -233,7 +75,7 @@ public class ModalUnbookableAppointmentSlotEditorView extends View {
                     getAppointment().getStart());
         this.spnDurationHours.setValue(getHoursFromDuration(
                 getMyController().getDescriptor().
-                getControllerDescription().getAppointment().getDuration().toHours()));
+                getControllerDescription().getAppointment().getDuration().toMinutes()));
         this.spnDurationMinutes.setValue(getMinutesFromDuration(
                 getMyController().getDescriptor().
                 getControllerDescription().getAppointment().getDuration().toMinutes()));
@@ -241,7 +83,29 @@ public class ModalUnbookableAppointmentSlotEditorView extends View {
     
     @Override
     public void initialiseView(){
-        LocalDate day = getMyController().getDescriptor().getViewDescription().getDay();
+        initComponents();
+        chkIsAllDay.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                if (e.getStateChange()== ItemEvent.SELECTED){
+                    spnDurationHours.setValue(8);
+                    spnDurationMinutes.setValue(0);
+                    spnDurationHours.setEnabled(false);
+                    spnDurationMinutes.setEnabled(false);
+                    cmbSelectStartTime.setEnabled(false);
+                    cmbSelectStartTime.setSelectedIndex(0);
+                }
+                else{
+                    spnDurationHours.setValue(0);
+                    spnDurationMinutes.setValue(0);
+                    spnDurationHours.setEnabled(true);
+                    spnDurationMinutes.setEnabled(true);
+                    cmbSelectStartTime.setEnabled(true);
+                }
+            }
+        });
+        
+        LocalDate day = getMyController().getDescriptor().getViewDescription().getScheduleDay();
         this.cmbSelectStartTime.setMaximumRowCount(20);
         this.cmbSelectStartTime.setRenderer(new SelectStartTimeLocalDateTimeRenderer());
         populateSelectStartTime(day);
@@ -257,7 +121,9 @@ public class ModalUnbookableAppointmentSlotEditorView extends View {
             else{
                 this.chkIsAllDay.setSelected(false);
                 this.cmbSelectStartTime.setSelectedItem(appointment.getStart());
-                this.spnDurationHours.setValue(getHoursFromDuration(appointment.getDuration().toHours()));
+                this.spnDurationHours.setValue(appointment.getDuration().toHours());
+                //this.spnDurationMinutes.setValue(appointment.getDuration().toMinutes());
+                //this.spnDurationHours.setValue(getHoursFromDuration(appointment.getDuration().toHours()));
                 this.spnDurationMinutes.setValue(getMinutesFromDuration(appointment.getDuration().toMinutes()));
             }
 
@@ -267,29 +133,8 @@ public class ModalUnbookableAppointmentSlotEditorView extends View {
             this.chkIsAllDay.setSelected(false);
         }
         else this.chkIsAllDay.setSelected(true);
-        
-        /*
-        if (getMyController().getDescriptor().getControllerDescription().
-                getAppointment().getPatient().toString().
-                equals(SystemDefinitions.APPOINTMENT_UNBOOKABILITY_MARKER)){
-            initialiseStartTimeAndDurationControls();
-        }
-        this.txaNotes.setText(getMyController().getDescriptor().
-                getControllerDescription().getAppointment().getNotes());
-        
-        */
-        
-        
-        //this.cmbSelectStartTime.setSelectedIndex(0);
-        this.setTitle("Unbookable slot editor (" + day.format(ddMMyyyyFormat) + ")");
-
-        
-        getDesktop().add(this);
         this.setLayer(JLayeredPane.MODAL_LAYER);
-        centreViewOnDesktop(getDesktop().getParent(),this);
-        this.setVisible(true);
-        
-        startModal(this);  
+        this.setVisible(true); 
     }
     
     private Integer getHoursFromDuration(long duration){
@@ -437,16 +282,11 @@ public class ModalUnbookableAppointmentSlotEditorView extends View {
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(pnlSlotDetails, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                    .addComponent(jPanel2, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(pnlSlotDetails, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
             .addGroup(layout.createSequentialGroup()
                 .addGap(72, 72, 72)
@@ -545,8 +385,8 @@ public class ModalUnbookableAppointmentSlotEditorView extends View {
 
     private Duration getDurationFromView(){
         return Duration.ofMinutes(
-                ((int)this.spnDurationHours.getValue() * 60) + 
-                ((int)this.spnDurationMinutes.getValue()));
+                ((Long)this.spnDurationHours.getValue()*60) + 
+                ((Integer)this.spnDurationMinutes.getValue()));
     }
     
     private void initialiseEntityDescriptorFromView(){

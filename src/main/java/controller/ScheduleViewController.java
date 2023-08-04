@@ -12,9 +12,10 @@ import model.Appointment;
 import model.Patient;
 import model.SurgeryDaysAssignment;
 import repository.StoreException;//01/03/2023
-import view.views.DesktopView;
+import view.views.non_modal_views.DesktopView;
 import view.View;
-import view.views.interfaces.IView;
+import view.views.modal_views.ModalView;
+import view.views.modal_views.ModalEmptySlotScanConfigurationView;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.Point;
@@ -49,12 +50,9 @@ public class ScheduleViewController extends ViewController{
                                             NO_COLLISION,
                                             SLOT_START_OK,
                                             UNDEFINED}
-    
+    private View secondaryView = null;
     private PropertyChangeSupport pcSupport = null;
-    private View view = null;
-    private View view2 = null;
     private PropertyChangeEvent pcEvent = null;
-    private DesktopView desktopView = null;
     private LocalDate appointmentScheduleDay = null;
     
     private LocalDate getAppointmentScheduleDay(){
@@ -74,23 +72,18 @@ public class ScheduleViewController extends ViewController{
      */
     public ScheduleViewController(ActionListener controller, DesktopView desktopView, Optional<Descriptor> ed)throws StoreException{
         setMyController(controller);
-        this.desktopView = desktopView;
+        setDesktopView(desktopView);
         pcSupport = new PropertyChangeSupport(this);
         Descriptor e = ed.orElse(new Descriptor());
-        setDescriptor(e);
-        //setNewEntityDescriptor(e);
-        //setOldEntityDescriptor(getDescriptor());
+        //setDescriptor(e);
+
         try{
             SurgeryDaysAssignment surgeryDaysAssignment = new SurgeryDaysAssignment();
             //surgeryDaysAssignment.read();
             surgeryDaysAssignment = surgeryDaysAssignment.read();
             getDescriptor().getControllerDescription().setSurgeryDaysAssignment(surgeryDaysAssignment.get());
-            View.setViewer(View.Viewer.SCHEDULE_VIEW);
-            this.view = View.factory(this, getDescriptor(), desktopView);
-            super.centreViewOnDesktop(desktopView, view);
-            this.view.addInternalFrameListeners(); 
-            this.view.initialiseView();
-            pcSupport.removePropertyChangeListener(this.view);
+
+            pcSupport.removePropertyChangeListener(getView());
         }
         catch (StoreException ex){
             displayErrorMessage(ex.getMessage(),"AppointmentViewController error",JOptionPane.WARNING_MESSAGE);
@@ -129,6 +122,7 @@ public class ScheduleViewController extends ViewController{
         else {
             
             View the_view = (View)e.getSource();
+            
 
             switch(the_view.getMyViewType()){
                 case SCHEDULE_VIEW:
@@ -156,7 +150,6 @@ public class ScheduleViewController extends ViewController{
                 Patient patient = appointment.getPatient();
                 getDescriptor().getControllerDescription().setPatient(patient);
                 LocalDate day = appointment.getStart().toLocalDate();
-                String test = patient.toString();
                 if (patient.toString().equals(SystemDefinitions.APPOINTMENT_UNBOOKABILITY_MARKER)) {
                     appointment.setScope(Scope.SINGLE);
                     appointment.delete();
@@ -170,7 +163,7 @@ public class ScheduleViewController extends ViewController{
                     getDescriptor().getControllerDescription().setAppointment(appointment);
                     getDescriptor().getControllerDescription().setAppointments(appointment.get());
                     getDescriptor().getControllerDescription().setAppointmentScheduleDay(day);
-                    doAppointeeReminderCount(appointment.get());
+                    //doAppointeeReminderCount(appointment.get());
                     getUpdatedAppointmentSlotsForDay(appointment);   
                 }
              
@@ -189,8 +182,10 @@ public class ScheduleViewController extends ViewController{
             appointment.read();
             getDescriptor().getControllerDescription().
                     setAppointmentCancellations(appointment.get());
-            View.setViewer(View.Viewer.CANCELLED_APPOINTMENTS_VIEW);
-            this.view2 = View.factory(this, getDescriptor(), this.desktopView);
+            setModalView((ModalView)new View().make(
+                    View.Viewer.APPOINTMENTS_CANCELLED_VIEW,
+                    this, 
+                    this.getDesktopView()).getModalView());
             
         }catch (StoreException ex){
             String msg = ex.getMessage() +"\n"
@@ -232,9 +227,10 @@ public class ScheduleViewController extends ViewController{
             getDescriptor().getControllerDescription().setViewMode(ViewMode.CREATE);
             if (getDescriptor().getControllerDescription().
                     getAppointment().getPatient()==null){
-                View.setViewer(View.Viewer.APPOINTMENT_CREATOR_EDITOR_VIEW);
-                this.view2 = View.factory(this, getDescriptor(), this.desktopView);
-            
+                setModalView((ModalView)new View().make(
+                    View.Viewer.APPOINTMENT_EDITOR_VIEW,
+                    this, 
+                    this.getDesktopView()).getModalView());
                 /**
                  * ENABLE_CONTROLS_REQUEST requests DesktopViewController to enable menu options in its view
                  * -- note: View.factory when opening a modal JInternalFrame does not return until the JInternalFrame has been closed
@@ -302,9 +298,12 @@ public class ScheduleViewController extends ViewController{
                         setViewMode(ViewController.ViewMode.UPDATE);
                 break;
         }
-        
-        View.setViewer(View.Viewer.UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_VIEW);
-        this.view2 = View.factory(this, getDescriptor(), this.desktopView);
+
+        //this.view2 = View.factory(this, getDescriptor(), this.desktopView);
+        setModalView((ModalView)new View().make(
+                    View.Viewer.UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_VIEW,
+                    this, 
+                    this.getDesktopView()).getModalView());
         /**
          * ENABLE_CONTROLS_REQUEST requests DesktopViewController to enable menu options in its view
          * -- note: View.factory when opening a modal JInternalFrame does not return until the JInternalFrame has been closed
@@ -339,8 +338,10 @@ public class ScheduleViewController extends ViewController{
                 getDescriptor().getControllerDescription().setAppointment(appointment);
                 getDescriptor().getControllerDescription().setPatients(patient.get());
                 getDescriptor().getControllerDescription().setViewMode(ViewMode.UPDATE);
-                View.setViewer(View.Viewer.APPOINTMENT_CREATOR_EDITOR_VIEW);
-                this.view2 = View.factory(this, getDescriptor(), this.desktopView);
+                setModalView((ModalView)new View().make(
+                    View.Viewer.APPOINTMENT_EDITOR_VIEW,
+                    this, 
+                    this.getDesktopView()).getModalView());
                 /**
                  * ENABLE_CONTROLS_REQUEST requests DesktopViewController to enable menu options in its view
                  * -- note: View.factory when opening a modal JInternalFrame does not return until the JInternalFrame has been closed
@@ -407,7 +408,7 @@ public class ScheduleViewController extends ViewController{
                     getView(),
                     this,
                     null,
-                    getDescriptor()
+                    null
             );
             resetEmptySlotScannerSettings();
         }
@@ -430,8 +431,10 @@ public class ScheduleViewController extends ViewController{
     private void doNonSurgeryDayScheduleViewRequest(){
         try{
             getDescriptor().getControllerDescription().setSurgeryDaysAssignment(new SurgeryDaysAssignment().read().get());
-            View.setViewer(View.Viewer.NON_SURGERY_DAY_EDITOR_VIEW);
-            this.view2 = View.factory(this, getDescriptor(), desktopView); 
+            setModalView((ModalView)new View().make(
+                    View.Viewer.NON_SURGERY_DAY_EDITOR_VIEW,
+                    this, 
+                    this.getDesktopView()).getModalView()); 
             /**
              * ENABLE_CONTROLS_REQUEST requests DesktopViewController to enable menu options in its view
              * -- note: View.factory when opening a modal JInternalFrame does not return until the JInternalFrame has been closed
@@ -452,8 +455,10 @@ public class ScheduleViewController extends ViewController{
         try{
             getDescriptor().getControllerDescription().setAppointmentScheduleDay(getAppointmentScheduleDay());
             getDescriptor().getControllerDescription().setSurgeryDaysAssignment(new SurgeryDaysAssignment().read().get());
-            View.setViewer(View.Viewer.SURGERY_DAY_EDITOR_VIEW);
-            this.view2 = View.factory(this, getDescriptor(), desktopView); 
+            setModalView((ModalView)new View().make(
+                    View.Viewer.SURGERY_DAY_EDITOR_VIEW,
+                    this, 
+                    this.getDesktopView()).getModalView()); 
             /**
              * ENABLE_CONTROLS_REQUEST requests DesktopViewController to enable menu options in its view
              * -- note: View.factory when opening a modal JInternalFrame does not return until the JInternalFrame has been closed
@@ -474,8 +479,11 @@ public class ScheduleViewController extends ViewController{
         /**
          * EMPTY_SLOT_SCANNER_DIALOG_REQUEST constructs an EmptySlotScanEditorModalViewer
          */
-        View.setViewer(View.Viewer.EMPTY_SLOT_SCAN_CONFIGURATION_VIEW);
-        this.view2 = View.factory(this, getDescriptor(), desktopView);
+        
+        this.setModalView((ModalView)new View().make(
+                    View.Viewer.EMPTY_SLOT_SCAN_CONFIGURATION_VIEW,
+                    this, 
+                    this.getDesktopView()).getModalView());
 
         /**
          * ENABLE_CONTROLS_REQUEST requests DesktopViewController to enable menu options in its view
@@ -555,7 +563,7 @@ public class ScheduleViewController extends ViewController{
                 firePropertyChangeEvent(
                         ViewController.AppointmentScheduleViewControllerPropertyChangeEvent.
                                 APPOINTMENTS_FOR_DAY_RECEIVED.toString(),
-                        this.view,//event target/listener
+                        getView(),//event target/listener
                         this,//event sender
                         null,
                         getDescriptor()//event related data        
@@ -565,7 +573,7 @@ public class ScheduleViewController extends ViewController{
                     firePropertyChangeEvent(
                            ViewController.AppointmentScheduleViewControllerPropertyChangeEvent.
                                    NO_APPOINTMENT_SLOTS_FROM_DAY_RECEIVED.toString(),
-                           this.view,//event target/listener
+                           this.getView(),//event target/listener
                            this,//event sender
                            null,
                            getDescriptor()//event related data        
@@ -597,11 +605,11 @@ public class ScheduleViewController extends ViewController{
             case APPOINTMENTS_FOR_DAY_REQUEST:
                 //?setEntityDescriptorFromView(((View)e.getSource()).getViewDescriptor());
                 //getDescriptor().setViewDescription(((Descriptor)(((View)e.getSource()).getViewDescriptor())).getViewDescription());
-                //?setAppointmentScheduleDay(getDescriptorFromView().getViewDescription().getDay());
-                setAppointmentScheduleDay(getDescriptor().getViewDescription().getDay());
+                //?setAppointmentScheduleDay(getDescriptorFromView().getViewDescription().getScheduleDay());
+                setAppointmentScheduleDay(getDescriptor().getViewDescription().getScheduleDay());
                 getDescriptor().getControllerDescription().
                         setAppointmentScheduleDay(getDescriptor().
-                                getViewDescription().getDay());
+                                getViewDescription().getScheduleDay());
                 doAppointmentForDayRequest(getDescriptor().
                         getControllerDescription().getAppointmentScheduleDay());
                 firePropertyChangeEvent(
@@ -632,27 +640,27 @@ public class ScheduleViewController extends ViewController{
     
     /**
      * redirects ActionEvents sent from secondary views that have been launched by the primary view
-     * -- secondary views are identified by the ActionEvent::Source property, defined in the View::ViewGype enum ; thus
-     * ---- APPOINTMENT_CREATOR_EDITOR_VIEW
-     * ---- EMPTY_SLOT_SCAN_CONFIGURATION_VIEW
-     * ---- NON_SURGERY_DAY_EDITOR_VIEW
-     * ---- SURGERY_DAY_EDITOR_VIEW
+ -- secondary views are identified by the ActionEvent::Source property, defined in the View::ViewGype enum ; thus
+ ---- APPOINTMENT_EDITOR_VIEW
+ ---- EMPTY_SLOT_SCAN_CONFIGURATION_VIEW
+ ---- NON_SURGERY_DAY_EDITOR_VIEW
+ ---- SURGERY_DAY_EDITOR_VIEW
      * @param e 
      */
     
     private void doSecondaryViewActionRequest(ActionEvent e){
-        this.view2 = (View)e.getSource();
+        setModalView((ModalView)e.getSource());
         //?setEntityDescriptorFromView(this.view2.getViewDescriptor());
         //getDescriptor().setViewDescription(this.view2.getViewDescriptor().getViewDescription());
-        switch(this.view2.getMyViewType()){
-            case CANCELLED_APPOINTMENTS_VIEW:
+        switch(this.getModalView().getMyViewType()){
+            case APPOINTMENTS_CANCELLED_VIEW:
                 doCancelledAppointmentsViewAction(e);
                 break;
             case UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_VIEW:
                 doUnbookableAppointmentSlotEditorAction(e);
                 //resetEmptySlotScannerSettings();
                 break;
-            case APPOINTMENT_CREATOR_EDITOR_VIEW:
+            case APPOINTMENT_EDITOR_VIEW:
                 doAppointmentCreatorEditorViewAction(e);
                 //resetEmptySlotScannerSettings();
                 break;
@@ -686,7 +694,7 @@ public class ScheduleViewController extends ViewController{
             //?setEntityDescriptorFromView(((View)e.getSource()).getViewDescriptor());
             //getDescriptor().setViewDescription(((Descriptor)(((View)e.getSource()).getViewDescriptor())).getViewDescription());
             try{
-                this.view2.setClosed(true);
+                getModalView().setClosed(true);
             }
             catch (PropertyVetoException ex){
                 String message = ex.getMessage() + "\n";
@@ -694,12 +702,14 @@ public class ScheduleViewController extends ViewController{
                 displayErrorMessage(message,"AppointmentViewController error",JOptionPane.WARNING_MESSAGE);
             }
             
-            pcSupport.addPropertyChangeListener(view);
-            pcEvent = new PropertyChangeEvent(this,
-                ViewController.AppointmentScheduleViewControllerPropertyChangeEvent.NON_SURGERY_DAY_EDIT_RECEIVED.toString(),
-                null,getDescriptor());
-            pcSupport.firePropertyChange(pcEvent);
-            pcSupport.removePropertyChangeListener(view);
+            firePropertyChangeEvent(
+                    AppointmentScheduleViewControllerPropertyChangeEvent.
+                            NON_SURGERY_DAY_EDIT_RECEIVED.toString(),
+                    getSecondaryView(), //listener
+                    this, //source
+                    null,
+                    null      
+            );
         }
         else if (e.getActionCommand().equals(
                 ViewController.AppointmentScheduleViewControllerActionEvent.MODAL_VIEWER_ACTIVATED.toString())){
@@ -722,7 +732,7 @@ public class ScheduleViewController extends ViewController{
                 HashMap<DayOfWeek,Boolean> surgeryDaysAssignmentValue = 
                         getDescriptor().getViewDescription().getSurgeryDaysAssignmentValue();
                 try{
-                    this.view2.setClosed(true);
+                    getModalView().setClosed(true);
                 }
                 catch (PropertyVetoException ex){
                     String message = ex.getMessage() + "\n";
@@ -735,7 +745,7 @@ public class ScheduleViewController extends ViewController{
                     getDescriptor().getControllerDescription().setSurgeryDaysAssignment(new SurgeryDaysAssignment().read().get());
                     firePropertyChangeEvent(
                             ViewController.AppointmentScheduleViewControllerPropertyChangeEvent.SURGERY_DAYS_ASSIGNMENT_RECEIVED.toString(),
-                            view,
+                            getSecondaryView(),
                             this,
                             null,
                             getDescriptor()
@@ -748,7 +758,7 @@ public class ScheduleViewController extends ViewController{
                 break;
             }
             case MODAL_VIEWER_ACTIVATED:
-                this.view2.initialiseView();
+                //this.view2.initialiseView();
                 break;
         }
 
@@ -761,7 +771,7 @@ public class ScheduleViewController extends ViewController{
                     //?getDescriptorFromView().getViewDescription().getSurgeryDaysAssignmentValue();
                     getDescriptor().getViewDescription().getSurgeryDaysAssignmentValue();
             try{
-                this.view2.setClosed(true);
+                getModalView().setClosed(true);
             }
             catch (PropertyVetoException ex){
                 String message = ex.getMessage() + "\n";
@@ -778,12 +788,14 @@ public class ScheduleViewController extends ViewController{
                 /**
                  * fire event over to APPOINTMENT_SCHEDULE
                  */
-                pcSupport.addPropertyChangeListener(view);
-                pcEvent = new PropertyChangeEvent(this,
-                    ViewController.AppointmentScheduleViewControllerPropertyChangeEvent.SURGERY_DAYS_ASSIGNMENT_RECEIVED.toString(),
-                    null,null);
-                pcSupport.firePropertyChange(pcEvent);
-                pcSupport.removePropertyChangeListener(view);
+                firePropertyChangeEvent(
+                        AppointmentScheduleViewControllerPropertyChangeEvent.
+                                SURGERY_DAYS_ASSIGNMENT_RECEIVED.toString(),
+                        getSecondaryView(),
+                        this,
+                        null,
+                        null
+                );
             }
             catch(StoreException ex){
                 String message = ex.getMessage();
@@ -792,7 +804,7 @@ public class ScheduleViewController extends ViewController{
         }
         else if (e.getActionCommand().equals(
                 ViewController.AppointmentScheduleViewControllerActionEvent.MODAL_VIEWER_ACTIVATED.toString())){
-            this.view2.initialiseView();
+            //this.view2.initialiseView();
             /**
              * passes message to DesktopView Controller to disable the VIEW control
              */
@@ -806,7 +818,7 @@ public class ScheduleViewController extends ViewController{
     
     private void doAppointmentSlotsFromDayRequest(){
         try{
-            this.view2.setClosed(true);
+            getModalView().setClosed(true);
             /**
              * the modal JinternalFrame has closed
              */
@@ -816,7 +828,7 @@ public class ScheduleViewController extends ViewController{
 
         }
         //initialiseNewEntityDescriptor();
-        //LocalDate day = getDescriptorFromView().getViewDescription().getDay();
+        //LocalDate day = getDescriptorFromView().getViewDescription().getScheduleDay();
         //getNewEntityDescriptor().getControllerDescription().setEmptySlotFromDay(
         //Duration duration = getDescriptorFromView().getViewDescription().getDuration();
         //getNewEntityDescriptor().getControllerDescription().setEmptySlotMinimumDuration(
@@ -843,7 +855,7 @@ public class ScheduleViewController extends ViewController{
                 this.firePropertyChangeEvent(
                         ViewController.AppointmentScheduleViewControllerPropertyChangeEvent.
                                 APPOINTMENT_SLOTS_FROM_DAY_RECEIVED.toString(),
-                        view,
+                        getView(),
                         this,
                         null,
                         getDescriptor()
@@ -864,8 +876,8 @@ public class ScheduleViewController extends ViewController{
         switch (actionCommand){
             case EMPTY_SLOTS_FROM_DAY_REQUEST:
                 getDescriptor().getControllerDescription().setEmptySlotFromDay(
-                        //?getDescriptorFromView().getViewDescription().getDay());
-                        getDescriptor().getViewDescription().getDay());
+                        //?getDescriptorFromView().getViewDescription().getScheduleDay());
+getDescriptor().getViewDescription().getScheduleDay());
                 getDescriptor().getControllerDescription().setEmptySlotMinimumDuration(
                         //?
                         getDescriptor().getViewDescription().getDuration());
@@ -904,12 +916,14 @@ public class ScheduleViewController extends ViewController{
         /**
          * fire event over to APPOINTMENT_CREATOR_EDITOR_VIEW
          */
-        pcSupport.addPropertyChangeListener(this.view2);
-        pcEvent = new PropertyChangeEvent(this,
-           ViewController.AppointmentScheduleViewControllerPropertyChangeEvent.APPOINTMENT_SCHEDULE_ERROR_RECEIVED.toString(),
-           null,getDescriptor());
-        pcSupport.firePropertyChange(pcEvent);
-        pcSupport.removePropertyChangeListener(this.view2);
+        firePropertyChangeEvent(
+                AppointmentScheduleViewControllerPropertyChangeEvent.
+                        APPOINTMENT_SCHEDULE_ERROR_RECEIVED.toString(),
+                getSecondaryView(),
+                this,
+                null,
+                null
+        );
     }
     
     private void doCancelledAppointmentsViewAction(ActionEvent e){
@@ -924,7 +938,7 @@ public class ScheduleViewController extends ViewController{
                 Appointment appointment = getDescriptor().getViewDescription().getAppointment();
                 setScheduleReport(new ScheduleReport());
                 try{
-                        this.view2.setClosed(true);
+                        getModalView().setClosed(true);
                     appointment = super.doChangeAppointmentScheduleForDayRequest(
                                 ViewMode.NO_ACTION, appointment);
                     if (appointment == null){//assume a collision has arisen and update appt. cancel status
@@ -982,7 +996,7 @@ public class ScheduleViewController extends ViewController{
                             firePropertyChangeEvent(
                                    ViewController.AppointmentScheduleViewControllerPropertyChangeEvent.
                                            APPOINTMENTS_FOR_DAY_RECEIVED.toString(),
-                                   this.view,//event target/listener
+                                   this.getView(),//event target/listener
                                    this,//event sender
                                    null,
                                    getDescriptor()//event related data        
@@ -1028,7 +1042,7 @@ public class ScheduleViewController extends ViewController{
         }
         if (result!=null){
             try{
-                this.view2.setClosed(true);
+                getModalView().setClosed(true);
             }
             catch (PropertyVetoException ex){
             }
@@ -1086,7 +1100,7 @@ public class ScheduleViewController extends ViewController{
                 result = doAppointmentCreateRequest(e, changedSlotRequest);
                 if (result!=null){
                     try{
-                        this.view2.setClosed(true);
+                        getModalView().setClosed(true);
                     }
                     catch (PropertyVetoException ex){
                     }
@@ -1124,7 +1138,7 @@ public class ScheduleViewController extends ViewController{
                 result = doAppointmentUpdateRequest(e, changedSlotRequest);
                 if (result!=null) {
                     try{
-                        this.view2.setClosed(true);
+                        getModalView().setClosed(true);
                     }
                     catch (PropertyVetoException ex){
                     }
@@ -1610,10 +1624,6 @@ public class ScheduleViewController extends ViewController{
         return appointment;
     }
 
-    public View getView( ){
-        return view;
-    }
-
     private void getUpdatedAppointmentSlotsForDay(Appointment appointment)throws StoreException{
         ArrayList<Appointment> appointmentSlotsForDay =
                 getAppointmentsForSelectedDayIncludingEmptySlots(appointment.get(),appointment.getStart().toLocalDate());
@@ -1678,12 +1688,20 @@ public class ScheduleViewController extends ViewController{
     private void resetEmptySlotScannerSettings(){
         firePropertyChangeEvent(
                 ViewController.AppointmentScheduleViewControllerPropertyChangeEvent.NO_APPOINTMENT_SLOTS_FROM_DAY_RECEIVED.toString(),
-                view,
+                getView(),
                 this,
                 null,
                 getDescriptor()
         );
         getDescriptor().getControllerDescription().setEmptySlotFromDay(null);
         getDescriptor().getControllerDescription().setEmptySlotMinimumDuration(null);
+    }
+    
+    private void setSecondaryView(View value){
+        secondaryView = value;
+    }
+    
+    private View getSecondaryView(){
+        return secondaryView;
     }
 }
