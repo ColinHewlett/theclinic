@@ -126,7 +126,7 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         }
     
     public static enum DesktopViewControllerActionEvent{
-        APPOINTMENT_VIEW_CONTROLLER_REQUEST,
+        SCHEDULE_VIEW_CONTROLLER_REQUEST,
         CLINIC_LOGO_VIEW_MODE_NOTIFICATION,
         COUNT_APPOINTMENT_TABLE_REQUEST,
         COUNT_PATIENT_TABLE_REQUEST,
@@ -217,7 +217,7 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
     }
     
     public static enum PatientViewControllerActionEvent{
-        APPOINTMENT_VIEW_CONTROLLER_REQUEST,
+        SCHEDULE_VIEW_CONTROLLER_REQUEST,
         MODAL_VIEWER_ACTIVATED,
         NULL_PATIENT_REQUEST,
         PATIENT_GUARDIAN_REQUEST,

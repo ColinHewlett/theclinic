@@ -16,6 +16,7 @@ public class AppointmentDateVetoPolicy implements DateVetoPolicy{
     private HashMap<DayOfWeek,Boolean> surgeryDaysAssignment = null;
 
     public AppointmentDateVetoPolicy(HashMap<DayOfWeek,Boolean> surgeryDaysAssignment){
+        int test = 10/0;
         setSurgeryDays(surgeryDaysAssignment);
     }
     

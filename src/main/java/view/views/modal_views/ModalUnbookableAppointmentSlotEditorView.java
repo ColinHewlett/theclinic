@@ -384,9 +384,11 @@ public class ModalUnbookableAppointmentSlotEditorView extends ModalView {
     // End of variables declaration//GEN-END:variables
 
     private Duration getDurationFromView(){
-        return Duration.ofMinutes(
-                ((Long)this.spnDurationHours.getValue()*60) + 
-                ((Integer)this.spnDurationMinutes.getValue()));
+        Long hours = ((SpinnerNumberModel)spnDurationHours.
+                getModel()).getNumber().longValue();
+        hours = hours * 60;
+        Integer minutes = ((Integer)this.spnDurationMinutes.getValue());
+        return Duration.ofMinutes(hours + minutes);
     }
     
     private void initialiseEntityDescriptorFromView(){

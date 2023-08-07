@@ -226,7 +226,7 @@ public class PatientView extends View{
                     getMyController().getDescriptor().getViewDescription().setScheduleDay(day);
                     ActionEvent actionEvent = new ActionEvent(
                             PatientView.this,ActionEvent.ACTION_PERFORMED,
-                            ViewController.PatientViewControllerActionEvent.APPOINTMENT_VIEW_CONTROLLER_REQUEST.toString());
+                            ViewController.PatientViewControllerActionEvent.SCHEDULE_VIEW_CONTROLLER_REQUEST.toString());
                     getMyController().actionPerformed(actionEvent);
                 }
             }
@@ -1575,7 +1575,7 @@ public class PatientView extends View{
             getMyController().getDescriptor().getViewDescription().setScheduleDay(day);
             ActionEvent actionEvent = new ActionEvent(
                     this,ActionEvent.ACTION_PERFORMED,
-                    ViewController.PatientViewControllerActionEvent.APPOINTMENT_VIEW_CONTROLLER_REQUEST.toString());
+                    ViewController.PatientViewControllerActionEvent.SCHEDULE_VIEW_CONTROLLER_REQUEST.toString());
             this.getMyController().actionPerformed(actionEvent);
         }
     }//GEN-LAST:event_btnFetchScheduleForSelectedAppointmentActionPerformed

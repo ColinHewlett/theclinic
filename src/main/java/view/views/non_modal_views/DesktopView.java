@@ -490,7 +490,7 @@ public class DesktopView extends javax.swing.JFrame implements PropertyChangeLis
    private void mniAppointmentViewRequestActionPerformed() {                                        
         ActionEvent actionEvent = new ActionEvent(this, 
                 ActionEvent.ACTION_PERFORMED,
-                DesktopViewController.DesktopViewControllerActionEvent.APPOINTMENT_VIEW_CONTROLLER_REQUEST.toString());
+                DesktopViewController.DesktopViewControllerActionEvent.SCHEDULE_VIEW_CONTROLLER_REQUEST.toString());
         String s;
         s = actionEvent.getSource().getClass().getSimpleName();
         this.getController().actionPerformed(actionEvent);

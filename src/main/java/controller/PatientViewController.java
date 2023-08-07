@@ -55,8 +55,8 @@ public class PatientViewController extends ViewController {
                                 VIEW_CONTROLLER_CHANGED_NOTIFICATION.toString());
                 this.getMyController().actionPerformed(actionEvent);
                 break;
-            case APPOINTMENT_VIEW_CONTROLLER_REQUEST: //on selection of row in appointment history table
-                doAppointmentViewControllerRequest();
+            case SCHEDULE_VIEW_CONTROLLER_REQUEST: //on selection of row in appointment history table
+                doScheduleViewControllerRequest();
                 break;
             case VIEW_CLOSE_NOTIFICATION://notification from view uts shutting down
                 doPatientViewClosed();
@@ -154,11 +154,11 @@ public class PatientViewController extends ViewController {
  -- ViewDescription is forwarded onto the Desktop VC
  -- the forwarded request references the Patient VC's EntityDescriptorFromView which contains details of the selected appointment for this patient; and thus the appointment schedule requested
      */
-    private void doAppointmentViewControllerRequest(){  
+    private void doScheduleViewControllerRequest(){  
         //setEntityDescriptorFromView(view.getViewDescriptor());
         ActionEvent actionEvent = new ActionEvent(
             this,ActionEvent.ACTION_PERFORMED,
-            ViewController.PatientViewControllerActionEvent.APPOINTMENT_VIEW_CONTROLLER_REQUEST.toString());
+            ViewController.PatientViewControllerActionEvent.SCHEDULE_VIEW_CONTROLLER_REQUEST.toString());
         this.getMyController().actionPerformed(actionEvent);
     }
     

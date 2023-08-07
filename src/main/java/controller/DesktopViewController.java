@@ -21,6 +21,7 @@ import java.beans.PropertyVetoException;
 import java.beans.PropertyChangeSupport;
 import java.beans.PropertyChangeListener;
 import java.io.File;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -240,15 +241,15 @@ public class DesktopViewController extends ViewController{
                     }
                 }
                 break;
-            case APPOINTMENT_VIEW_CONTROLLER_REQUEST:
+            case SCHEDULE_VIEW_CONTROLLER_REQUEST:
                 /**
                  * VC receives a request for a new AppointmentVC from a PatientVC
                  * -- the PatientVC view's EntityDescriptorFromView object defines an appointment for the selected patient
                  * -- the appointment date is used in the construction of a new AppointmentVC and associated appointment schedule view which includes the selected patient's appointment
                  */
                 PatientViewController patientViewController = (PatientViewController)e.getSource();
-                Optional<Descriptor> ed = Optional.of(patientViewController.getDescriptor());
-                createNewAppointmentScheduleViewController(ed);
+                //Optional<Descriptor> ed = Optional.of(patientViewController.getDescriptor());
+                createNewAppointmentScheduleViewController(patientViewController.getDescriptor());
                 break;
         }
     }
@@ -400,7 +401,7 @@ public class DesktopViewController extends ViewController{
                     doRequestForViewClose();
                     break;
                 }
-                case APPOINTMENT_VIEW_CONTROLLER_REQUEST:{
+                case SCHEDULE_VIEW_CONTROLLER_REQUEST:{
                     doRequestForAppointmentScheduleViewController();
                     break;
                 }
@@ -457,10 +458,14 @@ public class DesktopViewController extends ViewController{
         } 
     }
 
-    private void createNewAppointmentScheduleViewController(Optional<Descriptor> ed){
+    private void createNewAppointmentScheduleViewController(Descriptor ed){
         try{
             ScheduleViewController avc =
-                    new ScheduleViewController(this, getDesktopView(),ed);
+                    new ScheduleViewController(this, getDesktopView());
+            avc.setDescriptor(ed);
+            
+            //LocalDate test = ed.getViewDescription().getScheduleDay();
+            
             avc.setView(new View().make(
                 View.Viewer.SCHEDULE_VIEW,
                 avc, 
@@ -528,7 +533,7 @@ public class DesktopViewController extends ViewController{
     }
     
     private void doRequestForAppointmentScheduleViewController(){
-        createNewAppointmentScheduleViewController(Optional.ofNullable(null));
+        createNewAppointmentScheduleViewController(null);
     }
     
     private void doRequestForPatientNotificationViewController(){
@@ -916,7 +921,7 @@ public class DesktopViewController extends ViewController{
                 case "DesktopView":
                     doActionEventForDesktopView(e);
                      break;
-                case "AppointmentScheduleViewController":
+                case "ScheduleViewController":
                     doActionEventForScheduleViewController(e);
                     break;
                 case "PatientNotificationViewController":

@@ -70,11 +70,11 @@ public class ScheduleViewController extends ViewController{
      * @param ed
      * @throws StoreException 
      */
-    public ScheduleViewController(ActionListener controller, DesktopView desktopView, Optional<Descriptor> ed)throws StoreException{
+    public ScheduleViewController(ActionListener controller, DesktopView desktopView)throws StoreException{
         setMyController(controller);
         setDesktopView(desktopView);
         pcSupport = new PropertyChangeSupport(this);
-        Descriptor e = ed.orElse(new Descriptor());
+        //Descriptor e = ed.orElse(new Descriptor());
         //setDescriptor(e);
 
         try{
