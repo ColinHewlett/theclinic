@@ -462,6 +462,7 @@ public class DesktopViewController extends ViewController{
         try{
             ScheduleViewController avc =
                     new ScheduleViewController(this, getDesktopView());
+            if (ed == null) ed = new Descriptor();
             avc.setDescriptor(ed);
             
             //LocalDate test = ed.getViewDescription().getScheduleDay();
