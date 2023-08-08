@@ -1142,6 +1142,13 @@ public class ScheduleView extends View{
                     appointment.setHasPatientBeenContacted(value);
                     getMyController().getDescriptor().getViewDescription().setAppointment(appointment);
                     tblAppointments.clearSelection();
+                    /*
+                    ActionEvent actionEvent = new ActionEvent(
+                        ScheduleView.this,ActionEvent.ACTION_PERFORMED,
+                        ViewController.AppointmentRemindersViewControllerActionEvent.
+                                APPOINTEE_CONTACT_DETAILS_FOR_SCHEDULE_VIEW_CHANGE_NOTIFICATION.toString());
+                getMyController().actionPerformed(actionEvent);
+*/
                 }
             });
             this.tblAppointments.setModel(tableModel);
