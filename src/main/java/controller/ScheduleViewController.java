@@ -76,7 +76,7 @@ public class ScheduleViewController extends ViewController{
         pcSupport = new PropertyChangeSupport(this);
         //Descriptor e = ed.orElse(new Descriptor());
         //setDescriptor(e);
-
+        /*
         try{
             SurgeryDaysAssignment surgeryDaysAssignment = new SurgeryDaysAssignment();
             //surgeryDaysAssignment.read();
@@ -87,7 +87,8 @@ public class ScheduleViewController extends ViewController{
         }
         catch (StoreException ex){
             displayErrorMessage(ex.getMessage(),"AppointmentViewController error",JOptionPane.WARNING_MESSAGE);
-        }   
+        } 
+        */
     }
     
     @Override

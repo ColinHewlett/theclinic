@@ -5,7 +5,6 @@
  */
 package view.views.view_support_classes.models;
 
-import controller.Descriptor;
 import model.Appointment;
 import model.Patient;
 import java.time.Duration;

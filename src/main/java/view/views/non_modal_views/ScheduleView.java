@@ -72,6 +72,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
+import model.SurgeryDaysAssignment;
 
 
 /**
@@ -189,6 +190,8 @@ public class ScheduleView extends View{
         TitledBorder titledBorder = (TitledBorder)this.SlotAvailabilityPanel.getBorder();
         titledBorder.setTitle("Unscheduled appointment slots");
         //following action invokes call to controller via DateChange\Listener
+        //pcSupport.removePropertyChangeListener(getView());
+
         this.vetoPolicy = new AppointmentDateVetoPolicy(getMyController().getDescriptor().getControllerDescription().getSurgeryDaysAssignment());
         DatePickerSettings dps = dayDatePicker.getSettings();
         dps.setVetoPolicy(vetoPolicy);

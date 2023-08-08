@@ -462,7 +462,15 @@ public class DesktopViewController extends ViewController{
         try{
             ScheduleViewController avc =
                     new ScheduleViewController(this, getDesktopView());
-            if (ed == null) ed = new Descriptor();
+            try{
+                SurgeryDaysAssignment surgeryDaysAssignment = new SurgeryDaysAssignment();
+                surgeryDaysAssignment = surgeryDaysAssignment.read();
+                if (ed == null) ed = new Descriptor();
+                    ed.getControllerDescription().setSurgeryDaysAssignment(surgeryDaysAssignment.get());
+            }
+            catch (StoreException ex){
+                displayErrorMessage(ex.getMessage(),"DesktopViewController error",JOptionPane.WARNING_MESSAGE);
+            } 
             avc.setDescriptor(ed);
             
             //LocalDate test = ed.getViewDescription().getScheduleDay();
