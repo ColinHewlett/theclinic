@@ -1110,16 +1110,19 @@ public class ScheduleView extends View{
     private void doScheduleTitleRefresh(Patient appointee){
         String tableTitle = "Appointment schedule for " 
                 + dayDatePicker.getDate().format(appointmentScheduleFormat);
-        if ((appointee!=null) &&
-                (!appointee.toString().equals(SystemDefinitions.UNBOOKABLE_APPOINTMENT_SLOT.toString()))){
-            tableTitle = tableTitle + "          <"
+        if (appointee!=null){
+            if (!appointee.toString().equals(
+                    SystemDefinitions.APPOINTMENT_UNBOOKABILITY_MARKER)){
+                    //SystemDefinitions.UNBOOKABLE_APPOINTMENT_SLOT.toString())){
+                tableTitle = tableTitle + "          <"
                     + appointee.getName().getForenames() +  " " 
                     + appointee.getName().getSurname() + "'s contact "
                     + appointee.getPhone1();
-            if (!appointee.getPhone2().isEmpty())
-                tableTitle = tableTitle + "; "
-                        + appointee.getPhone2(); 
-            tableTitle = tableTitle + ">";   
+                if (!appointee.getPhone2().isEmpty())
+                    tableTitle = tableTitle + "; "
+                            + appointee.getPhone2(); 
+                tableTitle = tableTitle + ">";   
+            }
         }
         TitledBorder titledBorder = (TitledBorder)pnlAppointmentScheduleForDay.getBorder();
         titledBorder.setTitle(tableTitle);
