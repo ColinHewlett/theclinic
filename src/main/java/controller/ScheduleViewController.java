@@ -530,6 +530,16 @@ public class ScheduleViewController extends ViewController{
         ViewController.AppointmentScheduleViewControllerActionEvent actionCommand =
                ViewController.AppointmentScheduleViewControllerActionEvent.valueOf(e.getActionCommand());
         switch (actionCommand){
+            case APPOINTMENT_REMINDED_STATUS_UPDATE_REQUEST:
+                Appointment appointment = 
+                        getDescriptor().getViewDescription().getAppointment();
+                try{
+                    appointment.update();
+                }catch (StoreException ex){
+                    displayErrorMessage(ex.getMessage(), 
+                            "Schedule view controller",JOptionPane.WARNING_MESSAGE);
+                }
+                break;
             case APPOINTMENTS_CANCELLED_VIEW_REQUEST:
                 doAppointmentsCancelledViewRequest();
                 break;

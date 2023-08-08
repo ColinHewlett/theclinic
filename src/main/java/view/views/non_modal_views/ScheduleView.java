@@ -365,7 +365,7 @@ public class ScheduleView extends View{
      * 
      */
     private void populateAppointmentsForDayTable(){
-        configureAppointmentsForDayTable();;
+        ConfigureScheduleTable();;
         doScheduleTitleRefresh(null);
         setTitle(getMyController().getDescriptor().getControllerDescription().getAppointmentScheduleDay().
                 format(DateTimeFormatter.ofPattern("dd/MM/yy")) + " Appointment schedule");
@@ -1126,7 +1126,7 @@ public class ScheduleView extends View{
         pnlAppointmentScheduleForDay.repaint();
     }
     
-    private void configureAppointmentsForDayTable(){
+    private void ConfigureScheduleTable(){
         if (tableModel == null) {
             tableModel = new AppointmentsScheduleTableModel();
             tableModel.addTableModelListener(new TableModelListener(){
@@ -1142,13 +1142,13 @@ public class ScheduleView extends View{
                     appointment.setHasPatientBeenContacted(value);
                     getMyController().getDescriptor().getViewDescription().setAppointment(appointment);
                     tblAppointments.clearSelection();
-                    /*
+                    
                     ActionEvent actionEvent = new ActionEvent(
                         ScheduleView.this,ActionEvent.ACTION_PERFORMED,
-                        ViewController.AppointmentRemindersViewControllerActionEvent.
-                                APPOINTEE_CONTACT_DETAILS_FOR_SCHEDULE_VIEW_CHANGE_NOTIFICATION.toString());
-                getMyController().actionPerformed(actionEvent);
-*/
+                        ViewController.AppointmentScheduleViewControllerActionEvent.
+                                APPOINTMENT_REMINDED_STATUS_UPDATE_REQUEST.toString());
+                    getMyController().actionPerformed(actionEvent);
+
                 }
             });
             this.tblAppointments.setModel(tableModel);

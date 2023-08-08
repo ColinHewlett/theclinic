@@ -81,7 +81,8 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
          * PRIMARY VIEW ACTION EVENTS
          */
         //create view request actions
-        APPOINTMENT_REMINDERS_VIEW_REQUEST,
+        //APPOINTMENT_REMINDERS_VIEW_REQUEST,
+        APPOINTMENT_REMINDED_STATUS_UPDATE_REQUEST,
         APPOINTMENTS_CANCELLED_VIEW_REQUEST,
         APPOINTMENT_CREATE_VIEW_REQUEST,
         APPOINTMENT_UPDATE_VIEW_REQUEST,
