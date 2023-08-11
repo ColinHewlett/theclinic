@@ -1637,8 +1637,9 @@ public class Repository implements IStoreActions {
                 break;
             case READ_CANCELLED_APPOINTMENTS:
                 sql = "SELECT * "
-                        + "FROM Appointment "
-                        + "WHERE isDeleted = false AND isCancelled = true;";
+                        + "FROM Appointment a "
+                        + "WHERE isDeleted = false AND isCancelled = true "
+                        + "ORDER BY a.Start ASC;";
                 result = doReadCancelledAppointments(sql, entity);
                 break;
             case READ_DELETED_APPOINTMENTS_FOR_PATIENT:

@@ -428,7 +428,7 @@ public class ScheduleView extends View{
         btnNextPracticeDay = new javax.swing.JButton();
         btnPreviousPracticeDay = new javax.swing.JButton();
         dayDatePicker = new com.github.lgooddatepicker.components.DatePicker();
-        jPanel1 = new javax.swing.JPanel();
+        tbpScheduleOperations = new javax.swing.JPanel();
         btnCreateAppointment = new javax.swing.JButton();
         btnUpdateAppointment = new javax.swing.JButton();
         btnCancelSelectedAppointment = new javax.swing.JButton();
@@ -587,7 +587,7 @@ public class ScheduleView extends View{
                 .addGap(10, 10, 10))
         );
 
-        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Appointment schedule operations", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Segoe UI", 1, 12))); // NOI18N
+        tbpScheduleOperations.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Appointment schedule operations", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Segoe UI", 1, 12))); // NOI18N
 
         btnCreateAppointment.setText("Create");
         btnCreateAppointment.setToolTipText("create new appointment");
@@ -621,11 +621,11 @@ public class ScheduleView extends View{
             }
         });
 
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
+        javax.swing.GroupLayout tbpScheduleOperationsLayout = new javax.swing.GroupLayout(tbpScheduleOperations);
+        tbpScheduleOperations.setLayout(tbpScheduleOperationsLayout);
+        tbpScheduleOperationsLayout.setHorizontalGroup(
+            tbpScheduleOperationsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(tbpScheduleOperationsLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(btnCreateAppointment, javax.swing.GroupLayout.PREFERRED_SIZE, 97, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
@@ -636,11 +636,11 @@ public class ScheduleView extends View{
                 .addComponent(btnMarkSlotUnbookable, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
         );
-        jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
+        tbpScheduleOperationsLayout.setVerticalGroup(
+            tbpScheduleOperationsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(tbpScheduleOperationsLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                .addGroup(tbpScheduleOperationsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnCreateAppointment)
                     .addComponent(btnUpdateAppointment)
                     .addComponent(btnCancelSelectedAppointment)
@@ -709,7 +709,7 @@ public class ScheduleView extends View{
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(tbpScheduleOperations, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
                                 .addGap(30, 30, 30)
@@ -738,7 +738,7 @@ public class ScheduleView extends View{
                 .addComponent(pnlAppointmentScheduleForDay, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 72, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(tbpScheduleOperations, javax.swing.GroupLayout.PREFERRED_SIZE, 72, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(layout.createSequentialGroup()
                         .addGap(6, 6, 6)
                         .addComponent(btnPrintSchedule)
@@ -1042,7 +1042,6 @@ public class ScheduleView extends View{
     private javax.swing.ButtonGroup buttonGroup1;
     private com.github.lgooddatepicker.components.DatePicker dayDatePicker;
     private javax.swing.JMenuBar jMenuBar1;
-    private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JScrollPane jScrollPane1;
@@ -1059,6 +1058,7 @@ public class ScheduleView extends View{
     private javax.swing.JScrollPane scrAppointmentsForDayTable;
     private javax.swing.JTable tblAppointments;
     private javax.swing.JTable tblEmptySlotAvailability;
+    private javax.swing.JPanel tbpScheduleOperations;
     // End of variables declaration//GEN-END:variables
 
     class DayDatePickerChangeListener implements DateChangeListener {

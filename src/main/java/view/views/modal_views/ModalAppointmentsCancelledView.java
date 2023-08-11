@@ -44,7 +44,7 @@ public class ModalAppointmentsCancelledView extends ModalView{
             ViewController myController, 
             DesktopView desktopView){
 
-            setTitle("Cancelled appointment view");
+            setTitle("Cancelled appointments view");
             setMyController(myController);
             setMyViewType(myViewType);
             setDesktopView(desktopView);
