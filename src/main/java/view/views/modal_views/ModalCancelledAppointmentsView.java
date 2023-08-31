@@ -6,13 +6,25 @@ package view.views.modal_views;
 
 import controller.ViewController;
 import java.awt.Color;
+import java.awt.event.ActionEvent;
+import java.beans.PropertyVetoException;
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Iterator;
+import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumnModel;
+import model.Appointment;
+import model.Patient;
 import view.View;
 import view.views.non_modal_views.DesktopView;
 import view.views.view_support_classes.models.Appointments6ColumnTableModel;
+import view.views.view_support_classes.renderers.AppointmentsTableDurationRenderer;
+import view.views.view_support_classes.renderers.AppointmentsTableLocalDateRenderer;
+import view.views.view_support_classes.renderers.AppointmentsTablePatientRenderer;
 import view.views.view_support_classes.renderers.TableHeaderCellBorderRenderer;
 
 /**
@@ -20,7 +32,7 @@ import view.views.view_support_classes.renderers.TableHeaderCellBorderRenderer;
  * @author colin
  */
 public class ModalCancelledAppointmentsView extends ModalView {
-    private JTable tblCancelledAppointments = null;
+    //private JTable tblCancelledAppointments = null;
     private JScrollPane jScrollPane = null;
 
     /**
@@ -43,7 +55,9 @@ public class ModalCancelledAppointmentsView extends ModalView {
     @Override
     public void initialiseView(){
         initComponents();
+        /*
         tblCancelledAppointments = new JTable(new Appointments6ColumnTableModel());
+        
         TableColumnModel columnModel = this.tblCancelledAppointments.getColumnModel();
         columnModel.getColumn(0).setPreferredWidth(70);
         columnModel.getColumn(1).setPreferredWidth(190);
@@ -60,12 +74,18 @@ public class ModalCancelledAppointmentsView extends ModalView {
         JTableHeader tableHeader = this.tblCancelledAppointments.getTableHeader();
         tableHeader.setBackground(new Color(220,220,220));
         tableHeader.setOpaque(true);
+        */
+        /*
         jScrollPane = new JScrollPane();
         jScrollPane.setViewportView(tblCancelledAppointments);
-        pnlCancelledAppointments.add(tblCancelledAppointments);
-        
-        //this.populateCancelledAppointmentsTable();
+        pnlCancelledAppointments.add(jScrollPane);
+        pack();
+        */
+
+        this.populateCancelledAppointmentsTable();
+
         this.setVisible(true);
+        
     }
 
     /**
@@ -83,6 +103,8 @@ public class ModalCancelledAppointmentsView extends ModalView {
         btnGoToScheduleForSelectedAppointment = new javax.swing.JButton();
         btnCloseView = new javax.swing.JButton();
         pnlCancelledAppointments = new javax.swing.JPanel();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        tblCancelledAppointments = new javax.swing.JTable();
 
         jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Operations on selected appointment", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Segoe UI", 1, 12))); // NOI18N
 
@@ -93,7 +115,12 @@ public class ModalCancelledAppointmentsView extends ModalView {
             }
         });
 
-        btnGoToScheduleForSelectedAppointment.setText("Go to schedule for this appointment");
+        btnGoToScheduleForSelectedAppointment.setText("Return to schedule for selected apoointment");
+        btnGoToScheduleForSelectedAppointment.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnGoToScheduleForSelectedAppointmentActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -113,10 +140,15 @@ public class ModalCancelledAppointmentsView extends ModalView {
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnUncancelSelectedAppointment)
                     .addComponent(btnGoToScheduleForSelectedAppointment))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(23, Short.MAX_VALUE))
         );
 
         btnCloseView.setText("Close view");
+        btnCloseView.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCloseViewActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -124,33 +156,52 @@ public class ModalCancelledAppointmentsView extends ModalView {
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 137, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 44, Short.MAX_VALUE)
                 .addComponent(btnCloseView)
-                .addGap(84, 84, 84))
+                .addGap(24, 24, 24))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addContainerGap()
+                .addGap(5, 5, 5)
                 .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGap(26, 26, 26))
+                .addGap(10, 10, 10))
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(43, 43, 43)
+                .addGap(36, 36, 36)
                 .addComponent(btnCloseView)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        pnlCancelledAppointments.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Cancelled appointments", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Segoe UI", 1, 12))); // NOI18N
+        pnlCancelledAppointments.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+
+        tblCancelledAppointments.setModel(new Appointments6ColumnTableModel());
+        TableColumnModel columnModel = this.tblCancelledAppointments.getColumnModel();
+        columnModel.getColumn(0).setPreferredWidth(70);
+        columnModel.getColumn(1).setPreferredWidth(190);
+        columnModel.getColumn(2).setPreferredWidth(50);
+        columnModel.getColumn(3).setPreferredWidth(50);
+        columnModel.getColumn(4).setPreferredWidth(105);
+        columnModel.getColumn(5).setPreferredWidth(250);
+        columnModel.getColumn(0).setHeaderRenderer(new TableHeaderCellBorderRenderer(Color.LIGHT_GRAY));
+        columnModel.getColumn(1).setHeaderRenderer(new TableHeaderCellBorderRenderer(Color.LIGHT_GRAY));
+        columnModel.getColumn(2).setHeaderRenderer(new TableHeaderCellBorderRenderer(Color.LIGHT_GRAY));
+        columnModel.getColumn(3).setHeaderRenderer(new TableHeaderCellBorderRenderer(Color.LIGHT_GRAY));
+        columnModel.getColumn(4).setHeaderRenderer(new TableHeaderCellBorderRenderer(Color.LIGHT_GRAY));
+        columnModel.getColumn(5).setHeaderRenderer(new TableHeaderCellBorderRenderer(Color.LIGHT_GRAY));
+        JTableHeader tableHeader = this.tblCancelledAppointments.getTableHeader();
+        tableHeader.setBackground(new Color(220,220,220));
+        tableHeader.setOpaque(true);
+        jScrollPane2.setViewportView(tblCancelledAppointments);
 
         javax.swing.GroupLayout pnlCancelledAppointmentsLayout = new javax.swing.GroupLayout(pnlCancelledAppointments);
         pnlCancelledAppointments.setLayout(pnlCancelledAppointmentsLayout);
         pnlCancelledAppointmentsLayout.setHorizontalGroup(
             pnlCancelledAppointmentsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 0, Short.MAX_VALUE)
+            .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 565, javax.swing.GroupLayout.PREFERRED_SIZE)
         );
         pnlCancelledAppointmentsLayout.setVerticalGroup(
             pnlCancelledAppointmentsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 161, Short.MAX_VALUE)
+            .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 136, Short.MAX_VALUE)
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -158,28 +209,82 @@ public class ModalCancelledAppointmentsView extends ModalView {
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(pnlCancelledAppointments, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap())
+                    .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(pnlCancelledAppointments, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(5, 5, 5))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
                 .addComponent(pnlCancelledAppointments, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 102, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(10, 10, 10))
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(2, 2, 2))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    private void populateCancelledAppointmentsTable(){
+        if (tblCancelledAppointments.getModel() == null)
+            tblCancelledAppointments.setModel(new Appointments6ColumnTableModel());
+        Appointments6ColumnTableModel model = 
+                (Appointments6ColumnTableModel)tblCancelledAppointments.getModel();
+        model.removeAllElements();
+        Iterator<Appointment> it = 
+                getMyController().getDescriptor().getControllerDescription().getAppointmentCancellations().iterator();
+        while (it.hasNext()){
+            model.addElement(it.next());
+        }
+        this.tblCancelledAppointments.setDefaultRenderer(Duration.class, new AppointmentsTableDurationRenderer());
+        
+       
+        this.tblCancelledAppointments.setDefaultRenderer(LocalDateTime.class, new AppointmentsTableLocalDateRenderer());
+        this.tblCancelledAppointments.setDefaultRenderer(Patient.class, new AppointmentsTablePatientRenderer());
+        this.tblCancelledAppointments.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+        TableColumnModel columnModel = tblCancelledAppointments.getColumnModel();
+ 
+    }
+    
     private void btnUncancelSelectedAppointmentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUncancelSelectedAppointmentActionPerformed
-        // TODO add your handling code here:
+        int row = this.tblCancelledAppointments.getSelectedRow();
+        if (row != -1){
+            getMyController().getDescriptor().getViewDescription().setAppointment(
+                    ((Appointments6ColumnTableModel)tblCancelledAppointments.
+                            getModel()).getElementAt(row)); 
+            ActionEvent actionEvent = new ActionEvent(this, 
+                    ActionEvent.ACTION_PERFORMED,
+                    ViewController.ScheduleViewControllerActionEvent.APPOINTMENT_UNCANCEL_REQUEST.toString());
+            this.getMyController().actionPerformed(actionEvent);
+        }else
+            JOptionPane.showMessageDialog(this, "An appointment to uncancel has not been selected");
     }//GEN-LAST:event_btnUncancelSelectedAppointmentActionPerformed
+
+    private void btnGoToScheduleForSelectedAppointmentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGoToScheduleForSelectedAppointmentActionPerformed
+        if (this.tblCancelledAppointments.getSelectedRow()==-1){
+            JOptionPane.showMessageDialog(this, "An appointment has not been selected");
+        }
+        else{
+            int row = this.tblCancelledAppointments.getSelectedRow();
+            //LocalDateTime test = (LocalDateTime)this.tblCancelledAppointments.getValueAt(row,0);
+            //LocalDate day = ((LocalDateTime)this.tblCancelledAppointments.getValueAt(row,0)).toLocalDate();
+            LocalDate day = (LocalDate)this.tblCancelledAppointments.getValueAt(row,0);
+            getMyController().getDescriptor().getViewDescription().setScheduleDay(day);
+            ActionEvent actionEvent = new ActionEvent(
+                    this,ActionEvent.ACTION_PERFORMED,
+                    ViewController.ScheduleViewControllerActionEvent.SCHEDULE_VIEW_CONTROLLER_REQUEST.toString());
+            this.getMyController().actionPerformed(actionEvent);
+        }
+    }//GEN-LAST:event_btnGoToScheduleForSelectedAppointmentActionPerformed
+
+    private void btnCloseViewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCloseViewActionPerformed
+        try{
+            setClosed(true);
+        }catch (PropertyVetoException ex){
+            
+        }
+    }//GEN-LAST:event_btnCloseViewActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -188,6 +293,8 @@ public class ModalCancelledAppointmentsView extends ModalView {
     private javax.swing.JButton btnUncancelSelectedAppointment;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
+    private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JPanel pnlCancelledAppointments;
+    private javax.swing.JTable tblCancelledAppointments;
     // End of variables declaration//GEN-END:variables
 }

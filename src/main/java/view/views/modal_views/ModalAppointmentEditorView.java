@@ -520,14 +520,14 @@ public class ModalAppointmentEditorView extends ModalView {
                     case CREATE:
                         evt = new ActionEvent(ModalAppointmentEditorView.this,
                             ActionEvent.ACTION_PERFORMED,
-                            ViewController.AppointmentScheduleViewControllerActionEvent.
+                            ViewController.ScheduleViewControllerActionEvent.
                             APPOINTMENT_EDITOR_CREATE_REQUEST.toString());
                         ModalAppointmentEditorView.this.getMyController().actionPerformed(evt);
                         break;
                     case UPDATE:
                         evt = new ActionEvent(ModalAppointmentEditorView.this,
                             ActionEvent.ACTION_PERFORMED,
-                            ViewController.AppointmentScheduleViewControllerActionEvent.
+                            ViewController.ScheduleViewControllerActionEvent.
                             APPOINTMENT_EDITOR_UPDATE_REQUEST.toString());
                         ModalAppointmentEditorView.this.getMyController().actionPerformed(evt);
                         break;

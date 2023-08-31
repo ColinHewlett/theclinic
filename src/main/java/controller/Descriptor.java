@@ -100,6 +100,7 @@ public class Descriptor {
         private Point tableRowCount = null;
         
         public LocalDate getScheduleDay(){
+            if (scheduleDay == null) scheduleDay = LocalDate.now();
             return scheduleDay;
         }
         
@@ -254,14 +255,6 @@ public class Descriptor {
 
         public void setAppointmentSlots(ArrayList<Appointment> appointments){
             appointmentSlots = appointments;
-        }
-        
-        public LocalDate getAppointmentScheduleDay(){
-            return appointmentScheduleDay;
-        }
-
-        public void setAppointmentScheduleDay(LocalDate day){
-            appointmentScheduleDay = day;
         }
         
         public ArrayList<Appointment> getAppointments(){

@@ -273,7 +273,7 @@ cmbSelectSlotDuration.addActionListener(new java.awt.event.ActionListener() {
             getMyController().getDescriptor().getViewDescription().setDuration(duration);
             ActionEvent actionEvent = new ActionEvent(this,
                 ActionEvent.ACTION_PERFORMED,
-                ViewController.AppointmentScheduleViewControllerActionEvent.
+                ViewController.ScheduleViewControllerActionEvent.
                 EMPTY_SLOTS_FROM_DAY_REQUEST.toString());
             getMyController().actionPerformed(actionEvent);
         }

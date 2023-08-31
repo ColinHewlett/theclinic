@@ -142,7 +142,7 @@ public class ModalNonSurgeryDayEditorView extends ModalView {
             getMyController().getDescriptor().getViewDescription().setScheduleDay(dayDatePicker.getDate());
             ActionEvent actionEvent = new ActionEvent(this, 
                     ActionEvent.ACTION_PERFORMED,
-                    ViewController.AppointmentScheduleViewControllerActionEvent.APPOINTMENTS_FOR_NON_SURGERY_DAY_REQUEST.toString());
+                    ViewController.ScheduleViewControllerActionEvent.APPOINTMENTS_FOR_NON_SURGERY_DAY_REQUEST.toString());
             getMyController().actionPerformed(actionEvent);
         }
         else{

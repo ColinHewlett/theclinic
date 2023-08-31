@@ -144,7 +144,9 @@ public class ScheduleView extends View{
     
     private void updateDatePickerSettings(){
         DatePickerSettings dps = null;
-        this.vetoPolicy = new AppointmentDateVetoPolicy(getMyController().getDescriptor().getViewDescription().getSurgeryDaysAssignmentValue());
+        //this.vetoPolicy = new AppointmentDateVetoPolicy(getMyController().getDescriptor().getViewDescription().getSurgeryDaysAssignmentValue());
+        this.vetoPolicy = new AppointmentDateVetoPolicy(getMyController().getDescriptor().
+                getControllerDescription().getSurgeryDaysAssignment());
         dps = dayDatePicker.getSettings();
         dps.setVetoPolicy(vetoPolicy);
     }
@@ -167,6 +169,7 @@ public class ScheduleView extends View{
     @Override
     public void initialiseView(){
         initComponents();
+        addInternalFrameListeners();
         try{
             setVisible(true);
             setTitle("Appointments");
@@ -197,7 +200,8 @@ public class ScheduleView extends View{
         dps.setVetoPolicy(vetoPolicy);
         dps.setHighlightPolicy(new LeaveEditor());
       
-        LocalDate day = getMyController().getDescriptor().getViewDescription().getScheduleDay();
+        //LocalDate day = getMyController().getDescriptor().getViewDescription().getScheduleDay();
+        LocalDate day = getMyController().getDescriptor().getControllerDescription().getScheduleDay();
         if (!vetoPolicy.isDateAllowed(day)){
             HashMap<DayOfWeek, Boolean> allDaysSurgeryDays = new HashMap<>();
             allDaysSurgeryDays.put(DayOfWeek.MONDAY, true);
@@ -268,14 +272,14 @@ public class ScheduleView extends View{
     private void mniSurgeryDaysEditorActionPerformed(ActionEvent e){
         ActionEvent actionEvent = new ActionEvent(this, 
                     ActionEvent.ACTION_PERFORMED,
-                    ViewController.AppointmentScheduleViewControllerActionEvent.SURGERY_DAYS_EDITOR_VIEW_REQUEST.toString());
+                    ViewController.ScheduleViewControllerActionEvent.SURGERY_DAYS_EDITOR_VIEW_REQUEST.toString());
         this.getMyController().actionPerformed(actionEvent);
     }
 
     private void mniSelectNonSurgeryDayActionPerformed(ActionEvent e){
         ActionEvent actionEvent = new ActionEvent(this, 
                 ActionEvent.ACTION_PERFORMED,
-                ViewController.AppointmentScheduleViewControllerActionEvent.NON_SURGERY_DAY_SCHEDULE_VIEW_REQUEST.toString());
+                ViewController.ScheduleViewControllerActionEvent.NON_SURGERY_DAY_SCHEDULE_VIEW_REQUEST.toString());
         this.getMyController().actionPerformed(actionEvent);
     }
     
@@ -334,7 +338,7 @@ public class ScheduleView extends View{
     private void refreshAppointmentTableWithCurrentlySelectedDate(){
         ActionEvent actionEvent = new ActionEvent(ScheduleView.this, 
                 ActionEvent.ACTION_PERFORMED,
-                ViewController.AppointmentScheduleViewControllerActionEvent.APPOINTMENTS_FOR_DAY_REQUEST.toString());
+                ViewController.ScheduleViewControllerActionEvent.APPOINTMENTS_FOR_DAY_REQUEST.toString());
         ScheduleView.this.getMyController().actionPerformed(actionEvent);
         SwingUtilities.invokeLater(new Runnable() 
         {
@@ -367,11 +371,11 @@ public class ScheduleView extends View{
     private void populateAppointmentsForDayTable(){
         ConfigureScheduleTable();;
         doScheduleTitleRefresh(null);
-        setTitle(getMyController().getDescriptor().getControllerDescription().getAppointmentScheduleDay().
+        setTitle(getMyController().getDescriptor().getControllerDescription().getScheduleDay().
                 format(DateTimeFormatter.ofPattern("dd/MM/yy")) + " Appointment schedule");
         ActionEvent actionEvent = new ActionEvent(
                 this,ActionEvent.ACTION_PERFORMED,
-                ViewController.AppointmentScheduleViewControllerActionEvent.
+                ViewController.ScheduleViewControllerActionEvent.
                         VIEW_CHANGED_NOTIFICATION.toString());
         this.getMyController().actionPerformed(actionEvent);
         
@@ -388,7 +392,7 @@ public class ScheduleView extends View{
             public void internalFrameClosing(InternalFrameEvent e) {
                 ActionEvent actionEvent = new ActionEvent(
                         ScheduleView.this,ActionEvent.ACTION_PERFORMED,
-                        ViewController.AppointmentScheduleViewControllerActionEvent.
+                        ViewController.ScheduleViewControllerActionEvent.
                                 VIEW_CLOSE_NOTIFICATION.toString());
                 getMyController().actionPerformed(actionEvent);
             }
@@ -397,7 +401,7 @@ public class ScheduleView extends View{
             public void internalFrameActivated(InternalFrameEvent e){
                 ActionEvent actionEvent = new ActionEvent(
                         ScheduleView.this,ActionEvent.ACTION_PERFORMED,
-                        ViewController.AppointmentScheduleViewControllerActionEvent.
+                        ViewController.ScheduleViewControllerActionEvent.
                                 VIEW_ACTIVATED_NOTIFICATION.toString());
                 getMyController().actionPerformed(actionEvent);
             }
@@ -769,7 +773,7 @@ public class ScheduleView extends View{
         }
         ActionEvent actionEvent = new ActionEvent(this,
                 ActionEvent.ACTION_PERFORMED,
-                ViewController.AppointmentScheduleViewControllerActionEvent.APPOINTMENT_CREATE_VIEW_REQUEST.toString());
+                ViewController.ScheduleViewControllerActionEvent.APPOINTMENT_CREATE_VIEW_REQUEST.toString());
         this.getMyController().actionPerformed(actionEvent);
     }//GEN-LAST:event_btnCreateAppointmentActionPerformed
 
@@ -791,7 +795,7 @@ public class ScheduleView extends View{
             getMyController().getDescriptor().getViewDescription().setAppointment(tableModel.getElementAt(row));
             ActionEvent actionEvent = new ActionEvent(this, 
                     ActionEvent.ACTION_PERFORMED,
-                    ViewController.AppointmentScheduleViewControllerActionEvent.
+                    ViewController.ScheduleViewControllerActionEvent.
                             UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_VIEW_REQUEST.toString());
             this.getMyController().actionPerformed(actionEvent);
         }
@@ -799,7 +803,7 @@ public class ScheduleView extends View{
             initialiseEDRequestFromView(row);
             ActionEvent actionEvent = new ActionEvent(this, 
                     ActionEvent.ACTION_PERFORMED,
-                    ViewController.AppointmentScheduleViewControllerActionEvent.
+                    ViewController.ScheduleViewControllerActionEvent.
                             APPOINTMENT_UPDATE_VIEW_REQUEST.toString());
             this.getMyController().actionPerformed(actionEvent);
         }
@@ -834,7 +838,7 @@ public class ScheduleView extends View{
         getMyController().getDescriptor().getViewDescription().setScheduleDay(searchStartDate);
         ActionEvent actionEvent = new ActionEvent(this, 
                     ActionEvent.ACTION_PERFORMED,
-                    ViewController.AppointmentScheduleViewControllerActionEvent.
+                    ViewController.ScheduleViewControllerActionEvent.
                             EMPTY_SLOT_SCAN_CONFIGURATION_VIEW_REQUEST.toString());
         this.getMyController().actionPerformed(actionEvent);
     }//GEN-LAST:event_btnScanForEmptySlotsActionPerformed
@@ -893,7 +897,7 @@ public class ScheduleView extends View{
         if (OKToCancelAppointment==JOptionPane.YES_OPTION){
             ActionEvent actionEvent = new ActionEvent(this, 
                     ActionEvent.ACTION_PERFORMED,
-                    ViewController.AppointmentScheduleViewControllerActionEvent.APPOINTMENT_CANCEL_REQUEST.toString());
+                    ViewController.ScheduleViewControllerActionEvent.APPOINTMENT_CANCEL_REQUEST.toString());
             this.getMyController().actionPerformed(actionEvent);
         }
     }//GEN-LAST:event_btnCancelSelectedAppointmentActionPerformed
@@ -912,7 +916,7 @@ public class ScheduleView extends View{
     private void mniViewCancelledAppointmentsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mniViewCancelledAppointmentsActionPerformed
         ActionEvent actionEvent = new ActionEvent(this, 
                         ActionEvent.ACTION_PERFORMED,
-                        ViewController.AppointmentScheduleViewControllerActionEvent.
+                        ViewController.ScheduleViewControllerActionEvent.
                                 APPOINTMENTS_CANCELLED_VIEW_REQUEST.toString());
                 this.getMyController().actionPerformed(actionEvent);
     }//GEN-LAST:event_mniViewCancelledAppointmentsActionPerformed
@@ -933,7 +937,7 @@ public class ScheduleView extends View{
         }
         ActionEvent actionEvent = new ActionEvent(this,
                 ActionEvent.ACTION_PERFORMED,
-                ViewController.AppointmentScheduleViewControllerActionEvent.UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_VIEW_REQUEST.toString());
+                ViewController.ScheduleViewControllerActionEvent.UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_VIEW_REQUEST.toString());
         this.getMyController().actionPerformed(actionEvent);
     }//GEN-LAST:event_btnMarkSlotUnbookableActionPerformed
 
@@ -968,7 +972,7 @@ public class ScheduleView extends View{
         String stringToPrint;
         if (this.tblAppointments!=null){
             TableModel model = tblAppointments.getModel();
-            stringToPrint = getMyController().getDescriptor().getControllerDescription().getAppointmentScheduleDay().
+            stringToPrint = getMyController().getDescriptor().getControllerDescription().getScheduleDay().
                     format(DateTimeFormatter.ofPattern("dd/MM/yy"));
             stringToPrint = stringToPrint + " Appointment Schedule" +"\n\n";
             stringToPrint = stringToPrint + String.format(centreString(PATIENT_WIDTH,"Patient") +
@@ -1069,7 +1073,7 @@ public class ScheduleView extends View{
             tblAppointments.clearSelection();
             ActionEvent actionEvent = new ActionEvent(ScheduleView.this, 
                     ActionEvent.ACTION_PERFORMED,
-                    ViewController.AppointmentScheduleViewControllerActionEvent.APPOINTMENTS_FOR_DAY_REQUEST.toString());
+                    ViewController.ScheduleViewControllerActionEvent.APPOINTMENTS_FOR_DAY_REQUEST.toString());
             ScheduleView.this.getMyController().actionPerformed(actionEvent);
             //getMyController().actionPerformed(actionEvent);
             SwingUtilities.invokeLater(new Runnable() 
@@ -1148,7 +1152,7 @@ public class ScheduleView extends View{
                     
                     ActionEvent actionEvent = new ActionEvent(
                         ScheduleView.this,ActionEvent.ACTION_PERFORMED,
-                        ViewController.AppointmentScheduleViewControllerActionEvent.
+                        ViewController.ScheduleViewControllerActionEvent.
                                 APPOINTMENT_REMINDED_STATUS_UPDATE_REQUEST.toString());
                     getMyController().actionPerformed(actionEvent);
 
@@ -1272,7 +1276,7 @@ public class ScheduleView extends View{
         String stringToPrint;
         if (this.tblAppointments!=null){
             TableModel model = tblAppointments.getModel();
-            stringToPrint = getMyController().getDescriptor().getControllerDescription().getAppointmentScheduleDay().
+            stringToPrint = getMyController().getDescriptor().getControllerDescription().getScheduleDay().
                     format(DateTimeFormatter.ofPattern("dd/MM/yy"));
             stringToPrint = stringToPrint + " Appointment Schedule" +"\n\n";
             stringToPrint = stringToPrint + String.format(centreString(40,"Patient") +

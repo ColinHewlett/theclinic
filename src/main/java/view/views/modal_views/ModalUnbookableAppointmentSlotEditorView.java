@@ -336,15 +336,15 @@ public class ModalUnbookableAppointmentSlotEditorView extends ModalView {
                     null);
             }
         }
-        ViewController.AppointmentScheduleViewControllerActionEvent action = null;
+        ViewController.ScheduleViewControllerActionEvent action = null;
         switch(getMyController().getDescriptor().
                 getControllerDescription().getViewMode()){
             case CREATE:
-                action = ViewController.AppointmentScheduleViewControllerActionEvent.
+                action = ViewController.ScheduleViewControllerActionEvent.
                     UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_CREATE_REQUEST;
                 break;
             case UPDATE:
-                action = ViewController.AppointmentScheduleViewControllerActionEvent.
+                action = ViewController.ScheduleViewControllerActionEvent.
                     UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_UPDATE_REQUEST;
                 break;
         }

@@ -17,17 +17,13 @@ import view.views.non_modal_views.DesktopView;
 import java.awt.event.ActionEvent;
 import java.awt.Point;
 import java.beans.PropertyChangeEvent;
-import java.beans.PropertyVetoException;
 import java.beans.PropertyChangeSupport;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 import javax.swing.JOptionPane;
 import javax.swing.SwingWorker;
 import view.View;
@@ -137,6 +133,8 @@ public class DesktopViewController extends ViewController{
     
     /**
      * ActionEvent responder; action events sent by an ActionViewController include
+     * -- SCHEDULE_VIEW_CONTROLLER_REQUEST
+     * ---- 
      * -- APPOINTMENT_HISTORY_CHANGE_NOTIFICATION
      * -- DISABLE_DESKTOP_CONTROLS_REQUEST
      * -- ENABLE_DESKTOP_CONTROLS_REQUEST
@@ -148,6 +146,9 @@ public class DesktopViewController extends ViewController{
         ViewController.DesktopViewControllerActionEvent actionCommand =
                     ViewController.DesktopViewControllerActionEvent.valueOf(e.getActionCommand());
         switch(actionCommand){
+            case SCHEDULE_VIEW_CONTROLLER_REQUEST:  
+                doRequestForScheduleViewController(avc);
+                break;
             case VIEW_CONTROLLER_CHANGED_NOTIFICATION:
                 firePropertyChangeEvent(
                         ViewController.DesktopViewControllerPropertyChangeEvent.
@@ -182,24 +183,6 @@ public class DesktopViewController extends ViewController{
                 }
                 break;
             }
-                /*
-                for (Map.Entry<AppointmentScheduleViewController, AppointmentRemindersViewController> entry :
-                        appointmentScheduleViewControllersMap.entrySet()){
-                    if (entry.getKey().equals(e.getSource())){
-                        if (entry.getValue()!=null){
-
-                            ActionEvent actionEvent = new ActionEvent(
-                                    this,ActionEvent.ACTION_PERFORMED,
-                                    ViewController.AppointmentRemindersViewControllerActionEvent.
-                                            APPOINTMENT_SCHEDULE_VIEW_CLOSE_NOTIFICATION.toString());
-                            entry.getValue().actionPerformed(actionEvent);             
-                        }
-                        appointmentScheduleViewControllersMap.remove(entry.getKey());
-                        //break;
-                    }
-                    break;                  
-                }
-                */
         }           
     }
     
@@ -248,7 +231,6 @@ public class DesktopViewController extends ViewController{
                  * -- the appointment date is used in the construction of a new AppointmentVC and associated appointment schedule view which includes the selected patient's appointment
                  */
                 PatientViewController patientViewController = (PatientViewController)e.getSource();
-                //Optional<Descriptor> ed = Optional.of(patientViewController.getDescriptor());
                 createNewAppointmentScheduleViewController(patientViewController.getDescriptor());
                 break;
         }
@@ -402,7 +384,7 @@ public class DesktopViewController extends ViewController{
                     break;
                 }
                 case SCHEDULE_VIEW_CONTROLLER_REQUEST:{
-                    doRequestForAppointmentScheduleViewController();
+                    doRequestForScheduleViewController((DesktopView)e.getSource());
                     break;
                 }
                 case PATIENT_VIEW_CONTROLLER_REQUEST:{
@@ -458,22 +440,22 @@ public class DesktopViewController extends ViewController{
         } 
     }
 
-    private void createNewAppointmentScheduleViewController(Descriptor ed){
+    private void createNewAppointmentScheduleViewController(Descriptor ed){       
         try{
             ScheduleViewController avc =
                     new ScheduleViewController(this, getDesktopView());
+            this.appointmentScheduleViewControllers.add(avc);
             try{
                 SurgeryDaysAssignment surgeryDaysAssignment = new SurgeryDaysAssignment();
                 surgeryDaysAssignment = surgeryDaysAssignment.read();
                 if (ed == null) ed = new Descriptor();
-                    ed.getControllerDescription().setSurgeryDaysAssignment(surgeryDaysAssignment.get());
+                ed.getControllerDescription().setSurgeryDaysAssignment(
+                            surgeryDaysAssignment.get());  
             }
             catch (StoreException ex){
                 displayErrorMessage(ex.getMessage(),"DesktopViewController error",JOptionPane.WARNING_MESSAGE);
             } 
             avc.setDescriptor(ed);
-            
-            //LocalDate test = ed.getViewDescription().getScheduleDay();
             
             avc.setView(new View().make(
                 View.Viewer.SCHEDULE_VIEW,
@@ -541,10 +523,42 @@ public class DesktopViewController extends ViewController{
         }   
     }
     
-    private void doRequestForAppointmentScheduleViewController(){
-        createNewAppointmentScheduleViewController(null);
+    private void doRequestForScheduleViewController(DesktopView desktopView){
+        ScheduleViewController activeViewController = null;
+        for(ScheduleViewController svc : appointmentScheduleViewControllers){
+            /**
+             * the Schedule VC has been called from the Desktop view
+             * -- hence  the need to check if a schedule for today already exists
+             */
+            if (LocalDate.now().isEqual(svc.getDescriptor().getControllerDescription().getScheduleDay())){
+                activeViewController = svc;
+                break;
+            }
+        }
+        if (activeViewController!=null)
+            activeViewController.getView().toFront();
+        else createNewAppointmentScheduleViewController(null);
     }
     
+    private void doRequestForScheduleViewController(ScheduleViewController vc){
+        ScheduleViewController activeViewController = null;
+        for(ScheduleViewController svc : appointmentScheduleViewControllers){
+                if(vc.getDescriptor().getViewDescription().getScheduleDay().
+                        isEqual(svc.getDescriptor().getControllerDescription().getScheduleDay())){
+                    activeViewController = svc;
+                    break;
+                }
+        }
+        if (activeViewController!=null)
+            activeViewController.getView().toFront();
+        else {
+            Descriptor descriptor = new Descriptor();
+            descriptor.getControllerDescription().setScheduleDay(
+                    vc.getDescriptor().getViewDescription().getScheduleDay());
+            createNewAppointmentScheduleViewController(descriptor);
+        }
+    }
+
     private void doRequestForPatientNotificationViewController(){
         if (patientNotificationViewControllers.isEmpty()){
             try{
@@ -571,7 +585,8 @@ public class DesktopViewController extends ViewController{
         }else {
         }//do nothing because only one patient notification VC allowed
     }
-                
+    
+    
     private void doRequestForPatientViewController(){
         try{
             patientViewControllers.add(

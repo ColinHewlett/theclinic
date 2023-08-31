@@ -85,8 +85,8 @@ public class View extends JInternalFrame
                 break;
             case APPOINTMENTS_CANCELLED_VIEW:
                 //result = new ModalAppointmentsCancelledFactoryMethod(controller,dtView).makeView(viewer);
-                setModalView(makeView(new ModalAppointmentsCancelledView(viewer, controller, desktopView)));
-                //setModalView(makeView(new ModalCancelledAppointmentsView(viewer, controller, desktopView)));
+                //setModalView(makeView(new ModalAppointmentsCancelledView(viewer, controller, desktopView)));
+                setModalView(makeView(new ModalCancelledAppointmentsView(viewer, controller, desktopView)));
                 break;
             case APPOINTMENT_EDITOR_VIEW:
                 setModalView(makeView(new ModalAppointmentEditorView(viewer, controller, desktopView)));
@@ -201,11 +201,12 @@ public class View extends JInternalFrame
     
     protected final ModalView makeView(ModalView view){
         view.getMyController().setModalView(view);
+        view.setLayer(JLayeredPane.MODAL_LAYER);
         view.getMyController().getModalView().initialiseView();
         view.getMyController().centreViewOnDesktop(view.getDesktopView(), view.getMyController().getModalView());
         view.getDesktopView().getDeskTop().add(view.getMyController().getModalView());
-        view.setLayer(JLayeredPane.MODAL_LAYER);
         view.toFront();
+        startModal(view);
         return view;
     }
     

@@ -76,7 +76,7 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
                                             UNDEFINED}
   
     
-    public static enum AppointmentScheduleViewControllerActionEvent{
+    public static enum ScheduleViewControllerActionEvent{
         /**
          * PRIMARY VIEW ACTION EVENTS
          */
@@ -106,6 +106,7 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         APPOINTMENT_EDITOR_UPDATE_REQUEST,
         EMPTY_SLOTS_FROM_DAY_REQUEST,
         MODAL_VIEWER_ACTIVATED,
+        SCHEDULE_VIEW_CONTROLLER_REQUEST,
         SURGERY_DAYS_EDIT_REQUEST,
         UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_CREATE_REQUEST,
         UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_UPDATE_REQUEST    
@@ -127,6 +128,7 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         }
     
     public static enum DesktopViewControllerActionEvent{
+        BRING_TO_FRONT_SCHEDULE_VIEW_IF_ACTIVE_REQUEST,
         SCHEDULE_VIEW_CONTROLLER_REQUEST,
         CLINIC_LOGO_VIEW_MODE_NOTIFICATION,
         COUNT_APPOINTMENT_TABLE_REQUEST,

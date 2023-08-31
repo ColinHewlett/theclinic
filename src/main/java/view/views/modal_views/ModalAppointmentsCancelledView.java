@@ -82,7 +82,7 @@ public class ModalAppointmentsCancelledView extends ModalView{
                 populateCancelledAppointmentsTable();
                 ActionEvent actionEvent = new ActionEvent(this, 
                 ActionEvent.ACTION_PERFORMED,
-                        ViewController.AppointmentScheduleViewControllerActionEvent.VIEW_CHANGED_NOTIFICATION.toString());
+                        ViewController.ScheduleViewControllerActionEvent.VIEW_CHANGED_NOTIFICATION.toString());
                 this.getMyController().actionPerformed(actionEvent);
                 break;
         }        
@@ -153,7 +153,7 @@ public class ModalAppointmentsCancelledView extends ModalView{
                             getModel()).getElementAt(row)); 
             ActionEvent actionEvent = new ActionEvent(this, 
                     ActionEvent.ACTION_PERFORMED,
-                    ViewController.AppointmentScheduleViewControllerActionEvent.APPOINTMENT_UNCANCEL_REQUEST.toString());
+                    ViewController.ScheduleViewControllerActionEvent.APPOINTMENT_UNCANCEL_REQUEST.toString());
             this.getMyController().actionPerformed(actionEvent);
         }else
             JOptionPane.showMessageDialog(this, "An appointment to uncancel has not been selected");

@@ -38,6 +38,7 @@ public class ModalSurgeryDaysEditorView extends ModalView {
         setTitle("Surgery days editor");
         setMyViewType(myViewType);
         setMyController(myController);
+        setDesktopView(desktopView);
     }
     
     @Override
@@ -219,7 +220,7 @@ public class ModalSurgeryDaysEditorView extends ModalView {
         
         ActionEvent actionEvent = new ActionEvent(this, 
                 ActionEvent.ACTION_PERFORMED,
-                ViewController.AppointmentScheduleViewControllerActionEvent.SURGERY_DAYS_EDIT_REQUEST.toString());
+                ViewController.ScheduleViewControllerActionEvent.SURGERY_DAYS_EDIT_REQUEST.toString());
         this.getMyController().actionPerformed(actionEvent);
     }//GEN-LAST:event_btnSaveActionPerformed
 
