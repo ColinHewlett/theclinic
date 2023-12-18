@@ -11,6 +11,11 @@ package _system_environment_variables;
 public class SystemDefinitions {
     public static String APPOINTMENT_UNBOOKABILITY_MARKER = "UNBOOKABLE";
     public static Integer UNBOOKABLE_APPOINTMENT_SLOT = 1;
+    
+    public static String getPMSLookAndFeel(){
+        return System.getenv("PMS_LOOK_AND_FEEL");
+    }
+    
     public static String getPMSDebug(){
         return System.getenv("PMS_DEBUG");
     }

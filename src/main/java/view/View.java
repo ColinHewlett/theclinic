@@ -109,6 +109,9 @@ public class View extends JInternalFrame
             case UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_VIEW:
                 setModalView(makeView(new ModalUnbookableAppointmentSlotEditorView(viewer, controller, desktopView)));
                 break;
+            case TEST_PATIENT_VIEW:
+                setView(makeView(new TestPatientView(viewer, controller, desktopView)));
+                break;
             default:
                 JOptionPane.showMessageDialog(desktopView, 
                         "Could not find the requested view (" + viewer.toString());
@@ -137,7 +140,8 @@ public class View extends JInternalFrame
         PATIENT_NOTIFICATION_EDITOR_VIEW,
         UNACTIONED_PATIENT_NOTIFICATION_VIEW,
         SURGERY_DAY_EDITOR_VIEW,
-        UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_VIEW
+        UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_VIEW,
+        TEST_PATIENT_VIEW
     }
     
     protected Boolean getViewStatus(){

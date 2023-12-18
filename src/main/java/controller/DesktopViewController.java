@@ -26,6 +26,7 @@ import java.util.Iterator;
 import java.util.List;
 import javax.swing.JOptionPane;
 import javax.swing.SwingWorker;
+import javax.swing.UIManager;
 import view.View;
 
 /**
@@ -387,6 +388,10 @@ public class DesktopViewController extends ViewController{
                     doRequestForScheduleViewController((DesktopView)e.getSource());
                     break;
                 }
+                case TEST_PATIENT_VIEW_CONTROLLER_REQUEST:{
+                    doRequestForTestPatientViewController();
+                    break;
+                }
                 case PATIENT_VIEW_CONTROLLER_REQUEST:{
                     doRequestForPatientViewController();
                     break;
@@ -586,7 +591,27 @@ public class DesktopViewController extends ViewController{
         }//do nothing because only one patient notification VC allowed
     }
     
-    
+    private void doRequestForTestPatientViewController(){
+        try{
+            
+            patientViewControllers.add(
+                                    new PatientViewController(this, getDesktopView()));
+            
+            PatientViewController pvc = patientViewControllers.get(patientViewControllers.size()-1);
+            pvc.setView(new View().make(
+                View.Viewer.TEST_PATIENT_VIEW,
+                pvc, 
+                getDesktopView()));
+            
+            if (getDesktopViewMode().equals(DesktopViewMode.CLINIC_LOGO)){
+                    doSetupDesktopViewMode();
+            } 
+        
+        }
+        catch (StoreException ex){
+            displayErrorMessage(ex.getMessage(),"DesktopViewController error",JOptionPane.WARNING_MESSAGE);
+        }
+    }
     private void doRequestForPatientViewController(){
         try{
             patientViewControllers.add(
@@ -972,23 +997,36 @@ public class DesktopViewController extends ViewController{
             if (SystemDefinitions.getPMSOperationMode().equals("DATA_MIGRATION_ENABLED"))
                 isDataMigrationOptionEnabled = true;
             
-       
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Windows".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
+            String lookAndFeel = SystemDefinitions.getPMSLookAndFeel();
+            switch (lookAndFeel){
+                case "Metal":
+                    //javax.swing.UIManager.setLookAndFeel("Metal"); do nothing
                     break;
+                case "Windows":
+                    UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+                    break;
+            }
+            /*
+            if (SystemDefinitions.getPMSLookAndFeel().equals("Windows")){
+                //08/12/2023 09:41
+                for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+                    if ("Windows".equals(info.getName())) {
+                        javax.swing.UIManager.setLookAndFeel(info.getClassName());
+                        break;
                 }
             }
+            }
+            */
         } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(DesktopView.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(DesktopView.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
             java.util.logging.Logger.getLogger(DesktopView.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
             java.util.logging.Logger.getLogger(DesktopView.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        }catch (InstantiationException ex) {
+            java.util.logging.Logger.getLogger(DesktopView.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        }catch (IllegalAccessException ex) {
+            java.util.logging.Logger.getLogger(DesktopView.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
-        
+
         javax.swing.SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {

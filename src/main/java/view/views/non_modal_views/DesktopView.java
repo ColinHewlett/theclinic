@@ -514,7 +514,8 @@ public class DesktopView extends javax.swing.JFrame implements PropertyChangeLis
         ActionEvent actionEvent = new ActionEvent(this, 
                 ActionEvent.ACTION_PERFORMED,
                 DesktopViewController.DesktopViewControllerActionEvent.PATIENT_VIEW_CONTROLLER_REQUEST.toString());
-        this.getController().actionPerformed(actionEvent);
+                //DesktopViewController.DesktopViewControllerActionEvent.TEST_PATIENT_VIEW_CONTROLLER_REQUEST.toString());
+                this.getController().actionPerformed(actionEvent);
     }
     
     private void mniPatientNotificationViewRequestActionPerformed() {                                                      

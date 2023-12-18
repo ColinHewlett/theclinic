@@ -34,7 +34,17 @@ public class PatientViewController extends ViewController {
     private PropertyChangeSupport pcSupportForView = null;
     private PropertyChangeEvent pcEvent = null;
     private String message = null;
+    private PatientSelectionMode patientSelectionMode = null;
+    
+    private PatientSelectionMode getPatientSelectionMode(){
+        return patientSelectionMode;
+    }
+    
+    private void setPatientSelectionMode(PatientSelectionMode value){
+        patientSelectionMode = value;
+    }
 
+    private enum PatientSelectionMode{ PATIENT_SELECTION, PATIENT_RECOVERY};
 
     private void doPrimaryViewActionRequest(ActionEvent e){
         ActionEvent actionEvent = null;
@@ -68,13 +78,20 @@ public class PatientViewController extends ViewController {
                 doPatientDeleteRequest();
                 break;
             case PATIENT_RECOVER_REQUEST:
+                //06/12/2023 19:02
+                //private void doPatientRequest(ActionEvent e){
+                setPatientSelectionMode(PatientSelectionMode.PATIENT_RECOVERY);
                 doPatientRecoverySelectionRequest(e);
+                setPatientSelectionMode(PatientSelectionMode.PATIENT_SELECTION);
                 break;
             case PATIENT_UPDATE_REQUEST:
                 doPatientUpdateRequest();
                 break;
             case PATIENT_REQUEST:
-                doPatientRequest(e);
+                //06/12/2023 19:02
+                //doPatientRequest(e);
+                setPatientSelectionMode(PatientSelectionMode.PATIENT_SELECTION);
+                doPatientRequest();
                 break;
             case NULL_PATIENT_REQUEST:
                 doNullPatientRequest();
@@ -112,7 +129,9 @@ public class PatientViewController extends ViewController {
             case PATIENT_RECOVERY_SELECTION_VIEW:
                 switch (actionCommand){
                     case PATIENT_REQUEST:
-                        doPatientRequest(e);
+                        //06/12/2023 19:02
+                        //doPatientRequest(e);
+                        doPatientRequest();
                         break;
                     case PATIENT_RECOVER_REQUEST:
                         doPatientRecoverRequest(e);
@@ -223,6 +242,33 @@ public class PatientViewController extends ViewController {
             patient.setScope(Scope.DELETED);
             patient = patient.read();
             getDescriptor().getControllerDescription().setPatients(patient.get());
+            //06/12/2023 19:02
+            doPatientRequest();
+            /*
+            View.setViewer(View.Viewer.PATIENT_RECOVERY_SELECTION_VIEW);
+            setView((ModalView)new View().make(
+                    View.Viewer.PATIENT_RECOVERY_SELECTION_VIEW,
+                    this, 
+                    this.getDesktopView()).getModalView());
+            */
+        }
+        catch (StoreException ex){
+            String message = ex.getMessage();
+            displayErrorMessage(message,"AppointmentViewController error",JOptionPane.WARNING_MESSAGE);
+        }
+        
+    }
+    
+    /*
+    private void doPatientRecoverySelectionRequest(ActionEvent e){
+        //setEntityDescriptorFromView(((View)e.getSource()).getViewDescriptor());
+        Patient patient = null;
+        ArrayList<Patient> patients = null;
+        try{
+            patient = new Patient();
+            patient.setScope(Scope.DELETED);
+            patient = patient.read();
+            getDescriptor().getControllerDescription().setPatients(patient.get());
             View.setViewer(View.Viewer.PATIENT_RECOVERY_SELECTION_VIEW);
             setView((ModalView)new View().make(
                     View.Viewer.PATIENT_RECOVERY_SELECTION_VIEW,
@@ -234,6 +280,7 @@ public class PatientViewController extends ViewController {
             displayErrorMessage(message,"AppointmentViewController error",JOptionPane.WARNING_MESSAGE);
         }
     }
+    */
     
     private void doPatientDeleteRequest(){
         //setEntityDescriptorFromView(view.getViewDescriptor()); 
@@ -324,6 +371,7 @@ public class PatientViewController extends ViewController {
         String errorLog = "";
         //setEntityDescriptorFromView(((View)e.getSource()).getViewDescriptor()); 
         Patient patient = getDescriptor().getViewDescription().getPatient();
+        //06/12/2023 19:02
         
         try{
             ((View)e.getSource()).setClosed(true);
@@ -414,9 +462,16 @@ public class PatientViewController extends ViewController {
         }
     }
 
-    private void doPatientRequest(ActionEvent e){
+    //06/12/2023 19:02
+    //private void doPatientRequest(ActionEvent e){
+    private void doPatientRequest(){
         //setEntityDescriptorFromView(((View)e.getSource()).getViewDescriptor());
-        Patient patient = getDescriptor().getViewDescription().getPatient();
+        Patient patient = null;
+        if (getPatientSelectionMode().equals(PatientSelectionMode.PATIENT_SELECTION))
+            patient = getDescriptor().getViewDescription().getPatient();
+        else
+            patient = getDescriptor().getControllerDescription().getPatient();
+        //
         if (patient.getIsKeyDefined()){
             try{
                 patient.setScope(Scope.SINGLE);
@@ -477,6 +532,8 @@ public class PatientViewController extends ViewController {
         patient.read();
         getDescriptor().getControllerDescription().setPatients(patient.get());
         View.setViewer(View.Viewer.PATIENT_VIEW);
+        
+        
         
         //super.centreViewOnDesktop(desktopView, view);
         

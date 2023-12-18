@@ -151,6 +151,7 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         PATIENT_NOTIFICATION_VIEW_CONTROLLER_REQUEST,
         PATIENT_SELECTION_VIEW_CONTROLLER_REQUEST,
         PATIENT_VIEW_CONTROLLER_REQUEST,
+        TEST_PATIENT_VIEW_CONTROLLER_REQUEST,
         REFRESH_DISPLAY_REQUEST,
         VIEW_ACTIVATED_NOTIFICATION,
         VIEW_CHANGED_NOTIFICATION,
@@ -245,6 +246,7 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         PATIENTS_RECEIVED,
         PATIENT_VIEW_CONTROLLER_ERROR_RECEIVED,
         PATIENT_VIEW_CHANGE_NOTIFICATION
+        
         //PATIENT_VIEW_CONTROLLER_CHANGE_NOTIFICATION
     }
 
@@ -309,8 +311,9 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         Dimension deskTopViewDimension = desktopView.getSize();
         Dimension myViewDimension = view.getSize();
         Point point = new Point(
-                (int)((deskTopViewDimension.getWidth()) - (myViewDimension.getWidth()))/2,
-                (int)((deskTopViewDimension.getHeight()-insets.top) - myViewDimension.getHeight())/2);
+                (int)((deskTopViewDimension.getWidth() - (2*insets.left)) - (myViewDimension.getWidth()))/2,
+                //(int)((deskTopViewDimension.getHeight()-insets.top) - myViewDimension.getHeight())/2);
+                (int)((deskTopViewDimension.getHeight() - (2*insets.top)) - myViewDimension.getHeight())/2);
         
         view.setLocation(point);
         

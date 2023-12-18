@@ -369,7 +369,7 @@ public class ScheduleView extends View{
      * 
      */
     private void populateAppointmentsForDayTable(){
-        ConfigureScheduleTable();;
+        ConfigureScheduleTable();
         doScheduleTitleRefresh(null);
         setTitle(getMyController().getDescriptor().getControllerDescription().getScheduleDay().
                 format(DateTimeFormatter.ofPattern("dd/MM/yy")) + " Appointment schedule");
