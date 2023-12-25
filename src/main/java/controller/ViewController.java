@@ -226,6 +226,7 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         NULL_PATIENT_REQUEST,
         PATIENT_GUARDIAN_REQUEST,
         PATIENT_GUARDIANS_REQUEST,
+        DELETED_PATIENT_REQUEST,
         PATIENT_REQUEST,
         PATIENTS_REQUEST,
         PATIENT_SELECTION_VIEW_REQUEST,
@@ -234,6 +235,7 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         PATIENT_UPDATE_REQUEST,
         PATIENT_DELETE_REQUEST,
         PATIENT_RECOVER_REQUEST,
+        RECOVER_PATIENT_REQUEST,
         VIEW_ACTIVATED_NOTIFICATION,
         VIEW_CHANGED_NOTIFICATION,
         VIEW_CLOSE_NOTIFICATION      

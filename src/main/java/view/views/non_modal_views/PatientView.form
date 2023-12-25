@@ -913,7 +913,7 @@
                   <EmptySpace min="-2" pref="78" max="-2" attributes="0"/>
                   <Component id="btnCloseView" min="-2" pref="159" max="-2" attributes="0"/>
                   <EmptySpace min="-2" pref="141" max="-2" attributes="0"/>
-                  <Component id="btnCreatePatient" min="-2" pref="159" max="-2" attributes="0"/>
+                  <Component id="btnCreateNewPatient" min="-2" pref="159" max="-2" attributes="0"/>
                   <EmptySpace max="32767" attributes="0"/>
                   <Component id="btnUpdateSelectedPatient" min="-2" pref="159" max="-2" attributes="0"/>
                   <EmptySpace min="-2" pref="80" max="-2" attributes="0"/>
@@ -926,7 +926,7 @@
                   <Group type="103" groupAlignment="1" attributes="0">
                       <Component id="btnUpdateSelectedPatient" alignment="0" max="32767" attributes="0"/>
                       <Component id="btnCloseView" alignment="0" max="32767" attributes="0"/>
-                      <Component id="btnCreatePatient" alignment="0" max="32767" attributes="0"/>
+                      <Component id="btnCreateNewPatient" alignment="0" max="32767" attributes="0"/>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
               </Group>
@@ -934,7 +934,7 @@
         </DimensionLayout>
       </Layout>
       <SubComponents>
-        <Component class="javax.swing.JButton" name="btnCreatePatient">
+        <Component class="javax.swing.JButton" name="btnCreateNewPatient">
           <Properties>
             <Property name="text" type="java.lang.String" value="Update selected patient"/>
           </Properties>

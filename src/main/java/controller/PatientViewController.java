@@ -77,6 +77,9 @@ public class PatientViewController extends ViewController {
             case PATIENT_DELETE_REQUEST:
                 doPatientDeleteRequest();
                 break;
+            case RECOVER_PATIENT_REQUEST:
+                doPatientRecoverRequest();
+                break;
             case PATIENT_RECOVER_REQUEST:
                 //06/12/2023 19:02
                 //private void doPatientRequest(ActionEvent e){
@@ -92,6 +95,9 @@ public class PatientViewController extends ViewController {
                 //doPatientRequest(e);
                 setPatientSelectionMode(PatientSelectionMode.PATIENT_SELECTION);
                 doPatientRequest();
+                break;
+            case DELETED_PATIENT_REQUEST:
+                doDeletedPatientRequest();
                 break;
             case NULL_PATIENT_REQUEST:
                 doNullPatientRequest();
@@ -133,9 +139,11 @@ public class PatientViewController extends ViewController {
                         //doPatientRequest(e);
                         doPatientRequest();
                         break;
+                    /*
                     case PATIENT_RECOVER_REQUEST:
                         doPatientRecoverRequest(e);
                         break;
+                    */
                     case NULL_PATIENT_REQUEST:
                         doNullPatientRequest();
                         break;
@@ -233,8 +241,13 @@ public class PatientViewController extends ViewController {
         }
     }
     
+    /**
+     * primary view has requested a list of deleted patients on the system
+     * -- method initialises the Descriptor with the deleted patients on the system
+     * -- primary view is sent a PATIENTS_RECEIVED property change event
+     * @param e 
+     */
     private void doPatientRecoverySelectionRequest(ActionEvent e){
-        //setEntityDescriptorFromView(((View)e.getSource()).getViewDescriptor());
         Patient patient = null;
         ArrayList<Patient> patients = null;
         try{
@@ -242,19 +255,18 @@ public class PatientViewController extends ViewController {
             patient.setScope(Scope.DELETED);
             patient = patient.read();
             getDescriptor().getControllerDescription().setPatients(patient.get());
-            //06/12/2023 19:02
-            doPatientRequest();
-            /*
-            View.setViewer(View.Viewer.PATIENT_RECOVERY_SELECTION_VIEW);
-            setView((ModalView)new View().make(
-                    View.Viewer.PATIENT_RECOVERY_SELECTION_VIEW,
-                    this, 
-                    this.getDesktopView()).getModalView());
-            */
+            firePropertyChangeEvent(
+                    ViewController.PatientViewControllerPropertyChangeEvent.
+                        PATIENTS_RECEIVED.toString(),
+                    getView(),
+                    this,
+                    null,
+                    null
+            );
         }
         catch (StoreException ex){
             String message = ex.getMessage();
-            displayErrorMessage(message,"AppointmentViewController error",JOptionPane.WARNING_MESSAGE);
+            displayErrorMessage(message,"Patient View Controller error",JOptionPane.WARNING_MESSAGE);
         }
         
     }
@@ -367,20 +379,9 @@ public class PatientViewController extends ViewController {
      * -- then and only then can 
      * @param e 
      */
-    private void doPatientRecoverRequest(ActionEvent e){
+    private void doPatientRecoverRequest(){
         String errorLog = "";
-        //setEntityDescriptorFromView(((View)e.getSource()).getViewDescriptor()); 
         Patient patient = getDescriptor().getViewDescription().getPatient();
-        //06/12/2023 19:02
-        
-        try{
-            ((View)e.getSource()).setClosed(true);
-        }
-        catch (PropertyVetoException ex){
-            String message = ex.getMessage() + "\n";
-            message = message + "Error when closing down the NON_SURGERY_DAY_SCHEDULE_EDITOR view in AppointmentViewController::doSurgeryDaysEditorModalViewer()";
-            displayErrorMessage(message,"AppointmentViewController error",JOptionPane.WARNING_MESSAGE);
-        }
         if (patient.getIsKeyDefined()){
             try{
                 ArrayList<Appointment> deletedAppointments =
@@ -407,9 +408,9 @@ public class PatientViewController extends ViewController {
                                     " has been cancelled";            
                         }
                     }
-                }  
-                patient.setScope(Scope.DELETED);
-                patient.recover();
+                } 
+                //patient.setScope(Scope.DELETED);
+                //patient.recover();
                 if (collisionFromAppointmentRecovery) {
                     getDescriptor().getControllerDescription().setError(errorLog);
                     firePropertyChangeEvent(
@@ -420,40 +421,45 @@ public class PatientViewController extends ViewController {
                             null,
                             getDescriptor()
                     );
+                    doNullPatientRequest();
                 }
-                //fetch the recovered patient for the view
-                patient.setScope(Scope.SINGLE);
-                patient.read();
-                getDescriptor().getControllerDescription().setPatient(patient);
-                firePropertyChangeEvent(
+                else{
+                    //recover deleted patient
+                    patient.setScope(Scope.DELETED);
+                    patient.recover();
+                    //fetch the all the undeleted patients on the system for the view
+                    patient.setScope(Scope.ALL);
+                    patient.read();
+                    getDescriptor().getControllerDescription().setPatients(patient.get());
+                    firePropertyChangeEvent(
+                            ViewController.PatientViewControllerPropertyChangeEvent.
+                                    PATIENTS_RECEIVED.toString(),
+                            getView(),
+                            this,
+                            null,
+                            getDescriptor()     
+                    );
+                    firePropertyChangeEvent(
+                            ViewController.DesktopViewControllerPropertyChangeEvent.
+                                    PATIENT_VIEW_CONTROLLER_CHANGE_NOTIFICATION.toString(),
+                            (DesktopViewController)getMyController(),
+                            this,
+                            null,
+                            null     
+                    );
+                    //fetch the recovered patient for the view
+                    patient.setScope(Scope.SINGLE);
+                    patient.read();
+                    getDescriptor().getControllerDescription().setPatient(patient);
+                    firePropertyChangeEvent(
                        ViewController.PatientViewControllerPropertyChangeEvent.
                         PATIENT_RECEIVED.toString(),
                         getView(),
                         this,
                         null,
                         getDescriptor()
-                );
-                //fetch the all the undeleted patients on the system for the view
-                patient.setScope(Scope.ALL);
-                patient.read();
-                getDescriptor().getControllerDescription().setPatients(patient.get());
-                firePropertyChangeEvent(
-                        ViewController.PatientViewControllerPropertyChangeEvent.
-                                PATIENTS_RECEIVED.toString(),
-                        getView(),
-                        this,
-                        null,
-                        getDescriptor()     
-                );
-                firePropertyChangeEvent(
-                        ViewController.DesktopViewControllerPropertyChangeEvent.
-                                PATIENT_VIEW_CONTROLLER_CHANGE_NOTIFICATION.toString(),
-                        (DesktopViewController)getMyController(),
-                        this,
-                        null,
-                        null     
-                );
-                
+                    );
+                }    
             }catch (StoreException ex){
                 displayErrorMessage(ex.getMessage() +"\n"
                         + "Exception raised in PatientViewController::doPatientRecoverRequest()",
@@ -462,6 +468,46 @@ public class PatientViewController extends ViewController {
         }
     }
 
+    private void doDeletedPatientRequest(){
+        Patient requestedDeletedPatient = null;
+        Patient patient = getDescriptor().getViewDescription().getPatient();
+        if (patient.getIsKeyDefined()){
+            try{
+                patient.setScope(Scope.DELETED);
+                Patient the_patient = patient.read();
+                for(var p : the_patient.get()){
+                    if (p.equals(patient)){
+                        requestedDeletedPatient = p;
+                        break;
+                    }
+                }
+                if (requestedDeletedPatient!=null){
+                    getDescriptor().getControllerDescription().setPatient(requestedDeletedPatient);
+                    firePropertyChangeEvent(
+                           ViewController.PatientViewControllerPropertyChangeEvent.
+                            PATIENT_RECEIVED.toString(),
+                            getView(),
+                            this,
+                            null,
+                            getDescriptor()
+                    );
+                }
+                else{
+                    displayErrorMessage(
+                        "Could not find selected deleted patient in repository)",
+                        "Patient view controller error",
+                        JOptionPane.WARNING_MESSAGE);
+                }
+                
+            }catch (StoreException ex){
+                displayErrorMessage(ex.getMessage() + "\n"
+                        + "Exception raised in PatientViewController::doPatientRequest(ActionEvent)",
+                        "Patient view controller error",
+                        JOptionPane.WARNING_MESSAGE);
+            }
+        }
+    }
+    
     //06/12/2023 19:02
     //private void doPatientRequest(ActionEvent e){
     private void doPatientRequest(){

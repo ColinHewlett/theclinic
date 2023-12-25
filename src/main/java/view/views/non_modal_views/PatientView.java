@@ -20,6 +20,7 @@ import com.github.lgooddatepicker.components.DatePicker;
 import com.github.lgooddatepicker.components.DatePickerSettings;
 import com.github.lgooddatepicker.optionalusertools.DateChangeListener;
 import com.github.lgooddatepicker.zinternaltools.DateChangeEvent;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.*;
 import java.awt.Font;
@@ -34,7 +35,7 @@ import java.time.Period;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Optional;
-//import javax.swing.JInternalFrame;
+import javax.swing.border.TitledBorder;
 import javax.swing.JOptionPane;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
@@ -51,6 +52,7 @@ import javax.swing.JTable;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.JTextField;
+import javax.swing.border.TitledBorder;
 import javax.swing.table.TableColumnModel;
 
 
@@ -72,6 +74,15 @@ import javax.swing.table.TableColumnModel;
  * @author colin
  */
 public class PatientView extends View{
+    private String patientRecoveryCaption = "Recover patient";
+    private String patientCreateCaption = "Create new patient";
+    private String cancelPatientRecoveryCaption = "Cancel patient recovery";
+    private String patientUpdateCaption = "Update selected patient";
+    private String panelPatientSelectionTitle = "Select patient";
+    private String panelPatientRecoveryTitle = "Select patient to recover";
+    
+    private enum PatientSelectionMode{ PATIENT_SELECTION, 
+                                       PATIENT_RECOVERY}
     private enum BorderTitles { Appointment_history,
                                 Contact_details,
                                 Guardian_details,
@@ -101,29 +112,62 @@ public class PatientView extends View{
     private ActionListener myController = null;
     private InternalFrameAdapter internalFrameAdapter = null;
     private View.Viewer myViewType = null;
+    private PatientSelectionMode patientSelectionMode;
+    
+    private PatientSelectionMode getPatientSelectionMode(){
+        return patientSelectionMode;
+    }
 
-    static int mPatientViewHeight = 568;
-    static int wPatientViewHeight = 550;
-    static int mBeforeCreateNewPatientButtonGap = 87; 
-    static int wBeforeCreateNewPatientButtonGap = 84;
+    
+    private void setPatientSelectionMode(PatientSelectionMode value){
+        patientSelectionMode = value;
+        TitledBorder titledBorder = (TitledBorder)this.pnlSelectablePatients.getBorder();
+        switch (patientSelectionMode){
+            case PATIENT_RECOVERY:
+                titledBorder.setTitle(panelPatientRecoveryTitle);
+                titledBorder.setTitleColor(Color.RED);
+                btnCreateNewPatient.setText(patientRecoveryCaption);
+                btnCreateNewPatient.setForeground(Color.RED);
+                btnUpdateSelectedPatient.setText(cancelPatientRecoveryCaption);
+                btnUpdateSelectedPatient.setForeground(Color.RED);
+                break;
+            case PATIENT_SELECTION:
+                titledBorder.setTitle(panelPatientSelectionTitle);
+                titledBorder.setTitleColor(new java.awt.Color(0, 0, 204));
+                btnCreateNewPatient.setText(patientCreateCaption);
+                btnCreateNewPatient.setForeground(Color.BLACK);
+                btnUpdateSelectedPatient.setText(patientUpdateCaption);
+                btnUpdateSelectedPatient.setForeground(Color.BLACK);
+                break;
+        }
+        /**
+         * Note: On PATIENT_SELECTION case panel border requires a further nudge to display new title properly
+         */
+        this.pnlSelectablePatients.repaint();
+    }
+
+    static int mPatientViewHeight = 580;
+    static int wPatientViewHeight = 560;
+    static int mBeforeCreateNewPatientButtonGap = 86; 
+    static int wBeforeCreateNewPatientButtonGap = 83;
     static int mBeforeDOBGap = 9;
     static int wBeforeDOBGap = 18;
     static int mBeforeFetchButtonGap = 15;
     static int wBeforeFetchButtonGap = 25; 
-    static int mBeforeFrequencyLabelGap = 88;
-    static int wBeforeFrequencyLabelGap = 125;
+    static int mBeforeFrequencyLabelGap = 80;
+    static int wBeforeFrequencyLabelGap = 120;
     static int mBelowClearSelection = 27;
     static int wBelowClearSelection = 32;
     static int mBelowPhonesGap = 23;
     static int wBelowPhonesGap = 17;
-    static int mBetweenFrequencyLabelAndSpinnerGap = 18;
-    static int wBetweenFrequencyLabelAndSpinnerGap = 17;
+    static int mBetweenFrequencyLabelAndSpinnerGap = 11;
+    static int wBetweenFrequencyLabelAndSpinnerGap = 10;
     static int mBetweenPhonesAndGuardianPanelsGap = 20;
     static int wBetweenPhonesAndGuardianPanelsGap = 34;
     static int mBetweenGuardianAndRecallPanelsGap = 21;
     static int wBetweenGuardianAndRecallPanelsGap = 33;
-    static int mDatePickerWidth = 135;
-    static int wDatePickerWidth = 131;
+    static int mDatePickerWidth = 119;
+    static int wDatePickerWidth = 114;
     static int mLine2Width = 180;
     static int wLine2Width = 182;
     
@@ -320,6 +364,7 @@ public class PatientView extends View{
     @Override
     public void initialiseView(){ 
         initComponents();
+        setPatientSelectionMode(PatientSelectionMode.PATIENT_SELECTION);
         try{
             setVisible(true);
             setClosable(false);
@@ -327,14 +372,20 @@ public class PatientView extends View{
             setIconifiable(true);
             setResizable(false);
             setSelected(true);
-            setSize(968,593);
+            setSize(968,getPatientViewHeight());
         }catch(PropertyVetoException ex){
             
         }
         this.addInternalFrameListeners();
         btnFetchScheduleForSelectedAppointment.setText(
                 "<html><center>Fetch day schedule</center><center>for selected</center><center>appointment</center></html>");
-        //this.spnDentalRecallFrequency.setModel(new SpinnerNumberModel(6,0,12,3));
+        btnFetchScheduleForSelectedAppointment.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnFetchScheduleForSelectedAppointmentActionPerformed(evt);
+            }
+        });
+        
+        this.spnDentalRecallFrequency.setModel(new SpinnerNumberModel(6,0,12,3));
         tblAppointmentHistory.setModel(new Appointments3ColumnTableModel());
         ViewController.setJTableColumnProperties(
                 tblAppointmentHistory, 
@@ -853,7 +904,7 @@ public class PatientView extends View{
         Patient patient = getMyController().getDescriptor().
                 getControllerDescription().getPatient();
         if (patient.getIsKeyDefined())
-            //this.cmbSelectPatient.setSelectedItem(patient);
+            this.cmbPatientSelector.setSelectedItem(patient);
         this.setTitle(getSurname()); //Internal frame title
         setPatientTitle(patient.getName().getTitle());
         setForenames(patient.getName().getForenames());
@@ -1216,10 +1267,34 @@ public class PatientView extends View{
         
     //</editor-fold>
         btnFetchScheduleForSelectedAppointment = new javax.swing.JButton("<html><center>Fetch day schedule</center><center>for selected</center><center>appointment</center></html>");
+        
         btnClearSelection = new javax.swing.JButton("Clear patient selection");
+        btnClearSelection.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnClearSelectionActionPerformed(evt);
+            }
+        });
+        
         btnUpdateSelectedPatient = new javax.swing.JButton("Update selected patient");
+        btnUpdateSelectedPatient.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnUpdateSelectedPatientActionPerformed(evt);
+            }
+        });
+        
         btnCloseView = new javax.swing.JButton("Close view");
-        btnCreatePatient = new javax.swing.JButton("Create new patient");
+        btnCloseView.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCloseViewActionPerformed(evt);
+            }
+        });
+ 
+        btnCreateNewPatient = new javax.swing.JButton("Create new patient");
+        btnCreateNewPatient.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCreateNewPatientActionPerformed(evt);
+            }
+        });
         
         cmbSelectGuardian = new javax.swing.JComboBox<model.Patient>();
         cmbIsGuardianAPatient = new javax.swing.JComboBox<PatientView.YesNoItem>();
@@ -1264,6 +1339,11 @@ public class PatientView extends View{
         spnDentalRecallFrequency = new javax.swing.JSpinner();
         
         tblAppointmentHistory = new javax.swing.JTable();
+        
+        scrAppointmentHistory.setRowHeaderView(null);
+
+        tblAppointmentHistory.addMouseListener(mouseListener);
+        scrAppointmentHistory.setViewportView(tblAppointmentHistory);
 
         txtForenames = new javax.swing.JTextField();
         txtSurname = new javax.swing.JTextField();
@@ -1560,8 +1640,9 @@ public class PatientView extends View{
                 .addComponent(lblNameDOB, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addComponent(dobDatePicker, javax.swing.GroupLayout.PREFERRED_SIZE, getDatePickerWidth(), javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(10,10,10)
-                .addComponent(lblAge)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(lblAge,javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE)
+                //.addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                 .addContainerGap()) 
         );
         pnlNameLayout.setVerticalGroup(
             pnlNameLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1603,7 +1684,7 @@ public class PatientView extends View{
                 .addComponent(txtAddressCounty, javax.swing.GroupLayout.PREFERRED_SIZE, 114, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(15,15,15)
                 .addComponent(lblAddressPostcode, javax.swing.GroupLayout.PREFERRED_SIZE, 61, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addComponent(txtAddressPostcode, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(txtAddressPostcode, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
                 //.addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
                 );
@@ -1633,7 +1714,7 @@ public class PatientView extends View{
             pnlNotesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlNotesLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(txtPatientNotes, javax.swing.GroupLayout.PREFERRED_SIZE, 909, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(txtPatientNotes, javax.swing.GroupLayout.PREFERRED_SIZE, 908, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
         pnlNotesLayout.setVerticalGroup(
@@ -1775,7 +1856,7 @@ public class PatientView extends View{
                 .addGap(getBeforeCreateNewPatientButtonGap(),
                         getBeforeCreateNewPatientButtonGap(),
                         getBeforeCreateNewPatientButtonGap())
-                .addComponent(btnCreatePatient, javax.swing.GroupLayout.PREFERRED_SIZE, 175, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(btnCreateNewPatient, javax.swing.GroupLayout.PREFERRED_SIZE, 175, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(118, 118, 118)
                 .addComponent(btnUpdateSelectedPatient, javax.swing.GroupLayout.PREFERRED_SIZE, 175, javax.swing.GroupLayout.PREFERRED_SIZE)
                 //.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -1788,7 +1869,7 @@ public class PatientView extends View{
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlActionsLayout.createSequentialGroup()
                 .addGroup(pnlActionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(btnCloseView, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 50, Short.MAX_VALUE)
-                    .addComponent(btnCreatePatient, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 50, Short.MAX_VALUE)
+                    .addComponent(btnCreateNewPatient, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 50, Short.MAX_VALUE)
                     .addComponent(btnUpdateSelectedPatient, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 50, Short.MAX_VALUE))
                 .addContainerGap())
         );
@@ -1866,7 +1947,7 @@ public class PatientView extends View{
         lblAge = new javax.swing.JLabel();
         lblGender1 = new javax.swing.JLabel();
         pnlActions = new javax.swing.JPanel();
-        btnCreatePatient = new javax.swing.JButton();
+        btnCreateNewPatient = new javax.swing.JButton();
         btnUpdateSelectedPatient = new javax.swing.JButton();
         btnCloseView = new javax.swing.JButton();
         jMenuBar1 = new javax.swing.JMenuBar();
@@ -2300,7 +2381,7 @@ public class PatientView extends View{
         pnlActions.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createEtchedBorder(), "Actions", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Segoe UI", 1, 12))); // NOI18N
         pnlActions.setBackground(new java.awt.Color(220, 220, 220));
 
-        btnCreatePatient.setText("Update selected patient");
+        btnCreateNewPatient.setText("Update selected patient");
 
         btnUpdateSelectedPatient.setText("Close patient view");
 
@@ -2314,7 +2395,7 @@ public class PatientView extends View{
                 .addGap(78, 78, 78)
                 .addComponent(btnCloseView, javax.swing.GroupLayout.PREFERRED_SIZE, 159, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(141, 141, 141)
-                .addComponent(btnCreatePatient, javax.swing.GroupLayout.PREFERRED_SIZE, 159, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(btnCreateNewPatient, javax.swing.GroupLayout.PREFERRED_SIZE, 159, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(btnUpdateSelectedPatient, javax.swing.GroupLayout.PREFERRED_SIZE, 159, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(80, 80, 80))
@@ -2325,7 +2406,7 @@ public class PatientView extends View{
                 .addGroup(pnlActionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(btnUpdateSelectedPatient, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(btnCloseView, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(btnCreatePatient, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(btnCreateNewPatient, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
 
@@ -2479,7 +2560,7 @@ public class PatientView extends View{
                     + "Click the 'Select/clear patient details' from the menu options to select a patient");
     }//GEN-LAST:event_mniDeleteSelectedPatientActionPerformed
 
-    private void mniCreateNewPatientActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mniCreateNewPatientActionPerformed
+    private void createNewPatientActionPerformed(){
         if (!getMyController().getDescriptor().getControllerDescription().getPatient().getIsKeyDefined()){
             if (this.validateMinimumPatientDetails()){
                 getMyController().getDescriptor().getViewDescription().setPatient(initialisePatientFromView(null));
@@ -2492,9 +2573,43 @@ public class PatientView extends View{
         else
             JOptionPane.showMessageDialog(this, "A new patient cannot be created until the currently selected patient is deselected\n"
                     + "Click the 'Select/clear patient details' from the menu options to deselect the selected patient");
+    }
+    
+    private void btnCreateNewPatientActionPerformed(java.awt.event.ActionEvent evt){
+        switch (getPatientSelectionMode()){
+            case PATIENT_RECOVERY:
+                switch(cmbPatientSelector.getSelectedIndex()){
+                    case -1:
+                        JOptionPane.showMessageDialog(
+                                this, 
+                                "A patient has not been selected for recovery");
+                        break;
+                    default:
+                        getMyController().getDescriptor().getViewDescription()
+                                .setPatient(initialisePatientFromView(
+                                        (Patient)cmbPatientSelector.getSelectedItem())
+                                );
+                        setPatientSelectionMode(PatientSelectionMode.PATIENT_SELECTION);
+                        ActionEvent actionEvent = new ActionEvent(
+                                this,ActionEvent.ACTION_PERFORMED,
+                                ViewController.PatientViewControllerActionEvent.RECOVER_PATIENT_REQUEST.toString());
+                        this.getMyController().actionPerformed(actionEvent);
+                        break;
+                }
+                break;
+            case PATIENT_SELECTION:
+                //setPatientSelectionMode(PatientSelectionMode.PATIENT_SELECTION);
+                createNewPatientActionPerformed();
+                break;
+        }
+        
+    }
+    
+    private void mniCreateNewPatientActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mniCreateNewPatientActionPerformed
+        createNewPatientActionPerformed();
     }//GEN-LAST:event_mniCreateNewPatientActionPerformed
 
-    private void mniUpdateSelectedPatientActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mniUpdateSelectedPatientActionPerformed
+    private void updateSelectedPatientActionPerformed(){
         Patient patient = null;
         
         if (getMyController().getDescriptor().getControllerDescription().getPatient().getIsKeyDefined()){
@@ -2511,13 +2626,26 @@ public class PatientView extends View{
         }
         else
             JOptionPane.showMessageDialog(this, "Update operation cannot proceed unless an existing patient is currently selected");
+    }
+    
+    private void btnUpdateSelectedPatientActionPerformed(java.awt.event.ActionEvent evt){
+        switch (getPatientSelectionMode()){
+            case PATIENT_SELECTION:
+                updateSelectedPatientActionPerformed();
+                break;
+            case PATIENT_RECOVERY:
+                setPatientSelectionMode(PatientSelectionMode.PATIENT_SELECTION);
+                btnClearSelectionActionPerformed(evt);
+                break;
+        }
+        
+    }
+    
+    private void mniUpdateSelectedPatientActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mniUpdateSelectedPatientActionPerformed
+        updateSelectedPatientActionPerformed();
     }//GEN-LAST:event_mniUpdateSelectedPatientActionPerformed
 
-    private void mniCloseViewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mniCloseViewActionPerformed
-        /**
-         * update logged at 30/10/2021 08:32 ensures cautionary dialog only displayed 
-         * if a change has been made in the view since its launched
-         */
+    private void closeViewActionPerformed(){
         if (getViewStatus()){
             String[] options = {"Yes", "No"};
             int close = JOptionPane.showOptionDialog(this,
@@ -2552,6 +2680,15 @@ public class PatientView extends View{
                 //UnspecifiedError action
             }
         }
+    }
+    
+    private void btnCloseViewActionPerformed(java.awt.event.ActionEvent evt){
+        closeViewActionPerformed();
+    }
+    
+    private void mniCloseViewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mniCloseViewActionPerformed
+        closeViewActionPerformed();
+        
     }//GEN-LAST:event_mniCloseViewActionPerformed
 
     private void txtPhone2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtPhone2ActionPerformed
@@ -2579,6 +2716,14 @@ public class PatientView extends View{
     }//GEN-LAST:event_txtForenamesActionPerformed
 
     private void mniRecoverDeletedPatientActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mniRecoverDeletedPatientActionPerformed
+        setPatientSelectionMode(PatientSelectionMode.PATIENT_RECOVERY);
+        ActionEvent actionEvent = new ActionEvent(
+            this,ActionEvent.ACTION_PERFORMED,
+            ViewController.PatientViewControllerActionEvent.PATIENT_RECOVER_REQUEST.toString());
+        this.getMyController().actionPerformed(actionEvent);
+        mniRecoverDeletedPatient.setEnabled(false);
+        mniCreateNewPatient.setEnabled(false);
+        /*
         int response;
         Patient patient = getMyController().getDescriptor().
                 getControllerDescription().getPatient();
@@ -2591,15 +2736,25 @@ public class PatientView extends View{
         else
             JOptionPane.showMessageDialog(this, "A patient is already selected for recovery which is unexpected\n"
                     + "Patient recovery operation aborted");
+        */
     }//GEN-LAST:event_mniRecoverDeletedPatientActionPerformed
 
     private void cmbPatientSelectorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbPatientSelectorActionPerformed
+        ViewController.PatientViewControllerActionEvent event = null; 
+        switch(getPatientSelectionMode()){
+            case PATIENT_SELECTION:
+                event = ViewController.PatientViewControllerActionEvent.PATIENT_REQUEST;
+                break;
+            case PATIENT_RECOVERY:
+                event = ViewController.PatientViewControllerActionEvent.DELETED_PATIENT_REQUEST;
+                break;
+        }
         if (cmbPatientSelector.getSelectedIndex()!=-1){
             getMyController().getDescriptor().getViewDescription().
                     setPatient((Patient)cmbPatientSelector.getSelectedItem());
             ActionEvent actionEvent = new ActionEvent(
                     this,ActionEvent.ACTION_PERFORMED, 
-                    ViewController.PatientViewControllerActionEvent.PATIENT_REQUEST.toString());
+                    event.toString());
             this.getMyController().actionPerformed(actionEvent);
         }
     }//GEN-LAST:event_cmbPatientSelectorActionPerformed
@@ -2621,7 +2776,7 @@ public class PatientView extends View{
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnClearSelection;
     private javax.swing.JButton btnCloseView;
-    private javax.swing.JButton btnCreatePatient;
+    private javax.swing.JButton btnCreateNewPatient;
     private javax.swing.JButton btnFetchScheduleForSelectedAppointment;
     private javax.swing.JButton btnUpdateSelectedPatient;
     private javax.swing.JComboBox<GenderItem> cmbGender;
@@ -2691,7 +2846,7 @@ public class PatientView extends View{
     private com.github.lgooddatepicker.components.DatePicker dobDatePicker;
     private javax.swing.JButton btnUpdateSelectedPatient;
     private javax.swing.JButton btnCloseView;
-    private javax.swing.JButton btnCreatePatient;
+    private javax.swing.JButton btnCreateNewPatient;
     private javax.swing.JLabel lblPhone1;
     private javax.swing.JLabel lblFrequency;
     private javax.swing.JLabel lblPhone2;
