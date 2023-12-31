@@ -79,7 +79,7 @@
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" alignment="1" attributes="0">
-                      <Component id="tbpScheduleOperations" max="32767" attributes="0"/>
+                      <Component id="pnlScheduleOperations" max="32767" attributes="0"/>
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Group type="102" attributes="0">
                               <EmptySpace min="-2" pref="30" max="-2" attributes="0"/>
@@ -87,7 +87,7 @@
                           </Group>
                           <Group type="102" alignment="0" attributes="0">
                               <EmptySpace type="separate" max="-2" attributes="0"/>
-                              <Component id="btnPrintSchedule" min="-2" max="-2" attributes="0"/>
+                              <Component id="btnPrintDayScheduleRequest" min="-2" max="-2" attributes="0"/>
                           </Group>
                       </Group>
                       <EmptySpace min="-2" pref="17" max="-2" attributes="0"/>
@@ -99,7 +99,7 @@
                   <Group type="102" attributes="0">
                       <Component id="pnlAppointmentDaySelection" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="32767" attributes="0"/>
-                      <Component id="SlotAvailabilityPanel" min="-2" pref="388" max="-2" attributes="0"/>
+                      <Component id="pnlSlotAvailability" min="-2" pref="388" max="-2" attributes="0"/>
                   </Group>
               </Group>
               <EmptySpace min="-2" pref="10" max="-2" attributes="0"/>
@@ -112,21 +112,21 @@
               <EmptySpace min="-2" pref="5" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" max="-2" attributes="0">
                   <Component id="pnlAppointmentDaySelection" max="32767" attributes="0"/>
-                  <Component id="SlotAvailabilityPanel" pref="171" max="32767" attributes="0"/>
+                  <Component id="pnlSlotAvailability" pref="171" max="32767" attributes="0"/>
               </Group>
               <EmptySpace min="-2" pref="10" max="-2" attributes="0"/>
               <Component id="pnlAppointmentScheduleForDay" min="-2" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Component id="tbpScheduleOperations" min="-2" pref="72" max="-2" attributes="0"/>
+                  <Component id="pnlScheduleOperations" min="-2" pref="72" max="-2" attributes="0"/>
                   <Group type="102" attributes="0">
                       <EmptySpace min="-2" pref="6" max="-2" attributes="0"/>
-                      <Component id="btnPrintSchedule" min="-2" max="-2" attributes="0"/>
+                      <Component id="btnPrintDayScheduleRequest" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="btnCloseView" min="-2" max="-2" attributes="0"/>
                   </Group>
               </Group>
-              <EmptySpace max="32767" attributes="0"/>
+              <EmptySpace pref="17" max="32767" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -182,7 +182,7 @@
         </Container>
       </SubComponents>
     </Container>
-    <Container class="javax.swing.JPanel" name="SlotAvailabilityPanel">
+    <Container class="javax.swing.JPanel" name="pnlSlotAvailability">
       <Properties>
         <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
           <Border info="org.netbeans.modules.form.compat2.border.TitledBorderInfo">
@@ -204,7 +204,7 @@
           <Group type="103" groupAlignment="0" attributes="0">
               <Group type="102" alignment="1" attributes="0">
                   <EmptySpace max="32767" attributes="0"/>
-                  <Component id="jScrollPane1" min="-2" pref="352" max="-2" attributes="0"/>
+                  <Component id="scrPanelSlotAvailability" min="-2" pref="352" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
               </Group>
           </Group>
@@ -213,18 +213,18 @@
           <Group type="103" groupAlignment="0" attributes="0">
               <Group type="102" attributes="0">
                   <EmptySpace min="-2" pref="8" max="-2" attributes="0"/>
-                  <Component id="jScrollPane1" pref="0" max="32767" attributes="0"/>
+                  <Component id="scrPanelSlotAvailability" pref="0" max="32767" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
       </Layout>
       <SubComponents>
-        <Container class="javax.swing.JScrollPane" name="jScrollPane1">
+        <Container class="javax.swing.JScrollPane" name="scrPanelSlotAvailability">
 
           <Layout class="org.netbeans.modules.form.compat2.layouts.support.JScrollPaneSupportLayout"/>
           <SubComponents>
-            <Component class="javax.swing.JTable" name="tblEmptySlotAvailability">
+            <Component class="javax.swing.JTable" name="tblSlotAvailability">
               <AuxValues>
                 <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value=""/>
               </AuxValues>
@@ -251,14 +251,14 @@
         <DimensionLayout dim="0">
           <Group type="103" groupAlignment="0" attributes="0">
               <Group type="102" attributes="0">
-                  <EmptySpace min="-2" pref="22" max="-2" attributes="0"/>
-                  <Component id="btnScanForEmptySlots" min="-2" max="-2" attributes="0"/>
-                  <EmptySpace max="32767" attributes="0"/>
-              </Group>
-              <Group type="102" attributes="0">
                   <EmptySpace min="-2" pref="15" max="-2" attributes="0"/>
-                  <Component id="pnlAppointmentDaySelector" pref="251" max="32767" attributes="0"/>
+                  <Component id="pnlAppointmentDaySelector" pref="259" max="32767" attributes="0"/>
                   <EmptySpace min="-2" pref="20" max="-2" attributes="0"/>
+              </Group>
+              <Group type="102" alignment="0" attributes="0">
+                  <EmptySpace min="-2" pref="33" max="-2" attributes="0"/>
+                  <Component id="btnSlotAvailabilityScannerRequest" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace max="32767" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -268,19 +268,19 @@
                   <EmptySpace min="-2" pref="8" max="-2" attributes="0"/>
                   <Component id="pnlAppointmentDaySelector" min="-2" pref="90" max="-2" attributes="0"/>
                   <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                  <Component id="btnScanForEmptySlots" min="-2" pref="23" max="-2" attributes="0"/>
+                  <Component id="btnSlotAvailabilityScannerRequest" min="-2" pref="23" max="-2" attributes="0"/>
                   <EmptySpace min="-2" pref="10" max="-2" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
       </Layout>
       <SubComponents>
-        <Component class="javax.swing.JButton" name="btnScanForEmptySlots">
+        <Component class="javax.swing.JButton" name="btnSlotAvailabilityScannerRequest">
           <Properties>
             <Property name="text" type="java.lang.String" value="search for empty appointment slots"/>
           </Properties>
           <Events>
-            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnScanForEmptySlotsActionPerformed"/>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnSlotAvailabilityScannerRequestActionPerformed"/>
           </Events>
         </Component>
         <Container class="javax.swing.JPanel" name="pnlAppointmentDaySelector">
@@ -298,19 +298,19 @@
           <Layout>
             <DimensionLayout dim="0">
               <Group type="103" groupAlignment="0" attributes="0">
+                  <Group type="102" alignment="1" attributes="0">
+                      <EmptySpace min="0" pref="15" max="32767" attributes="0"/>
+                      <Component id="btnPreviousPracticeDay" min="-2" pref="62" max="-2" attributes="0"/>
+                      <EmptySpace type="separate" max="-2" attributes="0"/>
+                      <Component id="btnNowDay" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace type="separate" max="-2" attributes="0"/>
+                      <Component id="btnNextPracticeDay" min="-2" pref="54" max="-2" attributes="0"/>
+                      <EmptySpace min="-2" pref="33" max="-2" attributes="0"/>
+                  </Group>
                   <Group type="102" alignment="0" attributes="0">
-                      <EmptySpace min="-2" pref="34" max="-2" attributes="0"/>
-                      <Group type="103" groupAlignment="0" attributes="0">
-                          <Group type="102" alignment="0" attributes="0">
-                              <Component id="btnNowDay" min="-2" pref="53" max="-2" attributes="0"/>
-                              <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                              <Component id="btnPreviousPracticeDay" min="-2" pref="49" max="-2" attributes="0"/>
-                              <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                              <Component id="btnNextPracticeDay" min="-2" pref="48" max="-2" attributes="0"/>
-                          </Group>
-                          <Component id="dayDatePicker" alignment="0" min="-2" pref="172" max="-2" attributes="0"/>
-                      </Group>
-                      <EmptySpace pref="39" max="32767" attributes="0"/>
+                      <EmptySpace min="-2" pref="39" max="-2" attributes="0"/>
+                      <Component id="dayDatePicker" min="-2" pref="172" max="-2" attributes="0"/>
+                      <EmptySpace max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
@@ -319,13 +319,13 @@
                   <Group type="102" alignment="0" attributes="0">
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="dayDatePicker" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace type="separate" max="-2" attributes="0"/>
+                      <EmptySpace pref="15" max="32767" attributes="0"/>
                       <Group type="103" groupAlignment="3" attributes="0">
-                          <Component id="btnNextPracticeDay" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="btnPreviousPracticeDay" alignment="3" min="-2" max="-2" attributes="0"/>
-                          <Component id="btnNowDay" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="btnNowDay" alignment="3" min="-2" pref="9" max="-2" attributes="0"/>
+                          <Component id="btnNextPracticeDay" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
-                      <EmptySpace max="32767" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
@@ -374,7 +374,7 @@
         </Container>
       </SubComponents>
     </Container>
-    <Container class="javax.swing.JPanel" name="tbpScheduleOperations">
+    <Container class="javax.swing.JPanel" name="pnlScheduleOperations">
       <Properties>
         <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
           <Border info="org.netbeans.modules.form.compat2.border.TitledBorderInfo">
@@ -392,7 +392,7 @@
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="btnCreateAppointment" min="-2" pref="97" max="-2" attributes="0"/>
                   <EmptySpace type="separate" max="-2" attributes="0"/>
-                  <Component id="btnUpdateAppointment" min="-2" pref="97" max="-2" attributes="0"/>
+                  <Component id="btnUpdateSelectedAppointment" min="-2" pref="97" max="-2" attributes="0"/>
                   <EmptySpace type="separate" max="-2" attributes="0"/>
                   <Component id="btnCancelSelectedAppointment" min="-2" max="-2" attributes="0"/>
                   <EmptySpace min="-2" pref="87" max="-2" attributes="0"/>
@@ -407,7 +407,7 @@
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="3" attributes="0">
                       <Component id="btnCreateAppointment" alignment="3" min="-2" max="-2" attributes="0"/>
-                      <Component id="btnUpdateAppointment" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="btnUpdateSelectedAppointment" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="btnCancelSelectedAppointment" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="btnMarkSlotUnbookable" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
@@ -430,17 +430,17 @@
             <AuxValue name="JavaCodeGenerator_InitCodePost" type="java.lang.String" value="btnCreateAppointment.setToolTipText(&quot;create new appointment&quot;);"/>
           </AuxValues>
         </Component>
-        <Component class="javax.swing.JButton" name="btnUpdateAppointment">
+        <Component class="javax.swing.JButton" name="btnUpdateSelectedAppointment">
           <Properties>
             <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
               <Connection code="&quot;Update&quot;" type="code"/>
             </Property>
           </Properties>
           <Events>
-            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnUpdateAppointmentActionPerformed"/>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnUpdateSelectedAppointmentActionPerformed"/>
           </Events>
           <AuxValues>
-            <AuxValue name="JavaCodeGenerator_InitCodePost" type="java.lang.String" value="btnUpdateAppointment.setToolTipText(&quot;update selected appointment&quot;);"/>
+            <AuxValue name="JavaCodeGenerator_InitCodePost" type="java.lang.String" value="btnUpdateSelectedAppointment.setToolTipText(&quot;update selected appointment&quot;);"/>
           </AuxValues>
         </Component>
         <Component class="javax.swing.JButton" name="btnCancelSelectedAppointment">
@@ -467,12 +467,12 @@
         </Component>
       </SubComponents>
     </Container>
-    <Component class="javax.swing.JButton" name="btnPrintSchedule">
+    <Component class="javax.swing.JButton" name="btnPrintDayScheduleRequest">
       <Properties>
         <Property name="text" type="java.lang.String" value="Print schedule"/>
       </Properties>
       <Events>
-        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnPrintScheduleActionPerformed"/>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnPrintDayScheduleRequestActionPerformed"/>
       </Events>
     </Component>
     <Component class="javax.swing.JButton" name="btnCloseView">

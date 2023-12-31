@@ -80,7 +80,7 @@ import model.SurgeryDaysAssignment;
  * @author colin
  */
 public class ScheduleView extends View{
-    private enum COLUMN{From,Duration,ThePatient,Notes};
+    private enum COLUMN{From,Duration,Patient,Notes};
     private AppointmentsScheduleTableModel tableModel = null;
     private InternalFrameAdapter internalFrameAdapter = null;
     private DatePickerSettings settings = null;
@@ -98,7 +98,7 @@ public class ScheduleView extends View{
     public void propertyChange(PropertyChangeEvent e){
         String tableTitleDay = null;
                 String tableTitleDuration = null;
-        TitledBorder titledBorder = (TitledBorder)this.SlotAvailabilityPanel.getBorder();
+        TitledBorder titledBorder = (TitledBorder)this.pnlSlotAvailability.getBorder();
         ViewController.AppointmentScheduleViewControllerPropertyChangeEvent propertyName = 
                 ViewController.AppointmentScheduleViewControllerPropertyChangeEvent.valueOf(e.getPropertyName());
         //setViewDescriptor((Descriptor)e.getNewValue());
@@ -124,7 +124,7 @@ public class ScheduleView extends View{
                 tableTitleDay = getMyController().getDescriptor().getControllerDescription().
                                 getEmptySlotFromDay().format(DateTimeFormatter.ofPattern("dd/MM/yy"));
                         //getAppointment().getStart().format(DateTimeFormatter.ofPattern("dd/MM/yy"));
-                titledBorder = (TitledBorder)this.SlotAvailabilityPanel.getBorder();
+                titledBorder = (TitledBorder)this.pnlSlotAvailability.getBorder();
                 titledBorder.setTitle("Slot availability from " + tableTitleDay 
                         + " for a duration of " + tableTitleDuration);
                 populateEmptySlotAvailabilityTable(
@@ -178,7 +178,7 @@ public class ScheduleView extends View{
             setIconifiable(true);
             setResizable(false);
             setSelected(true);
-            setSize(766,548);
+            setSize(790,548);
             toFront();
         }catch (PropertyVetoException ex){
             
@@ -190,7 +190,7 @@ public class ScheduleView extends View{
         dayDatePicker.addDateChangeListener(new DayDatePickerChangeListener());
         this.mniCloseView.addActionListener((ActionEvent e) -> mniCloseViewActionPerformed(e));
         this.mniSelectNonSurgeryDay.addActionListener((ActionEvent e) -> mniSelectNonSurgeryDayActionPerformed(e)); 
-        TitledBorder titledBorder = (TitledBorder)this.SlotAvailabilityPanel.getBorder();
+        TitledBorder titledBorder = (TitledBorder)this.pnlSlotAvailability.getBorder();
         titledBorder.setTitle("Unscheduled appointment slots");
         //following action invokes call to controller via DateChange\Listener
         //pcSupport.removePropertyChangeListener(getView());
@@ -223,6 +223,7 @@ public class ScheduleView extends View{
         datePickerButton.setIcon(icon);
         
         refreshAppointmentTableWithCurrentlySelectedDate();
+        
     }  
     
     /**
@@ -284,8 +285,8 @@ public class ScheduleView extends View{
     }
     
     private void setEmptySlotAvailabilityTableListener(){
-        this.tblEmptySlotAvailability.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        ListSelectionModel lsm = this.tblEmptySlotAvailability.getSelectionModel();
+        this.tblSlotAvailability.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        ListSelectionModel lsm = this.tblSlotAvailability.getSelectionModel();
         lsm.addListSelectionListener(new ListSelectionListener() {
             public void valueChanged(ListSelectionEvent e) {
                 //Ignore extra messages.
@@ -352,7 +353,7 @@ public class ScheduleView extends View{
     
     private void doEmptySlotAvailabilityTableRowSelection(int row){
         Appointment appointment = 
-                ((EmptySlotAvailability2ColumnTableModel)this.tblEmptySlotAvailability.getModel()).getElementAt(row);
+                ((EmptySlotAvailability2ColumnTableModel)this.tblSlotAvailability.getModel()).getElementAt(row);
         LocalDate start = appointment.getStart().toLocalDate();
         DatePickerSettings dps = dayDatePicker.getSettings();
         if (!dps.getVetoPolicy().isDateAllowed(start)){
@@ -411,26 +412,30 @@ public class ScheduleView extends View{
     
     private void initComponentsx(){
         buttonGroup1 = new javax.swing.ButtonGroup();
+        
         pnlAppointmentScheduleForDay = new javax.swing.JPanel();
         scrAppointmentsForDayTable = new javax.swing.JScrollPane();
         tblAppointments = new javax.swing.JTable();
-        SlotAvailabilityPanel = new javax.swing.JPanel();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        tblEmptySlotAvailability = new javax.swing.JTable();
+        
+        pnlSlotAvailability = new javax.swing.JPanel();
+        scrPanelSlotAvailability = new javax.swing.JScrollPane();
+        tblSlotAvailability = new javax.swing.JTable();
+        
         pnlAppointmentDaySelection = new javax.swing.JPanel();
-        btnScanForEmptySlots = new javax.swing.JButton();
+        btnSlotAvailabilityScannerRequest = new javax.swing.JButton();
         pnlAppointmentDaySelector = new javax.swing.JPanel();
-        btnNowDay = new javax.swing.JButton();
-        btnNextPracticeDay = new javax.swing.JButton();
-        btnPreviousPracticeDay = new javax.swing.JButton();
+        btnNowDay = new javax.swing.JButton("now");
+        btnNextPracticeDay = new javax.swing.JButton(">>");
+        btnPreviousPracticeDay = new javax.swing.JButton("<<");
         dayDatePicker = new com.github.lgooddatepicker.components.DatePicker();
-        tbpScheduleOperations = new javax.swing.JPanel();
+        
+        pnlScheduleOperations = new javax.swing.JPanel();
         btnCreateAppointment = new javax.swing.JButton();
-        btnUpdateAppointment = new javax.swing.JButton();
+        btnUpdateSelectedAppointment = new javax.swing.JButton();
         btnCancelSelectedAppointment = new javax.swing.JButton();
         btnMarkSlotUnbookable = new javax.swing.JButton();
-        btnPrintSchedule = new javax.swing.JButton();
-        btnCloseView = new javax.swing.JButton();
+        btnPrintDayScheduleRequest = new javax.swing.JButton("Print schedule");
+        btnCloseView = new javax.swing.JButton("Close view");
         jMenuBar1 = new javax.swing.JMenuBar();
         mnuOptions = new javax.swing.JMenu();
         mniViewCancelledAppointments = new javax.swing.JMenuItem();
@@ -442,31 +447,25 @@ public class ScheduleView extends View{
         jSeparator3 = new javax.swing.JPopupMenu.Separator();
         mniCloseView = new javax.swing.JMenuItem();
 
-        pnlAppointmentScheduleForDay.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createEtchedBorder(), "Appointment schedule for ", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 1, 11))); // NOI18N
-
-        tblAppointments.setModel(new javax.swing.table.DefaultTableModel(
-
-        ));
-        scrAppointmentsForDayTable.setViewportView(tblAppointments);
         
-        SlotAvailabilityPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createEtchedBorder(), "Available empty slots", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 1, 11))); // NOI18N
-        SlotAvailabilityPanel.setPreferredSize(new java.awt.Dimension(266, 146));
-
-        jScrollPane1.setViewportView(tblEmptySlotAvailability);
         
-        SlotAvailabilityPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createEtchedBorder(), "Available empty slots", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 1, 11))); // NOI18N
-        SlotAvailabilityPanel.setPreferredSize(new java.awt.Dimension(266, 146));
-
-        jScrollPane1.setViewportView(tblEmptySlotAvailability);
+        //pnlSlotAvailability.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createEtchedBorder(), "Available empty slots", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 1, 11))); // NOI18N
+        //pnlSlotAvailability.setPreferredSize(new java.awt.Dimension(266, 146));
+        //scrPanelSlotAvailability.setViewportView(tblSlotAvailability);
         
-        pnlAppointmentDaySelection.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createEtchedBorder(), "Appointment day selection", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 1, 11))); // NOI18N
+        pnlSlotAvailability.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createEtchedBorder(), "Available empty slots", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 1, 11))); // NOI18N
+        pnlSlotAvailability.setPreferredSize(new java.awt.Dimension(266, 146));
+        scrPanelSlotAvailability.setViewportView(tblSlotAvailability);
+        
+        pnlAppointmentDaySelection.setBorder(
+                javax.swing.BorderFactory.createTitledBorder(
+                        javax.swing.BorderFactory.createEtchedBorder(), 
+                        "Appointment day selection", 
+                        javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, 
+                        javax.swing.border.TitledBorder.DEFAULT_POSITION, 
+                        new java.awt.Font("Tahoma", 1, 11))); // NOI18N
 
-        btnScanForEmptySlots.setText("search for empty appointment slots");
-        btnScanForEmptySlots.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnScanForEmptySlotsActionPerformed(evt);
-            }
-        });
+        
 
         pnlAppointmentDaySelector.setBorder(javax.swing.BorderFactory.createEtchedBorder());
         pnlAppointmentDaySelector.setPreferredSize(new java.awt.Dimension(200, 58));
@@ -488,7 +487,7 @@ public class ScheduleView extends View{
         });
 
         btnPreviousPracticeDay.setText("<<");
-        btnPreviousPracticeDay.setPreferredSize(new java.awt.Dimension(93, 23));
+        btnPreviousPracticeDay.setPreferredSize(new java.awt.Dimension(62, 23));
         btnPreviousPracticeDay.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnPreviousPracticeDayActionPerformed(evt);
@@ -502,7 +501,21 @@ public class ScheduleView extends View{
         //settings.setVetoPolicy(new AppointmentDateVetoPolicy());
         settings.setAllowKeyboardEditing(false);
         
-        tbpScheduleOperations.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Appointment schedule operations", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Segoe UI", 1, 12))); // NOI18N
+        //btnSlotAvailabilityScannerRequest.setSize(200,23);
+        btnSlotAvailabilityScannerRequest.setText("search for empty appointment slots");
+        btnSlotAvailabilityScannerRequest.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnScanForEmptySlotsActionPerformed(evt);
+            }
+        });
+        
+        pnlAppointmentScheduleForDay.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createEtchedBorder(), "Appointment schedule for ", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 1, 11))); // NOI18N
+        tblAppointments.setModel(new javax.swing.table.DefaultTableModel(
+
+        ));
+        scrAppointmentsForDayTable.setViewportView(tblAppointments);
+        
+        pnlScheduleOperations.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Appointment schedule operations", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Segoe UI", 1, 12))); // NOI18N
 
         btnCreateAppointment.setText("Create");
         btnCreateAppointment.setToolTipText("create new appointment");
@@ -512,9 +525,9 @@ public class ScheduleView extends View{
             }
         });
 
-        btnUpdateAppointment.setText("Update");
-        btnUpdateAppointment.setToolTipText("update selected appointment");
-        btnUpdateAppointment.addActionListener(new java.awt.event.ActionListener() {
+        btnUpdateSelectedAppointment.setText("Update");
+        btnUpdateSelectedAppointment.setToolTipText("update selected appointment");
+        btnUpdateSelectedAppointment.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnUpdateAppointmentActionPerformed(evt);
             }
@@ -536,8 +549,8 @@ public class ScheduleView extends View{
             }
         });
         
-        btnPrintSchedule.setText("Print schedule");
-        btnPrintSchedule.addActionListener(new java.awt.event.ActionListener() {
+        btnPrintDayScheduleRequest.setText("Print schedule");
+        btnPrintDayScheduleRequest.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnPrintScheduleActionPerformed(evt);
             }
@@ -590,13 +603,86 @@ public class ScheduleView extends View{
         setJMenuBar(jMenuBar1);
         
         
+        
+        
+        
+        
+// <editor-fold defaultstate="collapsed" desc="AppointmentDaySelector panel layout">  
+        javax.swing.GroupLayout pnlAppointmentDaySelectorLayout = new javax.swing.GroupLayout(pnlAppointmentDaySelector);
+        pnlAppointmentDaySelector.setLayout(pnlAppointmentDaySelectorLayout);
+        pnlAppointmentDaySelectorLayout.setHorizontalGroup(
+            pnlAppointmentDaySelectorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
+                    .addGroup(pnlAppointmentDaySelectorLayout.createSequentialGroup()
+                            .addContainerGap()
+                            .addGroup(pnlAppointmentDaySelectorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
+                                    .addGroup(javax.swing.GroupLayout.Alignment.CENTER, pnlAppointmentDaySelectorLayout.createSequentialGroup()
+                                            .addComponent(btnPreviousPracticeDay, javax.swing.GroupLayout.PREFERRED_SIZE, 62, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                            .addGap(18, 18, 18)
+                                            .addComponent(btnNowDay, javax.swing.GroupLayout.PREFERRED_SIZE, 62, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                            .addGap(18, 18, 18)
+                                            .addComponent(btnNextPracticeDay, javax.swing.GroupLayout.PREFERRED_SIZE, 62, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    )
+                                    .addComponent(dayDatePicker, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            )
+                            .addContainerGap()
+                    )
+        );
+        pnlAppointmentDaySelectorLayout.setVerticalGroup(
+            pnlAppointmentDaySelectorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
+                    .addGroup(pnlAppointmentDaySelectorLayout.createSequentialGroup()
+                            .addContainerGap()
+                            .addComponent(dayDatePicker, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGap(10,10,10)
+                            .addGroup(pnlAppointmentDaySelectorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(btnNextPracticeDay, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(btnNowDay, javax.swing.GroupLayout.PREFERRED_SIZE, 23,javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(btnPreviousPracticeDay, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            )
+                            .addContainerGap()
+                    )
+        );
+//</editor-fold>
+//<editor-fold defaultstate="collapsed" desc="Appointment day selection panel layout">
+        javax.swing.GroupLayout pnlAppointmentDaySelectionLayout = new javax.swing.GroupLayout(pnlAppointmentDaySelection);
+        pnlAppointmentDaySelection.setLayout(pnlAppointmentDaySelectionLayout);
+        pnlAppointmentDaySelectionLayout.setHorizontalGroup(
+                pnlAppointmentDaySelectionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
+                        .addGroup(pnlAppointmentDaySelectionLayout.createSequentialGroup()
+                                //.addGap(22, 22, 22)
+                                //.addContainerGap()
+                                .addComponent(btnSlotAvailabilityScannerRequest)
+                                //.addContainerGap()
+                                //.addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        )
+                        .addGroup(pnlAppointmentDaySelectionLayout.createSequentialGroup()
+                                //.addGap(15, 15, 15)
+                                .addContainerGap()
+                                .addComponent(pnlAppointmentDaySelector, javax.swing.GroupLayout.DEFAULT_SIZE, 251, Short.MAX_VALUE)
+                                .addContainerGap()
+                                //.addGap(20, 20, 20)
+                        )
+        );
+        pnlAppointmentDaySelectionLayout.setVerticalGroup(
+            pnlAppointmentDaySelectionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlAppointmentDaySelectionLayout.createSequentialGroup()
+                //.addGap(8, 8, 8)
+                .addContainerGap()
+                .addComponent(pnlAppointmentDaySelector, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(btnSlotAvailabilityScannerRequest, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
+                //.addGap(10, 10, 10)
+                .addContainerGap()
+            )
+        );
+//</editor-fold>  
+//<editor-fold defaultstate="collapsed" desc="Appointment day schedule panel">
         javax.swing.GroupLayout pnlAppointmentScheduleForDayLayout = new javax.swing.GroupLayout(pnlAppointmentScheduleForDay);
         pnlAppointmentScheduleForDay.setLayout(pnlAppointmentScheduleForDayLayout);
         pnlAppointmentScheduleForDayLayout.setHorizontalGroup(
             pnlAppointmentScheduleForDayLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlAppointmentScheduleForDayLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(scrAppointmentsForDayTable, javax.swing.GroupLayout.PREFERRED_SIZE, 700, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(scrAppointmentsForDayTable, javax.swing.GroupLayout.PREFERRED_SIZE, 742, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(12, 12, 12))
         );
         pnlAppointmentScheduleForDayLayout.setVerticalGroup(
@@ -606,85 +692,34 @@ public class ScheduleView extends View{
                 .addComponent(scrAppointmentsForDayTable, javax.swing.GroupLayout.DEFAULT_SIZE, 186, Short.MAX_VALUE)
                 .addContainerGap())
         );
-        
-        javax.swing.GroupLayout SlotAvailabilityPanelLayout = new javax.swing.GroupLayout(SlotAvailabilityPanel);
-        SlotAvailabilityPanel.setLayout(SlotAvailabilityPanelLayout);
+//</editor-fold>
+//<editor-fold defaultstate="collapsed" desc="Slot availability panel layout">
+        javax.swing.GroupLayout SlotAvailabilityPanelLayout = new javax.swing.GroupLayout(pnlSlotAvailability);
+        pnlSlotAvailability.setLayout(SlotAvailabilityPanelLayout);
         SlotAvailabilityPanelLayout.setHorizontalGroup(
             SlotAvailabilityPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, SlotAvailabilityPanelLayout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 352, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(scrPanelSlotAvailability, javax.swing.GroupLayout.PREFERRED_SIZE, /*352*/430, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
         SlotAvailabilityPanelLayout.setVerticalGroup(
             SlotAvailabilityPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(SlotAvailabilityPanelLayout.createSequentialGroup()
                 .addGap(8, 8, 8)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                .addComponent(scrPanelSlotAvailability, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                 .addContainerGap())
         );
-        
-        javax.swing.GroupLayout pnlAppointmentDaySelectorLayout = new javax.swing.GroupLayout(pnlAppointmentDaySelector);
-        pnlAppointmentDaySelector.setLayout(pnlAppointmentDaySelectorLayout);
-        pnlAppointmentDaySelectorLayout.setHorizontalGroup(
-            pnlAppointmentDaySelectorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlAppointmentDaySelectorLayout.createSequentialGroup()
-                .addGap(34, 34, 34)
-                .addGroup(pnlAppointmentDaySelectorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(pnlAppointmentDaySelectorLayout.createSequentialGroup()
-                        .addComponent(btnNowDay, javax.swing.GroupLayout.PREFERRED_SIZE, 53, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(btnPreviousPracticeDay, javax.swing.GroupLayout.PREFERRED_SIZE, 49, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(btnNextPracticeDay, javax.swing.GroupLayout.PREFERRED_SIZE, 48, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(dayDatePicker, javax.swing.GroupLayout.PREFERRED_SIZE, 172, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(39, Short.MAX_VALUE))
-        );
-        pnlAppointmentDaySelectorLayout.setVerticalGroup(
-            pnlAppointmentDaySelectorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlAppointmentDaySelectorLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(dayDatePicker, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addGroup(pnlAppointmentDaySelectorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(btnNextPracticeDay, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnPreviousPracticeDay, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnNowDay))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-
-        javax.swing.GroupLayout pnlAppointmentDaySelectionLayout = new javax.swing.GroupLayout(pnlAppointmentDaySelection);
-        pnlAppointmentDaySelection.setLayout(pnlAppointmentDaySelectionLayout);
-        pnlAppointmentDaySelectionLayout.setHorizontalGroup(
-            pnlAppointmentDaySelectionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlAppointmentDaySelectionLayout.createSequentialGroup()
-                .addGap(22, 22, 22)
-                .addComponent(btnScanForEmptySlots)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-            .addGroup(pnlAppointmentDaySelectionLayout.createSequentialGroup()
-                .addGap(15, 15, 15)
-                .addComponent(pnlAppointmentDaySelector, javax.swing.GroupLayout.DEFAULT_SIZE, 251, Short.MAX_VALUE)
-                .addGap(20, 20, 20))
-        );
-        pnlAppointmentDaySelectionLayout.setVerticalGroup(
-            pnlAppointmentDaySelectionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlAppointmentDaySelectionLayout.createSequentialGroup()
-                .addGap(8, 8, 8)
-                .addComponent(pnlAppointmentDaySelector, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(btnScanForEmptySlots, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(10, 10, 10))
-        );
-        
-        javax.swing.GroupLayout tbpScheduleOperationsLayout = new javax.swing.GroupLayout(tbpScheduleOperations);
-        tbpScheduleOperations.setLayout(tbpScheduleOperationsLayout);
+//</editor-fold>
+        javax.swing.GroupLayout tbpScheduleOperationsLayout = new javax.swing.GroupLayout(pnlScheduleOperations);
+        pnlScheduleOperations.setLayout(tbpScheduleOperationsLayout);
         tbpScheduleOperationsLayout.setHorizontalGroup(
             tbpScheduleOperationsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(tbpScheduleOperationsLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(btnCreateAppointment, javax.swing.GroupLayout.PREFERRED_SIZE, 97, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
-                .addComponent(btnUpdateAppointment, javax.swing.GroupLayout.PREFERRED_SIZE, 97, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(btnUpdateSelectedAppointment, javax.swing.GroupLayout.PREFERRED_SIZE, 97, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(btnCancelSelectedAppointment)
                 .addGap(87, 87, 87)
@@ -697,7 +732,7 @@ public class ScheduleView extends View{
                 .addContainerGap()
                 .addGroup(tbpScheduleOperationsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnCreateAppointment)
-                    .addComponent(btnUpdateAppointment)
+                    .addComponent(btnUpdateSelectedAppointment)
                     .addComponent(btnCancelSelectedAppointment)
                     .addComponent(btnMarkSlotUnbookable))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -711,22 +746,23 @@ public class ScheduleView extends View{
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addComponent(tbpScheduleOperations, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(pnlScheduleOperations, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
                                 .addGap(30, 30, 30)
                                 .addComponent(btnCloseView))
                             .addGroup(layout.createSequentialGroup()
                                 .addGap(18, 18, 18)
-                                .addComponent(btnPrintSchedule)))
+                                .addComponent(btnPrintDayScheduleRequest)))
                         .addGap(17, 17, 17))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(pnlAppointmentScheduleForDay, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(0, 0, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(pnlAppointmentDaySelection, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(SlotAvailabilityPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 388, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        //.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGap(20,20,20)
+                        .addComponent(pnlSlotAvailability, javax.swing.GroupLayout.PREFERRED_SIZE, /*388*/450, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addGap(10, 10, 10))
         );
         layout.setVerticalGroup(
@@ -735,15 +771,15 @@ public class ScheduleView extends View{
                 .addGap(5, 5, 5)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(pnlAppointmentDaySelection, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(SlotAvailabilityPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 171, Short.MAX_VALUE))
+                    .addComponent(pnlSlotAvailability, javax.swing.GroupLayout.DEFAULT_SIZE, 171, Short.MAX_VALUE))
                 .addGap(10, 10, 10)
                 .addComponent(pnlAppointmentScheduleForDay, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(tbpScheduleOperations, javax.swing.GroupLayout.PREFERRED_SIZE, 72, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(pnlScheduleOperations, javax.swing.GroupLayout.PREFERRED_SIZE, 72, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(layout.createSequentialGroup()
                         .addGap(6, 6, 6)
-                        .addComponent(btnPrintSchedule)
+                        .addComponent(btnPrintDayScheduleRequest)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnCloseView)))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -1042,22 +1078,22 @@ public class ScheduleView extends View{
         pnlAppointmentScheduleForDay = new javax.swing.JPanel();
         scrAppointmentsForDayTable = new javax.swing.JScrollPane();
         tblAppointments = new javax.swing.JTable();
-        SlotAvailabilityPanel = new javax.swing.JPanel();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        tblEmptySlotAvailability = new javax.swing.JTable();
+        pnlSlotAvailability = new javax.swing.JPanel();
+        scrPanelSlotAvailability = new javax.swing.JScrollPane();
+        tblSlotAvailability = new javax.swing.JTable();
         pnlAppointmentDaySelection = new javax.swing.JPanel();
-        btnScanForEmptySlots = new javax.swing.JButton();
+        btnSlotAvailabilityScannerRequest = new javax.swing.JButton();
         pnlAppointmentDaySelector = new javax.swing.JPanel();
         btnNowDay = new javax.swing.JButton();
         btnNextPracticeDay = new javax.swing.JButton();
         btnPreviousPracticeDay = new javax.swing.JButton();
         dayDatePicker = new com.github.lgooddatepicker.components.DatePicker();
-        tbpScheduleOperations = new javax.swing.JPanel();
+        pnlScheduleOperations = new javax.swing.JPanel();
         btnCreateAppointment = new javax.swing.JButton();
-        btnUpdateAppointment = new javax.swing.JButton();
+        btnUpdateSelectedAppointment = new javax.swing.JButton();
         btnCancelSelectedAppointment = new javax.swing.JButton();
         btnMarkSlotUnbookable = new javax.swing.JButton();
-        btnPrintSchedule = new javax.swing.JButton();
+        btnPrintDayScheduleRequest = new javax.swing.JButton();
         btnCloseView = new javax.swing.JButton();
         jMenuBar1 = new javax.swing.JMenuBar();
         mnuOptions = new javax.swing.JMenu();
@@ -1094,34 +1130,34 @@ public class ScheduleView extends View{
                 .addContainerGap())
         );
 
-        SlotAvailabilityPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createEtchedBorder(), "Available empty slots", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 1, 11))); // NOI18N
-        SlotAvailabilityPanel.setPreferredSize(new java.awt.Dimension(266, 146));
+        pnlSlotAvailability.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createEtchedBorder(), "Available empty slots", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 1, 11))); // NOI18N
+        pnlSlotAvailability.setPreferredSize(new java.awt.Dimension(266, 146));
 
-        jScrollPane1.setViewportView(tblEmptySlotAvailability);
+        scrPanelSlotAvailability.setViewportView(tblSlotAvailability);
 
-        javax.swing.GroupLayout SlotAvailabilityPanelLayout = new javax.swing.GroupLayout(SlotAvailabilityPanel);
-        SlotAvailabilityPanel.setLayout(SlotAvailabilityPanelLayout);
-        SlotAvailabilityPanelLayout.setHorizontalGroup(
-            SlotAvailabilityPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, SlotAvailabilityPanelLayout.createSequentialGroup()
+        javax.swing.GroupLayout pnlSlotAvailabilityLayout = new javax.swing.GroupLayout(pnlSlotAvailability);
+        pnlSlotAvailability.setLayout(pnlSlotAvailabilityLayout);
+        pnlSlotAvailabilityLayout.setHorizontalGroup(
+            pnlSlotAvailabilityLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlSlotAvailabilityLayout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 352, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(scrPanelSlotAvailability, javax.swing.GroupLayout.PREFERRED_SIZE, 352, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
-        SlotAvailabilityPanelLayout.setVerticalGroup(
-            SlotAvailabilityPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(SlotAvailabilityPanelLayout.createSequentialGroup()
+        pnlSlotAvailabilityLayout.setVerticalGroup(
+            pnlSlotAvailabilityLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlSlotAvailabilityLayout.createSequentialGroup()
                 .addGap(8, 8, 8)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                .addComponent(scrPanelSlotAvailability, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
         pnlAppointmentDaySelection.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createEtchedBorder(), "Appointment day selection", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 1, 11))); // NOI18N
 
-        btnScanForEmptySlots.setText("search for empty appointment slots");
-        btnScanForEmptySlots.addActionListener(new java.awt.event.ActionListener() {
+        btnSlotAvailabilityScannerRequest.setText("search for empty appointment slots");
+        btnSlotAvailabilityScannerRequest.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnScanForEmptySlotsActionPerformed(evt);
+                btnSlotAvailabilityScannerRequestActionPerformed(evt);
             }
         });
 
@@ -1163,29 +1199,30 @@ public class ScheduleView extends View{
         pnlAppointmentDaySelector.setLayout(pnlAppointmentDaySelectorLayout);
         pnlAppointmentDaySelectorLayout.setHorizontalGroup(
             pnlAppointmentDaySelectorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlAppointmentDaySelectorLayout.createSequentialGroup()
+                .addGap(0, 15, Short.MAX_VALUE)
+                .addComponent(btnPreviousPracticeDay, javax.swing.GroupLayout.PREFERRED_SIZE, 62, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(btnNowDay)
+                .addGap(18, 18, 18)
+                .addComponent(btnNextPracticeDay, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(33, 33, 33))
             .addGroup(pnlAppointmentDaySelectorLayout.createSequentialGroup()
-                .addGap(34, 34, 34)
-                .addGroup(pnlAppointmentDaySelectorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(pnlAppointmentDaySelectorLayout.createSequentialGroup()
-                        .addComponent(btnNowDay, javax.swing.GroupLayout.PREFERRED_SIZE, 53, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(btnPreviousPracticeDay, javax.swing.GroupLayout.PREFERRED_SIZE, 49, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(btnNextPracticeDay, javax.swing.GroupLayout.PREFERRED_SIZE, 48, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(dayDatePicker, javax.swing.GroupLayout.PREFERRED_SIZE, 172, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(39, Short.MAX_VALUE))
+                .addGap(39, 39, 39)
+                .addComponent(dayDatePicker, javax.swing.GroupLayout.PREFERRED_SIZE, 172, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         pnlAppointmentDaySelectorLayout.setVerticalGroup(
             pnlAppointmentDaySelectorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlAppointmentDaySelectorLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(dayDatePicker, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 15, Short.MAX_VALUE)
                 .addGroup(pnlAppointmentDaySelectorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(btnNextPracticeDay, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(btnPreviousPracticeDay, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnNowDay))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(btnNowDay, javax.swing.GroupLayout.PREFERRED_SIZE, 9, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnNextPracticeDay, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap())
         );
 
         javax.swing.GroupLayout pnlAppointmentDaySelectionLayout = new javax.swing.GroupLayout(pnlAppointmentDaySelection);
@@ -1193,13 +1230,13 @@ public class ScheduleView extends View{
         pnlAppointmentDaySelectionLayout.setHorizontalGroup(
             pnlAppointmentDaySelectionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlAppointmentDaySelectionLayout.createSequentialGroup()
-                .addGap(22, 22, 22)
-                .addComponent(btnScanForEmptySlots)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-            .addGroup(pnlAppointmentDaySelectionLayout.createSequentialGroup()
                 .addGap(15, 15, 15)
-                .addComponent(pnlAppointmentDaySelector, javax.swing.GroupLayout.DEFAULT_SIZE, 251, Short.MAX_VALUE)
+                .addComponent(pnlAppointmentDaySelector, javax.swing.GroupLayout.DEFAULT_SIZE, 259, Short.MAX_VALUE)
                 .addGap(20, 20, 20))
+            .addGroup(pnlAppointmentDaySelectionLayout.createSequentialGroup()
+                .addGap(33, 33, 33)
+                .addComponent(btnSlotAvailabilityScannerRequest)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         pnlAppointmentDaySelectionLayout.setVerticalGroup(
             pnlAppointmentDaySelectionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1207,11 +1244,11 @@ public class ScheduleView extends View{
                 .addGap(8, 8, 8)
                 .addComponent(pnlAppointmentDaySelector, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(btnScanForEmptySlots, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(btnSlotAvailabilityScannerRequest, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(10, 10, 10))
         );
 
-        tbpScheduleOperations.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Appointment schedule operations", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Segoe UI", 1, 12))); // NOI18N
+        pnlScheduleOperations.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Appointment schedule operations", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Segoe UI", 1, 12))); // NOI18N
 
         btnCreateAppointment.setText("Create");
         btnCreateAppointment.setToolTipText("create new appointment");
@@ -1221,11 +1258,11 @@ public class ScheduleView extends View{
             }
         });
 
-        btnUpdateAppointment.setText("Update");
-        btnUpdateAppointment.setToolTipText("update selected appointment");
-        btnUpdateAppointment.addActionListener(new java.awt.event.ActionListener() {
+        btnUpdateSelectedAppointment.setText("Update");
+        btnUpdateSelectedAppointment.setToolTipText("update selected appointment");
+        btnUpdateSelectedAppointment.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnUpdateAppointmentActionPerformed(evt);
+                btnUpdateSelectedAppointmentActionPerformed(evt);
             }
         });
 
@@ -1245,37 +1282,37 @@ public class ScheduleView extends View{
             }
         });
 
-        javax.swing.GroupLayout tbpScheduleOperationsLayout = new javax.swing.GroupLayout(tbpScheduleOperations);
-        tbpScheduleOperations.setLayout(tbpScheduleOperationsLayout);
-        tbpScheduleOperationsLayout.setHorizontalGroup(
-            tbpScheduleOperationsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(tbpScheduleOperationsLayout.createSequentialGroup()
+        javax.swing.GroupLayout pnlScheduleOperationsLayout = new javax.swing.GroupLayout(pnlScheduleOperations);
+        pnlScheduleOperations.setLayout(pnlScheduleOperationsLayout);
+        pnlScheduleOperationsLayout.setHorizontalGroup(
+            pnlScheduleOperationsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlScheduleOperationsLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(btnCreateAppointment, javax.swing.GroupLayout.PREFERRED_SIZE, 97, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
-                .addComponent(btnUpdateAppointment, javax.swing.GroupLayout.PREFERRED_SIZE, 97, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(btnUpdateSelectedAppointment, javax.swing.GroupLayout.PREFERRED_SIZE, 97, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(btnCancelSelectedAppointment)
                 .addGap(87, 87, 87)
                 .addComponent(btnMarkSlotUnbookable, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
         );
-        tbpScheduleOperationsLayout.setVerticalGroup(
-            tbpScheduleOperationsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(tbpScheduleOperationsLayout.createSequentialGroup()
+        pnlScheduleOperationsLayout.setVerticalGroup(
+            pnlScheduleOperationsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlScheduleOperationsLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(tbpScheduleOperationsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                .addGroup(pnlScheduleOperationsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnCreateAppointment)
-                    .addComponent(btnUpdateAppointment)
+                    .addComponent(btnUpdateSelectedAppointment)
                     .addComponent(btnCancelSelectedAppointment)
                     .addComponent(btnMarkSlotUnbookable))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        btnPrintSchedule.setText("Print schedule");
-        btnPrintSchedule.addActionListener(new java.awt.event.ActionListener() {
+        btnPrintDayScheduleRequest.setText("Print schedule");
+        btnPrintDayScheduleRequest.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnPrintScheduleActionPerformed(evt);
+                btnPrintDayScheduleRequestActionPerformed(evt);
             }
         });
 
@@ -1333,14 +1370,14 @@ public class ScheduleView extends View{
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addComponent(tbpScheduleOperations, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(pnlScheduleOperations, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
                                 .addGap(30, 30, 30)
                                 .addComponent(btnCloseView))
                             .addGroup(layout.createSequentialGroup()
                                 .addGap(18, 18, 18)
-                                .addComponent(btnPrintSchedule)))
+                                .addComponent(btnPrintDayScheduleRequest)))
                         .addGap(17, 17, 17))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(pnlAppointmentScheduleForDay, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -1348,7 +1385,7 @@ public class ScheduleView extends View{
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(pnlAppointmentDaySelection, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(SlotAvailabilityPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 388, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(pnlSlotAvailability, javax.swing.GroupLayout.PREFERRED_SIZE, 388, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addGap(10, 10, 10))
         );
         layout.setVerticalGroup(
@@ -1357,18 +1394,18 @@ public class ScheduleView extends View{
                 .addGap(5, 5, 5)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(pnlAppointmentDaySelection, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(SlotAvailabilityPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 171, Short.MAX_VALUE))
+                    .addComponent(pnlSlotAvailability, javax.swing.GroupLayout.DEFAULT_SIZE, 171, Short.MAX_VALUE))
                 .addGap(10, 10, 10)
                 .addComponent(pnlAppointmentScheduleForDay, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(tbpScheduleOperations, javax.swing.GroupLayout.PREFERRED_SIZE, 72, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(pnlScheduleOperations, javax.swing.GroupLayout.PREFERRED_SIZE, 72, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(layout.createSequentialGroup()
                         .addGap(6, 6, 6)
-                        .addComponent(btnPrintSchedule)
+                        .addComponent(btnPrintDayScheduleRequest)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnCloseView)))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(17, Short.MAX_VALUE))
         );
 
         pack();
@@ -1400,7 +1437,7 @@ public class ScheduleView extends View{
         this.getMyController().actionPerformed(actionEvent);
     }//GEN-LAST:event_btnCreateAppointmentActionPerformed
 
-    private void btnUpdateAppointmentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateAppointmentActionPerformed
+    private void btnUpdateSelectedAppointmentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateSelectedAppointmentActionPerformed
         int row = this.tblAppointments.getSelectedRow();
         if (row == -1){
             JOptionPane.showMessageDialog(this, "An appointment has not been selected for update");
@@ -1430,7 +1467,7 @@ public class ScheduleView extends View{
                             APPOINTMENT_UPDATE_VIEW_REQUEST.toString());
             this.getMyController().actionPerformed(actionEvent);
         }
-    }//GEN-LAST:event_btnUpdateAppointmentActionPerformed
+    }//GEN-LAST:event_btnUpdateSelectedAppointmentActionPerformed
 
     private void btnCloseViewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCloseViewActionPerformed
 
@@ -1455,7 +1492,7 @@ public class ScheduleView extends View{
         dayDatePicker.setDate(day);
     }//GEN-LAST:event_btnPreviousPracticeDayActionPerformed
 
-    private void btnScanForEmptySlotsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnScanForEmptySlotsActionPerformed
+    private void btnSlotAvailabilityScannerRequestActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSlotAvailabilityScannerRequestActionPerformed
         // TODO add your handling code here:
         LocalDate searchStartDate = dayDatePicker.getDate();
         getMyController().getDescriptor().getViewDescription().setScheduleDay(searchStartDate);
@@ -1464,7 +1501,7 @@ public class ScheduleView extends View{
                     ViewController.ScheduleViewControllerActionEvent.
                             EMPTY_SLOT_SCAN_CONFIGURATION_VIEW_REQUEST.toString());
         this.getMyController().actionPerformed(actionEvent);
-    }//GEN-LAST:event_btnScanForEmptySlotsActionPerformed
+    }//GEN-LAST:event_btnSlotAvailabilityScannerRequestActionPerformed
 
     
     private void btnCancelSelectedAppointmentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelSelectedAppointmentActionPerformed
@@ -1578,7 +1615,7 @@ public class ScheduleView extends View{
         return String.format("%-" + width + "s", s);
     }
     
-    private void btnPrintScheduleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPrintScheduleActionPerformed
+    private void btnPrintDayScheduleRequestActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPrintDayScheduleRequestActionPerformed
         int PATIENT_WIDTH = 36;
         int FROM_WIDTH = 8;
         int TO_WIDTH = 8;
@@ -1652,11 +1689,10 @@ public class ScheduleView extends View{
                 }
             }
         }
-    }//GEN-LAST:event_btnPrintScheduleActionPerformed
+    }//GEN-LAST:event_btnPrintDayScheduleRequestActionPerformed
 */
 /*
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JPanel SlotAvailabilityPanel;
     private javax.swing.JButton btnCancelSelectedAppointment;
     private javax.swing.JButton btnCloseView;
     private javax.swing.JButton btnCreateAppointment;
@@ -1664,13 +1700,12 @@ public class ScheduleView extends View{
     private javax.swing.JButton btnNextPracticeDay;
     private javax.swing.JButton btnNowDay;
     private javax.swing.JButton btnPreviousPracticeDay;
-    private javax.swing.JButton btnPrintSchedule;
-    private javax.swing.JButton btnScanForEmptySlots;
-    private javax.swing.JButton btnUpdateAppointment;
+    private javax.swing.JButton btnPrintDayScheduleRequest;
+    private javax.swing.JButton btnSlotAvailabilityScannerRequest;
+    private javax.swing.JButton btnUpdateSelectedAppointment;
     private javax.swing.ButtonGroup buttonGroup1;
     private com.github.lgooddatepicker.components.DatePicker dayDatePicker;
     private javax.swing.JMenuBar jMenuBar1;
-    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JPopupMenu.Separator jSeparator1;
     private javax.swing.JPopupMenu.Separator jSeparator2;
     private javax.swing.JPopupMenu.Separator jSeparator3;
@@ -1683,13 +1718,15 @@ public class ScheduleView extends View{
     private javax.swing.JPanel pnlAppointmentDaySelection;
     private javax.swing.JPanel pnlAppointmentDaySelector;
     private javax.swing.JPanel pnlAppointmentScheduleForDay;
+    private javax.swing.JPanel pnlScheduleOperations;
+    private javax.swing.JPanel pnlSlotAvailability;
     private javax.swing.JScrollPane scrAppointmentsForDayTable;
+    private javax.swing.JScrollPane scrPanelSlotAvailability;
     private javax.swing.JTable tblAppointments;
-    private javax.swing.JTable tblEmptySlotAvailability;
-    private javax.swing.JPanel tbpScheduleOperations;
+    private javax.swing.JTable tblSlotAvailability;
     // End of variables declaration//GEN-END:variables
 */
-    private javax.swing.JPanel SlotAvailabilityPanel;
+    private javax.swing.JPanel pnlSlotAvailability;
     private javax.swing.JButton btnCancelSelectedAppointment;
     private javax.swing.JButton btnCloseView;
     private javax.swing.JButton btnCreateAppointment;
@@ -1697,13 +1734,13 @@ public class ScheduleView extends View{
     private javax.swing.JButton btnNextPracticeDay;
     private javax.swing.JButton btnNowDay;
     private javax.swing.JButton btnPreviousPracticeDay;
-    private javax.swing.JButton btnPrintSchedule;
-    private javax.swing.JButton btnScanForEmptySlots;
-    private javax.swing.JButton btnUpdateAppointment;
+    private javax.swing.JButton btnPrintDayScheduleRequest;
+    private javax.swing.JButton btnSlotAvailabilityScannerRequest;
+    private javax.swing.JButton btnUpdateSelectedAppointment;
     private javax.swing.ButtonGroup buttonGroup1;
     private com.github.lgooddatepicker.components.DatePicker dayDatePicker;
     private javax.swing.JMenuBar jMenuBar1;
-    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane scrPanelSlotAvailability;
     private javax.swing.JPopupMenu.Separator jSeparator1;
     private javax.swing.JPopupMenu.Separator jSeparator2;
     private javax.swing.JPopupMenu.Separator jSeparator3;
@@ -1718,8 +1755,8 @@ public class ScheduleView extends View{
     private javax.swing.JPanel pnlAppointmentScheduleForDay;
     private javax.swing.JScrollPane scrAppointmentsForDayTable;
     private javax.swing.JTable tblAppointments;
-    private javax.swing.JTable tblEmptySlotAvailability;
-    private javax.swing.JPanel tbpScheduleOperations;
+    private javax.swing.JTable tblSlotAvailability;
+    private javax.swing.JPanel pnlScheduleOperations;
     // End of variables declaration 
     class DayDatePickerChangeListener implements DateChangeListener {
         @Override
@@ -1745,24 +1782,24 @@ public class ScheduleView extends View{
     private void populateEmptySlotAvailabilityTable(ArrayList<Appointment> a){
         if (a==null) a = new ArrayList<Appointment>();
         EmptySlotAvailability2ColumnTableModel model;
-        if (this.tblEmptySlotAvailability!=null){
-            jScrollPane1.remove(this.tblEmptySlotAvailability);   
+        if (this.tblSlotAvailability!=null){
+            scrPanelSlotAvailability.remove(this.tblSlotAvailability);   
         }
-        this.tblEmptySlotAvailability = new JTable(new EmptySlotAvailability2ColumnTableModel());
-        jScrollPane1.setViewportView(this.tblEmptySlotAvailability);
+        this.tblSlotAvailability = new JTable(new EmptySlotAvailability2ColumnTableModel());
+        scrPanelSlotAvailability.setViewportView(this.tblSlotAvailability);
         setEmptySlotAvailabilityTableListener();
-        model = (EmptySlotAvailability2ColumnTableModel)this.tblEmptySlotAvailability.getModel();
+        model = (EmptySlotAvailability2ColumnTableModel)this.tblSlotAvailability.getModel();
         model.removeAllElements();
         Iterator<Appointment> it = a.iterator();
         while (it.hasNext()){
-            ((EmptySlotAvailability2ColumnTableModel)this.tblEmptySlotAvailability.getModel()).addElement(it.next());
+            ((EmptySlotAvailability2ColumnTableModel)this.tblSlotAvailability.getModel()).addElement(it.next());
         }
 
-        JTableHeader tableHeader = this.tblEmptySlotAvailability.getTableHeader();
+        JTableHeader tableHeader = this.tblSlotAvailability.getTableHeader();
         tableHeader.setBackground(new Color(220,220,220));
         tableHeader.setOpaque(true);
         
-        TableColumnModel columnModel = this.tblEmptySlotAvailability.getColumnModel();
+        TableColumnModel columnModel = this.tblSlotAvailability.getColumnModel();
         columnModel.getColumn(0).setHeaderRenderer(new TableHeaderCellBorderRenderer(Color.LIGHT_GRAY));
         columnModel.getColumn(1).setHeaderRenderer(new TableHeaderCellBorderRenderer(Color.LIGHT_GRAY));
     }
@@ -1830,17 +1867,17 @@ public class ScheduleView extends View{
         this.tblAppointments.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
         
         TableColumnModel columnModel = this.tblAppointments.getColumnModel();
-        columnModel.getColumn(0).setPreferredWidth(190);
+        columnModel.getColumn(0).setPreferredWidth(205);
         columnModel.getColumn(0).setHeaderRenderer(new TableHeaderCellBorderRenderer(Color.LIGHT_GRAY));
         columnModel.getColumn(1).setPreferredWidth(36);
         columnModel.getColumn(1).setHeaderRenderer(new TableHeaderCellBorderRenderer(Color.LIGHT_GRAY));
         columnModel.getColumn(2).setPreferredWidth(36);
         columnModel.getColumn(2).setHeaderRenderer(new TableHeaderCellBorderRenderer(Color.LIGHT_GRAY));
-        columnModel.getColumn(3).setPreferredWidth(96);
+        columnModel.getColumn(3).setPreferredWidth(/*96*/120);
         columnModel.getColumn(3).setHeaderRenderer(new TableHeaderCellBorderRenderer(Color.LIGHT_GRAY));
         columnModel.getColumn(4).setMinWidth(248);
         columnModel.getColumn(4).setHeaderRenderer(new TableHeaderCellBorderRenderer(Color.LIGHT_GRAY));
-        columnModel.getColumn(5).setMinWidth(20);
+        columnModel.getColumn(5).setMinWidth(/*20*/50);
         columnModel.getColumn(5).setHeaderRenderer(new TableHeaderCellBorderRenderer(Color.LIGHT_GRAY));
         JTableHeader tableHeader = this.tblAppointments.getTableHeader();
         tableHeader.setBackground(new Color(220,220,220));
