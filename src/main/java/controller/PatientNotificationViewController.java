@@ -110,21 +110,21 @@ public class PatientNotificationViewController extends ViewController{
                             this,ActionEvent.ACTION_PERFORMED,
                             ViewController.DesktopViewControllerActionEvent.
                                     VIEW_CONTROLLER_ACTIVATED_NOTIFICATION.toString());
-                    this.actionPerformed(actionEvent);
-                    break;
+                    this.getMyController().actionPerformed(actionEvent);
+                    break;  
                 case VIEW_CHANGED_NOTIFICATION:
                     actionEvent = new ActionEvent(
                            this,ActionEvent.ACTION_PERFORMED,
                            ViewController.DesktopViewControllerActionEvent.
                                    VIEW_CONTROLLER_CHANGED_NOTIFICATION.toString());
-                    this.actionPerformed(actionEvent);
+                    this.getMyController().actionPerformed(actionEvent);
                     break;
                 case VIEW_CLOSED_NOTIFICATION:
                     actionEvent = new ActionEvent(
                            this,ActionEvent.ACTION_PERFORMED,
                            ViewController.DesktopViewControllerActionEvent.
                                    VIEW_CONTROLLER_CLOSE_NOTIFICATION.toString());
-                    this.actionPerformed(actionEvent);
+                    this.getMyController().actionPerformed(actionEvent);
                     break;
                 case UNACTIONED_PATIENT_NOTIFICATIONS_REQUEST:
                     doUnactionedPatientNotificationsRequest();
@@ -229,7 +229,7 @@ public class PatientNotificationViewController extends ViewController{
             ActionEvent actionEvent = new ActionEvent(
                    this,ActionEvent.ACTION_PERFORMED,
                    DesktopViewController.DesktopViewControllerActionEvent.MODAL_VIEWER_CLOSED.toString());
-            this.actionPerformed(actionEvent);
+            this.getMyController().actionPerformed(actionEvent);
         }catch (StoreException ex){
             String message = ex.getMessage();
             displayErrorMessage(message,"PatientNotificaionViewController error",JOptionPane.WARNING_MESSAGE);
@@ -264,7 +264,7 @@ public class PatientNotificationViewController extends ViewController{
             //patientNotificationCollection.read();
             //getNewEntityDescriptor().setPatientNotifications(patientNotificationCollection.get());
             //View.setViewer(View.Viewer.PATIENT_NOTIFICATION_EDITOR_VIEW);
-            setView((ModalView)new View().make(
+            setModalView((ModalView)new View().make(
                     View.Viewer.PATIENT_NOTIFICATION_EDITOR_VIEW,
                     this,
                     getDesktopView()).getModalView());
@@ -272,7 +272,7 @@ public class PatientNotificationViewController extends ViewController{
             ActionEvent actionEvent = new ActionEvent(
                    this,ActionEvent.ACTION_PERFORMED,
                    DesktopViewController.DesktopViewControllerActionEvent.MODAL_VIEWER_CLOSED.toString());
-            this.actionPerformed(actionEvent);
+            this.getMyController().actionPerformed(actionEvent);
         }catch (StoreException ex){
             String message = ex.getMessage();
             displayErrorMessage(message,"PatientNotificaionViewController error",JOptionPane.WARNING_MESSAGE);
@@ -375,6 +375,8 @@ public class PatientNotificationViewController extends ViewController{
         }catch (PropertyVetoException ex){
 
         }
+        
+        int test = 0;
     } 
     
     private void doPatientNotificationEditorCloseViewRequest(){

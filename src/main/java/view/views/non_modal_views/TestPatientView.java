@@ -1504,15 +1504,132 @@ public class TestPatientView extends View {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        pnlAppointmentDaySelection = new javax.swing.JPanel();
+        pnlSlotAvailability = new javax.swing.JPanel();
+        pnlAppointmentSchedule = new javax.swing.JPanel();
+        pnlScheduleActions = new javax.swing.JPanel();
+        btnUpdateSelectedAppointment = new javax.swing.JButton();
+        btnCancelAppointment = new javax.swing.JButton();
+        btnMarkUnbookable = new javax.swing.JButton();
+        btnPrintSchedule = new javax.swing.JButton();
+        btnCreateAppointment1 = new javax.swing.JButton();
+        btnCreateAppointment2 = new javax.swing.JButton();
+
+        pnlAppointmentDaySelection.setBorder(javax.swing.BorderFactory.createTitledBorder("Appointment day selection"));
+
+        javax.swing.GroupLayout pnlAppointmentDaySelectionLayout = new javax.swing.GroupLayout(pnlAppointmentDaySelection);
+        pnlAppointmentDaySelection.setLayout(pnlAppointmentDaySelectionLayout);
+        pnlAppointmentDaySelectionLayout.setHorizontalGroup(
+            pnlAppointmentDaySelectionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 277, Short.MAX_VALUE)
+        );
+        pnlAppointmentDaySelectionLayout.setVerticalGroup(
+            pnlAppointmentDaySelectionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 153, Short.MAX_VALUE)
+        );
+
+        pnlSlotAvailability.setBorder(javax.swing.BorderFactory.createTitledBorder("Available appointment slots"));
+
+        javax.swing.GroupLayout pnlSlotAvailabilityLayout = new javax.swing.GroupLayout(pnlSlotAvailability);
+        pnlSlotAvailability.setLayout(pnlSlotAvailabilityLayout);
+        pnlSlotAvailabilityLayout.setHorizontalGroup(
+            pnlSlotAvailabilityLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 381, Short.MAX_VALUE)
+        );
+        pnlSlotAvailabilityLayout.setVerticalGroup(
+            pnlSlotAvailabilityLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 0, Short.MAX_VALUE)
+        );
+
+        pnlAppointmentSchedule.setBorder(javax.swing.BorderFactory.createTitledBorder("Appontment schedule for..."));
+
+        javax.swing.GroupLayout pnlAppointmentScheduleLayout = new javax.swing.GroupLayout(pnlAppointmentSchedule);
+        pnlAppointmentSchedule.setLayout(pnlAppointmentScheduleLayout);
+        pnlAppointmentScheduleLayout.setHorizontalGroup(
+            pnlAppointmentScheduleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 0, Short.MAX_VALUE)
+        );
+        pnlAppointmentScheduleLayout.setVerticalGroup(
+            pnlAppointmentScheduleLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 0, Short.MAX_VALUE)
+        );
+
+        pnlScheduleActions.setBorder(javax.swing.BorderFactory.createTitledBorder("Schedule actions"));
+
+        btnUpdateSelectedAppointment.setText("Update");
+
+        btnCancelAppointment.setText("Cancel");
+
+        btnMarkUnbookable.setText("Mark");
+
+        btnPrintSchedule.setText("Print");
+
+        btnCreateAppointment1.setText("Create");
+
+        btnCreateAppointment2.setText("Create");
+
+        javax.swing.GroupLayout pnlScheduleActionsLayout = new javax.swing.GroupLayout(pnlScheduleActions);
+        pnlScheduleActions.setLayout(pnlScheduleActionsLayout);
+        pnlScheduleActionsLayout.setHorizontalGroup(
+            pnlScheduleActionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlScheduleActionsLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(pnlScheduleActionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(btnUpdateSelectedAppointment, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(btnCancelAppointment, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(btnMarkUnbookable, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(btnCreateAppointment2)
+                    .addComponent(btnCreateAppointment1)
+                    .addComponent(btnPrintSchedule, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(22, Short.MAX_VALUE))
+        );
+        pnlScheduleActionsLayout.setVerticalGroup(
+            pnlScheduleActionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlScheduleActionsLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(btnCreateAppointment2, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(28, 28, 28)
+                .addComponent(btnUpdateSelectedAppointment, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 27, Short.MAX_VALUE)
+                .addComponent(btnCancelAppointment, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(btnMarkUnbookable, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(btnPrintSchedule, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(btnCreateAppointment1, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
+        );
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 840, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                    .addComponent(pnlAppointmentSchedule, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(pnlAppointmentDaySelection, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(29, 29, 29)
+                        .addComponent(pnlSlotAvailability, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(pnlScheduleActions, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 274, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(pnlScheduleActions, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(pnlAppointmentDaySelection, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(pnlSlotAvailability, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGap(18, 18, 18)
+                        .addComponent(pnlAppointmentSchedule, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                .addContainerGap())
         );
 
         pack();
@@ -1521,6 +1638,16 @@ public class TestPatientView extends View {
     
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnCancelAppointment;
+    private javax.swing.JButton btnCreateAppointment1;
+    private javax.swing.JButton btnCreateAppointment2;
+    private javax.swing.JButton btnMarkUnbookable;
+    private javax.swing.JButton btnPrintSchedule;
+    private javax.swing.JButton btnUpdateSelectedAppointment;
+    private javax.swing.JPanel pnlAppointmentDaySelection;
+    private javax.swing.JPanel pnlAppointmentSchedule;
+    private javax.swing.JPanel pnlScheduleActions;
+    private javax.swing.JPanel pnlSlotAvailability;
     // End of variables declaration//GEN-END:variables
 
 */

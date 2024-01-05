@@ -89,7 +89,7 @@ public class PatientNotificationView extends View implements ItemListener {
         setTitle("Outstanding patient notifications");
         this.setMyViewType(myViewType);
         setMyController(myController);  
-        
+        setDesktopView(desktopView);
     }
     
     @Override
@@ -98,19 +98,21 @@ public class PatientNotificationView extends View implements ItemListener {
         String text = ((JRadioButton)e.getItem()).getText();
         switch(text){
             case DISPLAY_UNACTIONED_NOTIFICATIONS_TEXT:
-                if (e.getStateChange() == ItemEvent.SELECTED)
+                if (e.getStateChange() == ItemEvent.SELECTED){
                     request = ViewController.
                             PatientNotificationViewControllerActionEvent.
                             UNACTIONED_PATIENT_NOTIFICATIONS_REQUEST;
                             setUITitle(UI_UNACTIONED_NOTIFICATIONS_TITLE);
+                }
                             
                 break;
             case DISPLAY_ALL_NOTIFICATIONS_TEXT:
-                if (e.getStateChange() == ItemEvent.SELECTED)
+                if (e.getStateChange() == ItemEvent.SELECTED){
                     request = ViewController.
                             PatientNotificationViewControllerActionEvent.
                             PATIENT_NOTIFICATIONS_REQUEST;
                             setUITitle(UI_ALL_NOTIFICATIONS_TITLE);
+                }
                 break;
         }
         if (request!=null){

@@ -572,7 +572,7 @@ public class DesktopViewController extends ViewController{
                 PatientNotificationViewController pnvc = 
                         patientNotificationViewControllers.get(patientNotificationViewControllers.size()-1);
                 pnvc.setView(new View().make(
-                        View.Viewer.SCHEDULE_VIEW,
+                        View.Viewer.PATIENT_NOTIFICATION_VIEW/*SCHEDULE_VIEW*/,
                         pnvc, 
                         getDesktopView()));
                 

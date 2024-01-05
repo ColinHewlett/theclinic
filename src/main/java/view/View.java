@@ -11,9 +11,11 @@ import view.views.modal_views.*;
 import controller.ViewController;
 import java.awt.AWTEvent;
 import java.awt.ActiveEvent;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.EventQueue;
+import java.awt.Font;
 import java.awt.MenuComponent;
 import java.awt.Toolkit;
 import view.views.interfaces.IView;
@@ -22,6 +24,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseMotionAdapter;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
+import java.beans.PropertyVetoException;
 import javax.swing.JInternalFrame;
 import javax.swing.JLayeredPane;
 import javax.swing.JOptionPane;
@@ -42,6 +45,17 @@ public class View extends JInternalFrame
     private ViewController myController = null;
     private View view = null;
     private ModalView modalView = null;
+    
+    static Font borderTitleFont = new Font("Segoe UI", 1, 12);
+    static Color borderTitleColor = new Color(0,0,153);
+    
+    protected Color getBorderTitleColor(){
+        return borderTitleColor;
+    }
+    
+    protected Font getBorderTitleFont(){
+        return borderTitleFont;
+    }
 
     
     public Boolean getIsViewInitialised(){
@@ -200,6 +214,13 @@ public class View extends JInternalFrame
         view.getMyController().centreViewOnDesktop(view.getDesktopView(), view.getMyController().getView());
         view.getDesktopView().getDeskTop().add(view.getMyController().getView());
         view.toFront();
+        
+        try{
+            view.setSelected(true);
+        }catch(PropertyVetoException ex){
+            
+        }
+
         return view;
     }
     
@@ -228,6 +249,11 @@ public class View extends JInternalFrame
         lp.add(modalInterceptor);
         view.toFront();
 
+        try{
+            view.setSelected(true);
+        }catch(PropertyVetoException ex){
+            
+        }
         // We need to explicitly dispatch events when we are blocking the event
         // dispatch thread.
         EventQueue queue = Toolkit.getDefaultToolkit().getSystemEventQueue();

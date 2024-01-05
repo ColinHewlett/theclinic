@@ -133,7 +133,7 @@ public class PatientView extends View{
                 break;
             case PATIENT_SELECTION:
                 titledBorder.setTitle(panelPatientSelectionTitle);
-                titledBorder.setTitleColor(new java.awt.Color(0, 0, 204));
+                titledBorder.setTitleColor(getBorderTitleColor());
                 btnCreateNewPatient.setText(patientCreateCaption);
                 btnCreateNewPatient.setForeground(Color.BLACK);
                 btnUpdateSelectedPatient.setText(patientUpdateCaption);
@@ -170,6 +170,7 @@ public class PatientView extends View{
     static int wDatePickerWidth = 114;
     static int mLine2Width = 180;
     static int wLine2Width = 182;
+    
     
     private int getPatientViewHeight (){
         int result = 0;
@@ -1189,8 +1190,8 @@ public class PatientView extends View{
                         "Select patient to recover", 
                         javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, 
                         javax.swing.border.TitledBorder.DEFAULT_POSITION, 
-                        new java.awt.Font("Segoe UI", 1, 12), 
-                        new java.awt.Color(0, 0, 204))); // NOI18N 
+                        getBorderTitleFont(), 
+                        getBorderTitleColor())); // NOI18N 
         
         pnlAppointmentHistory.setBorder(
                 javax.swing.BorderFactory.createTitledBorder(
@@ -1198,8 +1199,8 @@ public class PatientView extends View{
                         "Appointment history (latest apppointment top of list)", 
                         javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, 
                         javax.swing.border.TitledBorder.DEFAULT_POSITION, 
-                        new java.awt.Font("Segoe UI", 1, 12), 
-                        new java.awt.Color(0, 0, 204))); // NOI18N
+                        getBorderTitleFont(), 
+                        getBorderTitleColor())); // NOI18N
         pnlAppointmentHistory.setBackground(new java.awt.Color(220, 220, 220));
 
         pnlName.setBorder(
@@ -1208,8 +1209,8 @@ public class PatientView extends View{
                         "Name & particulars", 
                         javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, 
                         javax.swing.border.TitledBorder.DEFAULT_POSITION, 
-                        new java.awt.Font("Segoe UI", 1, 12), 
-                        new java.awt.Color(0, 0, 204))); // NOI18N
+                        getBorderTitleFont(), 
+                        getBorderTitleColor())); // NOI18N
         
         pnlAddress.setBorder(
                 javax.swing.BorderFactory.createTitledBorder(
@@ -1217,8 +1218,8 @@ public class PatientView extends View{
                         "Address", 
                         javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, 
                         javax.swing.border.TitledBorder.DEFAULT_POSITION, 
-                        new java.awt.Font("Segoe UI", 1, 12), 
-                        new java.awt.Color(0, 0, 204))); // NOI18N
+                        getBorderTitleFont(), 
+                        getBorderTitleColor())); // NOI18N
         
         pnlNotes.setBorder(
                 javax.swing.BorderFactory.createTitledBorder(
@@ -1226,8 +1227,8 @@ public class PatientView extends View{
                         "Notes", 
                         javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, 
                         javax.swing.border.TitledBorder.DEFAULT_POSITION, 
-                        new java.awt.Font("Segoe UI", 1, 12),
-                        new java.awt.Color(0, 0, 204))); // NOI18N
+                        getBorderTitleFont(),
+                        getBorderTitleColor())); // NOI18N
         
         pnlPhones.setBorder(
                 javax.swing.BorderFactory.createTitledBorder(
@@ -1235,8 +1236,8 @@ public class PatientView extends View{
                         "Phone number(s) & email", 
                         javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, 
                         javax.swing.border.TitledBorder.DEFAULT_POSITION, 
-                        new java.awt.Font("Segoe UI", 1, 12),
-                        new java.awt.Color(0, 0, 204))); // NOI18N
+                        getBorderTitleFont(),
+                        getBorderTitleColor())); // NOI18N
 
         pnlGuardianDetails.setBorder(
                 javax.swing.BorderFactory.createTitledBorder(
@@ -1244,8 +1245,8 @@ public class PatientView extends View{
                         "Guardian details (patient < 18)", 
                         javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, 
                         javax.swing.border.TitledBorder.DEFAULT_POSITION, 
-                        new java.awt.Font("Segoe UI", 1, 12),
-                        new java.awt.Color(0, 0, 204))); // NOI18N
+                        getBorderTitleFont(),
+                        getBorderTitleColor())); // NOI18N
         
         pnlRecall.setBorder(
                 javax.swing.BorderFactory.createTitledBorder(
@@ -1253,16 +1254,16 @@ public class PatientView extends View{
                         "Recall details", 
                         javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, 
                         javax.swing.border.TitledBorder.DEFAULT_POSITION, 
-                        new java.awt.Font("Segoe UI", 1, 12),
-                        new java.awt.Color(0, 0, 204))); // NOI18N
+                        getBorderTitleFont(),
+                        getBorderTitleColor())); // NOI18N
         
         pnlActions.setBorder(
                 javax.swing.BorderFactory.createTitledBorder(
                         javax.swing.BorderFactory.createEtchedBorder(), 
                         "Actions", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, 
                         javax.swing.border.TitledBorder.DEFAULT_POSITION, 
-                        new java.awt.Font("Segoe UI", 1, 12),
-                        new java.awt.Color(0, 0, 204))); // NOI18N
+                        getBorderTitleFont(),
+                        getBorderTitleColor())); // NOI18N
         pnlActions.setBackground(new java.awt.Color(220, 220, 220));
         
     //</editor-fold>

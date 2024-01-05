@@ -25,6 +25,8 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Iterator;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
 import javax.swing.table.TableColumnModel;
@@ -130,6 +132,10 @@ public class ModalPatientNotificationEditorView extends ModalView {
     @Override
     public void initialiseView(){
         initComponents();
+        ImageIcon icon = new ImageIcon(this.getClass().getResource("/datepickerbutton1.png"));
+        JButton datePickerButton = dpNotificationDate.getComponentToggleCalendarButton();
+        datePickerButton.setText("");
+        datePickerButton.setIcon(icon);
         ViewController.setJTableColumnProperties(
                 tblPatientNotificationHistory, jScrollPane2.getPreferredSize().width, 20,80);
         setVisible(true);

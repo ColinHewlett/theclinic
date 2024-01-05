@@ -180,6 +180,7 @@ public class Notification extends Entity implements IEntityStoreActions {
      */
     @Override
     public Notification read() throws StoreException{
+        Iterator it;
         Patient p;
         Notification patientNotification = null; 
         switch (getScope()){
@@ -192,21 +193,22 @@ public class Notification extends Entity implements IEntityStoreActions {
             case DELETED_FOR_PATIENT:
                 set(new Repository().read(this, getPatient().getKey()).get());
                 break;
-            default:
-                set(new Repository().read(this, null).get());
-                Iterator it = get().iterator();
+            case FOR_PATIENT:
+                set(new Repository().read(this, getPatient().getKey()).get());
+                it = get().iterator();
                 while(it.hasNext()){
                     patientNotification = (Notification)it.next();
-                    switch(getScope()){ 
-                        case FOR_PATIENT:  
-                            patientNotification.setPatient(Notification.this.getPatient());     
-                            break;
-                        default:
-                            p = new Patient(patientNotification.getPatient().getKey());
-                            p.setScope(Scope.SINGLE);
-                            patientNotification.setPatient(p.read());
-                            break;        
-                    }
+                    patientNotification.setPatient(Notification.this.getPatient());
+                }
+                break;
+            default:
+                set(new Repository().read(this, null).get());
+                it = get().iterator();
+                while(it.hasNext()){
+                    patientNotification = (Notification)it.next();
+                    p = new Patient(patientNotification.getPatient().getKey());
+                    p.setScope(Scope.SINGLE);
+                    patientNotification.setPatient(p.read());        
                 }       
         }
         return patientNotification;
