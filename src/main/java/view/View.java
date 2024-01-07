@@ -92,7 +92,7 @@ public class View extends JInternalFrame
                 setView(makeView(new PatientView(viewer, controller, desktopView)));
                 break;
             case PATIENT_NOTIFICATION_VIEW:
-                setView(makeView(new PatientNotificationView(viewer, controller, desktopView)));
+                setView(makeView(new NotificationView(viewer, controller, desktopView)));
                 break;
             case SCHEDULE_VIEW:
                 setView(makeView(new ScheduleView(viewer, controller, desktopView)));

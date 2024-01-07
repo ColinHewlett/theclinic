@@ -39,7 +39,7 @@
               <EmptySpace min="-2" pref="71" max="-2" attributes="0"/>
               <Component id="btnEditSelectedNotification" min="-2" max="-2" attributes="0"/>
               <EmptySpace max="32767" attributes="0"/>
-              <Component id="btnDeletePatientNotification" min="-2" max="-2" attributes="0"/>
+              <Component id="btnDeleteSelectedNotification" min="-2" max="-2" attributes="0"/>
               <EmptySpace min="-2" pref="56" max="-2" attributes="0"/>
               <Component id="btnCloseView" min="-2" max="-2" attributes="0"/>
               <EmptySpace min="-2" pref="29" max="-2" attributes="0"/>
@@ -56,9 +56,9 @@
                   <Component id="btnCloseView" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="btnAddNewNotification" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="btnEditSelectedNotification" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="btnDeletePatientNotification" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="btnDeleteSelectedNotification" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
-              <EmptySpace pref="15" max="32767" attributes="0"/>
+              <EmptySpace pref="22" max="32767" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -80,19 +80,16 @@
         <DimensionLayout dim="0">
           <Group type="103" groupAlignment="0" attributes="0">
               <Group type="102" attributes="0">
-                  <Group type="103" groupAlignment="0" attributes="0">
-                      <Group type="102" alignment="0" attributes="0">
-                          <EmptySpace max="-2" attributes="0"/>
-                          <Component id="scrPatientNotificationView" min="-2" pref="749" max="-2" attributes="0"/>
-                      </Group>
-                      <Group type="102" alignment="0" attributes="0">
-                          <EmptySpace min="-2" pref="32" max="-2" attributes="0"/>
-                          <Component id="jPanel3" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace min="-2" pref="42" max="-2" attributes="0"/>
-                          <Component id="jPanel2" min="-2" max="-2" attributes="0"/>
-                      </Group>
-                  </Group>
-                  <EmptySpace max="32767" attributes="0"/>
+                  <EmptySpace min="-2" pref="32" max="-2" attributes="0"/>
+                  <Component id="pnlDisplayControls" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace min="-2" pref="42" max="-2" attributes="0"/>
+                  <Component id="pnColourKey" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace pref="48" max="32767" attributes="0"/>
+              </Group>
+              <Group type="102" alignment="0" attributes="0">
+                  <EmptySpace max="-2" attributes="0"/>
+                  <Component id="scrNotificationTable" max="32767" attributes="0"/>
+                  <EmptySpace max="-2" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -100,14 +97,14 @@
           <Group type="103" groupAlignment="0" attributes="0">
               <Group type="102" alignment="0" attributes="0">
                   <EmptySpace max="-2" attributes="0"/>
-                  <Component id="scrPatientNotificationView" min="-2" pref="262" max="-2" attributes="0"/>
+                  <Component id="scrNotificationTable" min="-2" pref="262" max="-2" attributes="0"/>
                   <EmptySpace type="separate" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Group type="102" attributes="0">
                           <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
-                          <Component id="jPanel2" min="-2" max="-2" attributes="0"/>
+                          <Component id="pnColourKey" min="-2" max="-2" attributes="0"/>
                       </Group>
-                      <Component id="jPanel3" alignment="0" max="32767" attributes="0"/>
+                      <Component id="pnlDisplayControls" alignment="0" max="32767" attributes="0"/>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
               </Group>
@@ -115,11 +112,11 @@
         </DimensionLayout>
       </Layout>
       <SubComponents>
-        <Container class="javax.swing.JScrollPane" name="scrPatientNotificationView">
+        <Container class="javax.swing.JScrollPane" name="scrNotificationTable">
 
           <Layout class="org.netbeans.modules.form.compat2.layouts.support.JScrollPaneSupportLayout"/>
         </Container>
-        <Container class="javax.swing.JPanel" name="jPanel2">
+        <Container class="javax.swing.JPanel" name="pnColourKey">
           <Properties>
             <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
               <Border info="org.netbeans.modules.form.compat2.border.TitledBorderInfo">
@@ -136,17 +133,17 @@
                   <Group type="102" attributes="0">
                       <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                          <Component id="lblBlack" alignment="0" max="32767" attributes="0"/>
-                          <Component id="lblRed" alignment="0" pref="82" max="32767" attributes="0"/>
-                          <Component id="lblBlue" alignment="0" max="32767" attributes="0"/>
-                          <Component id="lblGreen" alignment="0" max="32767" attributes="0"/>
+                          <Component id="lblNotDueYetNotificationColour" alignment="0" max="32767" attributes="0"/>
+                          <Component id="lblOverdueNotification" alignment="0" pref="82" max="32767" attributes="0"/>
+                          <Component id="lblOverdueNotificationColour" alignment="0" max="32767" attributes="0"/>
+                          <Component id="lblActionedNotificationColour" alignment="0" max="32767" attributes="0"/>
                       </Group>
                       <EmptySpace min="-2" pref="27" max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" attributes="0">
-                          <Component id="jLabel1" min="-2" max="-2" attributes="0"/>
+                          <Component id="lblNotDueYetNotification" min="-2" max="-2" attributes="0"/>
                           <Component id="jLabel2" min="-2" max="-2" attributes="0"/>
                           <Component id="jLabel3" min="-2" max="-2" attributes="0"/>
-                          <Component id="jLabel4" min="-2" max="-2" attributes="0"/>
+                          <Component id="lblActionedNotification" min="-2" max="-2" attributes="0"/>
                       </Group>
                       <EmptySpace pref="16" max="32767" attributes="0"/>
                   </Group>
@@ -157,23 +154,23 @@
                   <Group type="102" alignment="1" attributes="0">
                       <EmptySpace max="32767" attributes="0"/>
                       <Group type="103" groupAlignment="0" attributes="0">
-                          <Component id="lblBlack" alignment="1" min="-2" pref="18" max="-2" attributes="0"/>
-                          <Component id="jLabel1" alignment="1" min="-2" max="-2" attributes="0"/>
+                          <Component id="lblNotDueYetNotificationColour" alignment="1" min="-2" pref="18" max="-2" attributes="0"/>
+                          <Component id="lblNotDueYetNotification" alignment="1" min="-2" max="-2" attributes="0"/>
                       </Group>
                       <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="3" attributes="0">
-                          <Component id="lblRed" alignment="3" min="-2" pref="16" max="-2" attributes="0"/>
+                          <Component id="lblOverdueNotification" alignment="3" min="-2" pref="16" max="-2" attributes="0"/>
                           <Component id="jLabel2" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
                       <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="3" attributes="0">
-                          <Component id="lblBlue" alignment="3" min="-2" pref="16" max="-2" attributes="0"/>
+                          <Component id="lblOverdueNotificationColour" alignment="3" min="-2" pref="16" max="-2" attributes="0"/>
                           <Component id="jLabel3" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
                       <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="3" attributes="0">
-                          <Component id="lblGreen" alignment="3" min="-2" pref="16" max="-2" attributes="0"/>
-                          <Component id="jLabel4" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="lblActionedNotificationColour" alignment="3" min="-2" pref="16" max="-2" attributes="0"/>
+                          <Component id="lblActionedNotification" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
                       <EmptySpace max="-2" attributes="0"/>
                   </Group>
@@ -181,9 +178,9 @@
             </DimensionLayout>
           </Layout>
           <SubComponents>
-            <Component class="javax.swing.JLabel" name="lblBlack">
+            <Component class="javax.swing.JLabel" name="lblNotDueYetNotificationColour">
               <Properties>
-                <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor" postCode="lblBlack.setBackground(java.awt.Color.BLACK);">
+                <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor" postCode="lblNotDueYetNotificationColour.setBackground(java.awt.Color.BLACK);">
                   <Color blue="0" green="ff" red="ff" type="rgb"/>
                 </Property>
                 <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
@@ -192,40 +189,40 @@
                 <Property name="opaque" type="boolean" value="true"/>
               </Properties>
             </Component>
-            <Component class="javax.swing.JLabel" name="lblRed">
+            <Component class="javax.swing.JLabel" name="lblOverdueNotification">
               <Properties>
-                <Property name="text" type="java.lang.String" value=" "/>
-                <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor" postCode="lblRed.setBackground(java.awt.Color.RED);">
+                <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor" postCode="lblOverdueNotification.setBackground(java.awt.Color.RED);">
                   <Color blue="0" green="ff" id="yellow" palette="1" red="ff" type="palette"/>
                 </Property>
+                <Property name="text" type="java.lang.String" value=" "/>
                 <Property name="opaque" type="boolean" value="true"/>
               </Properties>
             </Component>
-            <Component class="javax.swing.JLabel" name="lblBlue">
+            <Component class="javax.swing.JLabel" name="lblOverdueNotificationColour">
               <Properties>
-                <Property name="text" type="java.lang.String" value=" "/>
                 <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
                   <Color blue="0" green="ff" id="yellow" palette="1" red="ff" type="palette"/>
                 </Property>
+                <Property name="text" type="java.lang.String" value=" "/>
                 <Property name="opaque" type="boolean" value="true"/>
               </Properties>
               <AuxValues>
-                <AuxValue name="JavaCodeGenerator_InitCodePost" type="java.lang.String" value="lblBlue.setBackground(java.awt.Color.BLUE);"/>
+                <AuxValue name="JavaCodeGenerator_InitCodePost" type="java.lang.String" value="lblOverdueNotificationColour.setBackground(java.awt.Color.BLUE);"/>
               </AuxValues>
             </Component>
-            <Component class="javax.swing.JLabel" name="lblGreen">
+            <Component class="javax.swing.JLabel" name="lblActionedNotificationColour">
               <Properties>
-                <Property name="text" type="java.lang.String" value=" "/>
                 <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
                   <Color blue="0" green="ff" id="yellow" palette="1" red="ff" type="palette"/>
                 </Property>
+                <Property name="text" type="java.lang.String" value=" "/>
                 <Property name="opaque" type="boolean" value="true"/>
               </Properties>
               <AuxValues>
-                <AuxValue name="JavaCodeGenerator_InitCodePost" type="java.lang.String" value="lblGreen.setBackground(java.awt.Color.GREEN);"/>
+                <AuxValue name="JavaCodeGenerator_InitCodePost" type="java.lang.String" value="lblActionedNotificationColour.setBackground(java.awt.Color.GREEN);"/>
               </AuxValues>
             </Component>
-            <Component class="javax.swing.JLabel" name="jLabel1">
+            <Component class="javax.swing.JLabel" name="lblNotDueYetNotification">
               <Properties>
                 <Property name="text" type="java.lang.String" value="patient notifications not yet due"/>
               </Properties>
@@ -240,14 +237,14 @@
                 <Property name="text" type="java.lang.String" value="overdue patient notifications"/>
               </Properties>
             </Component>
-            <Component class="javax.swing.JLabel" name="jLabel4">
+            <Component class="javax.swing.JLabel" name="lblActionedNotification">
               <Properties>
                 <Property name="text" type="java.lang.String" value="patient notifications which have been actioned"/>
               </Properties>
             </Component>
           </SubComponents>
         </Container>
-        <Container class="javax.swing.JPanel" name="jPanel3">
+        <Container class="javax.swing.JPanel" name="pnlDisplayControls">
 
           <Layout>
             <DimensionLayout dim="0">
@@ -335,12 +332,12 @@
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnEditSelectedNotificationActionPerformed"/>
       </Events>
     </Component>
-    <Component class="javax.swing.JButton" name="btnDeletePatientNotification">
+    <Component class="javax.swing.JButton" name="btnDeleteSelectedNotification">
       <Properties>
         <Property name="text" type="java.lang.String" value="Delete selected notification"/>
       </Properties>
       <Events>
-        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnDeletePatientNotificationActionPerformed"/>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnDeleteSelectedNotificationActionPerformed"/>
       </Events>
     </Component>
   </SubComponents>

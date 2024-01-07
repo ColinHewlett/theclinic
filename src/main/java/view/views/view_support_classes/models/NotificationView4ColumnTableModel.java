@@ -18,7 +18,7 @@ import javax.swing.table.DefaultTableModel;
  *
  * @author colin
  */
-public class PatientNotificationView4ColumnTableModel extends DefaultTableModel{
+public class NotificationView4ColumnTableModel extends DefaultTableModel{
     private DateTimeFormatter ddmmyy = DateTimeFormatter.ofPattern("dd/MM/yy");
     private ArrayList<Notification> patientNotifications = null;
     private enum COLUMN{Date, ThePatient,Phone,Notification};
@@ -28,7 +28,7 @@ public class PatientNotificationView4ColumnTableModel extends DefaultTableModel{
         String.class,
         String.class};
     
-    public PatientNotificationView4ColumnTableModel(){
+    public NotificationView4ColumnTableModel(){
         patientNotifications = new ArrayList<Notification>();
     }
         
