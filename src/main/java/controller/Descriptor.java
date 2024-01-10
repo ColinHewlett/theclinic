@@ -339,7 +339,7 @@ public class Descriptor {
             thePatient = patient;
         }
         
-        public Notification getPatientNotification(){
+        public Notification getNotification(){
             return patientNotification;
         }
         

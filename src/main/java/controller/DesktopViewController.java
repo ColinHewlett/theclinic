@@ -40,7 +40,7 @@ public class DesktopViewController extends ViewController{
     private DesktopView desktopView = null;
     //private ArrayList<AppointmentRemindersViewController> appointmentRemindersViewControllers = null;
     private ArrayList<ScheduleViewController>appointmentScheduleViewControllers = null;
-    private ArrayList<PatientNotificationViewController> patientNotificationViewControllers = null;
+    private ArrayList<NotificationViewController> notificationViewControllers = null;
     private ArrayList<PatientViewController> patientViewControllers = null;
     private ArrayList<ImportProgressViewController> importProgressViewControllers = null;
     private static Boolean isDataMigrationOptionEnabled = null;
@@ -70,7 +70,7 @@ public class DesktopViewController extends ViewController{
         appointmentScheduleViewControllers = new ArrayList<>();
         patientViewControllers = new ArrayList<>();
         importProgressViewControllers = new ArrayList<>();
-        patientNotificationViewControllers = new ArrayList<>();
+        notificationViewControllers = new ArrayList<>();
         boolean isPMSStoreDefined;
         if (isDataMigrationOptionEnabled) {
             notifyMigrationActionCompleted();
@@ -86,9 +86,9 @@ public class DesktopViewController extends ViewController{
         }
     }
 
-    private void doActionEventForPatientNotificationViewController(ActionEvent e){
+    private void doActionEventForNotificationViewController(ActionEvent e){
         String message = null;
-        PatientNotificationViewController pnvc = (PatientNotificationViewController)e.getSource();
+        NotificationViewController pnvc = (NotificationViewController)e.getSource();
         ViewController.DesktopViewControllerActionEvent actionCommand =
                     ViewController.DesktopViewControllerActionEvent.valueOf(e.getActionCommand());
         switch(actionCommand){
@@ -103,14 +103,14 @@ public class DesktopViewController extends ViewController{
                 );
                 break;
             case VIEW_CONTROLLER_CLOSE_NOTIFICATION:{
-                switch (this.patientNotificationViewControllers.size()){
+                switch (this.notificationViewControllers.size()){
                     case 0:
                         message = "No PatientNotification view controllers found in "
                                                     + "DesktopViewController collection.";
                         break;
                     case 1:
-                        if (pnvc.equals(this.patientNotificationViewControllers.get(0))){
-                            this.patientNotificationViewControllers.remove(0);
+                        if (pnvc.equals(this.notificationViewControllers.get(0))){
+                            this.notificationViewControllers.remove(0);
                         }
                         else{
                             message = "Could not find PatientNotification view controller in "
@@ -377,8 +377,8 @@ public class DesktopViewController extends ViewController{
                             getDescriptor()
                     );
                     break;
-                case PATIENT_NOTIFICATION_VIEW_CONTROLLER_REQUEST:
-                    doRequestForPatientNotificationViewController();
+                case NOTIFICATION_VIEW_CONTROLLER_REQUEST:
+                    doRequestForNotificationViewController();
                     break;
                 case VIEW_CLOSE_REQUEST:{
                     doRequestForViewClose();
@@ -564,16 +564,15 @@ public class DesktopViewController extends ViewController{
         }
     }
 
-    private void doRequestForPatientNotificationViewController(){
-        if (patientNotificationViewControllers.isEmpty()){
+    private void doRequestForNotificationViewController(){
+        if (notificationViewControllers.isEmpty()){
             try{
-                patientNotificationViewControllers.add(
-                                            new PatientNotificationViewController(this,getDesktopView()));
-                PatientNotificationViewController pnvc = 
-                        patientNotificationViewControllers.get(patientNotificationViewControllers.size()-1);
-                pnvc.setView(new View().make(
-                        View.Viewer.PATIENT_NOTIFICATION_VIEW/*SCHEDULE_VIEW*/,
-                        pnvc, 
+                notificationViewControllers.add(
+                                            new NotificationViewController(this,getDesktopView()));
+                NotificationViewController nvc = 
+                        notificationViewControllers.get(notificationViewControllers.size()-1);
+                nvc.setView(new View().make(View.Viewer.NOTIFICATION_VIEW/*SCHEDULE_VIEW*/,
+                        nvc, 
                         getDesktopView()));
                 
                 if (getDesktopViewMode().equals(DesktopViewMode.CLINIC_LOGO)){
@@ -973,8 +972,8 @@ public class DesktopViewController extends ViewController{
                 case "ScheduleViewController":
                     doActionEventForScheduleViewController(e);
                     break;
-                case "PatientNotificationViewController":
-                    doActionEventForPatientNotificationViewController(e);
+                case "NotificationViewController":
+                    doActionEventForNotificationViewController(e);
                     break;
                 case "PatientViewController":
                     doActionEventForPatientViewController(e);
@@ -1074,7 +1073,7 @@ public class DesktopViewController extends ViewController{
                                     REFRESH_DISPLAY_REQUEST.toString());
                     asvc.actionPerformed(actionEvent); 
                 }
-                for(PatientNotificationViewController pnvc : this.patientNotificationViewControllers){
+                for(NotificationViewController pnvc : this.notificationViewControllers){
                     ActionEvent actionEvent = new ActionEvent(
                             this,ActionEvent.ACTION_PERFORMED,
                             ViewController.DesktopViewControllerActionEvent.

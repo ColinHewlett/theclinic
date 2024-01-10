@@ -91,7 +91,7 @@ public class View extends JInternalFrame
             case PATIENT_VIEW:
                 setView(makeView(new PatientView(viewer, controller, desktopView)));
                 break;
-            case PATIENT_NOTIFICATION_VIEW:
+            case NOTIFICATION_VIEW:
                 setView(makeView(new NotificationView(viewer, controller, desktopView)));
                 break;
             case SCHEDULE_VIEW:
@@ -109,7 +109,7 @@ public class View extends JInternalFrame
                 setModalView(makeView(new ModalEmptySlotScanConfigurationView(viewer, controller, desktopView)));
                 break;
             case PATIENT_NOTIFICATION_EDITOR_VIEW:
-                setModalView(makeView(new ModalPatientNotificationEditorView(viewer, controller, desktopView)));
+                setModalView(makeView(new ModalNotificationEditorView(viewer, controller, desktopView)));
                 break;
             case PATIENT_RECOVERY_SELECTION_VIEW:
                 setModalView(makeView(new ModalPatientSelectionView(viewer, controller, desktopView)));
@@ -150,7 +150,7 @@ public class View extends JInternalFrame
         PATIENT_RECOVERY_SELECTION_VIEW,
         PATIENT_SELECTION_VIEW,
         PATIENT_VIEW,
-        PATIENT_NOTIFICATION_VIEW,
+        NOTIFICATION_VIEW,
         PATIENT_NOTIFICATION_EDITOR_VIEW,
         UNACTIONED_PATIENT_NOTIFICATION_VIEW,
         SURGERY_DAY_EDITOR_VIEW,

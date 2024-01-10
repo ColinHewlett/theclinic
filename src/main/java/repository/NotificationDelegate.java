@@ -11,14 +11,14 @@ import model.Notification;
  *
  * @author colin
  */
-public class PatientNotificationDelegate extends Notification {
+public class NotificationDelegate extends Notification {
     int test = 0;
     
-    protected PatientNotificationDelegate(){
+    protected NotificationDelegate(){
         super();
     }
     
-    protected PatientNotificationDelegate(Notification pn){
+    protected NotificationDelegate(Notification pn){
         super.setNotificationDate(pn.getNotificationDate());
         super.setNotificationText(pn.getNotificationText());
         super.setPatient(pn.getPatient());

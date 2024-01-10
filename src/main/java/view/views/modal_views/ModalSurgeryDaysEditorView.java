@@ -81,7 +81,7 @@ public class ModalSurgeryDaysEditorView extends ModalView {
         //setViewDescriptor((Descriptor)e.getNewValue());
  
         if (e.getPropertyName().equals(
-            ViewController.AppointmentScheduleViewControllerPropertyChangeEvent.APPOINTMENT_SCHEDULE_ERROR_RECEIVED.toString())){
+            ViewController.ScheduleViewControllerPropertyChangeEvent.APPOINTMENT_SCHEDULE_ERROR_RECEIVED.toString())){
             ViewController.displayErrorMessage(getMyController().getDescriptor().
                     getControllerDescription().getError(),
                                                "Appointment editor dialog error",

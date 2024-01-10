@@ -79,8 +79,8 @@ public class ScheduleViewController extends ViewController{
     
     @Override
     public void propertyChange(PropertyChangeEvent e){
-        ViewController.AppointmentScheduleViewControllerPropertyChangeEvent propertyName = 
-                ViewController.AppointmentScheduleViewControllerPropertyChangeEvent.
+        ViewController.ScheduleViewControllerPropertyChangeEvent propertyName = 
+                ViewController.ScheduleViewControllerPropertyChangeEvent.
                         valueOf(e.getPropertyName());
         switch(propertyName){
             case APPOINTMENT_FOR_DAY_RECEIVED:/*{
@@ -390,7 +390,7 @@ public class ScheduleViewController extends ViewController{
             doAppointeeReminderCount(appointment.get());
             getUpdatedAppointmentSlotsForDay(appointment);
             firePropertyChangeEvent(
-                    ViewController.AppointmentScheduleViewControllerPropertyChangeEvent.
+                    ViewController.ScheduleViewControllerPropertyChangeEvent.
                             APPOINTMENTS_FOR_DAY_RECEIVED.toString(),
                     getView(),
                     this,
@@ -558,7 +558,7 @@ public class ScheduleViewController extends ViewController{
                 doAppointmentForDayRequest(getScheduleDay());
                 
                 firePropertyChangeEvent(
-                        ViewController.AppointmentScheduleViewControllerPropertyChangeEvent.
+                        ViewController.ScheduleViewControllerPropertyChangeEvent.
                                 APPOINTMENTS_FOR_DAY_RECEIVED.toString(),
                         getView(),//event target/listener
                         this,//event sender
@@ -568,7 +568,7 @@ public class ScheduleViewController extends ViewController{
                 
                 if (getDescriptor().getControllerDescription().getEmptySlotFromDay()!=null){
                     firePropertyChangeEvent(
-                           ViewController.AppointmentScheduleViewControllerPropertyChangeEvent.
+                           ViewController.ScheduleViewControllerPropertyChangeEvent.
                                    NO_APPOINTMENT_SLOTS_FROM_DAY_RECEIVED.toString(),
                            this.getView(),//event target/listener
                            this,//event sender
@@ -739,7 +739,7 @@ public class ScheduleViewController extends ViewController{
                     surgeryDaysAssignment.update();
                     getDescriptor().getControllerDescription().setSurgeryDaysAssignment(new SurgeryDaysAssignment().read().get());
                     firePropertyChangeEvent(
-                            ViewController.AppointmentScheduleViewControllerPropertyChangeEvent.SURGERY_DAYS_ASSIGNMENT_RECEIVED.toString(),
+                            ViewController.ScheduleViewControllerPropertyChangeEvent.SURGERY_DAYS_ASSIGNMENT_RECEIVED.toString(),
                             getView(),
                             this,
                             null,
@@ -784,7 +784,7 @@ public class ScheduleViewController extends ViewController{
                  * fire event over to APPOINTMENT_SCHEDULE
                  */
                 firePropertyChangeEvent(
-                        AppointmentScheduleViewControllerPropertyChangeEvent.
+                        ScheduleViewControllerPropertyChangeEvent.
                                 SURGERY_DAYS_ASSIGNMENT_RECEIVED.toString(),
                         getSecondaryView(),
                         this,
@@ -848,7 +848,7 @@ public class ScheduleViewController extends ViewController{
                 getDescriptor().getControllerDescription().setAppointmentSlots(availableSlotsOfDuration);
                 getDescriptor().getControllerDescription().setAppointment(appointment);
                 this.firePropertyChangeEvent(
-                        ViewController.AppointmentScheduleViewControllerPropertyChangeEvent.
+                        ViewController.ScheduleViewControllerPropertyChangeEvent.
                                 APPOINTMENT_SLOTS_FROM_DAY_RECEIVED.toString(),
                         getView(),
                         this,
@@ -912,7 +912,7 @@ getDescriptor().getViewDescription().getScheduleDay());
          * fire event over to APPOINTMENT_CREATOR_EDITOR_VIEW
          */
         firePropertyChangeEvent(
-                AppointmentScheduleViewControllerPropertyChangeEvent.
+                ScheduleViewControllerPropertyChangeEvent.
                         APPOINTMENT_SCHEDULE_ERROR_RECEIVED.toString(),
                 getSecondaryView(),
                 this,
@@ -972,7 +972,7 @@ getDescriptor().getViewDescription().getScheduleDay());
                             getDescriptor().getControllerDescription().setEmptySlotFromDay(null);
                             getDescriptor().getControllerDescription().setEmptySlotMinimumDuration(null);
                             this.firePropertyChangeEvent(
-                                    ViewController.AppointmentScheduleViewControllerPropertyChangeEvent.
+                                    ViewController.ScheduleViewControllerPropertyChangeEvent.
                                             NO_APPOINTMENT_SLOTS_FROM_DAY_RECEIVED.toString(),
                                     getView(),
                                     this,
@@ -981,7 +981,7 @@ getDescriptor().getViewDescription().getScheduleDay());
                             );
                         }
                         this.firePropertyChangeEvent(
-                                ViewController.AppointmentScheduleViewControllerPropertyChangeEvent.
+                                ViewController.ScheduleViewControllerPropertyChangeEvent.
                                         APPOINTMENTS_CANCELLED_RECEIVED.toString(),
                                 (View)e.getSource(),
                                 this,
@@ -1005,7 +1005,7 @@ getDescriptor().getViewDescription().getScheduleDay());
                             doAppointmentForDayRequest(getScheduleDay());
                             
                             firePropertyChangeEvent(
-                                   ViewController.AppointmentScheduleViewControllerPropertyChangeEvent.
+                                   ViewController.ScheduleViewControllerPropertyChangeEvent.
                                            APPOINTMENTS_FOR_DAY_RECEIVED.toString(),
                                    this.getView(),//event target/listener
                                    this,//event sender
@@ -1698,7 +1698,7 @@ getDescriptor().getViewDescription().getScheduleDay());
  
     private void resetEmptySlotScannerSettings(){
         firePropertyChangeEvent(
-                ViewController.AppointmentScheduleViewControllerPropertyChangeEvent.NO_APPOINTMENT_SLOTS_FROM_DAY_RECEIVED.toString(),
+                ViewController.ScheduleViewControllerPropertyChangeEvent.NO_APPOINTMENT_SLOTS_FROM_DAY_RECEIVED.toString(),
                 getView(),
                 this,
                 null,

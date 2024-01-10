@@ -79,17 +79,30 @@ public class NotificationTableKeyColorsAndLocalDateRenderer extends JLabel imple
                 case 0:
                     date = (LocalDate)value;
                     super.setText(date.format(ddmmyy));
-                    if (date.compareTo(LocalDate.now()) > 0)
-                        setIsNotificationDateOverdue(true);
-                    else
+                    if (date.compareTo(LocalDate.now()) >= 0)
                         setIsNotificationDateOverdue(false);
+                    else
+                        setIsNotificationDateOverdue(true);
+                    if (notification.getIsActioned())
+                        super.setForeground(getActionedNotificationColour());
+                    else if (getIsNotificationDateOverdue())
+                        super.setForeground(getOverdueNotificationColour());
+                    else super.setForeground(getNotDueYetNotificationColour());
+                    break;
+                default:
+                    super.setText(value.toString());
+                    if (date.compareTo(LocalDate.now()) >= 0)
+                        setIsNotificationDateOverdue(false);
+                    else
+                        setIsNotificationDateOverdue(true);
+                    if (notification.getIsActioned())
+                        super.setForeground(getActionedNotificationColour());
+                    else if (getIsNotificationDateOverdue())
+                        super.setForeground(getOverdueNotificationColour());
+                    else super.setForeground(getNotDueYetNotificationColour());
                     break;
             }
-            if (notification.getIsActioned())
-                super.setForeground(getActionedNotificationColour());
-            else if (getIsNotificationDateOverdue())
-                super.setForeground(getOverdueNotificationColour());
-            else super.setForeground(getNotDueYetNotificationColour());  
+              
         }
         
         if (isSelected){

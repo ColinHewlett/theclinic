@@ -131,8 +131,8 @@ public class ScheduleView extends View{
         String tableTitleDay = null;
                 String tableTitleDuration = null;
         TitledBorder titledBorder = (TitledBorder)this.pnlSlotAvailability.getBorder();
-        ViewController.AppointmentScheduleViewControllerPropertyChangeEvent propertyName = 
-                ViewController.AppointmentScheduleViewControllerPropertyChangeEvent.valueOf(e.getPropertyName());
+        ViewController.ScheduleViewControllerPropertyChangeEvent propertyName = 
+                ViewController.ScheduleViewControllerPropertyChangeEvent.valueOf(e.getPropertyName());
         //setViewDescriptor((Descriptor)e.getNewValue());
         switch (propertyName){
             case APPOINTMENTS_FOR_DAY_RECEIVED:

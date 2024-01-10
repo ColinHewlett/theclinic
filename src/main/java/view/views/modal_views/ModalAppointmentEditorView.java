@@ -144,7 +144,7 @@ public class ModalAppointmentEditorView extends ModalView {
     @Override
     public void propertyChange(PropertyChangeEvent e){
         if (e.getPropertyName().equals(
-            ViewController.AppointmentScheduleViewControllerPropertyChangeEvent.APPOINTMENT_SCHEDULE_ERROR_RECEIVED.toString())){
+            ViewController.ScheduleViewControllerPropertyChangeEvent.APPOINTMENT_SCHEDULE_ERROR_RECEIVED.toString())){
             //Descriptor ed = (Descriptor)e.getNewValue();
             String error = getMyController().getDescriptor().
                     getControllerDescription().getError();

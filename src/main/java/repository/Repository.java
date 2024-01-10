@@ -77,20 +77,20 @@ public class Repository implements IStoreActions {
                                 UNCANCEL_APPOINTMENT,
                                 UPDATE_APPOINTMENT,
                                 
-                                CANCEL_PATIENT_NOTIFICATION,
-                                COUNT_DELETED_PATIENT_NOTIFICATIONS,
+                                CANCEL_NOTIFICATION,
+                                COUNT_DELETED_NOTIFICATIONS,
                                 COUNT_PATIENT_NOTIFICATIONS,
-                                COUNT_UNACTIONED_PATIENT_NOTIFICATIONS,
-                                CREATE_PATIENT_NOTIFICATION_TABLE,
+                                COUNT_UNACTIONED_NOTIFICATIONS,
+                                CREATE_NOTIFICATION_TABLE,
                                 //DELETE_PATIENT_NOTIFICATION,
-                                DELETE_PATIENT_NOTIFICATIONS,
-                                INSERT_PATIENT_NOTIFICATION,
-                                READ_PATIENT_NOTIFICATION,
-                                READ_PATIENT_NOTIFICATIONS,
-                                READ_UNACTIONED_PATIENT_NOTIFICATIONS,
-                                READ_PATIENT_NOTIFICATION_NEXT_HIGHEST_KEY,
-                                READ_PATIENT_NOTIFICATIONS_FOR_PATIENT,
-                                READ_DELETED_PATIENT_NOTIFICATIONS_FOR_PATIENT,
+                                DELETE_NOTIFICATIONS,
+                                INSERT_NOTIFICATION,
+                                READ_NOTIFICATION,
+                                READ_NOTIFICATIONS,
+                                READ_UNACTIONED_NOTIFICATIONS,
+                                READ_NOTIFICATION_NEXT_HIGHEST_KEY,
+                                READ_NOTIFICATIONS_FOR_PATIENT,
+                                READ_DELETED_NOTIFICATIONS_FOR_PATIENT,
                                 RECOVER_PATIENT_NOTIFICATION,
                                 UNCANCEL_PATIENT_NOTIFICATION,
                                 UPDATE_PATIENT_NOTIFICATION,
@@ -194,7 +194,7 @@ public class Repository implements IStoreActions {
                     result = doPMSSQLforPatient(pmsSQL, (Entity)client);
                     break;
                 case PATIENT_NOTIFICATION:
-                    result = doPMSSQLforPatientNotification(pmsSQL, (Entity)client);
+                    result = doPMSSQLforNotification(pmsSQL, (Entity)client);
                     break;
                 case SURGERY_DAYS_ASSIGNMENT:
                     result = doPMSSQLforSurgeryDaysAssignment(pmsSQL, (Entity)client);
@@ -332,7 +332,7 @@ public class Repository implements IStoreActions {
                 preparedStatement.setLong(1, delegate.getAppointmentKey());      
             }else if(entity.getIsPatientNotification()){
                 entityType = "PatientNotification";
-                PatientNotificationDelegate delegate = (PatientNotificationDelegate)entity;
+                NotificationDelegate delegate = (NotificationDelegate)entity;
                 preparedStatement.setLong(1, delegate.getKey());
             }
             else{
@@ -445,10 +445,10 @@ public class Repository implements IStoreActions {
                 delegate = (AppointmentDelegate)entity;
                 preparedStatement.setInt(1, ((AppointmentDelegate)delegate).getAppointmentKey());
             }else if (entity.getIsPatientNotification()){
-                delegate = (PatientNotificationDelegate)entity;
-                preparedStatement.setInt(1, ((PatientNotificationDelegate)delegate).getKey());
+                delegate = (NotificationDelegate)entity;
+                preparedStatement.setInt(1, ((NotificationDelegate)delegate).getKey());
             }
-            preparedStatement.setInt(1, ((AppointmentDelegate)delegate).getAppointmentKey());
+            //preparedStatement.setInt(1, ((AppointmentDelegate)delegate).getAppointmentKey());
             preparedStatement.executeUpdate();
         }catch (SQLException ex){
                 throw new StoreException("SQLException message -> " + ex.getMessage() + "\n"
@@ -1119,7 +1119,7 @@ public class Repository implements IStoreActions {
     private Notification get(Notification patientNotification, ResultSet rs)throws StoreException{
         Notification result = null;
         ArrayList<Notification> collection = new ArrayList<>();
-        PatientNotificationDelegate delegate = new PatientNotificationDelegate(patientNotification);
+        NotificationDelegate delegate = new NotificationDelegate(patientNotification);
         delegate.set(null);
         PatientDelegate pDelegate = new PatientDelegate(0);
         try{
@@ -1153,7 +1153,7 @@ public class Repository implements IStoreActions {
                            LocalDate notificationDate = rs.getObject("notificationDate", LocalDate.class);
                            String notificationText = rs.getString("notificationText");
                            Boolean isActioned = rs.getBoolean("isActioned");
-                           delegate = new PatientNotificationDelegate();
+                           delegate = new NotificationDelegate();
                            delegate.setKey(pid);
                            pDelegate = new PatientDelegate(patientKey);
                            //pDelegate.setPatientKey(patientKey);
@@ -1220,10 +1220,10 @@ public class Repository implements IStoreActions {
     }
     
     private Entity doReadPatientNotificationWithKey(String sql, Entity entity) throws StoreException{
-        PatientNotificationDelegate delegate;
+        NotificationDelegate delegate;
         if (entity != null) {
             if (entity.getIsPatientNotification()) {
-                delegate = (PatientNotificationDelegate) entity;
+                delegate = (NotificationDelegate) entity;
                 try {
                     PreparedStatement preparedStatement = getPMSStoreConnection().prepareStatement(sql);
                     preparedStatement.setLong(1, delegate.getKey());
@@ -1245,10 +1245,10 @@ public class Repository implements IStoreActions {
     }
     
     private void doInsertPatientNotification(String sql, Entity entity) throws StoreException{
-        PatientNotificationDelegate  delegate;
+        NotificationDelegate  delegate;
         if (entity != null) {
             if (entity.getIsPatientNotification()) {
-                delegate = (PatientNotificationDelegate) entity;
+                delegate = (NotificationDelegate) entity;
                 try {
                     PreparedStatement preparedStatement = getPMSStoreConnection().prepareStatement(sql);
                     preparedStatement.setLong(1, ((PatientDelegate)delegate.getPatient()).getPatientKey());
@@ -1272,11 +1272,11 @@ public class Repository implements IStoreActions {
         }
     }
     
-    private void doDeletePatientNotification(String sql, Entity entity)throws StoreException{
-        PatientNotificationDelegate delegate;
+    private void doDeleteNotification(String sql, Entity entity)throws StoreException{
+        NotificationDelegate delegate;
         if (entity != null){
             if (entity.getIsPatientNotification()) {
-                delegate = (PatientNotificationDelegate) entity;
+                delegate = (NotificationDelegate) entity;
                 //delegate.setKey(1);
                 try{
                     PreparedStatement preparedStatement = getPMSStoreConnection().prepareStatement(sql);
@@ -1300,10 +1300,10 @@ public class Repository implements IStoreActions {
     
     private void doUpdatePatientNotification(String sql, Entity entity) throws StoreException{
         PatientDelegate pDelegate;
-        PatientNotificationDelegate  delegate;
+        NotificationDelegate  delegate;
         if (entity != null) {
             if (entity.getIsPatientNotification()) {
-                delegate = (PatientNotificationDelegate) entity;
+                delegate = (NotificationDelegate) entity;
                 pDelegate = (PatientDelegate)delegate.getPatient();
                 try {
                     PreparedStatement preparedStatement = getPMSStoreConnection().prepareStatement(sql);
@@ -1826,17 +1826,17 @@ public class Repository implements IStoreActions {
         return result;
     }
 
-    private Entity doPMSSQLforPatientNotification(Repository.PMSSQL q, Entity entity) throws StoreException{
+    private Entity doPMSSQLforNotification(Repository.PMSSQL q, Entity entity) throws StoreException{
         Entity result = new Entity();
         String sql;
         switch (q){
-            case CANCEL_APPOINTMENT:
+            case CANCEL_NOTIFICATION:
                 sql = "UPDATE PatientNotification "
                         + "SET isCancelled = true "
                         + "WHERE pid = ?;";
                 doDeleteCancelChildEntity(sql, entity);
                 break;
-            case COUNT_DELETED_PATIENT_NOTIFICATIONS:
+            case COUNT_DELETED_NOTIFICATIONS:
                 sql = "SELECT COUNT(*) as row_count FROM PatientNotification "
                         + "WHERE isDeleted = true;";
                 result = doCount(sql,entity);
@@ -1851,13 +1851,14 @@ public class Repository implements IStoreActions {
                 result.setValue(new Point(result.getValue().x,
                         doCount(sql,entity).getValue().x));
                 break;
-            case COUNT_UNACTIONED_PATIENT_NOTIFICATIONS:
+            case COUNT_UNACTIONED_NOTIFICATIONS:
                 sql = "SELECT COUNT(*) as record_count "
                         + "FROM PatientNotifications "
                         + "WHERE isActioned = false "
                         + "AND isDeleted = false;";
                 result = doCount(sql,entity);
-            case CREATE_PATIENT_NOTIFICATION_TABLE:
+                break;
+            case CREATE_NOTIFICATION_TABLE:
                 sql = "CREATE TABLE PatientNotification ("
                         + "pid LONG PRIMARY KEY, "
                         + "patientToNotify LONG NOT NULL REFERENCES Patient(pid), "
@@ -1873,32 +1874,32 @@ public class Repository implements IStoreActions {
                 sql = "UPDATE Notification "
                         + "SET isDeleted = ? "
                         + "WHERE pid = ?;"; 
-                doDeletePatientNotification(sql, entity);
+                doDeleteNotification(sql, entity);
                 break; 
             */
-            case DELETE_PATIENT_NOTIFICATIONS:
+            case DELETE_NOTIFICATIONS:
                 sql = "DELETE FROM PatientNotification;";
                 doDelete(sql);
                 break;
-            case INSERT_PATIENT_NOTIFICATION:
+            case INSERT_NOTIFICATION:
                 sql = "INSERT INTO PatientNotification "
                         + "(patientToNotify, notificationDate, notificationText, isActioned, pid) "
                         + "VALUES(?,?,?,?,?);";
                 doInsertPatientNotification(sql, entity);
                 break;
-            case READ_PATIENT_NOTIFICATION_NEXT_HIGHEST_KEY:
+            case READ_NOTIFICATION_NEXT_HIGHEST_KEY:
                 sql = "SELECT MAX(pid) as highest_key "
                         + "FROM PatientNotification;";
                 result = doReadHighestKey(sql);
                 break;
-            case READ_PATIENT_NOTIFICATION:
+            case READ_NOTIFICATION:
                 sql = "SELECT * "
                         + "FROM PatientNotification "
                         + "WHERE pid = ? "
                         + "AND isDeleted = false;";
                 result = doReadPatientNotificationWithKey(sql, entity);
                 break;
-            case READ_PATIENT_NOTIFICATIONS_FOR_PATIENT:
+            case READ_NOTIFICATIONS_FOR_PATIENT:
                 //sql = "SELECT patientToNotify, notificationDate, notificationText, isActioned, isDeleted, pid "
                 sql = "SELECT * "
                         + "FROM PatientNotification "
@@ -1907,7 +1908,7 @@ public class Repository implements IStoreActions {
                         + "AND isDeleted = false;";
                 result = doReadPatientNotificationsForPatient(sql, entity);
                 break;
-            case READ_DELETED_PATIENT_NOTIFICATIONS_FOR_PATIENT:
+            case READ_DELETED_NOTIFICATIONS_FOR_PATIENT:
                 //sql = "SELECT patientToNotify, notificationDate, notificationText, isActioned, isDeleted, pid "
                 sql = "SELECT * "
                         + "FROM PatientNotification "
@@ -1915,7 +1916,7 @@ public class Repository implements IStoreActions {
                         + "AND isDeleted = true;";
                 result = doReadPatientNotificationsForPatient(sql, entity);
                 break;
-            case READ_UNACTIONED_PATIENT_NOTIFICATIONS:
+            case READ_UNACTIONED_NOTIFICATIONS:
                 sql = "SELECT * FROM PatientNotification "
                         + "WHERE IsActioned = false "
                         + "AND isDeleted = false "
@@ -1923,7 +1924,7 @@ public class Repository implements IStoreActions {
                         + "ORDER BY notificationDate DESC;";
                 result = doReadPatientNotifications(sql, entity);
                 break;
-            case READ_PATIENT_NOTIFICATIONS:
+            case READ_NOTIFICATIONS:
                 sql = "SELECT * FROM PatientNotification "
                         + "WHERE isDeleted = false "
                         + "AND isCancelled = false "
@@ -2046,21 +2047,21 @@ public class Repository implements IStoreActions {
      */
     public Integer insert(Notification pn, Integer patientKey)throws StoreException{
         Entity key = null;
-        PatientNotificationDelegate delegate = null;
+        NotificationDelegate delegate = null;
         PatientDelegate pDelegate = null;
         Entity entity;
         IStoreClient client;
         client = runSQL(Repository.EntitySQL.PATIENT_NOTIFICATION,
-                    Repository.PMSSQL.READ_PATIENT_NOTIFICATION_NEXT_HIGHEST_KEY,pn);
+                    Repository.PMSSQL.READ_NOTIFICATION_NEXT_HIGHEST_KEY,pn);
         entity = (Entity)client;
-        delegate = new PatientNotificationDelegate(pn);
+        delegate = new NotificationDelegate(pn);
         delegate.setKey(entity.getValue().x + 1);
         pDelegate = new PatientDelegate(delegate.getPatient());
         pDelegate.setPatientKey(patientKey);
         delegate.setPatient(pDelegate);
         //30/07/2022 09:26
         runSQL(Repository.EntitySQL.PATIENT_NOTIFICATION,
-                Repository.PMSSQL.INSERT_PATIENT_NOTIFICATION, delegate);
+                Repository.PMSSQL.INSERT_NOTIFICATION, delegate);
         return delegate.getKey();
     }
     
@@ -2149,8 +2150,8 @@ public class Repository implements IStoreActions {
             Integer patientNotificationKey)throws StoreException{
        switch(patientNotification.getScope()){
             case DELETED:
-               PatientNotificationDelegate delegate = 
-                       new PatientNotificationDelegate(patientNotification);
+               NotificationDelegate delegate = 
+                       new NotificationDelegate(patientNotification);
                delegate.setKey(patientNotificationKey);
                runSQL(Repository.EntitySQL.PATIENT,Repository.PMSSQL.RECOVER_PATIENT_NOTIFICATION, delegate);
                break;
@@ -2184,7 +2185,7 @@ public class Repository implements IStoreActions {
     */
    @Override
    public void delete(Notification patientNotification, Integer key)throws StoreException{
-        PatientNotificationDelegate delegate = new PatientNotificationDelegate(patientNotification);
+        NotificationDelegate delegate = new NotificationDelegate(patientNotification);
         switch (patientNotification.getScope()){
             /*
             case SINGLE:
@@ -2201,7 +2202,7 @@ public class Repository implements IStoreActions {
                 break;
             */
             case ALL:
-                runSQL(Repository.EntitySQL.PATIENT_NOTIFICATION,Repository.PMSSQL.DELETE_PATIENT_NOTIFICATIONS,null);
+                runSQL(Repository.EntitySQL.PATIENT_NOTIFICATION,Repository.PMSSQL.DELETE_NOTIFICATIONS,null);
                 break;
                 /*
             case FOR_PATIENT:
@@ -2285,19 +2286,19 @@ public class Repository implements IStoreActions {
         IStoreClient client;
         switch(patientNotification.getScope()){
             case SINGLE:
-                PatientNotificationDelegate patientNotificationDelegate = new PatientNotificationDelegate(patientNotification);
+                NotificationDelegate patientNotificationDelegate = new NotificationDelegate(patientNotification);
                 patientNotificationDelegate.setKey(key);
                 entity = (Entity)runSQL(Repository.EntitySQL.PATIENT_NOTIFICATION, 
-                            Repository.PMSSQL.READ_PATIENT_NOTIFICATION, 
+                            Repository.PMSSQL.READ_NOTIFICATION, 
                             patientNotificationDelegate);
             case UNACTIONED:
                 entity = (Entity)runSQL(Repository.EntitySQL.PATIENT_NOTIFICATION,
-                            Repository.PMSSQL.READ_UNACTIONED_PATIENT_NOTIFICATIONS, 
+                            Repository.PMSSQL.READ_UNACTIONED_NOTIFICATIONS, 
                             patientNotification);
                 break;
             case ALL:
                 entity = (Entity)runSQL(Repository.EntitySQL.PATIENT_NOTIFICATION,
-                            Repository.PMSSQL.READ_PATIENT_NOTIFICATIONS, 
+                            Repository.PMSSQL.READ_NOTIFICATIONS, 
                             patientNotification);
                 break;
             case FOR_PATIENT:
@@ -2305,7 +2306,7 @@ public class Repository implements IStoreActions {
                 patientDelegate.setPatientKey(key);
                 patientNotification.setPatient(patientDelegate);
                 entity = (Entity)runSQL(Repository.EntitySQL.PATIENT_NOTIFICATION,
-                            Repository.PMSSQL.READ_PATIENT_NOTIFICATIONS_FOR_PATIENT, 
+                            Repository.PMSSQL.READ_NOTIFICATIONS_FOR_PATIENT, 
                             patientNotification);
                 break;
             case DELETED_FOR_PATIENT:
@@ -2313,7 +2314,7 @@ public class Repository implements IStoreActions {
                 patientDelegate.setPatientKey(key);
                 patientNotification.setPatient(patientDelegate);
                 entity = (Entity)runSQL(Repository.EntitySQL.PATIENT_NOTIFICATION,
-                            Repository.PMSSQL.READ_DELETED_PATIENT_NOTIFICATIONS_FOR_PATIENT, 
+                            Repository.PMSSQL.READ_DELETED_NOTIFICATIONS_FOR_PATIENT, 
                             patientNotification);
                 break;
         }
@@ -2343,7 +2344,7 @@ public class Repository implements IStoreActions {
     
     
     public void uncancel(Notification notification, Integer notificationKey)throws StoreException{
-        PatientNotificationDelegate delegate = new PatientNotificationDelegate(notification);
+        NotificationDelegate delegate = new NotificationDelegate(notification);
         delegate.setKey(notificationKey);
         runSQL(Repository.EntitySQL.PATIENT_NOTIFICATION,Repository.PMSSQL.UNCANCEL_PATIENT_NOTIFICATION, delegate);
     }
@@ -2355,9 +2356,9 @@ public class Repository implements IStoreActions {
     }
     
     public void cancel(Notification notification, Integer notificationKey)throws StoreException{
-        PatientNotificationDelegate delegate = new PatientNotificationDelegate(notification);
+        NotificationDelegate delegate = new NotificationDelegate(notification);
         delegate.setKey(notificationKey);
-        runSQL(Repository.EntitySQL.PATIENT_NOTIFICATION,Repository.PMSSQL.CANCEL_PATIENT_NOTIFICATION, delegate);
+        runSQL(Repository.EntitySQL.PATIENT_NOTIFICATION,Repository.PMSSQL.CANCEL_NOTIFICATION, delegate);
     }
     
     public void cancel(Appointment appointment, Integer appointmentKey)throws StoreException{
@@ -2366,19 +2367,19 @@ public class Repository implements IStoreActions {
         runSQL(Repository.EntitySQL.APPOINTMENT,Repository.PMSSQL.CANCEL_APPOINTMENT, delegate);
     }
 
-    public Point count(Notification patientNotification)throws StoreException{
+    public Point count(Notification notification)throws StoreException{
         Entity result = null;
-        if (patientNotification !=null){
+        if (notification !=null){
         Repository.PMSSQL sqlStatement = null;
-            switch (patientNotification.getScope()){
+            switch (notification.getScope()){
                 case ALL:
                     sqlStatement = Repository.PMSSQL.COUNT_PATIENT_NOTIFICATIONS;
                     break;
                 case UNACTIONED:
-                    sqlStatement = Repository.PMSSQL.COUNT_UNACTIONED_PATIENT_NOTIFICATIONS;
+                    sqlStatement = Repository.PMSSQL.COUNT_UNACTIONED_NOTIFICATIONS;
                     break;
             }
-            result = (Entity)runSQL(Repository.EntitySQL.PATIENT_NOTIFICATION, sqlStatement, patientNotification);
+            result = (Entity)runSQL(Repository.EntitySQL.PATIENT_NOTIFICATION, sqlStatement, notification);
             return result.getValue();
         }
         else throw new StoreException("PatientNotification undefined in Repository.count(PatientNotification)",
@@ -2615,7 +2616,7 @@ public class Repository implements IStoreActions {
      */
     @Override
     public void update(Notification pn, Integer key, Integer patientKey)throws StoreException{
-        PatientNotificationDelegate delegate = new PatientNotificationDelegate(pn);
+        NotificationDelegate delegate = new NotificationDelegate(pn);
         PatientDelegate pDelegate = new PatientDelegate(patientKey);
         delegate.setKey(key);
         //pDelegate.setPatientKey(patientKey);
@@ -2653,7 +2654,7 @@ public class Repository implements IStoreActions {
     @Override
     public void create(Notification pn) throws StoreException{
         Entity value = null;
-        runSQL(Repository.EntitySQL.PATIENT_NOTIFICATION,Repository.PMSSQL.CREATE_PATIENT_NOTIFICATION_TABLE, value);
+        runSQL(Repository.EntitySQL.PATIENT_NOTIFICATION,Repository.PMSSQL.CREATE_NOTIFICATION_TABLE, value);
     }
     
     public void create()throws StoreException{

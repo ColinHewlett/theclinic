@@ -73,8 +73,8 @@ public class ModalAppointmentsCancelledView extends ModalView{
     
     @Override
     public void propertyChange(PropertyChangeEvent e){
-        ViewController.AppointmentScheduleViewControllerPropertyChangeEvent event =
-                ViewController.AppointmentScheduleViewControllerPropertyChangeEvent.
+        ViewController.ScheduleViewControllerPropertyChangeEvent event =
+                ViewController.ScheduleViewControllerPropertyChangeEvent.
                         valueOf(e.getPropertyName());
         switch (event){
             case APPOINTMENTS_CANCELLED_RECEIVED:

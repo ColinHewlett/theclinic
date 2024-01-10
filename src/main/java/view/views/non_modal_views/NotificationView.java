@@ -106,14 +106,14 @@ public class NotificationView extends View implements ItemListener {
     
     @Override
     public void itemStateChanged(ItemEvent e){
-        ViewController.PatientNotificationViewControllerActionEvent request = null;
+        ViewController.NotificationViewControllerActionEvent request = null;
         String text = ((JRadioButton)e.getItem()).getText();
         switch(text){
             case DISPLAY_UNACTIONED_NOTIFICATIONS_TEXT:
                 if (e.getStateChange() == ItemEvent.SELECTED){
                     request = ViewController.
-                            PatientNotificationViewControllerActionEvent.
-                            UNACTIONED_PATIENT_NOTIFICATIONS_REQUEST;
+                            NotificationViewControllerActionEvent.
+                            UNACTIONED_NOTIFICATIONS_REQUEST;
                             setUITitle(UI_UNACTIONED_NOTIFICATIONS_TITLE);
                 }
                             
@@ -121,8 +121,8 @@ public class NotificationView extends View implements ItemListener {
             case DISPLAY_ALL_NOTIFICATIONS_TEXT:
                 if (e.getStateChange() == ItemEvent.SELECTED){
                     request = ViewController.
-                            PatientNotificationViewControllerActionEvent.
-                            PATIENT_NOTIFICATIONS_REQUEST;
+                            NotificationViewControllerActionEvent.
+                            NOTIFICATIONS_REQUEST;
                             setUITitle(UI_ALL_NOTIFICATIONS_TITLE);
                 }
                 break;
@@ -134,7 +134,7 @@ public class NotificationView extends View implements ItemListener {
             this.getMyController().actionPerformed(actionEvent);
             actionEvent = new ActionEvent(
                 this,ActionEvent.ACTION_PERFORMED,
-                ViewController.PatientNotificationViewControllerActionEvent.
+                ViewController.NotificationViewControllerActionEvent.
                         VIEW_CHANGED_NOTIFICATION.toString());
             this.getMyController().actionPerformed(actionEvent);
             
@@ -156,7 +156,7 @@ public class NotificationView extends View implements ItemListener {
             public void internalFrameClosed(InternalFrameEvent e) {
                 ActionEvent actionEvent = new ActionEvent(
                         NotificationView.this,ActionEvent.ACTION_PERFORMED,
-                        ViewController.PatientNotificationViewControllerActionEvent.
+                        ViewController.NotificationViewControllerActionEvent.
                                 VIEW_CLOSED_NOTIFICATION.toString());
                 getMyController().actionPerformed(actionEvent);
             }
@@ -164,7 +164,7 @@ public class NotificationView extends View implements ItemListener {
             public void internalFrameActivated(InternalFrameEvent e) {
                 ActionEvent actionEvent = new ActionEvent(
                         NotificationView.this,ActionEvent.ACTION_PERFORMED,
-                        ViewController.PatientNotificationViewControllerActionEvent.
+                        ViewController.NotificationViewControllerActionEvent.
                                 VIEW_ACTIVATED_NOTIFICATION.toString());
                 getMyController().actionPerformed(actionEvent);
             }
@@ -182,9 +182,9 @@ public class NotificationView extends View implements ItemListener {
     public void propertyChange(PropertyChangeEvent e){
         //setViewDescriptor((Descriptor)e.getNewValue());
         ViewController.
-                PatientNotificationViewControllerPropertyChangeEvent
+                NotificationViewControllerPropertyChangeEvent
                 propertyName = ViewController.
-                        PatientNotificationViewControllerPropertyChangeEvent.
+                        NotificationViewControllerPropertyChangeEvent.
                         valueOf(e.getPropertyName());
         switch (propertyName){
             case RECEIVED_PATIENT_NOTIFICATIONS:
@@ -235,11 +235,11 @@ public class NotificationView extends View implements ItemListener {
         this.rdbDisplayAllNotifications.addItemListener(this);
         this.rdbDisplayUnactionedNotifications.addItemListener(this);
         this.tblNotifications = new JTable(new NotificationView4ColumnTableModel());
-        createPatientNotificationTable();
+        createNotificationTable();
 
         ActionEvent actionEvent = new ActionEvent(
             this,ActionEvent.ACTION_PERFORMED,
-            ViewController.PatientNotificationViewControllerActionEvent.UNACTIONED_PATIENT_NOTIFICATIONS_REQUEST.toString());
+            ViewController.NotificationViewControllerActionEvent.UNACTIONED_NOTIFICATIONS_REQUEST.toString());
         this.getMyController().actionPerformed(actionEvent);
         
     }
@@ -285,7 +285,7 @@ public class NotificationView extends View implements ItemListener {
         btnCloseView = new javax.swing.JButton();
         btnAddNewNotification = new javax.swing.JButton();
         btnEditSelectedNotification = new javax.swing.JButton();
-        btnDeleteSelectedNotification = new javax.swing.JButton();
+        btnCancelSelectedNotification = new javax.swing.JButton();
 
         setPreferredSize(new java.awt.Dimension(762, 530));
 
@@ -451,10 +451,10 @@ public class NotificationView extends View implements ItemListener {
             }
         });
 
-        btnDeleteSelectedNotification.setText("Delete selected notification");
-        btnDeleteSelectedNotification.addActionListener(new java.awt.event.ActionListener() {
+        btnCancelSelectedNotification.setText("Delete selected notification");
+        btnCancelSelectedNotification.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnDeleteSelectedNotificationActionPerformed(evt);
+                btnCancelSelectedNotificationActionPerformed(evt);
             }
         });
 
@@ -472,7 +472,7 @@ public class NotificationView extends View implements ItemListener {
                 .addGap(71, 71, 71)
                 .addComponent(btnEditSelectedNotification)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(btnDeleteSelectedNotification)
+                .addComponent(btnCancelSelectedNotification)
                 .addGap(56, 56, 56)
                 .addComponent(btnCloseView)
                 .addGap(29, 29, 29))
@@ -487,7 +487,7 @@ public class NotificationView extends View implements ItemListener {
                     .addComponent(btnCloseView)
                     .addComponent(btnAddNewNotification)
                     .addComponent(btnEditSelectedNotification)
-                    .addComponent(btnDeleteSelectedNotification))
+                    .addComponent(btnCancelSelectedNotification))
                 .addContainerGap(22, Short.MAX_VALUE))
         );
 
@@ -530,7 +530,7 @@ public class NotificationView extends View implements ItemListener {
                 getMyController().getDescriptor().getViewDescription().setPatientNotifications(patientNotifications);
                 ActionEvent actionEvent = new ActionEvent(
                     this,ActionEvent.ACTION_PERFORMED,
-                    ViewController.PatientNotificationViewControllerActionEvent.ACTION_PATIENT_NOTIFICATION_REQUEST.toString());
+                    ViewController.NotificationViewControllerActionEvent.ACTION_NOTIFICATION_REQUEST.toString());
                 this.getMyController().actionPerformed(actionEvent); 
                 message = "selected notification has been actioned";
                 JOptionPane.showMessageDialog(this,message);
@@ -543,7 +543,7 @@ public class NotificationView extends View implements ItemListener {
         // TODO add your handling code here:
         ActionEvent actionEvent = new ActionEvent(
                 this,ActionEvent.ACTION_PERFORMED,
-                ViewController.PatientNotificationViewControllerActionEvent.CREATE_PATIENT_NOTIFICATION_REQUEST.toString());
+                ViewController.NotificationViewControllerActionEvent.CREATE_NOTIFICATION_REQUEST.toString());
         this.getMyController().actionPerformed(actionEvent);
         this.tblNotifications.clearSelection();
     }//GEN-LAST:event_btnAddNewNotificationActionPerformed
@@ -561,18 +561,18 @@ public class NotificationView extends View implements ItemListener {
             getMyController().getDescriptor().getViewDescription().setPatientNotification(model.getElementAt(this.tblNotifications.getSelectedRow()));
             ActionEvent actionEvent = new ActionEvent(
                     this,ActionEvent.ACTION_PERFORMED,
-                    ViewController.PatientNotificationViewControllerActionEvent.UPDATE_PATIENT_NOTIFICATION_REQUEST.toString());
+                    ViewController.NotificationViewControllerActionEvent.UPDATE_NOTIFICATION_REQUEST.toString());
             this.getMyController().actionPerformed(actionEvent);
             this.tblNotifications.clearSelection();
         }
         
     }//GEN-LAST:event_btnEditSelectedNotificationActionPerformed
 
-    private void btnDeleteSelectedNotificationActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteSelectedNotificationActionPerformed
+    private void btnCancelSelectedNotificationActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelSelectedNotificationActionPerformed
         // TODO add your handling code here:
         boolean isError = false;
         if (this.tblNotifications.getSelectedRow()==-1){
-            JOptionPane.showMessageDialog(this, "A notifification to delete has not been selected");
+            JOptionPane.showMessageDialog(this, "A notifification to bed cancelled has not been selected");
             isError = true;
         }
         if (!isError){
@@ -582,17 +582,17 @@ public class NotificationView extends View implements ItemListener {
             getMyController().getDescriptor().getViewDescription().setPatientNotification(model.getElementAt(row));
             ActionEvent actionEvent = new ActionEvent(
                 this,ActionEvent.ACTION_PERFORMED,
-                ViewController.PatientNotificationViewControllerActionEvent.
-                        DELETE_PATIENT_NOTIFICATION_REQUEST.toString());
+                ViewController.NotificationViewControllerActionEvent.
+                        CANCEL_NOTIFICATION_REQUEST.toString());
             this.getMyController().actionPerformed(actionEvent);
         }
-    }//GEN-LAST:event_btnDeleteSelectedNotificationActionPerformed
+    }//GEN-LAST:event_btnCancelSelectedNotificationActionPerformed
 
     // Variables declaration - do not modify                     
     private javax.swing.JButton btnActionSelectedNotifications;
     private javax.swing.JButton btnAddNewNotification;
     private javax.swing.JButton btnCloseView;
-    private javax.swing.JButton btnDeleteSelectedNotification;
+    private javax.swing.JButton btnCancelSelectedNotification;
     private javax.swing.JButton btnEditSelectedNotification;
     private javax.swing.ButtonGroup buttonGroup1;
     private javax.swing.JLabel lblNotDueYetNotification;
@@ -615,8 +615,8 @@ public class NotificationView extends View implements ItemListener {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnActionSelectedNotifications;
     private javax.swing.JButton btnAddNewNotification;
+    private javax.swing.JButton btnCancelSelectedNotification;
     private javax.swing.JButton btnCloseView;
-    private javax.swing.JButton btnDeleteSelectedNotification;
     private javax.swing.JButton btnEditSelectedNotification;
     private javax.swing.ButtonGroup buttonGroup1;
     private javax.swing.JLabel jLabel2;
@@ -655,7 +655,7 @@ public class NotificationView extends View implements ItemListener {
         System.out.println("2 x point x = " + desktopView.getWidth()+ "-" + view.getWidth());
     }
     
-    private void createPatientNotificationTable(){
+    private void createNotificationTable(){
         this.tblNotifications = null;
         this.tblNotifications = new JTable(new NotificationView4ColumnTableModel());
         setNotificationTableDefaultRenderer(this.tblNotifications.getDefaultRenderer(LocalDate.class));
@@ -668,10 +668,21 @@ public class NotificationView extends View implements ItemListener {
         this.tblNotifications.setAutoCreateRowSorter(false);
         setNotificationTableKeyColorsAndLocalDateRenderer(
                 new NotificationTableKeyColorsAndLocalDateRenderer());
-            this.tblNotifications.getColumnModel().getColumn(0).setCellRenderer(getNotificationTableKeyColorsAndLocalDateRenderer());
-            this.tblNotifications.getColumnModel().getColumn(1).setCellRenderer(getNotificationTableKeyColorsAndLocalDateRenderer());
-            this.tblNotifications.getColumnModel().getColumn(2).setCellRenderer(getNotificationTableKeyColorsAndLocalDateRenderer());
-            this.tblNotifications.getColumnModel().getColumn(3).setCellRenderer(getNotificationTableKeyColorsAndLocalDateRenderer());
+        
+        lblOverdueNotificationColour.setBackground(
+                getNotificationTableKeyColorsAndLocalDateRenderer()
+                        .getOverdueNotificationColour());
+        lblNotDueYetNotificationColour.setBackground(
+                getNotificationTableKeyColorsAndLocalDateRenderer()
+                        .getNotDueYetNotificationColour());
+        lblActionedNotificationColour.setBackground(
+                getNotificationTableKeyColorsAndLocalDateRenderer()
+                        .getActionedNotificationColour());
+        
+        this.tblNotifications.getColumnModel().getColumn(0).setCellRenderer(getNotificationTableKeyColorsAndLocalDateRenderer());
+        this.tblNotifications.getColumnModel().getColumn(1).setCellRenderer(getNotificationTableKeyColorsAndLocalDateRenderer());
+        this.tblNotifications.getColumnModel().getColumn(2).setCellRenderer(getNotificationTableKeyColorsAndLocalDateRenderer());
+        this.tblNotifications.getColumnModel().getColumn(3).setCellRenderer(getNotificationTableKeyColorsAndLocalDateRenderer());
     }
     
 
@@ -685,7 +696,7 @@ public class NotificationView extends View implements ItemListener {
         buttonGroup1 = new javax.swing.ButtonGroup();
         pnlOperations = new javax.swing.JPanel();
         btnEditSelectedNotification = new javax.swing.JButton();
-        btnDeleteSelectedNotification = new javax.swing.JButton();
+        btnCancelSelectedNotification = new javax.swing.JButton();
         btnActionSelectedNotifications = new javax.swing.JButton();
         btnCloseView = new javax.swing.JButton();
         btnAddNewNotification = new javax.swing.JButton();
@@ -707,7 +718,7 @@ public class NotificationView extends View implements ItemListener {
 
         btnEditSelectedNotification.setText("<html><center>Update</center><center>selected</center><center>notification</center></html>");
 
-        btnDeleteSelectedNotification.setText("<html><center>Delete</center><center>selected</center><center>notification</center></html>");
+        btnCancelSelectedNotification.setText("<html><center>Cancel</center><center>selected</center><center>notification</center></html>");
 
         btnActionSelectedNotifications.setText("<html><center>Action</center><center>selected</center><center>notification(s)</center></html>");
 
@@ -717,23 +728,18 @@ public class NotificationView extends View implements ItemListener {
         
         pnlColourKey.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Notification colour key", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Segoe UI", 1, 12))); // NOI18N
 
-        lblNotDueYetNotificationColour.setBackground(
-                getNotificationTableKeyColorsAndLocalDateRenderer()
-                        .getNotDueYetNotificationColour());
+        
         lblNotDueYetNotificationColour.setText("");
         lblNotDueYetNotificationColour.setOpaque(true);
 
         lblOverdueNotificationColour.setText(" ");
         lblOverdueNotificationColour.setOpaque(true);
-        lblOverdueNotificationColour.setBackground(
-                getNotificationTableKeyColorsAndLocalDateRenderer()
-                        .getOverdueNotificationColour());
+        
+        
 
         lblActionedNotificationColour.setText(" ");
         lblActionedNotificationColour.setOpaque(true);
-        lblActionedNotificationColour.setBackground(
-                getNotificationTableKeyColorsAndLocalDateRenderer()
-                        .getActionedNotificationColour());
+        
 
         lblNotDueYetNotification.setText("notification not yet due");
         lblOverdueNotification.setText("notification overdue");
@@ -769,9 +775,9 @@ public class NotificationView extends View implements ItemListener {
         });
 
 
-        btnDeleteSelectedNotification.addActionListener(new java.awt.event.ActionListener() {
+        btnCancelSelectedNotification.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnDeleteSelectedNotificationActionPerformed(evt);
+                btnCancelSelectedNotificationActionPerformed(evt);
             }
         });
 
@@ -873,28 +879,26 @@ public class NotificationView extends View implements ItemListener {
 //<editor-fold defaultstate="collapsed" desc="Operations panel layout">
         javax.swing.GroupLayout pnlOperationsLayout = new javax.swing.GroupLayout(pnlOperations);
         pnlOperations.setLayout(pnlOperationsLayout);
-        pnlOperationsLayout.setHorizontalGroup(
-            pnlOperationsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+        pnlOperationsLayout.setHorizontalGroup(pnlOperationsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlOperationsLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(pnlOperationsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(btnActionSelectedNotifications)
                     .addComponent(btnCloseView)
-                    .addComponent(btnDeleteSelectedNotification)
+                    .addComponent(btnCancelSelectedNotification)
                     .addComponent(btnEditSelectedNotification)
                     .addComponent(btnAddNewNotification/*, javax.swing.GroupLayout.PREFERRED_SIZE, 103, javax.swing.GroupLayout.PREFERRED_SIZE*/))
                 //.addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addContainerGap())
         );
-        pnlOperationsLayout.setVerticalGroup(
-            pnlOperationsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+        pnlOperationsLayout.setVerticalGroup(pnlOperationsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlOperationsLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(btnAddNewNotification, javax.swing.GroupLayout.PREFERRED_SIZE, 51, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 15, Short.MAX_VALUE)
                 .addComponent(btnEditSelectedNotification, javax.swing.GroupLayout.PREFERRED_SIZE, 51, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 15, Short.MAX_VALUE)
-                .addComponent(btnDeleteSelectedNotification, javax.swing.GroupLayout.PREFERRED_SIZE, 51, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(btnCancelSelectedNotification, javax.swing.GroupLayout.PREFERRED_SIZE, 51, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 15, Short.MAX_VALUE)
                 .addComponent(btnActionSelectedNotifications, javax.swing.GroupLayout.PREFERRED_SIZE, 51, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 17, Short.MAX_VALUE)

@@ -181,7 +181,7 @@ public class DesktopView extends javax.swing.JFrame implements PropertyChangeLis
         
         mniAppointmentViewRequest.addActionListener((ActionEvent e) -> mniAppointmentViewRequestActionPerformed());
         mniPatientViewRequest.addActionListener((ActionEvent e) -> mniPatientViewRequestActionPerformed());
-        mniPatientNotificationViewRequest.addActionListener((ActionEvent e) -> mniPatientNotificationViewRequestActionPerformed());
+        mniPatientNotificationViewRequest.addActionListener((ActionEvent e) -> mniNotificationViewRequestActionPerformed());
         mniExitViewRequest.addActionListener((ActionEvent e) -> mniExitRequestViewActionPerformed());
     }
     
@@ -518,10 +518,10 @@ public class DesktopView extends javax.swing.JFrame implements PropertyChangeLis
                 this.getController().actionPerformed(actionEvent);
     }
     
-    private void mniPatientNotificationViewRequestActionPerformed() {                                                      
+    private void mniNotificationViewRequestActionPerformed() {                                                      
         ActionEvent actionEvent = new ActionEvent(this, 
                 ActionEvent.ACTION_PERFORMED,
-                DesktopViewController.DesktopViewControllerActionEvent.PATIENT_NOTIFICATION_VIEW_CONTROLLER_REQUEST.toString());
+                DesktopViewController.DesktopViewControllerActionEvent.NOTIFICATION_VIEW_CONTROLLER_REQUEST.toString());
         this.getController().actionPerformed(actionEvent);
     }
    /* 

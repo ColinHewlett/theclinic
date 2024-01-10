@@ -31,7 +31,7 @@ import view.views.modal_views.ModalView;
  *
  * @author colin
  */
-public class PatientNotificationViewController extends ViewController{
+public class NotificationViewController extends ViewController{
     
     private PatientNotificationViewListState viewListState = null;
 
@@ -58,7 +58,7 @@ public class PatientNotificationViewController extends ViewController{
         else{                                    
             View the_view = (View)e.getSource();
             switch (the_view.getMyViewType()){
-                case PATIENT_NOTIFICATION_VIEW:
+                case NOTIFICATION_VIEW:
                     doPrimaryViewActionRequest(e);
                     break;
                 default:
@@ -101,8 +101,8 @@ public class PatientNotificationViewController extends ViewController{
     
     private void doPrimaryViewActionRequest(ActionEvent e){
         ActionEvent actionEvent = null;
-        ViewController.PatientNotificationViewControllerActionEvent actionCommand =
-               ViewController.PatientNotificationViewControllerActionEvent.valueOf(e.getActionCommand());
+        ViewController.NotificationViewControllerActionEvent actionCommand =
+               ViewController.NotificationViewControllerActionEvent.valueOf(e.getActionCommand());
         try{
             switch (actionCommand){
                 case VIEW_ACTIVATED_NOTIFICATION:
@@ -126,24 +126,24 @@ public class PatientNotificationViewController extends ViewController{
                                    VIEW_CONTROLLER_CLOSE_NOTIFICATION.toString());
                     this.getMyController().actionPerformed(actionEvent);
                     break;
-                case UNACTIONED_PATIENT_NOTIFICATIONS_REQUEST:
+                case UNACTIONED_NOTIFICATIONS_REQUEST:
                     doUnactionedPatientNotificationsRequest();
                     setViewListState(PatientNotificationViewListState.UNACTIONED_NOTIFICATION_STATE);
                     break;
-                case PATIENT_NOTIFICATIONS_REQUEST:
+                case NOTIFICATIONS_REQUEST:
                     doPatientNotificationsRequest();
                     setViewListState(PatientNotificationViewListState.ALL_NOTIFICATION_STATE);
                     break;
-                case ACTION_PATIENT_NOTIFICATION_REQUEST:
+                case ACTION_NOTIFICATION_REQUEST:
                     doActionPatientNotificationRequest();                   
                     break;
-                case CREATE_PATIENT_NOTIFICATION_REQUEST:
+                case CREATE_NOTIFICATION_REQUEST:
                     doCreatePatientNotificationRequest();
                     break;
-                case DELETE_PATIENT_NOTIFICATION_REQUEST:
-                        doDeletePatientNotificationRequest();
+                case CANCEL_NOTIFICATION_REQUEST:
+                        doCancelNotificationRequest();
                         break;
-                case UPDATE_PATIENT_NOTIFICATION_REQUEST:
+                case UPDATE_NOTIFICATION_REQUEST:
                     doUpdatePatientNotificationRequest();
                     break;
             }
@@ -173,7 +173,7 @@ public class PatientNotificationViewController extends ViewController{
             
             pcSupportForView.addPropertyChangeListener(this.getView());
             pcEvent = new PropertyChangeEvent(this,
-               ViewController.PatientNotificationViewControllerPropertyChangeEvent.RECEIVED_PATIENT_NOTIFICATIONS.toString(),
+               ViewController.NotificationViewControllerPropertyChangeEvent.RECEIVED_PATIENT_NOTIFICATIONS.toString(),
                null,getDescriptor());
             pcSupportForView.firePropertyChange(pcEvent);
             pcSupportForView.removePropertyChangeListener(this.getView());
@@ -237,7 +237,7 @@ public class PatientNotificationViewController extends ViewController{
     }
 
     private void doUpdatePatientNotificationRequest(){
-        Notification notification = getDescriptor().getViewDescription().getPatientNotification();
+        Notification notification = getDescriptor().getViewDescription().getNotification();
         //setOldEntityDescriptor(getDescriptor());
         //setDescriptor(new Descriptor());
         getDescriptor().getControllerDescription().setPatientNotification(notification);
@@ -259,7 +259,7 @@ public class PatientNotificationViewController extends ViewController{
             patientNotification.setScope(Scope.FOR_PATIENT);
             patientNotification.read();
             getDescriptor().getControllerDescription().setPatientNotifications(patientNotification.get());
-            //PatientNotification.Collection patientNotificationCollection = patientNotification.getCollection();
+            //PatientNotification.Collection patientNotificationCollection = notification.getCollection();
             //patientNotificationCollection.setScope(Scope.FOR_PATIENT);
             //patientNotificationCollection.read();
             //getNewEntityDescriptor().setPatientNotifications(patientNotificationCollection.get());
@@ -283,19 +283,19 @@ public class PatientNotificationViewController extends ViewController{
         setModalView((ModalView)e.getSource());
         switch (getModalView().getMyViewType()){
             case PATIENT_NOTIFICATION_EDITOR_VIEW:
-                ViewController.PatientNotificationViewControllerActionEvent actionCommand =
-               ViewController.PatientNotificationViewControllerActionEvent.valueOf(e.getActionCommand());
+                ViewController.NotificationViewControllerActionEvent actionCommand =
+               ViewController.NotificationViewControllerActionEvent.valueOf(e.getActionCommand());
                 switch (actionCommand){
                     case MODAL_VIEWER_ACTIVATED:
                         //getSecondaryView().initialiseView();
                         break;
-                    case PATIENT_NOTIFICATION_EDITOR_CREATE_NOTIFICATION_REQUEST:
+                    case NOTIFICATION_EDITOR_CREATE_NOTIFICATION_REQUEST:
                         doPatientNotificationEditorCreateNotificationRequest();
                         break;
-                    case PATIENT_NOTIFICATION_EDITOR_UPDATE_NOTIFICATION_REQUEST:
+                    case NOTIFICATION_EDITOR_UPDATE_NOTIFICATION_REQUEST:
                         doPatientNotificationEditorUpdateNotificationRequest();
                         break;
-                    case PATIENT_NOTIFICATION_EDITOR_CLOSE_VIEW_REQUEST:
+                    case NOTIFICATION_EDITOR_CLOSE_VIEW_REQUEST:
                         doPatientNotificationEditorCloseViewRequest();
                         break;
                     case MODAL_VIEWER_DEACTIVATED:
@@ -314,7 +314,7 @@ public class PatientNotificationViewController extends ViewController{
 
     private void doPatientNotificationEditorCreateNotificationRequest()throws StoreException{
         Notification patientNotification = 
-                getDescriptor().getViewDescription().getPatientNotification();
+                getDescriptor().getViewDescription().getNotification();
         if (patientNotification!=null){
             patientNotification.insert();
             closeSecondaryView();
@@ -325,23 +325,21 @@ public class PatientNotificationViewController extends ViewController{
         }
     }
     
-    private void doDeletePatientNotificationRequest()throws StoreException{
-        Notification patientNotification = 
-                getDescriptor().getViewDescription().getPatientNotification();
-        if (patientNotification!=null){
-            patientNotification.setScope(Scope.SINGLE);
-            patientNotification.delete();
-            //closeSecondaryView();
-            if (getViewListState().equals(PatientNotificationViewListState.ALL_NOTIFICATION_STATE))
+    private void doCancelNotificationRequest()throws StoreException{
+        Notification notification = 
+                getDescriptor().getViewDescription().getNotification();
+        if (notification!=null){
+            notification.cancel();
+        if (getViewListState().equals(PatientNotificationViewListState.ALL_NOTIFICATION_STATE))
                 sendPrimaryViewPatientNotifications(Notification.Scope.ALL);
             else sendPrimaryViewPatientNotifications(Notification.Scope.UNACTIONED);
-            
+
         }
     }
     
     private void doPatientNotificationEditorUpdateNotificationRequest()throws StoreException{
         Notification patientNotification = 
-                getDescriptor().getViewDescription().getPatientNotification();
+                getDescriptor().getViewDescription().getNotification();
         if (patientNotification!=null){
             patientNotification.update();
             closeSecondaryView();
@@ -356,9 +354,9 @@ public class PatientNotificationViewController extends ViewController{
         getDescriptor().getControllerDescription().setPatientNotifications(patientNotification.get());
         String pcEventName;
         if(scope.equals(Notification.Scope.UNACTIONED)) pcEventName = 
-                PatientNotificationViewControllerPropertyChangeEvent.
+                NotificationViewControllerPropertyChangeEvent.
                         RECEIVED_UNACTIONED_NOTIFICATIONS.toString();
-        else pcEventName = PatientNotificationViewControllerPropertyChangeEvent.
+        else pcEventName = NotificationViewControllerPropertyChangeEvent.
                 RECEIVED_PATIENT_NOTIFICATIONS.toString();       
         firePropertyChangeEvent(
                 pcEventName,
@@ -383,7 +381,7 @@ public class PatientNotificationViewController extends ViewController{
         
     }
     
-    public PatientNotificationViewController(DesktopViewController controller, 
+    public NotificationViewController(DesktopViewController controller, 
                                                 DesktopView desktopView)
                                                 throws StoreException{
         setMyController(controller);

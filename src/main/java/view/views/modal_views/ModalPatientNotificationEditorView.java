@@ -117,8 +117,8 @@ public class ModalPatientNotificationEditorView extends ModalView {
     @Override
     public void propertyChange(PropertyChangeEvent e){
         //setViewDescriptor((Descriptor)e.getNewValue());
-        ViewController.PatientNotificationViewControllerPropertyChangeEvent propertyName =
-                ViewController.PatientNotificationViewControllerPropertyChangeEvent.valueOf(e.getPropertyName());
+        ViewController.NotificationViewControllerPropertyChangeEvent propertyName =
+                ViewController.NotificationViewControllerPropertyChangeEvent.valueOf(e.getPropertyName());
         switch (propertyName){
             case RECEIVED_PATIENT_NOTIFICATION:
                 doReceivedPatientNotification();
@@ -391,7 +391,7 @@ public class ModalPatientNotificationEditorView extends ModalView {
         if (response == JOptionPane.YES_OPTION){
             ActionEvent actionEvent = new ActionEvent(
                 this,ActionEvent.ACTION_PERFORMED,
-                ViewController.PatientNotificationViewControllerActionEvent.MODAL_VIEWER_DEACTIVATED.toString());
+                ViewController.NotificationViewControllerActionEvent.MODAL_VIEWER_DEACTIVATED.toString());
             this.getMyController().actionPerformed(actionEvent);
         }
     }
@@ -400,8 +400,8 @@ public class ModalPatientNotificationEditorView extends ModalView {
         if (doValidatePatientNotificationRequest()){
             ActionEvent actionEvent = new ActionEvent(
                 this,ActionEvent.ACTION_PERFORMED,
-                ViewController.PatientNotificationViewControllerActionEvent.
-                        PATIENT_NOTIFICATION_EDITOR_CREATE_NOTIFICATION_REQUEST.toString());
+                ViewController.NotificationViewControllerActionEvent.
+                        NOTIFICATION_EDITOR_CREATE_NOTIFICATION_REQUEST.toString());
             this.getMyController().actionPerformed(actionEvent);
         }       
     }
@@ -410,8 +410,8 @@ public class ModalPatientNotificationEditorView extends ModalView {
         if (doValidatePatientNotificationRequest()){
             ActionEvent actionEvent = new ActionEvent(
                 this,ActionEvent.ACTION_PERFORMED,
-                ViewController.PatientNotificationViewControllerActionEvent.
-                        PATIENT_NOTIFICATION_EDITOR_UPDATE_NOTIFICATION_REQUEST.toString());
+                ViewController.NotificationViewControllerActionEvent.
+                        NOTIFICATION_EDITOR_UPDATE_NOTIFICATION_REQUEST.toString());
             this.getMyController().actionPerformed(actionEvent);
         }
     }
