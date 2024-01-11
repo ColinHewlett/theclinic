@@ -36,7 +36,7 @@ import javax.swing.table.TableColumnModel;
  *
  * @author colin
  */
-public class ModalPatientNotificationEditorView extends ModalView {
+public class ModalNotificationEditorView extends ModalView {
     private ViewController.ViewMode viewMode = null;
     
     private void populatePatientNotificationHistoryTable(ArrayList<Notification> patientNotifications){
@@ -104,7 +104,7 @@ public class ModalPatientNotificationEditorView extends ModalView {
      * @param myController
      * @param desktopView 
      */
-    public ModalPatientNotificationEditorView(
+    public ModalNotificationEditorView(
             View.Viewer myViewType, 
             ViewController myController, 
             DesktopView desktopView) {//ViewMode arg
@@ -444,22 +444,22 @@ public class ModalPatientNotificationEditorView extends ModalView {
             }
         }
         if (result){
-            Notification patientNotification;
+            Notification notification;
             if (getViewMode().equals(ViewController.ViewMode.Create))
-                patientNotification = new Notification();
+                notification = new Notification();
             else
-                patientNotification = getMyController().
+                notification = getMyController().
                         getDescriptor().getControllerDescription().getPatientNotification();
-            patientNotification.setPatient(
+            notification.setPatient(
                     (Patient)this.cmbSelectPatient.getSelectedItem());
-            patientNotification.setNotificationDate(
+            notification.setNotificationDate(
                     this.dpNotificationDate.getDate());
-            patientNotification.setNotificationText(
+            notification.setNotificationText(
                     this.txaNotificationText.getText());
-            patientNotification.setIsActioned(
+            notification.setIsActioned(
                     rdbNotificationActioned.isSelected());
             getMyController().getDescriptor().getViewDescription().
-                    setPatientNotification(patientNotification);
+                    setPatientNotification(notification);
         }
         else getMyController().getDescriptor().getViewDescription().
                 setPatientNotification(null);

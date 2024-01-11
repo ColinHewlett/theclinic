@@ -121,7 +121,7 @@ public class PatientView extends View{
     
     private void setPatientSelectionMode(PatientSelectionMode value){
         patientSelectionMode = value;
-        TitledBorder titledBorder = (TitledBorder)this.pnlSelectablePatients.getBorder();
+        TitledBorder titledBorder = (TitledBorder)this.pnlPatientSelection.getBorder();
         switch (patientSelectionMode){
             case PATIENT_RECOVERY:
                 titledBorder.setTitle(panelPatientRecoveryTitle);
@@ -143,7 +143,7 @@ public class PatientView extends View{
         /**
          * Note: On PATIENT_SELECTION case panel border requires a further nudge to display new title properly
          */
-        this.pnlSelectablePatients.repaint();
+        this.pnlPatientSelection.repaint();
     }
 
     static int mPatientViewHeight = 580;
@@ -1182,9 +1182,9 @@ public class PatientView extends View{
         pnlPhones = new javax.swing.JPanel();
         pnlRecall = new javax.swing.JPanel();
     
-        pnlSelectablePatients = new javax.swing.JPanel();
-        pnlSelectablePatients.setBackground(new java.awt.Color(220, 220, 220));
-        pnlSelectablePatients.setBorder(
+        pnlPatientSelection = new javax.swing.JPanel();
+        pnlPatientSelection.setBackground(new java.awt.Color(220, 220, 220));
+        pnlPatientSelection.setBorder(
                 javax.swing.BorderFactory.createTitledBorder(
                         javax.swing.BorderFactory.createEtchedBorder(), 
                         "Select patient to recover", 
@@ -1513,7 +1513,7 @@ public class PatientView extends View{
             .addGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(pnlSelectablePatients, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(pnlPatientSelection, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(pnlAppointmentHistory, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     )
@@ -1546,7 +1546,7 @@ public class PatientView extends View{
                 //.addGap(5, 5, 5)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(pnlAppointmentHistory, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(pnlSelectablePatients, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(pnlPatientSelection, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 //.addGap(9, 9, 9)
                 .addComponent(pnlName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 //.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -1591,8 +1591,8 @@ public class PatientView extends View{
         );
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="Patient selection panel layout">
-        javax.swing.GroupLayout pnlSelectablePatientsLayout = new javax.swing.GroupLayout(pnlSelectablePatients);
-        pnlSelectablePatients.setLayout(pnlSelectablePatientsLayout);
+        javax.swing.GroupLayout pnlSelectablePatientsLayout = new javax.swing.GroupLayout(pnlPatientSelection);
+        pnlPatientSelection.setLayout(pnlSelectablePatientsLayout);
         pnlSelectablePatientsLayout.setHorizontalGroup(
             pnlSelectablePatientsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlSelectablePatientsLayout.createSequentialGroup()
@@ -1897,7 +1897,7 @@ public class PatientView extends View{
         scrAppointmentHistory = new javax.swing.JScrollPane();
         tblAppointmentHistory = new javax.swing.JTable();
         btnFetchScheduleForSelectedAppointment = new javax.swing.JButton();
-        pnlSelectablePatients = new javax.swing.JPanel();
+        pnlPatientSelection = new javax.swing.JPanel();
         cmbPatientSelector = new javax.swing.JComboBox<Patient>();
         btnClearSelection = new javax.swing.JButton();
         pnlRecall = new javax.swing.JPanel();
@@ -2076,8 +2076,8 @@ public class PatientView extends View{
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        pnlSelectablePatients.setBackground(new java.awt.Color(220, 220, 220));
-        pnlSelectablePatients.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createEtchedBorder(), "Select patient to recover", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Segoe UI", 1, 12))); // NOI18N
+        pnlPatientSelection.setBackground(new java.awt.Color(220, 220, 220));
+        pnlPatientSelection.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createEtchedBorder(), "Select patient to recover", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Segoe UI", 1, 12))); // NOI18N
 
         cmbPatientSelector.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -2093,20 +2093,20 @@ public class PatientView extends View{
             }
         });
 
-        javax.swing.GroupLayout pnlSelectablePatientsLayout = new javax.swing.GroupLayout(pnlSelectablePatients);
-        pnlSelectablePatients.setLayout(pnlSelectablePatientsLayout);
-        pnlSelectablePatientsLayout.setHorizontalGroup(
-            pnlSelectablePatientsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlSelectablePatientsLayout.createSequentialGroup()
+        javax.swing.GroupLayout pnlPatientSelectionLayout = new javax.swing.GroupLayout(pnlPatientSelection);
+        pnlPatientSelection.setLayout(pnlPatientSelectionLayout);
+        pnlPatientSelectionLayout.setHorizontalGroup(
+            pnlPatientSelectionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlPatientSelectionLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(pnlSelectablePatientsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(pnlPatientSelectionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(cmbPatientSelector, javax.swing.GroupLayout.PREFERRED_SIZE, 230, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(btnClearSelection, javax.swing.GroupLayout.PREFERRED_SIZE, 177, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
-        pnlSelectablePatientsLayout.setVerticalGroup(
-            pnlSelectablePatientsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlSelectablePatientsLayout.createSequentialGroup()
+        pnlPatientSelectionLayout.setVerticalGroup(
+            pnlPatientSelectionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlPatientSelectionLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(cmbPatientSelector, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 24, Short.MAX_VALUE)
@@ -2350,12 +2350,12 @@ public class PatientView extends View{
                 .addGap(18, 18, 18)
                 .addComponent(lblTitle, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(cmbTitle, javax.swing.GroupLayout.PREFERRED_SIZE, 65, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(21, 21, 21)
+                .addComponent(cmbTitle, javax.swing.GroupLayout.PREFERRED_SIZE, 68, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
                 .addComponent(lblGender)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(cmbGender, javax.swing.GroupLayout.PREFERRED_SIZE, 84, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(26, 26, 26)
+                .addComponent(cmbGender, javax.swing.GroupLayout.PREFERRED_SIZE, 92, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
                 .addComponent(lblGender1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(dobDatePicker, javax.swing.GroupLayout.PREFERRED_SIZE, 141, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -2471,7 +2471,7 @@ public class PatientView extends View{
                         .addComponent(pnlAddress, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(pnlName, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addGroup(layout.createSequentialGroup()
-                            .addComponent(pnlSelectablePatients, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(pnlPatientSelection, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                             .addComponent(pnlAppointmentHistory, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
@@ -2489,7 +2489,7 @@ public class PatientView extends View{
                 .addGap(5, 5, 5)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(pnlAppointmentHistory, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(pnlSelectablePatients, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(pnlPatientSelection, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(9, 9, 9)
                 .addComponent(pnlName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -2816,9 +2816,9 @@ public class PatientView extends View{
     private javax.swing.JPanel pnlGuardianDetails;
     private javax.swing.JPanel pnlName;
     private javax.swing.JPanel pnlNotes;
+    private javax.swing.JPanel pnlPatientSelection;
     private javax.swing.JPanel pnlPhones;
     private javax.swing.JPanel pnlRecall;
-    private javax.swing.JPanel pnlSelectablePatients;
     private com.github.lgooddatepicker.components.DatePicker recallDatePicker;
     private javax.swing.JScrollPane scrAppointmentHistory;
     private javax.swing.JSpinner spnDentalRecallFrequency;
@@ -2883,7 +2883,7 @@ public class PatientView extends View{
     private javax.swing.JPanel pnlNotes;
     private javax.swing.JPanel pnlPhones;
     private javax.swing.JPanel pnlRecall;
-    private javax.swing.JPanel pnlSelectablePatients;
+    private javax.swing.JPanel pnlPatientSelection;
     private com.github.lgooddatepicker.components.DatePicker recallDatePicker;
     private javax.swing.JScrollPane scrAppointmentHistory;
     private javax.swing.JSpinner spnDentalRecallFrequency;

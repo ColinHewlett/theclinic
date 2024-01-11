@@ -85,7 +85,7 @@
                       <Component id="pnlAddress" alignment="0" max="32767" attributes="0"/>
                       <Component id="pnlName" alignment="0" max="32767" attributes="0"/>
                       <Group type="102" alignment="1" attributes="0">
-                          <Component id="pnlSelectablePatients" min="-2" max="-2" attributes="0"/>
+                          <Component id="pnlPatientSelection" min="-2" max="-2" attributes="0"/>
                           <EmptySpace type="unrelated" max="-2" attributes="0"/>
                           <Component id="pnlAppointmentHistory" min="-2" max="-2" attributes="0"/>
                       </Group>
@@ -110,7 +110,7 @@
               <EmptySpace min="-2" pref="5" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="1" attributes="0">
                   <Component id="pnlAppointmentHistory" min="-2" max="-2" attributes="0"/>
-                  <Component id="pnlSelectablePatients" min="-2" max="-2" attributes="0"/>
+                  <Component id="pnlPatientSelection" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace min="-2" pref="9" max="-2" attributes="0"/>
               <Component id="pnlName" min="-2" max="-2" attributes="0"/>
@@ -357,7 +357,7 @@
         </Component>
       </SubComponents>
     </Container>
-    <Container class="javax.swing.JPanel" name="pnlSelectablePatients">
+    <Container class="javax.swing.JPanel" name="pnlPatientSelection">
       <Properties>
         <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
           <Color blue="dc" green="dc" red="dc" type="rgb"/>
@@ -772,12 +772,12 @@
                   <EmptySpace type="separate" max="-2" attributes="0"/>
                   <Component id="lblTitle" min="-2" pref="26" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
-                  <Component id="cmbTitle" min="-2" pref="65" max="-2" attributes="0"/>
-                  <EmptySpace min="-2" pref="21" max="-2" attributes="0"/>
+                  <Component id="cmbTitle" min="-2" pref="68" max="-2" attributes="0"/>
+                  <EmptySpace type="separate" max="-2" attributes="0"/>
                   <Component id="lblGender" min="-2" max="-2" attributes="0"/>
                   <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                  <Component id="cmbGender" min="-2" pref="84" max="-2" attributes="0"/>
-                  <EmptySpace min="-2" pref="26" max="-2" attributes="0"/>
+                  <Component id="cmbGender" min="-2" pref="92" max="-2" attributes="0"/>
+                  <EmptySpace type="separate" max="-2" attributes="0"/>
                   <Component id="lblGender1" min="-2" max="-2" attributes="0"/>
                   <EmptySpace type="unrelated" max="-2" attributes="0"/>
                   <Component id="dobDatePicker" min="-2" pref="141" max="-2" attributes="0"/>

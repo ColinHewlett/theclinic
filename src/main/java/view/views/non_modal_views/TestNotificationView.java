@@ -70,9 +70,9 @@ public class TestNotificationView extends javax.swing.JInternalFrame {
                 .addGroup(pnlOperationsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(btnActionSelectedNotifications)
                     .addComponent(btnCloseView)
-                    .addComponent(btnDeleteSelectedNotification)
                     .addComponent(btnEditSelectedNotification)
-                    .addComponent(btnAddNewNotification, javax.swing.GroupLayout.PREFERRED_SIZE, 103, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(btnAddNewNotification)
+                    .addComponent(btnDeleteSelectedNotification))
                 .addContainerGap(15, Short.MAX_VALUE))
         );
         pnlOperationsLayout.setVerticalGroup(

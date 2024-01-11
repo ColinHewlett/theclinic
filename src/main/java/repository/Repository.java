@@ -2619,7 +2619,6 @@ public class Repository implements IStoreActions {
         NotificationDelegate delegate = new NotificationDelegate(pn);
         PatientDelegate pDelegate = new PatientDelegate(patientKey);
         delegate.setKey(key);
-        //pDelegate.setPatientKey(patientKey);
         delegate.setPatient(pDelegate);
         runSQL(Repository.EntitySQL.PATIENT_NOTIFICATION, Repository.PMSSQL.UPDATE_PATIENT_NOTIFICATION,pn);
         

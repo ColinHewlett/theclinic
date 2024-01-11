@@ -293,7 +293,7 @@ public class NotificationViewController extends ViewController{
                         doPatientNotificationEditorCreateNotificationRequest();
                         break;
                     case NOTIFICATION_EDITOR_UPDATE_NOTIFICATION_REQUEST:
-                        doPatientNotificationEditorUpdateNotificationRequest();
+                        doNotificationEditorUpdateNotificationRequest();
                         break;
                     case NOTIFICATION_EDITOR_CLOSE_VIEW_REQUEST:
                         doPatientNotificationEditorCloseViewRequest();
@@ -337,11 +337,11 @@ public class NotificationViewController extends ViewController{
         }
     }
     
-    private void doPatientNotificationEditorUpdateNotificationRequest()throws StoreException{
-        Notification patientNotification = 
+    private void doNotificationEditorUpdateNotificationRequest()throws StoreException{
+        Notification notification = 
                 getDescriptor().getViewDescription().getNotification();
-        if (patientNotification!=null){
-            patientNotification.update();
+        if (notification!=null){
+            notification.update();
             closeSecondaryView();
         }
             

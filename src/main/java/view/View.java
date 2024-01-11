@@ -124,7 +124,7 @@ public class View extends JInternalFrame
                 setModalView(makeView(new ModalUnbookableAppointmentSlotEditorView(viewer, controller, desktopView)));
                 break;
             case TEST_PATIENT_VIEW:
-                setView(makeView(new TestPatientView(viewer, controller, desktopView)));
+                setView(makeView(new TestPatientViewOld(viewer, controller, desktopView)));
                 break;
             default:
                 JOptionPane.showMessageDialog(desktopView, 
