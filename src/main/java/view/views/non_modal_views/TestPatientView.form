@@ -29,22 +29,22 @@
                   <Group type="102" attributes="0">
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Group type="102" attributes="0">
-                              <Component id="jPanel2" min="-2" max="-2" attributes="0"/>
+                              <Component id="pnlPatientNotes" min="-2" max="-2" attributes="0"/>
                               <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                              <Component id="jPanel4" min="-2" max="-2" attributes="0"/>
+                              <Component id="pnlFurtherDetails" min="-2" max="-2" attributes="0"/>
                           </Group>
                           <Component id="pnlPatientSelection" min="-2" max="-2" attributes="0"/>
                       </Group>
                       <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                          <Component id="jPanel1" max="32767" attributes="0"/>
+                          <Component id="pnlAddress" max="32767" attributes="0"/>
                           <Component id="pnlName" max="32767" attributes="0"/>
                       </Group>
                       <EmptySpace max="32767" attributes="0"/>
                       <Component id="pnlOperations" min="-2" max="-2" attributes="0"/>
                       <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                   </Group>
-                  <Component id="jPanel3" max="32767" attributes="0"/>
+                  <Component id="pnlAppointmentHistory" max="32767" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
           </Group>
@@ -62,15 +62,15 @@
                       </Group>
                       <EmptySpace min="-2" pref="12" max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                          <Component id="jPanel1" max="32767" attributes="0"/>
-                          <Component id="jPanel2" max="32767" attributes="0"/>
-                          <Component id="jPanel4" max="32767" attributes="0"/>
+                          <Component id="pnlAddress" max="32767" attributes="0"/>
+                          <Component id="pnlPatientNotes" max="32767" attributes="0"/>
+                          <Component id="pnlFurtherDetails" max="32767" attributes="0"/>
                       </Group>
                   </Group>
                   <Component id="pnlOperations" min="-2" pref="319" max="-2" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
-              <Component id="jPanel3" min="-2" max="-2" attributes="0"/>
+              <Component id="pnlAppointmentHistory" min="-2" max="-2" attributes="0"/>
               <EmptySpace max="32767" attributes="0"/>
           </Group>
       </Group>
@@ -182,21 +182,21 @@
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" alignment="0" attributes="0">
                       <Group type="103" groupAlignment="0" attributes="0">
-                          <Component id="lblForenames" min="-2" max="-2" attributes="0"/>
-                          <Component id="lblSurname" min="-2" max="-2" attributes="0"/>
-                          <Component id="lblGender1" min="-2" max="-2" attributes="0"/>
-                          <Component id="lblDOB" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Component id="lblNameForename" min="-2" max="-2" attributes="0"/>
+                          <Component id="lblNameSurname" min="-2" max="-2" attributes="0"/>
+                          <Component id="lblNameTitle" min="-2" max="-2" attributes="0"/>
+                          <Component id="lblNameDOB" alignment="0" min="-2" max="-2" attributes="0"/>
                       </Group>
                       <EmptySpace type="unrelated" max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" attributes="0">
-                          <Component id="txtSurname" max="32767" attributes="0"/>
-                          <Component id="txtForenames" max="32767" attributes="0"/>
+                          <Component id="txtNameSurname" max="32767" attributes="0"/>
+                          <Component id="txtNameForename" max="32767" attributes="0"/>
                           <Group type="102" alignment="1" attributes="0">
                               <Group type="103" groupAlignment="0" attributes="0">
                                   <Group type="102" alignment="0" attributes="0">
-                                      <Component id="jComboBox1" min="-2" pref="86" max="-2" attributes="0"/>
+                                      <Component id="cmbNameTitle" min="-2" pref="86" max="-2" attributes="0"/>
                                       <EmptySpace max="32767" attributes="0"/>
-                                      <Component id="lblGender" min="-2" max="-2" attributes="0"/>
+                                      <Component id="lblNameGender" min="-2" max="-2" attributes="0"/>
                                   </Group>
                                   <Group type="102" alignment="0" attributes="0">
                                       <Component id="dobDatePicker" min="-2" pref="141" max="-2" attributes="0"/>
@@ -205,8 +205,8 @@
                               </Group>
                               <EmptySpace type="separate" max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="0" attributes="0">
-                                  <Component id="lblAge" min="-2" max="-2" attributes="0"/>
-                                  <Component id="jComboBox2" min="-2" pref="102" max="-2" attributes="0"/>
+                                  <Component id="lblNameAge" min="-2" max="-2" attributes="0"/>
+                                  <Component id="cmbNameGender" min="-2" pref="102" max="-2" attributes="0"/>
                               </Group>
                           </Group>
                       </Group>
@@ -217,26 +217,26 @@
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" alignment="0" attributes="0">
                       <Group type="103" groupAlignment="3" attributes="0">
-                          <Component id="txtForenames" alignment="3" min="-2" max="-2" attributes="0"/>
-                          <Component id="lblForenames" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="txtNameForename" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="lblNameForename" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
                       <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="3" attributes="0">
-                          <Component id="txtSurname" alignment="3" min="-2" max="-2" attributes="0"/>
-                          <Component id="lblSurname" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="txtNameSurname" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="lblNameSurname" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
                       <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="3" attributes="0">
-                          <Component id="lblGender" alignment="3" min="-2" max="-2" attributes="0"/>
-                          <Component id="jComboBox2" alignment="3" min="-2" max="-2" attributes="0"/>
-                          <Component id="lblGender1" alignment="3" min="-2" max="-2" attributes="0"/>
-                          <Component id="jComboBox1" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="lblNameGender" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="cmbNameGender" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="lblNameTitle" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="cmbNameTitle" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
                       <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="3" attributes="0">
-                          <Component id="lblDOB" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="lblNameDOB" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="dobDatePicker" alignment="3" min="-2" max="-2" attributes="0"/>
-                          <Component id="lblAge" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="lblNameAge" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
                       <EmptySpace min="0" pref="0" max="-2" attributes="0"/>
                   </Group>
@@ -244,28 +244,28 @@
             </DimensionLayout>
           </Layout>
           <SubComponents>
-            <Component class="javax.swing.JTextField" name="txtForenames">
+            <Component class="javax.swing.JTextField" name="txtNameForename">
             </Component>
-            <Component class="javax.swing.JLabel" name="lblForenames">
+            <Component class="javax.swing.JLabel" name="lblNameForename">
               <Properties>
                 <Property name="horizontalAlignment" type="int" value="4"/>
                 <Property name="text" type="java.lang.String" value="Forenames"/>
               </Properties>
             </Component>
-            <Component class="javax.swing.JTextField" name="txtSurname">
+            <Component class="javax.swing.JTextField" name="txtNameSurname">
             </Component>
-            <Component class="javax.swing.JLabel" name="lblSurname">
+            <Component class="javax.swing.JLabel" name="lblNameSurname">
               <Properties>
                 <Property name="horizontalAlignment" type="int" value="4"/>
                 <Property name="text" type="java.lang.String" value="Surname"/>
               </Properties>
             </Component>
-            <Component class="javax.swing.JLabel" name="lblGender">
+            <Component class="javax.swing.JLabel" name="lblNameGender">
               <Properties>
                 <Property name="text" type="java.lang.String" value="Gender"/>
               </Properties>
             </Component>
-            <Component class="javax.swing.JComboBox" name="jComboBox2">
+            <Component class="javax.swing.JComboBox" name="cmbNameGender">
               <Properties>
                 <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
                   <StringArray count="4">
@@ -280,12 +280,12 @@
                 <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;String&gt;"/>
               </AuxValues>
             </Component>
-            <Component class="javax.swing.JLabel" name="lblGender1">
+            <Component class="javax.swing.JLabel" name="lblNameTitle">
               <Properties>
                 <Property name="text" type="java.lang.String" value="Title"/>
               </Properties>
             </Component>
-            <Component class="javax.swing.JComboBox" name="jComboBox1">
+            <Component class="javax.swing.JComboBox" name="cmbNameTitle">
               <Properties>
                 <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
                   <StringArray count="4">
@@ -306,7 +306,7 @@
                 <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;String&gt;"/>
               </AuxValues>
             </Component>
-            <Component class="javax.swing.JLabel" name="lblDOB">
+            <Component class="javax.swing.JLabel" name="lblNameDOB">
               <Properties>
                 <Property name="text" type="java.lang.String" value="DOB"/>
               </Properties>
@@ -316,7 +316,7 @@
                 <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new com.github.lgooddatepicker.components.DatePicker();&#xa;DatePickerSettings settings = new DatePickerSettings();&#xa;settings.setFormatForDatesCommonEra(DateTimeFormatter.ofPattern(&quot;dd/MM/yyyy&quot;));&#xa;settings.setAllowKeyboardEditing(false);&#xa;dobDatePicker.setSettings(settings);&#xa;"/>
               </AuxValues>
             </Component>
-            <Component class="javax.swing.JLabel" name="lblAge">
+            <Component class="javax.swing.JLabel" name="lblNameAge">
               <Properties>
                 <Property name="text" type="java.lang.String" value="(age)"/>
               </Properties>
@@ -383,7 +383,7 @@
         </Component>
       </SubComponents>
     </Container>
-    <Container class="javax.swing.JPanel" name="jPanel1">
+    <Container class="javax.swing.JPanel" name="pnlAddress">
       <Properties>
         <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
           <Border info="org.netbeans.modules.form.compat2.border.TitledBorderInfo">
@@ -397,7 +397,7 @@
           <Group type="103" groupAlignment="0" attributes="0">
               <Group type="102" alignment="0" attributes="0">
                   <EmptySpace max="-2" attributes="0"/>
-                  <Component id="pnlNameContent1" max="32767" attributes="0"/>
+                  <Component id="pnlPatientAddressContent" max="32767" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
               </Group>
           </Group>
@@ -406,14 +406,14 @@
           <Group type="103" groupAlignment="0" attributes="0">
               <Group type="102" alignment="0" attributes="0">
                   <EmptySpace max="-2" attributes="0"/>
-                  <Component id="pnlNameContent1" max="32767" attributes="0"/>
+                  <Component id="pnlPatientAddressContent" max="32767" attributes="0"/>
                   <EmptySpace min="-2" pref="10" max="-2" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
       </Layout>
       <SubComponents>
-        <Container class="javax.swing.JPanel" name="pnlNameContent1">
+        <Container class="javax.swing.JPanel" name="pnlPatientAddressContent">
           <Properties>
             <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
               <Border info="org.netbeans.modules.form.compat2.border.LineBorderInfo">
@@ -428,37 +428,34 @@
                   <Group type="102" alignment="0" attributes="0">
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Group type="102" alignment="1" attributes="0">
-                              <Component id="lblGender3" min="-2" max="-2" attributes="0"/>
+                              <Component id="lblAddressTown" min="-2" max="-2" attributes="0"/>
                               <EmptySpace min="-2" pref="30" max="-2" attributes="0"/>
                           </Group>
                           <Group type="102" attributes="0">
                               <Group type="103" groupAlignment="0" attributes="0">
-                                  <Component id="lblForenames1" alignment="0" min="-2" max="-2" attributes="0"/>
-                                  <Component id="lblSurname1" alignment="0" min="-2" max="-2" attributes="0"/>
+                                  <Component id="lblAddressLine1" alignment="0" min="-2" max="-2" attributes="0"/>
+                                  <Component id="lblAddressLine2" alignment="0" min="-2" max="-2" attributes="0"/>
                               </Group>
                               <EmptySpace min="-2" pref="10" max="-2" attributes="0"/>
                           </Group>
                           <Group type="102" alignment="1" attributes="0">
-                              <Component id="lblDOB1" min="-2" max="-2" attributes="0"/>
+                              <Component id="lblAddressPostcode" min="-2" max="-2" attributes="0"/>
                               <EmptySpace type="unrelated" max="-2" attributes="0"/>
                           </Group>
                       </Group>
                       <Group type="103" groupAlignment="0" attributes="0">
-                          <Group type="102" attributes="0">
-                              <Group type="103" groupAlignment="0" attributes="0">
-                                  <Group type="102" attributes="0">
-                                      <Component id="jTextField1" min="-2" pref="102" max="-2" attributes="0"/>
-                                      <EmptySpace type="separate" max="-2" attributes="0"/>
-                                      <Component id="lblGender2" min="-2" max="-2" attributes="0"/>
-                                      <EmptySpace max="-2" attributes="0"/>
-                                      <Component id="jTextField2" min="-2" pref="81" max="-2" attributes="0"/>
-                                  </Group>
-                                  <Component id="jTextField3" alignment="0" min="-2" max="-2" attributes="0"/>
-                                  <Component id="txtSurname1" alignment="0" max="32767" attributes="0"/>
+                          <Component id="txtNameLine2" alignment="0" max="32767" attributes="0"/>
+                          <Group type="102" alignment="0" attributes="0">
+                              <Group type="103" groupAlignment="1" max="-2" attributes="0">
+                                  <Component id="txtAddressPostcode" alignment="0" pref="102" max="32767" attributes="0"/>
+                                  <Component id="txtAddressTown" alignment="0" max="32767" attributes="0"/>
                               </Group>
-                              <EmptySpace min="0" pref="0" max="-2" attributes="0"/>
+                              <EmptySpace type="separate" max="-2" attributes="0"/>
+                              <Component id="lblAddressCounty" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace max="-2" attributes="0"/>
+                              <Component id="txtAddressCounty" min="-2" pref="81" max="-2" attributes="0"/>
                           </Group>
-                          <Component id="txtForenames1" max="32767" attributes="0"/>
+                          <Component id="txtAddressLine1" max="32767" attributes="0"/>
                       </Group>
                   </Group>
               </Group>
@@ -467,85 +464,78 @@
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" alignment="0" attributes="0">
                       <Group type="103" groupAlignment="3" attributes="0">
-                          <Component id="txtForenames1" alignment="3" min="-2" max="-2" attributes="0"/>
-                          <Component id="lblForenames1" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="txtAddressLine1" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="lblAddressLine1" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
                       <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="3" attributes="0">
-                          <Component id="txtSurname1" alignment="3" min="-2" max="-2" attributes="0"/>
-                          <Component id="lblSurname1" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="txtNameLine2" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="lblAddressLine2" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
                       <EmptySpace min="-2" pref="10" max="-2" attributes="0"/>
-                      <Group type="103" groupAlignment="3" attributes="0">
-                          <Component id="lblGender2" alignment="3" min="-2" max="-2" attributes="0"/>
-                          <Component id="jTextField2" alignment="3" min="-2" max="-2" attributes="0"/>
-                          <Component id="lblGender3" alignment="3" min="-2" max="-2" attributes="0"/>
-                          <Component id="jTextField1" alignment="0" min="-2" pref="22" max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Component id="txtAddressTown" alignment="0" min="-2" pref="22" max="-2" attributes="0"/>
+                          <Group type="103" groupAlignment="3" attributes="0">
+                              <Component id="lblAddressCounty" alignment="3" min="-2" max="-2" attributes="0"/>
+                              <Component id="txtAddressCounty" alignment="3" min="-2" max="-2" attributes="0"/>
+                              <Component id="lblAddressTown" alignment="3" min="-2" max="-2" attributes="0"/>
+                          </Group>
                       </Group>
                       <EmptySpace min="-2" pref="9" max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="3" attributes="0">
-                          <Component id="jTextField3" alignment="3" min="-2" max="-2" attributes="0"/>
-                          <Component id="lblDOB1" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="txtAddressPostcode" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="lblAddressPostcode" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
                   </Group>
               </Group>
             </DimensionLayout>
           </Layout>
           <SubComponents>
-            <Component class="javax.swing.JTextField" name="txtForenames1">
+            <Component class="javax.swing.JTextField" name="txtAddressLine1">
             </Component>
-            <Component class="javax.swing.JLabel" name="lblForenames1">
+            <Component class="javax.swing.JLabel" name="lblAddressLine1">
               <Properties>
                 <Property name="horizontalAlignment" type="int" value="4"/>
                 <Property name="text" type="java.lang.String" value="Line 1"/>
               </Properties>
             </Component>
-            <Component class="javax.swing.JTextField" name="txtSurname1">
+            <Component class="javax.swing.JTextField" name="txtNameLine2">
             </Component>
-            <Component class="javax.swing.JLabel" name="lblSurname1">
+            <Component class="javax.swing.JLabel" name="lblAddressLine2">
               <Properties>
                 <Property name="horizontalAlignment" type="int" value="4"/>
                 <Property name="text" type="java.lang.String" value="Line 2"/>
               </Properties>
             </Component>
-            <Component class="javax.swing.JLabel" name="lblGender2">
+            <Component class="javax.swing.JLabel" name="lblAddressCounty">
               <Properties>
                 <Property name="text" type="java.lang.String" value="County"/>
               </Properties>
             </Component>
-            <Component class="javax.swing.JLabel" name="lblGender3">
+            <Component class="javax.swing.JLabel" name="lblAddressTown">
               <Properties>
                 <Property name="text" type="java.lang.String" value="Town"/>
               </Properties>
             </Component>
-            <Component class="javax.swing.JLabel" name="lblDOB1">
+            <Component class="javax.swing.JLabel" name="lblAddressPostcode">
               <Properties>
                 <Property name="text" type="java.lang.String" value="Postcode"/>
               </Properties>
             </Component>
-            <Component class="javax.swing.JTextField" name="jTextField1">
-              <Properties>
-                <Property name="text" type="java.lang.String" value="jTextField1"/>
-              </Properties>
+            <Component class="javax.swing.JTextField" name="txtAddressTown">
               <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jTextField1ActionPerformed"/>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="txtAddressTownActionPerformed"/>
               </Events>
             </Component>
-            <Component class="javax.swing.JTextField" name="jTextField2">
-              <Properties>
-                <Property name="text" type="java.lang.String" value="jTextField2"/>
-              </Properties>
+            <Component class="javax.swing.JTextField" name="txtAddressCounty">
             </Component>
-            <Component class="javax.swing.JTextField" name="jTextField3">
-              <Properties>
-                <Property name="text" type="java.lang.String" value="jTextField3"/>
-              </Properties>
+            <Component class="javax.swing.JTextField" name="txtAddressPostcode">
             </Component>
           </SubComponents>
         </Container>
       </SubComponents>
     </Container>
-    <Container class="javax.swing.JPanel" name="jPanel2">
+    <Container class="javax.swing.JPanel" name="pnlPatientNotes">
       <Properties>
         <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
           <Border info="org.netbeans.modules.form.compat2.border.TitledBorderInfo">
@@ -582,7 +572,7 @@
 
           <Layout class="org.netbeans.modules.form.compat2.layouts.support.JScrollPaneSupportLayout"/>
           <SubComponents>
-            <Component class="javax.swing.JTextArea" name="jTextArea1">
+            <Component class="javax.swing.JTextArea" name="txaNotes">
               <Properties>
                 <Property name="columns" type="int" value="20"/>
                 <Property name="lineWrap" type="boolean" value="true"/>
@@ -593,7 +583,7 @@
         </Container>
       </SubComponents>
     </Container>
-    <Container class="javax.swing.JPanel" name="jPanel3">
+    <Container class="javax.swing.JPanel" name="pnlAppointmentHistory">
       <Properties>
         <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
           <Border info="org.netbeans.modules.form.compat2.border.TitledBorderInfo">
@@ -607,7 +597,7 @@
           <Group type="103" groupAlignment="0" attributes="0">
               <Group type="102" alignment="0" attributes="0">
                   <EmptySpace max="-2" attributes="0"/>
-                  <Component id="jScrollPane2" min="-2" pref="684" max="-2" attributes="0"/>
+                  <Component id="scrAppointmentHistory" min="-2" pref="684" max="-2" attributes="0"/>
                   <EmptySpace max="32767" attributes="0"/>
                   <Component id="btnFetchScheduleForSelectedAppointment" min="-2" pref="102" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
@@ -620,7 +610,7 @@
                   <EmptySpace max="32767" attributes="0"/>
                   <Group type="103" groupAlignment="1" attributes="0">
                       <Component id="btnFetchScheduleForSelectedAppointment" min="-2" pref="75" max="-2" attributes="0"/>
-                      <Component id="jScrollPane2" min="-2" pref="75" max="-2" attributes="0"/>
+                      <Component id="scrAppointmentHistory" min="-2" pref="75" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
               </Group>
@@ -628,7 +618,7 @@
         </DimensionLayout>
       </Layout>
       <SubComponents>
-        <Container class="javax.swing.JScrollPane" name="jScrollPane2">
+        <Container class="javax.swing.JScrollPane" name="scrAppointmentHistory">
 
           <Layout class="org.netbeans.modules.form.compat2.layouts.support.JScrollPaneSupportLayout"/>
         </Container>
@@ -642,7 +632,7 @@
         </Component>
       </SubComponents>
     </Container>
-    <Container class="javax.swing.JPanel" name="jPanel4">
+    <Container class="javax.swing.JPanel" name="pnlFurtherDetails">
       <Properties>
         <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
           <Border info="org.netbeans.modules.form.compat2.border.TitledBorderInfo">
@@ -657,9 +647,9 @@
               <Group type="102" attributes="0">
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
-                      <Component id="jRadioButton3" alignment="0" min="-2" max="-2" attributes="0"/>
-                      <Component id="jRadioButton2" alignment="0" min="-2" max="-2" attributes="0"/>
-                      <Component id="jRadioButton1" alignment="0" min="-2" max="-2" attributes="0"/>
+                      <Component id="rdbRequestModalGuardianDetailsView" alignment="0" min="-2" max="-2" attributes="0"/>
+                      <Component id="rdbRequestModalRecallDetailsView" alignment="0" min="-2" max="-2" attributes="0"/>
+                      <Component id="rdbRequestPhoneEmailDetailsView" alignment="0" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace max="32767" attributes="0"/>
               </Group>
@@ -669,28 +659,28 @@
           <Group type="103" groupAlignment="0" attributes="0">
               <Group type="102" alignment="0" attributes="0">
                   <EmptySpace max="-2" attributes="0"/>
-                  <Component id="jRadioButton1" min="-2" max="-2" attributes="0"/>
+                  <Component id="rdbRequestPhoneEmailDetailsView" min="-2" max="-2" attributes="0"/>
                   <EmptySpace min="-2" pref="17" max="-2" attributes="0"/>
-                  <Component id="jRadioButton2" min="-2" max="-2" attributes="0"/>
+                  <Component id="rdbRequestModalRecallDetailsView" min="-2" max="-2" attributes="0"/>
                   <EmptySpace type="separate" max="-2" attributes="0"/>
-                  <Component id="jRadioButton3" min="-2" max="-2" attributes="0"/>
+                  <Component id="rdbRequestModalGuardianDetailsView" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="32767" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
       </Layout>
       <SubComponents>
-        <Component class="javax.swing.JRadioButton" name="jRadioButton1">
+        <Component class="javax.swing.JRadioButton" name="rdbRequestPhoneEmailDetailsView">
           <Properties>
             <Property name="text" type="java.lang.String" value="Phone/email"/>
           </Properties>
         </Component>
-        <Component class="javax.swing.JRadioButton" name="jRadioButton2">
+        <Component class="javax.swing.JRadioButton" name="rdbRequestModalRecallDetailsView">
           <Properties>
             <Property name="text" type="java.lang.String" value="Recall data"/>
           </Properties>
         </Component>
-        <Component class="javax.swing.JRadioButton" name="jRadioButton3">
+        <Component class="javax.swing.JRadioButton" name="rdbRequestModalGuardianDetailsView">
           <Properties>
             <Property name="text" type="java.lang.String" value="Guardian (if patient)"/>
           </Properties>

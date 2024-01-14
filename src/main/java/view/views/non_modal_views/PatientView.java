@@ -74,12 +74,13 @@ import javax.swing.table.TableColumnModel;
  * @author colin
  */
 public class PatientView extends View{
-    private String patientRecoveryCaption = "Recover patient";
-    private String patientCreateCaption = "Create new patient";
-    private String cancelPatientRecoveryCaption = "Cancel patient recovery";
-    private String patientUpdateCaption = "Update selected patient";
+    private String patientRecoveryCaption = "<html><center>Recover patient</center></html>";
+    private String patientCreateCaption = "<html><center>Create</center><center> new patient</center></html>";
+    private String cancelPatientRecoveryCaption = "<html><center>Cancel</center><center>patient</center><center>recovery</center>";
+    private String patientUpdateCaption = "<html><center>Update</center>selected</center><center>patient</center></html>";
     private String panelPatientSelectionTitle = "Select patient";
     private String panelPatientRecoveryTitle = "Select patient to recover";
+  
     
     private enum PatientSelectionMode{ PATIENT_SELECTION, 
                                        PATIENT_RECOVERY}
@@ -146,8 +147,10 @@ public class PatientView extends View{
         this.pnlPatientSelection.repaint();
     }
 
-    static int mPatientViewHeight = 580;
-    static int wPatientViewHeight = 560;
+    static int mPatientViewWidth = 905;
+    static int wPatientViewWidth = 875;
+    static int mPatientViewHeight = 525;
+    static int wPatientViewHeight = 515;
     static int mBeforeCreateNewPatientButtonGap = 86; 
     static int wBeforeCreateNewPatientButtonGap = 83;
     static int mBeforeDOBGap = 9;
@@ -170,7 +173,100 @@ public class PatientView extends View{
     static int wDatePickerWidth = 114;
     static int mLine2Width = 180;
     static int wLine2Width = 182;
+    static int mFurtherDetailsGapWidth = 7;
+    static int wFurtherDetailsGapWidth = 15;
+    static int mOperationsBottomGap = 322;
+    static int wOperationsBottomGap = 313;
+    static int mAppointmentHistoryScrollPaneWidth = 710;
+    static int wAppointmentHistoryScrollPaneWidth = 683;
+    static int mAppointmentHistoryTableWidth = 692;
+    static int wAppointmentHistoryTableWidth = 660;
+    static int mBetweenAppointmentHistoryAndFetchButtonGap = 33;
+    static int wBetweenAppointmentHistoryAndFetchButtonGap = 35;
     
+    private int getPatientViewWidth(){
+        int result = 0;
+        String lookAndFeel = SystemDefinitions.getPMSLookAndFeel();
+        switch (lookAndFeel){
+            case "Metal":
+                result = mPatientViewWidth ;
+                break;
+            case "Windows":
+                result = wPatientViewWidth ;
+                break;
+        }
+        return result;
+    }
+    
+    private int getBetweenAppointmentHistoryAndFetchButtonGap(){
+        int result = 0;
+        String lookAndFeel = SystemDefinitions.getPMSLookAndFeel();
+        switch (lookAndFeel){
+            case "Metal":
+                result = mBetweenAppointmentHistoryAndFetchButtonGap ;
+                break;
+            case "Windows":
+                result = wBetweenAppointmentHistoryAndFetchButtonGap ;
+                break;
+        }
+        return result;
+    }
+    
+    private int getAppointmentHistoryScrollPaneWidth(){
+        int result = 0;
+        String lookAndFeel = SystemDefinitions.getPMSLookAndFeel();
+        switch (lookAndFeel){
+            case "Metal":
+                result = mAppointmentHistoryScrollPaneWidth ;
+                break;
+            case "Windows":
+                result = wAppointmentHistoryScrollPaneWidth ;
+                break;
+        }
+        return result;
+    }
+    
+    private int getAppointmentHistoryTableWidth(){
+        int result = 0;
+        String lookAndFeel = SystemDefinitions.getPMSLookAndFeel();
+        switch (lookAndFeel){
+            case "Metal":
+                result = mAppointmentHistoryTableWidth ;
+                break;
+            case "Windows":
+                result = wAppointmentHistoryTableWidth ;
+                break;
+        }
+        return result;
+    }
+    
+    private int getOperationsHeight(){
+        int result = 0;
+        String lookAndFeel = SystemDefinitions.getPMSLookAndFeel();
+        switch (lookAndFeel){
+            case "Metal":
+                result = mOperationsBottomGap ;
+                break;
+            case "Windows":
+                result = wOperationsBottomGap ;
+                break;
+        }
+        return result;
+    }
+    
+    private int getFurtherDetailsGapWidth (){
+        int result = 0;
+        String lookAndFeel = SystemDefinitions.getPMSLookAndFeel();
+        switch (lookAndFeel){
+            case "Metal":
+                result = mFurtherDetailsGapWidth ;
+                break;
+            case "Windows":
+                result = wFurtherDetailsGapWidth ;
+                break;
+        }
+        return result;
+    }
     
     private int getPatientViewHeight (){
         int result = 0;
@@ -373,7 +469,7 @@ public class PatientView extends View{
             setIconifiable(true);
             setResizable(false);
             setSelected(true);
-            setSize(968,getPatientViewHeight());
+            setSize(getPatientViewWidth(),getPatientViewHeight());
         }catch(PropertyVetoException ex){
             
         }
@@ -386,32 +482,34 @@ public class PatientView extends View{
             }
         });
         
-        this.spnDentalRecallFrequency.setModel(new SpinnerNumberModel(6,0,12,3));
+        //this.spnDentalRecallFrequency.setModel(new SpinnerNumberModel(6,0,12,3));
+        /*
         tblAppointmentHistory.setModel(new Appointments3ColumnTableModel());
         ViewController.setJTableColumnProperties(
                 tblAppointmentHistory, 
                 scrAppointmentHistory.getPreferredSize().width, 
                 22,22,56);
+        */
         populatePatientSelector(this.cmbPatientSelector); 
-        populatePatientSelector(this.cmbSelectGuardian);
+        //populatePatientSelector(this.cmbSelectGuardian);
         this.cmbPatientSelector.addActionListener((ActionEvent e) -> cmbPatientSelectorActionPerformed(e));
         DatePickerSettings settings = new DatePickerSettings();
         dobDatePicker.addDateChangeListener((new PatientView.DOBDatePickerDateChangeListener()));
-        recallDatePicker.addDateChangeListener(new PatientView.RecallDatePickerDateChangeListener()); 
+        //recallDatePicker.addDateChangeListener(new PatientView.RecallDatePickerDateChangeListener()); 
         
         ImageIcon icon = new ImageIcon(this.getClass().getResource("/datepickerbutton1.png"));
         JButton datePickerButton = dobDatePicker.getComponentToggleCalendarButton();
         datePickerButton.setText("");
         datePickerButton.setIcon(icon);
-        datePickerButton = recallDatePicker.getComponentToggleCalendarButton();
+        //datePickerButton = recallDatePicker.getComponentToggleCalendarButton();
         datePickerButton.setText("");
         datePickerButton.setIcon(icon);
         ActionEvent actionEvent = new ActionEvent(
                 this,ActionEvent.ACTION_PERFORMED,
                 ViewController.PatientViewControllerActionEvent.NULL_PATIENT_REQUEST.toString());
         this.getMyController().actionPerformed(actionEvent);
-        this.pnlGuardianDetails.setEnabled(false);
-        this.cmbIsGuardianAPatient.setEnabled(false);
+        //this.pnlGuardianDetails.setEnabled(false);
+        //this.cmbIsGuardianAPatient.setEnabled(false);
         javax.swing.SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
@@ -486,11 +584,13 @@ public class PatientView extends View{
      */
     ItemListener itemSelectGuardianListener = new ItemListener(){
         public void itemStateChanged(ItemEvent e){
+            /*
             if (String.valueOf(cmbIsGuardianAPatient.getSelectedItem()).equals("Yes")){
                 if (cmbIsGuardianAPatient.getSelectedIndex() == -1) setViewStatus(false);
                 else setViewStatus(true);
             }
             else setViewStatus(false); 
+            */
         }  
     };
     /**
@@ -577,7 +677,7 @@ public class PatientView extends View{
                 //setViewMode(PatientView.ViewMode.Create_new_patient);
                 initialisePatientViewComponentFromED();
                 populatePatientSelector(this.cmbPatientSelector);
-                populatePatientSelector(this.cmbSelectGuardian);
+                //populatePatientSelector(this.cmbSelectGuardian);
                 this.setTitle("Patient view");
                 /**
                  * enable "Create new patient" menu item to allow creation of a new patient
@@ -602,7 +702,7 @@ public class PatientView extends View{
             case PATIENTS_RECEIVED:
                 //setViewDescriptor((Descriptor)e.getNewValue());
                 populatePatientSelector(this.cmbPatientSelector);
-                populatePatientSelector(this.cmbSelectGuardian);
+                //populatePatientSelector(this.cmbSelectGuardian);
                 break;
             //case RECOVERABLE_PATIENTS_RECEIVED:
                 //break;
@@ -731,6 +831,7 @@ public class PatientView extends View{
                             oldPatientValues.getNotes())){isNotes = true;
                         }
                         break;
+                    /*
                     case DENTAL_RECALL_DATE:
                         if (newPatientValues.getRecall().getDentalDate().equals(
                             oldPatientValues.getRecall().getDentalDate())){isDentalRecallDate = true;
@@ -745,7 +846,7 @@ public class PatientView extends View{
                         break;
                     case HYGIENE_RECALL_FREQUENCY:
                         break;
-
+                    */
                 }
                 if (errorType == null){
                     errorType = "patient";
@@ -846,7 +947,9 @@ public class PatientView extends View{
      * current entity state
      * -- note update 30/07/2021 09:05 applied
      */
+    
     private void initialisePatientGuardianViewComponent(){
+        /*
         //Descriptor ed = getViewDescriptor();
         
         this.cmbIsGuardianAPatient.setEnabled(true);
@@ -867,6 +970,7 @@ public class PatientView extends View{
             this.cmbIsGuardianAPatient.setSelectedItem(PatientView.YesNoItem.No);
             this.cmbSelectGuardian.setEnabled(false);
         }
+        */
     }
     
     private void populateAppointmentsHistoryTable(Patient patient){
@@ -881,8 +985,9 @@ public class PatientView extends View{
                     tableModel.addElement(it.next());
                 }
             }
-            TableColumnModel columnModel = this.tblAppointmentHistory.getColumnModel();
-            columnModel.getColumn(1).setPreferredWidth(120);
+
+            //TableColumnModel columnModel = this.tblAppointmentHistory.getColumnModel();
+            //columnModel.getColumn(1).setPreferredWidth(120);
         this.tblAppointmentHistory.setDefaultRenderer(Duration.class, new AppointmentsTableDurationRenderer());
         this.tblAppointmentHistory.setDefaultRenderer(LocalDateTime.class, new AppointmentsTableLocalDateTimeRenderer());;
         this.tblAppointmentHistory.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
@@ -910,25 +1015,27 @@ public class PatientView extends View{
         setPatientTitle(patient.getName().getTitle());
         setForenames(patient.getName().getForenames());
         setSurname(patient.getName().getSurname());
-        setPhone1(patient.getPhone1());
-        setPhone2(patient.getPhone2());
+        //setPhone1(patient.getPhone1());
+        //setPhone2(patient.getPhone2());
         setLine1(patient.getAddress().getLine1());
         setLine2(patient.getAddress().getLine2());
         setTown(patient.getAddress().getTown());
         setCounty(patient.getAddress().getCounty());
         setPostcode(patient.getAddress().getPostcode());
-        setRecallDate(patient.getRecall().getDentalDate());
-        setDentalRecallFrequency(patient.getRecall().getDentalFrequency());
+        //setRecallDate(patient.getRecall().getDentalDate());
+        //setDentalRecallFrequency(patient.getRecall().getDentalFrequency());
         setGender(patient.getGender());
         setNotes(patient.getNotes());
         setDOB(patient.getDOB());
-        setIsGuardianAPatient(patient.getIsGuardianAPatient());
+        //setIsGuardianAPatient(patient.getIsGuardianAPatient());
         //update 30/07/2021 09:05 applied
+        /*
         if(getMyController().getDescriptor().getControllerDescription().
                 getPatient().getGuardian()!=null)
                 this.cmbSelectGuardian.setSelectedItem(getMyController().
                         getDescriptor().getControllerDescription().getPatient().getGuardian());
         else this.cmbSelectGuardian.setSelectedIndex(-1); 
+        */
         //following is new statement
         populateAppointmentsHistoryTable(patient);
         //initialisePatientAppointmentHistoryViewFromED(PatientView.Category.DENTAL);
@@ -938,43 +1045,52 @@ public class PatientView extends View{
     private Patient initialisePatientFromView(Patient patient){
         if (patient== null) patient = new Patient();
             patient.getAddress().setCounty(getCounty());
+            /*
             patient.getRecall().setDentalDate(getDentalRecallDate());
+            */
             patient.setDOB(getDOB());
             patient.getName().setForenames(getForenames());
             patient.setGender(getGender());
+            /*
             patient.getRecall().setDentalDate(getDentalRecallDate());
             patient.getRecall().setDentalFrequency(getDentalRecallFrequency());
             patient.setIsGuardianAPatient(getIsGuardianAPatient());
+            */
             patient.getAddress().setLine1(getLine1());
             patient.getAddress().setLine2(getLine2());
+            
             patient.setNotes(getNotes());
+            /*
             patient.setPhone1(getPhone1());
             patient.setPhone2(getPhone2());
+            */
             patient.getAddress().setPostcode(getPostcode());
             patient.getName().setSurname(getSurname());
             patient.getName().setTitle(getPatientTitle());
             patient.getAddress().setTown(getTown());
+            /*
             if (getGuardian() != null){
                 patient.setGuardian(getGuardian());
             }
+            */
         return patient;
     }
 
     private String getPatientTitle(){
         String value = "";
-        if(PatientView.TitleItem.Dr.ordinal()==this.cmbTitle.getSelectedIndex()){
+        if(PatientView.TitleItem.Dr.ordinal()==this.cmbNameTitle.getSelectedIndex()){
             value = PatientView.TitleItem.Dr.toString();
         }
-        else if(PatientView.TitleItem.Mr.ordinal()==this.cmbTitle.getSelectedIndex()){
+        else if(PatientView.TitleItem.Mr.ordinal()==this.cmbNameTitle.getSelectedIndex()){
             value = PatientView.TitleItem.Mr.toString();
         }
-        else if(PatientView.TitleItem.Mrs.ordinal()==this.cmbTitle.getSelectedIndex()){
+        else if(PatientView.TitleItem.Mrs.ordinal()==this.cmbNameTitle.getSelectedIndex()){
             value = PatientView.TitleItem.Mrs.toString();
         }
-        else if(PatientView.TitleItem.Ms.ordinal()==this.cmbTitle.getSelectedIndex()){
+        else if(PatientView.TitleItem.Ms.ordinal()==this.cmbNameTitle.getSelectedIndex()){
             value = PatientView.TitleItem.Ms.toString();
         }
-        else if(PatientView.TitleItem.Miss.ordinal()==this.cmbTitle.getSelectedIndex()){
+        else if(PatientView.TitleItem.Miss.ordinal()==this.cmbNameTitle.getSelectedIndex()){
             value = PatientView.TitleItem.Miss.toString();
         }
  
@@ -982,7 +1098,7 @@ public class PatientView extends View{
     }
     private void setPatientTitle(String title){
         if (title == null){
-            cmbTitle.setSelectedIndex(-1);
+            cmbNameTitle.setSelectedIndex(-1);
         }
         else{
             Integer index = null;
@@ -993,26 +1109,26 @@ public class PatientView extends View{
                 }
             }
             if (index != null){
-                cmbTitle.setSelectedIndex(index);
+                cmbNameTitle.setSelectedIndex(index);
             }
             else {
-                cmbTitle.setSelectedIndex(-1);
+                cmbNameTitle.setSelectedIndex(-1);
             }
         }
     }
     private String getForenames(){
-        return this.txtForenames.getText();
+        return this.txtNameForename.getText();
     }
     private void setForenames(String forenames){
-        if (forenames == null) this.txtForenames.setText("");
-        else this.txtForenames.setText(forenames);
+        if (forenames == null) this.txtNameForename.setText("");
+        else this.txtNameForename.setText(forenames);
     }
     private String getSurname(){
-        return this.txtSurname.getText();
+        return this.txtNameSurname.getText();
     }
     private void setSurname(String surname){
-        if (surname == null) this.txtSurname.setText("");
-        else this.txtSurname.setText(surname);
+        if (surname == null) this.txtNameSurname.setText("");
+        else this.txtNameSurname.setText(surname);
     }
     private String getLine1(){
         return this.txtAddressLine1.getText();
@@ -1050,13 +1166,13 @@ public class PatientView extends View{
     }
     private String getGender(){
         String result = "";
-        if (this.cmbGender.getSelectedIndex()!=-1){
-            result = this.cmbGender.getSelectedItem().toString();
+        if (this.cmbNameGender.getSelectedIndex()!=-1){
+            result = this.cmbNameGender.getSelectedItem().toString();
         }
         return result;
     }
     private void setGender(String gender){
-        if (gender == null) cmbGender.setSelectedIndex(-1);
+        if (gender == null) cmbNameGender.setSelectedIndex(-1);
         else{
             Integer index = null;
             for (PatientView.GenderItem gi: PatientView.GenderItem.values()){
@@ -1066,10 +1182,10 @@ public class PatientView extends View{
                 }
             }
             if (index != null){
-                cmbGender.setSelectedIndex(index);
+                cmbNameGender.setSelectedIndex(index);
             }
             else {
-                cmbGender.setSelectedIndex(-1);
+                cmbNameGender.setSelectedIndex(-1);
             }
         }
     }
@@ -1089,13 +1205,15 @@ public class PatientView extends View{
     private void setDOB(LocalDate value){
         if (value != null){
             this.dobDatePicker.setDate(value);
-            lblAge.setText("(" + String.valueOf(getAge(value)) + " yrs)");   
+            lblNameAge.setText("(" + String.valueOf(getAge(value)) + " yrs)");   
         }
         else{
             this.dobDatePicker.setDate(value);
-            lblAge.setText("(years)");
+            lblNameAge.setText("(years)");
         }
     }
+    
+    /*
     private boolean getIsGuardianAPatient(){
         boolean value = false;
         if(PatientView.YesNoItem.Yes.ordinal()==this.cmbIsGuardianAPatient.getSelectedIndex()){
@@ -1114,6 +1232,8 @@ public class PatientView extends View{
             cmbIsGuardianAPatient.setSelectedItem(PatientView.YesNoItem.No);
         }
     }
+    */
+    /*
     private Patient getGuardian(){
         if (cmbSelectGuardian.getSelectedIndex() == -1){
             return null;
@@ -1141,6 +1261,7 @@ public class PatientView extends View{
         if (value == null) this.spnDentalRecallFrequency.setValue(0);
         else this.spnDentalRecallFrequency.setValue(value);
     }
+    */
     private String getNotes(){
         return this.txtPatientNotes.getText();
     }
@@ -1148,6 +1269,8 @@ public class PatientView extends View{
         if (notes == null) this.txtPatientNotes.setText("");
         else this.txtPatientNotes.setText(notes);
     }
+    
+    /*
     private String getPhone1(){
         return txtPhone1.getText();
     }
@@ -1162,7 +1285,7 @@ public class PatientView extends View{
         if (value == null) txtPhone2.setText("");
         else txtPhone2.setText(value);
     }
-
+    */
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -1173,14 +1296,14 @@ public class PatientView extends View{
     private void initComponents(){ 
     //<editor-fold defaultstate="collapsed" desc="Component Definitions">
     //<editor-fold defaultstate="collapsed" desc="Panel definitions">
-        pnlActions = new javax.swing.JPanel();
+        pnlOperations = new javax.swing.JPanel();
         pnlAddress = new javax.swing.JPanel();
         pnlAppointmentHistory = new javax.swing.JPanel();
-        pnlGuardianDetails = new javax.swing.JPanel();
+        //pnlGuardianDetails = new javax.swing.JPanel();
         pnlName = new javax.swing.JPanel();
-        pnlNotes = new javax.swing.JPanel();
-        pnlPhones = new javax.swing.JPanel();
-        pnlRecall = new javax.swing.JPanel();
+        pnlPatientNotes = new javax.swing.JPanel();
+        //pnlPhones = new javax.swing.JPanel();
+        //pnlRecall = new javax.swing.JPanel();
     
         pnlPatientSelection = new javax.swing.JPanel();
         pnlPatientSelection.setBackground(new java.awt.Color(220, 220, 220));
@@ -1221,7 +1344,7 @@ public class PatientView extends View{
                         getBorderTitleFont(), 
                         getBorderTitleColor())); // NOI18N
         
-        pnlNotes.setBorder(
+        pnlPatientNotes.setBorder(
                 javax.swing.BorderFactory.createTitledBorder(
                         javax.swing.BorderFactory.createEtchedBorder(), 
                         "Notes", 
@@ -1230,41 +1353,42 @@ public class PatientView extends View{
                         getBorderTitleFont(),
                         getBorderTitleColor())); // NOI18N
         
-        pnlPhones.setBorder(
-                javax.swing.BorderFactory.createTitledBorder(
-                        javax.swing.BorderFactory.createEtchedBorder(), 
-                        "Phone number(s) & email", 
-                        javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, 
-                        javax.swing.border.TitledBorder.DEFAULT_POSITION, 
-                        getBorderTitleFont(),
-                        getBorderTitleColor())); // NOI18N
+        //pnlPhones.setBorder(
+        //        javax.swing.BorderFactory.createTitledBorder(
+        //                javax.swing.BorderFactory.createEtchedBorder(), 
+        //                "Phone number(s) & email", 
+        //                javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, 
+        //                javax.swing.border.TitledBorder.DEFAULT_POSITION, 
+        //                getBorderTitleFont(),
+        //                getBorderTitleColor())); // NOI18N
 
-        pnlGuardianDetails.setBorder(
-                javax.swing.BorderFactory.createTitledBorder(
-                        javax.swing.BorderFactory.createEtchedBorder(), 
-                        "Guardian details (patient < 18)", 
-                        javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, 
-                        javax.swing.border.TitledBorder.DEFAULT_POSITION, 
-                        getBorderTitleFont(),
-                        getBorderTitleColor())); // NOI18N
+        //pnlGuardianDetails.setBorder(
+        //        javax.swing.BorderFactory.createTitledBorder(
+        //                javax.swing.BorderFactory.createEtchedBorder(), 
+        //                "Guardian details (patient < 18)", 
+        //                javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, 
+        //                javax.swing.border.TitledBorder.DEFAULT_POSITION, 
+        //                getBorderTitleFont(),
+        //                getBorderTitleColor())); // NOI18N
+
+        //pnlRecall.setBorder(
+        //        javax.swing.BorderFactory.createTitledBorder(
+        //                javax.swing.BorderFactory.createEtchedBorder(), 
+        //                "Recall details", 
+        //                javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, 
+        //                javax.swing.border.TitledBorder.DEFAULT_POSITION, 
+        //                getBorderTitleFont(),
+        //                getBorderTitleColor())); // NOI18N
         
-        pnlRecall.setBorder(
-                javax.swing.BorderFactory.createTitledBorder(
-                        javax.swing.BorderFactory.createEtchedBorder(), 
-                        "Recall details", 
-                        javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, 
-                        javax.swing.border.TitledBorder.DEFAULT_POSITION, 
-                        getBorderTitleFont(),
-                        getBorderTitleColor())); // NOI18N
-        
-        pnlActions.setBorder(
+        pnlOperations.setBorder(
                 javax.swing.BorderFactory.createTitledBorder(
                         javax.swing.BorderFactory.createEtchedBorder(), 
                         "Actions", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, 
                         javax.swing.border.TitledBorder.DEFAULT_POSITION, 
                         getBorderTitleFont(),
                         getBorderTitleColor())); // NOI18N
-        pnlActions.setBackground(new java.awt.Color(220, 220, 220));
+        pnlOperations.setBackground(new java.awt.Color(220, 220, 220));
+        
         
     //</editor-fold>
         btnFetchScheduleForSelectedAppointment = new javax.swing.JButton("<html><center>Fetch day schedule</center><center>for selected</center><center>appointment</center></html>");
@@ -1297,29 +1421,29 @@ public class PatientView extends View{
             }
         });
         
-        cmbSelectGuardian = new javax.swing.JComboBox<model.Patient>();
-        cmbIsGuardianAPatient = new javax.swing.JComboBox<PatientView.YesNoItem>();
+        //cmbSelectGuardian = new javax.swing.JComboBox<model.Patient>();
+        //cmbIsGuardianAPatient = new javax.swing.JComboBox<PatientView.YesNoItem>();
         cmbPatientSelector = new javax.swing.JComboBox<Patient>();
-        cmbTitle = new javax.swing.JComboBox<>();
-        cmbGender = new javax.swing.JComboBox<>();
+        cmbNameTitle = new javax.swing.JComboBox<>();
+        cmbNameGender = new javax.swing.JComboBox<>();
         
-        lblAge = new javax.swing.JLabel("age");
+        lblNameAge = new javax.swing.JLabel("age");
         lblNameDOB = new javax.swing.JLabel("DOB");
         lblNameForename = new javax.swing.JLabel("Forename");
         lblNameSurname = new javax.swing.JLabel("Surname");
         lblNameTitle = new javax.swing.JLabel("Title");
         lblNameGender = new javax.swing.JLabel("Gender");
         lblAddressCounty = new javax.swing.JLabel("County");
-        lblGuardianPatientName = new javax.swing.JLabel("Select guardian");
-        lblGuardianIsAPatient = new javax.swing.JLabel("Guardian is a patient?");
+        //lblGuardianPatientName = new javax.swing.JLabel("Select guardian");
+        //lblGuardianIsAPatient = new javax.swing.JLabel("Guardian is a patient?");
         lblAddressLine1 = new javax.swing.JLabel("Line 1");
-        lblAddressline2 = new javax.swing.JLabel("Line 2");
+        lblAddressLine2 = new javax.swing.JLabel("Line 2");
         lblAddressTown = new javax.swing.JLabel("Town");
         lblAddressPostcode = new javax.swing.JLabel("Postcode");
-        lblPhone1 = new javax.swing.JLabel("[1]");
-        lblFrequency = new javax.swing.JLabel("Frequency");
-        lblPhone2 = new javax.swing.JLabel("[2]");
-        lblEmail = new javax.swing.JLabel("Email");
+        //lblPhone1 = new javax.swing.JLabel("[1]");
+        //lblFrequency = new javax.swing.JLabel("Frequency");
+        //lblPhone2 = new javax.swing.JLabel("[2]");
+        //lblEmail = new javax.swing.JLabel("Email");
         
         //menu bits
         jMenuBar1 = new javax.swing.JMenuBar();
@@ -1331,58 +1455,64 @@ public class PatientView extends View{
         mniRecoverDeletedPatient = new javax.swing.JMenuItem();
         jSeparator3 = new javax.swing.JPopupMenu.Separator();
         mniCloseView = new javax.swing.JMenuItem();
-        
-        
-        
-        
 
-        scrAppointmentHistory = new javax.swing.JScrollPane();
-        spnDentalRecallFrequency = new javax.swing.JSpinner();
-        
         tblAppointmentHistory = new javax.swing.JTable();
-        
-        scrAppointmentHistory.setRowHeaderView(null);
-
         tblAppointmentHistory.addMouseListener(mouseListener);
-        scrAppointmentHistory.setViewportView(tblAppointmentHistory);
+        tblAppointmentHistory.setModel(new Appointments3ColumnTableModel());
+        //tblAppointmentHistory.setPreferredSize(new Dimension(660,(int)tblAppointmentHistory.getPreferredSize().getHeight()));
+        tblAppointmentHistory.setPreferredSize(new Dimension(getAppointmentHistoryTableWidth(),110));
 
-        txtForenames = new javax.swing.JTextField();
-        txtSurname = new javax.swing.JTextField();
+        
+        scrAppointmentHistory = new javax.swing.JScrollPane();
+        scrAppointmentHistory.setPreferredSize(new Dimension(
+                getAppointmentHistoryScrollPaneWidth(),100));
+        scrAppointmentHistory.setRowHeaderView(null);
+        scrAppointmentHistory.setViewportView(tblAppointmentHistory);
+        
+        ViewController.setJTableColumnProperties(tblAppointmentHistory, 
+                scrAppointmentHistory.getPreferredSize().width, 
+                20,20,60);
+        //spnDentalRecallFrequency = new javax.swing.JSpinner();
+
+        txtNameForename = new javax.swing.JTextField();
+        txtNameSurname = new javax.swing.JTextField();
         txtAddressLine2 = new javax.swing.JTextField();
         txtAddressLine1 = new javax.swing.JTextField();
         txtAddressTown = new javax.swing.JTextField();
         txtAddressCounty = new javax.swing.JTextField();
-        txtPatientNotes = new javax.swing.JTextField();
+        txtPatientNotes = new javax.swing.JTextArea();
         txtAddressPostcode = new javax.swing.JTextField();
-        txtRecallDate = new javax.swing.JTextField();
-        txtPhone1 = new javax.swing.JTextField();
-        txtPhone2 = new javax.swing.JTextField();
-        txtPhonesEmail = new javax.swing.JTextField();
+        //txtRecallDate = new javax.swing.JTextField();
+        //txtPhone1 = new javax.swing.JTextField();
+        //txtPhone2 = new javax.swing.JTextField();
+        //txtPhonesEmail = new javax.swing.JTextField();
 
         DatePickerSettings dateSettings = new DatePickerSettings();
         dateSettings.setVisibleDateTextField(false);
         dateSettings.setGapBeforeButtonPixels(0);
-        recallDatePicker = new com.github.lgooddatepicker.components.DatePicker(dateSettings);
+        //recallDatePicker = new com.github.lgooddatepicker.components.DatePicker(dateSettings);
 
         DatePickerSettings settings = new DatePickerSettings();
         settings.setFormatForDatesCommonEra(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
         settings.setAllowKeyboardEditing(false);
         dobDatePicker = new com.github.lgooddatepicker.components.DatePicker(settings);
 
-        txtRecallDate.getDocument().addDocumentListener(documentListener);
-        txtRecallDate.setEditable(false);
+        //txtRecallDate.getDocument().addDocumentListener(documentListener);
+        //txtRecallDate.setEditable(false);
 
-        cmbSelectGuardian.addItemListener(itemSelectGuardianListener);
-        cmbSelectGuardian.setEditable(false);
-        cmbSelectGuardian.setModel(new DefaultComboBoxModel<model.Patient>());
-        cmbSelectGuardian.setMinimumSize(new java.awt.Dimension(175, 22));
-        cmbSelectGuardian.setPreferredSize(new java.awt.Dimension(194, 22));
+        //cmbSelectGuardian.addItemListener(itemSelectGuardianListener);
+        //cmbSelectGuardian.setEditable(false);
+        //cmbSelectGuardian.setModel(new DefaultComboBoxModel<model.Patient>());
+        //cmbSelectGuardian.setMinimumSize(new java.awt.Dimension(175, 22));
+        //cmbSelectGuardian.setPreferredSize(new java.awt.Dimension(194, 22));
+        /*
         cmbSelectGuardian.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cmbSelectGuardianActionPerformed(evt);
             }
         });
-
+        */
+        /*
         cmbIsGuardianAPatient.addItemListener(itemListener);
         cmbIsGuardianAPatient.setEditable(true);
         cmbIsGuardianAPatient.setModel(new javax.swing.DefaultComboBoxModel<PatientView.YesNoItem>(PatientView.YesNoItem.values()));
@@ -1392,42 +1522,45 @@ public class PatientView extends View{
                 cmbIsGuardianAPatientActionPerformed(evt);
             }
         });
-        
-        txtForenames.getDocument().addDocumentListener(documentListener);
-        txtForenames.addActionListener(new java.awt.event.ActionListener() {
+        */
+        /*
+        txtNameForenames.getDocument().addDocumentListener(documentListener);
+        txtNameForenames.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 txtForenamesActionPerformed(evt);
             }
         });
-
-        txtSurname.getDocument().addDocumentListener(documentListener);
-        txtSurname.addActionListener(new java.awt.event.ActionListener() {
+        */
+        /*
+        txtNameSurname.getDocument().addDocumentListener(documentListener);
+        txtNameSurname.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 txtSurnameActionPerformed(evt);
             }
         });
-
-        cmbTitle.addItemListener(itemListener);
-        cmbTitle.setEditable(true);
-        cmbTitle.setModel(new javax.swing.DefaultComboBoxModel<>(PatientView.TitleItem.values()));
-        cmbTitle.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-        cmbTitle.addActionListener(new java.awt.event.ActionListener() {
+        */
+        cmbNameTitle.addItemListener(itemListener);
+        cmbNameTitle.setEditable(true);
+        cmbNameTitle.setModel(new javax.swing.DefaultComboBoxModel<>(PatientView.TitleItem.values()));
+        cmbNameTitle.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        /*
+        cmbNameTitle.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cmbTitleActionPerformed(evt);
             }
         });
-
-        cmbGender.addItemListener(itemListener);
-        cmbGender.setEditable(true);
-        cmbGender.setModel(new javax.swing.DefaultComboBoxModel<>(PatientView.GenderItem.values()));
-        cmbGender.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        */
+        cmbNameGender.addItemListener(itemListener);
+        cmbNameGender.setEditable(true);
+        cmbNameGender.setModel(new javax.swing.DefaultComboBoxModel<>(PatientView.GenderItem.values()));
+        cmbNameGender.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
         lblNameTitle.setText("Title");
         lblNameForename.setText("Forenames");
         lblNameSurname.setText("Surname");
         lblNameGender.setText("Gender");
 
-        lblAge.setText("(age)");
+        lblNameAge.setText("(age)");
 
         lblNameDOB.setText("DOB");
         
@@ -1441,7 +1574,7 @@ public class PatientView extends View{
 
         lblAddressLine1.setText("Line 1");
 
-        lblAddressline2.setText("Line 2");
+        lblAddressLine2.setText("Line 2");
 
         txtAddressLine2.getDocument().addDocumentListener(documentListener);
         txtAddressLine2.addActionListener(new java.awt.event.ActionListener() {
@@ -1450,9 +1583,48 @@ public class PatientView extends View{
             }
         });
         
+        //pnlPatientNotes.setBorder(javax.swing.BorderFactory.createTitledBorder("Patient notes"));
+
+        txtPatientNotes.setColumns(20);
+        txtPatientNotes.setLineWrap(true);
+        txtPatientNotes.setRows(5);
         
-        //</editor-fold>
-    //<editor-fold defaultstate="Collapsed" desc="Menu configuration">
+        scrPatientNotes = new javax.swing.JScrollPane();
+        scrPatientNotes.setViewportView(txtPatientNotes);
+        
+        
+
+        btnFetchScheduleForSelectedAppointment.setText("selected appointment");
+        btnFetchScheduleForSelectedAppointment.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnFetchScheduleForSelectedAppointmentActionPerformed(evt);
+            }
+        });
+        pnlNameContent = new javax.swing.JPanel();
+        pnlPatientAddressContent = new javax.swing.JPanel();
+        pnlFurtherDetails = new javax.swing.JPanel();
+        //pnlFurtherDetails.setBorder(javax.swing.BorderFactory.
+                //createTitledBorder("Further details"));
+                
+        pnlFurtherDetails.setBorder(
+                javax.swing.BorderFactory.createTitledBorder(
+                        javax.swing.BorderFactory.createEtchedBorder(), 
+                        "Further deails", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, 
+                        javax.swing.border.TitledBorder.DEFAULT_POSITION, 
+                        getBorderTitleFont(),
+                        getBorderTitleColor())); // NOI18N
+
+        rdbRequestModalPhoneEmailDetailsView = new javax.swing.JRadioButton();
+        rdbRequestModalRecallDetailsView = new javax.swing.JRadioButton();
+        rdbRequestModalGuardianDetailsView = new javax.swing.JRadioButton();
+        rdbRequestModalPhoneEmailDetailsView.setText("Phone/email");
+
+        rdbRequestModalRecallDetailsView.setText("Recall data");
+
+        rdbRequestModalGuardianDetailsView.setText("Guardian (if patient)");
+        
+//</editor-fold>
+//<editor-fold defaultstate="Collapsed" desc="Menu configuration">
     mnuActions.setText("Actions");
 
         mniCreateNewPatient.setText("Create new patient");
@@ -1501,383 +1673,338 @@ public class PatientView extends View{
 
         setJMenuBar(jMenuBar1);
     //</editor-fold>
-    // <editor-fold defaultstate="collapsed" desc="Layout Code">
-    //<editor-fold defaultstate="collapsed" desc="Frame layout">
-    javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
-        //layout.setAutoCreateGaps(true);
-        layout.setAutoCreateContainerGaps(true);
-        layout.setHorizontalGroup(
-            //layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            layout.createParallelGroup()
-            .addGroup(layout.createSequentialGroup()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(pnlPatientSelection, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(pnlAppointmentHistory, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    )
-                    .addGap(9,9,9)
-                    .addComponent(pnlName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                      //.addComponent(pnlAddress, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)  ))
-                    .addComponent(pnlAddress, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(pnlNotes, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
 
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(pnlPhones, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(getBetweenPhonesAndGuardianPanelsGap(),
-                                getBetweenPhonesAndGuardianPanelsGap(),
-                                getBetweenPhonesAndGuardianPanelsGap())
-                        .addComponent(pnlGuardianDetails, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        //.addGap(33,33,33)
-                        .addGap(getBetweenGuardianAndRecallPanelsGap(),
-                                getBetweenGuardianAndRecallPanelsGap(),
-                                getBetweenGuardianAndRecallPanelsGap())
-                        .addComponent(pnlRecall, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    )
-                    .addGap(9,9,9)    
-                    .addComponent(pnlActions, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                )
-            )
+//<editor-fold defaultstate="collapsed" desc="Patient address content panel layout">
+    javax.swing.GroupLayout pnlPatientAddressContentLayout = new javax.swing.GroupLayout(pnlPatientAddressContent);
+        pnlPatientAddressContent.setLayout(pnlPatientAddressContentLayout);
+        pnlPatientAddressContentLayout.setHorizontalGroup(
+            pnlPatientAddressContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlPatientAddressContentLayout.createSequentialGroup()
+                .addGroup(pnlPatientAddressContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlPatientAddressContentLayout.createSequentialGroup()
+                        .addComponent(lblAddressTown)
+                        .addGap(30, 30, 30))
+                    .addGroup(pnlPatientAddressContentLayout.createSequentialGroup()
+                        .addGroup(pnlPatientAddressContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(lblAddressLine1)
+                            .addComponent(lblAddressLine2))
+                        .addGap(10, 10, 10))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlPatientAddressContentLayout.createSequentialGroup()
+                        .addComponent(lblAddressPostcode)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)))
+                .addGroup(pnlPatientAddressContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(pnlPatientAddressContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(txtAddressLine2)
+                        .addGroup(pnlPatientAddressContentLayout.createSequentialGroup()
+                            .addGroup(pnlPatientAddressContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                .addComponent(txtAddressPostcode, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 102, Short.MAX_VALUE)
+                                .addComponent(txtAddressTown, javax.swing.GroupLayout.Alignment.LEADING))
+                            .addGap(18, 18, 18)
+                            .addComponent(lblAddressCounty)
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                            .addComponent(txtAddressCounty, javax.swing.GroupLayout.PREFERRED_SIZE, 81, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addComponent(txtAddressLine1)))
         );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                //.addGap(5, 5, 5)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(pnlAppointmentHistory, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(pnlPatientSelection, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                //.addGap(9, 9, 9)
-                .addComponent(pnlName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                //.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(pnlAddress, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                //.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(pnlNotes, javax.swing.GroupLayout.PREFERRED_SIZE, 47, javax.swing.GroupLayout.PREFERRED_SIZE)
-                //.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(pnlRecall, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(pnlGuardianDetails, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(pnlPhones, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(8, 8, 8)
-                .addComponent(pnlActions, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
+        pnlPatientAddressContentLayout.setVerticalGroup(
+            pnlPatientAddressContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlPatientAddressContentLayout.createSequentialGroup()
+                .addGroup(pnlPatientAddressContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(txtAddressLine1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblAddressLine1))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(pnlPatientAddressContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(txtAddressLine2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblAddressLine2))
+                .addGap(10, 10, 10)
+                .addGroup(pnlPatientAddressContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lblAddressCounty)
+                    .addComponent(txtAddressCounty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblAddressTown)
+                    .addComponent(txtAddressTown, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(9, 9, 9)
+                .addGroup(pnlPatientAddressContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(txtAddressPostcode, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblAddressPostcode)))
         );
-        
-        pack();
-    //</editor-fold>
-    //<editor-fold defaultstate="collapsed" desc="Individual panel layouts">
-    //<editor-fold defaultstate="collapsed" desc="Appointment history panel layout">
-        javax.swing.GroupLayout pnlAppointmentHistoryLayout = new javax.swing.GroupLayout(pnlAppointmentHistory);
-        pnlAppointmentHistory.setLayout(pnlAppointmentHistoryLayout);
-        pnlAppointmentHistoryLayout.setHorizontalGroup(
-            pnlAppointmentHistoryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlAppointmentHistoryLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(scrAppointmentHistory, javax.swing.GroupLayout.PREFERRED_SIZE, 492, javax.swing.GroupLayout.PREFERRED_SIZE)
-                //.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGap(getFetchButtonGap(),getFetchButtonGap(),getFetchButtonGap())
-                .addComponent(btnFetchScheduleForSelectedAppointment, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-        pnlAppointmentHistoryLayout.setVerticalGroup(
-            pnlAppointmentHistoryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlAppointmentHistoryLayout.createSequentialGroup()
-                //.addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                 .addContainerGap()
-                .addGroup(pnlAppointmentHistoryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(scrAppointmentHistory, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                    .addComponent(btnFetchScheduleForSelectedAppointment, javax.swing.GroupLayout.DEFAULT_SIZE, 90, Short.MAX_VALUE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-    //</editor-fold>
-    //<editor-fold defaultstate="collapsed" desc="Patient selection panel layout">
-        javax.swing.GroupLayout pnlSelectablePatientsLayout = new javax.swing.GroupLayout(pnlPatientSelection);
-        pnlPatientSelection.setLayout(pnlSelectablePatientsLayout);
-        pnlSelectablePatientsLayout.setHorizontalGroup(
-            pnlSelectablePatientsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlSelectablePatientsLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(pnlSelectablePatientsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(cmbPatientSelector, javax.swing.GroupLayout.PREFERRED_SIZE, 230, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnClearSelection, javax.swing.GroupLayout.DEFAULT_SIZE, 177, javax.swing.GroupLayout.PREFERRED_SIZE))
-                //.addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap())
-            );
-        pnlSelectablePatientsLayout.setVerticalGroup(
-            pnlSelectablePatientsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlSelectablePatientsLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(cmbPatientSelector, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 24, Short.MAX_VALUE)
-                .addComponent(btnClearSelection)
-                //.addGap(28, 28, 28))
-                //.addGap(32,32,32)
-                    
-                .addGap(getGapBelowClearSelection(),
-                        getGapBelowClearSelection(),
-                        getGapBelowClearSelection()))
-                    
-        );
-    //</editor-fold>
-    //<editor-fold defaultstate="collapsed" desc="Name panel layout">
-        javax.swing.GroupLayout pnlNameLayout = new javax.swing.GroupLayout(pnlName);
-        pnlName.setLayout(pnlNameLayout);
-        pnlNameLayout.setHorizontalGroup(
-            pnlNameLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlNameLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(lblNameForename, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addComponent(txtForenames, javax.swing.GroupLayout.PREFERRED_SIZE, 134, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(10,10,10)
-                .addComponent(lblNameSurname, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addComponent(txtSurname, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(10,10,10)
-                .addComponent(lblNameTitle, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addComponent(cmbTitle, javax.swing.GroupLayout.PREFERRED_SIZE,55 , javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(10,10,10)
-                .addComponent(lblNameGender, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addComponent(cmbGender, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(getDOBGap(),getDOBGap(),getDOBGap())
-                .addComponent(lblNameDOB, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addComponent(dobDatePicker, javax.swing.GroupLayout.PREFERRED_SIZE, getDatePickerWidth(), javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(10,10,10)
-                .addComponent(lblAge,javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE)
-                //.addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                 .addContainerGap()) 
-        );
-        pnlNameLayout.setVerticalGroup(
-            pnlNameLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlNameLayout.createSequentialGroup()
-                .addGroup(pnlNameLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(this.lblNameForename, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(txtForenames, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(txtSurname, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(cmbTitle, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(cmbGender, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(this.lblNameForename)
-                    .addComponent(this.lblNameSurname)
-                    
-                    .addComponent(lblNameTitle)
-                    .addComponent(lblNameGender)
-                    .addComponent(dobDatePicker, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(lblAge)
-                    .addComponent(lblNameDOB))
-                .addGap(0, 4, Short.MAX_VALUE))
-        );   
-    //</editor-fold>
-    //<editor-fold defaultstate="collapsed" desc="Address panel layout">> 
+//</editor-fold>
+//<editor-fold defaultstate="collapsed" desc="Address panel layout">
         javax.swing.GroupLayout pnlAddressLayout = new javax.swing.GroupLayout(pnlAddress);
         pnlAddress.setLayout(pnlAddressLayout);
         pnlAddressLayout.setHorizontalGroup(
             pnlAddressLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlAddressLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(lblAddressLine1, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addComponent(txtAddressLine1, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(15,15,15)
-                .addComponent(lblAddressline2, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addComponent(txtAddressLine2, javax.swing.GroupLayout.PREFERRED_SIZE, getLine2Width(), javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(15,15,15)
-                .addComponent(lblAddressTown, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addComponent(txtAddressTown, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(15,15,15)
-                .addComponent(lblAddressCounty, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addComponent(txtAddressCounty, javax.swing.GroupLayout.PREFERRED_SIZE, 114, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(15,15,15)
-                .addComponent(lblAddressPostcode, javax.swing.GroupLayout.PREFERRED_SIZE, 61, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addComponent(txtAddressPostcode, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
-                //.addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(pnlPatientAddressContent, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
-                );
+        );
         pnlAddressLayout.setVerticalGroup(
             pnlAddressLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlAddressLayout.createSequentialGroup()
-                .addGap(4, 4, 4)
-                .addGroup(pnlAddressLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(lblAddressLine1)
-                    //.addGap(0,0,0)
-                    .addComponent(txtAddressLine1, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(lblAddressline2)
-                    .addComponent(txtAddressLine2, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(lblAddressTown)
-                    .addComponent(txtAddressTown, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(lblAddressCounty)
-                    .addComponent(txtAddressCounty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(lblAddressPostcode)
-                    .addComponent(txtAddressPostcode, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(0, 8, Short.MAX_VALUE))
-        );
-    //</editor-fold>
-    //<editor-fold defaultstate="collapsed" desc="Notes panel layout">
-        javax.swing.GroupLayout pnlNotesLayout = new javax.swing.GroupLayout(pnlNotes);
-        pnlNotes.setLayout(pnlNotesLayout);
-        pnlNotesLayout.setHorizontalGroup(
-            pnlNotesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlNotesLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(txtPatientNotes, javax.swing.GroupLayout.PREFERRED_SIZE, 908, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(pnlPatientAddressContent, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGap(10, 10, 10))
+        );
+//</editor-fold>     
+//<editor-fold defaultstate="collapsed" desc="Patient notes panel layout">
+        javax.swing.GroupLayout pnlPatientNotesLayout = new javax.swing.GroupLayout(pnlPatientNotes);
+        pnlPatientNotes.setLayout(pnlPatientNotesLayout);
+        pnlPatientNotesLayout.setHorizontalGroup(
+            pnlPatientNotesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlPatientNotesLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(scrPatientNotes, javax.swing.GroupLayout.DEFAULT_SIZE, 104, Short.MAX_VALUE)
                 .addContainerGap())
         );
-        pnlNotesLayout.setVerticalGroup(
-            pnlNotesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlNotesLayout.createSequentialGroup()
-                .addComponent(txtPatientNotes, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+        pnlPatientNotesLayout.setVerticalGroup(
+            pnlPatientNotesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlPatientNotesLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(scrPatientNotes)
                 .addContainerGap())
         );
-    //</editor-fold>
-    //<editor-fold defaultstate="collapsed" desc="Phones panel layout">
-    javax.swing.GroupLayout pnlPhonesLayout = new javax.swing.GroupLayout(pnlPhones);
-        pnlPhones.setLayout(pnlPhonesLayout);
-        pnlPhonesLayout.setHorizontalGroup(
-            pnlPhonesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlPhonesLayout.createSequentialGroup()
+//</editor-fold>
+//<editor-fold defaultstate="collapsed" desc="Appointment history panel layout">        
+        javax.swing.GroupLayout pnlAppointmentHistoryLayout = new javax.swing.GroupLayout(pnlAppointmentHistory);
+        pnlAppointmentHistory.setLayout(pnlAppointmentHistoryLayout);
+        pnlAppointmentHistoryLayout.setHorizontalGroup(
+            pnlAppointmentHistoryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlAppointmentHistoryLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(pnlPhonesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(lblPhone1)
-                    .addComponent(lblEmail)
-                )
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(pnlPhonesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addGroup(pnlPhonesLayout.createSequentialGroup()
-                        .addComponent(txtPhone1, javax.swing.GroupLayout.PREFERRED_SIZE, 97, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(lblPhone2)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(txtPhone2, javax.swing.GroupLayout.PREFERRED_SIZE, 106, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(txtPhonesEmail)
-                )
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-        pnlPhonesLayout.setVerticalGroup(
-            pnlPhonesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlPhonesLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(pnlPhonesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(txtPhone2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(txtPhone1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(lblPhone1)
-                    .addComponent(lblPhone2)
-                )
-                .addGap(getBelowPhonesGap())
-                .addGroup(pnlPhonesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(txtPhonesEmail, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(lblEmail)
-                )
-                .addContainerGap()    
-            )
-        );
-        
-    //</editor-fold>
-    //<editor-fold defaultstate="collapsed" desc="Panel guardian details">
-        javax.swing.GroupLayout pnlGuardianDetailsLayout = new javax.swing.GroupLayout(pnlGuardianDetails);
-        pnlGuardianDetails.setLayout(pnlGuardianDetailsLayout);
-        pnlGuardianDetailsLayout.setHorizontalGroup(
-            pnlGuardianDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlGuardianDetailsLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(pnlGuardianDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(pnlGuardianDetailsLayout.createSequentialGroup()
-                        .addComponent(lblGuardianIsAPatient)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(cmbIsGuardianAPatient, javax.swing.GroupLayout.PREFERRED_SIZE, 53, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(pnlGuardianDetailsLayout.createSequentialGroup()
-                        .addComponent(lblGuardianPatientName)
-                        .addGap(18, 18, 18)
-                        .addComponent(cmbSelectGuardian, javax.swing.GroupLayout.PREFERRED_SIZE, 194, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            )
-        );
-        pnlGuardianDetailsLayout.setVerticalGroup(
-            pnlGuardianDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlGuardianDetailsLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(pnlGuardianDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(lblGuardianIsAPatient)
-                    .addComponent(cmbIsGuardianAPatient, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(pnlGuardianDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(lblGuardianPatientName)
-                    .addComponent(cmbSelectGuardian, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE))
-                //.addContainerGap(25, Short.MAX_VALUE)
-                  .addContainerGap()
-            )
-        );
-    //</editor-fold>
-    //<editor-fold defaultstate="collapsed" desc="Recall panel layout">
-        javax.swing.GroupLayout pnlRecallLayout = new javax.swing.GroupLayout(pnlRecall);
-        pnlRecall.setLayout(pnlRecallLayout);
-        pnlRecallLayout.setHorizontalGroup(
-            pnlRecallLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlRecallLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(pnlRecallLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(pnlRecallLayout.createSequentialGroup()
-                        .addComponent(txtRecallDate, javax.swing.GroupLayout.PREFERRED_SIZE, 106, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(spnDentalRecallFrequency, javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(pnlRecallLayout.createSequentialGroup()
-                        .addComponent(recallDatePicker, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        //.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 48, Short.MAX_VALUE)
-                        //.addGap(125,125,125)
-                        .addGap(getBeforeFrequencyLabelGap(),
-                                getBeforeFrequencyLabelGap(),
-                                getBeforeFrequencyLabelGap())
-                        .addComponent(lblFrequency)))
-                .addGap(30, 30, 30))
-        );
-        pnlRecallLayout.setVerticalGroup(
-            pnlRecallLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlRecallLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(pnlRecallLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(recallDatePicker, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    //.addGap(20,20,20)
-                    .addGroup(pnlRecallLayout.createSequentialGroup()
-                        .addComponent(lblFrequency, javax.swing.GroupLayout.PREFERRED_SIZE, 14, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    )
-                )
-                //.addGap(17,17,17)
-                .addGap(getBetweenFrequencyLabelAndSpinnerGap(),
-                        getBetweenFrequencyLabelAndSpinnerGap(),
-                        getBetweenFrequencyLabelAndSpinnerGap())
-                //.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(pnlRecallLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtRecallDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(spnDentalRecallFrequency, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-    //</editor-fold>
-    //<editor-fold defaultstate="collapsed" desc="Actions panel layout">
-    javax.swing.GroupLayout pnlActionsLayout = new javax.swing.GroupLayout(pnlActions);
-        pnlActions.setLayout(pnlActionsLayout);
-        pnlActionsLayout.setHorizontalGroup(
-            pnlActionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlActionsLayout.createSequentialGroup()
-                //.addGap(87,87,87)
-                .addGap(getBeforeCreateNewPatientButtonGap(),
-                        getBeforeCreateNewPatientButtonGap(),
-                        getBeforeCreateNewPatientButtonGap())
-                .addComponent(btnCreateNewPatient, javax.swing.GroupLayout.PREFERRED_SIZE, 175, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(118, 118, 118)
-                .addComponent(btnUpdateSelectedPatient, javax.swing.GroupLayout.PREFERRED_SIZE, 175, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(scrAppointmentHistory, javax.swing.GroupLayout.PREFERRED_SIZE, 
+                        getAppointmentHistoryScrollPaneWidth(), javax.swing.GroupLayout.PREFERRED_SIZE)
                 //.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGap(118, 118, 118)
-                .addComponent(btnCloseView, javax.swing.GroupLayout.PREFERRED_SIZE, 175, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(86, 86, 86))
+                .addGap(getBetweenAppointmentHistoryAndFetchButtonGap(),
+                        getBetweenAppointmentHistoryAndFetchButtonGap(),
+                        getBetweenAppointmentHistoryAndFetchButtonGap())
+                .addComponent(btnFetchScheduleForSelectedAppointment, javax.swing.GroupLayout.PREFERRED_SIZE, 102, javax.swing.GroupLayout.PREFERRED_SIZE)
+                //.addContainerGap())
+                .addGap(7)
+            )
         );
-        pnlActionsLayout.setVerticalGroup(
-            pnlActionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlActionsLayout.createSequentialGroup()
-                .addGroup(pnlActionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(btnCloseView, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 50, Short.MAX_VALUE)
-                    .addComponent(btnCreateNewPatient, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 50, Short.MAX_VALUE)
-                    .addComponent(btnUpdateSelectedPatient, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 50, Short.MAX_VALUE))
+        pnlAppointmentHistoryLayout.setVerticalGroup(
+            pnlAppointmentHistoryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlAppointmentHistoryLayout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(pnlAppointmentHistoryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(btnFetchScheduleForSelectedAppointment, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(scrAppointmentHistory, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap())
+                //.addGap(5,5,5))
+        );
+//</editor-fold>
+//<editor-fold defaultstate="collapsed" desc="Further details panel layout">
+        javax.swing.GroupLayout pnlFurtherDetailsLayout = new javax.swing.GroupLayout(pnlFurtherDetails);
+        pnlFurtherDetails.setLayout(pnlFurtherDetailsLayout);
+        pnlFurtherDetailsLayout.setHorizontalGroup(
+            pnlFurtherDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlFurtherDetailsLayout.createSequentialGroup()
+                //.addContainerGap()
+                .addGap(getFurtherDetailsGapWidth(),
+                        getFurtherDetailsGapWidth(),
+                        getFurtherDetailsGapWidth())
+                .addGroup(pnlFurtherDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(rdbRequestModalGuardianDetailsView)
+                    .addComponent(rdbRequestModalRecallDetailsView)
+                    .addComponent(rdbRequestModalPhoneEmailDetailsView))
+                //.addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(getFurtherDetailsGapWidth(),
+                        getFurtherDetailsGapWidth(),
+                        getFurtherDetailsGapWidth()))
+        );
+        pnlFurtherDetailsLayout.setVerticalGroup(
+            pnlFurtherDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlFurtherDetailsLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(rdbRequestModalPhoneEmailDetailsView)
+                .addGap(17, 17, 17)
+                .addComponent(rdbRequestModalRecallDetailsView)
+                .addGap(18, 18, 18)
+                .addComponent(rdbRequestModalGuardianDetailsView)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+//</editor-fold>
+//<editor-fold defaultstate="collapsed" desc="Operations panel layout">
+        javax.swing.GroupLayout pnlOperationsLayout = new javax.swing.GroupLayout(pnlOperations);
+        pnlOperations.setLayout(pnlOperationsLayout);
+        pnlOperationsLayout.setHorizontalGroup(
+            pnlOperationsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlOperationsLayout.createSequentialGroup()
+                //.addContainerGap(15, Short.MAX_VALUE)
+                .addGap(8,8,8)
+                .addGroup(pnlOperationsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
+                    .addComponent(btnCloseView, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 103, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnUpdateSelectedPatient, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 103, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnCreateNewPatient, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 103, javax.swing.GroupLayout.PREFERRED_SIZE))
+                //.addContainerGap())
+                //.addGap(15,15,15)
+            )
+        );
+        pnlOperationsLayout.setVerticalGroup(
+            pnlOperationsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlOperationsLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(btnCreateNewPatient, javax.swing.GroupLayout.PREFERRED_SIZE, 51, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(55,55,55)
+                .addComponent(btnUpdateSelectedPatient, javax.swing.GroupLayout.PREFERRED_SIZE, 51, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(55,55,55)
+                //.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 51, Short.MAX_VALUE)
+                .addComponent(btnCloseView, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(55,55,55))
+        );
+//</editor-fold>
+//<editor-fold defaultstate="collapsed" desc="Patient selection panel layout">
+        javax.swing.GroupLayout pnlPatientSelectionLayout = new javax.swing.GroupLayout(pnlPatientSelection);
+        pnlPatientSelection.setLayout(pnlPatientSelectionLayout);
+        pnlPatientSelectionLayout.setHorizontalGroup(
+            pnlPatientSelectionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlPatientSelectionLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(pnlPatientSelectionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(cmbPatientSelector, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(pnlPatientSelectionLayout.createSequentialGroup()
+                        .addGap(28, 28, 28)
+                        .addComponent(btnClearSelection, javax.swing.GroupLayout.PREFERRED_SIZE, 187, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 58, Short.MAX_VALUE)))
+                            
+                //.addContainerGap())
+                .addGap(20,20,20))
+        );
+        pnlPatientSelectionLayout.setVerticalGroup(
+            pnlPatientSelectionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlPatientSelectionLayout.createSequentialGroup()
+                .addGap(23, 23, 23)
+                .addComponent(cmbPatientSelector, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(btnClearSelection)
+                .addGap(36, 36, 36))
+        );
+//</editor-fold>
+//<editor-fold defaultstate="collapsed" desc="Name content panel layout">
+        javax.swing.GroupLayout pnlNameContentLayout = new javax.swing.GroupLayout(pnlNameContent);
+        pnlNameContent.setLayout(pnlNameContentLayout);
+        pnlNameContentLayout.setHorizontalGroup(
+            pnlNameContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlNameContentLayout.createSequentialGroup()
+                .addGroup(pnlNameContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(lblNameForename)
+                    .addComponent(lblNameSurname)
+                    .addComponent(lblNameTitle)
+                    .addComponent(lblNameDOB))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(pnlNameContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(txtNameSurname)
+                    .addComponent(txtNameForename)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlNameContentLayout.createSequentialGroup()
+                        .addGroup(pnlNameContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(pnlNameContentLayout.createSequentialGroup()
+                                .addComponent(cmbNameTitle, javax.swing.GroupLayout.PREFERRED_SIZE, 86, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(lblNameGender))
+                            .addGroup(pnlNameContentLayout.createSequentialGroup()
+                                .addComponent(dobDatePicker, javax.swing.GroupLayout.PREFERRED_SIZE, 141, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(0, 20, Short.MAX_VALUE)))
+                        .addGap(18, 18, 18)
+                        .addGroup(pnlNameContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(lblNameAge)
+                            .addComponent(cmbNameGender, javax.swing.GroupLayout.PREFERRED_SIZE, 102, javax.swing.GroupLayout.PREFERRED_SIZE)))))
+        );
+        pnlNameContentLayout.setVerticalGroup(
+            pnlNameContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlNameContentLayout.createSequentialGroup()
+                .addGroup(pnlNameContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(txtNameForename, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblNameForename))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(pnlNameContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(txtNameSurname, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblNameSurname))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(pnlNameContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lblNameGender)
+                    .addComponent(cmbNameGender, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblNameTitle)
+                    .addComponent(cmbNameTitle, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(pnlNameContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lblNameDOB)
+                    .addComponent(dobDatePicker, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblNameAge))
+                .addGap(0, 0, 0))
+        );
+//</editor-fold>
+//<editor-fold defaultstate="collapsed" desc="Name & particulars panel layout">
+        javax.swing.GroupLayout pnlNameLayout = new javax.swing.GroupLayout(pnlName);
+        pnlName.setLayout(pnlNameLayout);
+        pnlNameLayout.setHorizontalGroup(
+            pnlNameLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlNameLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(pnlNameContent, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
         );
-    //</editor-fold>
-    // </editor-fold>
-    //</editor-fold>
-    
+        pnlNameLayout.setVerticalGroup(
+            pnlNameLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlNameLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(pnlNameContent, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+//</editor-fold>
+
+
+//<editor-fold defaultstate="collapsed" desc="View layout">
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
+        getContentPane().setLayout(layout);
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(pnlFurtherDetails, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                //.addComponent(pnlPatientNotes, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(pnlPatientNotes, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                //.addComponent(pnlFurtherDetails, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(pnlPatientSelection, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        //.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGap(10)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(pnlAddress, javax.swing.GroupLayout.DEFAULT_SIZE, /*javax.swing.GroupLayout.DEFAULT_SIZE*/ 150, Short.MAX_VALUE)
+                            .addComponent(pnlName, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        //.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                          .addGap(10)
+                        .addComponent(pnlOperations, javax.swing.GroupLayout.PREFERRED_SIZE, /*javax.swing.GroupLayout.DEFAULT_SIZE*/ 130, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    //.addComponent(pnlAppointmentHistory, javax.swing.GroupLayout.DEFAULT_SIZE, /*javax.swing.GroupLayout.DEFAULT_SIZE*/ 500, Short.MAX_VALUE))
+                    .addComponent(pnlAppointmentHistory))
+                .addContainerGap())
+        );
+        layout.setVerticalGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                //.addContainerGap()
+                .addGap(4,4,4)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(pnlPatientSelection, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(pnlName, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGap(4,4,4)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(pnlAddress, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(pnlPatientNotes, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(pnlFurtherDetails, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                    .addComponent(pnlOperations, javax.swing.GroupLayout.PREFERRED_SIZE, getOperationsHeight(), javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(pnlAppointmentHistory, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+//</editor-fold>    
+
+        pack();
+
     }
     
     
@@ -1891,7 +2018,7 @@ public class PatientView extends View{
         lblGuardianPatientName = new javax.swing.JLabel();
         lblGuardianIsAPatient = new javax.swing.JLabel();
         cmbIsGuardianAPatient = new javax.swing.JComboBox<YesNoItem>();
-        pnlNotes = new javax.swing.JPanel();
+        pnlPatientNotes = new javax.swing.JPanel();
         txtPatientNotes = new javax.swing.JTextField();
         pnlAppointmentHistory = new javax.swing.JPanel();
         scrAppointmentHistory = new javax.swing.JScrollPane();
@@ -1933,10 +2060,10 @@ public class PatientView extends View{
         lblPostcode = new javax.swing.JLabel();
         txtAddressPostcode = new javax.swing.JTextField();
         pnlName = new javax.swing.JPanel();
-        txtForenames = new javax.swing.JTextField();
-        txtSurname = new javax.swing.JTextField();
-        cmbTitle = new javax.swing.JComboBox<TitleItem>();
-        cmbGender = new javax.swing.JComboBox<GenderItem>();
+        txtNameForenames = new javax.swing.JTextField();
+        txtNameSurname = new javax.swing.JTextField();
+        cmbNameTitle = new javax.swing.JComboBox<TitleItem>();
+        cmbNameGender = new javax.swing.JComboBox<GenderItem>();
         lblTitle = new javax.swing.JLabel();
         lblGender = new javax.swing.JLabel();
         dobDatePicker = new com.github.lgooddatepicker.components.DatePicker();
@@ -1945,7 +2072,7 @@ public class PatientView extends View{
         settings.setAllowKeyboardEditing(false);
         dobDatePicker.setSettings(settings);
         ;
-        lblAge = new javax.swing.JLabel();
+        lblNameAge = new javax.swing.JLabel();
         lblGender1 = new javax.swing.JLabel();
         pnlActions = new javax.swing.JPanel();
         btnCreateNewPatient = new javax.swing.JButton();
@@ -2019,23 +2146,23 @@ public class PatientView extends View{
                 .addContainerGap(25, Short.MAX_VALUE))
         );
 
-        pnlNotes.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createEtchedBorder(), "Notes", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 1, 11))); // NOI18N
-        pnlNotes.setPreferredSize(new java.awt.Dimension(351, 115));
+        pnlPatientNotes.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createEtchedBorder(), "Notes", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 1, 11))); // NOI18N
+        pnlPatientNotes.setPreferredSize(new java.awt.Dimension(351, 115));
 
         txtPatientNotes.setText("jTextField2");
 
-        javax.swing.GroupLayout pnlNotesLayout = new javax.swing.GroupLayout(pnlNotes);
-        pnlNotes.setLayout(pnlNotesLayout);
-        pnlNotesLayout.setHorizontalGroup(
-            pnlNotesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlNotesLayout.createSequentialGroup()
+        javax.swing.GroupLayout pnlPatientNotesLayout = new javax.swing.GroupLayout(pnlPatientNotes);
+        pnlPatientNotes.setLayout(pnlPatientNotesLayout);
+        pnlPatientNotesLayout.setHorizontalGroup(
+            pnlPatientNotesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlPatientNotesLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(txtPatientNotes)
                 .addContainerGap())
         );
-        pnlNotesLayout.setVerticalGroup(
-            pnlNotesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlNotesLayout.createSequentialGroup()
+        pnlPatientNotesLayout.setVerticalGroup(
+            pnlPatientNotesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlPatientNotesLayout.createSequentialGroup()
                 .addComponent(txtPatientNotes, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(0, 3, Short.MAX_VALUE))
         );
@@ -2301,40 +2428,40 @@ public class PatientView extends View{
 
         pnlName.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createEtchedBorder(), "Name & particulars", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Segoe UI", 1, 14), new java.awt.Color(0, 0, 204))); // NOI18N
 
-        txtForenames.getDocument().addDocumentListener(documentListener);
-        txtForenames.addActionListener(new java.awt.event.ActionListener() {
+        txtNameForenames.getDocument().addDocumentListener(documentListener);
+        txtNameForenames.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txtForenamesActionPerformed(evt);
+                txtNameForenamesActionPerformed(evt);
             }
         });
 
-        txtSurname.getDocument().addDocumentListener(documentListener);
-        txtSurname.addActionListener(new java.awt.event.ActionListener() {
+        txtNameSurname.getDocument().addDocumentListener(documentListener);
+        txtNameSurname.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txtSurnameActionPerformed(evt);
+                txtNameSurnameActionPerformed(evt);
             }
         });
 
-        cmbTitle.addItemListener(itemListener);
-        cmbTitle.setEditable(true);
-        cmbTitle.setModel(new javax.swing.DefaultComboBoxModel<>(TitleItem.values()));
-        cmbTitle.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-        cmbTitle.addActionListener(new java.awt.event.ActionListener() {
+        cmbNameTitle.addItemListener(itemListener);
+        cmbNameTitle.setEditable(true);
+        cmbNameTitle.setModel(new javax.swing.DefaultComboBoxModel<>(TitleItem.values()));
+        cmbNameTitle.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        cmbNameTitle.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cmbTitleActionPerformed(evt);
+                cmbNameTitleActionPerformed(evt);
             }
         });
 
-        cmbGender.addItemListener(itemListener);
-        cmbGender.setEditable(true);
-        cmbGender.setModel(new javax.swing.DefaultComboBoxModel<>(GenderItem.values()));
-        cmbGender.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        cmbNameGender.addItemListener(itemListener);
+        cmbNameGender.setEditable(true);
+        cmbNameGender.setModel(new javax.swing.DefaultComboBoxModel<>(GenderItem.values()));
+        cmbNameGender.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
         lblTitle.setText("Title");
 
         lblGender.setText("Gender");
 
-        lblAge.setText("(age)");
+        lblNameAge.setText("(age)");
 
         lblGender1.setText("DOB");
 
@@ -2344,37 +2471,37 @@ public class PatientView extends View{
             pnlNameLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlNameLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(txtForenames, javax.swing.GroupLayout.PREFERRED_SIZE, 134, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(txtNameForenames, javax.swing.GroupLayout.PREFERRED_SIZE, 134, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
-                .addComponent(txtSurname, javax.swing.GroupLayout.PREFERRED_SIZE, 206, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(txtNameSurname, javax.swing.GroupLayout.PREFERRED_SIZE, 206, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(lblTitle, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(cmbTitle, javax.swing.GroupLayout.PREFERRED_SIZE, 68, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(cmbNameTitle, javax.swing.GroupLayout.PREFERRED_SIZE, 68, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(lblGender)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(cmbGender, javax.swing.GroupLayout.PREFERRED_SIZE, 92, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(cmbNameGender, javax.swing.GroupLayout.PREFERRED_SIZE, 92, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(lblGender1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(dobDatePicker, javax.swing.GroupLayout.PREFERRED_SIZE, 141, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
-                .addComponent(lblAge)
+                .addComponent(lblNameAge)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         pnlNameLayout.setVerticalGroup(
             pnlNameLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlNameLayout.createSequentialGroup()
                 .addGroup(pnlNameLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(txtForenames, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(txtSurname, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(cmbTitle, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(cmbGender, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtNameForenames, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtNameSurname, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(cmbNameTitle, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(cmbNameGender, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(lblTitle)
                     .addComponent(lblGender)
                     .addComponent(dobDatePicker, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(lblAge)
+                    .addComponent(lblNameAge)
                     .addComponent(lblGender1))
                 .addGap(0, 4, Short.MAX_VALUE))
         );
@@ -2467,7 +2594,7 @@ public class PatientView extends View{
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                        .addComponent(pnlNotes, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 944, Short.MAX_VALUE)
+                        .addComponent(pnlPatientNotes, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 944, Short.MAX_VALUE)
                         .addComponent(pnlAddress, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(pnlName, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addGroup(layout.createSequentialGroup()
@@ -2494,8 +2621,8 @@ public class PatientView extends View{
                 .addComponent(pnlName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(pnlAddress, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(pnlNotes, javax.swing.GroupLayout.PREFERRED_SIZE, 47, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 9, Short.MAX_VALUE)
+                .addComponent(pnlPatientNotes, javax.swing.GroupLayout.PREFERRED_SIZE, 47, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(pnlRecall, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -2512,7 +2639,7 @@ public class PatientView extends View{
     private void cmbSelectGuardianActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbSelectGuardianActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_cmbSelectGuardianActionPerformed
-
+/*
     private void cmbIsGuardianAPatientActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbIsGuardianAPatientActionPerformed
         if (this.cmbIsGuardianAPatient.getSelectedItem()!=null){
             switch ((YesNoItem)this.cmbIsGuardianAPatient.getSelectedItem()){
@@ -2525,7 +2652,7 @@ public class PatientView extends View{
             }
         }
     }//GEN-LAST:event_cmbIsGuardianAPatientActionPerformed
-
+*/
     private void btnFetchScheduleForSelectedAppointmentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnFetchScheduleForSelectedAppointmentActionPerformed
         // TODO add your handling code here:
         if (this.tblAppointmentHistory.getSelectedRow()==-1){
@@ -2704,17 +2831,17 @@ public class PatientView extends View{
         // TODO add your handling code here:
     }//GEN-LAST:event_txtAddressLine1ActionPerformed
 
-    private void cmbTitleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbTitleActionPerformed
-        if (this.cmbTitle.getSelectedItem() != null){
-            if (this.cmbTitle.getSelectedItem().equals(TitleItem.Untitled)){
-                this.cmbTitle.setSelectedIndex(-1);
+    private void cmbNameTitleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbNameTitleActionPerformed
+        if (this.cmbNameTitle.getSelectedItem() != null){
+            if (this.cmbNameTitle.getSelectedItem().equals(TitleItem.Untitled)){
+                this.cmbNameTitle.setSelectedIndex(-1);
             }
         }
-    }//GEN-LAST:event_cmbTitleActionPerformed
+    }//GEN-LAST:event_cmbNameTitleActionPerformed
 
-    private void txtForenamesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtForenamesActionPerformed
+    private void txtNameForenamesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtNameForenamesActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_txtForenamesActionPerformed
+    }//GEN-LAST:event_txtNameForenamesActionPerformed
 
     private void mniRecoverDeletedPatientActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mniRecoverDeletedPatientActionPerformed
         setPatientSelectionMode(PatientSelectionMode.PATIENT_RECOVERY);
@@ -2740,6 +2867,7 @@ public class PatientView extends View{
         */
     }//GEN-LAST:event_mniRecoverDeletedPatientActionPerformed
 
+    
     private void cmbPatientSelectorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbPatientSelectorActionPerformed
         ViewController.PatientViewControllerActionEvent event = null; 
         switch(getPatientSelectionMode()){
@@ -2760,9 +2888,9 @@ public class PatientView extends View{
         }
     }//GEN-LAST:event_cmbPatientSelectorActionPerformed
 
-    private void txtSurnameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtSurnameActionPerformed
+    private void txtNameSurnameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtNameSurnameActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_txtSurnameActionPerformed
+    }//GEN-LAST:event_txtNameSurnameActionPerformed
 
     private void btnClearSelectionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClearSelectionActionPerformed
         getMyController().getDescriptor().getViewDescription().setPatient(new Patient());
@@ -2780,17 +2908,16 @@ public class PatientView extends View{
     private javax.swing.JButton btnCreateNewPatient;
     private javax.swing.JButton btnFetchScheduleForSelectedAppointment;
     private javax.swing.JButton btnUpdateSelectedPatient;
-    private javax.swing.JComboBox<GenderItem> cmbGender;
     private javax.swing.JComboBox<YesNoItem> cmbIsGuardianAPatient;
+    private javax.swing.JComboBox<GenderItem> cmbNameGender;
+    private javax.swing.JComboBox<TitleItem> cmbNameTitle;
     private javax.swing.JComboBox<Patient> cmbPatientSelector;
     private javax.swing.JComboBox<model.Patient> cmbSelectGuardian;
-    private javax.swing.JComboBox<TitleItem> cmbTitle;
     private com.github.lgooddatepicker.components.DatePicker dobDatePicker;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JPopupMenu.Separator jSeparator2;
     private javax.swing.JPopupMenu.Separator jSeparator3;
-    private javax.swing.JLabel lblAge;
     private javax.swing.JLabel lblCounty;
     private javax.swing.JLabel lblEmail;
     private javax.swing.JLabel lblGender;
@@ -2798,6 +2925,7 @@ public class PatientView extends View{
     private javax.swing.JLabel lblGuardianIsAPatient;
     private javax.swing.JLabel lblGuardianPatientName;
     private javax.swing.JLabel lblLine1;
+    private javax.swing.JLabel lblNameAge;
     private javax.swing.JLabel lblPhone1;
     private javax.swing.JLabel lblPhone2;
     private javax.swing.JLabel lblPostcode;
@@ -2815,7 +2943,7 @@ public class PatientView extends View{
     private javax.swing.JPanel pnlAppointmentHistory;
     private javax.swing.JPanel pnlGuardianDetails;
     private javax.swing.JPanel pnlName;
-    private javax.swing.JPanel pnlNotes;
+    private javax.swing.JPanel pnlPatientNotes;
     private javax.swing.JPanel pnlPatientSelection;
     private javax.swing.JPanel pnlPhones;
     private javax.swing.JPanel pnlRecall;
@@ -2829,21 +2957,22 @@ public class PatientView extends View{
     private javax.swing.JTextField txtAddressPostcode;
     private javax.swing.JTextField txtAddressTown;
     private javax.swing.JTextField txtEmail;
-    private javax.swing.JTextField txtForenames;
+    private javax.swing.JTextField txtNameForenames;
+    private javax.swing.JTextField txtNameSurname;
     private javax.swing.JTextField txtPatientNotes;
     private javax.swing.JTextField txtPhone1;
     private javax.swing.JTextField txtPhone2;
     private javax.swing.JTextField txtRecallDate;
-    private javax.swing.JTextField txtSurname;
     // End of variables declaration//GEN-END:variables
    */
+    /*
     private javax.swing.JButton btnClearSelection;
     private javax.swing.JButton btnFetchScheduleForSelectedAppointment;
-    private javax.swing.JComboBox<PatientView.GenderItem> cmbGender;
+    private javax.swing.JComboBox<PatientView.GenderItem> cmbNameGender;
     private javax.swing.JComboBox<PatientView.YesNoItem> cmbIsGuardianAPatient;
     private javax.swing.JComboBox<Patient> cmbPatientSelector;
     private javax.swing.JComboBox<model.Patient> cmbSelectGuardian;
-    private javax.swing.JComboBox<PatientView.TitleItem> cmbTitle;
+    private javax.swing.JComboBox<PatientView.TitleItem> cmbNameTitle;
     private com.github.lgooddatepicker.components.DatePicker dobDatePicker;
     private javax.swing.JButton btnUpdateSelectedPatient;
     private javax.swing.JButton btnCloseView;
@@ -2856,7 +2985,7 @@ public class PatientView extends View{
     private javax.swing.JPopupMenu.Separator jSeparator2;
     private javax.swing.JPopupMenu.Separator jSeparator3;
     private javax.swing.JTextField txtPhonesEmail;
-    private javax.swing.JLabel lblAge;
+    private javax.swing.JLabel lblNameAge;
     private javax.swing.JLabel lblAddressCounty;
     private javax.swing.JLabel lblNameGender;
     private javax.swing.JLabel lblNameDOB;
@@ -2880,7 +3009,7 @@ public class PatientView extends View{
     private javax.swing.JPanel pnlAppointmentHistory;
     private javax.swing.JPanel pnlGuardianDetails;
     private javax.swing.JPanel pnlName;
-    private javax.swing.JPanel pnlNotes;
+    private javax.swing.JPanel pnlPatientNotes;
     private javax.swing.JPanel pnlPhones;
     private javax.swing.JPanel pnlRecall;
     private javax.swing.JPanel pnlPatientSelection;
@@ -2893,63 +3022,23 @@ public class PatientView extends View{
     private javax.swing.JTextField txtAddressLine2;
     private javax.swing.JTextField txtAddressPostcode;
     private javax.swing.JTextField txtAddressTown;
-    private javax.swing.JTextField txtForenames;
+    private javax.swing.JTextField txtNameForenames;
     private javax.swing.JTextField txtPatientNotes;
     private javax.swing.JTextField txtPhone1;
     private javax.swing.JTextField txtPhone2;
     private javax.swing.JTextField txtRecallDate;
-    private javax.swing.JTextField txtSurname;
+    private javax.swing.JTextField txtNameSurname;
     private DatePicker dobPicker;
     private DatePicker dentalRecallPicker;
     private DatePicker hygieneRecallPicker;
-
-    class RecallDatePickerDateChangeListener implements DateChangeListener {
-        @Override
-        public void dateChanged(DateChangeEvent event) {
-            LocalDate date = event.getNewDate();
-            if (date != null) {
-                txtRecallDate.setText(date.format(recallFormat));
-            }
-            else txtRecallDate.setText("");
-        }
-    }
-    class DOBDatePickerDateChangeListener implements DateChangeListener {
-        @Override
-        public void dateChanged(DateChangeEvent event) {
-            /**
-             * Update logged at 30/10/2021 08:32
-             * inherited view status (set if any changes have been made to form since its initialisation)
-             * is initialised to true (date changed)
-             */
-            setViewStatus(true);
-            LocalDate date = event.getNewDate();
-            if (date != null) {
-                lblAge.setText("(" + String.valueOf(getAge(date)) + " yrs)");
-                if (getAge(date) > 17){
-                    PatientView.this.pnlGuardianDetails.setEnabled(false);
-                    PatientView.this.cmbIsGuardianAPatient.setSelectedIndex(-1);
-                    PatientView.this.cmbIsGuardianAPatient.setEnabled(false);
-                    PatientView.this.cmbSelectGuardian.setEnabled(false);
-                }
-                else {
-                    PatientView.this.pnlGuardianDetails.setEnabled(true);
-                    PatientView.this.cmbIsGuardianAPatient.setEnabled(true);
-                }
-            }
-            else{
-                PatientView.this.cmbIsGuardianAPatient.setSelectedIndex(-1);
-                PatientView.this.cmbIsGuardianAPatient.setEnabled(false);
-                PatientView.this.cmbSelectGuardian.setEnabled(false);
-            }         
-        }
-    }
+    */
     
-    /*
+    
     private void cmbSelectPatientActionPerformed(){
-        if (this.cmbSelectPatient.getSelectedItem()!=null){
+        if (this.cmbPatientSelector.getSelectedItem()!=null){
             Patient patient = 
-                    (Patient)this.cmbSelectPatient.getSelectedItem();
-            getViewDescriptor().getViewDescription().setPatient(patient);
+                    (Patient)this.cmbPatientSelector.getSelectedItem();
+            this.getMyController().getDescriptor().getViewDescription().setPatient(patient);
             ActionEvent actionEvent = new ActionEvent(
                     this,ActionEvent.ACTION_PERFORMED,
                     ViewController.PatientViewControllerActionEvent.PATIENT_REQUEST.toString());
@@ -2961,17 +3050,20 @@ public class PatientView extends View{
                 ViewController.PatientViewControllerActionEvent.
                         VIEW_CHANGED_NOTIFICATION.toString());
         this.getMyController().actionPerformed(actionEvent);
-    } 
-*/
+    }
+    
     private boolean validateMinimumPatientDetails(){
         boolean errorOnExit = false;
-        if (String.valueOf(cmbIsGuardianAPatient.getSelectedItem()).equals("Yes")){
-            if (this.cmbSelectGuardian.getSelectedIndex() == -1){
-                JOptionPane.showMessageDialog(this, "Patient guardian has not been specified");
-                errorOnExit = true;
-            }
-        }
-        else if (this.cmbGender.getSelectedIndex()==-1){
+        //
+        //if (String.valueOf(cmbIsGuardianAPatient.getSelectedItem()).equals("Yes")){
+        //    if (this.cmbSelectGuardian.getSelectedIndex() == -1){
+        //        JOptionPane.showMessageDialog(this, "Patient guardian has not been specified");
+        //        errorOnExit = true;
+        //    }
+        //}
+        //
+        //else 
+        if (this.cmbNameGender.getSelectedIndex()==-1){
             JOptionPane.showMessageDialog(this, "Patient gender must be specified");
             errorOnExit = true;
         }
@@ -2983,15 +3075,118 @@ public class PatientView extends View{
             JOptionPane.showMessageDialog(this, "Patient surname must be specified");
             errorOnExit = true;
         }
-        else if (this.getPhone1()==null){
-            JOptionPane.showMessageDialog(this, "Patient phone 1 must be specified");
-            errorOnExit = true;
-        }
-        else if (this.getPhone1().isEmpty()){
-            JOptionPane.showMessageDialog(this, "Patient phone 1 must be specified");
-            errorOnExit = true;
-        }
+        //else if (this.getPhone1()==null){
+        //    JOptionPane.showMessageDialog(this, "Patient phone 1 must be specified");
+        //    errorOnExit = true;
+        //}
+        //else if (this.getPhone1().isEmpty()){
+        //    JOptionPane.showMessageDialog(this, "Patient phone 1 must be specified");
+        //    errorOnExit = true;
+        //}
         return !errorOnExit;
     }
-
+    
+    // Variables declaration - do not modify  
+    private javax.swing.JTable tblAppointmentHistory;
+    private javax.swing.JMenuBar jMenuBar1;
+    private javax.swing.JMenuItem mniCloseView;
+    private javax.swing.JPopupMenu.Separator jSeparator2;
+    private javax.swing.JPopupMenu.Separator jSeparator3;
+    private javax.swing.JButton btnClearSelection;
+    private javax.swing.JButton btnCloseView;
+    private javax.swing.JButton btnCreateNewPatient;
+    private javax.swing.JButton btnFetchScheduleForSelectedAppointment;
+    private javax.swing.JButton btnUpdateSelectedPatient;
+    private javax.swing.ButtonGroup buttonGroup1;
+    private javax.swing.JComboBox<PatientView.GenderItem> cmbNameGender;
+    private javax.swing.JComboBox<PatientView.TitleItem> cmbNameTitle;
+    private javax.swing.JComboBox<Patient> cmbPatientSelector;
+    private com.github.lgooddatepicker.components.DatePicker dobDatePicker;
+    private javax.swing.JScrollPane scrPatientNotes;
+    private javax.swing.JLabel lblAddressCounty;
+    private javax.swing.JLabel lblAddressLine1;
+    private javax.swing.JLabel lblAddressLine2;
+    private javax.swing.JLabel lblAddressPostcode;
+    private javax.swing.JLabel lblAddressTown;
+    private javax.swing.JLabel lblNameAge;
+    private javax.swing.JLabel lblNameDOB;
+    private javax.swing.JLabel lblNameForename;
+    private javax.swing.JLabel lblNameGender;
+    private javax.swing.JLabel lblNameSurname;
+    private javax.swing.JLabel lblNameTitle;
+    private javax.swing.JPanel pnlAddress;
+    private javax.swing.JPanel pnlAppointmentHistory;
+    private javax.swing.JPanel pnlFurtherDetails;
+    private javax.swing.JPanel pnlName;
+    private javax.swing.JPanel pnlNameContent;
+    private javax.swing.JPanel pnlOperations;
+    private javax.swing.JPanel pnlPatientAddressContent;
+    private javax.swing.JPanel pnlPatientNotes;
+    private javax.swing.JPanel pnlPatientSelection;
+    private javax.swing.JRadioButton rdbRequestModalGuardianDetailsView;
+    private javax.swing.JRadioButton rdbRequestModalRecallDetailsView;
+    private javax.swing.JRadioButton rdbRequestModalPhoneEmailDetailsView;
+    private javax.swing.JScrollPane scrAppointmentHistory;
+    private javax.swing.JTextArea txtPatientNotes;
+    
+    private javax.swing.JTextField txtAddressCounty;
+    private javax.swing.JTextField txtAddressLine1;
+    private javax.swing.JTextField txtAddressPostcode;
+    private javax.swing.JTextField txtAddressTown;
+    private javax.swing.JTextField txtNameForename;
+    private javax.swing.JTextField txtAddressLine2;
+    private javax.swing.JTextField txtNameSurname;
+    private javax.swing.JMenuItem mniCreateNewPatient;
+    private javax.swing.JMenuItem mniDeleteSelectedPatient;
+    private javax.swing.JMenuItem mniRecoverDeletedPatient;
+    private javax.swing.JMenuItem mniUpdateSelectedPatient;
+    private javax.swing.JMenu mnuActions;
+    // End of variables declaration   
+    
+    
+    
+    
+    class RecallDatePickerDateChangeListener implements DateChangeListener {
+        @Override
+        public void dateChanged(DateChangeEvent event) {
+            //LocalDate date = event.getNewDate();
+            //if (date != null) {
+            //    txtRecallDate.setText(date.format(recallFormat));
+            //}
+            //else txtRecallDate.setText("");
+        }
+    }
+    
+    class DOBDatePickerDateChangeListener implements DateChangeListener {
+        @Override
+        public void dateChanged(DateChangeEvent event) {
+            /**
+             * Update logged at 30/10/2021 08:32
+             * inherited view status (set if any changes have been made to form since its initialisation)
+             * is initialised to true (date changed)
+             */
+            setViewStatus(true);
+            LocalDate date = event.getNewDate();
+            if (date != null) {
+                lblNameAge.setText("(" + String.valueOf(getAge(date)) + " yrs)");
+                
+                //if (getAge(date) > 17){
+                //    PatientView.this.pnlGuardianDetails.setEnabled(false);
+                //    PatientView.this.cmbIsGuardianAPatient.setSelectedIndex(-1);
+                //    PatientView.this.cmbIsGuardianAPatient.setEnabled(false);
+                //    PatientView.this.cmbSelectGuardian.setEnabled(false);
+                //}
+                //else {
+                //    PatientView.this.pnlGuardianDetails.setEnabled(true);
+                //    PatientView.this.cmbIsGuardianAPatient.setEnabled(true);
+                //}
+            //}
+            //else{
+            //    PatientView.this.cmbIsGuardianAPatient.setSelectedIndex(-1);
+            //    PatientView.this.cmbIsGuardianAPatient.setEnabled(false);
+            //    PatientView.this.cmbSelectGuardian.setEnabled(false);
+            }         
+        }
+    }
 }
+
