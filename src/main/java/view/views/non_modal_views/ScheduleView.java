@@ -233,22 +233,20 @@ public class ScheduleView extends View{
         DatePickerSettings dps = dayDatePicker.getSettings();
         dps.setVetoPolicy(vetoPolicy);
         dps.setHighlightPolicy(new LeaveEditor());
-      
-        //LocalDate day = getMyController().getDescriptor().getViewDescription().getScheduleDay();
+     
         LocalDate day = getMyController().getDescriptor().getControllerDescription().getScheduleDay();
         if (!vetoPolicy.isDateAllowed(day)){
-            HashMap<DayOfWeek, Boolean> allDaysSurgeryDays = new HashMap<>();
-            allDaysSurgeryDays.put(DayOfWeek.MONDAY, true);
-            allDaysSurgeryDays.put(DayOfWeek.TUESDAY, true);
-            allDaysSurgeryDays.put(DayOfWeek.WEDNESDAY, true);
-            allDaysSurgeryDays.put(DayOfWeek.THURSDAY, true);
-            allDaysSurgeryDays.put(DayOfWeek.FRIDAY, true);
-            allDaysSurgeryDays.put(DayOfWeek.SATURDAY, true);
-            allDaysSurgeryDays.put(DayOfWeek.SUNDAY, true);
-            dps.setVetoPolicy(new AppointmentDateVetoPolicy(allDaysSurgeryDays));
-            dayDatePicker.setDate(day);
-            refreshAppointmentTableWithCurrentlySelectedDate();
-            dps.setVetoPolicy(vetoPolicy);
+            switch(getMyController().
+                    getDescriptor().
+                    getControllerDescription().
+                    getViewMode()){
+            case UNREFERENCED_SCHEDULE_VIEW:
+                day = this.vetoPolicy.getNextAvailableDateTo(day);
+                break;
+            case REFERENCED_SCHEDULE_VIEW:
+ 
+                break;
+            }
         }
         dayDatePicker.setDate(day);
         ImageIcon icon = new ImageIcon(this.getClass().getResource("/datepickerbutton1.png"));

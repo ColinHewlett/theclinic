@@ -232,6 +232,9 @@ public class DesktopViewController extends ViewController{
                  * -- the appointment date is used in the construction of a new AppointmentVC and associated appointment schedule view which includes the selected patient's appointment
                  */
                 PatientViewController patientViewController = (PatientViewController)e.getSource();
+                patientViewController.getDescriptor()
+                        .getControllerDescription()
+                        .setViewMode(ViewController.ViewMode.REFERENCED_SCHEDULE_VIEW);
                 createNewAppointmentScheduleViewController(patientViewController.getDescriptor());
                 break;
         }
@@ -385,6 +388,7 @@ public class DesktopViewController extends ViewController{
                     break;
                 }
                 case SCHEDULE_VIEW_CONTROLLER_REQUEST:{
+                    
                     doRequestForScheduleViewController((DesktopView)e.getSource());
                     break;
                 }
@@ -542,7 +546,13 @@ public class DesktopViewController extends ViewController{
         }
         if (activeViewController!=null)
             activeViewController.getView().toFront();
-        else createNewAppointmentScheduleViewController(null);
+        else {
+            Descriptor descriptor = new Descriptor();
+            descriptor.getControllerDescription().setViewMode(
+                    ViewController.ViewMode.UNREFERENCED_SCHEDULE_VIEW);
+            descriptor.getControllerDescription().setScheduleDay(LocalDate.now());
+            createNewAppointmentScheduleViewController(null);
+        }
     }
     
     private void doRequestForScheduleViewController(ScheduleViewController vc){

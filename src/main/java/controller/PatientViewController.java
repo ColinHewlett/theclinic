@@ -183,6 +183,8 @@ public class PatientViewController extends ViewController {
      */
     private void doScheduleViewControllerRequest(){  
         //setEntityDescriptorFromView(view.getViewDescriptor());
+        getDescriptor().getControllerDescription().setScheduleDay(
+                getDescriptor().getViewDescription().getScheduleDay());
         ActionEvent actionEvent = new ActionEvent(
             this,ActionEvent.ACTION_PERFORMED,
             ViewController.PatientViewControllerActionEvent.SCHEDULE_VIEW_CONTROLLER_REQUEST.toString());

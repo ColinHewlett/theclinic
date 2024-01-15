@@ -1593,13 +1593,14 @@ public class PatientView extends View{
         scrPatientNotes.setViewportView(txtPatientNotes);
         
         
-
+/*
         btnFetchScheduleForSelectedAppointment.setText("selected appointment");
         btnFetchScheduleForSelectedAppointment.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnFetchScheduleForSelectedAppointmentActionPerformed(evt);
             }
         });
+        */
         pnlNameContent = new javax.swing.JPanel();
         pnlPatientAddressContent = new javax.swing.JPanel();
         pnlFurtherDetails = new javax.swing.JPanel();
