@@ -21,6 +21,7 @@ import view.View;
 import view.views.non_modal_views.DesktopView;
 import javax.swing.ImageIcon;
 
+
 /**
  *
  * @author colin
@@ -92,6 +93,46 @@ public class ModalPatientRecallEditorView extends ModalView{
                 .getControllerDescription().getPatient();
         setRecallDate(patient.getRecall().getDentalDate());
         setRecallFrequency(patient.getRecall().getDentalFrequency());
+        setHasRecallDateChanged(false);
+        setHasRecallFrequencyChanged(false);
+        dpsRecallDatePicker.addDateChangeListener(
+                new ModalPatientRecallEditorView.
+                        RecallDatePickerDateChangeListener());
+    }
+    
+    /**
+     * Sends an action event to the view controller to save recall data
+     * Only called if changes have been made to patients recall data
+     */
+    private void doSaveRecallChanges(){
+        Patient patient = getMyController()
+                .getDescriptor()
+                .getControllerDescription()
+                .getPatient();
+
+        if (getHasRecallDateChanged()){
+            patient.getRecall().setDentalDate(getRecallDate());
+            getMyController()
+                    .getDescriptor()
+                    .getViewDescription()
+                    .setPatient(patient);
+        }
+        if (getHasRecallFrequencyChanged()){
+            patient.getRecall().setDentalFrequency(getRecallFrequency());
+            getMyController()
+                    .getDescriptor()
+                    .getViewDescription()
+                    .setPatient(patient);
+        }
+        if (getHasRecallDateChanged() || getHasRecallFrequencyChanged()){
+            ActionEvent actionEvent = new ActionEvent(
+                ModalPatientRecallEditorView.this,ActionEvent.ACTION_PERFORMED, 
+                ViewController
+                        .PatientViewControllerActionEvent
+                        .PATIENT_RECALL_EDITOR_VIEW_CHANGE
+                        .toString());
+            getMyController().actionPerformed(actionEvent);
+        }
     }
     
     private void initComponents() {
@@ -109,15 +150,31 @@ public class ModalPatientRecallEditorView extends ModalView{
         btnCancel = new javax.swing.JButton();
         this.spnRecallFrequency.setModel(new SpinnerNumberModel(6,0,12,3));
         btnSaveDetails.setText("Save");
-
-        btnCancel.setText("Cancel");
+        btnCancel.setText("Close");
+        
+        //event handlers
         btnCancel.addActionListener(new java.awt.event.ActionListener() {
             @Override
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 try{
-                    ModalPatientRecallEditorView.this.setClosed(true);
-                }
-                catch (PropertyVetoException ex){
+                    int reply = 0;
+                    if (getHasRecallDateChanged() || getHasRecallFrequencyChanged()){
+                        String message = "Save changes before closing?";
+                        String[] options = {"Yes", "No"};
+                        reply = JOptionPane.showOptionDialog(
+                                ModalPatientRecallEditorView.this,
+                                message,null,
+                                JOptionPane.YES_NO_OPTION,
+                                JOptionPane.INFORMATION_MESSAGE,
+                                null,
+                                options,
+                                null);
+                    }
+                    if (reply == JOptionPane.YES_OPTION){
+                        doSaveRecallChanges();
+                    }
+                    ModalPatientRecallEditorView.this.setClosed(true);   
+                }catch (PropertyVetoException ex){
 
                 }
             }
@@ -132,37 +189,15 @@ public class ModalPatientRecallEditorView extends ModalView{
         btnSaveDetails.addActionListener(new java.awt.event.ActionListener() {
             @Override
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                
-                Patient patient = getMyController()
-                        .getDescriptor()
-                        .getControllerDescription()
-                        .getPatient();
-                
-                if (getHasRecallDateChanged()){
-                    patient.getRecall().setDentalDate(getRecallDate());
-                    getMyController()
-                            .getDescriptor()
-                            .getViewDescription()
-                            .setPatient(patient);
+                doSaveRecallChanges();
+                try{
+                    ModalPatientRecallEditorView.this.setClosed(true);
                 }
-                if (getHasRecallFrequencyChanged()){
-                    patient.getRecall().setDentalFrequency(getRecallFrequency());
-                    getMyController()
-                            .getDescriptor()
-                            .getViewDescription()
-                            .setPatient(patient);
+                catch (PropertyVetoException ex){
+
                 }
-                if (getHasRecallDateChanged() || getHasRecallFrequencyChanged()){
-                    ActionEvent actionEvent = new ActionEvent(
-                        ModalPatientRecallEditorView.this,ActionEvent.ACTION_PERFORMED, 
-                        ViewController
-                                .PatientViewControllerActionEvent
-                                .PATIENT_RECALL_EDITOR_VIEW_CHANGE
-                                .toString());
-                getMyController().actionPerformed(actionEvent);
-                }
-                
             }
+            
         });
         ImageIcon icon = new ImageIcon(this.getClass().getResource("/datepickerbutton1.png"));
         datePickerButton = this.dpsRecallDatePicker.getComponentToggleCalendarButton();
