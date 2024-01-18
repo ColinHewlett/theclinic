@@ -7,13 +7,14 @@ package view.views.modal_views;
 import com.github.lgooddatepicker.components.DatePickerSettings;
 import com.github.lgooddatepicker.optionalusertools.DateChangeListener;
 import com.github.lgooddatepicker.zinternaltools.DateChangeEvent;
-import controller.Descriptor;
 import controller.ViewController;
+import java.awt.event.ActionEvent;
 import model.Patient;
-import java.beans.PropertyChangeEvent;
 import java.beans.PropertyVetoException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import javax.swing.event.ChangeListener;
+import javax.swing.event.ChangeEvent;
 import javax.swing.JOptionPane;
 import javax.swing.SpinnerNumberModel;
 import view.View;
@@ -25,8 +26,24 @@ import javax.swing.ImageIcon;
  * @author colin
  */
 public class ModalPatientRecallEditorView extends ModalView{
+    boolean hasRecallDateChanged = false;
+    boolean hasRecallFrequencyChanged = false;
     
-    DateTimeFormatter recallFormat = DateTimeFormatter.ofPattern("MMMM/yyyy");
+    private boolean getHasRecallDateChanged(){
+        return hasRecallDateChanged;
+    }
+    
+    private void setHasRecallFrequencyChanged(boolean value){
+        hasRecallFrequencyChanged = value;
+    }
+    
+    private boolean getHasRecallFrequencyChanged(){
+        return hasRecallFrequencyChanged;
+    }
+    
+    private void setHasRecallDateChanged(boolean value){
+        hasRecallDateChanged = value;
+    }
     
     private LocalDate getRecallDate(){
         return this.dpsRecallDatePicker.getDate();
@@ -46,16 +63,10 @@ public class ModalPatientRecallEditorView extends ModalView{
     class RecallDatePickerDateChangeListener implements DateChangeListener {
         @Override
         public void dateChanged(DateChangeEvent event) {
-            /*
-            LocalDate date = event.getNewDate();
-            if (date != null) {
-                txtRecallDate.setText(date.format(recallFormat));
-            }
-            else txtRecallDate.setText("");
-            */
+            setHasRecallDateChanged(true);
         }
     }
-    
+
     /**
      * 
      * @param myViewType
@@ -74,7 +85,7 @@ public class ModalPatientRecallEditorView extends ModalView{
     @Override
     public void initialiseView(){
         initComponents();
-        setTitle("Patient phone/email editor");
+        setTitle("Patient recall editor");
         setVisible(true);
         Patient patient = getMyController()
                 .getDescriptor()
@@ -88,7 +99,7 @@ public class ModalPatientRecallEditorView extends ModalView{
         pnlRecallDate = new javax.swing.JPanel();
         dpsRecallDatePicker = new com.github.lgooddatepicker.components.DatePicker();
         DatePickerSettings settings = new DatePickerSettings();
-        settings.setFormatForDatesCommonEra(DateTimeFormatter.ofPattern("MMMM/yyyy"));
+        settings.setFormatForDatesCommonEra(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
         settings.setAllowKeyboardEditing(false);
         dpsRecallDatePicker.setSettings(settings);
         pnlRecallFrequency = new javax.swing.JPanel();
@@ -112,7 +123,47 @@ public class ModalPatientRecallEditorView extends ModalView{
             }
         });
         
+        spnRecallFrequency.addChangeListener(new ChangeListener(){
+            public void stateChanged(ChangeEvent e) {
+                setHasRecallFrequencyChanged(true);
+            }    
+        });
         
+        btnSaveDetails.addActionListener(new java.awt.event.ActionListener() {
+            @Override
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                
+                Patient patient = getMyController()
+                        .getDescriptor()
+                        .getControllerDescription()
+                        .getPatient();
+                
+                if (getHasRecallDateChanged()){
+                    patient.getRecall().setDentalDate(getRecallDate());
+                    getMyController()
+                            .getDescriptor()
+                            .getViewDescription()
+                            .setPatient(patient);
+                }
+                if (getHasRecallFrequencyChanged()){
+                    patient.getRecall().setDentalFrequency(getRecallFrequency());
+                    getMyController()
+                            .getDescriptor()
+                            .getViewDescription()
+                            .setPatient(patient);
+                }
+                if (getHasRecallDateChanged() || getHasRecallFrequencyChanged()){
+                    ActionEvent actionEvent = new ActionEvent(
+                        ModalPatientRecallEditorView.this,ActionEvent.ACTION_PERFORMED, 
+                        ViewController
+                                .PatientViewControllerActionEvent
+                                .PATIENT_RECALL_EDITOR_VIEW_CHANGE
+                                .toString());
+                getMyController().actionPerformed(actionEvent);
+                }
+                
+            }
+        });
         ImageIcon icon = new ImageIcon(this.getClass().getResource("/datepickerbutton1.png"));
         datePickerButton = this.dpsRecallDatePicker.getComponentToggleCalendarButton();
         datePickerButton.setText("");

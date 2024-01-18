@@ -230,6 +230,7 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         PATIENT_GUARDIAN_EDITOR_VIEW_REQUEST,
         PATIENT_NOTES_EDITOR_VIEW_REQUEST,
         
+        PATIENT_RECALL_EDITOR_VIEW_CHANGE,
         PATIENT_GUARDIAN_REQUEST,
         PATIENT_GUARDIANS_REQUEST,
         DELETED_PATIENT_REQUEST,
