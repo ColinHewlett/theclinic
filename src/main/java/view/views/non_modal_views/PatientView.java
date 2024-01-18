@@ -85,6 +85,7 @@ public class PatientView extends View implements ActionListener{
     private final String DISPLAY_RECALL_EDITOR_VIEW ="Recall details";
     private final String DISPLAY_GUARDIAN_EDITOR_VIEW = "Guardian (if patient)";
     private final String DISPLAY_PHONE_EMAIL_EDITOR_VIEW = "Phone/email";
+    private final String DISPLAY_PATIENT_NOTES_EDITOR_VIEW = "Patient notes editor";
     
     private enum PatientSelectionMode{ PATIENT_SELECTION, 
                                        PATIENT_RECOVERY}
@@ -486,7 +487,7 @@ public class PatientView extends View implements ActionListener{
             }
         });
         
-        //this.spnDentalRecallFrequency.setModel(new SpinnerNumberModel(6,0,12,3));
+        
         /*
         tblAppointmentHistory.setModel(new Appointments3ColumnTableModel());
         ViewController.setJTableColumnProperties(
@@ -505,9 +506,12 @@ public class PatientView extends View implements ActionListener{
         JButton datePickerButton = dobDatePicker.getComponentToggleCalendarButton();
         datePickerButton.setText("");
         datePickerButton.setIcon(icon);
-        //datePickerButton = recallDatePicker.getComponentToggleCalendarButton();
+        /*
+        ImageIcon icon = new ImageIcon(this.getClass().getResource("/datepickerbutton1.png"));
+        datePickerButton = recallDatePicker.getComponentToggleCalendarButton();
         datePickerButton.setText("");
         datePickerButton.setIcon(icon);
+        */
         ActionEvent actionEvent = new ActionEvent(
                 this,ActionEvent.ACTION_PERFORMED,
                 ViewController.PatientViewControllerActionEvent.NULL_PATIENT_REQUEST.toString());
@@ -531,12 +535,21 @@ public class PatientView extends View implements ActionListener{
                 request = ViewController.
                             PatientViewControllerActionEvent.
                             PATIENT_RECALL_EDITOR_VIEW_REQUEST;   
+                break;
             case DISPLAY_GUARDIAN_EDITOR_VIEW:
+                request = ViewController.
+                            PatientViewControllerActionEvent.
+                            PATIENT_GUARDIAN_EDITOR_VIEW_REQUEST;
                 break;
             case DISPLAY_PHONE_EMAIL_EDITOR_VIEW:
                 request = ViewController.
                             PatientViewControllerActionEvent.
                             PATIENT_PHONE_EMAIL_EDITOR_VIEW_REQUEST;
+                break;
+            case DISPLAY_PATIENT_NOTES_EDITOR_VIEW:
+                request = ViewController.
+                            PatientViewControllerActionEvent.
+                            PATIENT_NOTES_EDITOR_VIEW_REQUEST;
                 break;
         }
         if (request!=null){
@@ -676,6 +689,8 @@ public class PatientView extends View implements ActionListener{
         switch (propertyName){
             case PATIENT_RECALL_EDITOR_VIEW_CLOSED:
             case PATIENT_PHONE_EMAIL_EDITOR_VIEW_CLOSED:
+            case PATIENT_GUARDIAN_EDITOR_VIEW_CLOSED:
+            case PATIENT_NOTES_EDITOR_VIEW_CLOSED:
                 rdbGroup.clearSelection();
                 break;
             case PATIENT_VIEW_CONTROLLER_ERROR_RECEIVED:
@@ -1881,7 +1896,7 @@ public class PatientView extends View implements ActionListener{
         */
 //</editor-fold>
 //<editor-fold defaultstate="collapsed" desc="Further selectable information panel layout">
-        rdbRequestModalNotesEditorView.setText("Notes");
+        rdbRequestModalNotesEditorView.setText(DISPLAY_PATIENT_NOTES_EDITOR_VIEW);
 
         javax.swing.GroupLayout pnlFurtherDetailsLayout = new javax.swing.GroupLayout(pnlFurtherDetails);
         pnlFurtherDetails.setLayout(pnlFurtherDetailsLayout);
@@ -3240,16 +3255,7 @@ public class PatientView extends View implements ActionListener{
     
     
     
-    class RecallDatePickerDateChangeListener implements DateChangeListener {
-        @Override
-        public void dateChanged(DateChangeEvent event) {
-            //LocalDate date = event.getNewDate();
-            //if (date != null) {
-            //    txtRecallDate.setText(date.format(recallFormat));
-            //}
-            //else txtRecallDate.setText("");
-        }
-    }
+    
     
     class DOBDatePickerDateChangeListener implements DateChangeListener {
         @Override

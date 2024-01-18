@@ -81,6 +81,10 @@ public class PatientViewController extends ViewController {
                 doPatientRecallEditorViewRequest();
                 break;
             case PATIENT_GUARDIAN_EDITOR_VIEW_REQUEST:
+                doPatientGuardianEditorViewRequest();
+                break;
+            case PATIENT_NOTES_EDITOR_VIEW_REQUEST:
+                doPatientNotesEditorViewRequest();
                 break;
             case PATIENT_PHONE_EMAIL_EDITOR_VIEW_REQUEST:
                 doPatientPhoneEmailEditorViewRequest();
@@ -226,6 +230,38 @@ public class PatientViewController extends ViewController {
                         null
                 );
         
+    }
+    
+    private void doPatientGuardianEditorViewRequest(){
+        Patient patient = getDescriptor().getViewDescription().getPatient();
+        setModalView((ModalView)new View().make(
+                    View.Viewer.PATIENT_GUARDIAN_EDITOR_VIEW,
+                    this, 
+                    this.getDesktopView()).getModalView());
+        firePropertyChangeEvent(
+                        ViewController.PatientViewControllerPropertyChangeEvent.
+                            PATIENT_GUARDIAN_EDITOR_VIEW_CLOSED.toString(),
+                        getView(),
+                        this,
+                        null,
+                        null
+                );
+    }
+    
+    private void doPatientNotesEditorViewRequest(){
+        Patient patient = getDescriptor().getViewDescription().getPatient();
+        setModalView((ModalView)new View().make(
+                    View.Viewer.PATIENT_NOTES_EDITOR_VIEW,
+                    this, 
+                    this.getDesktopView()).getModalView());
+        firePropertyChangeEvent(
+                        ViewController.PatientViewControllerPropertyChangeEvent.
+                            PATIENT_NOTES_EDITOR_VIEW_CLOSED.toString(),
+                        getView(),
+                        this,
+                        null,
+                        null
+                );
     }
     
     private void doPatientRecallEditorViewRequest(){

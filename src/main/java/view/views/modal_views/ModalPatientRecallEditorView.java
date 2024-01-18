@@ -4,19 +4,55 @@
  */
 package view.views.modal_views;
 
+import com.github.lgooddatepicker.optionalusertools.DateChangeListener;
+import com.github.lgooddatepicker.zinternaltools.DateChangeEvent;
 import controller.Descriptor;
 import controller.ViewController;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyVetoException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import javax.swing.JOptionPane;
+import javax.swing.SpinnerNumberModel;
 import view.View;
 import view.views.non_modal_views.DesktopView;
+import javax.swing.ImageIcon;
 
 /**
  *
  * @author colin
  */
 public class ModalPatientRecallEditorView extends ModalView{
+    
+    DateTimeFormatter recallFormat = DateTimeFormatter.ofPattern("MMMM/yyyy");
+    
+    private LocalDate getRecallDate(){
+        return this.dpsRecallDatePicker.getDate();
+    }
+    private void setRecallDate(LocalDate dentalRecallDate){
+        this.dpsRecallDatePicker.setDate(dentalRecallDate);
+    }
+    private Integer getRecallFrequency(){
+        return (Integer)this.spnRecallFrequency.getValue();
+    }
+    private void setRecallFrequency(Integer value){
+        if (value == null) this.spnRecallFrequency.setValue(0);
+        else this.spnRecallFrequency.setValue(value);
+    }
+    
+    class RecallDatePickerDateChangeListener implements DateChangeListener {
+        @Override
+        public void dateChanged(DateChangeEvent event) {
+            /*
+            LocalDate date = event.getNewDate();
+            if (date != null) {
+                txtRecallDate.setText(date.format(recallFormat));
+            }
+            else txtRecallDate.setText("");
+            */
+        }
+    }
+    
     /**
      * 
      * @param myViewType
@@ -49,7 +85,7 @@ public class ModalPatientRecallEditorView extends ModalView{
         lblMonths = new javax.swing.JLabel();
         btnSaveDetails = new javax.swing.JButton();
         btnCancel = new javax.swing.JButton();
-        
+        this.spnRecallFrequency.setModel(new SpinnerNumberModel(6,0,12,3));
         btnSaveDetails.setText("Save");
 
         btnCancel.setText("Cancel");
@@ -64,6 +100,13 @@ public class ModalPatientRecallEditorView extends ModalView{
                 }
             }
         });
+        
+        
+        ImageIcon icon = new ImageIcon(this.getClass().getResource("/datepickerbutton1.png"));
+        datePickerButton = this.dpsRecallDatePicker.getComponentToggleCalendarButton();
+        datePickerButton.setText("");
+        datePickerButton.setIcon(icon);
+        
 
         pnlRecallDate.setBorder(
                 javax.swing.BorderFactory.createTitledBorder(
@@ -168,5 +211,6 @@ public class ModalPatientRecallEditorView extends ModalView{
     private javax.swing.JPanel pnlRecallDate;
     private javax.swing.JPanel pnlRecallFrequency;
     private javax.swing.JSpinner spnRecallFrequency;
+    private javax.swing.JButton datePickerButton;
     // End of variables declaration
 }
