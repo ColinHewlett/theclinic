@@ -4,10 +4,12 @@
  */
 package view.views.modal_views;
 
+import com.github.lgooddatepicker.components.DatePickerSettings;
 import com.github.lgooddatepicker.optionalusertools.DateChangeListener;
 import com.github.lgooddatepicker.zinternaltools.DateChangeEvent;
 import controller.Descriptor;
 import controller.ViewController;
+import model.Patient;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyVetoException;
 import java.time.LocalDate;
@@ -30,7 +32,8 @@ public class ModalPatientRecallEditorView extends ModalView{
         return this.dpsRecallDatePicker.getDate();
     }
     private void setRecallDate(LocalDate dentalRecallDate){
-        this.dpsRecallDatePicker.setDate(dentalRecallDate);
+        if (dentalRecallDate != null)
+            this.dpsRecallDatePicker.setDate(dentalRecallDate);
     }
     private Integer getRecallFrequency(){
         return (Integer)this.spnRecallFrequency.getValue();
@@ -63,7 +66,6 @@ public class ModalPatientRecallEditorView extends ModalView{
             View.Viewer myViewType, 
             ViewController myController,
             DesktopView desktopView) {//ViewMode arg
-        setTitle("Patient recall editor");
         setMyController(myController);
         setMyViewType(myViewType);
         setDesktopView(desktopView);  
@@ -74,12 +76,21 @@ public class ModalPatientRecallEditorView extends ModalView{
         initComponents();
         setTitle("Patient phone/email editor");
         setVisible(true);
+        Patient patient = getMyController()
+                .getDescriptor()
+                .getControllerDescription().getPatient();
+        setRecallDate(patient.getRecall().getDentalDate());
+        setRecallFrequency(patient.getRecall().getDentalFrequency());
     }
     
     private void initComponents() {
 
         pnlRecallDate = new javax.swing.JPanel();
         dpsRecallDatePicker = new com.github.lgooddatepicker.components.DatePicker();
+        DatePickerSettings settings = new DatePickerSettings();
+        settings.setFormatForDatesCommonEra(DateTimeFormatter.ofPattern("MMMM/yyyy"));
+        settings.setAllowKeyboardEditing(false);
+        dpsRecallDatePicker.setSettings(settings);
         pnlRecallFrequency = new javax.swing.JPanel();
         spnRecallFrequency = new javax.swing.JSpinner();
         lblMonths = new javax.swing.JLabel();

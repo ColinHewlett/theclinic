@@ -265,7 +265,7 @@ public class PatientViewController extends ViewController {
     }
     
     private void doPatientRecallEditorViewRequest(){
-        Patient patient = getDescriptor().getViewDescription().getPatient();
+        //getDescriptor().getControllerDescription().getPatient();
         setModalView((ModalView)new View().make(
                     View.Viewer.PATIENT_RECALL_EDITOR_VIEW,
                     this, 
