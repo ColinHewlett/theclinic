@@ -105,14 +105,20 @@ public class View extends JInternalFrame
             case APPOINTMENT_EDITOR_VIEW:
                 setModalView(makeView(new ModalAppointmentEditorView(viewer, controller, desktopView)));
                 break;
-            case EMPTY_SLOT_SCAN_CONFIGURATION_VIEW:
+            case APPOINTMENT_EMPTY_SLOT_SCAN_CONFIGURATION_VIEW:
                 setModalView(makeView(new ModalEmptySlotScanConfigurationView(viewer, controller, desktopView)));
                 break;
-            case PATIENT_NOTIFICATION_EDITOR_VIEW:
+            case NOTIFICATION_EDITOR_VIEW:
                 setModalView(makeView(new ModalNotificationEditorView(viewer, controller, desktopView)));
                 break;
             case PATIENT_RECOVERY_SELECTION_VIEW:
                 setModalView(makeView(new ModalPatientSelectionView(viewer, controller, desktopView)));
+                break;
+            case PATIENT_RECALL_EDITOR_VIEW:
+                setModalView(makeView(new ModalPatientRecallEditorView(viewer, controller,desktopView)));
+                break;
+            case PATIENT_PHONE_EMAIL_EDITOR_VIEW:
+                setModalView(makeView(new ModalPatientPhoneEmailEditorView(viewer, controller,desktopView)));
                 break;
             case NON_SURGERY_DAY_EDITOR_VIEW:
                 setModalView(makeView(new ModalNonSurgeryDayEditorView(viewer, controller, desktopView)));
@@ -139,19 +145,22 @@ public class View extends JInternalFrame
     }
 
     public static enum Viewer { 
-        SCHEDULE_VIEW,
+        
         APPOINTMENT_CREATOR_VIEW,
         APPOINTMENT_EDITOR_VIEW,
+        APPOINTMENT_EMPTY_SLOT_SCAN_CONFIGURATION_VIEW,
         APPOINTMENTS_CANCELLED_VIEW,
-        EMPTY_SLOT_SCAN_CONFIGURATION_VIEW,
         EXPORT_PROGRESS_VIEW,
         MIGRATION_MANAGER_VIEW,
         NON_SURGERY_DAY_EDITOR_VIEW,
+        PATIENT_RECALL_EDITOR_VIEW,
+        PATIENT_PHONE_EMAIL_EDITOR_VIEW,
         PATIENT_RECOVERY_SELECTION_VIEW,
         PATIENT_SELECTION_VIEW,
-        PATIENT_VIEW,
+        PATIENT_VIEW,        
         NOTIFICATION_VIEW,
-        PATIENT_NOTIFICATION_EDITOR_VIEW,
+        NOTIFICATION_EDITOR_VIEW,
+        SCHEDULE_VIEW,
         UNACTIONED_PATIENT_NOTIFICATION_VIEW,
         SURGERY_DAY_EDITOR_VIEW,
         UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_VIEW,

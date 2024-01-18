@@ -77,6 +77,14 @@ public class PatientViewController extends ViewController {
             case PATIENT_DELETE_REQUEST:
                 doPatientDeleteRequest();
                 break;
+            case PATIENT_RECALL_EDITOR_VIEW_REQUEST:
+                doPatientRecallEditorViewRequest();
+                break;
+            case PATIENT_GUARDIAN_EDITOR_VIEW_REQUEST:
+                break;
+            case PATIENT_PHONE_EMAIL_EDITOR_VIEW_REQUEST:
+                doPatientPhoneEmailEditorViewRequest();
+                break;
             case RECOVER_PATIENT_REQUEST:
                 doPatientRecoverRequest();
                 break;
@@ -149,7 +157,7 @@ public class PatientViewController extends ViewController {
                         break;
                 }
                 break;
-            case PATIENT_NOTIFICATION_EDITOR_VIEW:
+            case NOTIFICATION_EDITOR_VIEW:
                 //do nothing
                 break;
             default:
@@ -201,6 +209,40 @@ public class PatientViewController extends ViewController {
             ViewController.DesktopViewControllerActionEvent.
                     VIEW_CONTROLLER_CLOSE_NOTIFICATION.toString());
         this.getMyController().actionPerformed(actionEvent); 
+    }
+    
+    private void doPatientPhoneEmailEditorViewRequest(){
+        Patient patient = getDescriptor().getViewDescription().getPatient();
+        setModalView((ModalView)new View().make(
+                    View.Viewer.PATIENT_PHONE_EMAIL_EDITOR_VIEW,
+                    this, 
+                    this.getDesktopView()).getModalView());
+        firePropertyChangeEvent(
+                        ViewController.PatientViewControllerPropertyChangeEvent.
+                            PATIENT_PHONE_EMAIL_EDITOR_VIEW_CLOSED.toString(),
+                        getView(),
+                        this,
+                        null,
+                        null
+                );
+        
+    }
+    
+    private void doPatientRecallEditorViewRequest(){
+        Patient patient = getDescriptor().getViewDescription().getPatient();
+        setModalView((ModalView)new View().make(
+                    View.Viewer.PATIENT_RECALL_EDITOR_VIEW,
+                    this, 
+                    this.getDesktopView()).getModalView());
+        firePropertyChangeEvent(
+                        ViewController.PatientViewControllerPropertyChangeEvent.
+                            PATIENT_RECALL_EDITOR_VIEW_CLOSED.toString(),
+                        getView(),
+                        this,
+                        null,
+                        null
+                );
+        
     }
     
     private void doPatientCreateRequest(){

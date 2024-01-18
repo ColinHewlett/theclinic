@@ -48,6 +48,7 @@ import javax.swing.event.InternalFrameEvent;
 import javax.swing.JComboBox;
 import javax.swing.JDesktopPane;
 import javax.swing.JInternalFrame;
+import javax.swing.JRadioButton;
 import javax.swing.JTable;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.table.DefaultTableModel;
@@ -73,14 +74,17 @@ import javax.swing.table.TableColumnModel;
  *
  * @author colin
  */
-public class PatientView extends View{
-    private String patientRecoveryCaption = "<html><center>Recover patient</center></html>";
-    private String patientCreateCaption = "<html><center>Create</center><center> new patient</center></html>";
-    private String cancelPatientRecoveryCaption = "<html><center>Cancel</center><center>patient</center><center>recovery</center>";
-    private String patientUpdateCaption = "<html><center>Update</center>selected</center><center>patient</center></html>";
-    private String panelPatientSelectionTitle = "Select patient";
-    private String panelPatientRecoveryTitle = "Select patient to recover";
+public class PatientView extends View implements ActionListener{
+    private final String patientRecoveryCaption = "<html><center>Recover patient</center></html>";
+    private final String patientCreateCaption = "<html><center>Create</center><center> new patient</center></html>";
+    private final String cancelPatientRecoveryCaption = "<html><center>Cancel</center><center>patient</center><center>recovery</center>";
+    private final String patientUpdateCaption = "<html><center>Update</center>selected</center><center>patient</center></html>";
+    private final String panelPatientSelectionTitle = "Select patient";
+    private final String panelPatientRecoveryTitle = "Select patient to recover";
   
+    private final String DISPLAY_RECALL_EDITOR_VIEW ="Recall details";
+    private final String DISPLAY_GUARDIAN_EDITOR_VIEW = "Guardian (if patient)";
+    private final String DISPLAY_PHONE_EMAIL_EDITOR_VIEW = "Phone/email";
     
     private enum PatientSelectionMode{ PATIENT_SELECTION, 
                                        PATIENT_RECOVERY}
@@ -173,7 +177,7 @@ public class PatientView extends View{
     static int wDatePickerWidth = 114;
     static int mLine2Width = 180;
     static int wLine2Width = 182;
-    static int mFurtherDetailsGapWidth = 7;
+    static int mFurtherDetailsGapWidth = 50;
     static int wFurtherDetailsGapWidth = 15;
     static int mOperationsBottomGap = 322;
     static int wOperationsBottomGap = 313;
@@ -517,6 +521,37 @@ public class PatientView extends View{
               }
            });
     };
+
+    @Override
+    public void actionPerformed(ActionEvent e){
+        ViewController.PatientViewControllerActionEvent request = null;
+        //String text = ((JRadioButton)e.getItem()).getText();
+        switch(e.getActionCommand()){
+            case DISPLAY_RECALL_EDITOR_VIEW:
+                request = ViewController.
+                            PatientViewControllerActionEvent.
+                            PATIENT_RECALL_EDITOR_VIEW_REQUEST;   
+            case DISPLAY_GUARDIAN_EDITOR_VIEW:
+                break;
+            case DISPLAY_PHONE_EMAIL_EDITOR_VIEW:
+                request = ViewController.
+                            PatientViewControllerActionEvent.
+                            PATIENT_PHONE_EMAIL_EDITOR_VIEW_REQUEST;
+                break;
+        }
+        if (request!=null){
+            ActionEvent actionEvent = new ActionEvent(
+                this,ActionEvent.ACTION_PERFORMED,
+                request.toString());
+            this.getMyController().actionPerformed(actionEvent);
+            actionEvent = new ActionEvent(
+                this,ActionEvent.ACTION_PERFORMED,
+                ViewController.PatientViewControllerActionEvent.
+                        VIEW_CHANGED_NOTIFICATION.toString());
+            this.getMyController().actionPerformed(actionEvent);
+            
+        }
+    }
     
     /**
      * Establish an InternalFrameListener for when the view is closed 
@@ -639,6 +674,10 @@ public class PatientView extends View{
         ViewController.PatientViewControllerPropertyChangeEvent propertyName =
                 ViewController.PatientViewControllerPropertyChangeEvent.valueOf(e.getPropertyName());
         switch (propertyName){
+            case PATIENT_RECALL_EDITOR_VIEW_CLOSED:
+            case PATIENT_PHONE_EMAIL_EDITOR_VIEW_CLOSED:
+                rdbGroup.clearSelection();
+                break;
             case PATIENT_VIEW_CONTROLLER_ERROR_RECEIVED:
                 //setViewDescriptor((Descriptor)e.getNewValue());
                 ViewController.displayErrorMessage(
@@ -1343,15 +1382,16 @@ public class PatientView extends View{
                         javax.swing.border.TitledBorder.DEFAULT_POSITION, 
                         getBorderTitleFont(), 
                         getBorderTitleColor())); // NOI18N
-        
+        /*
         pnlPatientNotes.setBorder(
                 javax.swing.BorderFactory.createTitledBorder(
                         javax.swing.BorderFactory.createEtchedBorder(), 
-                        "Notes", 
+                        "Patient notes", 
                         javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, 
                         javax.swing.border.TitledBorder.DEFAULT_POSITION, 
                         getBorderTitleFont(),
                         getBorderTitleColor())); // NOI18N
+        */
         
         //pnlPhones.setBorder(
         //        javax.swing.BorderFactory.createTitledBorder(
@@ -1604,25 +1644,36 @@ public class PatientView extends View{
         pnlNameContent = new javax.swing.JPanel();
         pnlPatientAddressContent = new javax.swing.JPanel();
         pnlFurtherDetails = new javax.swing.JPanel();
-        //pnlFurtherDetails.setBorder(javax.swing.BorderFactory.
-                //createTitledBorder("Further details"));
                 
         pnlFurtherDetails.setBorder(
                 javax.swing.BorderFactory.createTitledBorder(
                         javax.swing.BorderFactory.createEtchedBorder(), 
-                        "Further deails", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, 
+                        "Patient information selectable for viewing", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, 
                         javax.swing.border.TitledBorder.DEFAULT_POSITION, 
                         getBorderTitleFont(),
                         getBorderTitleColor())); // NOI18N
-
-        rdbRequestModalPhoneEmailDetailsView = new javax.swing.JRadioButton();
-        rdbRequestModalRecallDetailsView = new javax.swing.JRadioButton();
-        rdbRequestModalGuardianDetailsView = new javax.swing.JRadioButton();
-        rdbRequestModalPhoneEmailDetailsView.setText("Phone/email");
-
-        rdbRequestModalRecallDetailsView.setText("Recall data");
-
-        rdbRequestModalGuardianDetailsView.setText("Guardian (if patient)");
+        
+        
+        rdbRequestModalPhoneEmailEditorView = new javax.swing.JRadioButton();
+        rdbRequestModalRecallEditorView = new javax.swing.JRadioButton();
+        rdbRequestModalGuardianEditorView = new javax.swing.JRadioButton();
+        rdbRequestModalNotesEditorView = new javax.swing.JRadioButton();
+        rdbRequestModalNotesEditorView.setText("Patient notes editor");
+        rdbRequestModalPhoneEmailEditorView.setText(DISPLAY_PHONE_EMAIL_EDITOR_VIEW);
+        rdbRequestModalPhoneEmailEditorView.setActionCommand(DISPLAY_PHONE_EMAIL_EDITOR_VIEW);
+        rdbRequestModalRecallEditorView.setText(DISPLAY_RECALL_EDITOR_VIEW);
+        rdbRequestModalRecallEditorView.setActionCommand(DISPLAY_RECALL_EDITOR_VIEW);
+        rdbRequestModalGuardianEditorView.setText(DISPLAY_GUARDIAN_EDITOR_VIEW);
+        rdbRequestModalGuardianEditorView.setActionCommand(DISPLAY_GUARDIAN_EDITOR_VIEW);
+        rdbGroup = new javax.swing.ButtonGroup();
+        rdbGroup.add(rdbRequestModalPhoneEmailEditorView);
+        rdbGroup.add(rdbRequestModalRecallEditorView);
+        rdbGroup.add(rdbRequestModalGuardianEditorView);
+        rdbGroup.add(rdbRequestModalNotesEditorView);
+        rdbRequestModalPhoneEmailEditorView.addActionListener(this);
+        rdbRequestModalRecallEditorView.addActionListener(this);
+        rdbRequestModalGuardianEditorView.addActionListener(this);
+        rdbRequestModalNotesEditorView.addActionListener(this);
         
 //</editor-fold>
 //<editor-fold defaultstate="Collapsed" desc="Menu configuration">
@@ -1745,8 +1796,9 @@ public class PatientView extends View{
                 .addComponent(pnlPatientAddressContent, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGap(10, 10, 10))
         );
-//</editor-fold>     
+//</editor-fold> 
 //<editor-fold defaultstate="collapsed" desc="Patient notes panel layout">
+        /*
         javax.swing.GroupLayout pnlPatientNotesLayout = new javax.swing.GroupLayout(pnlPatientNotes);
         pnlPatientNotes.setLayout(pnlPatientNotesLayout);
         pnlPatientNotesLayout.setHorizontalGroup(
@@ -1763,6 +1815,7 @@ public class PatientView extends View{
                 .addComponent(scrPatientNotes)
                 .addContainerGap())
         );
+        */
 //</editor-fold>
 //<editor-fold defaultstate="collapsed" desc="Appointment history panel layout">        
         javax.swing.GroupLayout pnlAppointmentHistoryLayout = new javax.swing.GroupLayout(pnlAppointmentHistory);
@@ -1792,8 +1845,10 @@ public class PatientView extends View{
                 .addContainerGap())
                 //.addGap(5,5,5))
         );
+        
 //</editor-fold>
 //<editor-fold defaultstate="collapsed" desc="Further details panel layout">
+        /*
         javax.swing.GroupLayout pnlFurtherDetailsLayout = new javax.swing.GroupLayout(pnlFurtherDetails);
         pnlFurtherDetails.setLayout(pnlFurtherDetailsLayout);
         pnlFurtherDetailsLayout.setHorizontalGroup(
@@ -1804,9 +1859,9 @@ public class PatientView extends View{
                         getFurtherDetailsGapWidth(),
                         getFurtherDetailsGapWidth())
                 .addGroup(pnlFurtherDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(rdbRequestModalGuardianDetailsView)
-                    .addComponent(rdbRequestModalRecallDetailsView)
-                    .addComponent(rdbRequestModalPhoneEmailDetailsView))
+                    .addComponent(rdbRequestModalGuardianEditorView)
+                    .addComponent(rdbRequestModalRecallEditorView)
+                    .addComponent(rdbRequestModalPhoneEmailEditorView))
                 //.addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addGap(getFurtherDetailsGapWidth(),
                         getFurtherDetailsGapWidth(),
@@ -1816,12 +1871,48 @@ public class PatientView extends View{
             pnlFurtherDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlFurtherDetailsLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(rdbRequestModalPhoneEmailDetailsView)
+                .addComponent(rdbRequestModalPhoneEmailEditorView)
                 .addGap(17, 17, 17)
-                .addComponent(rdbRequestModalRecallDetailsView)
+                .addComponent(rdbRequestModalRecallEditorView)
                 .addGap(18, 18, 18)
-                .addComponent(rdbRequestModalGuardianDetailsView)
+                .addComponent(rdbRequestModalGuardianEditorView)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        */
+//</editor-fold>
+//<editor-fold defaultstate="collapsed" desc="Further selectable information panel layout">
+        rdbRequestModalNotesEditorView.setText("Notes");
+
+        javax.swing.GroupLayout pnlFurtherDetailsLayout = new javax.swing.GroupLayout(pnlFurtherDetails);
+        pnlFurtherDetails.setLayout(pnlFurtherDetailsLayout);
+        pnlFurtherDetailsLayout.setHorizontalGroup(
+            pnlFurtherDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlFurtherDetailsLayout.createSequentialGroup()
+                //.addContainerGap()
+                .addGap(20,20,20)
+                .addGroup(pnlFurtherDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    
+                    .addComponent(rdbRequestModalPhoneEmailEditorView)
+                    .addComponent(rdbRequestModalRecallEditorView))
+                //.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGap(23,23,23)
+                .addGroup(pnlFurtherDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(rdbRequestModalGuardianEditorView)
+                    .addComponent(rdbRequestModalNotesEditorView))
+                .addGap(20,20,20))
+        );
+        pnlFurtherDetailsLayout.setVerticalGroup(
+            pnlFurtherDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlFurtherDetailsLayout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(pnlFurtherDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(rdbRequestModalPhoneEmailEditorView)
+                    .addComponent(rdbRequestModalGuardianEditorView))
+                .addGap(28, 28, 28)
+                .addGroup(pnlFurtherDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(rdbRequestModalRecallEditorView)
+                    .addComponent(rdbRequestModalNotesEditorView))
+                .addGap(27, 27, 27))
         );
 //</editor-fold>
 //<editor-fold defaultstate="collapsed" desc="Operations panel layout">
@@ -1964,10 +2055,10 @@ public class PatientView extends View{
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
-                                .addComponent(pnlFurtherDetails, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(pnlFurtherDetails, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                                 //.addComponent(pnlPatientNotes, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(pnlPatientNotes, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                //.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                //.addComponent(pnlPatientNotes, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                                 //.addComponent(pnlFurtherDetails, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addComponent(pnlPatientSelection, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                         //.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -1995,7 +2086,7 @@ public class PatientView extends View{
                         .addGap(4,4,4)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(pnlAddress, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(pnlPatientNotes, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            //.addComponent(pnlPatientNotes, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(pnlFurtherDetails, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                     .addComponent(pnlOperations, javax.swing.GroupLayout.PREFERRED_SIZE, getOperationsHeight(), javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -3088,6 +3179,7 @@ public class PatientView extends View{
     }
     
     // Variables declaration - do not modify  
+    private javax.swing.ButtonGroup rdbGroup;
     private javax.swing.JTable tblAppointmentHistory;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JMenuItem mniCloseView;
@@ -3124,9 +3216,10 @@ public class PatientView extends View{
     private javax.swing.JPanel pnlPatientAddressContent;
     private javax.swing.JPanel pnlPatientNotes;
     private javax.swing.JPanel pnlPatientSelection;
-    private javax.swing.JRadioButton rdbRequestModalGuardianDetailsView;
-    private javax.swing.JRadioButton rdbRequestModalRecallDetailsView;
-    private javax.swing.JRadioButton rdbRequestModalPhoneEmailDetailsView;
+    private javax.swing.JRadioButton rdbRequestModalGuardianEditorView;
+    private javax.swing.JRadioButton rdbRequestModalRecallEditorView;
+    private javax.swing.JRadioButton rdbRequestModalPhoneEmailEditorView;
+    private javax.swing.JRadioButton rdbRequestModalNotesEditorView;
     private javax.swing.JScrollPane scrAppointmentHistory;
     private javax.swing.JTextArea txtPatientNotes;
     

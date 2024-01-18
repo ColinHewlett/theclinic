@@ -220,9 +220,8 @@ public class NotificationViewController extends ViewController{
             //Patient.Collection  patientCollection = patient.getCollection();
             //patientCollection.read();
             //getNewEntityDescriptor().setThePatients(patientCollection.get());
-            View.setViewer(View.Viewer.PATIENT_NOTIFICATION_EDITOR_VIEW);
-            setView((ModalView)new View().make(
-                    View.Viewer.PATIENT_NOTIFICATION_EDITOR_VIEW,
+            View.setViewer(View.Viewer.NOTIFICATION_EDITOR_VIEW);
+            setView((ModalView)new View().make(View.Viewer.NOTIFICATION_EDITOR_VIEW,
                     this, 
                     getDesktopView()).getModalView());
             //note: View.factory when opening a modal JInternalFrame does not return until the JInternalFrame has been closed
@@ -263,9 +262,8 @@ public class NotificationViewController extends ViewController{
             //patientNotificationCollection.setScope(Scope.FOR_PATIENT);
             //patientNotificationCollection.read();
             //getNewEntityDescriptor().setPatientNotifications(patientNotificationCollection.get());
-            //View.setViewer(View.Viewer.PATIENT_NOTIFICATION_EDITOR_VIEW);
-            setModalView((ModalView)new View().make(
-                    View.Viewer.PATIENT_NOTIFICATION_EDITOR_VIEW,
+            //View.setViewer(View.Viewer.NOTIFICATION_EDITOR_VIEW);
+            setModalView((ModalView)new View().make(View.Viewer.NOTIFICATION_EDITOR_VIEW,
                     this,
                     getDesktopView()).getModalView());
             //note: View.factory when opening a modal JInternalFrame does not return until the JInternalFrame has been closed
@@ -282,7 +280,7 @@ public class NotificationViewController extends ViewController{
     private void doSecondaryViewActionRequest(ActionEvent e)throws StoreException{
         setModalView((ModalView)e.getSource());
         switch (getModalView().getMyViewType()){
-            case PATIENT_NOTIFICATION_EDITOR_VIEW:
+            case NOTIFICATION_EDITOR_VIEW:
                 ViewController.NotificationViewControllerActionEvent actionCommand =
                ViewController.NotificationViewControllerActionEvent.valueOf(e.getActionCommand());
                 switch (actionCommand){

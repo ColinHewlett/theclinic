@@ -467,8 +467,7 @@ public class ScheduleViewController extends ViewController{
          * EMPTY_SLOT_SCANNER_DIALOG_REQUEST constructs an EmptySlotScanEditorModalViewer
          */
         
-        this.setModalView((ModalView)new View().make(
-                    View.Viewer.EMPTY_SLOT_SCAN_CONFIGURATION_VIEW,
+        this.setModalView((ModalView)new View().make(View.Viewer.APPOINTMENT_EMPTY_SLOT_SCAN_CONFIGURATION_VIEW,
                     this, 
                     this.getDesktopView()).getModalView());
 
@@ -648,7 +647,7 @@ public class ScheduleViewController extends ViewController{
      * redirects ActionEvents sent from secondary views that have been launched by the primary view
  -- secondary views are identified by the ActionEvent::Source property, defined in the View::ViewGype enum ; thus
  ---- APPOINTMENT_EDITOR_VIEW
- ---- EMPTY_SLOT_SCAN_CONFIGURATION_VIEW
+ ---- APPOINTMENT_EMPTY_SLOT_SCAN_CONFIGURATION_VIEW
  ---- NON_SURGERY_DAY_EDITOR_VIEW
  ---- SURGERY_DAY_EDITOR_VIEW
      * @param e 
@@ -670,7 +669,7 @@ public class ScheduleViewController extends ViewController{
                 doAppointmentCreatorEditorViewAction(e);
                 //resetEmptySlotScannerSettings();
                 break;
-            case EMPTY_SLOT_SCAN_CONFIGURATION_VIEW:
+            case APPOINTMENT_EMPTY_SLOT_SCAN_CONFIGURATION_VIEW:
                 doEmptySlotScanConfigurationViewAction(e);
                 break;
             case NON_SURGERY_DAY_EDITOR_VIEW:
