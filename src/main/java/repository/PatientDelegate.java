@@ -38,6 +38,7 @@ final class PatientDelegate extends Patient {
         super.setNotes(patient.getNotes());
         super.setPhone1(patient.getPhone1());
         super.setPhone2(patient.getPhone2());
+        super.setEmail(patient.getEmail());
         super.getAddress().setLine1(patient.getAddress().getLine1());
         super.getAddress().setLine2(patient.getAddress().getLine2());
         super.getAddress().setTown(patient.getAddress().getTown());

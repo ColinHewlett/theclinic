@@ -6,10 +6,16 @@ package view.views.modal_views;
 
 import model.Patient;
 import controller.ViewController;
+import java.awt.event.ActionEvent;
+import view.views.non_modal_views.PatientView;
 import java.beans.PropertyVetoException;
 import view.View;
 import view.views.non_modal_views.DesktopView;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Iterator;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JComboBox;
 
 /**
  *
@@ -52,10 +58,42 @@ public class ModalPatientGuardianEditorView extends ModalView{
     @Override
     public void initialiseView(){
         initComponents();
-        setTitle("Patient phone & email editor");
+        setTitle("Patient guardian editor");
         setVisible(true);
         addListeners();
-                
+        populatePatientSelector(); 
+        if (getMyController()
+                .getDescriptor()
+                .getControllerDescription()
+                .getPatient()
+                .getIsGuardianAPatient()){
+            this.cmbSelectYesNo.setSelectedItem(PatientView.YesNoItem.Yes);
+            Patient guardian = getMyController()
+                .getDescriptor()
+                .getControllerDescription()
+                .getPatient()
+                .getGuardian();
+            if (guardian != null){
+                this.cmbSelectGuardian.setSelectedItem(guardian);
+            }else this.cmbSelectGuardian.setSelectedItem(-1);
+        }else {
+            this.cmbSelectYesNo.setSelectedItem(PatientView.YesNoItem.No);
+            this.cmbSelectGuardian.setSelectedItem(-1);
+        }
+    }
+    
+    private void populatePatientSelector(){
+        DefaultComboBoxModel<Patient> model = 
+                new DefaultComboBoxModel<>();
+        ArrayList<Patient> patients = 
+                getMyController().getDescriptor().getControllerDescription().getPatients();
+        Iterator<Patient> it = patients.iterator();
+        while (it.hasNext()){
+            Patient patient = it.next();
+            model.addElement(patient);
+        }
+        cmbSelectGuardian.setModel(model);
+        cmbSelectGuardian.setSelectedIndex(-1);
     }
     
     private void addListeners(){
@@ -70,6 +108,46 @@ public class ModalPatientGuardianEditorView extends ModalView{
                 }
             }
         });
+        btnSaveGuardianDetails.addActionListener(new java.awt.event.ActionListener() {
+            @Override
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                doSaveEditorChanges();
+                try{
+                    ModalPatientGuardianEditorView.this.setClosed(true);
+                }
+                catch (PropertyVetoException ex){
+
+                }
+            }
+        });
+    }
+    
+    private void doSaveEditorChanges(){
+        Patient patient = 
+                getMyController()
+                        .getDescriptor()
+                        .getControllerDescription()
+                        .getPatient();
+        if (cmbSelectYesNo.getSelectedItem().equals(PatientView.YesNoItem.Yes)){
+            patient.setIsGuardianAPatient(true);
+            if (cmbSelectGuardian.getSelectedIndex() != -1){
+                patient.setGuardian((Patient)cmbSelectGuardian.getSelectedItem());
+            }else patient.setGuardian(null);
+        }else {
+            patient.setIsGuardianAPatient(false);
+            patient.setGuardian(null);
+        }  
+        getMyController()
+            .getDescriptor()
+            .getViewDescription()
+            .setPatient(patient);
+        ActionEvent actionEvent = new ActionEvent(
+            ModalPatientGuardianEditorView.this,ActionEvent.ACTION_PERFORMED, 
+            ViewController
+                    .PatientViewControllerActionEvent
+                    .PATIENT_EDITOR_VIEW_CHANGE
+                    .toString());
+        getMyController().actionPerformed(actionEvent);
     }
     
     private void initComponents() {
@@ -77,17 +155,19 @@ public class ModalPatientGuardianEditorView extends ModalView{
         lblIsGuardianAPatient = new javax.swing.JLabel();
         cmbSelectYesNo = new javax.swing.JComboBox<>();
         jPanel2 = new javax.swing.JPanel();
-        cmbSelectGuardian = new javax.swing.JComboBox<>();
+        cmbSelectGuardian = new javax.swing.JComboBox<Patient>();
         btnSaveGuardianDetails = new javax.swing.JButton();
         btnCloseView = new javax.swing.JButton();
 
         lblIsGuardianAPatient.setText("Guardian is a patient ?");
 
-        cmbSelectYesNo.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        cmbSelectYesNo.setModel(new javax.swing.DefaultComboBoxModel<>());
+        cmbSelectYesNo.addItem(PatientView.YesNoItem.Yes);
+        cmbSelectYesNo.addItem(PatientView.YesNoItem.No);
 
         jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder("Select guardian from patients"));
 
-        cmbSelectGuardian.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        //cmbSelectGuardian.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -154,8 +234,8 @@ public class ModalPatientGuardianEditorView extends ModalView{
     // Variables declaration - do not modify                     
     private javax.swing.JButton btnCloseView;
     private javax.swing.JButton btnSaveGuardianDetails;
-    private javax.swing.JComboBox<String> cmbSelectGuardian;
-    private javax.swing.JComboBox<String> cmbSelectYesNo;
+    private javax.swing.JComboBox<Patient> cmbSelectGuardian;
+    private javax.swing.JComboBox<PatientView.YesNoItem> cmbSelectYesNo;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JLabel lblIsGuardianAPatient;
     // End of variables declaration      

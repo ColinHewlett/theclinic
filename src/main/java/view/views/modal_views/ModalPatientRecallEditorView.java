@@ -104,7 +104,7 @@ public class ModalPatientRecallEditorView extends ModalView{
      * Sends an action event to the view controller to save recall data
      * Only called if changes have been made to patients recall data
      */
-    private void doSaveRecallChanges(){
+    private void doSaveEditorChanges(){
         Patient patient = getMyController()
                 .getDescriptor()
                 .getControllerDescription()
@@ -129,7 +129,7 @@ public class ModalPatientRecallEditorView extends ModalView{
                 ModalPatientRecallEditorView.this,ActionEvent.ACTION_PERFORMED, 
                 ViewController
                         .PatientViewControllerActionEvent
-                        .PATIENT_RECALL_EDITOR_VIEW_CHANGE
+                        .PATIENT_EDITOR_VIEW_CHANGE
                         .toString());
             getMyController().actionPerformed(actionEvent);
         }
@@ -171,7 +171,7 @@ public class ModalPatientRecallEditorView extends ModalView{
                                 null);
                     }
                     if (reply == JOptionPane.YES_OPTION){
-                        doSaveRecallChanges();
+                        doSaveEditorChanges();
                     }
                     ModalPatientRecallEditorView.this.setClosed(true);   
                 }catch (PropertyVetoException ex){
@@ -189,7 +189,7 @@ public class ModalPatientRecallEditorView extends ModalView{
         btnSaveDetails.addActionListener(new java.awt.event.ActionListener() {
             @Override
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                doSaveRecallChanges();
+                doSaveEditorChanges();
                 try{
                     ModalPatientRecallEditorView.this.setClosed(true);
                 }

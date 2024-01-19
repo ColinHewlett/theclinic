@@ -813,6 +813,7 @@ public class Repository implements IStoreActions {
         patient.getAddress().setPostcode(rs.getString("postcode"));
         patient.setPhone1(rs.getString("phone1"));
         patient.setPhone2(rs.getString("phone2"));
+        patient.setEmail(rs.getString("email"));
         patient.setGender(rs.getString("gender"));
         patient.setNotes(rs.getString("notes"));
         patient.setIsDeleted(rs.getBoolean("isDeleted"));
@@ -846,26 +847,6 @@ public class Repository implements IStoreActions {
     }
     
     private void doInsertPatient(String sql, Entity entity)throws StoreException{
-        String test1 ;
-        String test2;
-        String test3;
-        String test4;
-        String test5;
-        String test6;
-        String test7;
-        String test8;
-        String test9 ;
-        String test10;
-        String test11;
-        java.sql.Date test12;
-        String test12a;
-        boolean test13;
-        int test14;
-        java.sql.Date test15;
-        String test15a;
-        String test16;
-        Integer test17;Integer test18;
-        String test18a;
         PatientDelegate delegate;
         if (entity != null) {
             if (entity.getIsPatient()) {
@@ -908,43 +889,10 @@ public class Repository implements IStoreActions {
                         preparedStatement.setLong(18,((PatientDelegate)delegate.getGuardian()).getPatientKey());
                     }
                     else preparedStatement.setNull(18, java.sql.Types.INTEGER);
+                    preparedStatement.setString(11, delegate.getEmail());
+                    
                     preparedStatement.executeUpdate();
                 } catch (SQLException ex) {
-                    test1 = delegate.getName().getTitle();
-                    test2 = delegate.getName().getForenames();
-                    test3 = delegate.getName().getSurname();
-                    test4 = delegate.getAddress().getLine1();
-                    test5 = delegate.getAddress().getLine2();
-                    test6 = delegate.getAddress().getTown();
-                    test7 = delegate.getAddress().getCounty();
-                    test8 = delegate.getAddress().getPostcode();
-                    test9 = delegate.getPhone1();
-                    test10 = delegate.getPhone2();
-                    test11 = delegate.getGender();
-                    if (delegate.getDOB() != null) {
-                        test12 = java.sql.Date.valueOf(delegate.getDOB());
-                    } else { 
-                        test12a = "null Date  type";
-                    }
-                    test13 = delegate.getIsGuardianAPatient();
-                    if (delegate.getRecall().getDentalFrequency()==null)
-                        test14 = 0;
-                    else
-                        test14 = delegate.getRecall().getDentalFrequency();
-                    if (delegate.getRecall().getDentalDate() != null) {
-                        test15 = java.sql.Date.valueOf(delegate.getRecall().getDentalDate());
-                    } else {
-                        test15a = "null Date type";
-                    }
-                    test16 = delegate.getNotes();
-                    test17 = delegate.getPatientKey();
-                    if (((PatientDelegate)delegate.getGuardian()).getPatientKey() > 0){
-                        test18 = ((PatientDelegate)delegate.getGuardian()).getPatientKey();
-                    }
-                    else {
-                        test18a = "null Integer type";
-                    }
-                    
                     throw new StoreException("SQLException message -> " + ex.getMessage() + "\n"
                             + "StoreException message -> exception raised in Repository::doInsertPatient()",
                             StoreException.ExceptionType.SQL_EXCEPTION);
@@ -1088,7 +1036,8 @@ public class Repository implements IStoreActions {
                         //preparedStatement.setNull(17, 0);
                         preparedStatement.setNull(17, Types.INTEGER);
                     }
-                    preparedStatement.setLong(18, delegate.getPatientKey());
+                    preparedStatement.setString(18, delegate.getEmail());
+                    preparedStatement.setLong(19, delegate.getPatientKey());
                     preparedStatement.executeUpdate();
                 } catch (SQLException ex) {
                     throw new StoreException("SQLException message -> " + ex.getMessage() + "\n"
@@ -1740,6 +1689,7 @@ public class Repository implements IStoreActions {
                         + "postcode Char(15), "
                         + "phone1 Char(30), "
                         + "phone2 Char(30), "
+                        + "email Char(30), " 
                         + "gender Char(10), "
                         + "dob DateTime,"
                         + "isGuardianAPatient YesNo,"
@@ -1762,16 +1712,11 @@ public class Repository implements IStoreActions {
                     = "INSERT INTO Patient "
                     + "(title, forenames, surname, line1, line2,"
                     + "town, county, postcode,phone1, phone2, gender, dob,"
-                    + "isGuardianAPatient,recallFrequency, recallDate, notes,pid, guardianKey) "
-                    + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
+                    + "isGuardianAPatient,recallFrequency, recallDate, notes,pid, guardianKey, email) "
+                    + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
                 doInsertPatient(sql, entity);
                 break;
             case READ_PATIENT:
-                /*
-                sql = "SELECT pid, title, forenames, surname, line1, line2, "
-                        + "town, county, postcode, gender, dob, isGuardianAPatient, "
-                        + "phone1, phone2, recallFrequency, recallDate, notes, guardianKey "
-                */
                 sql = "SELECT * "
                         + "FROM Patient "
                         + "WHERE pid=? "
@@ -1818,7 +1763,8 @@ public class Repository implements IStoreActions {
                     + "recallFrequency = ?,"
                     + "recallDate = ?,"
                     + "notes = ?,"
-                    + "guardianKey = ? "
+                    + "guardianKey = ?, "
+                    + "email = ? "
                     + "WHERE pid = ? ;";
                 doUpdatePatient(sql, entity);
                 break;
@@ -2788,6 +2734,7 @@ public class Repository implements IStoreActions {
                                         "postcode character varying(255) COLLATE pg_catalog.\"default\",\n" +
                                         "phone1 character varying(255) COLLATE pg_catalog.\"default\",\n" +
                                         "phone2 character varying(255) COLLATE pg_catalog.\"default\",\n" +
+                                        "email character varying(255) COLLATE pg_catalog.\"default\",\n" +
                                         "gender character varying(255) COLLATE pg_catalog.\"default\",\n" +
                                         "dob date,\n" +
                                         "isguardianapatient boolean DEFAULT false,\n" +

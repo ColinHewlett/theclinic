@@ -33,6 +33,7 @@ public class Patient extends Entity implements IEntityStoreActions {
     private String notes = null;
     private String phone1 = null;
     private String phone2 = null;
+    private String email = null;
     private Patient.Address address = null;
     private Patient.Name name = null;
     private Patient.Recall recall = null;
@@ -209,6 +210,7 @@ public class Patient extends Entity implements IEntityStoreActions {
                                         KEY,
                                         PHONE1,
                                         PHONE2,
+                                        EMAIL,
                                         GENDER,
                                         DOB,
                                         IS_GUARDIAN_A_PATIENT,
@@ -293,6 +295,14 @@ public class Patient extends Entity implements IEntityStoreActions {
     }
     public void setPhone2(String phone2){
         this.phone2 = phone2;
+    }
+    
+    public String getEmail(){
+        return email;
+    }
+    
+    public void setEmail(String value){
+        this.email = value;
     }
     
     private int getAge(LocalDate dob){

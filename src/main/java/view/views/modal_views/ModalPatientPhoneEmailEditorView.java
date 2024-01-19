@@ -6,9 +6,11 @@ package view.views.modal_views;
 
 import controller.Descriptor;
 import controller.ViewController;
+import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyVetoException;
 import javax.swing.JOptionPane;
+import model.Patient;
 import view.View;
 import view.views.non_modal_views.DesktopView;
 
@@ -40,13 +42,70 @@ public class ModalPatientPhoneEmailEditorView extends ModalView{
         setTitle("Patient phone & email editor");
         setVisible(true);
         addListeners();
+        Patient patient = getMyController()
+                .getDescriptor()
+                .getControllerDescription().getPatient();
+        
+        txtPhone1.setText(patient.getPhone1());
+        txtPhone2.setText(patient.getPhone2());
+        txtEmail.setText(patient.getEmail());
                 
+    }
+    
+    /**
+     * Sends an action event to the view controller to save changes
+     * Only called if changes have been made to patients data
+     */
+    private void doSaveEditorChanges(){
+        Patient patient = getMyController()
+                .getDescriptor()
+                .getControllerDescription()
+                .getPatient();
+        patient.setPhone1(txtPhone1.getText());
+        patient.setPhone2(txtPhone2.getText());
+        patient.setEmail(txtEmail.getText());
+        getMyController()
+                .getDescriptor()
+                .getViewDescription()
+                .setPatient(patient);
+        ActionEvent actionEvent = new ActionEvent(
+            ModalPatientPhoneEmailEditorView.this,ActionEvent.ACTION_PERFORMED, 
+            ViewController
+                    .PatientViewControllerActionEvent
+                    .PATIENT_EDITOR_VIEW_CHANGE
+                    .toString());
+        getMyController().actionPerformed(actionEvent);
     }
     
     private void addListeners(){
         btnClose.addActionListener(new java.awt.event.ActionListener() {
             @Override
             public void actionPerformed(java.awt.event.ActionEvent evt) {
+                String message = "Save if any changes before closing?";
+                String[] options = {"Yes", "No"};
+                int reply = JOptionPane.showOptionDialog(
+                        ModalPatientPhoneEmailEditorView.this,
+                        message,null,
+                        JOptionPane.YES_NO_OPTION,
+                        JOptionPane.INFORMATION_MESSAGE,
+                        null,
+                        options,
+                        null);
+                if (reply == JOptionPane.YES_OPTION){
+                    doSaveEditorChanges();
+                }
+                try{
+                    ModalPatientPhoneEmailEditorView.this.setClosed(true);   
+                }catch (PropertyVetoException ex){
+
+                }
+            }
+        });
+        
+        btnSavePhoneEmail.addActionListener(new java.awt.event.ActionListener() {
+            @Override
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                doSaveEditorChanges();
                 try{
                     ModalPatientPhoneEmailEditorView.this.setClosed(true);
                 }

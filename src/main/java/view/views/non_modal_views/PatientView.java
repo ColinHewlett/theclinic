@@ -103,7 +103,7 @@ public class PatientView extends View implements ActionListener{
     private enum GenderItem {Male,
                              Female,
                              Trans}
-    private enum YesNoItem {No,
+    public enum YesNoItem {No,
                             Yes}
     private enum ViewMode {Create_new_patient,
                            Update_patient_details}
@@ -538,8 +538,8 @@ public class PatientView extends View implements ActionListener{
                 break;
             case DISPLAY_GUARDIAN_EDITOR_VIEW:
                 request = ViewController.
-                            PatientViewControllerActionEvent.
-                            PATIENT_GUARDIAN_EDITOR_VIEW_REQUEST;
+                        PatientViewControllerActionEvent.
+                        PATIENT_GUARDIAN_EDITOR_VIEW_REQUEST;
                 break;
             case DISPLAY_PHONE_EMAIL_EDITOR_VIEW:
                 request = ViewController.
@@ -657,6 +657,12 @@ public class PatientView extends View implements ActionListener{
         } 
     };
     
+    private void setViewTitle(Patient patient){
+        this.setTitle (patient.toString()
+                + " [phone: " + patient.getPhone1()
+                + " email: " + patient.getEmail() +"]");
+    }
+    
     private void populatePatientSelector(JComboBox<Patient> selector){
         DefaultComboBoxModel<Patient> model = 
                 new DefaultComboBoxModel<>();
@@ -687,11 +693,12 @@ public class PatientView extends View implements ActionListener{
         ViewController.PatientViewControllerPropertyChangeEvent propertyName =
                 ViewController.PatientViewControllerPropertyChangeEvent.valueOf(e.getPropertyName());
         switch (propertyName){
-            case PATIENT_RECALL_EDITOR_VIEW_CLOSED:
-            case PATIENT_PHONE_EMAIL_EDITOR_VIEW_CLOSED:
-            case PATIENT_GUARDIAN_EDITOR_VIEW_CLOSED:
-            case PATIENT_NOTES_EDITOR_VIEW_CLOSED:
+            case PATIENT_EDITOR_VIEW_CLOSED:
                 rdbGroup.clearSelection();
+                setViewTitle(getMyController().
+                        getDescriptor().
+                        getControllerDescription().
+                        getPatient());
                 break;
             case PATIENT_VIEW_CONTROLLER_ERROR_RECEIVED:
                 //setViewDescriptor((Descriptor)e.getNewValue());
@@ -702,8 +709,13 @@ public class PatientView extends View implements ActionListener{
             case PATIENT_RECEIVED:
                 //setViewDescriptor((Descriptor)e.getNewValue());
                 initialisePatientViewComponentFromED(); 
-                String frameTitle = getMyController().getDescriptor().getControllerDescription().getPatient().toString();
-                this.setTitle(frameTitle);
+                Patient patient = getMyController()
+                        .getDescriptor()
+                        .getControllerDescription()
+                        .getPatient();
+                setViewTitle(patient);
+               
+                //this.setTitle(frameTitle);
                 /**
                  * disable "Create new patient" menu item
                  * -- this disables attempt to create a new patient whilst an existing patientis selected
