@@ -240,11 +240,24 @@ public class ScheduleView extends View{
                     getDescriptor().
                     getControllerDescription().
                     getViewMode()){
-            case UNREFERENCED_SCHEDULE_VIEW:
+            case SCHEDULE_REFERENCED_DESKTOP_VIEW:
                 day = this.vetoPolicy.getNextAvailableDateTo(day);
                 break;
-            case REFERENCED_SCHEDULE_VIEW:
- 
+            case SCHEDULE_REFERENCED_FROM_PATIENT_VIEW:
+                HashMap<DayOfWeek, Boolean> allDaysSurgeryDays = new HashMap<>();
+                allDaysSurgeryDays.put(DayOfWeek.MONDAY, true);
+                allDaysSurgeryDays.put(DayOfWeek.TUESDAY, true);
+                allDaysSurgeryDays.put(DayOfWeek.WEDNESDAY, true);
+                allDaysSurgeryDays.put(DayOfWeek.THURSDAY, true);
+                allDaysSurgeryDays.put(DayOfWeek.FRIDAY, true);
+                allDaysSurgeryDays.put(DayOfWeek.SATURDAY, true);
+                allDaysSurgeryDays.put(DayOfWeek.SUNDAY, true);
+                dps.setVetoPolicy(new AppointmentDateVetoPolicy(allDaysSurgeryDays));
+                dayDatePicker.setDate(day);
+                //refreshAppointmentTableWithCurrentlySelectedDate();
+                dps.setVetoPolicy(vetoPolicy);
+        
+        //dayDatePicker.setDate(day);
                 break;
             }
         }

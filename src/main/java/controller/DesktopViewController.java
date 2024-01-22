@@ -234,7 +234,7 @@ public class DesktopViewController extends ViewController{
                 PatientViewController patientViewController = (PatientViewController)e.getSource();
                 patientViewController.getDescriptor()
                         .getControllerDescription()
-                        .setViewMode(ViewController.ViewMode.REFERENCED_SCHEDULE_VIEW);
+                        .setViewMode(ViewController.ViewMode.SCHEDULE_REFERENCED_FROM_PATIENT_VIEW);
                 createNewAppointmentScheduleViewController(patientViewController.getDescriptor());
                 break;
         }
@@ -548,8 +548,7 @@ public class DesktopViewController extends ViewController{
             activeViewController.getView().toFront();
         else {
             Descriptor descriptor = new Descriptor();
-            descriptor.getControllerDescription().setViewMode(
-                    ViewController.ViewMode.UNREFERENCED_SCHEDULE_VIEW);
+            descriptor.getControllerDescription().setViewMode(ViewController.ViewMode.SCHEDULE_REFERENCED_DESKTOP_VIEW);
             descriptor.getControllerDescription().setScheduleDay(LocalDate.now());
             createNewAppointmentScheduleViewController(descriptor);
         }

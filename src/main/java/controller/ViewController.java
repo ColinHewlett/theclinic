@@ -277,8 +277,8 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         Update,
         SLOT_SELECTED,
         SLOT_UNSELECTED,
-        REFERENCED_SCHEDULE_VIEW,
-        UNREFERENCED_SCHEDULE_VIEW,
+        SCHEDULE_REFERENCED_FROM_PATIENT_VIEW,
+        SCHEDULE_REFERENCED_DESKTOP_VIEW,
         NO_ACTION
     } 
     
