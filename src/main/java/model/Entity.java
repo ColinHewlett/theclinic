@@ -21,6 +21,7 @@ public class Entity implements IStoreClient{
     private Boolean isTableRowValue = false;
     private Boolean isPMSStore = false;
     private Boolean isSurgeryDaysAssignment = false;
+    private Boolean isPatientNote = false;
     private Scope scope = null;
     private Point value = null;
     protected Boolean isDeleted = false;
@@ -49,6 +50,7 @@ public class Entity implements IStoreClient{
         setIsPMSStore(false);
         setIsTableRowValue(false); 
         setIsSurgeryDaysAssignment(false);
+        setIsPatientNote(false);
     }
     
     /**
@@ -58,7 +60,7 @@ public class Entity implements IStoreClient{
                         APPOINTEE_REMINDERS,    //all entities
                         CANCELLED,              //cancelled appointments
                         FOR_DAY,                //appointments for this day
-                        FOR_PATIENT,            //appointments for this patient
+                        FOR_PATIENT,            //appointments/notes for this patient
                         DELETED_FOR_PATIENT,    //deleted appointments for this patient (when a deleted patient is being recovered)         
                         DELETED,                //deleted patients
                         FROM_DAY,               //appointmens from this day
@@ -113,7 +115,11 @@ public class Entity implements IStoreClient{
     }
     public Boolean getIsSurgeryDaysAssignment(){
         return isSurgeryDaysAssignment;
-    }  
+    } 
+    
+    public Boolean getIsPatientNote(){
+        return isPatientNote;
+    }
     
     protected void setIsAppointment(Boolean value){
         if (value) resetAll();
@@ -145,4 +151,8 @@ public class Entity implements IStoreClient{
         if (value) resetAll();
         isSurgeryDaysAssignment = value;
     } 
+    protected void setIsPatientNote(Boolean value){
+        if (value) resetAll();
+        isPatientNote = value;
+    }
 }

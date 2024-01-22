@@ -551,7 +551,7 @@ public class DesktopViewController extends ViewController{
             descriptor.getControllerDescription().setViewMode(
                     ViewController.ViewMode.UNREFERENCED_SCHEDULE_VIEW);
             descriptor.getControllerDescription().setScheduleDay(LocalDate.now());
-            createNewAppointmentScheduleViewController(null);
+            createNewAppointmentScheduleViewController(descriptor);
         }
     }
     
