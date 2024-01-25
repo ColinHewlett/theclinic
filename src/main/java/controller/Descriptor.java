@@ -9,6 +9,7 @@ import model.Appointment;
 import model.Patient;
 import model.Notification;
 import model.SurgeryDaysAssignment;
+import model.PatientNote;
 import java.awt.Point;
 import java.util.ArrayList;
 import java.time.Duration;
@@ -75,6 +76,8 @@ public class Descriptor {
     
     public class ControllerDescription{
         ViewController.ViewMode viewMode = null;
+        private PatientNote patientNote = null;
+        private ArrayList<PatientNote> patientNotes = null;
         private LocalDate scheduleDay = null;
         private LocalDateTime appointmentEarlyStart = null;
         private LocalDateTime appointmentLateStart = null;
@@ -134,6 +137,22 @@ public class Descriptor {
         }
         public void setViewMode(ViewController.ViewMode value){
             viewMode = value;
+        }
+        
+        public PatientNote getPatientNote(){
+            return patientNote;
+        }
+        
+        public void setPatientNotes(PatientNote value){
+            patientNote = value;
+        }
+        
+        public ArrayList<PatientNote> getPatientNotes(){
+            return patientNotes;
+        }
+        
+        public void setPatientNotes(ArrayList<PatientNote> value){
+            patientNotes = value;
         }
         
         public ArrayList<Appointment> getAppointmentCancellations(){
@@ -285,6 +304,7 @@ public class Descriptor {
     
     public class ViewDescription {
         ViewController.ViewMode viewMode = null;
+        private PatientNote patientNote = null;
         private Appointment appointment = null;
         private Patient thePatient = null;
         private Patient theGuardian = null;
@@ -337,6 +357,14 @@ public class Descriptor {
         
         public void setPatient(Patient patient){
             thePatient = patient;
+        }
+        
+        public PatientNote getPatientNote(){
+            return patientNote;
+        }
+        
+        public void setPatientNote(PatientNote value){
+            patientNote = value;
         }
         
         public Notification getNotification(){

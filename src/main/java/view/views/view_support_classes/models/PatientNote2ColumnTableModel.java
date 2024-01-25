@@ -1,11 +1,9 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package view.views.view_support_classes.models;
 
-import model.Appointment;
 import java.time.DayOfWeek;
 import java.time.Duration;
 import java.time.LocalDate;
@@ -13,43 +11,42 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import javax.swing.table.AbstractTableModel;
+import model.PatientNote;
 
 /**
- * A custom model for display of empty slot availability is required to handle the 
- * processing requirements. The model returns String values thus avoiding the need
- * for custom renderers.
+ *
  * @author colin
  */
-public class EmptySlotAvailability2ColumnTableModel extends AbstractTableModel{
-    public static final LocalTime LAST_APPOINTMENT_SLOT = LocalTime.of(17,0);
-    public ArrayList<Appointment> emptySlots = new ArrayList<>();
-    private DateTimeFormatter emptySlotFormat = DateTimeFormatter.ofPattern("dd/MM/yy HH:mm (EEE)");
-    private enum COLUMN{EmptySlot, Duration};
+public class PatientNote2ColumnTableModel extends AbstractTableModel{
+    //public static final LocalTime LAST_APPOINTMENT_SLOT = LocalTime.of(17,0);
+    public ArrayList<PatientNote> patientNotes = new ArrayList<>();
+    private DateTimeFormatter patientNoteFormat = DateTimeFormatter.ofPattern("dd/MM/yy HH:mm (EEE)");
+    private enum COLUMN{Date, Notes};
     private final Class[] columnClass = new Class[] { 
         String.class,
         String.class};
     
     
-    public ArrayList<Appointment> getEmptySlots(){
-        return this.emptySlots;
+    public ArrayList<PatientNote> getPatientNotes(){
+        return this.patientNotes;
     }
     
-    public void addElement(Appointment a){
-        emptySlots.add(a);
+    public void addElement(PatientNote patientNote){
+        patientNotes.add(patientNote);
     }
     
     public void removeAllElements(){
-        emptySlots.clear();
+        patientNotes.clear();
         this.fireTableDataChanged();
     }
     
-    public Appointment getElementAt(int row){
-        return emptySlots.get(row);
+    public PatientNote getElementAt(int row){
+        return patientNotes.get(row);
     }
 
     @Override
     public int getRowCount(){
-        return getEmptySlots().size();
+        return getPatientNotes().size();
     }
 
     @Override
@@ -62,7 +59,7 @@ public class EmptySlotAvailability2ColumnTableModel extends AbstractTableModel{
         String result = null;
         switch (columnIndex){
             case 0:
-                result = "Empty slots";
+                result = "Date";
                 break;
             case 1:
                 result = "Notes";
@@ -80,14 +77,17 @@ public class EmptySlotAvailability2ColumnTableModel extends AbstractTableModel{
     @Override
     public Object getValueAt(int row, int columnIndex){
         Object result = null;
-        Appointment slot = getEmptySlots().get(row);
+        PatientNote patientNote = getPatientNotes().get(row);
         switch (columnIndex){
             case 0:
-                result = slot.getStart().format(emptySlotFormat);  
+                result = patientNote.getDatestamp().format(patientNoteFormat);  
                 break;   
             case 1:
+                result = patientNote.getNote();
+                /*
                 result = convertSlotDurationToString(
-                    slot.getDuration(), slot.getStart().toLocalDate());   
+                    patientNote.getNote(), patientNote.getDatestamp().toLocalDate()); 
+                */
                 break; 
         }
         return (String)result;
@@ -99,7 +99,7 @@ public class EmptySlotAvailability2ColumnTableModel extends AbstractTableModel{
         
     }
     */
-    
+    /*
     private String convertSlotDurationToString(Duration duration, LocalDate start){
         String result = null;
         if (duration.toHours() < 8) result = renderDurationLessThanSingleDay(duration);
@@ -131,7 +131,7 @@ public class EmptySlotAvailability2ColumnTableModel extends AbstractTableModel{
         }
         return result;
     }
-    
+    */
     /**
      * Slightly tricky calculation involved because method includes in its counting
      * whether the interim days fall on a practice day or not. The actual duration 
@@ -142,6 +142,7 @@ public class EmptySlotAvailability2ColumnTableModel extends AbstractTableModel{
      * @return String representing the closing date and time of the empty slot when duration
      * is more than one day or "all day" if duration is a single day only
      */
+    /*
     private String renderDurationMoreThanOrEqualToSingleDay(Duration duration, LocalDate start){
         String result = null;
         int index;
@@ -174,4 +175,5 @@ public class EmptySlotAvailability2ColumnTableModel extends AbstractTableModel{
                             || day.getDayOfWeek().equals(DayOfWeek.THURSDAY)
                             || day.getDayOfWeek().equals(DayOfWeek.FRIDAY));
     }
+    */
 }

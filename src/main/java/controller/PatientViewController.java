@@ -9,9 +9,12 @@ package controller;
 import model.Entity;
 import model.Patient;
 import model.Appointment;
+import model.PatientNote;
 import model.Entity.Scope;
 import view.views.non_modal_views.DesktopView;
 import view.View;
+import view.views.modal_views.ModalView;
+import view.views.modal_views.ModalPatientNotesEditorView;
 import repository.StoreException;//01/03/2023
 import static controller.ViewController.displayErrorMessage;
 import java.beans.PropertyChangeSupport;
@@ -26,7 +29,7 @@ import java.time.Period;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import javax.swing.JOptionPane;
-import view.views.modal_views.ModalView;
+
 /**
  *
  * @author colin
@@ -149,7 +152,7 @@ public class PatientViewController extends ViewController {
                     doPatientNotesEditorViewRequest();
                 else{
                     JOptionPane.showMessageDialog(getView(), 
-                        "A patient has not been selected; so notes editor request aborted",
+                        "A patient has not been selected; notes editor request aborted",
                         "Patient View Controller Error", 
                         JOptionPane.WARNING_MESSAGE);
                     firePropertyChangeEvent(
@@ -257,20 +260,15 @@ public class PatientViewController extends ViewController {
                 break;
             case PATIENT_RECALL_EDITOR_VIEW:
             case PATIENT_PHONE_EMAIL_EDITOR_VIEW:
+            case PATIENT_GUARDIAN_EDITOR_VIEW:    
                 switch (actionCommand){
                     case PATIENT_EDITOR_VIEW_CHANGE:
                         doPatientEditorViewChange(the_view);
                 }
                 break;
-            case PATIENT_GUARDIAN_EDITOR_VIEW:
-                
-                        
-                switch (actionCommand){
-                    case PATIENT_EDITOR_VIEW_CHANGE:
-                        doPatientEditorViewChange(the_view);
-                }
+            case PATIENT_NOTES_EDITOR_VIEW:
+                doPatientNotesEditorViewChange(e);
                 break;
-           
             default:
                 JOptionPane.showMessageDialog(getView(), 
                         "Unrecognised view type specified in PatientViewController::doSecondaryViewActionRequest()",
@@ -370,19 +368,35 @@ public class PatientViewController extends ViewController {
     }
     
     private void doPatientNotesEditorViewRequest(){
-        Patient patient = getDescriptor().getViewDescription().getPatient();
-        setModalView((ModalView)new View().make(
-                    View.Viewer.PATIENT_NOTES_EDITOR_VIEW,
-                    this, 
-                    this.getDesktopView()).getModalView());
-        firePropertyChangeEvent(
-                ViewController.PatientViewControllerPropertyChangeEvent.
-                    PATIENT_EDITOR_VIEW_CLOSED.toString(),
-                getView(),
-                this,
-                null,
-                null
-        );
+        PatientNote patientNote = new PatientNote(getCurrentlySelectedPatient());
+        patientNote.setScope(Scope.FOR_PATIENT);
+        try{
+            patientNote.read();
+            getDescriptor()
+                    .getControllerDescription()
+                    .setPatientNotes(patientNote.get());
+            getDescriptor()
+                    .getControllerDescription()
+                    .setPatient(patientNote.getPatient());
+
+            setModalView((ModalView)new View().make(
+                        View.Viewer.PATIENT_NOTES_EDITOR_VIEW,
+                        this, 
+                        this.getDesktopView()).getModalView());
+            firePropertyChangeEvent(
+                    ViewController.PatientViewControllerPropertyChangeEvent.
+                        PATIENT_EDITOR_VIEW_CLOSED.toString(),
+                    getView(),
+                    this,
+                    null,
+                    null
+            );
+        }catch(StoreException ex){
+            displayErrorMessage(ex.getMessage(),
+                    "Patient view controller error",
+                    JOptionPane.WARNING_MESSAGE);
+        }
+        
     }
     
     private void doPatientRecallEditorViewRequest(){
@@ -717,6 +731,38 @@ public class PatientViewController extends ViewController {
                         "Patient view controller error",
                         JOptionPane.WARNING_MESSAGE);
             }
+        }
+    }
+    
+    private void doPatientNotesEditorViewChange(ActionEvent e){
+        PatientNote patientNote = getDescriptor().getViewDescription().getPatientNote();
+        try{
+            switch(getDescriptor().getViewDescription().getViewMode()){
+                case CREATE:
+                    patientNote.insert();
+                    break;
+                case UPDATE:
+                    patientNote.update();
+                    break;
+            }
+            patientNote.setScope(Scope.FOR_PATIENT);
+            PatientNote thePatientNote = new PatientNote(getCurrentlySelectedPatient());
+            patientNote.read();
+            getDescriptor().getControllerDescription().setPatientNotes(patientNote.get());
+            firePropertyChangeEvent(
+                       ViewController.PatientViewControllerPropertyChangeEvent.
+                        PATIENT_NOTES_RECEIVED.toString(),
+                        (ModalPatientNotesEditorView)e.getSource(),
+                        this,
+                        null,
+                        getDescriptor()
+                );
+            
+        }catch(StoreException ex){
+            displayErrorMessage(ex.getMessage() + "\n"
+                    + "Raised in PatientViewController::doPatientNotesEditorViewChange()",
+                    "Patient view controller error",
+                    JOptionPane.WARNING_MESSAGE);
         }
     }
     

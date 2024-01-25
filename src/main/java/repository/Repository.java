@@ -105,6 +105,7 @@ public class Repository implements IStoreActions {
                                 READ_PATIENT_NOTE,
                                 READ_ALL_PATIENT_NOTES,
                                 READ_NOTES_FOR_PATIENT,
+                                UPDATE_PATIENT_NOTE,
                                 
                                 COUNT_PATIENTS,
                                 CREATE_PATIENT_TABLE,
@@ -209,6 +210,7 @@ public class Repository implements IStoreActions {
                     break;
                 case PATIENT_NOTE:
                     result = doPMSSQLforPatientNote(pmsSQL, (Entity)client);
+                    break;
                 case SURGERY_DAYS_ASSIGNMENT:
                     result = doPMSSQLforSurgeryDaysAssignment(pmsSQL, (Entity)client);
                     break;
@@ -1168,7 +1170,7 @@ public class Repository implements IStoreActions {
                             PatientNote thePatientNote = new PatientNote(datestamp,patientKey);
                             thePatientNote.setNote(notes);
                             thePatientNote.setIsDeleted(isDeleted);
-                            collection.add(patientNote);
+                            collection.add(thePatientNote);
                         }
                         patientNote.set(collection);
                     }
@@ -1205,6 +1207,7 @@ public class Repository implements IStoreActions {
                 patientNote = (PatientNote)entity;
                 try {
                     PreparedStatement preparedStatement = getPMSStoreConnection().prepareStatement(sql);
+                    //preparedStatement.setTimestamp(1, java.sql.Timestamp.valueOf(patientNote.getDatestamp()));
                     preparedStatement.setLong(1, patientNote.getPatientKey());
                     ResultSet rs = preparedStatement.executeQuery();
                     return get(patientNote, rs);
@@ -1313,7 +1316,7 @@ public class Repository implements IStoreActions {
                     preparedStatement.setTimestamp(1, java.sql.Timestamp.valueOf(patientNote.getDatestamp()));
                     preparedStatement.setLong(2, patientNote.getPatientKey());
                     preparedStatement.setString(3, patientNote.getNote());
-                    preparedStatement.setBoolean(4, true);
+                    preparedStatement.setBoolean(4, false);
                     preparedStatement.execute();
                 } catch (SQLException ex) {
                     throw new StoreException("SQLException message -> " + ex.getMessage() + "\n"
@@ -1403,6 +1406,32 @@ public class Repository implements IStoreActions {
             }
         } else {
             String msg = "StoreException -> entity undefined in doUpdatePatientNotification(sql, entity)";
+            throw new StoreException(msg, StoreException.ExceptionType.NULL_KEY_EXCEPTION);
+        }
+    }
+    
+    private void doUpdatePatientNote(String sql, Entity entity) throws StoreException{
+        PatientNote patientNote;
+        if (entity != null) {
+            if (entity.getIsPatientNote()){
+                    patientNote = (PatientNote)entity;
+                try{
+                    PreparedStatement preparedStatement = getPMSStoreConnection().prepareStatement(sql);
+                    preparedStatement.setString(1, patientNote.getNote());
+                    preparedStatement.setTimestamp(2, java.sql.Timestamp.valueOf(patientNote.getDatestamp()));
+                    preparedStatement.setLong(3, patientNote.getPatientKey());
+                    preparedStatement.executeUpdate();   
+                }catch(SQLException ex){
+                    throw new StoreException("SQLException message -> " + ex.getMessage() + "\n"
+                            + "StoreException message -> exception raised in Repository::doUpdatePatientNote()",
+                            StoreException.ExceptionType.SQL_EXCEPTION);
+                }
+            }else{
+                String msg = "StoreException -> patient note defined invalidly in doUpdatePatientNote()";
+                throw new StoreException(msg, StoreException.ExceptionType.UNEXPECTED_DATA_TYPE_ENCOUNTERED);
+            }
+        } else {
+            String msg = "StoreException -> patient note undefined in doUpdatePatientNote()";
             throw new StoreException(msg, StoreException.ExceptionType.NULL_KEY_EXCEPTION);
         }
     }
@@ -2000,6 +2029,12 @@ public class Repository implements IStoreActions {
                         + "AND isDeleted = false;";
                 result = doReadPatientNotesForPatient(sql, entity);
                 break;
+            case UPDATE_PATIENT_NOTE:
+                sql = "UPDATE PatientNote "
+                        + "SET notes = ? "
+                        + "WHERE datestamp = ? "
+                        + "AND patientKey = ?";
+                doUpdatePatientNote(sql, entity);
             
 
         }
@@ -2495,25 +2530,34 @@ public class Repository implements IStoreActions {
     public PatientNote read(PatientNote patientNote)throws StoreException{
         PatientNote result = null;
         Entity entity = null;
-        if ((patientNote.getDatestamp()!=null)
+    switch(patientNote.getScope()){
+        case SINGLE:{
+            if ((patientNote.getDatestamp()!=null)
                 &&(patientNote.getPatientKey()!=null)){
-            switch(patientNote.getScope()){
-                case SINGLE:
-                    entity = (Entity)runSQL(Repository.EntitySQL.PATIENT_NOTE, 
-                                Repository.PMSSQL.READ_PATIENT_NOTE, 
-                                patientNote);
-                case ALL:
-                    entity = (Entity)runSQL(Repository.EntitySQL.PATIENT_NOTE,
-                                Repository.PMSSQL.READ_ALL_PATIENT_NOTES, 
-                                patientNote);
-                    break;
-                case FOR_PATIENT:
-                    entity = (Entity)runSQL(Repository.EntitySQL.PATIENT_NOTE,
-                                Repository.PMSSQL.READ_NOTES_FOR_PATIENT, 
-                                patientNote);
-                    break;
+                entity = (Entity)runSQL(Repository.EntitySQL.PATIENT_NOTE, 
+                        Repository.PMSSQL.READ_PATIENT_NOTE, 
+                        patientNote);
+            }else{
+                String message = "";
+                throw new StoreException(
+                    message + "StoreException raised -> null value returned from persistent store "
+                        + "in method Repository::read(PatientNote[" 
+                            + patientNote.getScope().toString() + "])\n",
+                    StoreException.ExceptionType.UNEXPECTED_DATA_TYPE_ENCOUNTERED);
             }
+            break;
         }
+        case ALL:
+            entity = (Entity)runSQL(Repository.EntitySQL.PATIENT_NOTE,
+                        Repository.PMSSQL.READ_ALL_PATIENT_NOTES, 
+                        patientNote);
+            break;
+        case FOR_PATIENT:
+            entity = (Entity)runSQL(Repository.EntitySQL.PATIENT_NOTE,
+                        Repository.PMSSQL.READ_NOTES_FOR_PATIENT, 
+                        patientNote);
+            break;
+    }
         if (entity!=null){
                 if (entity.getIsPatientNote()){
                     result = (PatientNote)entity;
@@ -2907,8 +2951,8 @@ public class Repository implements IStoreActions {
     public void update(PatientNote patientNote)throws StoreException{
         if ((patientNote.getDatestamp()!=null)
                 || (patientNote.getPatientKey()!=null))
-            runSQL(Repository.EntitySQL.PATIENT_NOTIFICATION, 
-                    Repository.PMSSQL.UPDATE_NOTIFICATION,patientNote);
+            runSQL(Repository.EntitySQL.PATIENT_NOTE, 
+                    Repository.PMSSQL.UPDATE_PATIENT_NOTE,patientNote);
         else{
             throw new StoreException(
                     "Patient note datastamp or patient key is undefined in "

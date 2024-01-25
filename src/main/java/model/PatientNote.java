@@ -54,6 +54,19 @@ public class PatientNote extends Entity implements IEntityStoreActions{
         super.setIsPatientNote(true);
     }
     
+    public PatientNote(LocalDateTime datestamp, Patient patient){
+        this.datestamp = datestamp;
+        this.patient = patient;
+        this.patientKey = this.patient.getKey();
+        super.setIsPatientNote(true);
+    }
+    
+    public PatientNote(Patient patient){
+        super.setIsPatientNote(true);
+        this.patientKey = patient.getKey();
+        this.patient = patient;
+    }
+    
     public PatientNote(){
         super.setIsPatientNote(true);
     }
@@ -170,7 +183,7 @@ public class PatientNote extends Entity implements IEntityStoreActions{
         switch (getScope()){
             case SINGLE:
                 patientNote = new Repository().read(this);
-                if (this.getPatient()!=null){
+                if (this.getPatient()==null){
                     p = new Patient(patientNote.getPatientKey());
                     p.setScope(Scope.SINGLE);
                     patientNote.setPatient(p.read());
@@ -188,7 +201,9 @@ public class PatientNote extends Entity implements IEntityStoreActions{
                 it = this.get().iterator();
                 while(it.hasNext()){
                     patientNote = (PatientNote)it.next();
-                    patientNote.setPatient(PatientNote.this.getPatient());
+                    Patient thePatient = new Patient(patientNote.getPatientKey());
+                    thePatient.setScope(Scope.SINGLE);
+                    patientNote.setPatient(thePatient.read());
                 }
                 break;
             default:
