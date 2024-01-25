@@ -2017,7 +2017,7 @@ public class Repository implements IStoreActions {
                         + "FROM PatientNote "
                         + "WHERE datestamp = ? "
                         + "AND patientKey = ? "
-                        + "AND isDeleted = false;";
+                        + "AND isDeleted = false; ";                       
                 result = doReadPatientNoteWithKey(sql, entity);
                 break;
             case READ_ALL_PATIENT_NOTES:
@@ -2026,7 +2026,8 @@ public class Repository implements IStoreActions {
                 sql = "SELECT * "
                         + "FROM PatientNote "
                         + "WHERE patientKey = ? "
-                        + "AND isDeleted = false;";
+                        + "AND isDeleted = false "
+                        + "ORDER BY datestamp DESC;";
                 result = doReadPatientNotesForPatient(sql, entity);
                 break;
             case UPDATE_PATIENT_NOTE:

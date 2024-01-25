@@ -78,12 +78,14 @@ public class ModalPatientNotesEditorView extends ModalView implements PropertyCh
     @Override
     public void initialiseView(){
         initComponents();
-        setTitle("Patient notes editor");
+        ViewController.setJTableColumnProperties(
+                tblNotesIndex, scrNoteIndex.getPreferredSize().width, 25,75);
         setVisible(true);
         addListeners();
         setNotepadEnabledColor(txaNotepad.getBackground());
         Patient patient = getMyController()
                 .getDescriptor().getControllerDescription().getPatient();
+        setTitle("Patient notes editor for " + patient.toString());
         setPatient(patient);
         setNotepad(new Notepad());
         getNotepad().shut();
@@ -373,8 +375,7 @@ public class ModalPatientNotesEditorView extends ModalView implements PropertyCh
         
         scrNoteIndex.setViewportView(tblNotesIndex);
         
-        ViewController.setJTableColumnProperties(
-                tblNotesIndex, scrNoteIndex.getWidth(), 20,80);
+        
 
         btnClearNotepad.setText("<html>"
                 + "<center>Clear</center>"
@@ -599,6 +600,7 @@ public class ModalPatientNotesEditorView extends ModalView implements PropertyCh
                         .PATIENT_EDITOR_VIEW_CHANGE
                         .toString());
             getMyController().actionPerformed(actionEvent);
+            setViewMode(ViewController.ViewMode.UPDATE);
         }
         
         private void open(){
