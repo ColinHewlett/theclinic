@@ -24,12 +24,14 @@ import java.beans.PropertyChangeSupport;
 import javax.swing.JInternalFrame;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Iterator;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.table.TableColumn;
+import model.PatientNote;
 
 
 /**
@@ -364,7 +366,7 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
 
     protected Appointment doChangeAppointmentScheduleForDayRequest(ViewMode mode, Appointment rSlot) throws StoreException{
         Appointment result = null;
-        
+        PatientNote patientNote = null;
         LocalDate day = rSlot.getStart().toLocalDate();
         Appointment appointment = new Appointment(); 
         appointment.setStart(day.atStartOfDay());
@@ -380,14 +382,29 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
             getDescriptor().getControllerDescription().setError(null);
             switch (mode){//one or more appointments already exist so check the CREATE or UPGRADE make sense
                 case CREATE:
+                    patientNote = new PatientNote(rSlot.getPatient());
+                    patientNote.setDatestamp(rSlot.getStart());
+                    patientNote.setNote(rSlot.getNotes());
+                    patientNote.setLastUpdated(LocalDateTime.now());
+                    Integer patientNoteKey = patientNote.insert();
+                    rSlot.setPatientNoteKey(patientNoteKey);
                     rSlot.insert(); 
                     rSlot.setScope(Entity.Scope.SINGLE);
                     result = rSlot.read();
+                    
                     break;
                 case UPDATE:
                     rSlot.update();
                     rSlot.setScope(Entity.Scope.SINGLE);
                     result = rSlot.read();
+                    patientNote = new PatientNote(result.getPatientNoteKey());
+                    patientNote.setDatestamp(result.getStart());
+                    patientNote.setPatient(result.getPatient());
+                    patientNote.setNote(result.getNotes());
+                    patientNote.setLastUpdated(LocalDateTime.now());
+                    patientNote.setIsDeleted(result.getIsDeleted());
+                    patientNote.setScope(Entity.Scope.SINGLE);
+                    patientNote.update();
                     break;
                 case NO_ACTION:
                     result = rSlot;

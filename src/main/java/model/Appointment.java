@@ -35,6 +35,7 @@ public class Appointment extends Entity implements IEntityStoreActions{
     private String notes = null;
     private Patient patient;
     private Boolean hasPatientBeenContacted = null;
+    private Integer patientNoteKey = null;
     private ArrayList<Appointment> collection = null;
     private static final DateTimeFormatter ddMMyyyyFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
@@ -134,6 +135,13 @@ public class Appointment extends Entity implements IEntityStoreActions{
      */
     public LocalDateTime getSlotEndTime(){
         return getStart().plusMinutes(getDuration().toMinutes());
+    }
+    
+    public void setPatientNoteKey(Integer value){
+        patientNoteKey = value;
+    }
+    public Integer getPatientNoteKey(){
+        return patientNoteKey;
     }
     
     /**
@@ -283,10 +291,12 @@ public class Appointment extends Entity implements IEntityStoreActions{
      * @throws StoreException 
      */
     @Override
-    public void insert() throws StoreException{
+    public Integer insert() throws StoreException{
         Integer pid;
         pid = new Repository().insert(this, getPatient().getKey()); 
+
         setKey(pid);
+        return pid;
     }
     
     /**

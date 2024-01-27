@@ -9,6 +9,7 @@ import static controller.ViewController.displayErrorMessage;
 import static controller.ViewController.ViewControllers;
 import model.Entity;
 import model.Entity.Scope;
+import model.PatientNote;
 import _system_environment_variables.SystemDefinitions;
 import org.apache.commons.io.FilenameUtils;
 import model.*;
@@ -1001,7 +1002,18 @@ public class DesktopViewController extends ViewController{
         isDataMigrationOptionEnabled = false;
         try {
             Class.forName("net.ucanaccess.jdbc.UcanaccessDriver");
-        
+            if ((SystemDefinitions.getPMSDebug().equals("ENABLED"))){
+                PatientNote patientNote = new PatientNote();
+                try{
+                    patientNote.createNotesFromAppointmentTable();
+                }catch(StoreException ex){
+                    displayErrorMessage(ex.getMessage() + "\n",
+                            "Raised in Desktop view controller",
+                            JOptionPane.WARNING_MESSAGE);
+                }
+                System.exit(0);
+            }
+            //System.exit(0);
             if (SystemDefinitions.getPMSOperationMode().equals("DATA_MIGRATION_ENABLED"))
                 isDataMigrationOptionEnabled = true;
             

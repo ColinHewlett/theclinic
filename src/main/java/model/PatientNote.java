@@ -169,8 +169,9 @@ public class PatientNote extends Entity implements IEntityStoreActions{
      * @throws StoreException 
      */
     @Override
-    public void insert() throws StoreException{
+    public Integer insert() throws StoreException{
         setKey(new Repository().insert(this));
+        return getKey();
     }
     
     /**
@@ -191,7 +192,7 @@ public class PatientNote extends Entity implements IEntityStoreActions{
         PatientNote patientNote = null;  
         switch (getScope()){
             case SINGLE:
-                patientNote = new Repository().read(this);
+                patientNote = new Repository().read(this, getKey());
                 if (this.getPatient()==null){
                     p = new Patient(patientNote.getPatientKey());
                     p.setScope(Scope.SINGLE);
@@ -206,7 +207,7 @@ public class PatientNote extends Entity implements IEntityStoreActions{
               
                 break;
             case FOR_PATIENT:
-                this.set((new Repository().read(this)).get());
+                this.set((new Repository().read(this, null)).get());
                 it = this.get().iterator();
                 while(it.hasNext()){
                     patientNote = (PatientNote)it.next();
@@ -225,6 +226,25 @@ public class PatientNote extends Entity implements IEntityStoreActions{
     public void update()throws StoreException{
         new Repository().update(this, getKey());
     }
-            
+    /**
+     * Part of data migration facility; refer to DesktopVC main() method for its invocation
+     * @throws StoreException 
+     */
+    public void createNotesFromAppointmentTable()throws StoreException{
+        Appointment appointment = new Appointment();
+        appointment.setScope(Scope.ALL);
+        appointment.read();
+        Iterator<Appointment> it = ((Appointment)appointment).get().iterator();
+            while (it.hasNext()){
+                Appointment a = it.next();
+                //PatientDelegate delegate = new PatientDelegate(a.getPatient());
+                PatientNote patientNote = new PatientNote(a.getPatient());
+                patientNote.setDatestamp(a.getStart());
+                patientNote.setNote(a.getNotes());
+                patientNote.setLastUpdated(LocalDateTime.now());
+                a.setPatientNoteKey(new Repository().insert(patientNote));
+                a.update();
+            }
+    }
     
 }

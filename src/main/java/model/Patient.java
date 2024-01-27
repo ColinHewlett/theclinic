@@ -135,7 +135,7 @@ public class Patient extends Entity implements IEntityStoreActions {
      * @throws StoreException 
      */
     @Override
-    public void insert() throws StoreException{
+    public Integer insert() throws StoreException{
         Integer pid = null;
         
         if (getIsKeyDefined()){//option followed if data migration is happening
@@ -156,6 +156,7 @@ public class Patient extends Entity implements IEntityStoreActions {
         }
         setKey(pid); 
         setIsKeyDefined(true);
+        return getKey();
     }
     
     /**

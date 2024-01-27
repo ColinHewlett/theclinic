@@ -160,10 +160,11 @@ public class Notification extends Entity implements IEntityStoreActions {
      * @throws StoreException 
      */
     @Override
-    public void insert() throws StoreException{
+    public Integer insert() throws StoreException{
         Integer patientKey = null;
         patientKey = getPatient().getKey();
         setKey(new Repository().insert(this, patientKey));
+        return getKey();
     }
     
     /**

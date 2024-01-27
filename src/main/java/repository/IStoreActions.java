@@ -41,7 +41,7 @@ public interface IStoreActions {
     public Integer insert(Appointment a, Integer appointeeKey) throws StoreException; 
     public Integer insert(Patient p, Integer patientKey, Integer guardianKey) throws StoreException;
     public Integer insert(Notification pn, Integer patientKey) throws StoreException;
-    public void insert(SurgeryDaysAssignment p) throws StoreException;
+    public Integer insert(SurgeryDaysAssignment p) throws StoreException;
     public Integer insert(PatientNote pn) throws StoreException;
     
     //public void populate(SurgeryDaysAssignment data)throws StoreException;
@@ -49,7 +49,7 @@ public interface IStoreActions {
     public Appointment read(Appointment a, Integer key)throws StoreException ;
     public Patient read(Patient p, Integer key) throws StoreException;
     public Notification read(Notification value, Integer key)throws StoreException;
-    public PatientNote read(PatientNote pn)throws StoreException;
+    public PatientNote read(PatientNote pn, Integer key)throws StoreException;
     public SurgeryDaysAssignment read(SurgeryDaysAssignment value) throws StoreException;
     
     public void recover(Appointment a, Integer key) throws StoreException;

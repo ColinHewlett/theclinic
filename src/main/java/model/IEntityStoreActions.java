@@ -17,7 +17,7 @@ public interface IEntityStoreActions {
     public void create()throws StoreException;
     public void delete()throws StoreException;
     public void drop()throws StoreException;
-    public void insert()throws StoreException;
+    public Integer insert()throws StoreException;
     public Entity read()throws StoreException;
     //public void recover() throws StoreException;
     public void update()throws StoreException;

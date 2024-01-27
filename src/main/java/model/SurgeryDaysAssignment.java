@@ -76,7 +76,7 @@ public class SurgeryDaysAssignment extends Entity implements IEntityStoreActions
      * @throws StoreException
      */
     @Override
-    public void insert() throws StoreException{
+    public Integer insert() throws StoreException{
         get().put(DayOfWeek.MONDAY, Boolean.TRUE);
         get().put(DayOfWeek.TUESDAY, Boolean.TRUE);
         get().put(DayOfWeek.WEDNESDAY, Boolean.TRUE);
@@ -84,7 +84,7 @@ public class SurgeryDaysAssignment extends Entity implements IEntityStoreActions
         get().put(DayOfWeek.FRIDAY, Boolean.TRUE);
         get().put(DayOfWeek.SATURDAY, Boolean.FALSE);
         get().put(DayOfWeek.SUNDAY, Boolean.FALSE);
-        new Repository().insert(this);
+        return new Repository().insert(this);
     }
     
     /**

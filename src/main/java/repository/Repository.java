@@ -283,6 +283,7 @@ public class Repository implements IStoreActions {
         appointment.setHasPatientBeenContacted(rs.getBoolean("hasPatientBeenContacted"));
         appointment.setIsDeleted(rs.getBoolean("isDeleted"));
         appointment.setIsCancelled(rs.getBoolean("isCancelled"));
+        appointment.setPatientNoteKey(rs.getInt("patientNoteKey"));
         //09/06/2023 fix 
         //patientDelegate = new PatientDelegate();
         int patientKey = rs.getInt("PatientKey");
@@ -499,6 +500,7 @@ public class Repository implements IStoreActions {
                 preparedStatement.setLong(3, delegate.getDuration().toMinutes());
                 preparedStatement.setString(4, delegate.getNotes());
                 preparedStatement.setLong(5, delegate.getAppointmentKey());
+                preparedStatement.setLong(6, delegate.getPatientNoteKey());
                 preparedStatement.executeUpdate();
                    
             } catch (SQLException ex) {
@@ -746,7 +748,8 @@ public class Repository implements IStoreActions {
                     preparedStatement.setLong(3, delegate.getDuration().toMinutes());
                     preparedStatement.setString(4, delegate.getNotes());
                     preparedStatement.setBoolean(5, delegate.getHasPatientBeenContacted());
-                    preparedStatement.setLong(6, delegate.getAppointmentKey());
+                    preparedStatement.setLong(6, delegate.getPatientNoteKey());
+                    preparedStatement.setLong(7, delegate.getAppointmentKey());
                     preparedStatement.executeUpdate();
                 }catch (SQLException ex){
                     throw new StoreException("SQLException message -> " + ex.getMessage() + "\n"
@@ -1156,8 +1159,8 @@ public class Repository implements IStoreActions {
                         Integer patientKey = rs.getInt("patientKey");
                         String notes = rs.getString("notes");
                         Boolean isDeleted = rs.getBoolean("isDeleted");
-                        patientNote.setDatestamp(datestamp);
                         patientNote = new PatientNote(pid);
+                        patientNote.setDatestamp(datestamp);
                         patientNote.setPatientKey(patientKey);
                         patientNote.setNote(notes);
                         patientNote.setIsDeleted(isDeleted);
@@ -1267,15 +1270,13 @@ public class Repository implements IStoreActions {
     }
     
     private Entity doReadPatientNoteWithKey(String sql, Entity entity)throws StoreException{
-        PatientNote patientNote = null;
+        PatientNoteDelegate delegate = null;
         if (entity != null) {
             if (entity.getIsPatientNote()) {
-                patientNote = (PatientNote) entity;
+                delegate = (PatientNoteDelegate) entity;
                 try {
                     PreparedStatement preparedStatement = getPMSStoreConnection().prepareStatement(sql);
-                    preparedStatement.setTimestamp(1, java.sql.Timestamp.valueOf(patientNote.getDatestamp()));
-                    preparedStatement.setLong(2, patientNote.getPatientKey());
-                    preparedStatement.setBoolean(3, patientNote.getIsDeleted());
+                    preparedStatement.setLong(1, delegate.getKey());
                     ResultSet rs = preparedStatement.executeQuery();
                     return get(new PatientNote(), rs);
                 } catch (SQLException ex) {
@@ -1380,13 +1381,14 @@ public class Repository implements IStoreActions {
     }
     
     private void doDeletePatientNote(String sql, Entity entity)throws StoreException{
+        PatientNoteDelegate delegate = null;
         if (entity != null){
             if (entity.getIsPatientNote()){
                 PatientNote patientNote = (PatientNote)entity;
+                delegate = new PatientNoteDelegate(patientNote);
                 try{
                     PreparedStatement preparedStatement = getPMSStoreConnection().prepareStatement(sql);
                     preparedStatement.setBoolean(1, true);
-                    preparedStatement.setTimestamp(2, java.sql.Timestamp.valueOf(patientNote.getDatestamp()));
                     preparedStatement.setLong(3, patientNote.getPatientKey());
                     preparedStatement.executeUpdate();
                 }catch (SQLException ex){
@@ -1749,6 +1751,7 @@ public class Repository implements IStoreActions {
                         sql = "CREATE TABLE Appointment ("
                         + "pid LONG PRIMARY KEY, "
                         + "patientKey LONG NOT NULL REFERENCES Patient(pid), "
+                        + "patientNoteKey LONG LONG NOT NULL REFERENCES PatientNote(pid), "
                         + "start DateTime, "
                         + "duration LONG, "
                         + "notes char, "
@@ -1775,8 +1778,8 @@ public class Repository implements IStoreActions {
                 break;
             case INSERT_APPOINTMENT:
                 sql = "INSERT INTO Appointment "
-                        + "(PatientKey, Start, Duration, Notes,pid) "
-                        + "VALUES (?,?,?,?,?);";
+                        + "(PatientKey, Start, Duration, Notes,pid, patientNoteKey) "
+                        + "VALUES (?,?,?,?,?,?);";
                 doInsertAppointment(sql, entity);
                 break;
             case RECOVER_APPOINTMENT:
@@ -1876,7 +1879,8 @@ public class Repository implements IStoreActions {
                         + "Start = ?,"
                         + "Duration = ?,"
                         + "Notes = ?, "
-                        + "hasPatientBeenContacted = ? "
+                        + "hasPatientBeenContacted = ?, "
+                        + "patientNoteKey = ? "
                         + "WHERE pid = ? ;";
                 doUpdateAppointment(sql, entity);
                 break;
@@ -2018,9 +2022,9 @@ public class Repository implements IStoreActions {
                 break;
             case DELETE_PATIENT_NOTE:
                 sql = "UPDATE PatientNote "
-                        + "SET isDeleted = ? "
-                        + "WHERE datestamp = ? "
-                        + "AND patientKey = ?"; 
+                        + "SET isDeleted = true "
+                        + "WHERE pid = ?";
+
                 doDeletePatientNote(sql, entity);
                 break; 
             case DELETE_PATIENT_NOTES:
@@ -2036,8 +2040,7 @@ public class Repository implements IStoreActions {
             case READ_PATIENT_NOTE:
                 sql = "SELECT * "
                         + "FROM PatientNote "
-                        + "WHERE datestamp = ? "
-                        + "AND patientKey = ? "
+                        + "WHERE pid = ? "
                         + "AND isDeleted = false; ";                       
                 result = doReadPatientNoteWithKey(sql, entity);
                 break;
@@ -2238,10 +2241,10 @@ public class Repository implements IStoreActions {
     }
     
     @Override
-    public void insert(SurgeryDaysAssignment surgeryDaysAssignment) throws StoreException {
+    public Integer insert(SurgeryDaysAssignment surgeryDaysAssignment) throws StoreException {
         runSQL(Repository.EntitySQL.SURGERY_DAYS_ASSIGNMENT, 
             Repository.PMSSQL.INSERT_SURGERY_DAYS_ASSIGNMENT, surgeryDaysAssignment);
-           
+        return null;  
     }
 
     /**
@@ -2558,49 +2561,50 @@ public class Repository implements IStoreActions {
     }
     
     @Override
-    public PatientNote read(PatientNote patientNote)throws StoreException{
+    public PatientNote read(PatientNote patientNote, Integer key)throws StoreException{
         PatientNote result = null;
         Entity entity = null;
-    switch(patientNote.getScope()){
-        case SINGLE:{
-            if ((patientNote.getDatestamp()!=null)
-                &&(patientNote.getPatientKey()!=null)){
-                entity = (Entity)runSQL(Repository.EntitySQL.PATIENT_NOTE, 
-                        Repository.PMSSQL.READ_PATIENT_NOTE, 
-                        patientNote);
+        PatientNoteDelegate delegate = new PatientNoteDelegate();
+        delegate.setKey(key);
+        switch(patientNote.getScope()){
+            case SINGLE:{
+                try{
+                    entity = (Entity)runSQL(Repository.EntitySQL.PATIENT_NOTE, 
+                            Repository.PMSSQL.READ_PATIENT_NOTE, 
+                            delegate);
+                }catch(StoreException ex){
+                    String message = "";
+                    throw new StoreException(
+                        message + "StoreException raised -> null value returned from persistent store "
+                            + "in method Repository::read(PatientNote[" 
+                                + patientNote.getScope().toString() + "])\n",
+                        StoreException.ExceptionType.UNEXPECTED_DATA_TYPE_ENCOUNTERED);
+                }
+                break;
+            }       
+            case ALL:
+                entity = (Entity)runSQL(Repository.EntitySQL.PATIENT_NOTE,
+                            Repository.PMSSQL.READ_ALL_PATIENT_NOTES, 
+                            patientNote);
+                break;
+            case FOR_PATIENT:
+                entity = (Entity)runSQL(Repository.EntitySQL.PATIENT_NOTE,
+                            Repository.PMSSQL.READ_NOTES_FOR_PATIENT, 
+                            patientNote);
+                break;
+        }
+        if (entity!=null){
+            if (entity.getIsPatientNote()){
+                result = (PatientNote)entity;
+                return result;
             }else{
                 String message = "";
                 throw new StoreException(
-                    message + "StoreException raised -> null value returned from persistent store "
-                        + "in method Repository::read(PatientNote[" 
-                            + patientNote.getScope().toString() + "])\n",
-                    StoreException.ExceptionType.UNEXPECTED_DATA_TYPE_ENCOUNTERED);
+
+                    message + "StoreException raised -> unexpected entity type returned from persistent store "
+                        + "in method Repository::read(PatientNote)\n",
+                    StoreException.ExceptionType.UNEXPECTED_DATA_TYPE_ENCOUNTERED); 
             }
-            break;
-        }
-        case ALL:
-            entity = (Entity)runSQL(Repository.EntitySQL.PATIENT_NOTE,
-                        Repository.PMSSQL.READ_ALL_PATIENT_NOTES, 
-                        patientNote);
-            break;
-        case FOR_PATIENT:
-            entity = (Entity)runSQL(Repository.EntitySQL.PATIENT_NOTE,
-                        Repository.PMSSQL.READ_NOTES_FOR_PATIENT, 
-                        patientNote);
-            break;
-    }
-        if (entity!=null){
-                if (entity.getIsPatientNote()){
-                    result = (PatientNote)entity;
-                    return result;
-                }else{
-                    String message = "";
-                    throw new StoreException(
-                            
-                        message + "StoreException raised -> unexpected entity type returned from persistent store "
-                            + "in method Repository::read(PatientNote)\n",
-                        StoreException.ExceptionType.UNEXPECTED_DATA_TYPE_ENCOUNTERED); 
-                }
         }else{
             String message = "";
             throw new StoreException(
