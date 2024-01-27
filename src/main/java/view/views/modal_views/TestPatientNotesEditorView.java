@@ -33,6 +33,8 @@ public class TestPatientNotesEditorView extends javax.swing.JInternalFrame {
         scrNotepad = new javax.swing.JScrollPane();
         txaNotepad = new javax.swing.JTextArea();
         dateTimePicker1 = new com.github.lgooddatepicker.components.DateTimePicker();
+        btnPreviousNote = new javax.swing.JButton();
+        btnNextNote = new javax.swing.JButton();
         jPanel3 = new javax.swing.JPanel();
         btnAddNewNote = new javax.swing.JButton();
         BtnSaveChanges = new javax.swing.JButton();
@@ -76,6 +78,10 @@ public class TestPatientNotesEditorView extends javax.swing.JInternalFrame {
         txaNotepad.setRows(5);
         scrNotepad.setViewportView(txaNotepad);
 
+        btnPreviousNote.setText("<<");
+
+        btnNextNote.setText(">>");
+
         javax.swing.GroupLayout pnlNotepadLayout = new javax.swing.GroupLayout(pnlNotepad);
         pnlNotepad.setLayout(pnlNotepadLayout);
         pnlNotepadLayout.setHorizontalGroup(
@@ -86,14 +92,20 @@ public class TestPatientNotesEditorView extends javax.swing.JInternalFrame {
                     .addComponent(scrNotepad)
                     .addGroup(pnlNotepadLayout.createSequentialGroup()
                         .addComponent(dateTimePicker1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(btnPreviousNote)
+                        .addGap(29, 29, 29)
+                        .addComponent(btnNextNote)))
                 .addContainerGap())
         );
         pnlNotepadLayout.setVerticalGroup(
             pnlNotepadLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlNotepadLayout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(dateTimePicker1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(pnlNotepadLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(dateTimePicker1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnPreviousNote)
+                    .addComponent(btnNextNote))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(scrNotepad, javax.swing.GroupLayout.PREFERRED_SIZE, 155, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18))
@@ -165,6 +177,8 @@ public class TestPatientNotesEditorView extends javax.swing.JInternalFrame {
     private javax.swing.JButton BtnSaveChanges;
     private javax.swing.JButton btnAddNewNote;
     private javax.swing.JButton btnCloseView;
+    private javax.swing.JButton btnNextNote;
+    private javax.swing.JButton btnPreviousNote;
     private com.github.lgooddatepicker.components.DateTimePicker dateTimePicker1;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel pnlNoteIndex;

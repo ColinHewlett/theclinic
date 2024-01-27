@@ -117,7 +117,10 @@
                       <Component id="scrNotepad" max="32767" attributes="0"/>
                       <Group type="102" alignment="0" attributes="0">
                           <Component id="dateTimePicker1" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                          <EmptySpace max="32767" attributes="0"/>
+                          <Component id="btnPreviousNote" min="-2" max="-2" attributes="0"/>
+                          <EmptySpace min="-2" pref="29" max="-2" attributes="0"/>
+                          <Component id="btnNextNote" min="-2" max="-2" attributes="0"/>
                       </Group>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
@@ -128,7 +131,11 @@
           <Group type="103" groupAlignment="0" attributes="0">
               <Group type="102" alignment="1" attributes="0">
                   <EmptySpace max="32767" attributes="0"/>
-                  <Component id="dateTimePicker1" min="-2" max="-2" attributes="0"/>
+                  <Group type="103" groupAlignment="3" attributes="0">
+                      <Component id="dateTimePicker1" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="btnPreviousNote" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="btnNextNote" alignment="3" min="-2" max="-2" attributes="0"/>
+                  </Group>
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="scrNotepad" min="-2" pref="155" max="-2" attributes="0"/>
                   <EmptySpace min="-2" pref="18" max="-2" attributes="0"/>
@@ -150,6 +157,16 @@
           </SubComponents>
         </Container>
         <Component class="com.github.lgooddatepicker.components.DateTimePicker" name="dateTimePicker1">
+        </Component>
+        <Component class="javax.swing.JButton" name="btnPreviousNote">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="&lt;&lt;"/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JButton" name="btnNextNote">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="&gt;&gt;"/>
+          </Properties>
         </Component>
       </SubComponents>
     </Container>

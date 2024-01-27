@@ -42,7 +42,7 @@ public interface IStoreActions {
     public Integer insert(Patient p, Integer patientKey, Integer guardianKey) throws StoreException;
     public Integer insert(Notification pn, Integer patientKey) throws StoreException;
     public void insert(SurgeryDaysAssignment p) throws StoreException;
-    public void insert(PatientNote pn) throws StoreException;
+    public Integer insert(PatientNote pn) throws StoreException;
     
     //public void populate(SurgeryDaysAssignment data)throws StoreException;
     
@@ -60,5 +60,5 @@ public interface IStoreActions {
     public void update(SurgeryDaysAssignment value) throws StoreException;
     public void update(Patient p, Integer key, Integer guardianKey) throws StoreException;
     public void update(Notification pn, Integer key, Integer patientKey)throws StoreException;
-    public void update(PatientNote pn)throws StoreException;
+    public void update(PatientNote pn, Integer patientNoteKey)throws StoreException;
 }

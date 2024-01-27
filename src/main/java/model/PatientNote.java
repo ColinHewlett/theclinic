@@ -25,27 +25,24 @@ import java.util.List;
  * @author colin
  */
 public class PatientNote extends Entity implements IEntityStoreActions{
-    private LocalDateTime datestamp = null;
-    private Integer patientKey = null;
-    private String note = null;
-    private Boolean isDeleted = null;
-    private Patient patient = null;
-    private ArrayList<PatientNote> collection = null;
-    
+
     private Boolean checkIfPatientExistsWithKey(Integer key){
         return null;
     }
     
-    public ArrayList<PatientNote> get(){
-        ArrayList<PatientNote> patientNotes = new ArrayList<>();
-        for(PatientNote patientNote : collection){
-            patientNotes.add(patientNote);  
-        }
-        return patientNotes;
+    private ArrayList<PatientNote> collection = new ArrayList<>();;
+    public ArrayList<PatientNote> get(){  
+        return collection;
     }
 
     public void set(ArrayList<PatientNote> value){
         collection = value;
+    }
+    
+    
+    public PatientNote(Integer key){
+        this.key = key;
+        super.setIsPatientNote(true);
     }
     
     public PatientNote(LocalDateTime datestamp, int patientKey)throws StoreException{
@@ -71,49 +68,61 @@ public class PatientNote extends Entity implements IEntityStoreActions{
         super.setIsPatientNote(true);
     }
     
+    private Integer key = null;
+    protected void setKey(Integer value){
+        this.key = value;
+    }
+    protected Integer getKey(){
+        return key;
+    }
+    
+    private LocalDateTime datestamp = null;
     public void setDatestamp(LocalDateTime value){
         this.datestamp = value;
     }
-    
     public LocalDateTime getDatestamp(){
         return datestamp;
     }
     
-    /**
-     * 
-     * @param value; Integer representing patient pid
-     * @throws StoreException if a patient with this pid cannot be found
-     */
-    public void setPatientKey(Integer value)throws StoreException{
+    private Integer patientKey = null;
+    public void setPatientKey(Integer value){
         this.patientKey = value;
     }
-    
     public Integer getPatientKey(){
         return patientKey;
     }
     
-    public void setPatient(Patient value)throws StoreException{
+    private Patient patient = null;
+    public void setPatient(Patient value){
+        setPatientKey(value.getKey());
         patient = value;
     }
-    
     public Patient getPatient(){
         return patient;
     }
     
+    private String note = null;
     public void setNote(String value){
         note = value;
     }
-    
     public String getNote(){
         return note;
     }
     
+    private Boolean isDeleted = null;
     public void setIsDeleted(Boolean value){
         isDeleted = value;
     }
-    
     public Boolean getIsDeleted(){
         return isDeleted;
+    }
+    
+    private LocalDateTime lastUpdated = null;
+    public LocalDateTime getLastUpdated(){
+        return lastUpdated;
+    }
+    public void setLastUpdated(LocalDateTime value){
+        lastUpdated = value;
     }
     
     /**
@@ -161,7 +170,7 @@ public class PatientNote extends Entity implements IEntityStoreActions{
      */
     @Override
     public void insert() throws StoreException{
-        new Repository().insert(this);
+        setKey(new Repository().insert(this));
     }
     
     /**
@@ -214,7 +223,7 @@ public class PatientNote extends Entity implements IEntityStoreActions{
     
     @Override
     public void update()throws StoreException{
-        new Repository().update(this);
+        new Repository().update(this, getKey());
     }
             
     

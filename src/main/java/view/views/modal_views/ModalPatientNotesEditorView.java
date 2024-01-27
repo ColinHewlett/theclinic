@@ -9,15 +9,23 @@ import controller.ViewController;
 import model.PatientNote;
 import model.Patient;
 import java.awt.Color;
+import java.awt.Rectangle;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyVetoException;
 import javax.swing.JOptionPane;
 import view.View;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.LocalDateTime;
 import view.views.non_modal_views.DesktopView;
 import com.github.lgooddatepicker.components.DateTimePicker;
 import com.github.lgooddatepicker.components.TimePickerSettings;
 import com.github.lgooddatepicker.components.DatePickerSettings;
+import com.github.lgooddatepicker.optionalusertools.DateTimeChangeListener;
+import com.github.lgooddatepicker.zinternaltools.DateTimeChangeEvent;
+import com.github.lgooddatepicker.zinternaltools.DateChangeEvent;
+import com.github.lgooddatepicker.zinternaltools.TimeChangeEvent;
+
 import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeEvent;
 import java.time.LocalDate;
@@ -31,10 +39,9 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumnModel;
-import model.Appointment;
-import view.views.view_support_classes.models.EmptySlotAvailability2ColumnTableModel;
 import view.views.view_support_classes.models.PatientNote2ColumnTableModel;
 import view.views.view_support_classes.renderers.TableHeaderCellBorderRenderer;
+
 
 /**
  *
@@ -58,23 +65,6 @@ public class ModalPatientNotesEditorView extends ModalView implements PropertyCh
         setDesktopView(desktopView);  
     }
     
-    private Notepad notepad = null;
-    private void setNotepad(Notepad value){
-        notepad = value;
-    }
-    private Notepad getNotepad(){
-        return notepad;
-    }
-    
-    private PatientNote patientNote = null;
-    private PatientNote getPatientNote(){
-        return patientNote;
-    }
-    private void setPatientNote(PatientNote value){
-        patientNote = value;
-    }
-            
-    
     @Override
     public void initialiseView(){
         initComponents();
@@ -82,7 +72,8 @@ public class ModalPatientNotesEditorView extends ModalView implements PropertyCh
                 tblNotesIndex, scrNoteIndex.getPreferredSize().width, 25,75);
         setVisible(true);
         addListeners();
-        setNotepadEnabledColor(txaNotepad.getBackground());
+        dateTimePicker.addDateTimeChangeListener(new DateTimePickerChangeListener());
+        
         Patient patient = getMyController()
                 .getDescriptor().getControllerDescription().getPatient();
         setTitle("Patient notes editor for " + patient.toString());
@@ -96,16 +87,6 @@ public class ModalPatientNotesEditorView extends ModalView implements PropertyCh
                 .getDescriptor().getControllerDescription().getPatientNotes();
         setNotesIndexTableListener();
         populateNotesIndexTable(patientNotes); 
-
-        
-    }
-    
-    private Patient patient = null;
-    private Patient getPatient(){
-        return patient;
-    }
-    private void setPatient(Patient value){
-        patient = value;
     }
     
     @Override
@@ -122,23 +103,37 @@ public class ModalPatientNotesEditorView extends ModalView implements PropertyCh
         }
     }
     
-    private NotepadState notepadState = null;
-    private static enum NotepadState{OPEN,SHUT};
+    private enum State{OPEN,SHUT};
     
-    private Color notepadDisabledColor = new Color(220,220,220);;
-    private Color notepadEnabledColor = null;
-            
-    private Color getNotepadDisabledColor(){
-        return notepadDisabledColor;
+    private Notepad notepad = null;
+    private void setNotepad(Notepad value){
+        notepad = value;
+    }
+    private Notepad getNotepad(){
+        return notepad;
     }
     
-    private Color getNotepadEnabledColor(){
-        return notepadEnabledColor;
+    private PatientNote patientNote = null;
+    private PatientNote getPatientNote(){
+        return patientNote;
+    }
+    private void setPatientNote(PatientNote value){
+        patientNote = value;
     }
     
-    private void setNotepadEnabledColor(Color value){
-        notepadEnabledColor = value;
+    private Patient patient = null;
+    private Patient getPatient(){
+        return patient;
     }
+    private void setPatient(Patient value){
+        patient = value;
+    }
+
+    
+    
+    
+    
+    
     
     private ViewController.ViewMode viewMode = null;
     
@@ -150,41 +145,12 @@ public class ModalPatientNotesEditorView extends ModalView implements PropertyCh
         viewMode = value;
     }
     
-    private void openNotepad(PatientNote patientNote){
-        txaNotepad.setEnabled(true);
-        txaNotepad.setBackground(getNotepadEnabledColor());
-        setNotepadState(NotepadState.OPEN);
-        if (patientNote.getDatestamp()==null){
-            txaNotepad.setText("");
-            dateTimePicker.setDateTimePermissive(LocalDateTime.now());
-            setViewMode(ViewController.ViewMode.CREATE);
-        }else{
-            txaNotepad.setText(patientNote.getNote());
-            dateTimePicker.datePicker.setDate(patientNote
-                    .getDatestamp().toLocalDate());
-            dateTimePicker.timePicker.setTime(patientNote
-                    .getDatestamp().toLocalTime());
-            setViewMode(ViewController.ViewMode.UPDATE);
-        }
-    }
-    
-    private void shutNotepad(){
-        txaNotepad.setEnabled(false);
-        txaNotepad.setBackground(getNotepadDisabledColor());
-        txaNotepad.setText("");
-        dateTimePicker.clear();
-        setNotepadState(NotepadState.SHUT);
-    }
-    
-    private NotepadState getNotepadState(){
-        return notepadState;
-    }
-    
-    private void setNotepadState(NotepadState value){
-        notepadState = value;
-    }
-
     private void addListeners(){
+        ArrayList<PatientNote> patientNotes = new ArrayList<>();
+        PatientNote2ColumnTableModel model = 
+                (PatientNote2ColumnTableModel)tblNotesIndex.getModel();
+        PatientNote patientNote;
+
         btnCloseView.addActionListener(new java.awt.event.ActionListener() {
             @Override
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -209,12 +175,11 @@ public class ModalPatientNotesEditorView extends ModalView implements PropertyCh
         this.btnAddNewNote.addActionListener(new java.awt.event.ActionListener() {
                 @Override
                 public void actionPerformed(java.awt.event.ActionEvent evt) {
-                    Boolean result = okToClearNotepad("OK to lose current notepad contents");
+                    Boolean result = okToClearNotepad("Contents in notepad will be lost. OK to proceed?");
                     if (result){
                         getNotepad().shut();
-                        //setNotepad(new Notepad(LocalDateTime.now()));
-                        getNotepad().open();
-                        //setViewMode(ViewController.ViewMode.CREATE);
+                        getNotepad().open(null);
+
                     }
                 }
             }
@@ -248,6 +213,38 @@ public class ModalPatientNotesEditorView extends ModalView implements PropertyCh
                 }   
             }
                       
+        });
+        this.btnNextNote.addActionListener(new java.awt.event.ActionListener() {
+            int row;
+            @Override
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                if (!model.getPatientNotes().isEmpty()){//any rows in the table
+                    row = tblNotesIndex.getSelectedRow();
+                    if ((row+1) < model.getPatientNotes().size()){
+                        tblNotesIndex.setRowSelectionInterval(row+1,row+1);
+                        tblNotesIndex.scrollRectToVisible(
+                                new Rectangle(tblNotesIndex.
+                                        getCellRect(row+1, 0, true)));
+                    }
+                }
+            }
+        });
+        this.btnPreviousNote.addActionListener(new java.awt.event.ActionListener() {
+            int row;
+            @Override
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                if (!model.getPatientNotes().isEmpty()){//any rows in the table
+                    row = tblNotesIndex.getSelectedRow();
+                    if ((row-1) >= 0){
+                        tblNotesIndex.setRowSelectionInterval(row-1,row-1);
+                        //following code auto moves the vertical scrool bar 
+                        //when next row selected would be off scroll pane
+                        tblNotesIndex.scrollRectToVisible(
+                                new Rectangle(tblNotesIndex.
+                                        getCellRect(row-1, 0, true)));
+                    }
+                }
+            }
         });
     }
     
@@ -292,14 +289,17 @@ public class ModalPatientNotesEditorView extends ModalView implements PropertyCh
         PatientNote patientNote = 
                 ((PatientNote2ColumnTableModel)this.tblNotesIndex.getModel()).getElementAt(row);
         Notepad notepad = getNotepad();
+        notepad.shut();
+        /*
         if (notepad.isOpen()){
-            Boolean result = okToClearNotepad("OK to lose current contents of notepad?");
+            Boolean result = okToClearNotepad("Current notepad cotents would be lost. Proceed?");
             if (result){
                 getNotepad().shut();
             }
         }
+        */
         setPatientNote(patientNote);
-        notepad.open();
+        notepad.open(patientNote);
         notepad.setDatestamp(patientNote.getDatestamp());
         notepad.setContent(patientNote.getNote());
         setViewMode(ViewController.ViewMode.UPDATE);
@@ -343,6 +343,8 @@ public class ModalPatientNotesEditorView extends ModalView implements PropertyCh
         btnSaveNoteChanges = new javax.swing.JButton();
         btnCloseView = new javax.swing.JButton();
         btnClearNotepad = new javax.swing.JButton();
+        btnNextNote = new javax.swing.JButton();
+        btnPreviousNote = new javax.swing.JButton();
 
         pnlNoteIndex.setBorder(javax.swing.BorderFactory.createTitledBorder("Note index"));
         pnlNotepad.setBorder(javax.swing.BorderFactory.createTitledBorder("Notepad"));
@@ -375,7 +377,8 @@ public class ModalPatientNotesEditorView extends ModalView implements PropertyCh
         
         scrNoteIndex.setViewportView(tblNotesIndex);
         
-        
+        btnNextNote.setText(">>");
+        btnPreviousNote.setText("<<");
 
         btnClearNotepad.setText("<html>"
                 + "<center>Clear</center>"
@@ -429,14 +432,44 @@ public class ModalPatientNotesEditorView extends ModalView implements PropertyCh
                     .addComponent(scrNotepad)
                     .addGroup(pnlNotepadLayout.createSequentialGroup()
                         .addComponent(dateTimePicker, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        //.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGap(100)
+                        .addComponent(btnPreviousNote)
+                        .addGap(25,25,25)
+                        .addComponent(btnNextNote)))
+                .addContainerGap())
+            /*
+            pnlNotepadLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlNotepadLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(pnlNotepadLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(scrNotepad)
+                    .addGroup(pnlNotepadLayout.createSequentialGroup()
+                        .addComponent(dateTimePicker, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(btnPreviousNote)
+                        .addGap(20,20,20)
+                        .addComponent(btnNextNote)
                         .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
+                */
         );
         pnlNotepadLayout.setVerticalGroup(
+            /*
             pnlNotepadLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlNotepadLayout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(dateTimePicker, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(scrNotepad, javax.swing.GroupLayout.PREFERRED_SIZE, 155, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18))
+            */
+            pnlNotepadLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlNotepadLayout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(pnlNotepadLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(dateTimePicker, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnPreviousNote)
+                    .addComponent(btnNextNote))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(scrNotepad, javax.swing.GroupLayout.PREFERRED_SIZE, 155, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18))
@@ -501,6 +534,8 @@ public class ModalPatientNotesEditorView extends ModalView implements PropertyCh
 
 
     // Variables declaration - do not modify                     
+    private javax.swing.JButton btnPreviousNote;
+    private javax.swing.JButton btnNextNote;
     private javax.swing.JButton btnSaveNoteChanges;
     private javax.swing.JButton btnAddNewNote;
     private javax.swing.JButton btnCloseView;
@@ -518,25 +553,26 @@ public class ModalPatientNotesEditorView extends ModalView implements PropertyCh
     // End of variables declaration    
     
     private class Notepad{
-
+        
+        
         Notepad(){
-            
-        };
-        
-        Notepad(LocalDateTime datestamp){
-            Notepad.this.datestamp = datestamp;
-            //setPatientNote(new PatientNote(datestamp, patient));
+            setOpenColor(txaNotepad.getBackground());
+            shut();
+        }
+       
+        private Color shutColor = new Color(220,220,220);
+        private Color getShutColor(){
+            return shutColor;
         }
         
-        /*
-        private PatientNote patientNote = null;
-        private void setPatientNote(PatientNote value){
-            Notepad.this.patientNote = value;
+        private Color openColor = null;
+        private Color getOpenColor(){
+            return openColor;
         }
-        private PatientNote getPatientNote(){
-            return Notepad.this.patientNote;
+        private void setOpenColor(Color value){
+            openColor = value;
         }
-        */
+
         private LocalDateTime datestamp = null;
         private LocalDateTime getDatestamp(){
             return dateTimePicker.getDateTimePermissive();
@@ -545,71 +581,120 @@ public class ModalPatientNotesEditorView extends ModalView implements PropertyCh
             dateTimePicker.setDateTimePermissive(value);
         }
         
-        private NotepadState state = null;
+        private State state = null;
         private boolean isOpen(){
-            return Notepad.this.state.equals(NotepadState.OPEN);
+            return Notepad.this.state.equals(State.OPEN);
         }
         private boolean isShut(){
-            return Notepad.this.state.equals(NotepadState.SHUT);
-        }
-        
-        private void setState(NotepadState value){
-            Notepad.this.state = value;
+            return Notepad.this.state.equals(State.SHUT);
         }
         
         private String getContent(){
             return txaNotepad.getText();
         }
-        
         private void setContent(String value){
             txaNotepad.setText(value);
+        }
+        
+        private void open(PatientNote patientNote){
+            state = State.OPEN;
+            txaNotepad.setEnabled(true);
+            txaNotepad.setBackground(getOpenColor());
+            if (patientNote==null){
+                txaNotepad.setText("");
+                dateTimePicker.setDateTimePermissive(LocalDateTime.now());
+                setViewMode(ViewController.ViewMode.CREATE);
+            }else{
+                txaNotepad.setText(patientNote.getNote());
+                dateTimePicker.datePicker
+                        .setDate(patientNote
+                                .getDatestamp().toLocalDate());
+                dateTimePicker.timePicker
+                        .setTime(patientNote
+                                .getDatestamp().toLocalTime());
+                setViewMode(ViewController.ViewMode.UPDATE);
+            }
         }
         
         private void shut(){
             txaNotepad.setEnabled(false);
             txaNotepad.setText("");
-            txaNotepad.setBackground(getNotepadDisabledColor());
+            txaNotepad.setBackground(getShutColor());
             dateTimePicker.clear();
-            Notepad.this.setDatestamp(dateTimePicker.getDateTimePermissive());
-            setState(NotepadState.SHUT);
+            state = State.SHUT;
         }
         
         private void save(){
+            PatientNote patientNote = null;
+            boolean isDatestampError = false;
             switch(getViewMode()){
                 case CREATE:
-                    setPatientNote(new PatientNote(Notepad.this.getDatestamp(),getPatient()));
-                    getPatientNote().setNote(getContent());
+                    patientNote = new PatientNote();
+                    patientNote.setPatient(getPatient());
+                    patientNote.setNote(getContent());
+                    patientNote.setLastUpdated(LocalDateTime.now());
+                    if (getDatestamp()!=null)
+                        patientNote.setDatestamp(getDatestamp());
+                    else isDatestampError = true;
                     break;
                 case UPDATE:
+                    patientNote = getPatientNote();
                     getPatientNote().setNote(getContent());
+                    patientNote.setLastUpdated(LocalDateTime.now());
+                    if (getDatestamp()!=null)
+                        patientNote.setDatestamp(getDatestamp());
+                    else isDatestampError = true;
                     break;
             }
-            getMyController()
-                    .getDescriptor()
-                    .getViewDescription()
-                    .setPatientNote(getPatientNote());
-            getMyController()
-                    .getDescriptor()
-                    .getViewDescription()
-                    .setViewMode(getViewMode());
+            if (!isDatestampError){
+                setPatientNote(patientNote);
+                getMyController()
+                        .getDescriptor()
+                        .getViewDescription()
+                        .setPatientNote(getPatientNote());
+                getMyController()
+                        .getDescriptor()
+                        .getViewDescription()
+                        .setViewMode(getViewMode());
 
-            ActionEvent actionEvent = new ActionEvent(
-            ModalPatientNotesEditorView.this,ActionEvent.ACTION_PERFORMED, 
-                ViewController
-                        .PatientViewControllerActionEvent
-                        .PATIENT_EDITOR_VIEW_CHANGE
-                        .toString());
-            getMyController().actionPerformed(actionEvent);
-            setViewMode(ViewController.ViewMode.UPDATE);
+                ActionEvent actionEvent = new ActionEvent(
+                ModalPatientNotesEditorView.this,ActionEvent.ACTION_PERFORMED, 
+                    ViewController
+                            .PatientViewControllerActionEvent
+                            .PATIENT_EDITOR_VIEW_CHANGE
+                            .toString());
+                getMyController().actionPerformed(actionEvent);
+                setViewMode(ViewController.ViewMode.UPDATE);
+            }else{
+                JOptionPane.showMessageDialog(ModalPatientNotesEditorView.this, 
+                        "a date and time must be specified before "
+                                + "the patient note is saved");
+            }
+            
         }
-        
-        private void open(){
-            txaNotepad.setEnabled(true);
-            txaNotepad.setBackground(getNotepadEnabledColor());
-            setState(NotepadState.OPEN);
-            txaNotepad.setText("");
-            dateTimePicker.setDateTimePermissive(LocalDateTime.now());
-            setViewMode(ViewController.ViewMode.CREATE);
+    }
+    
+    /**
+   * SampleDateTimeChangeListener, A DateTimeChangeListener provides a way for a class to receive
+   * notifications whenever the date or time has changed in a DateTimePicker.
+   */
+    private class DateTimePickerChangeListener implements DateTimeChangeListener {
+
+        @Override
+        public void dateOrTimeChanged(DateTimeChangeEvent event) {
+            DateChangeEvent dateEvent = event.getDateChangeEvent();
+            if (dateEvent!=null){
+                LocalDate oldDate = dateEvent.getOldDate();
+                LocalDate newDate = dateEvent.getNewDate();
+            }
+            TimeChangeEvent timeEvent = event.getTimeChangeEvent();
+            if (timeEvent!=null){
+                LocalTime oldTime = timeEvent.getOldTime();
+                LocalTime newTime = timeEvent.getNewTime();
+            }
+            ModalPatientNotesEditorView.this
+                    .getNotepad()
+                    .setDatestamp(dateTimePicker.getDateTimePermissive());
         }
     }
 }
