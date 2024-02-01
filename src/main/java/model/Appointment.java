@@ -35,7 +35,7 @@ public class Appointment extends Entity implements IEntityStoreActions{
     private String notes = null;
     private Patient patient;
     private Boolean hasPatientBeenContacted = null;
-    private Integer patientNoteKey = null;
+    private PatientNote patientNote = null;
     private ArrayList<Appointment> collection = null;
     private static final DateTimeFormatter ddMMyyyyFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
@@ -137,11 +137,11 @@ public class Appointment extends Entity implements IEntityStoreActions{
         return getStart().plusMinutes(getDuration().toMinutes());
     }
     
-    public void setPatientNoteKey(Integer value){
-        patientNoteKey = value;
+    public void setPatientNote(PatientNote value){
+        patientNote = value;
     }
-    public Integer getPatientNoteKey(){
-        return patientNoteKey;
+    public PatientNote getPatientNote(){
+        return patientNote;
     }
     
     /**
@@ -205,6 +205,20 @@ public class Appointment extends Entity implements IEntityStoreActions{
         hasPatientBeenContacted = value;
     }
     
+
+    public Boolean getIsPatientNoteDefined(){
+        Boolean result = null;
+        
+        PatientNote test = getPatientNote();
+        if (test!=null){
+            if (test.getKey()==0)
+            result = false;
+        
+            
+            else result = true; 
+        }
+        return result;
+    }
     /**
      * 
      * @return 
@@ -293,7 +307,9 @@ public class Appointment extends Entity implements IEntityStoreActions{
     @Override
     public Integer insert() throws StoreException{
         Integer pid;
-        pid = new Repository().insert(this, getPatient().getKey()); 
+        if (getIsUnbookableSlot())
+            pid = new Repository().insert(this, getPatient().getKey(), 0);
+        else pid = new Repository().insert(this, getPatient().getKey(), getPatientNote().getKey()); 
 
         setKey(pid);
         return pid;
@@ -334,6 +350,7 @@ public class Appointment extends Entity implements IEntityStoreActions{
      */
     @Override
     public Appointment read() throws StoreException{
+        PatientNote patientNote = null;
         Patient patient = null;
         Appointment result = null;
         ArrayList<Appointment> appointments = null;
@@ -345,13 +362,21 @@ public class Appointment extends Entity implements IEntityStoreActions{
                     
                     for(var a : this.get()){
                         if (a.getPatient().getIsKeyDefined()){
-                            patient = new Patient(a.getPatient().getKey());
+                            Integer key = a.getPatient().getKey();
+                            patient = new Patient(key);
                             patient.setScope(Scope.SINGLE);
                             a.setPatient(patient.read());
                         }else{
                         String message = "A key has not been defined for the appointee object in the read Appointment, "
                                 + "raised in Appointment::Read(scope = " + this.getScope().toString() + ")";
                         throw new StoreException(message, StoreException.ExceptionType.NULL_KEY_EXCEPTION);
+                        }
+                        int test = 0;
+                        if (a.getPatientNote().getKey()>0){
+                            patientNote = new PatientNote(a.getPatientNote().getKey());
+                            patientNote.setScope(Scope.SINGLE);
+                            System.out.println(patientNote.getKey());
+                            a.setPatientNote(patientNote.read());
                         }
                     }
                     result = this;
@@ -399,6 +424,11 @@ public class Appointment extends Entity implements IEntityStoreActions{
                                 + "raised in Appointment::Read(case SINGLE read)";
                         throw new StoreException(message, StoreException.ExceptionType.KEY_NOT_FOUND_EXCEPTION);
                     }
+                    if (result.getPatientNote().getKey()>0){
+                        patientNote = new PatientNote(result.getPatientNote().getKey());
+                        patientNote.setScope(Scope.SINGLE);
+                        result.setPatientNote(patientNote.read()); 
+                    }
 
                 }catch(NullPointerException ex){
                     String message = "The patient object in an appointment "
@@ -438,6 +468,18 @@ public class Appointment extends Entity implements IEntityStoreActions{
                                 + "raised in Appointment::Read(default read)";
                         throw new StoreException(message, StoreException.ExceptionType.NULL_KEY_EXCEPTION);
                         }
+                        if (a.getPatientNote().getKey()>0){
+                            patientNote = new PatientNote(a.getPatientNote().getKey());
+                            patientNote.setScope(Scope.SINGLE);
+                            a.setPatientNote(patientNote.read()); 
+                        }
+                        /*
+                        else{
+                            String message = "A zero key has been defined for the patient note object, "
+                                + "raised in Appointment::Read(default read)";
+                        throw new StoreException(message, StoreException.ExceptionType.NULL_KEY_EXCEPTION);
+                        }
+                        */
                     }
                     result = this;
                 }catch(NullPointerException ex){
@@ -499,7 +541,7 @@ public class Appointment extends Entity implements IEntityStoreActions{
      */
     @Override
     public void update() throws StoreException{ 
-        new Repository().update(this, getKey(), getPatient().getKey());
+        new Repository().update(this, getKey(), getPatient().getKey(), getPatientNote().getKey());
     }//</editor-fold>   
     
 //<editor-fold defaultstate="collapsed" desc="Object level methods overridden in Class">

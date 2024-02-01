@@ -81,19 +81,7 @@ public class ModalPatientPhoneEmailEditorView extends ModalView{
         btnClose.addActionListener(new java.awt.event.ActionListener() {
             @Override
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                String message = "Save if any changes before closing?";
-                String[] options = {"Yes", "No"};
-                int reply = JOptionPane.showOptionDialog(
-                        ModalPatientPhoneEmailEditorView.this,
-                        message,null,
-                        JOptionPane.YES_NO_OPTION,
-                        JOptionPane.INFORMATION_MESSAGE,
-                        null,
-                        options,
-                        null);
-                if (reply == JOptionPane.YES_OPTION){
-                    doSaveEditorChanges();
-                }
+                doSaveEditorChanges();
                 try{
                     ModalPatientPhoneEmailEditorView.this.setClosed(true);   
                 }catch (PropertyVetoException ex){
@@ -169,7 +157,7 @@ public class ModalPatientPhoneEmailEditorView extends ModalView{
 
         lbl1.setText("[1]");
 
-        lbl2.setText("lbl2");
+        lbl2.setText("[2]");
 
         javax.swing.GroupLayout pnlPhonesLayout = new javax.swing.GroupLayout(pnlPhones);
         pnlPhones.setLayout(pnlPhonesLayout);
@@ -214,10 +202,9 @@ public class ModalPatientPhoneEmailEditorView extends ModalView{
                 .addContainerGap())
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(btnSavePhoneEmail)
-                .addGap(90, 90, 90)
                 .addComponent(btnClose)
-                .addGap(76, 76, 76))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            )
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -228,7 +215,7 @@ public class ModalPatientPhoneEmailEditorView extends ModalView{
                 .addComponent(pnlEmail, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(btnSavePhoneEmail)
+                    //.addComponent(btnSavePhoneEmail)
                     .addComponent(btnClose))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );

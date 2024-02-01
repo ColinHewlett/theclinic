@@ -210,6 +210,7 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         NOTIFICATION_EDITOR_CREATE_NOTIFICATION_REQUEST,
         NOTIFICATION_EDITOR_UPDATE_NOTIFICATION_REQUEST,
         NOTIFICATIONS_REQUEST,
+        NOTIFICATIONS_FOR_PATIENT_REQUEST,
         UNACTIONED_NOTIFICATIONS_REQUEST,
         UPDATE_NOTIFICATION_REQUEST,
         VIEW_ACTIVATED_NOTIFICATION,
@@ -382,12 +383,14 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
             getDescriptor().getControllerDescription().setError(null);
             switch (mode){//one or more appointments already exist so check the CREATE or UPGRADE make sense
                 case CREATE:
-                    patientNote = new PatientNote(rSlot.getPatient());
-                    patientNote.setDatestamp(rSlot.getStart());
-                    patientNote.setNote(rSlot.getNotes());
-                    patientNote.setLastUpdated(LocalDateTime.now());
-                    Integer patientNoteKey = patientNote.insert();
-                    rSlot.setPatientNoteKey(patientNoteKey);
+                    if (!rSlot.getIsUnbookableSlot()){
+                        patientNote = new PatientNote(rSlot.getPatient());
+                        patientNote.setDatestamp(rSlot.getStart());
+                        patientNote.setNote(rSlot.getPatientNote().getNote());
+                        patientNote.setLastUpdated(LocalDateTime.now());
+                        Integer patientNoteKey = patientNote.insert();
+                        rSlot.setPatientNote(new PatientNote(patientNoteKey));
+                    }
                     rSlot.insert(); 
                     rSlot.setScope(Entity.Scope.SINGLE);
                     result = rSlot.read();
@@ -397,14 +400,16 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
                     rSlot.update();
                     rSlot.setScope(Entity.Scope.SINGLE);
                     result = rSlot.read();
-                    patientNote = new PatientNote(result.getPatientNoteKey());
-                    patientNote.setDatestamp(result.getStart());
-                    patientNote.setPatient(result.getPatient());
-                    patientNote.setNote(result.getNotes());
-                    patientNote.setLastUpdated(LocalDateTime.now());
-                    patientNote.setIsDeleted(result.getIsDeleted());
-                    patientNote.setScope(Entity.Scope.SINGLE);
-                    patientNote.update();
+                    if (!rSlot.getIsUnbookableSlot()){
+                        patientNote = result.getPatientNote();
+                        patientNote.setDatestamp(result.getStart());
+                        patientNote.setPatient(result.getPatient());
+                        patientNote.setNote(result.getNotes());
+                        patientNote.setLastUpdated(LocalDateTime.now());
+                        patientNote.setIsDeleted(result.getIsDeleted());
+                        patientNote.setScope(Entity.Scope.SINGLE);
+                        patientNote.update();
+                    }
                     break;
                 case NO_ACTION:
                     result = rSlot;

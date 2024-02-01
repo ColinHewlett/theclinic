@@ -275,6 +275,7 @@ public class Repository implements IStoreActions {
         Appointment appointment = new Appointment();
         AppointmentDelegate delegate = null;
         PatientDelegate patientDelegate = null;
+        PatientNoteDelegate patientNoteDelegate = null;
         
         int key = rs.getInt("pid");
         appointment.setStart(rs.getObject("Start", LocalDateTime.class));
@@ -283,13 +284,18 @@ public class Repository implements IStoreActions {
         appointment.setHasPatientBeenContacted(rs.getBoolean("hasPatientBeenContacted"));
         appointment.setIsDeleted(rs.getBoolean("isDeleted"));
         appointment.setIsCancelled(rs.getBoolean("isCancelled"));
-        appointment.setPatientNoteKey(rs.getInt("patientNoteKey"));
+        
         //09/06/2023 fix 
         //patientDelegate = new PatientDelegate();
         int patientKey = rs.getInt("PatientKey");
         patientDelegate = new PatientDelegate(patientKey);
         patientDelegate.setPatientKey(patientKey); 
         appointment.setPatient(patientDelegate);
+        
+        int patientNoteKey = rs.getInt("patientNoteKey");
+        patientNoteDelegate = new PatientNoteDelegate();
+        patientNoteDelegate.setKey(patientNoteKey);
+        appointment.setPatientNote(patientNoteDelegate);
         
         delegate = new AppointmentDelegate(appointment);
         delegate.setAppointmentKey(key);
@@ -495,12 +501,14 @@ public class Repository implements IStoreActions {
             AppointmentDelegate delegate = (AppointmentDelegate)entity;
             try {
                 PreparedStatement preparedStatement = getPMSStoreConnection().prepareStatement(sql);
-                preparedStatement.setInt(1, ((PatientDelegate)delegate.getPatient()).getPatientKey());
+                preparedStatement.setInt(1, 
+                        ((PatientDelegate)delegate.getPatient()).getPatientKey());
                 preparedStatement.setTimestamp(2, Timestamp.valueOf(delegate.getStart()));
                 preparedStatement.setLong(3, delegate.getDuration().toMinutes());
                 preparedStatement.setString(4, delegate.getNotes());
                 preparedStatement.setLong(5, delegate.getAppointmentKey());
-                preparedStatement.setLong(6, delegate.getPatientNoteKey());
+                preparedStatement.setLong(6, 
+                        ((PatientNoteDelegate)delegate.getPatientNote()).getKey());
                 preparedStatement.executeUpdate();
                    
             } catch (SQLException ex) {
@@ -742,13 +750,15 @@ public class Repository implements IStoreActions {
                 try{
                     PreparedStatement preparedStatement = getPMSStoreConnection().prepareStatement(sql);
                     if (delegate.getPatient() != null) {
-                        preparedStatement.setInt(1, ((repository.PatientDelegate)delegate.getPatient()).getPatientKey());
+                        preparedStatement.setInt(1, 
+                                ((repository.PatientDelegate)delegate.getPatient()).getPatientKey());
                     }
                     preparedStatement.setTimestamp(2, Timestamp.valueOf(delegate.getStart()));
                     preparedStatement.setLong(3, delegate.getDuration().toMinutes());
                     preparedStatement.setString(4, delegate.getNotes());
                     preparedStatement.setBoolean(5, delegate.getHasPatientBeenContacted());
-                    preparedStatement.setLong(6, delegate.getPatientNoteKey());
+                    preparedStatement.setLong(6, 
+                            ((repository.PatientNoteDelegate)delegate.getPatientNote()).getKey());
                     preparedStatement.setLong(7, delegate.getAppointmentKey());
                     preparedStatement.executeUpdate();
                 }catch (SQLException ex){
@@ -908,7 +918,7 @@ public class Repository implements IStoreActions {
                         preparedStatement.setLong(18,((PatientDelegate)delegate.getGuardian()).getPatientKey());
                     }
                     else preparedStatement.setNull(18, java.sql.Types.INTEGER);
-                    preparedStatement.setString(11, delegate.getEmail());
+                    preparedStatement.setString(19, delegate.getEmail());
                     
                     preparedStatement.executeUpdate();
                 } catch (SQLException ex) {
@@ -1243,17 +1253,17 @@ public class Repository implements IStoreActions {
     
     private Entity doReadPatientNotificationsForPatient(String sql, Entity entity)throws StoreException{
         //07/08/2022
-        Notification patientNotification;
+        Notification notification = null;
         PatientDelegate delegate;
         if (entity != null) {
             if (entity.getIsPatientNotification()) {
-                patientNotification = (Notification)entity;
+                notification = (Notification)entity;
                 try {
                     PreparedStatement preparedStatement = getPMSStoreConnection().prepareStatement(sql);
-                    delegate = (PatientDelegate)patientNotification.getPatient();
+                    delegate = (PatientDelegate)notification.getPatient();
                     preparedStatement.setLong(1, delegate.getPatientKey());
                     ResultSet rs = preparedStatement.executeQuery();
-                    return get(patientNotification, rs);
+                    return get(notification, rs);
                 } catch (SQLException ex) {
                     throw new StoreException("SQLException message -> " + ex.getMessage() + "\n"
                             + "StoreException message -> exception raised in Repository::doReadPatientNotificationsForPatient()",
@@ -1278,7 +1288,8 @@ public class Repository implements IStoreActions {
                     PreparedStatement preparedStatement = getPMSStoreConnection().prepareStatement(sql);
                     preparedStatement.setLong(1, delegate.getKey());
                     ResultSet rs = preparedStatement.executeQuery();
-                    return get(new PatientNote(), rs);
+                    delegate.setScope(Entity.Scope.SINGLE);
+                    return get(delegate, rs);
                 } catch (SQLException ex) {
                     throw new StoreException("SQLException message -> " + ex.getMessage() + "\n"
                             + "StoreException message -> exception raised in Repository::doReadPatientNoteWithKey()",
@@ -2255,12 +2266,16 @@ public class Repository implements IStoreActions {
      * @throws StoreException 
      */
     @Override
-    public Integer insert(Appointment appointment,Integer appointeeKey) throws StoreException {
+    public Integer insert(Appointment appointment,Integer appointeeKey, Integer patientNoteKey) throws StoreException {
         Integer result = null;
         AppointmentDelegate delegate = new AppointmentDelegate(appointment);
         PatientDelegate pDelegate = new PatientDelegate(delegate.getPatient());
+        PatientNoteDelegate noteDelegate = new PatientNoteDelegate();
+        
         pDelegate.setPatientKey(appointeeKey);
         delegate.setPatient(pDelegate);
+        noteDelegate.setKey(patientNoteKey);
+        delegate.setPatientNote(noteDelegate);
         Entity entity;
         IStoreClient client;
         client = runSQL(Repository.EntitySQL.APPOINTMENT,
@@ -2941,12 +2956,15 @@ public class Repository implements IStoreActions {
      * @param appointeeKey Integer value of the appointment's appointee key
      * @throws StoreException 
      */
-    public void update(Appointment appointment, Integer key, Integer appointeeKey) throws StoreException {
+    public void update(Appointment appointment, Integer key, Integer appointeeKey, Integer patientNoteKey) throws StoreException {
         AppointmentDelegate delegate = new AppointmentDelegate(appointment);
         PatientDelegate pDelegate = new PatientDelegate(delegate.getPatient());
+        PatientNoteDelegate noteDelegate = new PatientNoteDelegate();
+        noteDelegate.setKey(patientNoteKey);
         delegate.setAppointmentKey(key);
         pDelegate.setPatientKey(appointeeKey);
         delegate.setPatient(pDelegate);
+        delegate.setPatientNote(noteDelegate);
         runSQL(Repository.EntitySQL.APPOINTMENT, Repository.PMSSQL.UPDATE_APPOINTMENT, delegate);
 
     }

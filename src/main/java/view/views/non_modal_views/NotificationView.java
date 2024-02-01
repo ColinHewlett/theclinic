@@ -20,9 +20,12 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyVetoException;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Iterator;
 import javax.swing.JDesktopPane;
@@ -33,7 +36,10 @@ import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.table.TableCellRenderer;
+import model.Patient;
 
 /**
  *
@@ -50,8 +56,8 @@ public class NotificationView extends View implements ItemListener {
 
     private final String DISPLAY_UNACTIONED_NOTIFICATIONS_TEXT = "display unactioned notifications";
     private final String DISPLAY_ALL_NOTIFICATIONS_TEXT = "display all notifications";
-    private final String UI_UNACTIONED_NOTIFICATIONS_TITLE = "Outstanding patient notifications";
-    private final String UI_ALL_NOTIFICATIONS_TITLE = "Patient notifications";
+    private final String UI_UNACTIONED_NOTIFICATIONS_TITLE = "Outstanding notifications for patients";
+    private final String UI_ALL_NOTIFICATIONS_TITLE = "All notifications for patients";
     
     private String UITitle = UI_UNACTIONED_NOTIFICATIONS_TITLE;
     private PatientNotificationViewListState viewListState = null;
@@ -215,6 +221,7 @@ public class NotificationView extends View implements ItemListener {
      */
     @Override
     public void initialiseView(){
+        
         initComponents();
         try{
             setVisible(true);
@@ -227,6 +234,7 @@ public class NotificationView extends View implements ItemListener {
             setSize(860,520);
             
             addInternalFrameListeners();
+
         }
         catch (PropertyVetoException ex){
             
@@ -235,14 +243,50 @@ public class NotificationView extends View implements ItemListener {
         this.rdbDisplayAllNotifications.addItemListener(this);
         this.rdbDisplayUnactionedNotifications.addItemListener(this);
         this.tblNotifications = new JTable(new NotificationView4ColumnTableModel());
-        createNotificationTable();
 
+        createNotificationTable();
+        setNotificationTableListener();
         ActionEvent actionEvent = new ActionEvent(
             this,ActionEvent.ACTION_PERFORMED,
             ViewController.NotificationViewControllerActionEvent.UNACTIONED_NOTIFICATIONS_REQUEST.toString());
         this.getMyController().actionPerformed(actionEvent);
         
     }
+    
+    private boolean tableValueChangedListenerActivated = false;
+    private void setNotificationTableListener(){
+        this.tblNotifications.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        ListSelectionModel lsm = this.tblNotifications.getSelectionModel();
+        
+        lsm.addListSelectionListener(new ListSelectionListener() {
+            @Override
+            public void valueChanged(ListSelectionEvent e) {
+                if (!e.getValueIsAdjusting()) {   // Ensure the event is not fired multiple times
+                    int selectedRow = tblNotifications.getSelectedRow();
+                    if (selectedRow!=-1){
+                        tableValueChangedListenerActivated = true;
+                        //Patient patient = (Patient)tblAppointments.getModel().getValueAt(selectedRow, 0);
+                        //doScheduleTitleRefresh(patient);
+                    }
+                    //else doScheduleTitleRefresh(null);   
+                }
+            }
+        });
+        
+        tblNotifications.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (!tableValueChangedListenerActivated){
+                    int selectedRow = tblNotifications.rowAtPoint(e.getPoint());
+                    if (selectedRow!=-1 && tblNotifications.isRowSelected(selectedRow))
+                    tblNotifications.clearSelection(); // Deselect the clicked row
+                }else tableValueChangedListenerActivated = false;
+            }
+        });
+        
+    }
+    
+    
  
     private void populatePatientNotificationTable(
             ArrayList<Notification> patientNotifications, boolean toAddRenderer){
@@ -512,31 +556,23 @@ public class NotificationView extends View implements ItemListener {
     private void btnActionSelectedNotificationsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnActionSelectedNotificationsActionPerformed
         boolean isError = false;
         if (this.tblNotifications.getSelectedRow()==-1){
-            JOptionPane.showMessageDialog(this, "no notifications have been selected and so cannot be actioned/removed from the list");
+            JOptionPane.showMessageDialog(this, "A notification has not been selected");
             isError = true;
         }
         if (!isError){
-            int response = JOptionPane.NO_OPTION;
-            String message ="Are you sure you want to remove (action) all selected notifications from the list?";
-            response = JOptionPane.showConfirmDialog(this,message, "Action selected patient notifications", JOptionPane.YES_NO_OPTION);
-            if (response==JOptionPane.YES_OPTION){
-                NotificationView4ColumnTableModel model = (NotificationView4ColumnTableModel)this.tblNotifications.getModel();
-                ArrayList<Notification> patientNotifications = new ArrayList<>();
-                int selectedRows[] = tblNotifications.getSelectedRows();
-                for (int row : selectedRows){
-                    Notification patientNotification = (Notification)model.getPatientNotifications().get(row);
-                    patientNotifications.add(patientNotification);
-                }
-                getMyController().getDescriptor().getViewDescription().setPatientNotifications(patientNotifications);
-                ActionEvent actionEvent = new ActionEvent(
-                    this,ActionEvent.ACTION_PERFORMED,
-                    ViewController.NotificationViewControllerActionEvent.ACTION_NOTIFICATION_REQUEST.toString());
-                this.getMyController().actionPerformed(actionEvent); 
-                message = "selected notification has been actioned";
-                JOptionPane.showMessageDialog(this,message);
+            NotificationView4ColumnTableModel model = (NotificationView4ColumnTableModel)this.tblNotifications.getModel();
+            ArrayList<Notification> patientNotifications = new ArrayList<>();
+            int selectedRows[] = tblNotifications.getSelectedRows();
+            for (int row : selectedRows){
+                Notification patientNotification = (Notification)model.getPatientNotifications().get(row);
+                patientNotifications.add(patientNotification);
             }
-        }
-         
+            getMyController().getDescriptor().getViewDescription().setPatientNotifications(patientNotifications);
+            ActionEvent actionEvent = new ActionEvent(
+                this,ActionEvent.ACTION_PERFORMED,
+                ViewController.NotificationViewControllerActionEvent.ACTION_NOTIFICATION_REQUEST.toString());
+            this.getMyController().actionPerformed(actionEvent); 
+        }  
     }//GEN-LAST:event_btnActionSelectedNotificationsActionPerformed
 
     private void btnAddNewNotificationActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddNewNotificationActionPerformed
@@ -552,7 +588,7 @@ public class NotificationView extends View implements ItemListener {
         // TODO add your handling code here:
         boolean isError = false;
         if (this.tblNotifications.getSelectedRow()==-1){
-            JOptionPane.showMessageDialog(this, "A notifification to edit has not been selected");
+            JOptionPane.showMessageDialog(this, "A notification has not been selected");
             isError = true;
         }
         if (!isError){
@@ -572,19 +608,30 @@ public class NotificationView extends View implements ItemListener {
         // TODO add your handling code here:
         boolean isError = false;
         if (this.tblNotifications.getSelectedRow()==-1){
-            JOptionPane.showMessageDialog(this, "A notifification to bed cancelled has not been selected");
+            JOptionPane.showMessageDialog(this, "A notification has not been selected for cancellation");
             isError = true;
         }
         if (!isError){
-            int row = this.tblNotifications.getSelectedRow();
-            NotificationView4ColumnTableModel model = 
-                (NotificationView4ColumnTableModel)this.tblNotifications.getModel();
-            getMyController().getDescriptor().getViewDescription().setPatientNotification(model.getElementAt(row));
-            ActionEvent actionEvent = new ActionEvent(
-                this,ActionEvent.ACTION_PERFORMED,
-                ViewController.NotificationViewControllerActionEvent.
-                        CANCEL_NOTIFICATION_REQUEST.toString());
-            this.getMyController().actionPerformed(actionEvent);
+            String[] options = {"Yes", "No"};
+            int reply = JOptionPane.showOptionDialog(this,
+                        "Are you sure you want to cancel the selected "
+                                + "notificatiom?",null,
+                        JOptionPane.YES_NO_OPTION,
+                        JOptionPane.INFORMATION_MESSAGE,
+                        null,
+                        options,
+                        null);
+            if (reply==JOptionPane.YES_OPTION){
+                int row = this.tblNotifications.getSelectedRow();
+                NotificationView4ColumnTableModel model = 
+                    (NotificationView4ColumnTableModel)this.tblNotifications.getModel();
+                getMyController().getDescriptor().getViewDescription().setPatientNotification(model.getElementAt(row));
+                ActionEvent actionEvent = new ActionEvent(
+                    this,ActionEvent.ACTION_PERFORMED,
+                    ViewController.NotificationViewControllerActionEvent.
+                            CANCEL_NOTIFICATION_REQUEST.toString());
+                this.getMyController().actionPerformed(actionEvent);
+            }
         }
     }//GEN-LAST:event_btnCancelSelectedNotificationActionPerformed
 
@@ -757,6 +804,11 @@ public class NotificationView extends View implements ItemListener {
         btnCloseView.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnCloseViewActionPerformed(evt);
+            }
+        });
+        btnActionSelectedNotifications.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnActionSelectedNotificationsActionPerformed(evt);
             }
         });
 

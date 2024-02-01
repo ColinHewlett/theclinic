@@ -61,25 +61,33 @@ public class ModalPatientGuardianEditorView extends ModalView{
         setTitle("Patient guardian editor");
         setVisible(true);
         addListeners();
+        initialiseViewOnOpening();
+    }
+    
+    private Patient currentlySelectedPatient = null;
+    private Patient getCurrentlySelectedPatient(){
+        return currentlySelectedPatient;
+    }
+    private void setCurrentlySelectedPatient(Patient  value){
+        currentlySelectedPatient = value;
+    }
+    
+    private void initialiseViewOnOpening(){
+        Patient guardian = null;
+        setCurrentlySelectedPatient(getMyController()
+                .getDescriptor()
+                .getControllerDescription()
+                .getPatient());
+        //populate guardian patient selector control
         populatePatientSelector(); 
-        if (getMyController()
-                .getDescriptor()
-                .getControllerDescription()
-                .getPatient()
-                .getIsGuardianAPatient()){
+        //does this patient have a guardian who is a patient 
+        if (getCurrentlySelectedPatient().getIsGuardianAPatient()){
             this.cmbSelectYesNo.setSelectedItem(PatientView.YesNoItem.Yes);
-            Patient guardian = getMyController()
-                .getDescriptor()
-                .getControllerDescription()
-                .getPatient()
-                .getGuardian();
+            guardian = getCurrentlySelectedPatient().getGuardian();
             if (guardian != null){
                 this.cmbSelectGuardian.setSelectedItem(guardian);
-            }else this.cmbSelectGuardian.setSelectedItem(-1);
-        }else {
-            this.cmbSelectYesNo.setSelectedItem(PatientView.YesNoItem.No);
-            this.cmbSelectGuardian.setSelectedItem(-1);
-        }
+            }else this.cmbSelectGuardian.setSelectedIndex(-1);
+        }else this.cmbSelectYesNo.setSelectedItem(PatientView.YesNoItem.No);
     }
     
     private void populatePatientSelector(){
@@ -97,9 +105,44 @@ public class ModalPatientGuardianEditorView extends ModalView{
     }
     
     private void addListeners(){
+        /*
+        this.cmbSelectGuardian.addActionListener(new java.awt.event.ActionListener(){
+            @Override
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                
+                Patient patient = getCurrentlySelectedPatient();
+                patient.setGuardian((Patient)cmbSelectGuardian.getSelectedItem());
+                setCurrentlySelectedPatient(patient);    
+
+            }
+        });
+        */
+        this.cmbSelectYesNo.addActionListener(new java.awt.event.ActionListener(){
+             @Override
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                if (cmbSelectYesNo.getSelectedItem()
+                        .equals(PatientView.YesNoItem.No)){
+                    cmbSelectGuardian.setSelectedIndex(-1);
+                    cmbSelectGuardian.setEnabled(false);
+                    //getCurrentlySelectedPatient().setIsGuardianAPatient(false);
+                }
+                else if (cmbSelectYesNo.getSelectedItem()
+                        .equals(PatientView.YesNoItem.Yes)){
+                    Patient guardian = getCurrentlySelectedPatient().getGuardian();
+                    if (guardian != null){
+                        cmbSelectGuardian.setSelectedItem(guardian);
+                    }else cmbSelectGuardian.setSelectedItem(-1);
+                    cmbSelectGuardian.setEnabled(true);
+                    //getCurrentlySelectedPatient().setIsGuardianAPatient(true);
+
+                }
+            }
+        });
+
         btnCloseView.addActionListener(new java.awt.event.ActionListener() {
             @Override
             public void actionPerformed(java.awt.event.ActionEvent evt) {
+                doSaveEditorChanges();
                 try{
                     ModalPatientGuardianEditorView.this.setClosed(true);
                 }
@@ -123,24 +166,25 @@ public class ModalPatientGuardianEditorView extends ModalView{
     }
     
     private void doSaveEditorChanges(){
-        Patient patient = 
-                getMyController()
-                        .getDescriptor()
-                        .getControllerDescription()
-                        .getPatient();
-        if (cmbSelectYesNo.getSelectedItem().equals(PatientView.YesNoItem.Yes)){
-            patient.setIsGuardianAPatient(true);
-            if (cmbSelectGuardian.getSelectedIndex() != -1){
-                patient.setGuardian((Patient)cmbSelectGuardian.getSelectedItem());
-            }else patient.setGuardian(null);
-        }else {
-            patient.setIsGuardianAPatient(false);
-            patient.setGuardian(null);
-        }  
+        if (this.cmbSelectYesNo.getSelectedItem()
+                .equals(PatientView.YesNoItem.Yes)){
+            getCurrentlySelectedPatient().setIsGuardianAPatient(true);
+            if (this.cmbSelectGuardian.getSelectedIndex()!=-1)
+                getCurrentlySelectedPatient()
+                        .setGuardian((Patient)cmbSelectGuardian.getSelectedItem());
+            else {
+                getCurrentlySelectedPatient().setGuardian(null);
+                getCurrentlySelectedPatient().setIsGuardianAPatient(false);
+            }
+        }
+        else {
+            getCurrentlySelectedPatient().setGuardian(null);
+            getCurrentlySelectedPatient().setIsGuardianAPatient(false);
+        }
         getMyController()
             .getDescriptor()
             .getViewDescription()
-            .setPatient(patient);
+            .setPatient(getCurrentlySelectedPatient());
         ActionEvent actionEvent = new ActionEvent(
             ModalPatientGuardianEditorView.this,ActionEvent.ACTION_PERFORMED, 
             ViewController
@@ -205,11 +249,10 @@ public class ModalPatientGuardianEditorView extends ModalView{
                         .addGap(49, 49, 49)))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
             .addGroup(layout.createSequentialGroup()
-                .addGap(89, 89, 89)
-                .addComponent(btnSaveGuardianDetails)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(btnCloseView)
-                .addGap(66, 66, 66))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            )
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -222,7 +265,7 @@ public class ModalPatientGuardianEditorView extends ModalView{
                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(btnSaveGuardianDetails)
+                    //.addComponent(btnSaveGuardianDetails)
                     .addComponent(btnCloseView))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );

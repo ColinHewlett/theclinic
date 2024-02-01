@@ -19,9 +19,9 @@ public class AppointmentsTableDurationRenderer extends JLabel implements TableCe
     
     public AppointmentsTableDurationRenderer()
     {
-        //Font f = super.getFont();
+        Font f = super.getFont();
         // bold
-        //this.setFont(f.deriveFont(f.getStyle() | ~Font.BOLD));;
+        this.setFont(f.deriveFont(f.getStyle() | ~Font.PLAIN));
     }
     
     @Override

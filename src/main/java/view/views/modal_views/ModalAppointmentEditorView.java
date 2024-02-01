@@ -11,6 +11,7 @@ import controller.Descriptor;
 import controller.ViewController;
 import view.View;
 import model.Patient;
+import model.PatientNote;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
@@ -48,7 +49,7 @@ public class ModalAppointmentEditorView extends ModalView {
     private JMenuItem mniExitView = null;
     private View.Viewer myViewType = null;
     private Descriptor entityDescriptor = null;
-    private ActionListener myController = null;
+    //private ActionListener myController = null;
     private ViewController.ViewMode viewMode = null;
     private final String CREATE_BUTTON = "Create appointment";
     private final String UPDATE_BUTTON = "Update appointment";
@@ -251,6 +252,21 @@ public class ModalAppointmentEditorView extends ModalView {
                 setDuration(getDurationFromView());
         getMyController().getDescriptor().getViewDescription().getAppointment().
                 setNotes(this.txaNotepad.getText());
+        
+        PatientNote patientNote = new PatientNote();
+        patientNote.setNote(this.txaNotepad.getText());
+        patientNote.setDatestamp(getMyController()
+                .getDescriptor()
+                .getViewDescription()
+                .getAppointment().getStart());
+        patientNote.setPatient((getMyController()
+                .getDescriptor()
+                .getViewDescription()
+                .getAppointment().getPatient()));
+        patientNote.setLastUpdated(LocalDateTime.now());
+        
+        getMyController().getDescriptor().getViewDescription()
+                .getAppointment().setPatientNote(patientNote);
     }
     private Duration getDurationFromView(){
         return Duration.ofMinutes(

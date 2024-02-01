@@ -38,7 +38,7 @@ public interface IStoreActions {
     
     public List<String[]> importEntityFromCSV(Entity entity) throws StoreException;
     
-    public Integer insert(Appointment a, Integer appointeeKey) throws StoreException; 
+    public Integer insert(Appointment a, Integer appointeeKey, Integer patientNoteKey) throws StoreException; 
     public Integer insert(Patient p, Integer patientKey, Integer guardianKey) throws StoreException;
     public Integer insert(Notification pn, Integer patientKey) throws StoreException;
     public Integer insert(SurgeryDaysAssignment p) throws StoreException;
@@ -56,7 +56,7 @@ public interface IStoreActions {
     public void recover(Patient p, Integer key) throws StoreException;
     public void recover(Notification p, Integer key) throws StoreException;
 
-    public void update(Appointment a, Integer key, Integer appointeeKee) throws StoreException;
+    public void update(Appointment a, Integer key, Integer appointeeKee, Integer patientNoteKey) throws StoreException;
     public void update(SurgeryDaysAssignment value) throws StoreException;
     public void update(Patient p, Integer key, Integer guardianKey) throws StoreException;
     public void update(Notification pn, Integer key, Integer patientKey)throws StoreException;

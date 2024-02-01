@@ -47,29 +47,21 @@
  */
 package view.views.non_modal_views;
 
-//import controller.ViewController.DesktopViewControllerActionEvent;
 import controller.DesktopViewController;
 import controller.ViewController;
-//import controller.DesktopViewController.DesktopViewControllerActionEvent;
-//import controller.DesktopViewController.DesktopViewControllerPropertyChangeEvent;
 import controller.Descriptor;
-import view.View;
 import view.views.view_support_classes.*;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.Image;
-import java.awt.Graphics;
 import java.awt.GridBagLayout;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.Point;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
-import java.beans.PropertyVetoException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import javax.swing.JDesktopPane;
@@ -94,14 +86,14 @@ public class DesktopView extends javax.swing.JFrame implements PropertyChangeLis
     private HashMap<JMenuItem, JInternalFrame> menuItemFrameMap = null;
     private JDesktopPane desktop;
     private DesktopViewScrollPane desktopScrollPane;
-    private JPanel clinicLogoPane;
+    private final JPanel clinicLogoPane;
     private final String clinicLogo = "/xclinic3.jpg";
     private Boolean isPMSStoreDefined = null;
     private Descriptor entityDescriptor = null;
     private final String SELECT_VIEW_MENU_TITLE = "View";
-        private final String APPOINTMENT_VIEW_REQUEST_TITLE = "Appointment";
-        private final String PATIENT_VIEW_REQUEST_TITLE = "Patient";
-        private final String PATIENT_NOTIFICATION_VIEW_REQUEST = "Patient notifications";
+        private final String APPOINTMENT_VIEW_REQUEST_TITLE = "Appointments";
+        private final String PATIENT_VIEW_REQUEST_TITLE = "Patients";
+        private final String PATIENT_NOTIFICATION_VIEW_REQUEST = "Notifications";
         
         private final String EXIT_VIEW_REQUEST_TITLE = "Exit the Clinic practice management system";
     
@@ -109,7 +101,7 @@ public class DesktopView extends javax.swing.JFrame implements PropertyChangeLis
         
             
         private final String PMS_DATABASE_PROFILE_TITLE = "Database profile";
-            private final String PMS_DATABASE_URL = "PMS database URL";
+            //private final String PMS_DATABASE_URL = "PMS database URL";
             private final String APPOINTMENT_TABLE_RECORD_COUNT_TITLE = "Appointment table ";
             private final String PATIENT_TABLE_RECORD_COUNT_TITLE = "Patient table ";
             private final String PATIENT_NOTIFICATION_TABLE_RECORD_COUNT_TITLE = "PatientNotification table ";
@@ -172,8 +164,8 @@ public class DesktopView extends javax.swing.JFrame implements PropertyChangeLis
         mniPatientViewRequest = new JMenuItem(PATIENT_VIEW_REQUEST_TITLE);
         mniPatientNotificationViewRequest = new JMenuItem(PATIENT_NOTIFICATION_VIEW_REQUEST);
         mniExitViewRequest = new JMenuItem(EXIT_VIEW_REQUEST_TITLE);
-        mnuSelectView.add(mniAppointmentViewRequest);
         mnuSelectView.add(mniPatientViewRequest);
+        mnuSelectView.add(mniAppointmentViewRequest);
         mnuSelectView.add(mniPatientNotificationViewRequest);
         mnuSelectView.add(new JSeparator());
         setTopDynamicFrameListDelimiter(mnuSelectView.getItemCount()-1);
@@ -580,8 +572,8 @@ public class DesktopView extends javax.swing.JFrame implements PropertyChangeLis
          */
         
         ImageIcon icon = new ImageIcon(this.getClass().getResource(clinicLogo));
-        new MailMerger();
-        new Emailer("abc");
+        //new MailMerger();
+        //new Emailer("abc");
         ActionEvent actionEvent = new ActionEvent(this, 
                 ActionEvent.ACTION_PERFORMED,
                 DesktopViewController.DesktopViewControllerActionEvent.VIEW_CLOSE_REQUEST.toString());

@@ -43,11 +43,21 @@ public class PatientViewController extends ViewController {
     
     
     private void setCurrentlySelectedPatient(Patient value){
-        currentlySelectedPatient = value;
+        if (!value.getIsKeyDefined())
+        {
+            getDescriptor().getControllerDescription()
+                    .setViewMode(ViewMode.CREATE);
+        }
+        else {
+            getDescriptor().getControllerDescription()
+                    .setViewMode(ViewMode.UPDATE);
+        }
+        getDescriptor().getControllerDescription()
+                .setPatient(value);
     }
     
     private Patient getCurrentlySelectedPatient(){
-        return currentlySelectedPatient;
+        return getDescriptor().getControllerDescription().getPatient();
     }
     
     private PatientSelectionMode getPatientSelectionMode(){
@@ -60,7 +70,7 @@ public class PatientViewController extends ViewController {
 
     private enum PatientSelectionMode{ PATIENT_SELECTION, PATIENT_RECOVERY};
 
-    private void doPrimaryViewActionRequest(ActionEvent e){
+    private void doPrimaryViewActionRequest(ActionEvent e){      
         ActionEvent actionEvent = null;
         ViewController.PatientViewControllerActionEvent actionCommand =
                ViewController.PatientViewControllerActionEvent.valueOf(e.getActionCommand());
@@ -92,85 +102,16 @@ public class PatientViewController extends ViewController {
                 doPatientDeleteRequest();
                 break;
             case PATIENT_RECALL_EDITOR_VIEW_REQUEST:
-                if (currentlySelectedPatient!=null)
-                    doPatientRecallEditorViewRequest();
-                else{
-                    JOptionPane.showMessageDialog(getView(), 
-                        "A patient has not been selected; so recall editor request aborted",
-                        "Patient View Controller Error", 
-                        JOptionPane.WARNING_MESSAGE);
-                    firePropertyChangeEvent(
-                            ViewController.PatientViewControllerPropertyChangeEvent.
-                                PATIENT_EDITOR_VIEW_CLOSED.toString(),
-                            getView(),
-                            this,
-                            null,
-                            null
-                    );
-                
-                }
-                break;
             case PATIENT_GUARDIAN_EDITOR_VIEW_REQUEST:
-                if (getCurrentlySelectedPatient()!=null){
-                    LocalDate dob = getCurrentlySelectedPatient().getDOB();
-                    if (Period.between(dob, LocalDate.now()).getYears() > 17){
-                        JOptionPane.showMessageDialog(
-                                getView(), 
-                                "The selected patient is at least 18; hence search for guardian details aborted",
-                                "Patient View Controller Error",
-                                JOptionPane.WARNING_MESSAGE); 
-                        firePropertyChangeEvent(
-                            ViewController.PatientViewControllerPropertyChangeEvent.
-                                PATIENT_EDITOR_VIEW_CLOSED.toString(),
-                            getView(),
-                            this,
-                            null,
-                            null
-                    );
-                    }else{
-                        doPatientGuardianEditorViewRequest();
-                    }
-                }
-                else{
-                    JOptionPane.showMessageDialog(getView(), 
-                        "A patient has not been selected; so guardian editor request aborted",
-                        "Patient View Controller Error", 
-                        JOptionPane.WARNING_MESSAGE);
-                    firePropertyChangeEvent(
-                            ViewController.PatientViewControllerPropertyChangeEvent.
-                                PATIENT_EDITOR_VIEW_CLOSED.toString(),
-                            getView(),
-                            this,
-                            null,
-                            null
-                    );
-                }
-                
+            case PATIENT_PHONE_EMAIL_EDITOR_VIEW_REQUEST:
+                doPatientEditorViewRequest(actionCommand);
                 break;
             case PATIENT_NOTES_EDITOR_VIEW_REQUEST:
-                if (getCurrentlySelectedPatient()!=null)
+                if (getCurrentlySelectedPatient().getIsKeyDefined())
                     doPatientNotesEditorViewRequest();
                 else{
                     JOptionPane.showMessageDialog(getView(), 
                         "A patient has not been selected; notes editor request aborted",
-                        "Patient View Controller Error", 
-                        JOptionPane.WARNING_MESSAGE);
-                    firePropertyChangeEvent(
-                            ViewController.PatientViewControllerPropertyChangeEvent.
-                                PATIENT_EDITOR_VIEW_CLOSED.toString(),
-                            getView(),
-                            this,
-                            null,
-                            null
-                    );
-                }
-                break;
-            case PATIENT_PHONE_EMAIL_EDITOR_VIEW_REQUEST:
-                if (getCurrentlySelectedPatient()!=null)
-                    doPatientPhoneEmailEditorViewRequest();
-                else{
-                    JOptionPane.showMessageDialog(getView(), 
-                        "A patient has not been selected; so phone/email editor request aborted",
                         "Patient View Controller Error", 
                         JOptionPane.WARNING_MESSAGE);
                     firePropertyChangeEvent(
@@ -261,11 +202,8 @@ public class PatientViewController extends ViewController {
             case PATIENT_RECALL_EDITOR_VIEW:
             case PATIENT_PHONE_EMAIL_EDITOR_VIEW:
             case PATIENT_GUARDIAN_EDITOR_VIEW:    
-                switch (actionCommand){
-                    case PATIENT_EDITOR_VIEW_CHANGE:
-                        doPatientEditorViewChange(the_view);
-                }
-                break;
+                doPatientEditorViewChange(the_view);
+                break;  
             case PATIENT_NOTES_EDITOR_VIEW:
                 doPatientNotesEditorViewChange(e);
                 break;
@@ -321,9 +259,6 @@ public class PatientViewController extends ViewController {
     }
     
     private void doPatientPhoneEmailEditorViewRequest(){
-        getDescriptor().
-                getControllerDescription().
-                setPatient(getCurrentlySelectedPatient());
         setModalView((ModalView)new View().make(
                     View.Viewer.PATIENT_PHONE_EMAIL_EDITOR_VIEW,
                     this, 
@@ -336,25 +271,18 @@ public class PatientViewController extends ViewController {
                         null,
                         null
                 );
-        
     }
     
     private void doPatientGuardianEditorViewRequest(){
-        try{
-            Patient patient = new Patient();
-            patient.setScope(Scope.ALL);
-            patient.read();
-            getDescriptor().
-                    getControllerDescription().
-                    setPatient(getCurrentlySelectedPatient());
-            getDescriptor()
-                    .getControllerDescription()
-                    .setPatients(patient.get());
-            setModalView((ModalView)new View().make(
-                        View.Viewer.PATIENT_GUARDIAN_EDITOR_VIEW,
-                        this, 
-                        this.getDesktopView()).getModalView());
-            firePropertyChangeEvent(
+        LocalDate dob = getCurrentlySelectedPatient().getDOB();
+        if (dob!=null){
+            if (Period.between(dob, LocalDate.now()).getYears() > 17){
+                JOptionPane.showMessageDialog(
+                        getView(), 
+                        "The selected patient is at least 18; hence search for guardian details aborted",
+                        "Patient View Controller Error",
+                        JOptionPane.WARNING_MESSAGE); 
+                firePropertyChangeEvent(
                             ViewController.PatientViewControllerPropertyChangeEvent.
                                 PATIENT_EDITOR_VIEW_CLOSED.toString(),
                             getView(),
@@ -362,8 +290,63 @@ public class PatientViewController extends ViewController {
                             null,
                             null
                     );
-        }catch(StoreException ex){
+            }else {
+                /**
+                 * 31/01/24
+                 * presumed ControllerDescription::patient is already initialised
+                 */
+                try{
+                    Patient patient = new Patient();
+                    patient.setScope(Scope.ALL);
+                    patient.read();
+                    getDescriptor()
+                            .getControllerDescription()
+                            .setPatients(patient.get());
+                    setModalView((ModalView)new View().make(
+                                View.Viewer.PATIENT_GUARDIAN_EDITOR_VIEW,
+                                this, 
+                                this.getDesktopView()).getModalView());
+                    firePropertyChangeEvent(
+                            ViewController.PatientViewControllerPropertyChangeEvent.
+                                PATIENT_EDITOR_VIEW_CLOSED.toString(),
+                            getView(),
+                            this,
+                            null,
+                            null
+                    );
+                }catch(StoreException ex){
 
+                }
+            }
+        }else{
+            JOptionPane.showMessageDialog(
+                    getView(), 
+                    "the patient's date of birth needs to be defined",
+                    null,
+                    JOptionPane.WARNING_MESSAGE);
+            firePropertyChangeEvent(
+                    ViewController.PatientViewControllerPropertyChangeEvent.
+                        PATIENT_EDITOR_VIEW_CLOSED.toString(),
+                    getView(),
+                    this,
+                    null,
+                    null
+            );
+        }          
+    }
+    
+    private void doPatientEditorViewRequest(
+            ViewController.PatientViewControllerActionEvent actionCommand){
+        switch(actionCommand){
+            case PATIENT_RECALL_EDITOR_VIEW_REQUEST:
+                doPatientRecallEditorViewRequest();
+                break;
+            case PATIENT_GUARDIAN_EDITOR_VIEW_REQUEST:
+                doPatientGuardianEditorViewRequest();
+                break;
+            case PATIENT_PHONE_EMAIL_EDITOR_VIEW_REQUEST:
+                doPatientPhoneEmailEditorViewRequest();
+                break;
         }
     }
     
@@ -400,20 +383,11 @@ public class PatientViewController extends ViewController {
     }
     
     private void doPatientRecallEditorViewRequest(){
-        if (getCurrentlySelectedPatient()!=null){
-            getDescriptor()
-                .getControllerDescription()
-                .setPatient(getCurrentlySelectedPatient());
-                setModalView((ModalView)new View().make(
-                            View.Viewer.PATIENT_RECALL_EDITOR_VIEW,
-                            this, 
-                            this.getDesktopView()).getModalView());
-        }
-        else{JOptionPane.showMessageDialog(getView(), 
-                        "A patient has not been selected; so recall editor request aborted",
-                        "Patient View Controller Error", 
-                        JOptionPane.WARNING_MESSAGE);
-        }
+        setModalView((ModalView)new View().make(
+                    View.Viewer.PATIENT_RECALL_EDITOR_VIEW,
+                    this, 
+                    this.getDesktopView()).getModalView());
+        
         firePropertyChangeEvent(
                 ViewController.PatientViewControllerPropertyChangeEvent.
                     PATIENT_EDITOR_VIEW_CLOSED.toString(),
@@ -422,7 +396,6 @@ public class PatientViewController extends ViewController {
                 null,
                 null
         );
-        
     }
     
     private void doPatientCreateRequest(){
@@ -566,7 +539,8 @@ public class PatientViewController extends ViewController {
                         null,
                         getDescriptor()
                 );
-                getDescriptor().getControllerDescription().setPatient(patient);
+                //getDescriptor().getControllerDescription().setPatient(patient);
+                setCurrentlySelectedPatient(patient);
                 firePropertyChangeEvent(
                         ViewController.PatientViewControllerPropertyChangeEvent.
                             PATIENT_RECEIVED.toString(),
@@ -575,7 +549,6 @@ public class PatientViewController extends ViewController {
                         null,
                         getDescriptor()
                 );
-                setCurrentlySelectedPatient(patient);
             }catch (StoreException ex){
                 displayErrorMessage(ex.getMessage() +"\n"
                         + "Exception raised in PatientViewController::doPatientViewUpdateRequest()",
@@ -766,13 +739,20 @@ public class PatientViewController extends ViewController {
         }
     }
     
+    /**
+     * a change made on a secondary view editor
+     * @param secondaryView 
+     */
     private void doPatientEditorViewChange(View secondaryView){
         Patient patient = getDescriptor().getViewDescription().getPatient();
         try{
+            if (getDescriptor().getControllerDescription()
+                    .getViewMode().equals(ViewController.ViewMode.UPDATE)){
             patient.update();
             patient.setScope(Scope.SINGLE);
             patient.read();
             setCurrentlySelectedPatient(patient);
+            }
         }catch(StoreException ex){
             displayErrorMessage(ex.getMessage() + "\n"
                         + "Exception raised in PatientViewController::doPatientEditorViewChange(View secondaryView)",
@@ -822,7 +802,7 @@ public class PatientViewController extends ViewController {
     
     private void doNullPatientRequest(){
         //initialiseNewEntityDescriptor();
-        setCurrentlySelectedPatient(null);
+        setCurrentlySelectedPatient(new Patient());
         Patient patient = new Patient();
         patient.setScope(Scope.ALL);
         try{
@@ -855,14 +835,7 @@ public class PatientViewController extends ViewController {
         patient.read();
         getDescriptor().getControllerDescription().setPatients(patient.get());
         View.setViewer(View.Viewer.PATIENT_VIEW);
-        
-        
-        
-        //super.centreViewOnDesktop(desktopView, view);
-        
-        //getView().addInternalFrameListeners(); 
-        
-        //view.initialiseView();
+        setCurrentlySelectedPatient(new Patient());
     }
     
     @Override

@@ -1,25 +1,24 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package view.views.view_support_classes.renderers;
 
+import _system_environment_variables.SystemDefinitions;
 import java.awt.Component;
 import java.awt.Font;
-import java.time.format.DateTimeFormatter;
-import java.time.LocalDateTime;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
+import model.PatientNote;
+
 /**
  *
  * @author colin
  */
-public class AppointmentsTableLocalDateTimeRenderer extends JLabel implements TableCellRenderer{
-    private DateTimeFormatter ddMMyyhhmm12Format = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm ");
+public class AppointmentsTablePatientNoteRenderer extends JLabel implements TableCellRenderer{
     
-    public AppointmentsTableLocalDateTimeRenderer()
+    public AppointmentsTablePatientNoteRenderer()
     {
         Font f = super.getFont();
         // plain
@@ -30,9 +29,10 @@ public class AppointmentsTableLocalDateTimeRenderer extends JLabel implements Ta
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
         boolean hasFocus, int row, int column)
     {
-        if (value != null){
-            LocalDateTime startTime = (LocalDateTime)value;
-            super.setText(startTime.format(ddMMyyhhmm12Format));
+        PatientNote patientNote = null;
+        if (value!=null){
+            patientNote = (PatientNote)value;
+            super.setText(patientNote.getNote());
         }
         else super.setText("");
         
@@ -43,7 +43,6 @@ public class AppointmentsTableLocalDateTimeRenderer extends JLabel implements Ta
             setBackground(table.getBackground());
             setForeground(table.getForeground());
         }
-        
         setOpaque(true);
         return this;
     }

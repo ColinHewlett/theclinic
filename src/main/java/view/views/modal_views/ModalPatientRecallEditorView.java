@@ -156,23 +156,8 @@ public class ModalPatientRecallEditorView extends ModalView{
         btnCancel.addActionListener(new java.awt.event.ActionListener() {
             @Override
             public void actionPerformed(java.awt.event.ActionEvent evt) {
+                doSaveEditorChanges();
                 try{
-                    int reply = 0;
-                    if (getHasRecallDateChanged() || getHasRecallFrequencyChanged()){
-                        String message = "Save changes before closing?";
-                        String[] options = {"Yes", "No"};
-                        reply = JOptionPane.showOptionDialog(
-                                ModalPatientRecallEditorView.this,
-                                message,null,
-                                JOptionPane.YES_NO_OPTION,
-                                JOptionPane.INFORMATION_MESSAGE,
-                                null,
-                                options,
-                                null);
-                    }
-                    if (reply == JOptionPane.YES_OPTION){
-                        doSaveEditorChanges();
-                    }
                     ModalPatientRecallEditorView.this.setClosed(true);   
                 }catch (PropertyVetoException ex){
 
@@ -277,10 +262,8 @@ public class ModalPatientRecallEditorView extends ModalView{
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(btnSaveDetails)
-                .addGap(43, 43, 43)
                 .addComponent(btnCancel)
-                .addGap(111, 111, 111))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -292,7 +275,7 @@ public class ModalPatientRecallEditorView extends ModalView{
                 .addGap(24, 24, 24)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(btnCancel)
-                    .addComponent(btnSaveDetails))
+                )
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 

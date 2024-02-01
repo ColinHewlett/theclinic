@@ -4,9 +4,8 @@
  * and open the template in the editor.
  */
 package view.views.view_support_classes.renderers;
-import view.views.non_modal_views.NotificationView;
-import model.Notification;
-import view.views.view_support_classes.models.NotificationView4ColumnTableModel;
+
+import _system_environment_variables.SystemDefinitions;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
@@ -14,23 +13,25 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import javax.swing.JLabel;
 import javax.swing.JTable;
-import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
+import model.Notification;
+import view.views.modal_views.ModalNotificationEditorView;
+import view.views.non_modal_views.NotificationView;
+import view.views.view_support_classes.models.PatientNotificationView2ColumnTableModel;
 
 /**
  *
  * @author colin
  */
-public class NotificationTableKeyColorsAndLocalDateRenderer extends JLabel implements TableCellRenderer{
-//public class NotificationTableKeyColorsAndLocalDateRenderer extends javax.swing.table.DefaultTableCellRenderer{  
+public class NotificationEditorTableLocalDateRenderer extends JLabel implements TableCellRenderer{
     private DateTimeFormatter ddmmyy = DateTimeFormatter.ofPattern("dd/MM/yy");
     private LocalDate date = null;
     boolean isNotificationDateOverdue = false;
     boolean isNotificationDateNow = false;
     private NotificationView  view = null;
     
-    public NotificationTableKeyColorsAndLocalDateRenderer(){
-        Font f = super.getFont();
+    public NotificationEditorTableLocalDateRenderer(){
+       Font f = super.getFont();
         // bold
         this.setFont(f.deriveFont(f.getStyle() | ~Font.PLAIN));
         setOpaque(true);
@@ -69,20 +70,17 @@ public class NotificationTableKeyColorsAndLocalDateRenderer extends JLabel imple
      public void setIsNotificationDateOverdue(boolean value){
         isNotificationDateOverdue = value;
     }
-    
-    
-    
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
         boolean hasFocus, int row, int column){
-        NotificationView4ColumnTableModel model = (NotificationView4ColumnTableModel)table.getModel();
+        PatientNotificationView2ColumnTableModel model = (PatientNotificationView2ColumnTableModel)table.getModel();
         Notification notification  = model.getElementAt(row);
         if (value != null){
             switch(column){
                 case 0:
-                    date = (LocalDate)value;
-                    super.setText(date.format(ddmmyy));
-                    if (date.compareTo(LocalDate.now()) >= 0)
+                    ModalNotificationEditorView.setDate((LocalDate)value);
+                    super.setText(ModalNotificationEditorView.getDate().format(ddmmyy));
+                    if (ModalNotificationEditorView.getDate().compareTo(LocalDate.now()) >= 0)
                         setIsNotificationDateOverdue(false);
                     else
                         setIsNotificationDateOverdue(true);
@@ -92,9 +90,9 @@ public class NotificationTableKeyColorsAndLocalDateRenderer extends JLabel imple
                         super.setForeground(getOverdueNotificationColour());
                     else super.setForeground(getNotDueYetNotificationColour());
                     break;
-                default:
+                case 1:
                     super.setText(value.toString());
-                    if (date.compareTo(LocalDate.now()) >= 0)
+                    if (ModalNotificationEditorView.getDate().compareTo(LocalDate.now()) >= 0)
                         setIsNotificationDateOverdue(false);
                     else
                         setIsNotificationDateOverdue(true);
@@ -119,4 +117,3 @@ public class NotificationTableKeyColorsAndLocalDateRenderer extends JLabel imple
         return this;
     }
 }
-

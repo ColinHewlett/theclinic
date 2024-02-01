@@ -199,7 +199,10 @@ public class Notification extends Entity implements IEntityStoreActions {
                 it = get().iterator();
                 while(it.hasNext()){
                     patientNotification = (Notification)it.next();
+                    p = new Patient(patientNotification.getPatient().getKey());
                     patientNotification.setPatient(Notification.this.getPatient());
+                    p.setScope(Scope.SINGLE);
+                    patientNotification.setPatient(p.read());
                 }
                 break;
             default:

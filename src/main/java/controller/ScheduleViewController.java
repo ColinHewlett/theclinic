@@ -655,6 +655,7 @@ public class ScheduleViewController extends ViewController{
     
     private void doSecondaryViewActionRequest(ActionEvent e){
         setModalView((ModalView)e.getSource());
+        setSecondaryView(getModalView());
         //?setEntityDescriptorFromView(this.view2.getViewDescriptor());
         //getDescriptor().setViewDescription(this.view2.getViewDescriptor().getViewDescription());
         switch(this.getModalView().getMyViewType()){

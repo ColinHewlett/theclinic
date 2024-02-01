@@ -37,6 +37,10 @@ public class PatientNotificationView2ColumnTableModel extends DefaultTableModel{
         patientNotifications.add(patientNotification);
     }
     
+    public Notification getElementAt(int row){
+        return patientNotifications.get(row);
+    }
+    
     public void removeAllElements(){
         patientNotifications.clear();
         this.fireTableDataChanged();

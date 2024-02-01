@@ -196,10 +196,12 @@ public class Patient extends Entity implements IEntityStoreActions {
     public void update() throws StoreException{ 
         
         if (getIsGuardianAPatient()) 
-            new Repository().update(this, this.getKey(),this.getGuardian().getKey());
+            if (getGuardian()!=null)
+                new Repository().update(this, this.getKey(),
+                        this.getGuardian().getKey());
+            else new Repository().update(this, this.getKey(),null);
         else {
-            Repository repository = new Repository();
-            repository.update(this, this.getKey(),null);
+            new Repository().update(this, this.getKey(),null);
         }
 
     }

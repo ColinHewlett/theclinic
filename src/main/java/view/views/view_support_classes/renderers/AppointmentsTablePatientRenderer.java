@@ -22,9 +22,9 @@ public class AppointmentsTablePatientRenderer  extends JLabel implements TableCe
     private boolean isUnbookable = false;
     public AppointmentsTablePatientRenderer()
     {
-        //Font f = super.getFont();
+        Font f = super.getFont();
         // bold
-        //this.setFont(f.deriveFont(f.getStyle() | ~Font.BOLD));;
+        this.setFont(f.deriveFont(f.getStyle() | ~Font.PLAIN));
     }
     
     private boolean getIsUnbookable(){
@@ -58,6 +58,7 @@ public class AppointmentsTablePatientRenderer  extends JLabel implements TableCe
             super.setHorizontalAlignment(JLabel.LEFT);
             super.setForeground(Color.BLACK);
             setIsUnbookable(false);
+            
         }
         
         if (isSelected) {

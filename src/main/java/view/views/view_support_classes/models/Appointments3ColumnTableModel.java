@@ -6,13 +6,12 @@
 package view.views.view_support_classes.models;
 
 import model.Appointment;
-import controller.Descriptor;
+import model.PatientNote;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import javax.swing.table.AbstractTableModel;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableModel;
+
 
 /**
  *
@@ -24,7 +23,9 @@ public class Appointments3ColumnTableModel extends AbstractTableModel{
     public ArrayList<Appointment> appointments = new ArrayList<>();
     private enum COLUMN{From,Duration,Notes};
     private final Class[] columnClass = new Class[] {
-        LocalDateTime.class, Duration.class,String.class};
+        LocalDateTime.class, 
+        Duration.class,
+        PatientNote.class};
     
     public ArrayList<Appointment> getAppointments(){
         return appointments;
@@ -82,7 +83,7 @@ public class Appointments3ColumnTableModel extends AbstractTableModel{
                             result = appointment.getStart();
                             break;
                         case Notes:
-                            result = appointment.getNotes();
+                            result = appointment.getPatientNote();
                             break;
                     }
                     break;

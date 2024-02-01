@@ -24,6 +24,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.*;
 import java.awt.Font;
+import javax.swing.border.TitledBorder;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyVetoException;
 import java.time.Duration;
@@ -53,8 +54,13 @@ import javax.swing.JTable;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
 import javax.swing.border.TitledBorder;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.table.TableColumnModel;
+import model.PatientNote;
+import view.views.view_support_classes.renderers.AppointmentsTablePatientNoteRenderer;
 
 
 /**
@@ -134,8 +140,10 @@ public class PatientView extends View implements ActionListener{
                 titledBorder.setTitleColor(Color.RED);
                 btnCreateNewPatient.setText(patientRecoveryCaption);
                 btnCreateNewPatient.setForeground(Color.RED);
+                btnUpdateSelectedPatient.setEnabled(true);
                 btnUpdateSelectedPatient.setText(cancelPatientRecoveryCaption);
                 btnUpdateSelectedPatient.setForeground(Color.RED);
+                
                 break;
             case PATIENT_SELECTION:
                 titledBorder.setTitle(panelPatientSelectionTitle);
@@ -486,15 +494,7 @@ public class PatientView extends View implements ActionListener{
                 btnFetchScheduleForSelectedAppointmentActionPerformed(evt);
             }
         });
-        
-        
-        /*
-        tblAppointmentHistory.setModel(new Appointments3ColumnTableModel());
-        ViewController.setJTableColumnProperties(
-                tblAppointmentHistory, 
-                scrAppointmentHistory.getPreferredSize().width, 
-                22,22,56);
-        */
+
         populatePatientSelector(this.cmbPatientSelector); 
         //populatePatientSelector(this.cmbSelectGuardian);
         this.cmbPatientSelector.addActionListener((ActionEvent e) -> cmbPatientSelectorActionPerformed(e));
@@ -506,18 +506,11 @@ public class PatientView extends View implements ActionListener{
         JButton datePickerButton = dobDatePicker.getComponentToggleCalendarButton();
         datePickerButton.setText("");
         datePickerButton.setIcon(icon);
-        /*
-        ImageIcon icon = new ImageIcon(this.getClass().getResource("/datepickerbutton1.png"));
-        datePickerButton = recallDatePicker.getComponentToggleCalendarButton();
-        datePickerButton.setText("");
-        datePickerButton.setIcon(icon);
-        */
+
         ActionEvent actionEvent = new ActionEvent(
                 this,ActionEvent.ACTION_PERFORMED,
                 ViewController.PatientViewControllerActionEvent.NULL_PATIENT_REQUEST.toString());
         this.getMyController().actionPerformed(actionEvent);
-        //this.pnlGuardianDetails.setEnabled(false);
-        //this.cmbIsGuardianAPatient.setEnabled(false);
         javax.swing.SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
@@ -529,7 +522,10 @@ public class PatientView extends View implements ActionListener{
     @Override
     public void actionPerformed(ActionEvent e){
         ViewController.PatientViewControllerActionEvent request = null;
-        //String text = ((JRadioButton)e.getItem()).getText();
+        Patient patient = initialisePatientFromView(getMyController()
+                .getDescriptor().getControllerDescription().getPatient());
+        getMyController().getDescriptor()
+                .getViewDescription().setPatient(patient);
         switch(e.getActionCommand()){
             case DISPLAY_RECALL_EDITOR_VIEW:
                 request = ViewController.
@@ -601,7 +597,27 @@ public class PatientView extends View implements ActionListener{
             setViewStatus(true);
         }
     };
-    
+    /*
+    private void setAppointmentHistoryTableListener(){
+        this.tblAppointmentHistory.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        ListSelectionModel lsm = this.tblAppointmentHistory.getSelectionModel();
+        
+        lsm.addListSelectionListener(new ListSelectionListener() {
+            @Override
+            public void valueChanged(ListSelectionEvent e) {
+                if (!e.getValueIsAdjusting()) {   // Ensure the event is not fired multiple times
+                    int selectedRow = tblAppointmentHistory.getSelectedRow();
+                    if (selectedRow!=-1){
+                        tableValueChangedListenerActivated = true;
+                        //Patient patient = (Patient)tblAppointments.getModel().getValueAt(selectedRow, 0);
+                        //doScheduleTitleRefresh(patient);
+                    }
+                    //else doScheduleTitleRefresh(null);  
+                }
+            }
+        });    
+    }
+    */
     /**
      * 07/11/2021 11:07 dev. log update
      * Implements appointment double click event which displays appointment schedule day
@@ -609,6 +625,7 @@ public class PatientView extends View implements ActionListener{
      * Mouse listener added in the initialisation code for the JTable component 
      * in "initComponents")
      */
+    //private boolean tableValueChangedListenerActivated = true;
     MouseAdapter mouseListener = new MouseAdapter() {
         public void mouseClicked(MouseEvent me) {
             if (me.getClickCount() == 2) {     // to detect doble click events
@@ -690,15 +707,19 @@ public class PatientView extends View implements ActionListener{
      */
     @Override
     public void propertyChange(PropertyChangeEvent e){
+        initialiseFromControllerViewMode();
         ViewController.PatientViewControllerPropertyChangeEvent propertyName =
                 ViewController.PatientViewControllerPropertyChangeEvent.valueOf(e.getPropertyName());
         switch (propertyName){
             case PATIENT_EDITOR_VIEW_CLOSED:
                 rdbGroup.clearSelection();
-                setViewTitle(getMyController().
-                        getDescriptor().
-                        getControllerDescription().
-                        getPatient());
+                if(getMyController().getDescriptor().getControllerDescription()
+                        .getViewMode().equals(ViewController.ViewMode.UPDATE)){
+                    setViewTitle(getMyController().
+                            getDescriptor().
+                            getControllerDescription().
+                            getPatient());
+                }
                 break;
             case PATIENT_VIEW_CONTROLLER_ERROR_RECEIVED:
                 //setViewDescriptor((Descriptor)e.getNewValue());
@@ -707,7 +728,6 @@ public class PatientView extends View implements ActionListener{
                         "Patient vew error", JOptionPane.WARNING_MESSAGE);
                 break;
             case PATIENT_RECEIVED:
-                //setViewDescriptor((Descriptor)e.getNewValue());
                 initialisePatientViewComponentFromED(); 
                 Patient patient = getMyController()
                         .getDescriptor()
@@ -796,6 +816,20 @@ public class PatientView extends View implements ActionListener{
                 //UnpecifiedError action
             }
         */
+    }
+    
+    private void initialiseFromControllerViewMode(){
+        switch(getMyController().getDescriptor()
+                .getControllerDescription().getViewMode()){
+            case CREATE:
+                this.btnCreateNewPatient.setEnabled(true);
+                this.btnUpdateSelectedPatient.setEnabled(false);
+                break;
+            case UPDATE:
+                this.btnCreateNewPatient.setEnabled(false);
+                this.btnUpdateSelectedPatient.setEnabled(true);
+                break;
+        }
     }
 
     private void crossCheck(Patient newPatientValues, 
@@ -1040,23 +1074,33 @@ public class PatientView extends View implements ActionListener{
     }
     
     private void populateAppointmentsHistoryTable(Patient patient){
+        int appointments = 0;
         Appointments3ColumnTableModel tableModel = 
                 (Appointments3ColumnTableModel)tblAppointmentHistory.getModel(); 
         tableModel.removeAllElements();
         try{
             if (patient.getIsKeyDefined()){//if patient data in view has just been cleared  
                 patient.setScope(Entity.Scope.FOR_PATIENT);
+                appointments = patient.getAppointmentHistory().size();
                 Iterator<Appointment> it = patient.getAppointmentHistory().iterator();
                 while (it.hasNext()){
                     tableModel.addElement(it.next());
                 }
             }
-
-            //TableColumnModel columnModel = this.tblAppointmentHistory.getColumnModel();
-            //columnModel.getColumn(1).setPreferredWidth(120);
-        this.tblAppointmentHistory.setDefaultRenderer(Duration.class, new AppointmentsTableDurationRenderer());
-        this.tblAppointmentHistory.setDefaultRenderer(LocalDateTime.class, new AppointmentsTableLocalDateTimeRenderer());;
-        this.tblAppointmentHistory.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+            this.tblAppointmentHistory.setDefaultRenderer(Duration.class, new AppointmentsTableDurationRenderer());
+            this.tblAppointmentHistory.setDefaultRenderer(LocalDateTime.class, new AppointmentsTableLocalDateTimeRenderer());;
+            this.tblAppointmentHistory.setDefaultRenderer(PatientNote.class, new AppointmentsTablePatientNoteRenderer());
+            this.tblAppointmentHistory.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+            
+            TitledBorder titledBorder =
+                    (TitledBorder)this.pnlAppointmentHistory.getBorder();
+            
+            if (appointments < 3)
+                titledBorder.setTitle("Appointment history ");
+            else titledBorder.setTitle("Appointment history "
+                    + "(top of the list is latest of " + patient.getAppointmentHistory().size() 
+                    + " appointments)");
+            
         }catch(Exception ex){
             JOptionPane.showMessageDialog(this, "Following StoreException raised in PatientView::populateAppointmentsHistoryTable()\n"
                     + ex.getMessage());
@@ -1109,7 +1153,11 @@ public class PatientView extends View implements ActionListener{
     
     
     private Patient initialisePatientFromView(Patient patient){
-        if (patient== null) patient = new Patient();
+        //if (patient== null) patient = new Patient();
+        /**
+         * 31/1/24 
+         * -- there is always a patient object although it might not have a key defined yet
+         */
             patient.getAddress().setCounty(getCounty());
             /*
             patient.getRecall().setDentalDate(getDentalRecallDate());
@@ -1501,16 +1549,11 @@ public class PatientView extends View implements ActionListener{
         lblNameTitle = new javax.swing.JLabel("Title");
         lblNameGender = new javax.swing.JLabel("Gender");
         lblAddressCounty = new javax.swing.JLabel("County");
-        //lblGuardianPatientName = new javax.swing.JLabel("Select guardian");
-        //lblGuardianIsAPatient = new javax.swing.JLabel("Guardian is a patient?");
         lblAddressLine1 = new javax.swing.JLabel("Line 1");
         lblAddressLine2 = new javax.swing.JLabel("Line 2");
         lblAddressTown = new javax.swing.JLabel("Town");
         lblAddressPostcode = new javax.swing.JLabel("Postcode");
-        //lblPhone1 = new javax.swing.JLabel("[1]");
-        //lblFrequency = new javax.swing.JLabel("Frequency");
-        //lblPhone2 = new javax.swing.JLabel("[2]");
-        //lblEmail = new javax.swing.JLabel("Email");
+
         
         //menu bits
         jMenuBar1 = new javax.swing.JMenuBar();
@@ -1526,7 +1569,6 @@ public class PatientView extends View implements ActionListener{
         tblAppointmentHistory = new javax.swing.JTable();
         tblAppointmentHistory.addMouseListener(mouseListener);
         tblAppointmentHistory.setModel(new Appointments3ColumnTableModel());
-        //tblAppointmentHistory.setPreferredSize(new Dimension(660,(int)tblAppointmentHistory.getPreferredSize().getHeight()));
         tblAppointmentHistory.setPreferredSize(new Dimension(getAppointmentHistoryTableWidth(),110));
 
         
@@ -2808,9 +2850,13 @@ public class PatientView extends View implements ActionListener{
     }//GEN-LAST:event_mniDeleteSelectedPatientActionPerformed
 
     private void createNewPatientActionPerformed(){
+        
         if (!getMyController().getDescriptor().getControllerDescription().getPatient().getIsKeyDefined()){
             if (this.validateMinimumPatientDetails()){
-                getMyController().getDescriptor().getViewDescription().setPatient(initialisePatientFromView(null));
+                getMyController().getDescriptor().getViewDescription()
+                        .setPatient(initialisePatientFromView(
+                                getMyController().getDescriptor()
+                                        .getControllerDescription().getPatient()));
                 ActionEvent actionEvent = new ActionEvent(
                         this,ActionEvent.ACTION_PERFORMED,
                         ViewController.PatientViewControllerActionEvent.PATIENT_CREATE_REQUEST.toString());
@@ -2970,22 +3016,9 @@ public class PatientView extends View implements ActionListener{
         this.getMyController().actionPerformed(actionEvent);
         mniRecoverDeletedPatient.setEnabled(false);
         mniCreateNewPatient.setEnabled(false);
-        /*
-        int response;
-        Patient patient = getMyController().getDescriptor().
-                getControllerDescription().getPatient();
-        if (!patient.getIsKeyDefined()){
-            ActionEvent actionEvent = new ActionEvent(
-                this,ActionEvent.ACTION_PERFORMED,
-                ViewController.PatientViewControllerActionEvent.PATIENT_RECOVER_REQUEST.toString());
-            this.getMyController().actionPerformed(actionEvent);
-        }
-        else
-            JOptionPane.showMessageDialog(this, "A patient is already selected for recovery which is unexpected\n"
-                    + "Patient recovery operation aborted");
-        */
+        this.btnUpdateSelectedPatient.setEnabled(true);
     }//GEN-LAST:event_mniRecoverDeletedPatientActionPerformed
-
+    
     
     private void cmbPatientSelectorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbPatientSelectorActionPerformed
         ViewController.PatientViewControllerActionEvent event = null; 
@@ -3151,25 +3184,6 @@ public class PatientView extends View implements ActionListener{
     private DatePicker dentalRecallPicker;
     private DatePicker hygieneRecallPicker;
     */
-    
-    
-    private void cmbSelectPatientActionPerformed(){
-        if (this.cmbPatientSelector.getSelectedItem()!=null){
-            Patient patient = 
-                    (Patient)this.cmbPatientSelector.getSelectedItem();
-            this.getMyController().getDescriptor().getViewDescription().setPatient(patient);
-            ActionEvent actionEvent = new ActionEvent(
-                    this,ActionEvent.ACTION_PERFORMED,
-                    ViewController.PatientViewControllerActionEvent.PATIENT_REQUEST.toString());
-            this.getMyController().actionPerformed(actionEvent);
-            setTitle(patient.toString());
-        }else setTitle("No patient currently selected");
-        ActionEvent actionEvent = new ActionEvent(
-                this,ActionEvent.ACTION_PERFORMED,
-                ViewController.PatientViewControllerActionEvent.
-                        VIEW_CHANGED_NOTIFICATION.toString());
-        this.getMyController().actionPerformed(actionEvent);
-    }
     
     private boolean validateMinimumPatientDetails(){
         boolean errorOnExit = false;

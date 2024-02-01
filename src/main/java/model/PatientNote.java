@@ -242,7 +242,8 @@ public class PatientNote extends Entity implements IEntityStoreActions{
                 patientNote.setDatestamp(a.getStart());
                 patientNote.setNote(a.getNotes());
                 patientNote.setLastUpdated(LocalDateTime.now());
-                a.setPatientNoteKey(new Repository().insert(patientNote));
+                patientNote.setKey(new Repository().insert(patientNote));
+                a.setPatientNote(patientNote);
                 a.update();
             }
     }

@@ -164,6 +164,24 @@ public class NotificationViewController extends ViewController{
         sendPrimaryViewPatientNotifications(Notification.Scope.ALL);
     }
     
+    private void doNotificationsForPatientRequest()throws StoreException{
+        Patient patient = getDescriptor().getViewDescription().getPatient();
+        Notification notification = new Notification();
+        notification.setPatient(patient);
+        notification.setScope(Scope.FOR_PATIENT);
+        notification.read();
+        getDescriptor().getControllerDescription()
+                .setPatientNotifications(notification.get());
+        firePropertyChangeEvent(
+                NotificationViewControllerPropertyChangeEvent
+                        .RECEIVED_PATIENT_NOTIFICATIONS.toString(),
+                getSecondaryView(),
+                this,
+                null,
+                null
+        );
+    }
+    
     /*
     private void getPatientNotificationsFor(Notification notification){
         try{
@@ -210,16 +228,14 @@ public class NotificationViewController extends ViewController{
         //setOldEntityDescriptor(getDescriptor());
         setDescriptor(new Descriptor());
         getDescriptor().getControllerDescription().setPatientNotifications(new ArrayList<>());
+        getDescriptor().getControllerDescription().setViewMode(ViewController.ViewMode.CREATE);
 
         try{
             Patient patient = new Patient();
             patient.setScope(Scope.ALL);
             patient.read();
             getDescriptor().getControllerDescription().setPatients(patient.get());
-            //07/08/2022
-            //Patient.Collection  patientCollection = patient.getCollection();
-            //patientCollection.read();
-            //getNewEntityDescriptor().setThePatients(patientCollection.get());
+
             View.setViewer(View.Viewer.NOTIFICATION_EDITOR_VIEW);
             setView((ModalView)new View().make(View.Viewer.NOTIFICATION_EDITOR_VIEW,
                     this, 
@@ -257,12 +273,10 @@ public class NotificationViewController extends ViewController{
             patientNotification.setPatient(notification.getPatient());
             patientNotification.setScope(Scope.FOR_PATIENT);
             patientNotification.read();
-            getDescriptor().getControllerDescription().setPatientNotifications(patientNotification.get());
-            //PatientNotification.Collection patientNotificationCollection = notification.getCollection();
-            //patientNotificationCollection.setScope(Scope.FOR_PATIENT);
-            //patientNotificationCollection.read();
-            //getNewEntityDescriptor().setPatientNotifications(patientNotificationCollection.get());
-            //View.setViewer(View.Viewer.NOTIFICATION_EDITOR_VIEW);
+            getDescriptor().getControllerDescription()
+                    .setPatientNotifications(patientNotification.get());
+            getDescriptor().getControllerDescription().
+                    setViewMode(ViewController.ViewMode.UPDATE);
             setModalView((ModalView)new View().make(View.Viewer.NOTIFICATION_EDITOR_VIEW,
                     this,
                     getDesktopView()).getModalView());
@@ -277,8 +291,17 @@ public class NotificationViewController extends ViewController{
         }
     }
 
+    private ModalView modalView = null;
+    private ModalView getSecondaryView(){
+        return modalView;
+    }
+    private void setSecondaryView(ModalView value){
+        modalView = value;
+    }
+    
     private void doSecondaryViewActionRequest(ActionEvent e)throws StoreException{
         setModalView((ModalView)e.getSource());
+        setSecondaryView(getModalView());
         switch (getModalView().getMyViewType()){
             case NOTIFICATION_EDITOR_VIEW:
                 ViewController.NotificationViewControllerActionEvent actionCommand =
@@ -286,6 +309,9 @@ public class NotificationViewController extends ViewController{
                 switch (actionCommand){
                     case MODAL_VIEWER_ACTIVATED:
                         //getSecondaryView().initialiseView();
+                        break;
+                    case NOTIFICATIONS_FOR_PATIENT_REQUEST:
+                        doNotificationsForPatientRequest();
                         break;
                     case NOTIFICATION_EDITOR_CREATE_NOTIFICATION_REQUEST:
                         doPatientNotificationEditorCreateNotificationRequest();
