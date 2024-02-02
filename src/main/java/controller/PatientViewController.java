@@ -25,6 +25,7 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyVetoException;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.LocalDateTime;
 import java.time.Period;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -406,8 +407,17 @@ public class PatientViewController extends ViewController {
                 patient.insert();
                 patient.setScope(Scope.SINGLE);
                 patient = patient.read();
+                PatientNote patientNote = new PatientNote(patient);
+                patientNote.setDatestamp(LocalDateTime.now());
+                patientNote.setNote(patient.getName()
+                        .getTitle() + " " 
+                        + patient.getName().getForenames() 
+                        + " " + patient.getName().getSurname() 
+                        + " registered as a new patient on the system.");
+                patientNote.setLastUpdated(LocalDateTime.now());
                 patient.setScope(Entity.Scope.ALL);
-                patient.read();
+                patientNote.insert();
+                patient.read(); 
                 getDescriptor().getControllerDescription().setPatients(patient.get());
                 firePropertyChangeEvent(
                         ViewController.PatientViewControllerPropertyChangeEvent.
