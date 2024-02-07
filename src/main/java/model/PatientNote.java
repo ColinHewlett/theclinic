@@ -248,4 +248,14 @@ public class PatientNote extends Entity implements IEntityStoreActions{
             }
     }
     
+    public void createPatientNoteFromAppointment(Appointment a)throws StoreException{
+        PatientNote patientNote = new PatientNote(a.getPatient());
+        patientNote.setDatestamp(a.getStart());
+        patientNote.setNote(a.getNotes());
+        patientNote.setLastUpdated(LocalDateTime.now());
+        patientNote.setKey(new Repository().insert(patientNote));
+        a.setPatientNote(patientNote);
+        a.update();
+    }
+    
 }

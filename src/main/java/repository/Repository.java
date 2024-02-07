@@ -305,6 +305,7 @@ public class Repository implements IStoreActions {
     private String getName(Entity entity){
         if (entity.getIsAppointment()) return "Appointment";
         if (entity.getIsPatient()) return "Patient";
+        if (entity.getIsPatientNote()) return "PatientNote";
         if (entity.getIsPatientNotification()) return "PatientNotification";
         if (entity.getIsSurgeryDaysAssignment()) return "SurgeryDaysAssignment";
         return null;
@@ -426,6 +427,9 @@ public class Repository implements IStoreActions {
                 sql = "UPDATE PatientNotification SET IsDeleted = true WHERE patientToNotify = ?;";
                 preparedStatement = getPMSStoreConnection().prepareStatement(sql); 
                 preparedStatement.setLong(1, patient.getPatientKey());
+                sql = "UPDATE PatientNote SET IsDeleted = true WHERE patientKey = ?;";
+                preparedStatement = getPMSStoreConnection().prepareStatement(sql); 
+                preparedStatement.setLong(1, patient.getPatientKey());
                 preparedStatement.executeUpdate();
                 sql = "UPDATE Patient SET isDeleted = true WHERE pid = ?;";
                 preparedStatement = getPMSStoreConnection().prepareStatement(sql); 
@@ -507,8 +511,11 @@ public class Repository implements IStoreActions {
                 preparedStatement.setLong(3, delegate.getDuration().toMinutes());
                 preparedStatement.setString(4, delegate.getNotes());
                 preparedStatement.setLong(5, delegate.getAppointmentKey());
-                preparedStatement.setLong(6, 
-                        ((PatientNoteDelegate)delegate.getPatientNote()).getKey());
+                Integer patientNoteKey =
+                        ((PatientNoteDelegate)delegate.getPatientNote()).getKey();
+                if (patientNoteKey == null)
+                    preparedStatement.setNull(6, java.sql.Types.INTEGER);
+                else preparedStatement.setLong(6, patientNoteKey);
                 preparedStatement.executeUpdate();
                    
             } catch (SQLException ex) {
@@ -527,14 +534,14 @@ public class Repository implements IStoreActions {
                                     + "StoreException message -> exception raised in Repository::runSQL(PracticeManagementSystemSQL.INSERT_APPOINTMENT)",
                                     StoreException.ExceptionType.SQL_EXCEPTION);
                         }
+                        
                         /*
                         else{
                             throw new StoreException("SQLException message -> " + ex.getMessage() + "\n"
                                     + "StoreException message -> exception raised in Repository::runSQL(PracticeManagementSystemSQL.INSERT_APPOINTMENT)",
                                     StoreException.ExceptionType.SQL_EXCEPTION);
-                        }
-                       */
-                        
+                        }   
+                        */
                 }
 
             }
@@ -1762,7 +1769,7 @@ public class Repository implements IStoreActions {
                         sql = "CREATE TABLE Appointment ("
                         + "pid LONG PRIMARY KEY, "
                         + "patientKey LONG NOT NULL REFERENCES Patient(pid), "
-                        + "patientNoteKey LONG LONG NOT NULL REFERENCES PatientNote(pid), "
+                        + "patientNoteKey LONG NOT NULL REFERENCES PatientNote(pid), "
                         + "start DateTime, "
                         + "duration LONG, "
                         + "notes char, "
@@ -2025,11 +2032,11 @@ public class Repository implements IStoreActions {
                 sql = "CREATE TABLE PatientNote ("
                         + "pid LONG PRIMARY KEY, "
                         + "datestamp DateTime, "
-                        + "patientKey LONG, "
-                        + "note Long Text"
+                        + "patientKey LONG NOT NULL REFERENCES Patient(pid), "
+                        + "note Long Text, "
                         + "isDeleted YesNo, "
-                        + "lastUpdated DateTime";
-                doCreatePatientNotificationTable(sql);
+                        + "lastUpdated DateTime;";
+                doCreatePatientNoteTable(sql);
                 break;
             case DELETE_PATIENT_NOTE:
                 sql = "UPDATE PatientNote "
@@ -2836,6 +2843,12 @@ public class Repository implements IStoreActions {
     }
     
     @Override
+    public void create(PatientNote table) throws StoreException{
+        Entity value = null;
+        runSQL(Repository.EntitySQL.PATIENT_NOTE,Repository.PMSSQL.CREATE_PATIENT_NOTE_TABLE, value);
+    }
+    
+    @Override
     public void create(SurgeryDaysAssignment surgeryDaysAssignment) throws StoreException {
             runSQL(Repository.EntitySQL.SURGERY_DAYS_ASSIGNMENT,Repository.PMSSQL.CREATE_SURGERY_DAYS_ASSIGNMENT_TABLE, surgeryDaysAssignment);
     }
@@ -3042,57 +3055,11 @@ public class Repository implements IStoreActions {
                 Repository.PMSSQL.INSERT_SURGERY_DAYS_ASSIGNMENT, surgeryDaysAssignment);
         
     }
-    
-    @Override
-    public void create(PatientNote pn)throws StoreException{
-        Entity value = null;
-        runSQL(Repository.EntitySQL.PATIENT_NOTE,Repository.PMSSQL.CREATE_PATIENT_NOTE_TABLE, value);
-    }
 
-    
     @Override
     public void create(Notification pn) throws StoreException{
         Entity value = null;
         runSQL(Repository.EntitySQL.PATIENT_NOTIFICATION,Repository.PMSSQL.CREATE_NOTIFICATION_TABLE, value);
-    }
-    
-    public void create()throws StoreException{
-        RepositoryType repositoryType = RepositoryType.valueOf(System.getenv("PMS_STORE_TYPE"));
-        switch(repositoryType){
-            case ACCESS:{
-                File file = null;
-                try {
-                    file = new File(getURL());
-                    if (!file.exists()){
-                        DatabaseBuilder.create(Database.FileFormat.V2016, file);
-                        //01/03/202323
-                        new Patient().create();
-                        new Notification().create();
-                        new SurgeryDaysAssignment().create();
-                        new Appointment().create();
-                    }else{
-                        throw new StoreException("PMS database already exists and must be deleted before being re-created",
-                                StoreException.ExceptionType.PMS_DATABASE_EXISTS);
-                    }
-                } catch (IOException io) {
-                    String msg = "IOException -> raised on attempt to create a new Access database in DesktopControllerActionEvent.MIGRATION_DATABASE_CREATION_REQUEST";
-                    throw new StoreException(msg + "\nStoreException raised in "
-                            + "initialiseTargetStore(file = "
-                            + file.toString() + ")", StoreException.ExceptionType.IO_EXCEPTION);
-                }
-            }
-            default:{
-                String sql = "CREATE DATABASE abc;";
-                try{
-                    PreparedStatement preparedStatement = getPMSStoreConnection().prepareStatement(sql);
-                    preparedStatement.executeQuery();
-                }catch (SQLException ex){
-                    String message = ex.getMessage() + "\n";
-                    message = message + "StoreException raised in PostgresRepository::createDatabase()";
-                    throw new StoreException(message, StoreException.ExceptionType.SQL_EXCEPTION);
-                }
-            }
-        }
     }
     
     public boolean doesPMSDatabaseExist(){
@@ -3121,24 +3088,32 @@ public class Repository implements IStoreActions {
                 else{
                     String path = (this.url).substring(this.url.indexOf("//")+2);
                     File file = new File(path);
+                    password = "";
+                    user = "Admin";
+                    instance = this;
+                    repositoryName = "ACCESS";
                     try{  
                         if (!file.exists()) {
+                            
                             DatabaseBuilder.create(Database.FileFormat.V2016, new File(path));
                             //01/03/2023
-                            new Patient().create();
-                            new Notification().create();
-                            new SurgeryDaysAssignment().create();
-                            new Appointment().create();
+                            create(new Patient());
+                            create(new PatientNote());
+                            create(new Notification());
+                            create(new SurgeryDaysAssignment());
+                            create(new Appointment());
                         }
-                        password = "";
-                        user = "Admin";
-                        instance = this;
-                        repositoryName = "ACCESS";
+                        
                     }catch (IOException io) {
                         String msg = "IOException -> raised on attempt to create a new Access database in DesktopControllerActionEvent.MIGRATION_DATABASE_CREATION_REQUEST";
                         throw new StoreException(msg + "\nStoreException raised in "
                                 + "initialiseTargetStore(file = "
                                 + file.toString() + ")", StoreException.ExceptionType.IO_EXCEPTION);
+                    }catch(StoreException ex){
+                        displayErrorMessage(ex.getMessage() + "\n "
+                                + "Raised in Repository.create(ACCESS)",
+                                "Repository error",
+                                JOptionPane.WARNING_MESSAGE);
                     }
                 }
                 break;
@@ -3202,12 +3177,28 @@ public class Repository implements IStoreActions {
                                         "CONSTRAINT patient_fk1 FOREIGN KEY (guardiankey)\n" +
                                         "    REFERENCES public.patient (pid) MATCH SIMPLE\n" +
                                         "    ON UPDATE NO ACTION\n" +
-                                        "    ON DELETE NO ACTION \n);"; 
+                                        "    ON DELETE NO ACTION \n);";
+                            preparedStatement = getPMSStoreConnection().prepareStatement(sql);
+                            preparedStatement.execute();   
+                            sql = "CREATE TABLE public.patientnote (" +
+                                    "pid integer NOT NULL,\n" +
+                                    "datestamp timestamp without time zone,\n" +
+                                    "notes text,\n" +
+                                    "isdeleted boolean DEFAULT false,\n" +
+                                    "lastupdated timestamp without time zone,\n" +
+                                    "patientkey integer NOT NULL,\n" +
+                                    "CONSTRAINT patientnote_pk PRIMARY KEY (pid),\n" +
+                                    "CONSTRAINT patient_fk2 FOREIGN KEY (patientkey)\n" +
+                                    "    REFERENCES public.patient (pid) MATCH SIMPLE\n" +
+                                    "     ON UPDATE NO ACTION\n" +
+                                    "     ON DELETE NO ACTION \n);"; 
                             preparedStatement = getPMSStoreConnection().prepareStatement(sql);
                             preparedStatement.execute();        
+                            
                             sql = "CREATE TABLE public.appointment(" +
                                     "pid integer NOT NULL,\n" +
-                                    "patientkey integer,\n" +
+                                    "patientkey integer NOT NULL,\n" +
+                                    "patientnotekey integer,\n" +
                                     "duration integer,\n" +
                                     "notes character varying(255) COLLATE pg_catalog.\"default\",\n" +
                                     "start timestamp without time zone,\n" +
@@ -3215,10 +3206,14 @@ public class Repository implements IStoreActions {
                                     "haspatientbeencontacted boolean DEFAULT false,\n" +
                                     "isCancelled boolean DEFAULT false,\n" +
                                     "CONSTRAINT appointment_pk PRIMARY KEY (pid),\n" +
-                                    "CONSTRAINT appointment_fk1 FOREIGN KEY (patientkey)\n" +
+                                    "CONSTRAINT appointment_fk1 FOREIGN KEY (patientkey) \n" +
                                     "   REFERENCES public.patient (pid) MATCH SIMPLE\n" +
                                     "    ON UPDATE NO ACTION\n" +
-                                    "    ON DELETE NO ACTION)\n";
+                                    "    ON DELETE NO ACTION,\n" +
+                                    "CONSTRAINT appointment_fk2 FOREIGN KEY (patientnotekey)\n" +
+                                    "   REFERENCES public.patientnote (pid) MATCH SIMPLE\n" +
+                                    "    ON UPDATE NO ACTION\n" +
+                                    "    ON DELETE NO ACTION\n);";
                             preparedStatement = getPMSStoreConnection().prepareStatement(sql);
                             preparedStatement.execute();
                             sql = "CREATE TABLE public.patientnotification(\n" +

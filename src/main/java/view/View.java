@@ -88,6 +88,7 @@ public class View extends JInternalFrame
                 break;
             case MIGRATION_MANAGER_VIEW:
                 setView(makeView(new ImportProgressView(viewer, controller, desktopView)));
+                break;
             case PATIENT_VIEW:
                 setView(makeView(new PatientView(viewer, controller, desktopView)));
                 break;
@@ -125,6 +126,9 @@ public class View extends JInternalFrame
                 break;
             case PATIENT_GUARDIAN_EDITOR_VIEW:
                 setModalView(makeView(new ModalPatientGuardianEditorView(viewer, controller,desktopView)));
+                break;
+            case PATIENT_SELECTION_VIEW:
+                setModalView(makeView(new ModalPatientSelectionView(viewer, controller,desktopView)));
                 break;
             case NON_SURGERY_DAY_EDITOR_VIEW:
                 setModalView(makeView(new ModalNonSurgeryDayEditorView(viewer, controller, desktopView)));

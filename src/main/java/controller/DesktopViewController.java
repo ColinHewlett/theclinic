@@ -10,6 +10,7 @@ import static controller.ViewController.ViewControllers;
 import model.Entity;
 import model.Entity.Scope;
 import model.PatientNote;
+import repository.Repository;
 import _system_environment_variables.SystemDefinitions;
 import org.apache.commons.io.FilenameUtils;
 import model.*;
@@ -22,6 +23,7 @@ import java.beans.PropertyChangeSupport;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -60,8 +62,7 @@ public class DesktopViewController extends ViewController{
          * -- Boolean signifying whether view enables data migration functions
          */
         DesktopView desktopView = new DesktopView(this, isDataMigrationOptionEnabled, getDescriptor() );
-        //view.setSize(1020, 650);
-        //view.setVisible(true);
+
         setDesktopView(desktopView);
         
         
@@ -73,6 +74,15 @@ public class DesktopViewController extends ViewController{
         importProgressViewControllers = new ArrayList<>();
         notificationViewControllers = new ArrayList<>();
         boolean isPMSStoreDefined;
+        try{
+            new Repository();
+        }catch (StoreException ex){
+            displayErrorMessage(ex.getMessage() + "\n"
+                    + "Raised in Desktop view controller constructor",
+                    "Desktop view controller error",
+                    JOptionPane.WARNING_MESSAGE);
+        }
+        
         if (isDataMigrationOptionEnabled) {
             notifyMigrationActionCompleted();
             getDesktopView().initialiseView();
@@ -275,10 +285,23 @@ public class DesktopViewController extends ViewController{
                             JOptionPane.WARNING_MESSAGE);    
                 }
                 break;
+            case IMPORT_EXPORT_PATIENT_NOTE_DATA:
+                try{
+                    if (PMSStore.isSelected()) 
+                        startBackgroundThread(new PatientNote(), this);
+                }catch (StoreException ex){
+                    displayErrorMessage(ex.getMessage() + "\nException handled"
+                            + " in case EXPORT_MIGRATED_APPOINTMENTS inside "
+                            + "doImportExportProgressViewControllerAction()",
+                            "Desktop View Controller error",
+                            JOptionPane.WARNING_MESSAGE);    
+                }
+                break;    
             case IMPORT_EXPORT_MIGRATED_SURGERY_DAYS_ASSIGNMENT:
                 SurgeryDaysAssignment surgeryDaysAssignment = new SurgeryDaysAssignment();       
                 try{
                     surgeryDaysAssignment.insert();
+                    getDesktopView().initialiseView();
                 }catch (StoreException ex){
                     displayErrorMessage(ex.getMessage(), 
                             "Desktop view controleer", JOptionPane.WARNING_MESSAGE);
@@ -357,6 +380,18 @@ public class DesktopViewController extends ViewController{
                             getDescriptor()
                     );
                     break;
+                case COUNT_PATIENT_NOTE_TABLE_REQUEST:
+                    theCount = doRequestCountForPatientNoteTable();
+                    getDescriptor().getControllerDescription().setTableRowCount(theCount);
+                    firePropertyChangeEvent(
+                            ViewController.DesktopViewControllerPropertyChangeEvent.
+                                    PATIENT_NOTE_TABLE_COUNT_RECEIVED.toString(),
+                            (PropertyChangeListener)e.getSource(),
+                            this,
+                            null,
+                            getDescriptor()
+                    );
+                    break;
                 case COUNT_PATIENT_NOTIFICATION_TABLE_REQUEST:
                     theCount = doRequestCountForPatientNotificationTable();
                     getDescriptor().getControllerDescription().setTableRowCount(theCount);
@@ -381,6 +416,13 @@ public class DesktopViewController extends ViewController{
                             getDescriptor()
                     );
                     break;
+                /**
+                 * Currently modal patient notes editor view
+                 */
+                case NOTES_VIEW_CONTROLLER_REQUEST:
+
+                    break;
+                    
                 case NOTIFICATION_VIEW_CONTROLLER_REQUEST:
                     doRequestForNotificationViewController();
                     break;
@@ -407,6 +449,7 @@ public class DesktopViewController extends ViewController{
                 }  
                 case DELETE_DATA_FROM_PMS_DATABASE_REQUEST:{
                     doRequestForDeleteDataFromPMSDatabase();
+                    getDesktopView().initialiseView();
                     break;
                 }
                 case IMPORT_DATA_FROM_SOURCE:{                  
@@ -519,7 +562,7 @@ public class DesktopViewController extends ViewController{
                                     new ImportProgressViewController(this, getDesktopView(), getDescriptor()));
             ImportProgressViewController ipvc = importProgressViewControllers.get(importProgressViewControllers.size()-1);
             ipvc.setView(new View().make(
-                View.Viewer.SCHEDULE_VIEW,
+                View.Viewer.MIGRATION_MANAGER_VIEW,
                 ipvc, 
                 getDesktopView()));
             
@@ -656,7 +699,7 @@ public class DesktopViewController extends ViewController{
      */
     private void startBackgroundThread(Entity entity,DesktopViewController desktopViewController){
         SwingWorker sw1 = new SwingWorker(){
-            
+        int appointmentRecordCount = 0;    
             @Override
             protected String doInBackground()  
             {
@@ -708,6 +751,23 @@ public class DesktopViewController extends ViewController{
                         }//end of dbfRecords iteration
                         dbfRecords.clear();
                     }
+                    else if(entity.getIsPatientNote()){
+                        recordCount = 0;
+                        Appointment appointment = new Appointment();
+                        appointment.setScope(Scope.ALL);
+                        appointment.read();
+                        setCount(appointment.count().x);
+                        Iterator<Appointment> it = ((Appointment)appointment).get().iterator();
+                        while (it.hasNext()){
+                            Appointment a = it.next();
+                            new PatientNote().createPatientNoteFromAppointment(a);
+                            recordCount++;
+                            if (recordCount <= getCount()){
+                                Integer percentage = recordCount*100/getCount();
+                                setProgress(percentage);
+                            }
+                        }
+                    }
                      
                 }catch (StoreException ex){
                     displayErrorMessage(ex.getMessage(), "Desktop view controller error",
@@ -720,6 +780,7 @@ public class DesktopViewController extends ViewController{
                     Appointment appointmentTable) throws StoreException {
                 for(Appointment appointment : appointments){
                     appointment.insert();
+                    appointmentRecordCount = appointmentRecordCount + 1;
                     if (getRecordCount() <= getCount()){
                         Integer percentage = getRecordCount()*100/getCount();
                         setProgress(percentage);
@@ -755,8 +816,19 @@ public class DesktopViewController extends ViewController{
             @Override
             protected void done(){
                 DesktopViewControllerActionEvent event = null;
-                if (entity.getIsPatient())event = DesktopViewControllerActionEvent.IMPORT_EXPORT_PATIENT_DATA_COMPLETED;
-                if (entity.getIsAppointment())event = DesktopViewControllerActionEvent.IMPORT_EXPORT_APPOINTMENT_DATA_COMPLETED;
+                if (entity.getIsPatient()){
+                    event = DesktopViewControllerActionEvent.IMPORT_EXPORT_PATIENT_DATA_COMPLETED;
+                    getDesktopView().initialiseView();
+                    
+                }
+                if (entity.getIsAppointment()){
+                    event = DesktopViewControllerActionEvent.IMPORT_EXPORT_APPOINTMENT_DATA_COMPLETED;
+                    //getDesktopView().initialiseView();
+                }
+                if (entity.getIsPatientNote()){
+                    event = DesktopViewControllerActionEvent.IMPORT_EXPORT_PATIENT_NOTE_DATA_COMPLETED;
+                    //getDesktopView().initialiseView();
+                }
                 
                 ImportProgressViewController evc = importProgressViewControllers.get(0);
                 if (event!=null){
@@ -793,6 +865,21 @@ public class DesktopViewController extends ViewController{
         return result;
     }
     
+    private Point doRequestCountForPatientNoteTable(){
+        Point result = null;
+        //07/08/2022
+        PatientNote patientNote = new PatientNote();
+        patientNote.setScope(Scope.ALL);
+        try{
+            result = patientNote.count();
+        }catch (StoreException ex){
+            displayErrorMessage(
+                    ex.getMessage() + "\n Exception handled in doPatientNoteTableCountRequest()",
+                    "Desktop View Controller error", JOptionPane.WARNING_MESSAGE);
+        }
+        return result;
+    }
+    
     private Point doRequestCountForPatientTable(){
         Point result = null;
         //07/08/2022
@@ -802,7 +889,7 @@ public class DesktopViewController extends ViewController{
             result = patient.count();
         }catch (StoreException ex){
             displayErrorMessage(
-                    ex.getMessage() + "\n Exception handled in doAppointmentTableCountRequest()",
+                    ex.getMessage() + "\n Exception handled in doPatientTableCountRequest()",
                     "Desktop View Controller error", JOptionPane.WARNING_MESSAGE);
         }
         return result;
@@ -888,7 +975,7 @@ public class DesktopViewController extends ViewController{
     private void notifyMigrationActionCompleted(){
         pcSupport.addPropertyChangeListener(getDesktopView());
         PropertyChangeEvent pcEvent = new PropertyChangeEvent(this,
-            DesktopViewController.DesktopViewControllerPropertyChangeEvent.MIGRATION_ACTION_COMPLETE.toString(),
+            DesktopViewController.DesktopViewControllerPropertyChangeEvent.PMS_STORE_PATH_RECEIVED.toString(),
             null,getDescriptor());
         pcSupport.firePropertyChange(pcEvent);
         pcSupport.removePropertyChangeListener(getDesktopView());
@@ -944,6 +1031,15 @@ public class DesktopViewController extends ViewController{
         }
         
         try{
+            PatientNote patientNote = new PatientNote();
+            patientNote.setScope(Entity.Scope.ALL);
+            patientNote.delete();
+        }catch (StoreException ex){
+            displayErrorMessage(ex.getMessage(),
+                    "Desktop view controller",JOptionPane.WARNING_MESSAGE);
+        }
+        
+        try{
             Patient patient = new Patient();
             patient.setScope(Entity.Scope.ALL);
             patient.delete();
@@ -952,13 +1048,8 @@ public class DesktopViewController extends ViewController{
                     "Desktop view controller",JOptionPane.WARNING_MESSAGE);
         }
     
-        notifyMigrationActionCompleted();
     }
-       /*
-    public Descriptor getViewDescriptor(){
-        return this.entityDescriptor;
-    }
-*/
+
     @Override
     public void actionPerformed(ActionEvent e){
         if (e.getActionCommand().equals(ViewController.DesktopViewControllerActionEvent.
@@ -1167,13 +1258,15 @@ public class DesktopViewController extends ViewController{
                 case "ACCESS":{
                     String url = SystemDefinitions.getPMSStoreAccessURL();
                     path = url.substring(url.indexOf("//")+2);
-
+                    /*
                     try{
                         File file = new File(path);
                         if (!SystemDefinitions.getPMSDebug().equals("ENABLED")){
                             if (!file.exists()){
                                 Entity.createPMSDatabase();
                                 Patient patientTable = new Patient();
+                                patientTable.create();
+                                PatientNote patientNoteTable = new PatientNote();
                                 patientTable.create();
                                 Notification patientNotificationTable = new Notification();
                                 patientNotificationTable.create();
@@ -1188,6 +1281,7 @@ public class DesktopViewController extends ViewController{
                         displayErrorMessage("Exception message raised in doDesktopViewAction(), case IMPORT_DATA_FROM_SOURCE\n"
                                 + ex.getMessage(),"Desktop View Controller error", JOptionPane.WARNING_MESSAGE);
                     }
+                    */
                     break;
                 }
                 case "POSTGRES":

@@ -17,7 +17,7 @@ import java.beans.PropertyChangeEvent;
  * @author colin
  */
 public class ImportProgressViewController extends ViewController{
-    public static enum Entity{APPOINTMENT, PATIENT, NONE}
+    public static enum Entity{APPOINTMENT, PATIENT, PATIENT_NOTE, NONE}
     private static enum Operation {EXPORT, IMPORT};
     private Entity newEntity = Entity.NONE;
     private Entity oldEntity = Entity.NONE;
@@ -80,11 +80,18 @@ public class ImportProgressViewController extends ViewController{
                 break;
                 
             case IMPORT_EXPORT_APPOINTMENT_DATA_COMPLETED:
-                actionEvent = new ActionEvent(
-                    this,ActionEvent.ACTION_PERFORMED,
-                    ViewController.DesktopViewControllerActionEvent.IMPORT_EXPORT_MIGRATED_SURGERY_DAYS_ASSIGNMENT.toString());
-                getMyController().actionPerformed(actionEvent);
-                
+                setOldEntity(getNewEntity());
+                setNewEntity(Entity.PATIENT_NOTE);
+                firePropertyChangeEvent(
+                        ImportProgressViewControllerPropertyChangeEvent.
+                                    PREPARE_FOR_RECEIPT_OF_PATIENT_NOTE_PROGRESS.toString(),
+                        getView(),
+                        this,
+                        null,
+                        null
+                );
+                break;
+                /*
                 setOldEntity(getNewEntity());
                 setNewEntity(Entity.NONE);
                 firePropertyChangeEvent(
@@ -95,7 +102,22 @@ public class ImportProgressViewController extends ViewController{
                         null,
                         null
                 );
-                break;
+*/
+            case IMPORT_EXPORT_PATIENT_NOTE_DATA_COMPLETED:
+                actionEvent = new ActionEvent(
+                    this,ActionEvent.ACTION_PERFORMED,
+                    ViewController.DesktopViewControllerActionEvent.IMPORT_EXPORT_MIGRATED_SURGERY_DAYS_ASSIGNMENT.toString());
+                getMyController().actionPerformed(actionEvent);
+                setOldEntity(getNewEntity());
+                setNewEntity(Entity.NONE);
+                firePropertyChangeEvent(
+                        ImportProgressViewControllerPropertyChangeEvent.
+                                    OPERATION_COMPLETED.toString(),
+                        getView(),
+                        this,
+                        null,
+                        null
+                );
         }
     }
     
@@ -134,6 +156,13 @@ public class ImportProgressViewController extends ViewController{
                     actionEvent = new ActionEvent(
                         this,ActionEvent.ACTION_PERFORMED,
                         ViewController.DesktopViewControllerActionEvent.IMPORT_EXPORT_APPOINTMENT_DATA.toString());
+                    getMyController().actionPerformed(actionEvent);
+                    break;
+                    
+                case READY_FOR_RECEIPT_OF_PATIENT_NOTE_PROGRESS:                 
+                    actionEvent = new ActionEvent(
+                        this,ActionEvent.ACTION_PERFORMED,
+                        ViewController.DesktopViewControllerActionEvent.IMPORT_EXPORT_PATIENT_NOTE_DATA.toString());
                     getMyController().actionPerformed(actionEvent);
                     break;
 

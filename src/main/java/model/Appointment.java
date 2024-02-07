@@ -280,9 +280,9 @@ public class Appointment extends Entity implements IEntityStoreActions{
                 key = getPatient().getKey();      
             
         }
-        if (SystemDefinitions.getPMSDebug().equals("ENABLED"))
-                return new Repository().count(this,pid);
-        else return null;
+        
+        return new Repository().count(this,pid);
+
     }
     
 
@@ -309,7 +309,11 @@ public class Appointment extends Entity implements IEntityStoreActions{
         Integer pid;
         if (getIsUnbookableSlot())
             pid = new Repository().insert(this, getPatient().getKey(), 0);
-        else pid = new Repository().insert(this, getPatient().getKey(), getPatientNote().getKey()); 
+        else if (getPatientNote()!=null)
+            pid = new Repository().insert(this, getPatient().getKey(), 
+                    getPatientNote().getKey());
+        else pid = new Repository().insert(this, getPatient().getKey(),null);
+         
 
         setKey(pid);
         return pid;
@@ -375,7 +379,7 @@ public class Appointment extends Entity implements IEntityStoreActions{
                         if (a.getPatientNote().getKey()>0){
                             patientNote = new PatientNote(a.getPatientNote().getKey());
                             patientNote.setScope(Scope.SINGLE);
-                            System.out.println(patientNote.getKey());
+                            //System.out.println(patientNote.getKey());
                             a.setPatientNote(patientNote.read());
                         }
                     }
@@ -451,6 +455,10 @@ public class Appointment extends Entity implements IEntityStoreActions{
                     throw new StoreException(message, StoreException.ExceptionType.NULL_KEY_EXCEPTION);
                     }
                 }
+                result = this;
+                break;
+            case ALL:
+                set(new Repository().read(this, key).get());
                 result = this;
                 break;
             default:

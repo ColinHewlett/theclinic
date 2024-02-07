@@ -1090,8 +1090,9 @@ public class PatientView extends View implements ActionListener{
             this.tblAppointmentHistory.setDefaultRenderer(Duration.class, new AppointmentsTableDurationRenderer());
             this.tblAppointmentHistory.setDefaultRenderer(LocalDateTime.class, new AppointmentsTableLocalDateTimeRenderer());;
             this.tblAppointmentHistory.setDefaultRenderer(PatientNote.class, new AppointmentsTablePatientNoteRenderer());
-            this.tblAppointmentHistory.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+            //this.tblAppointmentHistory.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
             
+            //this.tblAppointmentHistory.setPreferredScrollableViewportSize(tblAppointmentHistory.getPreferredSize());
             TitledBorder titledBorder =
                     (TitledBorder)this.pnlAppointmentHistory.getBorder();
             
@@ -1569,7 +1570,7 @@ public class PatientView extends View implements ActionListener{
         tblAppointmentHistory = new javax.swing.JTable();
         tblAppointmentHistory.addMouseListener(mouseListener);
         tblAppointmentHistory.setModel(new Appointments3ColumnTableModel());
-        tblAppointmentHistory.setPreferredSize(new Dimension(getAppointmentHistoryTableWidth(),110));
+        //tblAppointmentHistory.setPreferredSize(new Dimension(getAppointmentHistoryTableWidth(),110));
 
         
         scrAppointmentHistory = new javax.swing.JScrollPane();

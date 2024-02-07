@@ -819,43 +819,55 @@ public class Patient extends Entity implements IEntityStoreActions {
                     isInvalidMonth = false;
                     if ($value.length()>1){
                         $value = $value.strip();
-                        values = $value.split("-");
+                        values = $value.split("/");
                         if (values.length > 0){
                             switch (values[0]){
                                 case "Jan": 
+                                case "JAN":
                                     mm = 1;
                                     break;
                                 case "Feb":
+                                case "FEB":
                                     mm = 2;
                                     break;
                                 case "Mar":
+                                case "MAR":
                                     mm = 3;
                                     break;
                                 case "Apr":
+                                case "APR":
                                     mm = 4;
                                     break;
                                 case "May":
+                                case "MAY":
                                     mm = 5;
                                     break;
                                 case "Jun":
+                                case "JUN":
                                     mm = 6;
                                     break;
                                 case "Jul":
+                                case "JUL":
                                     mm = 7;
                                     break;
                                 case "Aug":
+                                case "AUG":
                                     mm = 8;
                                     break;
                                 case "Sep":
+                                case "SEP":
                                     mm = 9;
                                     break;
                                 case "Oct":
+                                case "OCT":
                                     mm = 10;
                                     break;
                                 case "Nov":
+                                case "NOV":
                                     mm = 11;
                                     break;
                                 case "Dec":
+                                case "DEC":
                                     mm = 12;
                                     break;
                                 default:
