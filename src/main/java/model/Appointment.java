@@ -306,16 +306,21 @@ public class Appointment extends Entity implements IEntityStoreActions{
      */
     @Override
     public Integer insert() throws StoreException{
-        Integer pid;
+        Integer pid = null;
+        /**
+         * 11/02/2024 code logic update
+         */
+        this.setKey(new Repository().insert(this, getPatient().getKey(), getPatientNote().getKey()));
+        
+        /*
         if (getIsUnbookableSlot())
             pid = new Repository().insert(this, getPatient().getKey(), 0);
         else if (getPatientNote()!=null)
             pid = new Repository().insert(this, getPatient().getKey(), 
                     getPatientNote().getKey());
         else pid = new Repository().insert(this, getPatient().getKey(),null);
-         
+        */
 
-        setKey(pid);
         return pid;
     }
     
@@ -549,6 +554,12 @@ public class Appointment extends Entity implements IEntityStoreActions{
      */
     @Override
     public void update() throws StoreException{ 
+        /**
+         * 11/02/2024 code logic update
+         * -- the patient note has to be updated before updated independently of the appointment update
+         * -- might s well do it here as anywhere else
+         */
+        this.getPatientNote().update();
         new Repository().update(this, getKey(), getPatient().getKey(), getPatientNote().getKey());
     }//</editor-fold>   
     

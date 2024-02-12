@@ -11,6 +11,7 @@ import model.Entity;
 import model.Entity.Scope;
 import model.PatientNote;
 import repository.Repository;
+import repository.StoreException;
 import _system_environment_variables.SystemDefinitions;
 import org.apache.commons.io.FilenameUtils;
 import model.*;
@@ -45,6 +46,7 @@ public class DesktopViewController extends ViewController{
     private ArrayList<ScheduleViewController>appointmentScheduleViewControllers = null;
     private ArrayList<NotificationViewController> notificationViewControllers = null;
     private ArrayList<PatientViewController> patientViewControllers = null;
+    private ArrayList<NotesViewController> notesViewControllers = null;
     private ArrayList<ImportProgressViewController> importProgressViewControllers = null;
     private static Boolean isDataMigrationOptionEnabled = null;
     private PropertyChangeSupport pcSupport = null;
@@ -73,6 +75,7 @@ public class DesktopViewController extends ViewController{
         patientViewControllers = new ArrayList<>();
         importProgressViewControllers = new ArrayList<>();
         notificationViewControllers = new ArrayList<>();
+        notesViewControllers = new ArrayList<>();
         boolean isPMSStoreDefined;
         try{
             new Repository();
@@ -94,6 +97,53 @@ public class DesktopViewController extends ViewController{
                         "Desktop View Controller error", JOptionPane.WARNING_MESSAGE);
                 System.exit(0);
             } 
+        }
+    }
+    
+    private void doActionEventForNotesViewController(ActionEvent e){
+        String message = null;
+        NotesViewController nvc = (NotesViewController)e.getSource();
+        ViewController.DesktopViewControllerActionEvent actionCommand =
+                    ViewController.DesktopViewControllerActionEvent.valueOf(e.getActionCommand());
+        switch(actionCommand){
+            case VIEW_CONTROLLER_CHANGED_NOTIFICATION:
+                firePropertyChangeEvent(
+                        ViewController.DesktopViewControllerPropertyChangeEvent.
+                                DESKTOP_VIEW_CHANGED_NOTIFICATION.toString(),
+                        getDesktopView(),
+                        this,
+                        null,
+                        null
+                );
+                break;
+            case VIEW_CONTROLLER_CLOSE_NOTIFICATION:{
+                switch (this.notesViewControllers.size()){
+                    case 0:
+                        message = "No Notes view controllers found in "
+                                                    + "DesktopViewController collection.";
+                        break;
+                    case 1:
+                        if (nvc.equals(this.notesViewControllers.get(0))){
+                            this.notesViewControllers.remove(0);
+                        }
+                        else{
+                            message = "Could not find Notes view controller in "
+                                                    + "DesktopViewController collection.";
+                        }
+                        break;
+                    default:
+                        message = "More than one Notes view controller found in "
+                                                    + "DesktopViewController collection.";
+                        break;
+                }
+                if (message!=null){
+                    displayErrorMessage("Raised in doActionEventForNotesViewController"
+                            + "(case VIEW_CONTROLLER_CLOSE_NOTIFICATION)\n"
+                            + message,
+                            "Desktop view controller error",
+                            JOptionPane.WARNING_MESSAGE);
+                }
+            }   
         }
     }
 
@@ -235,6 +285,9 @@ public class DesktopViewController extends ViewController{
                             this.patientViewControllers.isEmpty()){ 
                     }
                 }
+                break;
+            case NOTES_VIEW_CONTROLLER_REQUEST:
+                doRequestForNotesViewController(e);
                 break;
             case SCHEDULE_VIEW_CONTROLLER_REQUEST:
                 /**
@@ -416,11 +469,9 @@ public class DesktopViewController extends ViewController{
                             getDescriptor()
                     );
                     break;
-                /**
-                 * Currently modal patient notes editor view
-                 */
                 case NOTES_VIEW_CONTROLLER_REQUEST:
-
+                    //getDescriptor().getControllerDescription().setPatient(null);
+                    doRequestForNotesViewController(e);
                     break;
                     
                 case NOTIFICATION_VIEW_CONTROLLER_REQUEST:
@@ -430,8 +481,7 @@ public class DesktopViewController extends ViewController{
                     doRequestForViewClose();
                     break;
                 }
-                case SCHEDULE_VIEW_CONTROLLER_REQUEST:{
-                    
+                case SCHEDULE_VIEW_CONTROLLER_REQUEST:{                  
                     doRequestForScheduleViewController((DesktopView)e.getSource());
                     break;
                 }
@@ -616,6 +666,50 @@ public class DesktopViewController extends ViewController{
             createNewAppointmentScheduleViewController(descriptor);
         }
     }
+    
+    private void doRequestForNotesViewController(ActionEvent e){
+        NotesViewController nvc = null;
+        PatientViewController pvc = null;
+        if (e.getSource() instanceof PatientViewController){
+            pvc = (PatientViewController)e.getSource();
+            this.getDescriptor().getControllerDescription().setPatient(
+                    pvc.getDescriptor().getControllerDescription().getPatient());  
+        }
+        if (notesViewControllers.isEmpty()){
+            notesViewControllers.add(
+                    new NotesViewController(
+                            this,
+                            getDesktopView()));
+            nvc = notesViewControllers.get(notesViewControllers.size()-1);
+
+            /**
+             * 12/02/2024 code logic update
+             */
+            if (e.getSource() instanceof PatientViewController){
+                pvc = (PatientViewController)e.getSource();
+                nvc.getDescriptor().getControllerDescription().setPatient(
+                        pvc.getDescriptor().getControllerDescription().getPatient());
+            }
+            else nvc.getDescriptor().getControllerDescription().setPatient(null);
+            
+            ActionEvent actionEvent = new ActionEvent(
+                    this,ActionEvent.ACTION_PERFORMED,
+                    DesktopViewController.DesktopViewControllerActionEvent.INITIALISE_VIEW.toString());
+             nvc.actionPerformed(actionEvent);
+            /* 
+            nvc.setView(new View().make(View.Viewer.NOTES_VIEW,
+                    nvc, 
+                    getDesktopView()));
+            nvc.initialiseView();
+            */
+
+            if (getDesktopViewMode().equals(DesktopViewMode.CLINIC_LOGO)){
+                    doSetupDesktopViewMode();
+            }
+        }else {
+            notesViewControllers.get(0).getView().toFront();
+        }//do nothing because only one patient notification VC allowed
+    }
 
     private void doRequestForNotificationViewController(){
         if (notificationViewControllers.isEmpty()){
@@ -640,6 +734,7 @@ public class DesktopViewController extends ViewController{
                         message, "Desktop View Controller error", JOptionPane.WARNING_MESSAGE);
             }
         }else {
+            notificationViewControllers.get(0).getView().toFront();
         }//do nothing because only one patient notification VC allowed
     }
     
@@ -1075,6 +1170,9 @@ public class DesktopViewController extends ViewController{
                     break;
                 case "NotificationViewController":
                     doActionEventForNotificationViewController(e);
+                    break;
+                case "NotesViewController":
+                    doActionEventForNotesViewController(e);
                     break;
                 case "PatientViewController":
                     doActionEventForPatientViewController(e);

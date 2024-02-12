@@ -64,6 +64,8 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
 import java.util.HashMap;
 import java.util.Map;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JComboBox;
 import javax.swing.JDesktopPane;
 import javax.swing.ImageIcon;
 import javax.swing.JInternalFrame;
@@ -71,8 +73,10 @@ import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
+import model.Patient;
 import org.apache.commons.io.FilenameUtils;
 
 /**
@@ -179,7 +183,7 @@ public class DesktopView extends javax.swing.JFrame implements PropertyChangeLis
         
         mniAppointmentViewRequest.addActionListener((ActionEvent e) -> mniAppointmentViewRequestActionPerformed());
         mniPatientViewRequest.addActionListener((ActionEvent e) -> mniPatientViewRequestActionPerformed());
-        mniPatientNotesViewRequest.addActionListener((ActionEvent e) -> mniNotificationViewRequestActionPerformed());
+        mniPatientNotesViewRequest.addActionListener((ActionEvent e) -> mniNotesViewRequestActionPerformed());
         mniPatientNotificationViewRequest.addActionListener((ActionEvent e) -> mniNotificationViewRequestActionPerformed());
         mniExitViewRequest.addActionListener((ActionEvent e) -> mniExitRequestViewActionPerformed());
     }
@@ -381,7 +385,7 @@ public class DesktopView extends javax.swing.JFrame implements PropertyChangeLis
         String propertyName = e.getPropertyName();
         ViewController.DesktopViewControllerPropertyChangeEvent propertyType = 
                 ViewController.DesktopViewControllerPropertyChangeEvent.valueOf(e.getPropertyName());
-        switch (propertyType){           
+        switch (propertyType){ 
             case DESKTOP_VIEW_CHANGED_NOTIFICATION:
                 this.refreshDesktopFrameMenuItems(getActiveMenu());
                 break;
@@ -524,11 +528,12 @@ public class DesktopView extends javax.swing.JFrame implements PropertyChangeLis
                 this.getController().actionPerformed(actionEvent);
     }
     
-    private void mniNotesViewRequestActionPerformed() {                                                      
+    private void mniNotesViewRequestActionPerformed() {    
         ActionEvent actionEvent = new ActionEvent(this, 
                 ActionEvent.ACTION_PERFORMED,
                 DesktopViewController.DesktopViewControllerActionEvent.NOTES_VIEW_CONTROLLER_REQUEST.toString());
         this.getController().actionPerformed(actionEvent);
+        
     }
     
     private void mniNotificationViewRequestActionPerformed() {                                                      

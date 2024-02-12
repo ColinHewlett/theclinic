@@ -20,9 +20,7 @@ import repository.StoreException;//01/03/2023
 import view.views.non_modal_views.DesktopView;
 import view.View;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeSupport;
 import javax.swing.JOptionPane;
 import java.util.ArrayList;
 import view.views.modal_views.ModalView;

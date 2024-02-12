@@ -107,10 +107,16 @@ public class PatientViewController extends ViewController {
             case PATIENT_PHONE_EMAIL_EDITOR_VIEW_REQUEST:
                 doPatientEditorViewRequest(actionCommand);
                 break;
-            case PATIENT_NOTES_EDITOR_VIEW_REQUEST:
-                if (getCurrentlySelectedPatient().getIsKeyDefined())
-                    doPatientNotesEditorViewRequest();
-                else{
+            case PATIENT_NOTES_EDITOR_VIEW_REQUEST:   
+                if (getCurrentlySelectedPatient().getIsKeyDefined()){
+                    getDescriptor().getControllerDescription()
+                            .setPatient(getCurrentlySelectedPatient());
+                    actionEvent = new ActionEvent(
+                        this,ActionEvent.ACTION_PERFORMED,
+                        ViewController.DesktopViewControllerActionEvent
+                            .NOTES_VIEW_CONTROLLER_REQUEST.toString());
+                    this.getMyController().actionPerformed(actionEvent);
+                }else{
                     JOptionPane.showMessageDialog(getView(), 
                         "A patient has not been selected; notes editor request aborted",
                         "Patient View Controller Error", 
@@ -125,6 +131,7 @@ public class PatientViewController extends ViewController {
                     );
                 }
                 break;
+            
             case RECOVER_PATIENT_REQUEST:
                 doPatientRecoverRequest();
                 break;
@@ -205,9 +212,11 @@ public class PatientViewController extends ViewController {
             case PATIENT_GUARDIAN_EDITOR_VIEW:    
                 doPatientEditorViewChange(the_view);
                 break;  
+            /*
             case PATIENT_NOTES_EDITOR_VIEW:
                 doPatientNotesEditorViewChange(e);
                 break;
+            */
             default:
                 JOptionPane.showMessageDialog(getView(), 
                         "Unrecognised view type specified in PatientViewController::doSecondaryViewActionRequest()",
@@ -351,6 +360,7 @@ public class PatientViewController extends ViewController {
         }
     }
     
+    /*
     private void doPatientNotesEditorViewRequest(){
         PatientNote patientNote = new PatientNote(getCurrentlySelectedPatient());
         patientNote.setScope(Scope.FOR_PATIENT);
@@ -382,7 +392,7 @@ public class PatientViewController extends ViewController {
         }
         
     }
-    
+    */
     private void doPatientRecallEditorViewRequest(){
         setModalView((ModalView)new View().make(
                     View.Viewer.PATIENT_RECALL_EDITOR_VIEW,

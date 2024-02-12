@@ -130,6 +130,7 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         }
     
     public static enum DesktopViewControllerActionEvent{
+        INITIALISE_VIEW,
         BRING_TO_FRONT_SCHEDULE_VIEW_IF_ACTIVE_REQUEST,
         SCHEDULE_VIEW_CONTROLLER_REQUEST,
         CLINIC_LOGO_VIEW_MODE_NOTIFICATION,
@@ -166,6 +167,7 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         VIEW_CONTROLLER_CHANGED_NOTIFICATION,
         VIEW_CLOSE_REQUEST,
         VIEW_CLOSED_NOTIFICATION
+
     }
     
     public static enum DesktopViewControllerPropertyChangeEvent{
@@ -183,7 +185,8 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         PATIENT_NOTE_TABLE_COUNT_RECEIVED,
         PATIENT_NOTIFICATION_TABLE_COUNT_RECEIVED,
         SURGERY_DAYS_ASSIGNMENT_TABLE_COUNT_RECEIVED,
-        MIGRATION_ACTION_COMPLETE
+        MIGRATION_ACTION_COMPLETE,
+        PATIENTS_RECEIVED
     }
     
     public static enum ImportProgressViewControllerActionEvent{
@@ -204,6 +207,21 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         PREPARE_FOR_RECEIPT_OF_PATIENT_PROGRESS,
         PREPARE_FOR_RECEIPT_OF_PATIENT_NOTE_PROGRESS
         }
+    
+    public static enum NotesViewControllerActionEvent{
+        NOTES_VIEW_CLOSE_REQUEST,
+        NOTES_FOR_PATIENT_REQUEST,
+        NOTES_FOR_PATIENT_CHANGE_REQUEST,
+        NOTES_PATIENT_SELECTION_REQUEST,
+        VIEW_ACTIVATED_NOTIFICATION,
+        VIEW_CHANGED_NOTIFICATION,
+        VIEW_CLOSED_NOTIFICATION
+    }
+    
+    public static enum NotesViewControllerPropertyChangeEvent{
+        NOTES_FOR_PATIENT_RECEIVED,
+        PATIENT_SELECTION_REQUESTED
+    }
     
     public static enum NotificationViewControllerActionEvent{
         ACTION_NOTIFICATION_REQUEST,
@@ -239,7 +257,6 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         PATIENT_PHONE_EMAIL_EDITOR_VIEW_REQUEST,
         PATIENT_GUARDIAN_EDITOR_VIEW_REQUEST,
         PATIENT_NOTES_EDITOR_VIEW_REQUEST,
-        
         PATIENT_EDITOR_VIEW_CHANGE,
         PATIENT_RECALL_EDITOR_VIEW_CHANGE,
         PATIENT_GUARDIAN_REQUEST,
@@ -390,14 +407,19 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
             getDescriptor().getControllerDescription().setError(null);
             switch (mode){//one or more appointments already exist so check the CREATE or UPGRADE make sense
                 case CREATE:
-                    if (!rSlot.getIsUnbookableSlot()){
+                    /**
+                     * 11/02/2024  code change
+                     *
+                     */
+                    //if (!rSlot.getIsUnbookableSlot()){
                         patientNote = new PatientNote(rSlot.getPatient());
                         patientNote.setDatestamp(rSlot.getStart());
                         patientNote.setNote(rSlot.getPatientNote().getNote());
                         patientNote.setLastUpdated(LocalDateTime.now());
                         Integer patientNoteKey = patientNote.insert();
                         rSlot.setPatientNote(new PatientNote(patientNoteKey));
-                    }
+                        //rSlot.setPatientNoteKey(patientNoteKey);
+                    //}
                     rSlot.insert(); 
                     rSlot.setScope(Entity.Scope.SINGLE);
                     result = rSlot.read();
@@ -407,16 +429,20 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
                     rSlot.update();
                     rSlot.setScope(Entity.Scope.SINGLE);
                     result = rSlot.read();
-                    if (!rSlot.getIsUnbookableSlot()){
-                        patientNote = result.getPatientNote();
+                    /**
+                     * 11/02/2024 code logic update
+                     
+                    //if (!rSlot.getIsUnbookableSlot()){
+                      /  patientNote = result.getPatientNote();
                         patientNote.setDatestamp(result.getStart());
                         patientNote.setPatient(result.getPatient());
-                        patientNote.setNote(result.getNotes());
+                        patientNote.setNote(result.getPatientNote().getNote());
                         patientNote.setLastUpdated(LocalDateTime.now());
                         patientNote.setIsDeleted(result.getIsDeleted());
                         patientNote.setScope(Entity.Scope.SINGLE);
                         patientNote.update();
-                    }
+                    //}
+                    */
                     break;
                 case NO_ACTION:
                     result = rSlot;
@@ -633,6 +659,10 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
                                                 + " overwrites the unbookable slot which starts at " 
                                                 + nextScheduledSlot.getUnbookableSlotStartTime());
                                         }
+                                        else scheduleReport.setError(
+                                                "The updated appointment for " + requestedSlot.getAppointeeName()
+                                                + " overwrites the appointment for "
+                                                        + nextScheduledSlot.getAppointeeNamePlusSlotStartTime());
                                     }
                                     else scheduleReport.setState(RequestedAppointmentState.SLOT_START_OK);
                                 }

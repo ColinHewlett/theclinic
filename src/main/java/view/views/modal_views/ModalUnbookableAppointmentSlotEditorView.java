@@ -7,6 +7,7 @@ package view.views.modal_views;
 import controller.Descriptor;
 import controller.ViewController;
 import model.Appointment;
+import model.PatientNote;
 import view.views.non_modal_views.DesktopView;
 import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
@@ -134,10 +135,15 @@ public class ModalUnbookableAppointmentSlotEditorView extends ModalView {
         else if (getMyController().getDescriptor().getControllerDescription().getViewMode().equals(ViewController.ViewMode.UPDATE)){    
             initialiseStartTimeAndDurationControls();    
             this.chkIsAllDay.setSelected(false);
+            this.txaNotes.setText(getMyController()
+                    .getDescriptor()
+                    .getControllerDescription()
+                    .getAppointment().getPatientNote().getNote());
         }
         else this.chkIsAllDay.setSelected(true);
         this.setLayer(JLayeredPane.MODAL_LAYER);
         this.setVisible(true); 
+
     }
     
     private Integer getHoursFromDuration(long duration){
@@ -328,7 +334,7 @@ public class ModalUnbookableAppointmentSlotEditorView extends ModalView {
             JOptionPane.showMessageDialog(this, "Duration for unbookable slot undefined ((equals zero minutes)");
         else {
             if (getMyController().getDescriptor().
-                    getViewDescription().getAppointment().getNotes().isEmpty()){
+                    getViewDescription().getAppointment().getPatientNote().getNote().isEmpty()){
                 String[] options = {"Yes", "No"};
                 OKToSaveAppointment = JOptionPane.showOptionDialog(this,
                     "No notes defined for appointment. Save anyway?",null,
@@ -394,6 +400,7 @@ public class ModalUnbookableAppointmentSlotEditorView extends ModalView {
         return Duration.ofMinutes(hours + minutes);
     }
     
+    private PatientNote patientNote = null;
     private void initialiseEntityDescriptorFromView(){
         getMyController().getDescriptor().getViewDescription().setAppointment(
                     getMyController().getDescriptor().getControllerDescription().
@@ -402,7 +409,20 @@ public class ModalUnbookableAppointmentSlotEditorView extends ModalView {
                 setStart((LocalDateTime)this.cmbSelectStartTime.getSelectedItem());
         getMyController().getDescriptor().getViewDescription().getAppointment().
                 setDuration(getDurationFromView());
-        getMyController().getDescriptor().getViewDescription().getAppointment().
-                setNotes(this.txaNotes.getText());
+        if (getMyController()
+                .getDescriptor()
+                .getControllerDescription()
+                .getViewMode().equals(ViewController.ViewMode.CREATE)){
+            patientNote = new PatientNote();
+            getMyController().getDescriptor()
+                .getViewDescription()
+                .getAppointment()
+                .setPatientNote(patientNote);
+        }   
+        getMyController().getDescriptor()
+                .getViewDescription()
+                .getAppointment()
+                .getPatientNote()
+                .setNote(this.txaNotes.getText());
     }
 }

@@ -95,6 +95,9 @@ public class View extends JInternalFrame
             case NOTIFICATION_VIEW:
                 setView(makeView(new NotificationView(viewer, controller, desktopView)));
                 break;
+            case NOTES_VIEW:
+                setView(makeView(new NotesView(viewer, controller, desktopView)));
+                break;
             case SCHEDULE_VIEW:
                 setView(makeView(new ScheduleView(viewer, controller, desktopView)));
                 break;
@@ -115,9 +118,11 @@ public class View extends JInternalFrame
             case PATIENT_RECOVERY_SELECTION_VIEW:
                 setModalView(makeView(new ModalPatientSelectionView(viewer, controller, desktopView)));
                 break;
+            /*
             case PATIENT_NOTES_EDITOR_VIEW:
                 setModalView(makeView(new ModalPatientNotesEditorView(viewer, controller,desktopView)));
                 break;
+            */
             case PATIENT_RECALL_EDITOR_VIEW:
                 setModalView(makeView(new ModalPatientRecallEditorView(viewer, controller,desktopView)));
                 break;
@@ -163,10 +168,11 @@ public class View extends JInternalFrame
         EXPORT_PROGRESS_VIEW,
         MIGRATION_MANAGER_VIEW,
         NON_SURGERY_DAY_EDITOR_VIEW,
+        NOTES_VIEW,
         PATIENT_RECALL_EDITOR_VIEW,
         PATIENT_PHONE_EMAIL_EDITOR_VIEW,
         PATIENT_GUARDIAN_EDITOR_VIEW,
-        PATIENT_NOTES_EDITOR_VIEW,
+        //PATIENT_NOTES_EDITOR_VIEW,
         PATIENT_RECOVERY_SELECTION_VIEW,
         PATIENT_SELECTION_VIEW,
         PATIENT_VIEW,        
@@ -269,6 +275,7 @@ public class View extends JInternalFrame
         modalInterceptor.addMouseMotionListener(new MouseMotionAdapter(){});
         lp.add(modalInterceptor);
         view.toFront();
+        view.setVisible(true);
 
         try{
             view.setSelected(true);

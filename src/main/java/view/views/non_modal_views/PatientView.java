@@ -546,6 +546,7 @@ public class PatientView extends View implements ActionListener{
                 request = ViewController.
                             PatientViewControllerActionEvent.
                             PATIENT_NOTES_EDITOR_VIEW_REQUEST;
+                rdbGroup.clearSelection();
                 break;
         }
         if (request!=null){
