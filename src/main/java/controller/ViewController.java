@@ -7,6 +7,7 @@ package controller;
 
 import model.Entity;
 import model.Appointment;
+import model.Patient;
 import view.View;
 import view.views.modal_views.ModalView;
 import view.views.non_modal_views.DesktopView;
@@ -32,6 +33,15 @@ import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.table.TableColumn;
 import model.PatientNote;
+import _system_environment_variables.SystemDefinitions;
+import javax.mail.*;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
+import java.util.Properties;
+import java.io.FileInputStream;
+import java.io.IOException;
+import org.apache.poi.xwpf.extractor.XWPFWordExtractor;
+import org.apache.poi.xwpf.usermodel.XWPFDocument;
 
 
 /**
@@ -781,6 +791,114 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
     
     public final ModalView getModalView(){
         return modalView;
+    }
+    
+    class Email{
+        
+        Email(){
+            
+        }
+        
+        public void send(Patient patient, String subject){
+            String document = null;
+            try {
+                // Set the SMTP server properties
+                Properties props = new Properties();
+                props.put("mail.smtp.host", getSMTPServer());
+                props.put("mail.smtp.auth", "true");
+                props.put("mail.smtp.starttls.enable", "true");
+                props.put("mail.smtp.port", "587");
+
+                // Create a session with the SMTP server and authenticate
+                Session session = Session.getInstance(props, new Authenticator() {
+                    @Override
+                    protected PasswordAuthentication getPasswordAuthentication() {
+                        return new PasswordAuthentication(getSMTPSender(), getSMTPUserPassword());
+                    }
+                });
+
+                // Create the email message
+                MimeMessage message = new MimeMessage(session);
+                message.setFrom(new InternetAddress(getSMTPSender()));
+                message.setRecipient(Message.RecipientType.TO, new InternetAddress(getSMTPReceiver()));
+                message.setSubject(subject);
+                document = extractFromSource();
+                document = getSalutation() + document;
+                message.setText(document);
+
+                // Send the email
+                Transport.send(message);
+
+                System.out.println("Email sent successfully.");
+            } catch (MessagingException e) {
+                e.printStackTrace();
+            }
+        }
+        
+        private String extractFromSource(){
+            String document = null;
+            try {
+                // Path to your .docx file
+                String filePath = getSMTPBody();
+
+                // Open the .docx file
+                FileInputStream fis = new FileInputStream(filePath);
+                XWPFDocument docx = new XWPFDocument(fis);
+
+                // Create a Word extractor
+                XWPFWordExtractor extractor = new XWPFWordExtractor(docx);
+
+                // Extract text from the document
+                document = extractor.getText();
+                //System.out.println("Contents of the .docx file:");
+                //System.out.println(text);
+
+                // Close the extractor and file input stream
+                extractor.close();
+                fis.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return document;
+        }
+        
+        private final String getSMTPSender(){
+            return SystemDefinitions.getPMSSMTPUser();
+        }
+        
+        private final String getSMTPServer(){
+            return SystemDefinitions.getPMSSMTPServer();
+        }
+        
+        private final String getSMTPBody(){
+            return SystemDefinitions.getPMSSMTPBody();
+        }
+        
+        private final String smtpUserPassword = "pmsq20000907B@@@";
+        private String getSMTPUserPassword(){
+            return smtpUserPassword;
+        }
+        
+        private Patient patientToReceiveEmail = null;
+        private void setPatientToReceiveEmail(Patient patient){
+            patientToReceiveEmail = patient; 
+        }
+        private Patient getPatientToReceiveEmail(){
+            return patientToReceiveEmail;
+        }
+        
+        private String getSMTPReceiver(){
+            return getPatientToReceiveEmail().getEmail();
+        }
+        
+        private String getSalutation(){
+            String name = getPatientToReceiveEmail().getName().getForenames();
+            String[] names = name.split(" ");
+            return "Dear " + names[0] + "\n";
+        }
+        
+        
+        
     }
 
 }

@@ -13,6 +13,18 @@ public class SystemDefinitions {
     public static String APPOINTMENT_UNBOOKABILITY_MARKER = "UNBOOKABLE";
     public static Integer UNBOOKABLE_APPOINTMENT_SLOT = 1;
     
+    public static String getPMSSMTPBody(){
+        return System.getenv("PMS_SMTP_BODY");
+    }
+    
+    public static String getPMSSMTPServer(){
+        return System.getenv("PMS_SMTP_SERVER");
+    }
+    
+    public static String getPMSSMTPUser(){
+        return System.getenv("PMS_SMTP_USER");
+    }
+    
     public static String getPMSLookAndFeel(){
         return System.getenv("PMS_LOOK_AND_FEEL");
     }
