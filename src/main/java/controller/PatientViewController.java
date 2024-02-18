@@ -625,6 +625,9 @@ public class PatientViewController extends ViewController {
                                     " from " + fromTime.format(DateTimeFormatter.ofPattern("HH:mm")) +
                                     " to " + toTime.format(DateTimeFormatter.ofPattern("HH:mm")) +
                                     " has been cancelled";            
+                        }else{//assume no collision returning this appointment to schedule
+                            PatientNote patientNote = a.getPatientNote();
+                            patientNote.recover();
                         }
                     }
                 } 

@@ -1083,7 +1083,8 @@ public class ScheduleView extends View{
                 from = ((LocalTime)model.getValueAt(row, fromColumn)).format(DateTimeFormatter.ofPattern("HH:mm"));
                 to = ((LocalTime)model.getValueAt(row, toColumn)).format(DateTimeFormatter.ofPattern("HH:mm"));
                 Patient p = (Patient)model.getValueAt(row, patientColumn);
-                String notes = (String)model.getValueAt(row, notesColumn);
+                //String notes = (String)model.getValueAt(row, notesColumn);
+                PatientNote patientNote = (PatientNote)model.getValueAt(row, notesColumn);
                 //if (model.getValueAt(row, patientColumn)==null) {
                 if (p==null){
                     patient = "AVAILABLE SLOT";
@@ -1091,21 +1092,21 @@ public class ScheduleView extends View{
                         centreString(PATIENT_WIDTH, patient) +
                         centreString(FROM_WIDTH, from) +
                         centreString(TO_WIDTH, to) +
-                        leftAlignString(NOTES_WIDTH, notes));
+                        leftAlignString(NOTES_WIDTH, ""));
                 }else if(p.toString().equals(SystemDefinitions.APPOINTMENT_UNBOOKABILITY_MARKER)){
                     patient = "<< U N B O O K A B L E  S L O T >>";
                     stringToPrint = stringToPrint + String.format(
                         centreString(PATIENT_WIDTH, patient) +
                         centreString(FROM_WIDTH, from) +
                         centreString(TO_WIDTH, to) +
-                        leftAlignString(NOTES_WIDTH, notes));   
+                        leftAlignString(NOTES_WIDTH, patientNote.getNote()));   
                 }else {
                     patient = model.getValueAt(row,patientColumn).toString();
                     stringToPrint = stringToPrint + String.format(
                         leftAlignString(PATIENT_WIDTH, patient) +
                         centreString(FROM_WIDTH, from) +
                         centreString(TO_WIDTH, to) +
-                        leftAlignString(NOTES_WIDTH, notes));
+                        leftAlignString(NOTES_WIDTH, patientNote.getNote()));
                 }
                 stringToPrint = stringToPrint + "\n";
             }

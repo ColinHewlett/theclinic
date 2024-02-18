@@ -760,11 +760,8 @@ public class PatientView extends View implements ActionListener{
                 this.getMyController().actionPerformed(actionEvent);
                 break;
             case NULL_PATIENT_RECEIVED:
-                //setViewDescriptor((Descriptor)e.getNewValue());
-                //setViewMode(PatientView.ViewMode.Create_new_patient);
                 initialisePatientViewComponentFromED();
                 populatePatientSelector(this.cmbPatientSelector);
-                //populatePatientSelector(this.cmbSelectGuardian);
                 this.setTitle("Patient view");
                 /**
                  * enable "Create new patient" menu item to allow creation of a new patient
@@ -1103,6 +1100,8 @@ public class PatientView extends View implements ActionListener{
                     + "(top of the list is latest of " + patient.getAppointmentHistory().size() 
                     + " appointments)");
             
+            this.pnlAppointmentHistory.repaint();
+            
         }catch(Exception ex){
             JOptionPane.showMessageDialog(this, "Following StoreException raised in PatientView::populateAppointmentsHistoryTable()\n"
                     + ex.getMessage());
@@ -1127,30 +1126,15 @@ public class PatientView extends View implements ActionListener{
         setPatientTitle(patient.getName().getTitle());
         setForenames(patient.getName().getForenames());
         setSurname(patient.getName().getSurname());
-        //setPhone1(patient.getPhone1());
-        //setPhone2(patient.getPhone2());
         setLine1(patient.getAddress().getLine1());
         setLine2(patient.getAddress().getLine2());
         setTown(patient.getAddress().getTown());
         setCounty(patient.getAddress().getCounty());
         setPostcode(patient.getAddress().getPostcode());
-        //setRecallDate(patient.getRecall().getDentalDate());
-        //setDentalRecallFrequency(patient.getRecall().getDentalFrequency());
         setGender(patient.getGender());
         setNotes(patient.getNotes());
         setDOB(patient.getDOB());
-        //setIsGuardianAPatient(patient.getIsGuardianAPatient());
-        //update 30/07/2021 09:05 applied
-        /*
-        if(getMyController().getDescriptor().getControllerDescription().
-                getPatient().getGuardian()!=null)
-                this.cmbSelectGuardian.setSelectedItem(getMyController().
-                        getDescriptor().getControllerDescription().getPatient().getGuardian());
-        else this.cmbSelectGuardian.setSelectedIndex(-1); 
-        */
-        //following is new statement
         populateAppointmentsHistoryTable(patient);
-        //initialisePatientAppointmentHistoryViewFromED(PatientView.Category.DENTAL);
     }
     
     

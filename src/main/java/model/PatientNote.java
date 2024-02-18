@@ -222,6 +222,11 @@ public class PatientNote extends Entity implements IEntityStoreActions{
         return patientNote;
     }
     
+    public void recover()throws StoreException{
+        this.setScope(Scope.DELETED);
+        new Repository().recover(this,getKey());
+    }
+    
     @Override
     public void update()throws StoreException{
         new Repository().update(this, getKey());

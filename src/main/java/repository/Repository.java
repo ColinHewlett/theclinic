@@ -106,6 +106,7 @@ public class Repository implements IStoreActions {
                                 READ_ALL_PATIENT_NOTES,
                                 READ_NOTES_FOR_PATIENT,
                                 READ_PATIENT_NOTE_NEXT_HIGHEST_KEY,
+                                RECOVER_PATIENT_NOTE,
                                 UPDATE_PATIENT_NOTE,
                                 
                                 COUNT_PATIENTS,
@@ -348,8 +349,8 @@ public class Repository implements IStoreActions {
     
     private void doRecoverPatientChild(String sql, Entity entity)throws StoreException{
         String entityType = null;
-        PreparedStatement preparedStatement = null;
         try{
+            PreparedStatement preparedStatement = getPMSStoreConnection().prepareStatement(sql);
             if (entity.getIsAppointment()){
                 entityType = "Appointment";
                 AppointmentDelegate delegate = (AppointmentDelegate)entity;
@@ -357,6 +358,10 @@ public class Repository implements IStoreActions {
             }else if(entity.getIsPatientNotification()){
                 entityType = "PatientNotification";
                 NotificationDelegate delegate = (NotificationDelegate)entity;
+                preparedStatement.setLong(1, delegate.getKey());
+            }else if(entity.getIsPatientNote()){
+                entityType = "PatientNote";
+                PatientNoteDelegate delegate = (PatientNoteDelegate)entity;
                 preparedStatement.setLong(1, delegate.getKey());
             }
             else{
@@ -2077,6 +2082,12 @@ public class Repository implements IStoreActions {
                         + "ORDER BY datestamp DESC;";
                 result = doReadPatientNotesForPatient(sql, entity);
                 break;
+            case RECOVER_PATIENT_NOTE:
+                sql = "UPDATE PatientNote "
+                        + "SET isDeleted = false "
+                        + "WHERE pid = ?;";
+                doRecoverPatientChild(sql, entity);
+                break;
             case UPDATE_PATIENT_NOTE:
                 sql = "UPDATE PatientNote "
                         + "SET datestamp = ?, "
@@ -2427,6 +2438,22 @@ public class Repository implements IStoreActions {
        }
    }
     
+    public void recover(PatientNote patientNote, Integer patientNoteKey)throws StoreException{
+        switch(patientNote.getScope()){
+             case DELETED:
+                PatientNoteDelegate delegate = 
+                        new PatientNoteDelegate();
+                delegate.setKey(patientNoteKey);
+                runSQL(Repository.EntitySQL.PATIENT_NOTE,Repository.PMSSQL.RECOVER_PATIENT_NOTE, delegate);
+                break;
+             default:
+                 String error = "Scope of recovery not defined as DELETED; "
+                         + "raised in Repository.recover(PatientNote)";
+                 throw new StoreException(error, 
+                         StoreException.ExceptionType.STORE_EXCEPTION);
+        }
+    }
+    
     @Override
     public void recover(Notification patientNotification, 
             Integer patientNotificationKey)throws StoreException{
@@ -2435,11 +2462,11 @@ public class Repository implements IStoreActions {
                 NotificationDelegate delegate = 
                         new NotificationDelegate(patientNotification);
                 delegate.setKey(patientNotificationKey);
-                runSQL(Repository.EntitySQL.PATIENT,Repository.PMSSQL.RECOVER_NOTIFICATION, delegate);
+                runSQL(Repository.EntitySQL.PATIENT_NOTIFICATION,Repository.PMSSQL.RECOVER_NOTIFICATION, delegate);
                 break;
              default:
                  String error = "Scope of recovery not defined as DELETED; "
-                         + "raised in Repository.recover(Patient)";
+                         + "raised in Repository.recover(PatientNotification)";
                  throw new StoreException(error, 
                          StoreException.ExceptionType.STORE_EXCEPTION);
         }
@@ -3156,7 +3183,7 @@ public class Repository implements IStoreActions {
                                         "title character varying(255) COLLATE pg_catalog.\"default\",\n" +                            
                                         "forenames character varying(255) COLLATE pg_catalog.\"default\",\n" +
                                         "surname character varying(255) COLLATE pg_catalog.\"default\",\n" +
-                                        "line1 character varying(255) COLLATE pg_catalog.\"default\" NOT NULL,\n" +
+                                        "line1 character varying(255) COLLATE pg_catalog.\"default\",\n" +
                                         "line2 character varying(255) COLLATE pg_catalog.\"default\",\n" +
                                         "town character varying(255) COLLATE pg_catalog.\"default\",\n" +
                                         "county character varying(255) COLLATE pg_catalog.\"default\",\n" +
@@ -3225,7 +3252,7 @@ public class Repository implements IStoreActions {
                                     "    patienttonotify integer,\n" +
                                     "    isCancelled boolean DEFAULT false,\n" +
                                     "    CONSTRAINT patientnotification_pk PRIMARY KEY (pid),\n" +
-                                    "    CONSTRAINT patientnotification_fk1 FOREIGN KEY (pid)\n" +
+                                    "    CONSTRAINT patientnotification_fk1 FOREIGN KEY (patienttonotify)\n" +
                                     "    REFERENCES public.patient (pid) MATCH SIMPLE\n" +
                                     "    ON UPDATE NO ACTION\n" +
                                     "    ON DELETE NO ACTION)";

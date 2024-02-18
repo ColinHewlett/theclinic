@@ -63,11 +63,19 @@ public class ModalEmptySlotScanConfigurationView extends ModalView {
     @Override
     public void initialiseView(){
         initComponents();
+        
+        pnlStartDateOffset.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(
+                new Color(220,220,220)),"Start date offset ...",
+                javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, 
+                javax.swing.border.TitledBorder.DEFAULT_POSITION, 
+                getBorderTitleFont(), 
+                getBorderTitleColor()));// NOI18N
+         
         this.cmbSelectSlotDuration.setRenderer(new SelectSlotDurationRenderer());
         this.buttonGroup1.add(this.rdbSelectMonths);
         this.buttonGroup1.add(this.rdbSelectWeeks);
         this.rdbSelectWeeks.setSelected(true);
-        cmbSelectSlotDurationActionPerformed(null);       
+        //cmbSelectSlotDurationActionPerformed(null);       
         this.setVisible(true);
         this.setClosable(true);
         //disallow any resizing including minimising to tak bar
@@ -94,9 +102,9 @@ public class ModalEmptySlotScanConfigurationView extends ModalView {
 
         buttonGroup1 = new javax.swing.ButtonGroup();
         jPanel3 = new javax.swing.JPanel();
-        jLabel2 = new javax.swing.JLabel();
+        lblDuration = new javax.swing.JLabel();
         cmbSelectSlotDuration = new javax.swing.JComboBox<Duration>();
-        jPanel4 = new javax.swing.JPanel();
+        pnlStartDateOffset = new javax.swing.JPanel();
         spnSlotSearchOffset = new javax.swing.JSpinner();
         rdbSelectMonths = new javax.swing.JRadioButton();
         rdbSelectWeeks = new javax.swing.JRadioButton();
@@ -106,7 +114,7 @@ public class ModalEmptySlotScanConfigurationView extends ModalView {
         jPanel3.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
         jPanel3.setPreferredSize(new java.awt.Dimension(266, 144));
 
-        jLabel2.setText("  Slot duration");
+        lblDuration.setText("Duration");
 
         cmbSelectSlotDuration.setModel(new javax.swing.DefaultComboBoxModel<>(new Duration[] {
             Duration.ofMinutes(5),
@@ -138,30 +146,30 @@ cmbSelectSlotDuration.addActionListener(new java.awt.event.ActionListener() {
     }
     });
 
-    jPanel4.setBorder(javax.swing.BorderFactory.createTitledBorder("Search start date offset by ..."));
+    pnlStartDateOffset.setBorder(javax.swing.BorderFactory.createTitledBorder("Start date offset by ..."));
 
     rdbSelectMonths.setText("month(s)");
 
     rdbSelectWeeks.setText("week(s)");
 
-    javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
-    jPanel4.setLayout(jPanel4Layout);
-    jPanel4Layout.setHorizontalGroup(
-        jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-        .addGroup(jPanel4Layout.createSequentialGroup()
-            .addGap(51, 51, 51)
+    javax.swing.GroupLayout pnlStartDateOffsetLayout = new javax.swing.GroupLayout(pnlStartDateOffset);
+    pnlStartDateOffset.setLayout(pnlStartDateOffsetLayout);
+    pnlStartDateOffsetLayout.setHorizontalGroup(
+        pnlStartDateOffsetLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+        .addGroup(pnlStartDateOffsetLayout.createSequentialGroup()
+            .addGap(20, 20, 20)
             .addComponent(spnSlotSearchOffset, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addGap(30, 30, 30)
             .addComponent(rdbSelectWeeks)
-            .addGap(12, 12, 12)
+            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
             .addComponent(rdbSelectMonths)
-            .addGap(7, 7, 7))
+            .addGap(21, 21, 21))
     );
-    jPanel4Layout.setVerticalGroup(
-        jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-        .addGroup(jPanel4Layout.createSequentialGroup()
+    pnlStartDateOffsetLayout.setVerticalGroup(
+        pnlStartDateOffsetLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+        .addGroup(pnlStartDateOffsetLayout.createSequentialGroup()
             .addContainerGap()
-            .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+            .addGroup(pnlStartDateOffsetLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                 .addComponent(spnSlotSearchOffset, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addComponent(rdbSelectMonths)
                 .addComponent(rdbSelectWeeks))
@@ -189,31 +197,32 @@ cmbSelectSlotDuration.addActionListener(new java.awt.event.ActionListener() {
     jPanel3Layout.setHorizontalGroup(
         jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
         .addGroup(jPanel3Layout.createSequentialGroup()
-            .addGap(20, 20, 20)
-            .addComponent(btnSave)
-            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(btnCancel, javax.swing.GroupLayout.PREFERRED_SIZE, 67, javax.swing.GroupLayout.PREFERRED_SIZE)
-            .addGap(25, 25, 25))
+            .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
+                    .addContainerGap()
+                    .addComponent(pnlStartDateOffset, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGroup(jPanel3Layout.createSequentialGroup()
+                    .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(lblDuration, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGap(18, 18, 18)
+                    .addComponent(cmbSelectSlotDuration, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE)))
+            .addGap(15, 15, 15))
         .addGroup(jPanel3Layout.createSequentialGroup()
             .addContainerGap()
-            .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addGroup(jPanel3Layout.createSequentialGroup()
-                    .addGap(39, 39, 39)
-                    .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 74, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                    .addComponent(cmbSelectSlotDuration, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-            .addContainerGap())
+            .addComponent(btnSave)
+            .addGap(18, 18, 18)
+            .addComponent(btnCancel, javax.swing.GroupLayout.PREFERRED_SIZE, 77, javax.swing.GroupLayout.PREFERRED_SIZE)
+            .addGap(0, 0, Short.MAX_VALUE))
     );
     jPanel3Layout.setVerticalGroup(
         jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
         .addGroup(jPanel3Layout.createSequentialGroup()
             .addGap(9, 9, 9)
             .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                .addComponent(jLabel2)
+                .addComponent(lblDuration)
                 .addComponent(cmbSelectSlotDuration, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
             .addGap(18, 18, 18)
-            .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+            .addComponent(pnlStartDateOffset, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
             .addGap(18, 18, 18)
             .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                 .addComponent(btnSave)
@@ -226,7 +235,7 @@ cmbSelectSlotDuration.addActionListener(new java.awt.event.ActionListener() {
     layout.setHorizontalGroup(
         layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
         .addGroup(layout.createSequentialGroup()
-            .addGap(15, 15, 15)
+            .addGap(20, 20, 20)
             .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, 307, javax.swing.GroupLayout.PREFERRED_SIZE)
             .addGap(20, 20, 20))
     );
@@ -298,9 +307,9 @@ cmbSelectSlotDuration.addActionListener(new java.awt.event.ActionListener() {
     private javax.swing.JButton btnSave;
     private javax.swing.ButtonGroup buttonGroup1;
     private javax.swing.JComboBox<Duration> cmbSelectSlotDuration;
-    private javax.swing.JLabel jLabel2;
     private javax.swing.JPanel jPanel3;
-    private javax.swing.JPanel jPanel4;
+    private javax.swing.JLabel lblDuration;
+    private javax.swing.JPanel pnlStartDateOffset;
     private javax.swing.JRadioButton rdbSelectMonths;
     private javax.swing.JRadioButton rdbSelectWeeks;
     private javax.swing.JSpinner spnSlotSearchOffset;

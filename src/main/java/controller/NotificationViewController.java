@@ -57,6 +57,10 @@ public class NotificationViewController extends ViewController{
             View the_view = (View)e.getSource();
             switch (the_view.getMyViewType()){
                 case NOTIFICATION_VIEW:
+                    /**
+                     * 13/02/24 bug fixing move
+                     */
+                    setView(the_view);
                     doPrimaryViewActionRequest(e);
                     break;
                 default:

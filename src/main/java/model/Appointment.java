@@ -310,16 +310,11 @@ public class Appointment extends Entity implements IEntityStoreActions{
         /**
          * 11/02/2024 code logic update
          */
-        this.setKey(new Repository().insert(this, getPatient().getKey(), getPatientNote().getKey()));
-        
-        /*
-        if (getIsUnbookableSlot())
-            pid = new Repository().insert(this, getPatient().getKey(), 0);
-        else if (getPatientNote()!=null)
-            pid = new Repository().insert(this, getPatient().getKey(), 
-                    getPatientNote().getKey());
-        else pid = new Repository().insert(this, getPatient().getKey(),null);
-        */
+        if (getPatientNote()==null)
+            this.setKey(new Repository().insert(
+                    this, getPatient().getKey(), null));
+        else this.setKey(new Repository().insert(
+                this, getPatient().getKey(), getPatientNote().getKey()));
 
         return pid;
     }

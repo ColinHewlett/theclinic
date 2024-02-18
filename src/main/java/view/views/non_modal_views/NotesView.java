@@ -15,11 +15,14 @@ import controller.ViewController;
 import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyVetoException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Iterator;
 import javax.swing.ImageIcon;
@@ -27,6 +30,7 @@ import javax.swing.JInternalFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
+import javax.swing.border.TitledBorder;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
 import javax.swing.event.ListSelectionEvent;
@@ -105,10 +109,7 @@ public class NotesView extends View {
                 ViewController.NotesViewControllerPropertyChangeEvent.valueOf(e.getPropertyName());
         switch (propertyName){
             case NOTES_FOR_PATIENT_RECEIVED:
-                populateNotesIndexTable(getMyController()
-                        .getDescriptor()
-                        .getControllerDescription()
-                        .getPatientNotes());
+                doRefreshNoteIndex();
                 break; 
             case PATIENT_SELECTION_REQUESTED:
                 ActionEvent actionEvent = new ActionEvent(
@@ -118,6 +119,13 @@ public class NotesView extends View {
             }
     }
     
+    private void doRefreshNoteIndex(){
+        populateNotesIndexTable(getMyController()
+                .getDescriptor()
+                .getControllerDescription()
+                .getPatientNotes());
+    }
+
     private enum State{OPEN,SHUT};
     
     private Notepad notepad = null;
@@ -332,30 +340,29 @@ public class NotesView extends View {
 
                 ListSelectionModel lsm = (ListSelectionModel)e.getSource();
                 if (!lsm.isSelectionEmpty()) {
-                    int selectedRow = lsm.getMinSelectionIndex();
+                    Integer selectedRow = lsm.getMinSelectionIndex();
                     doPatientNotesIndexTableRowSelection(selectedRow);
                 }
+                else doPatientNotesIndexTableRowSelection(null);
             }
         });
     }
     
-    private void doPatientNotesIndexTableRowSelection(int row){
-        PatientNote patientNote = 
-                ((PatientNote2ColumnTableModel)this.tblNotesIndex.getModel()).getElementAt(row);
-        Notepad notepad = getNotepad();
-        notepad.shut();
-        /*
-        if (notepad.isOpen()){
-            Boolean result = okToClearNotepad("Current notepad cotents would be lost. Proceed?");
-            if (result){
-                getNotepad().shut();
-            }
-        }
-        */
-        
-        setPatientNote(patientNote);
-        
-        getNotepad().actionPerformed(USER_ACTION.NOTEPAD_INDEX_ITEM_SELECTED);
+    private void doPatientNotesIndexTableRowSelection(Integer row){
+        TitledBorder titledBorder = (TitledBorder)pnlNoteIndex.getBorder();
+        if (row!=null){
+            PatientNote2ColumnTableModel model = 
+                    (PatientNote2ColumnTableModel)tblNotesIndex.getModel();
+            setPatientNote((PatientNote)model.getElementAt(row));
+            titledBorder.setTitle("Note index (selection last updated " 
+                    + getPatientNote().getLastUpdated().toLocalDate()
+                            .format(DateTimeFormatter.ofPattern("dd/MM/yy"))
+                    + " at " + getPatientNote().getLastUpdated().toLocalTime()
+                            .format(DateTimeFormatter.ofPattern("hh:mm)")));
+            getNotepad().shut();
+            getNotepad().actionPerformed(USER_ACTION.NOTEPAD_INDEX_ITEM_SELECTED);
+        }else titledBorder.setTitle("Note index");
+        pnlNoteIndex.repaint();
         
         
         
@@ -860,6 +867,7 @@ public class NotesView extends View {
                     btnCreateUpdateNote.setEnabled(true);
                     open(null);
                     disableNoteSelectionFromIndex();
+                    doRefreshNoteIndex();
                     setNotepadMode(value);
                     break;
                 case NOTEPAD_OPENED_FOR_UPDATE:
@@ -901,5 +909,5 @@ public class NotesView extends View {
                     .setDatestamp(dateTimePicker.getDateTimePermissive());
         }
     }
-    
+
 }

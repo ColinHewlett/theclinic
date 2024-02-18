@@ -52,9 +52,9 @@ public class WordMerge {
         }
     }  
     
-    public static void mainx(String[] args) throws Exception {
+    public static void mainz(String[] args) throws Exception {
 
-        FileOutputStream faos = new FileOutputStream("/home/victor/result.docx");
+        FileOutputStream faos = new FileOutputStream("");
 
         WordMerge wm = new WordMerge(faos);
 

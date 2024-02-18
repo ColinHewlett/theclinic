@@ -803,14 +803,24 @@ public class DesktopViewController extends ViewController{
                 int count = 0;
                 try{
                     if (entity.getIsPatient()){
+                        
+                        /**
+                         * 13/02/2024 08:50 code update
+                         * -- creates a patient with a pid = 1
+                         * -- required for the UNBOOKABLE 'appointment' schedule mechanism
+                         * -- implemented by first 2 lines
+                         */
+                        Patient patient = new Patient(1);
+                        patient.insert();
+                        
                         Patient patientTable = (Patient)entity;
                             dbfRecords = patientTable.importEntityFromCSV();  
                             count = dbfRecords.size();
                             Iterator dbfRecordsIt = dbfRecords.iterator();
-                            int recordCount = 0;
+                            int recordCount = 1;
 
                             while(dbfRecordsIt.hasNext()){
-                                Patient patient = patientTable.convertDBFToPatient((String[])dbfRecordsIt.next());
+                                patient = patientTable.convertDBFToPatient((String[])dbfRecordsIt.next());
                                 patient.reformat();
                                 try{
                                     patient.insert();
