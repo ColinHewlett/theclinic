@@ -5,7 +5,7 @@
  */
 package controller;
 
-import _system_environment_variables.SystemDefinitions;
+import model.SystemDefinition;
 import static controller.ViewController.displayErrorMessage;
 import model.Entity.Scope;
 import model.Appointment;
@@ -137,7 +137,7 @@ public class ScheduleViewController extends ViewController{
                 Patient patient = appointment.getPatient();
                 getDescriptor().getControllerDescription().setPatient(patient);
                 LocalDate day = appointment.getStart().toLocalDate();
-                if (patient.toString().equals(SystemDefinitions.APPOINTMENT_UNBOOKABILITY_MARKER)) {
+                if (patient.toString().equals(SystemDefinition.APPOINTMENT_UNBOOKABILITY_MARKER)) {
                     appointment.setScope(Scope.SINGLE);
                     appointment.delete();
                 }
@@ -229,7 +229,7 @@ public class ScheduleViewController extends ViewController{
                 this.getMyController().actionPerformed(actionEvent);
             }else{
                 if (getDescriptor().getControllerDescription().
-                    getAppointment().getPatient().toString().equals(SystemDefinitions.APPOINTMENT_UNBOOKABILITY_MARKER)) 
+                    getAppointment().getPatient().toString().equals(SystemDefinition.APPOINTMENT_UNBOOKABILITY_MARKER)) 
                     displayErrorMessage("Cannot create an appointment in an unbookable slot", 
                         "Schedule view controller error",JOptionPane.WARNING_MESSAGE);
                 else displayErrorMessage("Cannot create an appointment in the selected slot "

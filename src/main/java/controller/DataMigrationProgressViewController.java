@@ -16,7 +16,7 @@ import java.beans.PropertyChangeEvent;
  *
  * @author colin
  */
-public class ImportProgressViewController extends ViewController{
+public class DataMigrationProgressViewController extends ViewController{
     public static enum Entity{APPOINTMENT, PATIENT, PATIENT_NOTE, NONE}
     private static enum Operation {EXPORT, IMPORT};
     private Entity newEntity = Entity.NONE;
@@ -54,7 +54,7 @@ public class ImportProgressViewController extends ViewController{
         oldEntity = entity;
     }
     
-    public ImportProgressViewController(ActionListener controller, DesktopView desktopView, Descriptor entityDescriptor){
+    public DataMigrationProgressViewController(ActionListener controller, DesktopView desktopView, Descriptor entityDescriptor){
         View.setViewer(View.Viewer.EXPORT_PROGRESS_VIEW);
         this.setMyController(controller);
         setDesktopView(desktopView);
@@ -66,12 +66,11 @@ public class ImportProgressViewController extends ViewController{
                ViewController.DesktopViewControllerActionEvent.valueOf(e.getActionCommand());
         
         switch (actionCommand){
-            case IMPORT_EXPORT_PATIENT_DATA_COMPLETED:
-                setOldEntity(getNewEntity());
-                setNewEntity(Entity.APPOINTMENT);
+            case MIGRATE_PATIENT_DATA_COMPLETED:
                 firePropertyChangeEvent(
-                        ImportProgressViewControllerPropertyChangeEvent.
-                                    PREPARE_FOR_RECEIPT_OF_APPOINTMENT_PROGRESS.toString(),
+                        
+                        DataMigrationViewControllerPropertyChangeEvent.
+                                    PREPARE_FOR_RECEIPT_OF_APPOINTMENT_MIGRATION_PROGRESS.toString(),
                         getView(),
                         this,
                         null,
@@ -79,40 +78,56 @@ public class ImportProgressViewController extends ViewController{
                 );
                 break;
                 
-            case IMPORT_EXPORT_APPOINTMENT_DATA_COMPLETED:
-                setOldEntity(getNewEntity());
-                setNewEntity(Entity.PATIENT_NOTE);
+            case MIGRATE_APPOINTMENT_DATA_COMPLETED:
                 firePropertyChangeEvent(
-                        ImportProgressViewControllerPropertyChangeEvent.
-                                    PREPARE_FOR_RECEIPT_OF_PATIENT_NOTE_PROGRESS.toString(),
+                        DataMigrationViewControllerPropertyChangeEvent.
+                                    PREPARE_FOR_RECEIPT_OF_PRIMARY_CONDITION_MIGRATION_PROGRESS.toString(),
                         getView(),
                         this,
                         null,
                         null
                 );
                 break;
+  
+            case MIGRATE_PATIENT_NOTE_DATA_COMPLETED:
                 /*
-                setOldEntity(getNewEntity());
-                setNewEntity(Entity.NONE);
+                actionEvent = new ActionEvent(
+                    this,ActionEvent.ACTION_PERFORMED,
+                    ViewController.DesktopViewControllerActionEvent.MIGRATE_SURGERY_DAYS_ASSIGNMENT_DATA.toString());
+                getMyController().actionPerformed(actionEvent);
+                */
+                //setOldEntity(getNewEntity());
+                //setNewEntity(Entity.NONE);
                 firePropertyChangeEvent(
-                        ImportProgressViewControllerPropertyChangeEvent.
-                                    OPERATION_COMPLETED.toString(),
+                        DataMigrationViewControllerPropertyChangeEvent
+                                .PREPARE_FOR_RECEIPT_OF_PRIMARY_CONDITION_MIGRATION_PROGRESS
+                                .toString(),
                         getView(),
                         this,
                         null,
                         null
                 );
-*/
-            case IMPORT_EXPORT_PATIENT_NOTE_DATA_COMPLETED:
+                break;
+                
+            case MIGRATE_PRIMARY_CONDITION_DATA_COMPLETED:
+                firePropertyChangeEvent(
+                        DataMigrationViewControllerPropertyChangeEvent.
+                                    PREPARE_FOR_RECEIPT_OF_SECONDARY_CONDITION_MIGRATION_PROGRESS.toString(),
+                        getView(),
+                        this,
+                        null,
+                        null
+                );
+                break;
+                
+            case MIGRATE_SECONDARY_CONDITION_DATA_COMPLETED:
                 actionEvent = new ActionEvent(
                     this,ActionEvent.ACTION_PERFORMED,
-                    ViewController.DesktopViewControllerActionEvent.IMPORT_EXPORT_MIGRATED_SURGERY_DAYS_ASSIGNMENT.toString());
+                    ViewController.DesktopViewControllerActionEvent.MIGRATE_SURGERY_DAYS_ASSIGNMENT_DATA.toString());
                 getMyController().actionPerformed(actionEvent);
-                setOldEntity(getNewEntity());
-                setNewEntity(Entity.NONE);
                 firePropertyChangeEvent(
-                        ImportProgressViewControllerPropertyChangeEvent.
-                                    OPERATION_COMPLETED.toString(),
+                        DataMigrationViewControllerPropertyChangeEvent
+                                .DATA_MIGRATION_COMPLETED.toString(),
                         getView(),
                         this,
                         null,
@@ -128,16 +143,16 @@ public class ImportProgressViewController extends ViewController{
         if (e.getSource() instanceof DesktopViewController){
             doDesktopViewControllerAction(e);
         }else{
-            ViewController.ImportProgressViewControllerActionEvent actionCommand =
-               ViewController.ImportProgressViewControllerActionEvent.valueOf(e.getActionCommand());
+            ViewController.DataMigrationViewControllerActionEvent actionCommand =
+               ViewController.DataMigrationViewControllerActionEvent.valueOf(e.getActionCommand());
             
             switch (actionCommand){
-                case IMPORT_EXPORT_START_REQUEST:
+                case DATA_MIGRATION_START_REQUEST:
                     setOldEntity(getNewEntity());
                     setNewEntity(Entity.PATIENT);
                     firePropertyChangeEvent(
-                            ImportProgressViewControllerPropertyChangeEvent.
-                                        PREPARE_FOR_RECEIPT_OF_PATIENT_PROGRESS.toString(),
+                            DataMigrationViewControllerPropertyChangeEvent.
+                                        PREPARE_FOR_RECEIPT_OF_PATIENT_MIGRATION_PROGRESS.toString(),
                             getView(),
                             this,
                             null,
@@ -145,28 +160,42 @@ public class ImportProgressViewController extends ViewController{
                     );
                     break;
 
-                case READY_FOR_RECEIPT_OF_PATIENT_PROGRESS:
+                case READY_FOR_RECEIPT_OF_PATIENT_MIGRATION_PROGRESS:
                     actionEvent = new ActionEvent(
                         this,ActionEvent.ACTION_PERFORMED,
-                        ViewController.DesktopViewControllerActionEvent.IMPORT_EXPORT_PATIENT_DATA.toString());
+                        ViewController.DesktopViewControllerActionEvent.MIGRATE_PATIENT_DATA.toString());
                     getMyController().actionPerformed(actionEvent);
                     break;
 
-                case READY_FOR_RECEIPT_OF_APPOINTMENT_PROGRESS:                 
+                case READY_FOR_RECEIPT_OF_APPOINTMENT_MIGRATION_PROGRESS:                 
                     actionEvent = new ActionEvent(
                         this,ActionEvent.ACTION_PERFORMED,
-                        ViewController.DesktopViewControllerActionEvent.IMPORT_EXPORT_APPOINTMENT_DATA.toString());
+                        ViewController.DesktopViewControllerActionEvent.MIGRATE_APPOINTMENT_DATA.toString());
                     getMyController().actionPerformed(actionEvent);
                     break;
                     
-                case READY_FOR_RECEIPT_OF_PATIENT_NOTE_PROGRESS:                 
+                case READY_FOR_RECEIPT_OF_PATIENT_NOTE_MIGRATION_PROGRESS:                 
                     actionEvent = new ActionEvent(
                         this,ActionEvent.ACTION_PERFORMED,
-                        ViewController.DesktopViewControllerActionEvent.IMPORT_EXPORT_PATIENT_NOTE_DATA.toString());
+                        ViewController.DesktopViewControllerActionEvent.MIGRATE_PATIENT_NOTE_DATA.toString());
+                    getMyController().actionPerformed(actionEvent);
+                    break;
+                    
+                case READY_FOR_RECEIPT_OF_PRIMARY_CONDITION_MIGRATION_PROGRESS:
+                    actionEvent = new ActionEvent(
+                        this,ActionEvent.ACTION_PERFORMED,
+                        ViewController.DesktopViewControllerActionEvent.MIGRATE_PRIMARY_CONDITION_DATA.toString());
+                    getMyController().actionPerformed(actionEvent);
+                    break;
+                    
+                case READY_FOR_RECEIPT_OF_SECONDARY_CONDITION_MIGRATION_PROGRESS:
+                    actionEvent = new ActionEvent(
+                        this,ActionEvent.ACTION_PERFORMED,
+                        ViewController.DesktopViewControllerActionEvent.MIGRATE_SECONDARY_CONDITION_DATA.toString());
                     getMyController().actionPerformed(actionEvent);
                     break;
 
-                case IMPORT_EXPORT_PROGRESS_CLOSE_NOTIFICATION:
+                case DATA_MIGRATION_PROGRESS_VIEW_CLOSE_NOTIFICATION:
                     actionEvent = new ActionEvent(
                         this,ActionEvent.ACTION_PERFORMED,
                         ViewController.DesktopViewControllerActionEvent.VIEW_CLOSED_NOTIFICATION.toString());

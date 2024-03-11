@@ -17,15 +17,21 @@ import javax.swing.event.InternalFrameEvent;
  *
  * @author colin
  */
-public class ImportProgressView extends View {
-    enum Mode {PATIENT, APPOINTMENT, PATIENT_NOTE, NONE};
+public class DataMigrationProgressView extends View {
+    enum Mode {
+        APPOINTMENT,
+        PATIENT,  
+        PATIENT_NOTE, 
+        PRIMARY_CONDITION,
+        SECONDARY_CONDITION,
+        NONE};
     enum Operation {EXPORT, IMPORT};
     
     private final boolean hasSystemGCed = false;
-    private final static String IMPORT_TITLE_HEADER = "Import progress";
-    private final static String IMPORT_APPOINTMENT_PROGRESS_HEADER = "Import appointment data from CSV source";
-    private final static String IMPORT_PATIENT_PROGRESS_HEADER = "Import patient data from CSV source";
-    private final static String IMPORT_PATIENT_NOTES_PROGRESS_HEADER = "Import patient notes data from appointment data";
+    private final static String IMPORT_TITLE_HEADER = "Data migration progress monitor";
+    private final static String IMPORT_APPOINTMENT_PROGRESS_HEADER = "Appointment table data migrated from CSV source";
+    private final static String IMPORT_PATIENT_PROGRESS_HEADER = "Patient table data migrated from CSV source";
+    private final static String IMPORT_PATIENT_NOTES_PROGRESS_HEADER = "PatientNotes table data migrated from appointment table";
     private final static String IMPORT_START_PROCESS_HEADER = "Start import";
     
     
@@ -56,8 +62,10 @@ public class ImportProgressView extends View {
         barAppointments = new javax.swing.JProgressBar();
         btnStart = new javax.swing.JButton();
         btnClose = new javax.swing.JButton();
-        lblPatientNotesProgressBar = new javax.swing.JLabel();
-        barPatientNotes = new javax.swing.JProgressBar();
+        barPrimaryCondition = new javax.swing.JProgressBar();
+        lblPrimaryCondition = new javax.swing.JLabel();
+        lblSecondaryCondition = new javax.swing.JLabel();
+        barSecondaryCondition = new javax.swing.JProgressBar();
 
         setTitle("Exported data progress");
 
@@ -88,35 +96,43 @@ public class ImportProgressView extends View {
             }
         });
 
-        lblPatientNotesProgressBar.setText("PatientNotes");
+        barPrimaryCondition.setMinimum(0);
+        barPrimaryCondition.setMaximum(100);
+        barPrimaryCondition.setStringPainted(true);
 
-        barPatientNotes.setMinimum(0);
-        barPatientNotes.setMaximum(100);
-        barPatientNotes.setStringPainted(true);
+        lblPrimaryCondition.setText("PrimaryCondition");
+
+        lblSecondaryCondition.setText("SecondaryCondition");
+
+        barSecondaryCondition.setMinimum(0);
+        barSecondaryCondition.setMaximum(100);
+        barSecondaryCondition.setStringPainted(true);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(36, 36, 36)
-                .addComponent(btnStart)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 43, Short.MAX_VALUE)
-                .addComponent(btnClose)
-                .addGap(49, 49, 49))
-            .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                        .addComponent(barPatientNotes, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 285, Short.MAX_VALUE)
+                    .addComponent(barPatients, javax.swing.GroupLayout.DEFAULT_SIZE, 456, Short.MAX_VALUE)
+                    .addComponent(barAppointments, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(barPrimaryCondition, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(barSecondaryCondition, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(lblPatientsProgressBar)
                             .addComponent(lblAppointmentsProgressBar)
-                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                                .addComponent(barAppointments, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 285, Short.MAX_VALUE)
-                                .addComponent(barPatients, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
-                    .addComponent(lblPatientNotesProgressBar))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addComponent(lblPrimaryCondition)
+                            .addComponent(lblSecondaryCondition))
+                        .addGap(0, 0, Short.MAX_VALUE)))
+                .addContainerGap())
+            .addGroup(layout.createSequentialGroup()
+                .addGap(68, 68, 68)
+                .addComponent(btnStart)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(btnClose)
+                .addGap(97, 97, 97))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -125,19 +141,23 @@ public class ImportProgressView extends View {
                 .addComponent(lblPatientsProgressBar)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(barPatients, javax.swing.GroupLayout.PREFERRED_SIZE, 19, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 10, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(lblAppointmentsProgressBar)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(barAppointments, javax.swing.GroupLayout.PREFERRED_SIZE, 19, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(lblPatientNotesProgressBar)
+                .addComponent(lblPrimaryCondition)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(barPatientNotes, javax.swing.GroupLayout.PREFERRED_SIZE, 19, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(23, 23, 23)
+                .addComponent(barPrimaryCondition, javax.swing.GroupLayout.PREFERRED_SIZE, 19, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(lblSecondaryCondition)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(barSecondaryCondition, javax.swing.GroupLayout.PREFERRED_SIZE, 19, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnStart)
                     .addComponent(btnClose))
-                .addContainerGap())
+                .addContainerGap(23, Short.MAX_VALUE))
         );
 
         pack();
@@ -155,7 +175,7 @@ public class ImportProgressView extends View {
         btnStart.setEnabled(false);
         ActionEvent actionEvent = new ActionEvent(this, 
                 ActionEvent.ACTION_PERFORMED,
-                ViewController.ImportProgressViewControllerActionEvent.IMPORT_EXPORT_START_REQUEST.toString());
+                ViewController.DataMigrationViewControllerActionEvent.DATA_MIGRATION_START_REQUEST.toString());
         getMyController().actionPerformed(actionEvent);
         
 
@@ -164,13 +184,15 @@ public class ImportProgressView extends View {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JProgressBar barAppointments;
-    private javax.swing.JProgressBar barPatientNotes;
     private javax.swing.JProgressBar barPatients;
+    private javax.swing.JProgressBar barPrimaryCondition;
+    private javax.swing.JProgressBar barSecondaryCondition;
     private javax.swing.JButton btnClose;
     private javax.swing.JButton btnStart;
     private javax.swing.JLabel lblAppointmentsProgressBar;
-    private javax.swing.JLabel lblPatientNotesProgressBar;
     private javax.swing.JLabel lblPatientsProgressBar;
+    private javax.swing.JLabel lblPrimaryCondition;
+    private javax.swing.JLabel lblSecondaryCondition;
     // End of variables declaration//GEN-END:variables
 
     /**
@@ -179,7 +201,7 @@ public class ImportProgressView extends View {
      * @param myController
      * @param desktopView 
      */
-    public ImportProgressView(
+    public DataMigrationProgressView(
             View.Viewer myViewType,
             ViewController myController,
             DesktopView desktopView) {
@@ -190,11 +212,13 @@ public class ImportProgressView extends View {
         initComponents();
         this.setVisible(true);
         addInternalFrameListeners();
-        lblPatientsProgressBar.setText(ImportProgressView.IMPORT_PATIENT_PROGRESS_HEADER);
-        lblAppointmentsProgressBar.setText(ImportProgressView.IMPORT_APPOINTMENT_PROGRESS_HEADER);
-        lblPatientNotesProgressBar.setText(ImportProgressView.IMPORT_PATIENT_NOTES_PROGRESS_HEADER);
-        btnStart.setText(ImportProgressView.IMPORT_START_PROCESS_HEADER);
-        this.setTitle(ImportProgressView.IMPORT_TITLE_HEADER);
+        lblPatientsProgressBar.setText(DataMigrationProgressView.IMPORT_PATIENT_PROGRESS_HEADER);
+        lblAppointmentsProgressBar.setText(DataMigrationProgressView.IMPORT_APPOINTMENT_PROGRESS_HEADER);
+        //lblPatientNotesProgressBar.setText(DataMigrationProgressView.IMPORT_PATIENT_NOTES_PROGRESS_HEADER);
+        this.lblPrimaryCondition.setText("PrimaryCondition table migrated from template");
+        this.lblSecondaryCondition.setText("SecondaryCondition table migrated from template");
+        btnStart.setText(DataMigrationProgressView.IMPORT_START_PROCESS_HEADER);
+        this.setTitle(DataMigrationProgressView.IMPORT_TITLE_HEADER);
     }
 
     public void addInternalFrameListeners(){
@@ -206,8 +230,8 @@ public class ImportProgressView extends View {
             @Override  
             public void internalFrameClosing(InternalFrameEvent e) {
                 ActionEvent actionEvent = new ActionEvent(
-                        ImportProgressView.this,ActionEvent.ACTION_PERFORMED,
-                        ViewController.ImportProgressViewControllerActionEvent.IMPORT_EXPORT_PROGRESS_CLOSE_NOTIFICATION.toString());
+                        DataMigrationProgressView.this,ActionEvent.ACTION_PERFORMED,
+                        ViewController.DataMigrationViewControllerActionEvent.DATA_MIGRATION_PROGRESS_VIEW_CLOSE_NOTIFICATION.toString());
                 getMyController().actionPerformed(actionEvent);
             }
         };
@@ -218,10 +242,11 @@ public class ImportProgressView extends View {
     public void initialiseView(){
         
         this.setVisible(true);
-        lblPatientsProgressBar.setText(ImportProgressView.IMPORT_PATIENT_PROGRESS_HEADER);
-        lblAppointmentsProgressBar.setText(ImportProgressView.IMPORT_APPOINTMENT_PROGRESS_HEADER);
-        btnStart.setText(ImportProgressView.IMPORT_START_PROCESS_HEADER);
-        this.setTitle(ImportProgressView.IMPORT_TITLE_HEADER);
+        lblPatientsProgressBar.setText(DataMigrationProgressView.IMPORT_PATIENT_PROGRESS_HEADER);
+        lblAppointmentsProgressBar.setText(DataMigrationProgressView.IMPORT_APPOINTMENT_PROGRESS_HEADER);
+        btnStart.setText(DataMigrationProgressView.IMPORT_START_PROCESS_HEADER);
+        this.setTitle(DataMigrationProgressView.IMPORT_TITLE_HEADER);
+        this.setSize(520,325);
     }
     
     /**
@@ -251,8 +276,16 @@ public class ImportProgressView extends View {
                         barAppointments.setValue(progress);
                         break;
                     case PATIENT_NOTE:
-                        barPatientNotes.setIndeterminate(false);
-                        barPatientNotes.setValue(progress);
+                        //barPatientNotes.setIndeterminate(false);
+                        //barPatientNotes.setValue(progress);
+                        break;
+                    case PRIMARY_CONDITION:
+                        barPrimaryCondition.setIndeterminate(false);
+                        barPrimaryCondition.setValue(progress);
+                        break;
+                    case SECONDARY_CONDITION:
+                        barSecondaryCondition.setIndeterminate(false);
+                        barSecondaryCondition.setValue(progress);
                         break;
                 }
                 break;
@@ -260,38 +293,56 @@ public class ImportProgressView extends View {
                 break;
         }
         ActionEvent actionEvent = null;
-        ViewController.ImportProgressViewControllerPropertyChangeEvent propertyName =
-                ViewController.ImportProgressViewControllerPropertyChangeEvent.valueOf(e.getPropertyName());
+        ViewController.DataMigrationViewControllerPropertyChangeEvent propertyName =
+                ViewController.DataMigrationViewControllerPropertyChangeEvent.valueOf(e.getPropertyName());
         switch(propertyName){    
-            case OPERATION_COMPLETED:
+            case DATA_MIGRATION_COMPLETED:
                 btnStart.setEnabled(true);
                 setMode(Mode.NONE);
                 break;    
-            case PREPARE_FOR_RECEIPT_OF_APPOINTMENT_PROGRESS:
+            case PREPARE_FOR_RECEIPT_OF_APPOINTMENT_MIGRATION_PROGRESS:
                 barAppointments.setIndeterminate(true);
                 barAppointments.setValue(0);
                 setMode(Mode.APPOINTMENT);
                 actionEvent = new ActionEvent(
-                        ImportProgressView.this,ActionEvent.ACTION_PERFORMED,
-                        ViewController.ImportProgressViewControllerActionEvent.READY_FOR_RECEIPT_OF_APPOINTMENT_PROGRESS.toString());
+                        DataMigrationProgressView.this,ActionEvent.ACTION_PERFORMED,
+                        ViewController.DataMigrationViewControllerActionEvent.READY_FOR_RECEIPT_OF_APPOINTMENT_MIGRATION_PROGRESS.toString());
                 getMyController().actionPerformed(actionEvent);
                 break;  
-            case PREPARE_FOR_RECEIPT_OF_PATIENT_NOTE_PROGRESS:
-                barPatientNotes.setIndeterminate(true);
-                barPatientNotes.setValue(0);
+            case PREPARE_FOR_RECEIPT_OF_PATIENT_NOTE_MIGRATION_PROGRESS:
+                //barPatientNotes.setIndeterminate(true);
+                //barPatientNotes.setValue(0);
                 setMode(Mode.PATIENT_NOTE);
                 actionEvent = new ActionEvent(
-                        ImportProgressView.this,ActionEvent.ACTION_PERFORMED,
-                        ViewController.ImportProgressViewControllerActionEvent.READY_FOR_RECEIPT_OF_PATIENT_NOTE_PROGRESS.toString());
+                        DataMigrationProgressView.this,ActionEvent.ACTION_PERFORMED,
+                        ViewController.DataMigrationViewControllerActionEvent.READY_FOR_RECEIPT_OF_PATIENT_NOTE_MIGRATION_PROGRESS.toString());
                 getMyController().actionPerformed(actionEvent);
                 break;  
-            case PREPARE_FOR_RECEIPT_OF_PATIENT_PROGRESS:
+            case PREPARE_FOR_RECEIPT_OF_PATIENT_MIGRATION_PROGRESS:
                 barPatients.setIndeterminate(true);
                 barPatients.setValue(0);
                 setMode(Mode.PATIENT);
                 actionEvent = new ActionEvent(
-                        ImportProgressView.this,ActionEvent.ACTION_PERFORMED,
-                        ViewController.ImportProgressViewControllerActionEvent.READY_FOR_RECEIPT_OF_PATIENT_PROGRESS.toString());
+                        DataMigrationProgressView.this,ActionEvent.ACTION_PERFORMED,
+                        ViewController.DataMigrationViewControllerActionEvent.READY_FOR_RECEIPT_OF_PATIENT_MIGRATION_PROGRESS.toString());
+                getMyController().actionPerformed(actionEvent);
+                break;
+            case PREPARE_FOR_RECEIPT_OF_PRIMARY_CONDITION_MIGRATION_PROGRESS:
+                barPrimaryCondition.setIndeterminate(true);
+                barPrimaryCondition.setValue(0);
+                setMode(Mode.PRIMARY_CONDITION);
+                actionEvent = new ActionEvent(
+                        DataMigrationProgressView.this,ActionEvent.ACTION_PERFORMED,
+                        ViewController.DataMigrationViewControllerActionEvent.READY_FOR_RECEIPT_OF_PRIMARY_CONDITION_MIGRATION_PROGRESS.toString());
+                getMyController().actionPerformed(actionEvent);
+                break;
+            case PREPARE_FOR_RECEIPT_OF_SECONDARY_CONDITION_MIGRATION_PROGRESS:
+                barSecondaryCondition.setIndeterminate(true);
+                barSecondaryCondition.setValue(0);
+                setMode(Mode.SECONDARY_CONDITION);
+                actionEvent = new ActionEvent(
+                        DataMigrationProgressView.this,ActionEvent.ACTION_PERFORMED,
+                        ViewController.DataMigrationViewControllerActionEvent.READY_FOR_RECEIPT_OF_SECONDARY_CONDITION_MIGRATION_PROGRESS.toString());
                 getMyController().actionPerformed(actionEvent);
                 break;
         }

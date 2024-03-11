@@ -7,7 +7,6 @@ package model;
 //<editor-fold defaultstate="collapsed" desc="Imports">
 import repository.Repository;
 import repository.StoreException;//01/03/2023
-import _system_environment_variables.SystemDefinitions;
 import java.awt.Point;
 import java.time.LocalDate;
 import java.time.Period;
@@ -37,11 +36,14 @@ public class Patient extends Entity implements IEntityStoreActions {
     private Patient.Address address = null;
     private Patient.Name name = null;
     private Patient.Recall recall = null;
+    private Patient.MedicalHistory medicalHistory= null;
     private ArrayList<Patient> collection = null;
+    
+    
     private static final DateTimeFormatter ddMMyyyyFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy");
     
     
-    protected Integer getKey(){
+    public Integer getKey(){
         return key;
     }
     
@@ -227,6 +229,7 @@ public class Patient extends Entity implements IEntityStoreActions {
         name = new Name();
         address = new Address();
         recall = new Recall();
+        medicalHistory = new MedicalHistory();
         setIsGuardianAPatient(false);
         setIsKeyDefined(false);
         this.setIsPatient(true);
@@ -251,6 +254,14 @@ public class Patient extends Entity implements IEntityStoreActions {
                 patients.add(patient);  
         }
         return patients;
+    }
+    
+    public MedicalHistory getMedicalHistory(){
+        return medicalHistory;
+    }
+    
+    public void setMedicalHistory(MedicalHistory value){
+        medicalHistory = value;
     }
 
     public void set(ArrayList<Patient> value){
@@ -441,6 +452,79 @@ public class Patient extends Entity implements IEntityStoreActions {
     }
     //</editor-fold>
     
+    public class MedicalHistory{
+        private ArrayList<PrimaryCondition> collection = null;
+        private Doctor doctor;
+        private Medication medication = null;
+        
+        public MedicalHistory(){
+
+        } 
+        
+        public ArrayList<PrimaryCondition> get(){
+            return collection;
+        }
+        public void set(ArrayList<PrimaryCondition> value){
+            collection = value;
+        }
+        
+        /**
+         * 
+         * @return Doctor; if null it means no doctor on the system for this patient
+         */
+        public Doctor getDoctor()throws StoreException{
+            doctor = new Doctor(Patient.this);
+            doctor.setScope(Scope.FOR_PATIENT);
+            doctor = doctor.read();
+            return doctor;
+        }
+        
+        public void setDoctor(Doctor dr)throws StoreException{
+            dr.setPatientKey(Patient.this.getKey());
+            dr.insert();
+        }
+        
+        /**
+         * 
+         * @return Medication; if null it means no medication on the system for this patient
+         */
+        public Medication getMedication()throws StoreException{
+            medication = new Medication(Patient.this);
+            medication.setScope(Scope.FOR_PATIENT);
+            return medication.read();
+        }
+        
+        public void setMedication(Medication dr)throws StoreException{
+            dr.setPatientKey(Patient.this.getKey());
+            dr.insert();
+        }
+        
+        public PrimaryCondition getPrimaryCondition()throws StoreException{
+            PrimaryCondition pc = new PrimaryCondition(Patient.this);
+            pc.setScope(Scope.FOR_PATIENT);
+            for(PrimaryCondition p : pc.read().get()){
+                SecondaryCondition s = new SecondaryCondition(p);
+                s.setScope(Scope.FOR_PRIMARY_CONDITION);
+                s.read();
+                p.setSecondaryCondition(s);
+            }
+            return pc;
+        }
+        
+        /*
+        public void insert()throws StoreException{
+            
+            for(PrimaryCondition pc : get()){
+                pc.setPatientKey(Patient.this.getKey());
+                new Repository().insert(pc);
+            }
+        }
+        */
+        public void update(){
+            
+        }
+    }
+
     //<editor-fold defaultstate="collapsed" desc="Patient Recall inner class">
     public class Recall {
 
@@ -488,27 +572,27 @@ public class Patient extends Entity implements IEntityStoreActions {
 
  //<editor-fold defaultstate="collapsed" desc="Object level methods overriden in Patient class">
     @Override
-        public boolean equals(Object obj) 
-        { 
-            // if both the object references are  
-            // referring to the same object. 
-            if(this == obj) 
-                return true; 
+    public boolean equals(Object obj) 
+    { 
+        // if both the object references are  
+        // referring to the same object. 
+        if(this == obj) 
+            return true; 
 
-            // checks if the comparison involves 2 objecs of the same type 
-            /**
-             * issue arise if one of the objects is an entity (for example a Patient) and the other object is its delegate sub class
-             */
-            //if(obj == null || obj.getClass()!= this.getClass()) 
-                //return false; 
-            if (obj == null) return false;
-            // type casting of the argument.  
-            Patient patient = (Patient) obj; 
+        // checks if the comparison involves 2 objecs of the same type 
+        /**
+         * issue arise if one of the objects is an entity (for example a Patient) and the other object is its delegate sub class
+         */
+        //if(obj == null || obj.getClass()!= this.getClass()) 
+            //return false; 
+        if (obj == null) return false;
+        // type casting of the argument.  
+        Patient patient = (Patient) obj; 
 
-            // comparing the state of argument with  
-            // the state of 'this' Object. 
-            return (patient.getKey().equals(this.getKey())); 
-        }
+        // comparing the state of argument with  
+        // the state of 'this' Object. 
+        return (patient.getKey().equals(this.getKey())); 
+    }
     
     @Override
     /**
@@ -521,7 +605,7 @@ public class Patient extends Entity implements IEntityStoreActions {
     public String toString(){
         String cappedName = null;
         if (getKey() == 1){
-            return SystemDefinitions.APPOINTMENT_UNBOOKABILITY_MARKER;
+            return SystemDefinition.APPOINTMENT_UNBOOKABILITY_MARKER;
         }
         if (!getName().getSurname().isEmpty()){
             //if (getData().getSurname().strip().contains("-")) 
@@ -959,19 +1043,7 @@ public class Patient extends Entity implements IEntityStoreActions {
         String result =  firstLetter + otherLetters;
         return result;
     }
-    /*
-    private Patient updateGender(Patient patient){
-        switch (patient.getGender()){
-            case "M":
-                patient.setGender("Male");
-                break;
-            case "F":
-                patient.setGender("Female");
-                break;
-        }
-        return patient;
-    }
-    */
+
     enum DenPatField {  KEY,
                         TITLE,
                         FORENAMES,
@@ -992,3 +1064,4 @@ public class Patient extends Entity implements IEntityStoreActions {
                         GUARDIAN}
     //</editor-fold>   
 }
+

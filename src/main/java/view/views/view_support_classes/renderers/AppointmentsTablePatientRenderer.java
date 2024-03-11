@@ -6,7 +6,7 @@
 package view.views.view_support_classes.renderers;
 
 import model.Patient;
-import _system_environment_variables.SystemDefinitions;
+import model.SystemDefinition;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
@@ -47,7 +47,7 @@ public class AppointmentsTablePatientRenderer  extends JLabel implements TableCe
             setIsUnbookable(false);
 
         }
-        else if (patient.toString().equals(SystemDefinitions.APPOINTMENT_UNBOOKABILITY_MARKER)){
+        else if (patient.toString().equals(SystemDefinition.APPOINTMENT_UNBOOKABILITY_MARKER)){
             super.setText("<< U N B O O K A B L E  S L O T >>");
             super.setForeground(Color.RED);
             super.setHorizontalAlignment(JLabel.CENTER);

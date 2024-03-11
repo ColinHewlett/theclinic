@@ -4,7 +4,7 @@
  */
 package view.views.non_modal_views;
 
-import _system_environment_variables.SystemDefinitions;
+import model.SystemDefinition;
 import view.views.view_support_classes.models.Appointments3ColumnTableModel;
 import view.views.view_support_classes.renderers.AppointmentsTableLocalDateTimeRenderer;
 import view.views.view_support_classes.renderers.AppointmentsTableDurationRenderer;

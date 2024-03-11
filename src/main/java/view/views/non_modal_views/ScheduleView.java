@@ -5,7 +5,7 @@
  */
 package view.views.non_modal_views;
 
-import _system_environment_variables.SystemDefinitions;
+import model.SystemDefinition;
 import view.views.view_support_classes.renderers.AppointmentsTableDurationRenderer;
 import view.views.view_support_classes.renderers.AppointmentsTableLocalDateTimeRenderer;
 import view.views.view_support_classes.renderers.AppointmentsTablePatientRenderer;
@@ -98,28 +98,42 @@ public class ScheduleView extends View{
     
     private int getAppointmentDayScheduleTableWidth(){
         int result = 0;
-        String lookAndFeel = SystemDefinitions.getPMSLookAndFeel();
-        switch (lookAndFeel){
-            case "Metal":
-                result = mAppointmentDayScheduleWidth ;
-                break;
-            case "Windows":
-                result = wAppointmentDayScheduleWidth ;
-                break;
+        try{
+            String lookAndFeel = SystemDefinition.getPMSLookAndFeel();
+            switch (lookAndFeel){
+                case "Metal":
+                    result = mAppointmentDayScheduleWidth ;
+                    break;
+                case "Windows":
+                    result = wAppointmentDayScheduleWidth ;
+                    break;
+            }
+        }catch(Exception ex){
+            String message = ex.getMessage() + "\n"
+                    + "Raised in ScheduleView::getAppointmentDayScheduleTableWidth()";
+            ViewController.displayErrorMessage(message, 
+                    "Schedule view controller error", JOptionPane.WARNING_MESSAGE);
         }
         return result;
     }
     
-    private int getGapBetweenAppointmentDaySelectionAndAvailabilitySlotsPanels(){
+    private int getGapBetweenAppointmentDaySelectionAndAvailabilitySlotsPanels()throws Exception{
         int result = 0;
-        String lookAndFeel = SystemDefinitions.getPMSLookAndFeel();
-        switch (lookAndFeel){
-            case "Metal":
-                result = mGapBetweenAppointmentDaySelectionAndAvailabilitySlotsPanels ;
-                break;
-            case "Windows":
-                result = wGapBetweenAppointmentDaySelectionAndAvailabilitySlotsPanels ;
-                break;
+        try{
+            String lookAndFeel = SystemDefinition.getPMSLookAndFeel();
+            switch (lookAndFeel){
+                case "Metal":
+                    result = mGapBetweenAppointmentDaySelectionAndAvailabilitySlotsPanels ;
+                    break;
+                case "Windows":
+                    result = wGapBetweenAppointmentDaySelectionAndAvailabilitySlotsPanels ;
+                    break;
+            }
+        }catch(Exception ex){
+            String message = ex.getMessage() + "\n"
+                    + "Raised in ScheduleView::getGapBetweenAppointmentDaySelectionAndAvailabilitySlotsPanels()";
+            ViewController.displayErrorMessage(message, 
+                    "Schedule view controller error", JOptionPane.WARNING_MESSAGE);
         }
         return result;
     }
@@ -203,9 +217,10 @@ public class ScheduleView extends View{
     
     @Override
     public void initialiseView(){
-        initComponentsx();
-        addInternalFrameListeners();
         try{
+            initComponentsx();
+            addInternalFrameListeners();
+        
             setVisible(true);
             setTitle("Appointments");
             setClosable(false);
@@ -218,6 +233,11 @@ public class ScheduleView extends View{
             toFront();
         }catch (PropertyVetoException ex){
             
+        }catch(Exception ex){
+            String message = ex.getMessage() + "\n"
+                    + "Raised in ScheduleView::initialiseView()";
+            ViewController.displayErrorMessage(message, 
+                    "Schedule view controller error", JOptionPane.WARNING_MESSAGE);
         }
 
         setEmptySlotAvailabilityTableListener();
@@ -457,7 +477,7 @@ public class ScheduleView extends View{
         this.addInternalFrameListener(internalFrameAdapter);
     }
     
-    private void initComponentsx(){
+    private void initComponentsx()throws Exception{
         buttonGroup1 = new javax.swing.ButtonGroup();
         
         pnlAppointmentScheduleForDay = new javax.swing.JPanel();
@@ -886,7 +906,7 @@ public class ScheduleView extends View{
         else if (!((AppointmentsScheduleTableModel)this.tblAppointments.getModel()).getElementAt(row).getPatient().getIsKeyDefined()){
             JOptionPane.showMessageDialog(this, "An appointment has not been selected for update");
         }
-        else if (SystemDefinitions.APPOINTMENT_UNBOOKABILITY_MARKER.equals(((AppointmentsScheduleTableModel)this.tblAppointments.getModel()).
+        else if (SystemDefinition.APPOINTMENT_UNBOOKABILITY_MARKER.equals(((AppointmentsScheduleTableModel)this.tblAppointments.getModel()).
                             getElementAt(row).getPatient().toString())){
             getMyController().getDescriptor().getViewDescription().
                     setViewMode(ViewController.ViewMode.UPDATE);
@@ -972,7 +992,7 @@ public class ScheduleView extends View{
 
         String message;
         if (getMyController().getDescriptor().getViewDescription().getAppointment().getPatient().toString().
-                equals(SystemDefinitions.APPOINTMENT_UNBOOKABILITY_MARKER)){
+                equals(SystemDefinition.APPOINTMENT_UNBOOKABILITY_MARKER)){
             message = "Are you sure you want to cancel the unbookable appointment slot";
         }
         else {
@@ -1093,7 +1113,7 @@ public class ScheduleView extends View{
                         centreString(FROM_WIDTH, from) +
                         centreString(TO_WIDTH, to) +
                         leftAlignString(NOTES_WIDTH, ""));
-                }else if(p.toString().equals(SystemDefinitions.APPOINTMENT_UNBOOKABILITY_MARKER)){
+                }else if(p.toString().equals(SystemDefinition.APPOINTMENT_UNBOOKABILITY_MARKER)){
                     patient = "<< U N B O O K A B L E  S L O T >>";
                     stringToPrint = stringToPrint + String.format(
                         centreString(PATIENT_WIDTH, patient) +
@@ -1512,7 +1532,7 @@ public class ScheduleView extends View{
         else if (!((AppointmentsScheduleTableModel)this.tblAppointments.getModel()).getElementAt(row).getPatient().getIsKeyDefined()){
             JOptionPane.showMessageDialog(this, "An appointment has not been selected for update");
         }
-        else if (SystemDefinitions.APPOINTMENT_UNBOOKABILITY_MARKER.equals(((AppointmentsScheduleTableModel)this.tblAppointments.getModel()).
+        else if (SystemDefinition.APPOINTMENT_UNBOOKABILITY_MARKER.equals(((AppointmentsScheduleTableModel)this.tblAppointments.getModel()).
                             getElementAt(row).getPatient().toString())){
             getMyController().getDescriptor().getViewDescription().
                     setViewMode(ViewController.ViewMode.UPDATE);
@@ -1598,7 +1618,7 @@ public class ScheduleView extends View{
 
         String message;
         if (getMyController().getDescriptor().getViewDescription().getAppointment().getPatient().toString().
-                equals(SystemDefinitions.APPOINTMENT_UNBOOKABILITY_MARKER)){
+                equals(SystemDefinition.APPOINTMENT_UNBOOKABILITY_MARKER)){
             message = "Are you sure you want to cancel the unbookable appointment slot";
         }
         else {
@@ -1719,7 +1739,7 @@ public class ScheduleView extends View{
                         centreString(FROM_WIDTH, from) +
                         centreString(TO_WIDTH, to) +
                         leftAlignString(NOTES_WIDTH, notes));
-                }else if(p.toString().equals(SystemDefinitions.APPOINTMENT_UNBOOKABILITY_MARKER)){
+                }else if(p.toString().equals(SystemDefinition.APPOINTMENT_UNBOOKABILITY_MARKER)){
                     patient = "<< U N B O O K A B L E  S L O T >>";
                     stringToPrint = stringToPrint + String.format(
                         centreString(PATIENT_WIDTH, patient) +
@@ -1872,8 +1892,7 @@ public class ScheduleView extends View{
         String tableTitle = "Appointment schedule for " 
                 + dayDatePicker.getDate().format(appointmentScheduleFormat);
         if (appointee!=null){
-            if (!appointee.toString().equals(
-                    SystemDefinitions.APPOINTMENT_UNBOOKABILITY_MARKER)){
+            if (!appointee.toString().equals(SystemDefinition.APPOINTMENT_UNBOOKABILITY_MARKER)){
                     //SystemDefinitions.UNBOOKABLE_APPOINTMENT_SLOT.toString())){
                 tableTitle = tableTitle + "          <"
                     + appointee.getName().getForenames() +  " " 

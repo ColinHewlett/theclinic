@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<views>
+	<view id="Patient">
+		<categories>
+			<category id="Contact details">
+				<category id="Person">
+					<category id="Name">
+						<action id="name_dialog"></action>
+					</category>
+					<category id="Title"/>
+					<options>
+						<option id="Dr"/>
+						<option id="Miss"/>
+						<option id="Mr"/>
+						<option id="Mrs"/>
+						<option id="Ms"/>
+						<option id="Untitled"/>
+					</options>
+					<category id="Gender">
+						<options>
+							<option id="Female"/>
+							<option id="Male"/>
+							<option id="Trans"/>
+						</options>
+					</category>
+					<category id="Age">
+						<action id="date_dialog"></action>
+					</category>	
+				</category>
+			</category>
+			<category id="Recall details">
+				<category id="Date">
+					<action id="date_dialog"></action>
+				</category>
+				<category id="Recall frequency">
+					<action id="spinner_dialog"></action>
+				</category>
+			</category>
+					<category id="Allergies">
+						<option id="Allergic rhinitus (hay fever)"></option>
+						<option id="Asthma"></option>
+						<category id="To local anaesthetics">
+							<option id="lidocaine"></option>
+							<option id="mepicacaine"></option>
+							<option id="bupivacaine"></option>
+							<option id="prilocaine"></option>
+						</category>
+						<option id="To other medication...">
+							<option id="Penecillen"></option>
+							<option id="Undefined...">
+								<action id="decription_dialog"></action>
+							</option>
+						</option>
+					</category>
+				</categories>
+			</view>
+			<view id="Schedule"/>
+		</views>

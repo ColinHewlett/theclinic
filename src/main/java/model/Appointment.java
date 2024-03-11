@@ -7,7 +7,6 @@ package model;
 
 
 //<editor-fold defaultstate="collapsed" desc="Imports">
-import _system_environment_variables.SystemDefinitions;
 
 import repository.Repository;
 import repository.StoreException;//01/03/2023
@@ -93,7 +92,7 @@ public class Appointment extends Entity implements IEntityStoreActions{
     }
     
     public boolean getIsUnbookableSlot(){
-        return getPatient().getKey() == SystemDefinitions.UNBOOKABLE_APPOINTMENT_SLOT;
+        return getPatient().getKey() == SystemDefinition.UNBOOKABLE_APPOINTMENT_SLOT;
     }
     
     
@@ -294,7 +293,7 @@ public class Appointment extends Entity implements IEntityStoreActions{
     @Override
     
     public void create()throws StoreException{
-        if (SystemDefinitions.getPMSDebug().equals("ENABLED"))
+        if (SystemDefinition.getPMSDebug().equals("ENABLED"))
             new Repository().create(this);
     }
 

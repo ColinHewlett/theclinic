@@ -27,6 +27,7 @@ import com.github.lgooddatepicker.zinternaltools.DateChangeEvent;
 import com.github.lgooddatepicker.zinternaltools.TimeChangeEvent;
 
 import java.awt.event.ActionEvent;
+import java.awt.event.ItemListener;
 import java.beans.PropertyChangeEvent;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -47,8 +48,8 @@ import view.views.view_support_classes.renderers.TableHeaderCellBorderRenderer;
  *
  * @author colin
  */
-public class ModalPatientNotesEditorView extends ModalView implements PropertyChangeListener{
-    
+public class ModalPatientNotesEditorView extends ModalView 
+                                         implements PropertyChangeListener{
     /**
      * 
      * @param myViewType

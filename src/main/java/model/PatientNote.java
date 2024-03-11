@@ -5,7 +5,6 @@
 package model;
 
 //<editor-fold defaultstate="collapsed" desc="Imports">
-import _system_environment_variables.SystemDefinitions;
 
 import repository.Repository;
 import repository.StoreException;//01/03/2023

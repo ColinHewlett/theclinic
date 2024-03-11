@@ -4,7 +4,7 @@
  */
 package view.views.view_support_classes.renderers;
 
-import _system_environment_variables.SystemDefinitions;
+import model.SystemDefinition;
 import java.awt.Component;
 import java.awt.Font;
 import javax.swing.JLabel;

@@ -5,6 +5,7 @@
  */
 package controller;
 
+import controller.exceptions.TemplateReaderException;
 import model.Entity;
 import model.Appointment;
 import model.Patient;
@@ -19,6 +20,7 @@ import java.awt.event.ActionListener;
 import java.awt.Frame;
 import java.awt.Insets;
 import java.awt.Point;
+import java.io.File;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
@@ -27,13 +29,15 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.ArrayList;
 import java.util.Iterator;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.table.TableColumn;
 import model.PatientNote;
-import _system_environment_variables.SystemDefinitions;
+import model.SystemDefinition;
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
@@ -42,7 +46,15 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import org.apache.poi.xwpf.extractor.XWPFWordExtractor;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
-
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.ParserConfigurationException;
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
+import org.w3c.dom.Node;
+import org.w3c.dom.Element;
+import org.xml.sax.SAXException;
+import java.io.File;
 
 /**
  *
@@ -148,20 +160,26 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         COUNT_PATIENT_TABLE_REQUEST,
         COUNT_PATIENT_NOTE_TABLE_REQUEST,
         COUNT_PATIENT_NOTIFICATION_TABLE_REQUEST,
+        COUNT_PRIMARY_CONDITION_TABLE_REQUEST,
+        COUNT_SECONDARY_CONDITION_TABLE_REQUEST,
         COUNT_SURGERY_DAYS_ASSIGNMENT_TABLE_REQUEST,
         DELETE_DATA_FROM_PMS_DATABASE_REQUEST,
         DESKTOP_VIEW_MODE_NOTIFICATION,
         GET_APPOINTMENT_CSV_PATH_REQUEST,
         GET_PATIENT_CSV_PATH_REQUEST,
         GET_PMS_STORE_PATH_REQUEST,
-        IMPORT_DATA_FROM_SOURCE,
-        IMPORT_EXPORT_APPOINTMENT_DATA,
-        IMPORT_EXPORT_APPOINTMENT_DATA_COMPLETED,
-        IMPORT_EXPORT_MIGRATED_SURGERY_DAYS_ASSIGNMENT,
-        IMPORT_EXPORT_PATIENT_DATA,
-        IMPORT_EXPORT_PATIENT_DATA_COMPLETED,
-        IMPORT_EXPORT_PATIENT_NOTE_DATA,
-        IMPORT_EXPORT_PATIENT_NOTE_DATA_COMPLETED,
+        MIGRATE_DATA_FROM_SOURCE_VIEW_REQUEST,
+        MIGRATE_APPOINTMENT_DATA,
+        MIGRATE_APPOINTMENT_DATA_COMPLETED,
+        MIGRATE_SURGERY_DAYS_ASSIGNMENT_DATA,
+        MIGRATE_PATIENT_DATA,
+        MIGRATE_PATIENT_DATA_COMPLETED,
+        MIGRATE_PATIENT_NOTE_DATA,
+        MIGRATE_PATIENT_NOTE_DATA_COMPLETED,
+        MIGRATE_PRIMARY_CONDITION_DATA,
+        MIGRATE_PRIMARY_CONDITION_DATA_COMPLETED,
+        MIGRATE_SECONDARY_CONDITION_DATA,
+        MIGRATE_SECONDARY_CONDITION_DATA_COMPLETED,
         MODAL_VIEWER_ACTIVATED,
         MODAL_VIEWER_CLOSED,
         NOTES_VIEW_CONTROLLER_REQUEST,
@@ -194,28 +212,34 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         PATIENT_TABLE_COUNT_RECEIVED,
         PATIENT_NOTE_TABLE_COUNT_RECEIVED,
         PATIENT_NOTIFICATION_TABLE_COUNT_RECEIVED,
+        PRIMARY_CONDITION_TABLE_COUNT_RECEIVED,
+        SECONDARY_CONDITION_TABLE_COUNT_RECEIVED,
         SURGERY_DAYS_ASSIGNMENT_TABLE_COUNT_RECEIVED,
         MIGRATION_ACTION_COMPLETE,
         PATIENTS_RECEIVED
     }
     
-    public static enum ImportProgressViewControllerActionEvent{
-        IMPORT_EXPORT_START_REQUEST,
-        IMPORT_EXPORT_PROGRESS_CLOSE_NOTIFICATION,
-        READY_FOR_RECEIPT_OF_APPOINTMENT_PROGRESS,
-        READY_FOR_RECEIPT_OF_PATIENT_NOTE_PROGRESS,
-        READY_FOR_RECEIPT_OF_PATIENT_PROGRESS
+    public static enum DataMigrationViewControllerActionEvent{
+        DATA_MIGRATION_START_REQUEST,
+        DATA_MIGRATION_PROGRESS_VIEW_CLOSE_NOTIFICATION,
+        READY_FOR_RECEIPT_OF_APPOINTMENT_MIGRATION_PROGRESS,
+        READY_FOR_RECEIPT_OF_PATIENT_NOTE_MIGRATION_PROGRESS,
+        READY_FOR_RECEIPT_OF_PATIENT_MIGRATION_PROGRESS,
+        READY_FOR_RECEIPT_OF_PRIMARY_CONDITION_MIGRATION_PROGRESS,
+        READY_FOR_RECEIPT_OF_SECONDARY_CONDITION_MIGRATION_PROGRESS
     }
     
-    public static enum ImportProgressViewControllerPropertyChangeEvent{
+    public static enum DataMigrationViewControllerPropertyChangeEvent{
         state,
         progress,
         PATIENT,
         APPOINTMENT,
-        OPERATION_COMPLETED,
-        PREPARE_FOR_RECEIPT_OF_APPOINTMENT_PROGRESS,
-        PREPARE_FOR_RECEIPT_OF_PATIENT_PROGRESS,
-        PREPARE_FOR_RECEIPT_OF_PATIENT_NOTE_PROGRESS
+        DATA_MIGRATION_COMPLETED,
+        PREPARE_FOR_RECEIPT_OF_APPOINTMENT_MIGRATION_PROGRESS,
+        PREPARE_FOR_RECEIPT_OF_PATIENT_MIGRATION_PROGRESS,
+        PREPARE_FOR_RECEIPT_OF_PATIENT_NOTE_MIGRATION_PROGRESS,
+        PREPARE_FOR_RECEIPT_OF_PRIMARY_CONDITION_MIGRATION_PROGRESS,
+        PREPARE_FOR_RECEIPT_OF_SECONDARY_CONDITION_MIGRATION_PROGRESS
         }
     
     public static enum NotesViewControllerActionEvent{
@@ -773,7 +797,7 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         desktopView = value;
     }
     
-    protected final DesktopView getDesktopView(){
+    public final DesktopView getDesktopView(){
         return desktopView;
     }
     
@@ -811,9 +835,10 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
 
                 // Create a session with the SMTP server and authenticate
                 Session session = Session.getInstance(props, new Authenticator() {
+                    String SMTPSender = getSMTPSender();
                     @Override
                     protected PasswordAuthentication getPasswordAuthentication() {
-                        return new PasswordAuthentication(getSMTPSender(), getSMTPUserPassword());
+                        return new PasswordAuthentication(SMTPSender, getSMTPUserPassword());
                     }
                 });
 
@@ -832,7 +857,11 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
                 System.out.println("Email sent successfully.");
             } catch (MessagingException e) {
                 e.printStackTrace();
+            }catch(StoreException ex){
+                String message = ex.getMessage() + "\n"
+                        + "Raised in ViewController::Email.send()";
             }
+            
         }
         
         private String extractFromSource(){
@@ -858,20 +887,24 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
                 fis.close();
             } catch (IOException e) {
                 e.printStackTrace();
+            } catch(StoreException ex){
+                String message = ex.getMessage() + "\n"
+                        + "Raised in ViewController::Email.extractFromSource()";
             }
+            
             return document;
         }
         
-        private final String getSMTPSender(){
-            return SystemDefinitions.getPMSSMTPUser();
+        private final String getSMTPSender()throws StoreException{
+            return SystemDefinition.getPMSSMTPUser();
         }
         
-        private final String getSMTPServer(){
-            return SystemDefinitions.getPMSSMTPServer();
+        private final String getSMTPServer()throws StoreException{
+            return SystemDefinition.getPMSSMTPServer();
         }
         
-        private final String getSMTPBody(){
-            return SystemDefinitions.getPMSSMTPBody();
+        private final String getSMTPBody()throws StoreException{
+            return SystemDefinition.getPMSSMTPBody();
         }
         
         private final String smtpUserPassword = "pmsq20000907B@@@";
@@ -895,10 +928,202 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
             String name = getPatientToReceiveEmail().getName().getForenames();
             String[] names = name.split(" ");
             return "Dear " + names[0] + "\n";
+        }       
+    }
+    /*
+    public class TemplateReaderx{
+        private File templateFile = null;
+        private String entityId = null;
+        private String sectionId = null;
+        private Patient patient = null;
+        private Appointment appointment = null;
+
+        public String getEntityId(){
+            return entityId;
+        }
+
+        public String getSectionId(){
+            return sectionId;
         }
         
+        private File getTemplateFile(){
+            return templateFile;
+        }
         
+        private Patient getPatient(){
+            return patient;
+        }
         
-    }
+        private Appointment getAppointment(){
+            return appointment;
+        }
+        
+        public TemplateReaderx(File templateFile, 
+                String entityId, String sectionId){
+            this.entityId = entityId;
+            this.sectionId = sectionId; 
+            this.templateFile = templateFile;
+        }
 
+        public TemplateReaderx(Patient patient,String sectionId) {
+            
+        }
+        
+        public TemplateReaderx(Appointment appointment, String sectionId){
+
+        }
+
+        Element getTemplate()throws TemplateReaderException{
+            Element result = null;
+            try{
+                DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+                DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+                Document doc = dBuilder.parse(getTemplateFile());
+                doc.getDocumentElement().normalize();  
+                
+                return doc.getDocumentElement();
+            }
+            catch(ParserConfigurationException ex){
+                String message = ex.getMessage() + "\n"
+                        + "ParserConfigurationException raised in getTemplate() method";
+                throw new TemplateReaderException(message, 
+                        TemplateReaderException
+                                .ExceptionType.PARSER_CONFIGURATION_ERROR);
+            }
+            catch(SAXException ex){
+                String message = ex.getMessage() + "\n"
+                        + "Raised in MenuMaker.getTemplate() method";
+                throw new TemplateReaderException(message,
+                        TemplateReaderException.ExceptionType.SAX_EXCEPTION);
+            }
+            catch(IOException ex){
+                String message = ex.getMessage() + "\n"
+                        + "Raised in MenuMaker.getTemplate() method";
+                throw new TemplateReaderException(message,
+                        TemplateReaderException.ExceptionType.IO_EXCEPTION);
+            }
+        }
+        
+        Element getSelectedRootFromTemplate()throws TemplateReaderException{
+            Element result = null;
+            Element element = null;
+            NodeList nodes = null;
+            Node node = null;
+            boolean isElementFound = false;
+            
+            Element template = getTemplate();
+            
+            nodes = template.getElementsByTagName(getEntityId());
+            if (nodes.getLength() == 0){
+                String message = "Template element tagged 'entity' not found in '"
+                        + getTemplateFile() + "'\n"
+                        + "Raised in getSelectedRootFromTemplate() method";
+                throw new TemplateReaderException(message,
+                        TemplateReaderException.ExceptionType.ELEMENT_NOT_FOUND_IN_TEMPLATE);
+            }
+            
+            for (int temp = 0; temp < nodes.getLength(); temp++) {
+                node = nodes.item(temp);
+                if (node.getNodeType() == Node.ELEMENT_NODE) {
+                    element = (Element)node;
+                    if (element.getAttribute("id").equals(getEntityId())){
+                        isElementFound = true;
+                        break;
+                    }
+                }
+            }
+            if (!isElementFound){
+                String message = "Template entity element with id '" + getEntityId() + "' not found in '"
+                        + getTemplateFile() + "'\n"
+                        + "Raised in getSelectedRootFromTemplate() method";
+                throw new TemplateReaderException(message,
+                        TemplateReaderException.ExceptionType.ELEMENT_NOT_FOUND_IN_TEMPLATE);
+            }
+            
+            nodes = template.getElementsByTagName("section");
+            if (nodes.getLength() == 0){
+                String message = "Template element tagged 'section' not found in '"
+                        + getTemplateFile() + "'\n"
+                        + "Raised in getSelectedRootFromTemplate() method";
+                throw new TemplateReaderException(message,
+                        TemplateReaderException.ExceptionType.ELEMENT_NOT_FOUND_IN_TEMPLATE);
+            }
+            
+            if (getSectionId()!=null){
+                for (int temp = 0; temp < nodes.getLength(); temp++) {
+                    node = nodes.item(temp);
+                    if (node.getNodeType() == Node.ELEMENT_NODE) {
+                        element = (Element)node;
+                        if (element.getAttribute("id").equals(getSectionId())){
+                            isElementFound = true;
+                            result = element;
+                            break;
+                        }
+                    }
+                }
+                if (!isElementFound){
+                    String message = "Template secrtion element with id '" + getSectionId() + "' not found in '"
+                            + getTemplateFile() + "'\n"
+                            + "Raised in getSelectedRootFromTemplate() method";
+                    throw new TemplateReaderException(message,
+                            TemplateReaderException.ExceptionType.ELEMENT_NOT_FOUND_IN_TEMPLATE);
+                }
+            }//end of if getSectionId !=null
+            return result;
+        }
+        
+        public HashMap extract(HashMap<String,String> map)throws TemplateReaderException{
+            //Map<String,String> myMap = new HashMap<>();
+            Element eSection;
+            Element ePrimary;
+            
+            Element element = getSelectedRootFromTemplate();
+            NodeList sNodes = element.getElementsByTagName("section");
+            for(int sIndex = 0; sIndex < sNodes.getLength(); sIndex++){
+                if((sNodes.item(sIndex).getNodeType() == Node.ENTITY_NODE)){
+                    eSection = (Element)sNodes.item(sIndex);
+                    NodeList pNodes = eSection.getElementsByTagName("primary");
+                    for(int pIndex = 0; pIndex < pNodes.getLength(); pIndex++){
+                        if((pNodes.item(pIndex).getNodeType() == Node.ENTITY_NODE)){
+                            ePrimary = (Element)pNodes.item(pIndex);
+                            map.put(eSection.getAttribute("id"), 
+                                      ePrimary.getAttribute("id"));
+                        }
+                    }
+                }
+            }
+            return map;
+        }
+             
+        public Patient.MedicalHistory extract(Patient.MedicalHistory mh)throws TemplateReaderException{
+            Patient.MedicalHistory.PrimaryCondition pc;
+            Patient.MedicalHistory.PrimaryCondition.SecondaryCondition sc;
+            Element pElement;
+            Element sElement;
+
+            Element element = getSelectedRootFromTemplate();
+            NodeList pNodes = element.getElementsByTagName("primary");
+            mh.set(new ArrayList<>());
+            for(int pIndex = 0; pIndex < pNodes.getLength(); pIndex++){
+                if((pNodes.item(pIndex).getNodeType() == Node.ENTITY_NODE)){
+                    pElement = (Element)pNodes.item(pIndex);
+                    pc = mh.new PrimaryCondition();
+                    pc.setDescription(pElement.getAttribute("id"));
+                    NodeList sNodes = element.getElementsByTagName("secondary");
+                    for(int sIndex = 0; sIndex < sNodes.getLength(); sIndex++){
+                        if((sNodes.item(sIndex).getNodeType() == Node.ENTITY_NODE)){
+                            sElement = (Element)sNodes.item(sIndex);
+                            sc = pc.new SecondaryCondition();
+                            sc.setDescription(sElement.getAttribute("id"));
+                            pc.get().add(sc);
+                        }
+                    }
+                    mh.get().add(pc);
+                }
+            }
+            return mh;
+        }
+    }
+    */
 }
+

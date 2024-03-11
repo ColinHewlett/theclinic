@@ -7,13 +7,14 @@ package model;
 
 import repository.StoreException;//01/03/2023
 import java.awt.Point;
+import java.util.ArrayList;
 
 /**
  *
  * @author colin
  */
 public class Entity implements IStoreClient{
-    
+    private String systemDefinitionProperty = null;
     private Boolean isAppointment = false;
     private Boolean isAppointmentDate = false;
     private Boolean isPatient = false;
@@ -22,6 +23,10 @@ public class Entity implements IStoreClient{
     private Boolean isPMSStore = false;
     private Boolean isSurgeryDaysAssignment = false;
     private Boolean isPatientNote = false;
+    private Boolean isPrimaryCondition = false;
+    private Boolean isSecondaryCondition = false;
+    private Boolean isMedication = false;
+    private Boolean isDoctor = false;
     private Scope scope = null;
     private Point value = null;
     protected Boolean isDeleted = false;
@@ -51,6 +56,10 @@ public class Entity implements IStoreClient{
         setIsTableRowValue(false); 
         setIsSurgeryDaysAssignment(false);
         setIsPatientNote(false);
+        setIsPrimaryCondition(false);
+        setIsSecondaryCondition(false);
+        setIsMedication(false);
+        setIsDoctor(false);
     }
     
     /**
@@ -61,6 +70,7 @@ public class Entity implements IStoreClient{
                         CANCELLED,              //cancelled appointments
                         FOR_DAY,                //appointments for this day
                         FOR_PATIENT,            //appointments/notes for this patient
+                        FOR_PRIMARY_CONDITION,  //secondary condition(s) for this primary condition
                         DELETED_FOR_PATIENT,    //deleted appointments for this patient (when a deleted patient is being recovered)         
                         DELETED,                //deleted patients
                         FROM_DAY,               //appointmens from this day
@@ -76,6 +86,13 @@ public class Entity implements IStoreClient{
 */
     }
 
+    public void setSystemDefinitionProperty(String value){
+        systemDefinitionProperty = value;
+    }
+    public String getSystemDefinitionProperty(){
+        return systemDefinitionProperty;
+    }
+    
     
     public Point getValue(){
         return value;
@@ -121,6 +138,39 @@ public class Entity implements IStoreClient{
         return isPatientNote;
     }
     
+    public Boolean getIsPrimaryCondition(){
+        return isPrimaryCondition;
+    }
+    
+    public Boolean getIsSecondaryCondition(){
+        return isSecondaryCondition;
+    }
+    
+    public Boolean getIsMedication(){
+        return isMedication;
+    }
+    
+    public Boolean getIsDoctor(){
+        return isDoctor;
+    }
+    
+    protected void setIsDoctor(Boolean value){
+        if (value) resetAll();
+        isDoctor= value;
+    }
+    
+    protected void setIsMedication(Boolean value){
+        if (value) resetAll();
+        isMedication= value;
+    }
+    protected void setIsSecondaryCondition(Boolean value){
+        if (value) resetAll();
+        isSecondaryCondition= value;
+    }
+    protected void setIsPrimaryCondition(Boolean value){
+        if (value) resetAll();
+        isPrimaryCondition= value;
+    }
     protected void setIsAppointment(Boolean value){
         if (value) resetAll();
         isAppointment= value;
@@ -155,4 +205,5 @@ public class Entity implements IStoreClient{
         if (value) resetAll();
         isPatientNote = value;
     }
+
 }

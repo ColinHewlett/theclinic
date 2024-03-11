@@ -18,6 +18,7 @@ import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.MenuComponent;
 import java.awt.Toolkit;
+import java.util.ArrayList;
 import view.views.interfaces.IView;
 import view.views.interfaces.IViewInternalFrameListener;
 import java.awt.event.MouseAdapter;
@@ -25,6 +26,7 @@ import java.awt.event.MouseMotionAdapter;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyVetoException;
+import javax.swing.JCheckBox;
 import javax.swing.JInternalFrame;
 import javax.swing.JLayeredPane;
 import javax.swing.JOptionPane;
@@ -45,9 +47,16 @@ public class View extends JInternalFrame
     private ViewController myController = null;
     private View view = null;
     private ModalView modalView = null;
+    private ArrayList<JCheckBox> options = null;
+    
+    
     
     static Font borderTitleFont = new Font("Segoe UI", 1, 12);
     static Color borderTitleColor = new Color(0,0,153);
+    
+    public ArrayList<JCheckBox> getOptions(){
+        return options;
+    }
     
     protected Color getBorderTitleColor(){
         return borderTitleColor;
@@ -84,10 +93,10 @@ public class View extends JInternalFrame
         setModalView(null);
         switch(viewer){
             case EXPORT_PROGRESS_VIEW:
-                setView(makeView(new ImportProgressView(viewer, controller,desktopView)));
+                setView(makeView(new DataMigrationProgressView(viewer, controller,desktopView)));
                 break;
             case MIGRATION_MANAGER_VIEW:
-                setView(makeView(new ImportProgressView(viewer, controller, desktopView)));
+                setView(makeView(new DataMigrationProgressView(viewer, controller, desktopView)));
                 break;
             case PATIENT_VIEW:
                 setView(makeView(new PatientView(viewer, controller, desktopView)));
@@ -144,8 +153,14 @@ public class View extends JInternalFrame
             case UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_VIEW:
                 setModalView(makeView(new ModalUnbookableAppointmentSlotEditorView(viewer, controller, desktopView)));
                 break;
+            case CHECKBOX_LIST_VIEW:
+                setModalView(makeView(new ModalCheckBoxListView(
+                        viewer, 
+                        controller, 
+                        desktopView)));
+                break;
             case TEST_PATIENT_VIEW:
-                setView(makeView(new TestPatientViewOld(viewer, controller, desktopView)));
+                //setView(makeView(new TestPatientViewOld(viewer, controller, desktopView)));
                 break;
             default:
                 JOptionPane.showMessageDialog(desktopView, 
@@ -165,6 +180,7 @@ public class View extends JInternalFrame
         APPOINTMENT_EDITOR_VIEW,
         APPOINTMENT_EMPTY_SLOT_SCAN_CONFIGURATION_VIEW,
         APPOINTMENTS_CANCELLED_VIEW,
+        CHECKBOX_LIST_VIEW,
         EXPORT_PROGRESS_VIEW,
         MIGRATION_MANAGER_VIEW,
         NON_SURGERY_DAY_EDITOR_VIEW,
