@@ -35,13 +35,6 @@ public class PrimaryCondition extends Condition implements IEntityStoreActions {
         setIsPrimaryCondition(true);
     }
 
-    public ArrayList<PrimaryCondition> get(){
-        return collection;
-    }
-    public void set(ArrayList<PrimaryCondition> value){
-        collection = value;
-    }
-    
     public Integer getKey(){
                 return key;
     }

@@ -111,6 +111,7 @@ public class Repository implements IStoreActions {
                                 CREATE_DOCTOR_TABLE,
                                 COUNT_DOCTOR,
                                 DELETE_ALL_DOCTOR,
+                                DELETE_DOCTOR,
                                 INSERT_DOCTOR,
                                 READ_DOCTOR,
                                 READ_ALL_DOCTOR,
@@ -121,6 +122,7 @@ public class Repository implements IStoreActions {
                                 CREATE_MEDICATION_TABLE,
                                 COUNT_MEDICATION,
                                 DELETE_ALL_MEDICATION,
+                                DELETE_MEDICATION,
                                 INSERT_MEDICATION,
                                 READ_MEDICATION,
                                 READ_ALL_MEDICATION,
@@ -989,8 +991,8 @@ public class Repository implements IStoreActions {
                 try{
                     PreparedStatement preparedStatement = getPMSStoreConnection().prepareStatement(sql);
                     preparedStatement.setLong(1,medication.getKey());
-                    preparedStatement.setLong(2,medication.getPatientKey());
-                    preparedStatement.setString(3,medication.getMedication());
+                    preparedStatement.setLong(2,medication.getPatient().getKey());
+                    preparedStatement.setString(3,medication.getDescription());
                     preparedStatement.setString(4,medication.getNotes());
                     preparedStatement.setBoolean(5,medication.getIsDeleted());
                     preparedStatement.executeUpdate();
@@ -1017,7 +1019,7 @@ public class Repository implements IStoreActions {
                     PreparedStatement preparedStatement = getPMSStoreConnection().prepareStatement(sql);
                     preparedStatement.setLong(1,doctor.getKey());
                     preparedStatement.setLong(2,doctor.getPatientKey());
-                    preparedStatement.setString(3,doctor.getDoctor());
+                    preparedStatement.setString(3,doctor.getTitle());
                     preparedStatement.setString(4,doctor.getLine1());
                     preparedStatement.setString(5,doctor.getLine2());
                     preparedStatement.setString(6,doctor.getTown());
@@ -1470,7 +1472,7 @@ public class Repository implements IStoreActions {
     
     private PrimaryCondition get(PrimaryCondition primaryCondition, ResultSet rs)throws StoreException{
         PrimaryCondition result = null;
-        ArrayList<PrimaryCondition> collection = new ArrayList<>();
+        ArrayList<Condition> collection = new ArrayList<>();
         try{
             switch (primaryCondition.getScope()){
                 case SINGLE:
@@ -1525,7 +1527,7 @@ public class Repository implements IStoreActions {
     
     private SecondaryCondition get(SecondaryCondition secondaryCondition, ResultSet rs)throws StoreException{
         SecondaryCondition result = null;
-        ArrayList<SecondaryCondition> collection = new ArrayList<>();
+        ArrayList<Condition> collection = new ArrayList<>();
         try{
             switch (secondaryCondition.getScope()){
                 case SINGLE:
@@ -1583,7 +1585,7 @@ public class Repository implements IStoreActions {
                         rs.next();
                         Integer pid = rs.getInt("pid");
                         Integer patientKey = rs.getInt("patientKey");
-                        String thedoctor = rs.getString("doctor");
+                        String title = rs.getString("title");
                         String line1 = rs.getString("line1");
                         String line2 = rs.getString("line2");
                         String town = rs.getString("town");
@@ -1594,7 +1596,7 @@ public class Repository implements IStoreActions {
                         Boolean isDeleted = rs.getBoolean("isDeleted");
                         doctor = new Doctor(pid);
                         doctor.setPatient(new Patient(patientKey));
-                        doctor.setDoctor(thedoctor);
+                        doctor.setTitle(title);
                         doctor.setLine1(line1);
                         doctor.setLine2(line2);
                         doctor.setTown(town);
@@ -1610,7 +1612,7 @@ public class Repository implements IStoreActions {
                         while (rs.next()){
                             Integer pid = rs.getInt("pid");
                             Integer patientKey = rs.getInt("patientKey");
-                            String thedoctor = rs.getString("doctor");
+                            String title = rs.getString("title");
                             String line1 = rs.getString("line1");
                             String line2 = rs.getString("line2");
                             String town = rs.getString("town");
@@ -1620,7 +1622,7 @@ public class Repository implements IStoreActions {
                             String email = rs.getString("email");
                             Boolean isDeleted = rs.getBoolean("isDeleted");
                             doctor = new Doctor(pid);
-                            doctor.setDoctor(thedoctor);
+                            doctor.setTitle(title);
                             doctor.setPatient(new Patient(patientKey));
                             doctor.setLine1(line1);
                             doctor.setLine2(line2);
@@ -1656,12 +1658,12 @@ public class Repository implements IStoreActions {
                         rs.next();
                         Integer pid = rs.getInt("pid");
                         Integer patientKey = rs.getInt("patientKey");
-                        String themedication = rs.getString("medication");
+                        String description = rs.getString("description");
                         String notes = rs.getString("notes");
                         Boolean isDeleted = rs.getBoolean("isDeleted");
                         medication = new Medication(pid);
                         medication.setPatient(new Patient(patientKey));
-                        medication.setMedication(themedication);
+                        medication.setDescription(description);
                         medication.setNotes(notes);
                         medication.setIsDeleted(isDeleted);
                     }
@@ -1671,12 +1673,12 @@ public class Repository implements IStoreActions {
                         while (rs.next()){
                             Integer pid = rs.getInt("pid");
                             Integer patientKey = rs.getInt("patientKey");
-                            String themedication = rs.getString("medication");
+                            String description = rs.getString("description");
                             String notes = rs.getString("notes");
                             Boolean isDeleted = rs.getBoolean("isDeleted");
                             medication = new Medication(pid);
                             medication.setPatient(new Patient(patientKey));
-                            medication.setMedication(themedication);
+                            medication.setDescription(description);
                             medication.setNotes(notes);
                             medication.setIsDeleted(isDeleted);
                             collection.add(medication);
@@ -1772,7 +1774,7 @@ public class Repository implements IStoreActions {
                     preparedStatement.setLong(1, doctor.getPatient().getKey());
                     ResultSet rs = preparedStatement.executeQuery();
                     doctor.setScope(Entity.Scope.FOR_PATIENT);
-                    return get(new Doctor(), rs);
+                    return get(doctor, rs);
                 } catch (SQLException ex) {
                     throw new StoreException("SQLException message -> " + ex.getMessage() + "\n"
                             + "StoreException message -> exception raised in Repository::doReadDoctorWithKey()",
@@ -1824,7 +1826,7 @@ public class Repository implements IStoreActions {
                     preparedStatement.setLong(1, medication.getPatient().getKey());
                     ResultSet rs = preparedStatement.executeQuery();
                     medication.setScope(Entity.Scope.FOR_PATIENT);
-                    return get(new Medication(), rs);
+                    return get(medication, rs);
                 } catch (SQLException ex) {
                     throw new StoreException("SQLException message -> " + ex.getMessage() + "\n"
                             + "StoreException message -> exception raised in Repository::doReadMedicationWithKey()",
@@ -1876,7 +1878,7 @@ public class Repository implements IStoreActions {
                     preparedStatement.setLong(1, pc.getPatient().getKey());
                     ResultSet rs = preparedStatement.executeQuery();
                     pc.setScope(Entity.Scope.FOR_PATIENT);
-                    return get(new PrimaryCondition(), rs);
+                    return get(pc, rs);
                 } catch (SQLException ex) {
                     throw new StoreException("SQLException message -> " + ex.getMessage() + "\n"
                             + "StoreException message -> exception raised in Repository::doReadPrimaryConditionForPatient()",
@@ -1928,7 +1930,7 @@ public class Repository implements IStoreActions {
                     preparedStatement.setLong(1, sc.getPrimaryCondition().getKey());
                     ResultSet rs = preparedStatement.executeQuery();
                     sc.setScope(Entity.Scope.FOR_PRIMARY_CONDITION);
-                    return get(new SecondaryCondition(), rs);
+                    return get(sc, rs);
                 } catch (SQLException ex) {
                     throw new StoreException("SQLException message -> " + ex.getMessage() + "\n"
                             + "StoreException message -> exception raised in Repository::doReadSecondaryConditionForPatient()",
@@ -2082,6 +2084,52 @@ public class Repository implements IStoreActions {
         }
     }
     
+    private void doDeleteMedication(String sql, Entity entity)throws StoreException{
+        if (entity != null){
+            if (entity.getIsMedication()){
+                Medication medication = (Medication)entity;
+                try{
+                    PreparedStatement preparedStatement = getPMSStoreConnection().prepareStatement(sql);
+                    preparedStatement.setLong(1, medication.getKey());
+                    preparedStatement.executeUpdate();
+                }catch (SQLException ex){
+                    throw new StoreException("SQLException message -> " + ex.getMessage() + "\n"
+                            + "StoreException message -> exception raised in Repository::doDeleteMedicatiom(sql, entity)",
+                            StoreException.ExceptionType.SQL_EXCEPTION);
+                }
+            } else {
+                String msg = "StoreException -> unexpected entity type in doDeleteMedicatiom(sql, entity)";
+                throw new StoreException(msg, StoreException.ExceptionType.UNEXPECTED_DATA_TYPE_ENCOUNTERED);
+            }   
+        }else {
+                String msg = "StoreException -> undefined entity type in doDeleteMedicatiom(sql, entity)";
+                throw new StoreException(msg, StoreException.ExceptionType.UNEXPECTED_DATA_TYPE_ENCOUNTERED);
+        }
+    }
+    
+    private void doDeleteDoctor(String sql, Entity entity)throws StoreException{
+        if (entity != null){
+            if (entity.getIsDoctor()){
+                Doctor doctor = (Doctor)entity;
+                try{
+                    PreparedStatement preparedStatement = getPMSStoreConnection().prepareStatement(sql);
+                    preparedStatement.setLong(1, doctor.getKey());
+                    preparedStatement.executeUpdate();
+                }catch (SQLException ex){
+                    throw new StoreException("SQLException message -> " + ex.getMessage() + "\n"
+                            + "StoreException message -> exception raised in Repository::doDeleteMedicatiom(sql, entity)",
+                            StoreException.ExceptionType.SQL_EXCEPTION);
+                }
+            } else {
+                String msg = "StoreException -> unexpected entity type in doDeleteMedicatiom(sql, entity)";
+                throw new StoreException(msg, StoreException.ExceptionType.UNEXPECTED_DATA_TYPE_ENCOUNTERED);
+            }   
+        }else {
+                String msg = "StoreException -> undefined entity type in doDeleteMedicatiom(sql, entity)";
+                throw new StoreException(msg, StoreException.ExceptionType.UNEXPECTED_DATA_TYPE_ENCOUNTERED);
+        }
+    }
+    
     private void doDeletePatientNote(String sql, Entity entity)throws StoreException{
         PatientNoteDelegate delegate = null;
         if (entity != null){
@@ -2167,8 +2215,8 @@ public class Repository implements IStoreActions {
                     doctor = (Doctor)entity;
                 try{
                     PreparedStatement preparedStatement = getPMSStoreConnection().prepareStatement(sql);
-                    preparedStatement.setLong(1, doctor.getPatientKey());
-                    preparedStatement.setString(2, doctor.getDoctor());
+                    preparedStatement.setLong(1, doctor.getPatient().getKey());
+                    preparedStatement.setString(2, doctor.getTitle());
                     preparedStatement.setString(3, doctor.getLine1());
                     preparedStatement.setString(4, doctor.getLine2());
                     preparedStatement.setString(5, doctor.getTown());
@@ -2258,11 +2306,11 @@ public class Repository implements IStoreActions {
                     medication = (Medication)entity;
                 try{
                     PreparedStatement preparedStatement = getPMSStoreConnection().prepareStatement(sql);
-                    preparedStatement.setLong(1, medication.getPatientKey());
-                    preparedStatement.setString(2, medication.getMedication());
+                    preparedStatement.setLong(1, medication.getPatient().getKey());
+                    preparedStatement.setString(2, medication.getDescription());
                     preparedStatement.setString(3, medication.getNotes());
                     preparedStatement.setBoolean(4, medication.getIsDeleted());
-                    preparedStatement.setLong(4, medication.getKey());
+                    preparedStatement.setLong(5, medication.getKey());
                     preparedStatement.executeUpdate();   
                 }catch(SQLException ex){
                     throw new StoreException("SQLException message -> " + ex.getMessage() + "\n"
@@ -2921,7 +2969,7 @@ public class Repository implements IStoreActions {
             case CREATE_DOCTOR_TABLE:
                 sql = "CREATE TABLE Doctor ("
                         + "pid LONG SECONDARY KEY, "
-                        + "doctor Char(30), "
+                        + "title Char(30), "
                         + "patientKey LONG NOT NULL REFERENCES Patient(pid), "
                         + "line1 Char(30), " 
                         + "line2 Char(30), " 
@@ -2938,9 +2986,15 @@ public class Repository implements IStoreActions {
                 sql = "DELETE FROM Doctor;";
                 doDelete(sql);
                 break;
+            case DELETE_DOCTOR:
+                sql = "UPDATE Doctor "
+                        + "SET isdeleted = true "
+                        + "WHERE pid = ?;";
+                doDeleteDoctor(sql,entity);
+                break;
             case INSERT_DOCTOR:
                 sql = "INSERT INTO Doctor "
-                        + "(pid, patientKey,doctor, line1, "
+                        + "(pid, patientKey,title, line1, "
                         + "line2, town, county, postcode, "
                         + "phone, email, isDeleted) "
                         + "VALUES(?,?,?,?,?,?,?,?,?,?,?);";
@@ -2970,7 +3024,7 @@ public class Repository implements IStoreActions {
             case UPDATE_DOCTOR:
                 sql = "UPDATE Doctor "
                         + "SET patientKey = ?"
-                        + "doctor = ?, "
+                        + "title = ?, "
                         + "line1 = ?, "
                         + "line2 = ?, "
                         + "town = ?, "
@@ -2978,7 +3032,7 @@ public class Repository implements IStoreActions {
                         + "postcode = ?, "
                         + "phone = ?, "
                         + "email = ?, "
-                        + "isDeleted = ?, "
+                        + "isDeleted = ? "
                         + "WHERE pid = ?;";
                 doUpdateDoctor(sql, entity);
         }
@@ -3002,7 +3056,7 @@ public class Repository implements IStoreActions {
             case CREATE_MEDICATION_TABLE:
                 sql = "CREATE TABLE Doctor ("
                         + "pid LONG SECONDARY KEY, "
-                        + "medication Char(50), "
+                        + "description Char(50), "
                         + "notes Char(255), "
                         + "isDeleted YesNo, "
                         + "patientKey LONG NOT NULL REFERENCES Patient(pid);";
@@ -3012,9 +3066,15 @@ public class Repository implements IStoreActions {
                 sql = "DELETE FROM Medication;";
                 doDelete(sql);
                 break;
+            case DELETE_MEDICATION:
+                sql = "UPDATE Medication "
+                        + "SET isdeleted = true "
+                        + "WHERE pid = ?;";
+                doDeleteMedication(sql,entity);
+                break;
             case INSERT_MEDICATION:
                 sql = "INSERT INTO Medication "
-                        + "(pid,patientKey,medication,notes,isDeleted) "
+                        + "(pid,patientKey,description,notes,isDeleted) "
                         + "VALUES(?,?,?,?,?);";
                 doInsertMedication(sql, entity);
                 break; 
@@ -3029,7 +3089,8 @@ public class Repository implements IStoreActions {
                 sql = "SELECT * "
                         + "FROM Medication "
                         + "WHERE patientKey = ? "
-                        + "AND isDeleted = false; ";
+                        + "AND isDeleted = false "
+                        + "ORDER BY description ASC;";
                 result = doReadMedicationForPatient(sql, entity);
                 break;
             case READ_ALL_MEDICATION:
@@ -3042,9 +3103,9 @@ public class Repository implements IStoreActions {
             case UPDATE_MEDICATION:
                 sql = "UPDATE Medication "
                         + "SET patientKey = ?, "
-                        + "medication = ?, "
+                        + "description = ?, "
                         + "notes = ?, "
-                        + "isDeleted = ?, "
+                        + "isDeleted = ? "
                         + "WHERE pid = ?";
                 doUpdateMedication(sql, entity);
         }
@@ -3088,7 +3149,8 @@ public class Repository implements IStoreActions {
                 sql = "SELECT * "
                         + "FROM PrimaryCondition "
                         + "WHERE patientKey = ? "
-                        + "AND isDeleted = false; ";
+                        + "AND isDeleted = false "
+                        + "ORDER BY description ASC";
                 result = doReadPrimaryConditionForPatient(sql, entity);
                 break;
             case READ_ALL_PRIMARY_CONDITION:
@@ -3116,7 +3178,7 @@ public class Repository implements IStoreActions {
                         + "description = ?, "
                         + "state = ?, "
                         + "notes = ?, "
-                        + "isDeleted = ?, "
+                        + "isDeleted = ? "
                         + "WHERE pid = ?";
                 doUpdatePrimaryCondition(sql, entity);
         }
@@ -3157,7 +3219,7 @@ public class Repository implements IStoreActions {
             case READ_SECONDARY_CONDITION_FOR_PRIMARY_CONDITION:
                 sql = "SELECT * "
                         + "FROM SecondaryCondition "
-                        + "WHERE patientKey = ? "
+                        + "WHERE primaryConditionKey = ? "
                         + "AND isDeleted = false; ";
                 result = doReadSecondaryConditionForPatient(sql, entity);
                 break;
@@ -3184,9 +3246,9 @@ public class Repository implements IStoreActions {
                         + "SET primaryConditionKey = ?, "
                         + "description = ?, "
                         + "state = ?, "
-                        + "isDeleted = ?, "
+                        + "isDeleted = ? "
                         + "WHERE pid = ?";
-                doUpdatePrimaryCondition(sql, entity);
+                doUpdateSecondaryCondition(sql, entity);
         }
         return result;
     }
@@ -3876,18 +3938,9 @@ public class Repository implements IStoreActions {
     public void delete(Doctor doctor)throws StoreException{
         if (doctor.getScope()!=null){
             switch(doctor.getScope()){
-               /*
                case SINGLE:
-                   if ((datestamp!=null)&&(patientKey!=null))
-                       runSQL(Repository.EntitySQL.DOCTOR,Repository.PMSSQL.DELETE_DOCTOR,doctor);
-                   else{
-                       String error = "datestamp or patient key undefined. " 
-                            + "Raised in Repository.delete(Doctor, datestamp, patientKey)";
-                        throw new StoreException(error, 
-                            StoreException.ExceptionType.STORE_EXCEPTION);
-                   }
-                   break;
-                */
+                    runSQL(Repository.EntitySQL.DOCTOR,Repository.PMSSQL.DELETE_DOCTOR,doctor);
+                    break;
                case ALL:
                    runSQL(Repository.EntitySQL.DOCTOR,Repository.PMSSQL.DELETE_ALL_DOCTOR,null);
                    break;
@@ -3911,21 +3964,12 @@ public class Repository implements IStoreActions {
     public void delete(Medication medication)throws StoreException{
         if (medication.getScope()!=null){
             switch(medication.getScope()){
-               /*
                case SINGLE:
-                   if ((datestamp!=null)&&(patientKey!=null))
-                       runSQL(Repository.EntitySQL.DOCTOR,Repository.PMSSQL.DELETE_DOCTOR,medication);
-                   else{
-                       String error = "datestamp or patient key undefined. " 
-                            + "Raised in Repository.delete(Medication, datestamp, patientKey)";
-                        throw new StoreException(error, 
-                            StoreException.ExceptionType.STORE_EXCEPTION);
-                   }
-                   break;
-                */
+                    runSQL(Repository.EntitySQL.MEDICATION,Repository.PMSSQL.DELETE_MEDICATION,medication);
+                    break;
                case ALL:
-                   runSQL(Repository.EntitySQL.DOCTOR,Repository.PMSSQL.DELETE_ALL_DOCTOR,null);
-                   break;
+                    runSQL(Repository.EntitySQL.DOCTOR,Repository.PMSSQL.DELETE_ALL_MEDICATION,null);
+                    break;
                default:
                     String error = "Unexpected scope encountered (" 
                             + medication.getScope().toString() + ")\n" 
@@ -4713,11 +4757,11 @@ public class Repository implements IStoreActions {
         List<String[]> result = null;
         if (entity.getIsAppointment()) {
             result = new CSVReader().getAppointmentDBFRecords(SystemDefinition.getPMSImportedAppointmentData());
-            //result = new CSVReader().getAppointmentDBFRecords(System.getenv("PMS_IMPORT_APPOINTMENT_DATA"));
+            
         }
         if (entity.getIsPatient()) {
             result = new CSVReader().getPatientDBFRecords(SystemDefinition.getPMSImportedPatientData());
-            //result = new CSVReader().getPatientDBFRecords(System.getenv("PMS_IMPORT_PATIENT_DATA"));
+            
             
         }
         
@@ -4743,7 +4787,7 @@ public class Repository implements IStoreActions {
     
     @Override
     public void update(PrimaryCondition pc)throws StoreException{
-        runSQL(Repository.EntitySQL.SECONDARY_CONDITION, Repository.PMSSQL.UPDATE_SECONDARY_CONDITION,pc); 
+        runSQL(Repository.EntitySQL.PRIMARY_CONDITION, Repository.PMSSQL.UPDATE_PRIMARY_CONDITION,pc); 
     }
     
     @Override
@@ -4826,7 +4870,7 @@ public class Repository implements IStoreActions {
             switch (repositoryType){
             case ACCESS:{
                 this.url = SystemDefinition.getPMSStoreAccessURL();
-                //this.url = System.getenv("PMS_STORE_ACCESS_URL");
+                
                 if (this.url.equals("undefined")){
                     throw new StoreException("PMS access database undefined",
                     StoreException.ExceptionType.PMS_DATABASE_UNDEFINED);
@@ -4871,7 +4915,7 @@ public class Repository implements IStoreActions {
             case POSTGRES:
                 repositoryName = "POSTGRES";
                 this.url = SystemDefinition.getPMSStorePostgresSQLURL();
-                //this.url = System.getenv("PMS_STORE_POSTGRES_URL");
+                
                 if (this.url.equals("undefined")){
                     throw new StoreException("PMS postgres database undefined",
                     StoreException.ExceptionType.PMS_DATABASE_UNDEFINED);

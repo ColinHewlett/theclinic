@@ -14,7 +14,7 @@ import repository.Repository;
  * @author colin
  */
 public class Doctor extends Entity implements IEntityStoreActions{
-    private String doctor = null;
+    private String title = null;
     private String line1 = null;
     private String line2 = null;
     private String town = null;
@@ -73,12 +73,12 @@ public class Doctor extends Entity implements IEntityStoreActions{
         this.patient = value;
     }
     
-    public String getDoctor() {
-        return doctor;
+    public String getTitle() {
+        return title;
     }
 
-    public void setDoctor(String doctor) {
-        this.doctor = doctor;
+    public void setTitle(String doctor) {
+        this.title = doctor;
     }
     
     public String getLine1() {

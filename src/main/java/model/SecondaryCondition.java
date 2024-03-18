@@ -32,14 +32,6 @@ public class SecondaryCondition extends Condition implements IEntityStoreActions
         setIsSecondaryCondition(true);
     }
 
-    public ArrayList<SecondaryCondition> get(){
-        return collection;
-    }
-    public void set(ArrayList<SecondaryCondition> value){
-        collection = value;
-    }
-    
-    
     public Integer getKey(){
         return key;
     }

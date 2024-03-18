@@ -8,6 +8,7 @@ package view.views.non_modal_views;
 import model.SystemDefinition;
 import view.views.modal_views.dialogs.Dialog;
 import controller.exceptions.TemplateReaderException;
+import controller.TemplateReader;
 import view.views.view_support_classes.models.Appointments3ColumnTableModel;
 import view.views.view_support_classes.renderers.AppointmentsTableLocalDateTimeRenderer;
 import view.views.view_support_classes.renderers.AppointmentsTableDurationRenderer;
@@ -37,12 +38,14 @@ import java.time.LocalDateTime;
 import java.time.Period;
 import java.util.ArrayList;
 import java.util.Iterator;
+import javax.swing.SwingConstants;
 import javax.swing.JCheckBox;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.InternalFrameAdapter;
@@ -99,7 +102,7 @@ public class PatientView extends View implements ActionListener{
   
     private final String DISPLAY_RECALL_EDITOR_VIEW ="Recall details";
     //28/02/2024 07:45
-    private final String DISPLAY_MEDICAL_PROFILE = "Medical profile";
+    private final String DISPLAY_MEDICAL_PROFILE = "Medical history";
     //private final String DISPLAY_GUARDIAN_EDITOR_VIEW = "Guardian (if patient)";
     private final String DISPLAY_PHONE_EMAIL_EDITOR_VIEW = "Phone/email";
     private final String DISPLAY_PATIENT_NOTES_EDITOR_VIEW = "Patient notes editor";
@@ -526,7 +529,7 @@ public class PatientView extends View implements ActionListener{
             /**
              * 18/02/2024 07:53 code update to support note taking data entry
              */
-
+            /*
             String noteTakingMode = SystemDefinition.getPMSNotesTemplateMode();
             switch(noteTakingMode){
                 case "ENABLED":
@@ -538,6 +541,9 @@ public class PatientView extends View implements ActionListener{
                 default:
 
             }
+            */
+            mbaPatientView.add(mnuActions);
+            setJMenuBar(mbaPatientView);
         }catch(PropertyVetoException ex){
             
         }catch (Exception exc){
@@ -577,7 +583,15 @@ public class PatientView extends View implements ActionListener{
                 break;
             */
             case DISPLAY_MEDICAL_PROFILE:
-                doDisplayMedicalProfileRequest();
+                if (this.cmbPatientSelector.getSelectedIndex()!=-1){
+                    doDisplayMedicalProfileRequest();
+                }else{
+                    JOptionPane.showInternalMessageDialog(this, 
+                            "a patient has to be selected before a medical history "
+                                    + "can be displayed","Patient view error", 
+                                    JOptionPane.WARNING_MESSAGE);
+                    rdbGroup.clearSelection();
+                }
                 break;
             case DISPLAY_PHONE_EMAIL_EDITOR_VIEW:
                 request = ViewController.
@@ -1711,11 +1725,12 @@ public class PatientView extends View implements ActionListener{
             rdbGroup = new javax.swing.ButtonGroup();
             rdbGroup.add(rdbRequestModalPhoneEmailEditorView);
             rdbGroup.add(rdbRequestModalRecallEditorView);
-            rdbGroup.add(rdbRequestModalGuardianEditorView);
+            //rdbGroup.add(rdbRequestModalGuardianEditorView);
+            rdbGroup.add(rdbRequestModalMedicalProfilePopup);
             rdbGroup.add(rdbRequestModalNotesEditorView);
             rdbRequestModalPhoneEmailEditorView.addActionListener(this);
             rdbRequestModalRecallEditorView.addActionListener(this);
-            rdbRequestModalGuardianEditorView.addActionListener(this);
+            rdbRequestModalMedicalProfilePopup.addActionListener(this);
             rdbRequestModalNotesEditorView.addActionListener(this);
         }catch (Exception exc){
             String message = exc.getMessage() + "\n";
@@ -1954,7 +1969,7 @@ public class PatientView extends View implements ActionListener{
                 //.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGap(23,23,23)
                 .addGroup(pnlFurtherDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(rdbRequestModalGuardianEditorView)
+                    .addComponent(rdbRequestModalMedicalProfilePopup)
                     .addComponent(rdbRequestModalNotesEditorView))
                 .addGap(20,20,20))
         );
@@ -1964,7 +1979,7 @@ public class PatientView extends View implements ActionListener{
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(pnlFurtherDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(rdbRequestModalPhoneEmailEditorView)
-                    .addComponent(rdbRequestModalGuardianEditorView))
+                    .addComponent(rdbRequestModalMedicalProfilePopup))
                 .addGap(28, 28, 28)
                 .addGroup(pnlFurtherDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(rdbRequestModalRecallEditorView)
@@ -3299,7 +3314,9 @@ public class PatientView extends View implements ActionListener{
     }
     
     private void doEnableNoteTaking(){
-        mbaPatientView.add(mnuActions);
+        
+   
+        
         try{
             setMenuMaker(new MenuMaker(
                     mbaPatientView,
@@ -3325,6 +3342,7 @@ public class PatientView extends View implements ActionListener{
         private JMenuBar menuBar = null;
         private String selectedMenuBarID = null;
         private JPopupMenu popupMenu;
+  
 
         /**
          * 
@@ -3686,9 +3704,85 @@ public class PatientView extends View implements ActionListener{
     }      
 
     private void doDisplayMedicalProfileRequest(){
-        JPopupMenu popup = new JPopupMenu();
-        MenuMaker popupMenuMaker = new MenuMaker(popup, "Medical history");
+        JPopupMenu popup = new JPopupMenu("Select option");
+        JLabel title = new JLabel("       Select options");
+        popup.add(title);    
+        popup.addSeparator();
+        
+        popup.setVisible(true);
+        Patient patient = (Patient)cmbPatientSelector.getSelectedItem();
+        
+        ArrayList<String> items = 
+                TemplateReader.extract(patient.getMedicalHistory());
+        Iterator itemsIterator = items.iterator();
+        while(itemsIterator.hasNext()){
+            String item = (String)itemsIterator.next();
+            switch(item){
+                case "History":
+                    popup.add(item).addActionListener(new java.awt.event.ActionListener() {
+                        public void actionPerformed(java.awt.event.ActionEvent evt) {
+                            mniMedicalHistoryActionPerformed(evt);
+                        }
+                    });
+                   // rdbGroup.clearSelection();
+                    break;
+                case "Medication":
+                    popup.add(item).addActionListener(new java.awt.event.ActionListener() {
+                        public void actionPerformed(java.awt.event.ActionEvent evt) {
+                            mniMedicationActionPerformed(evt);
+                        }
+                    });
+                    //rdbGroup.clearSelection();
+                    break;
+                case "Doctor":
+                    popup.add(item).addActionListener(new java.awt.event.ActionListener() {
+                        public void actionPerformed(java.awt.event.ActionEvent evt) {
+                            mniDoctorActionPerformed(evt);
+                        }
+                    });
+                    //rdbGroup.clearSelection();
+                    break;        
+            }
+        }
+        popup.show(this.rdbRequestModalMedicalProfilePopup, 
+                rdbRequestModalMedicalProfilePopup.getX()-50,
+                rdbRequestModalMedicalProfilePopup.getY()-50 );
     }
+    
+    private void mniMedicalHistoryActionPerformed(ActionEvent e){
+        ViewController.PatientViewControllerActionEvent request = 
+                ViewController.PatientViewControllerActionEvent.
+                PATIENT_MEDICAL_HISTORY_1_EDITOR_VIEW_REQUEST;
+        doPopupWithAction(request);
+    }
+    
+    private void mniMedicationActionPerformed(ActionEvent e){
+        ViewController.PatientViewControllerActionEvent request = 
+                ViewController.PatientViewControllerActionEvent.
+                PATIENT_MEDICATION_EDITOR_VIEW_REQUEST;
+        doPopupWithAction(request);
+    }
+    
+    private void mniDoctorActionPerformed(ActionEvent e){
+        ViewController.PatientViewControllerActionEvent request = 
+                ViewController.PatientViewControllerActionEvent.
+                PATIENT_DOCTOR_EDITOR_VIEW_REQUEST;
+        doPopupWithAction(request);
+    }
+    
+    private void doPopupWithAction(ViewController.PatientViewControllerActionEvent request){
+        ActionEvent actionEvent = new ActionEvent(
+            this,ActionEvent.ACTION_PERFORMED,
+            request.toString());
+        this.getMyController().actionPerformed(actionEvent);
+        actionEvent = new ActionEvent(
+            this,ActionEvent.ACTION_PERFORMED,
+            ViewController.PatientViewControllerActionEvent.
+                    VIEW_CHANGED_NOTIFICATION.toString());
+        this.getMyController().actionPerformed(actionEvent);
+        rdbGroup.clearSelection();
+    }
+
 }
 
 

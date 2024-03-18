@@ -23,7 +23,7 @@ public class SystemDefinition {
     private static String pmsImportPatientData = null;
     private static String pmsLookAndFeel = null;
     private static String pmsMasterDocument = null;
-    private static String pmsNotesTemplate = null;
+    private static String pmsSystemDefinition = null;
     private static String pmsNotesTemplateMode = null;
     private static String pmsOperationMode = null;
     private static String pmsSMTPBody = null;
@@ -57,8 +57,8 @@ public class SystemDefinition {
     public static String getPMSNotesTemplateMode(){
         return pmsNotesTemplateMode;
     }
-    public static String getPMSNotesTemplate(){
-        return pmsNotesTemplate;
+    public static String getPMSSystemDefinition(){
+        return pmsSystemDefinition;
     }
     public static String getPMSMasterDocument(){
         return pmsMasterDocument;
@@ -98,8 +98,8 @@ public class SystemDefinition {
                 case "PMS_MASTER_DOCUMENT":
                     pmsMasterDocument = entry.getValue();
                     break;
-                case "PMS_NOTES_TEMPLATE":
-                    pmsNotesTemplate = entry.getValue();
+                case "PMS_SYSTEM_DEFINITION":
+                    pmsSystemDefinition = entry.getValue();
                     break;
                 case "PMS_NOTES_TEMPLATE_MODE":
                     pmsNotesTemplateMode = entry.getValue();

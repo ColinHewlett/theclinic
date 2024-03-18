@@ -6,15 +6,14 @@
 package controller;
 
 //import controller.DesktopViewController.DesktopViewControllerActionEvent;
-import model.Entity;
-import model.Patient;
-import model.Appointment;
-import model.PatientNote;
+import controller.exceptions.TemplateReaderException;
+import model.*;
 import model.Entity.Scope;
 import view.views.non_modal_views.DesktopView;
 import view.View;
 import view.views.modal_views.ModalView;
 import view.views.modal_views.ModalPatientNotesEditorView;
+import view.views.modal_views.ModalPatientMedicalHistory1EditorView;
 import repository.StoreException;//01/03/2023
 import static controller.ViewController.displayErrorMessage;
 import java.beans.PropertyChangeSupport;
@@ -23,6 +22,7 @@ import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyVetoException;
+import java.io.File;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.LocalDateTime;
@@ -101,6 +101,15 @@ public class PatientViewController extends ViewController {
                 break;
             case PATIENT_DELETE_REQUEST:
                 doPatientDeleteRequest();
+                break;
+            case PATIENT_MEDICAL_HISTORY_1_EDITOR_VIEW_REQUEST:
+                doMedicalHistory1EditorViewRequest();
+                break;
+            case PATIENT_MEDICATION_EDITOR_VIEW_REQUEST:
+                doMedicationEditorViewRequest();
+                break;
+            case PATIENT_DOCTOR_EDITOR_VIEW_REQUEST:
+                doDoctorEditorViewRequest();
                 break;
             case PATIENT_RECALL_EDITOR_VIEW_REQUEST:
             case PATIENT_GUARDIAN_EDITOR_VIEW_REQUEST:
@@ -212,11 +221,21 @@ public class PatientViewController extends ViewController {
             case PATIENT_GUARDIAN_EDITOR_VIEW:    
                 doPatientEditorViewChange(the_view);
                 break;  
-            /*
-            case PATIENT_NOTES_EDITOR_VIEW:
-                doPatientNotesEditorViewChange(e);
+            case PATIENT_MEDICAL_HISTORY_1_EDITOR_VIEW:
+                doPatientMedicalHistory1EditorViewRequest(e);
                 break;
-            */
+            case PATIENT_MEDICAL_HISTORY_2_EDITOR_VIEW:
+                doPatientMedicalHistory2EditorViewRequest(e);
+                break;
+            case PATIENT_MEDICATION_EDITOR_VIEW:
+                doPatientMedicationEditorViewRequest(e);
+                break;
+            case PATIENT_DOCTOR_EDITOR_VIEW:
+                doPatientDoctorEditorViewRequest(e);
+                break;
+            case NOTE_TAKER:
+                doNoteTakerRequest(e);
+                break;
             default:
                 JOptionPane.showMessageDialog(getView(), 
                         "Unrecognised view type specified in PatientViewController::doSecondaryViewActionRequest()",
@@ -343,6 +362,115 @@ public class PatientViewController extends ViewController {
                     null
             );
         }          
+    }
+    
+    private void doDoctorEditorViewRequest(){
+        try{
+            Doctor doctor = new Doctor(
+                    getDescriptor().getControllerDescription().getPatient());
+            doctor.setScope(Scope.FOR_PATIENT);
+            doctor = doctor.read();
+            getDescriptor().getControllerDescription().setDoctor(doctor);
+            setModalView((ModalView)new View().make(View.Viewer.PATIENT_DOCTOR_EDITOR_VIEW,
+                    this, 
+                    this.getDesktopView()).getModalView());
+            firePropertyChangeEvent(
+                    ViewController.PatientViewControllerPropertyChangeEvent.
+                        PATIENT_EDITOR_VIEW_CLOSED.toString(),
+                    getView(),
+                    this,
+                    null,
+                    null
+            );
+        }catch(StoreException ex){
+            String message = ex.getMessage() + "\n"
+                    + "Handled in PatientViewController::doDoctorEditorViewRequest()";
+            displayErrorMessage(message, "Patient view controller", 
+                    JOptionPane.WARNING_MESSAGE);
+        }
+    }
+    
+    private void doMedicationEditorViewRequest(){
+        try{
+            Medication medication = new Medication(
+                    getDescriptor().getControllerDescription().getPatient());
+            medication.setScope(Scope.FOR_PATIENT);
+            medication = medication.read();
+            getDescriptor().getControllerDescription().setMedication(medication);
+            setModalView((ModalView)new View().make(View.Viewer.PATIENT_MEDICATION_EDITOR_VIEW,
+                    this, 
+                    this.getDesktopView()).getModalView());
+            firePropertyChangeEvent(
+                ViewController.PatientViewControllerPropertyChangeEvent.
+                    PATIENT_EDITOR_VIEW_CLOSED.toString(),
+                getView(),
+                this,
+                null,
+                null
+            );           
+        }catch(StoreException ex){
+            String message = ex.getMessage() + "\n"
+                    + "Handled in PatientViewController::doMedicationjEditorViewRequest()";
+            displayErrorMessage(message, "Patient view controller", 
+                    JOptionPane.WARNING_MESSAGE);
+        }    
+    }
+    
+    private void doMedicalHistory1EditorViewRequest(){
+        /**
+         * -- check if this patient has medical history data
+         */ 
+
+        PrimaryCondition pc = null;
+        PrimaryCondition storedPrimaryCondition = null; 
+        Patient patient = getDescriptor().getControllerDescription().getPatient();
+        try{
+            if (patient!=null){
+                pc = new PrimaryCondition(patient);
+                pc.setScope(Scope.FOR_PATIENT);
+                pc = pc.read();
+                if (pc.get().isEmpty()){// patient needs default medical history from template file
+                    pc = createPrimaryConditionsFromTemplate(patient);    
+                }
+                
+                for (Condition primaryCondition : pc.get()){
+                    PrimaryCondition pCondition = (PrimaryCondition)primaryCondition;
+                    SecondaryCondition sCondition = new SecondaryCondition(pCondition);
+                    sCondition.setScope(Scope.FOR_PRIMARY_CONDITION);
+                    sCondition = sCondition.read();
+                    pCondition.setSecondaryCondition(sCondition);
+                } 
+            }
+
+            getDescriptor().getControllerDescription().setCondition(pc);
+            setModalView((ModalView)new View().make(View.Viewer.PATIENT_MEDICAL_HISTORY_1_EDITOR_VIEW,
+                    this, 
+                    this.getDesktopView()).getModalView());
+            firePropertyChangeEvent(
+                    ViewController.PatientViewControllerPropertyChangeEvent.
+                        PATIENT_EDITOR_VIEW_CLOSED.toString(),
+                    getView(),
+                    this,
+                    null,
+                    null
+            );
+            firePropertyChangeEvent(
+                    ViewController.PatientViewControllerPropertyChangeEvent.
+                        MAKE_VIEW_VISIBLE.toString(),
+                    getView(),
+                    this,
+                    null,
+                    null
+            );
+        }catch(TemplateReaderException ex){
+            String message = ex.getMessage() + "\n"
+                    + "TemplateErrorMessage raised in PatientViewController::doMedicalHistoryRequest()";
+            displayErrorMessage(message,"Patient view controller error", JOptionPane.WARNING_MESSAGE);
+        }catch(StoreException ex){
+            String message = ex.getMessage() + "\n"
+                    + "StoreException raised in PatientViewController::doMedicalHistoryRequest()";
+            displayErrorMessage(message,"Patient view controller error", JOptionPane.WARNING_MESSAGE);
+        }
     }
     
     private void doPatientEditorViewRequest(
@@ -762,6 +890,377 @@ public class PatientViewController extends ViewController {
         }
     }
     
+    private View patientMedicalHistory2View = null;
+    private void setPatientMedicalHistory2View(View view){
+        patientMedicalHistory2View = view;
+    }
+    private View getPatientMedicalHistory2View(){
+        return patientMedicalHistory2View;
+    }
+    
+    private void doPatientMedicalHistory2EditorViewRequest(ActionEvent e){
+        Condition condition = null;
+        View view = (View)e.getSource();
+        /**
+         * save reference for access later after receipt of a request from the note taker
+         */
+        setPatientMedicalHistory2View(view);
+        switch(ViewController.PatientViewControllerActionEvent.valueOf(e.getActionCommand())){
+            case PATIENT_MEDICAL_HISTORY_NOTE_TAKER_REQUEST:
+                firePropertyChangeEvent(
+                        ViewController.PatientViewControllerPropertyChangeEvent.
+                            MAKE_VIEW_INVISIBLE.toString(),
+                        view,
+                        this,
+                        null,
+                        null
+                );
+                condition = getDescriptor().getViewDescription().getCondition();
+                getDescriptor().getControllerDescription().setCondition(condition);
+
+                setModalView((ModalView)new View().make(View.Viewer.NOTE_TAKER,
+                        this, 
+                        this.getDesktopView()).getModalView());
+                firePropertyChangeEvent(
+                        ViewController.PatientViewControllerPropertyChangeEvent.
+                            MAKE_VIEW_VISIBLE.toString(),
+                        view,
+                        this,
+                        null,
+                        null
+                );
+                firePropertyChangeEvent(
+                        ViewController.PatientViewControllerPropertyChangeEvent.
+                            PATIENT_EDITOR_VIEW_CLOSED.toString(),
+                        getView(),
+                        this,
+                        null,
+                        null
+                );
+                break;
+            case CONDITION_STATE_UPDATE_REQUEST:
+                condition = getDescriptor()
+                        .getViewDescription().getCondition();
+                try{
+                    if (condition.getIsPrimaryCondition()){
+                        PrimaryCondition pc = (PrimaryCondition)condition;
+                        pc.setState(false);
+                        pc.update();
+                    }else if(condition.getIsSecondaryCondition()){
+                        SecondaryCondition sc = (SecondaryCondition)condition;
+                        sc.update();
+                    }else{
+                        String message = "Unexpected condition data type encountered in "
+                                + "PatientViewController::doPatientMedicalHistory2EditorViewRequest()";
+                        displayErrorMessage(message, 
+                                "Patient view controller", JOptionPane.WARNING_MESSAGE);
+                    }
+                }catch(StoreException ex){
+                    String message = ex.getMessage() + "\n"
+                            + "StoreException raised in PatientViewController::doPatientMedicalHistory1ViewRequest()";
+                    displayErrorMessage(message,"Patient view controller error", JOptionPane.WARNING_MESSAGE);
+                }
+                break;
+        }
+    }
+    
+    private PrimaryCondition makeFatPrimaryCondition()throws StoreException{
+        PrimaryCondition fatPC = null;
+        Patient patient = getDescriptor().getControllerDescription().getPatient();
+        fatPC = new PrimaryCondition(patient);
+        fatPC.setScope(Scope.FOR_PATIENT);
+        fatPC = fatPC.read();
+        /**
+         * fetch secondary condition collection for each primary condition 
+         */
+        for (Condition primaryCondition : fatPC.get()){
+            PrimaryCondition pCondition = (PrimaryCondition)primaryCondition;
+            SecondaryCondition sCondition = new SecondaryCondition(pCondition);
+            sCondition.setScope(Scope.FOR_PRIMARY_CONDITION);
+            sCondition = sCondition.read();
+            sCondition.setPrimaryCondition(pCondition);
+            pCondition.setSecondaryCondition(sCondition);
+        }
+        return fatPC;
+    }
+    
+    private void doNoteTakerRequest(ActionEvent e){
+        switch(ViewController.PatientViewControllerActionEvent.valueOf(e.getActionCommand())){
+            case PATIENT_MEDICAL_HISTORY_NOTES_TAKEN_REQUEST:
+                try{
+                    Condition condition = getDescriptor().getViewDescription().getCondition();
+                    if(condition.getIsPrimaryCondition()){
+                        PrimaryCondition pc = (PrimaryCondition)condition;        
+                        pc.setPatient(getDescriptor().getControllerDescription().getPatient());
+                        pc.update();
+                    }else if(condition.getIsSecondaryCondition()){
+                        SecondaryCondition sc = (SecondaryCondition)condition;
+                        
+                    }
+                    
+                    /*
+                    Patient patient = getDescriptor().getControllerDescription().getPatient();
+                    pc = new PrimaryCondition(patient);
+                    pc.setScope(Scope.FOR_PATIENT);
+                    pc = pc.read();
+
+                    for (Condition primaryCondition : pc.get()){
+                        PrimaryCondition pCondition = (PrimaryCondition)primaryCondition;
+                        SecondaryCondition sCondition = new SecondaryCondition(pCondition);
+                        sCondition.setScope(Scope.FOR_PRIMARY_CONDITION);
+                        sCondition = sCondition.read();
+                        pCondition.setSecondaryCondition(sCondition);
+                    }  
+                    */
+                    getDescriptor().getControllerDescription().setCondition(makeFatPrimaryCondition());
+                    firePropertyChangeEvent(
+                            ViewController.PatientViewControllerPropertyChangeEvent.
+                                PATIENT_MEDICAL_HISTORY_RECEIVED.toString(),
+                            getPatientMedicalHistory1View(),
+                            this,
+                            null,
+                            null
+                    );
+                }catch(StoreException ex){
+                    String message = ex.getMessage() + "\n"
+                            + "Handled in PatientViewController::doNoteTakerRequest";
+                    displayErrorMessage(message,"Patient view controller error", 
+                            JOptionPane.WARNING_MESSAGE);
+                }
+                break;
+        }
+    }
+    
+    private View patientMedicalHistory1View = null;
+    private void setPatientMedicalHistory1View(View view){
+        patientMedicalHistory1View = view;
+    }
+    private View getPatientMedicalHistory1View(){
+        return patientMedicalHistory1View;
+    }
+    
+    private void doPatientDoctorEditorViewRequest(ActionEvent e){
+        Doctor doctor = getDescriptor().getViewDescription().getDoctor();
+        try{
+            switch(ViewController
+                    .PatientViewControllerActionEvent.valueOf(e.getActionCommand())){ 
+                case PATIENT_DOCTOR_CREATE_REQUEST:
+                    doctor.create();
+                    doctor = new Doctor(getDescriptor()
+                            .getControllerDescription().getPatient());
+                    doctor.setScope(Scope.FOR_PATIENT);
+                    doctor = doctor.read();
+                    getDescriptor().getControllerDescription().setDoctor(doctor);
+                    firePropertyChangeEvent(
+                            ViewController.PatientViewControllerPropertyChangeEvent.
+                                DOCTOR_RECEIVED.toString(),
+                            (View)e.getSource(),
+                            this,
+                            null,
+                            null
+                    );
+                    break;
+                case PATIENT_DOCTOR_DELETE_REQUEST:
+                    doctor.setScope(Scope.SINGLE);
+                    doctor.delete();
+                    doctor.setScope(Scope.FOR_PATIENT);
+                    doctor = doctor.read();
+                    getDescriptor().getControllerDescription().setDoctor(doctor);
+                    firePropertyChangeEvent(
+                            ViewController.PatientViewControllerPropertyChangeEvent.
+                                DOCTOR_RECEIVED.toString(),
+                            (View)e.getSource(),
+                            this,
+                            null,
+                            null
+                    );
+                    break;
+                case PATIENT_DOCTOR_UPDATE_REQUEST:
+                    doctor.update();
+                    doctor.setScope(Scope.FOR_PATIENT);
+                    doctor = doctor.read();
+                    getDescriptor().getControllerDescription().setDoctor(doctor);
+                    firePropertyChangeEvent(
+                            ViewController.PatientViewControllerPropertyChangeEvent.
+                                DOCTOR_RECEIVED.toString(),
+                            (View)e.getSource(),
+                            this,
+                            null,
+                            null
+                    );
+                    break;
+
+            }
+        }catch(StoreException ex){
+            String message = ex.getMessage() + "\n"
+                    + "Handled in "
+                    + "PatientViewController::doPatientDoctorEditorViewRequest()";
+        }
+    }
+    
+    private void doPatientMedicationEditorViewRequest(ActionEvent e){
+        Medication medication = getDescriptor().getViewDescription().getMedication();
+        try{
+            switch(ViewController
+                    .PatientViewControllerActionEvent.valueOf(e.getActionCommand())){ 
+                case PATIENT_MEDICATION_CREATE_REQUEST:
+                    medication.insert();
+                    medication = new Medication(getDescriptor()
+                            .getControllerDescription().getPatient());
+                    medication.setScope(Scope.FOR_PATIENT);
+                    medication = medication.read();
+                    getDescriptor().getControllerDescription().setMedication(medication);
+                    firePropertyChangeEvent(
+                            ViewController.PatientViewControllerPropertyChangeEvent.
+                                MEDICATIONS_RECEIVED.toString(),
+                            (View)e.getSource(),
+                            this,
+                            null,
+                            null
+                    );
+                    break;
+                case PATIENT_MEDICATION_DELETE_REQUEST:
+                    medication.setScope(Scope.SINGLE);
+                    medication.delete();
+                    medication.setScope(Scope.FOR_PATIENT);
+                    medication = medication.read();
+                    getDescriptor().getControllerDescription().setMedication(medication);
+                    firePropertyChangeEvent(
+                            ViewController.PatientViewControllerPropertyChangeEvent.
+                                MEDICATIONS_RECEIVED.toString(),
+                            (View)e.getSource(),
+                            this,
+                            null,
+                            null
+                    );
+                    break;
+                case PATIENT_MEDICATION_UPDATE_REQUEST:
+                    medication.update();
+                    medication.setScope(Scope.FOR_PATIENT);
+                    medication = medication.read();
+                    getDescriptor().getControllerDescription().setMedication(medication);
+                    firePropertyChangeEvent(
+                            ViewController.PatientViewControllerPropertyChangeEvent.
+                                MEDICATIONS_RECEIVED.toString(),
+                            (View)e.getSource(),
+                            this,
+                            null,
+                            null
+                    );
+                    break;
+
+            }
+        }catch(StoreException ex){
+            String message = ex.getMessage() + "\n"
+                    + "Handled in "
+                    + "PatientViewController::doPatientMedicationEditorViewRequest()";
+            displayErrorMessage(message,
+                    "Patient view controller error",JOptionPane.WARNING_MESSAGE);
+        }
+    }
+    
+    private void doPatientMedicalHistory1EditorViewRequest(ActionEvent e){
+        PrimaryCondition pc = null;
+        View view = (View)e.getSource();
+        /**
+         * save reference for access later after receipt of a request from the note taker
+         */
+        setPatientMedicalHistory1View(view);
+        switch(ViewController.PatientViewControllerActionEvent.valueOf(e.getActionCommand())){
+            case CONDITION_STATE_UPDATE_REQUEST:
+                pc = (PrimaryCondition)getDescriptor()
+                        .getViewDescription().getCondition();
+                try{
+                    pc.update();
+                    
+                }catch(StoreException ex){
+                    String message = ex.getMessage() + "\n"
+                            + "StoreException raised in PatientViewController::doPatientMedicalHistory1ViewRequest()";
+                    displayErrorMessage(message,"Patient view controller error", JOptionPane.WARNING_MESSAGE);
+                }
+                break;
+            case PATIENT_MEDICAL_HISTORY_NOTE_TAKER_REQUEST:
+                firePropertyChangeEvent(
+                        ViewController.PatientViewControllerPropertyChangeEvent.
+                            MAKE_VIEW_INVISIBLE.toString(),
+                        getPatientMedicalHistory1View(),
+                        this,
+                        null,
+                        null
+                );
+                Condition condition = getDescriptor().getViewDescription().getCondition();
+                getDescriptor().getControllerDescription().setCondition(condition);
+
+                setModalView((ModalView)new View().make(View.Viewer.NOTE_TAKER,
+                        this, 
+                        this.getDesktopView()).getModalView());
+                
+                firePropertyChangeEvent(
+                        ViewController.PatientViewControllerPropertyChangeEvent.
+                            PATIENT_EDITOR_VIEW_CLOSED.toString(),
+                        getView(),
+                        this,
+                        null,
+                        null
+                );
+                firePropertyChangeEvent(
+                        ViewController.PatientViewControllerPropertyChangeEvent.
+                            MAKE_VIEW_VISIBLE.toString(),
+                        view,
+                        this,
+                        null,
+                        null
+                );
+                break;
+            case PATIENT_MEDICAL_HISTORY_2_EDITOR_VIEW_REQUEST:
+                /**
+                 * -- fetch selected primary condition's collection of secondary conditions
+                 */
+                pc = (PrimaryCondition)getDescriptor()
+                        .getViewDescription().getCondition();
+                getDescriptor().getControllerDescription().setCondition(pc);
+                /*
+                SecondaryCondition sc = new SecondaryCondition(pc);
+                sc.setScope(Scope.FOR_PRIMARY_CONDITION);
+                sc = sc.read();
+                pc.setSecondaryCondition(sc);
+                getDescriptor().getControllerDescription().setCondition(pc);
+                */
+                firePropertyChangeEvent(
+                        ViewController.PatientViewControllerPropertyChangeEvent.
+                            MAKE_VIEW_INVISIBLE.toString(),
+                        view,
+                        this,
+                        null,
+                        null
+                );
+
+                setModalView((ModalView)new View().make(View.Viewer.PATIENT_MEDICAL_HISTORY_2_EDITOR_VIEW,
+                        this, 
+                        this.getDesktopView()).getModalView());
+
+                firePropertyChangeEvent(
+                        ViewController.PatientViewControllerPropertyChangeEvent.
+                            PATIENT_EDITOR_VIEW_CLOSED.toString(),
+                        getView(),
+                        this,
+                        null,
+                        null
+                );
+                firePropertyChangeEvent(
+                        ViewController.PatientViewControllerPropertyChangeEvent.
+                            MAKE_VIEW_VISIBLE.toString(),
+                        view,
+                        this,
+                        null,
+                        null
+                );
+
+                break;
+        }
+        
+    }
+    
     /**
      * a change made on a secondary view editor
      * @param secondaryView 
@@ -905,7 +1404,9 @@ public class PatientViewController extends ViewController {
         if (e.getSource() instanceof DesktopViewController){
             doDesktopViewControllerActionRequest(e);
         }
-        else{
+        else if(e.getSource() instanceof ModalPatientMedicalHistory1EditorView){
+            doSecondaryViewActionRequest(e);
+        }else{
             View the_view = (View)e.getSource();
             switch (the_view.getMyViewType()){
                 case PATIENT_VIEW:

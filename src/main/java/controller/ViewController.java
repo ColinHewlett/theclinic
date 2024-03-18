@@ -6,9 +6,7 @@
 package controller;
 
 import controller.exceptions.TemplateReaderException;
-import model.Entity;
-import model.Appointment;
-import model.Patient;
+import model.*;
 import view.View;
 import view.views.modal_views.ModalView;
 import view.views.non_modal_views.DesktopView;
@@ -56,6 +54,7 @@ import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 import java.io.File;
 
+
 /**
  *
  * @author colin
@@ -77,6 +76,69 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
     private DesktopView desktopView;
     private View view = null;
     private ModalView modalView = null;
+    
+    private PrimaryCondition extractedPrimaryConditiomFromTemplate = null;
+    
+    public PrimaryCondition getExtractedPrimaryConditionFromTemplate(){
+        return extractedPrimaryConditiomFromTemplate;
+    }
+    public void setExtractedPrimaryConditionFromTemplate(PrimaryCondition value){
+        extractedPrimaryConditiomFromTemplate = value;
+    }
+    
+    protected PrimaryCondition extractMedicalHistoryFromTemplate()throws TemplateReaderException{
+        TemplateReader.setTemplateFile(
+                        new File(SystemDefinition.getPMSSystemDefinition()));
+        TemplateReader.setEntityTag("entity");
+        TemplateReader.setEntityId("Patient");
+        TemplateReader.setSectionId("History");
+        PrimaryCondition pc = TemplateReader.extract(new PrimaryCondition());
+        return pc;
+    }
+    
+    /**
+     * fetches primary condition with the collection of primary conditions defined in the template file
+     * @param patient; the patient owner of the primary condition records
+     * @return 
+     */
+    protected PrimaryCondition createPrimaryConditionsFromTemplate(Patient patient)
+            throws TemplateReaderException, StoreException{
+        PrimaryCondition pc = extractMedicalHistoryFromTemplate();
+        /**
+         * insert each primary condition record read from the template file
+         */
+        for(Condition condition : pc.get()){
+            PrimaryCondition pCondition = (PrimaryCondition)condition;
+            pCondition.setPatient(patient);
+            pCondition.insert();
+        }
+        PrimaryCondition pConditionFromStore = null;
+        /**
+         * fetch back each primary condition stored
+         */
+        for(Condition primaryCondition : pc.get()){
+            PrimaryCondition pCondition = (PrimaryCondition)primaryCondition;
+            pCondition.setPatient(patient);
+            pCondition.setScope(Entity.Scope.SINGLE);
+            pConditionFromStore = pCondition.read();
+            /**
+             * insert each secondary condition for each primary condition fetched
+             */
+            for(Condition secondaryCondition : 
+                    pCondition.getSecondaryCondition().get()){
+                SecondaryCondition sCondition = (SecondaryCondition)secondaryCondition;
+                sCondition.setPrimaryCondition(pConditionFromStore);
+                sCondition.insert();
+            }
+        }
+        /**
+         * fetch stored primary conditions for this patient
+         */
+        pc = new PrimaryCondition(patient);
+        pc.setScope(Entity.Scope.FOR_PATIENT);
+        pc = pc.read();
+        return pc;
+    }
     
     public enum ViewControllers {
         ScheduleViewController,
@@ -284,47 +346,71 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
     }
     
     public static enum PatientViewControllerActionEvent{
-        SCHEDULE_VIEW_CONTROLLER_REQUEST,
-        MODAL_VIEWER_ACTIVATED,
+        //primary view requests (commands)
+        
+        
+        DELETED_PATIENT_REQUEST, 
+        
         NULL_PATIENT_REQUEST,
-        PATIENT_RECALL_EDITOR_VIEW_REQUEST,
-        PATIENT_PHONE_EMAIL_EDITOR_VIEW_REQUEST,
+        PATIENT_CREATE_REQUEST,
+        PATIENT_DELETE_REQUEST,
+        PATIENT_DOCTOR_EDITOR_VIEW_REQUEST,
         PATIENT_GUARDIAN_EDITOR_VIEW_REQUEST,
+        PATIENT_MEDICAL_HISTORY_1_EDITOR_VIEW_REQUEST,
+        PATIENT_MEDICATION_EDITOR_VIEW_REQUEST,
         PATIENT_NOTES_EDITOR_VIEW_REQUEST,
+        PATIENT_PHONE_EMAIL_EDITOR_VIEW_REQUEST,
+        PATIENT_RECALL_EDITOR_VIEW_REQUEST,
+        PATIENT_RECOVER_REQUEST,
+        PATIENT_REQUEST,
+        PATIENT_SELECTION_VIEW_REQUEST,
+        PATIENT_UPDATE_REQUEST,
+        RECOVER_PATIENT_REQUEST,
+        SCHEDULE_VIEW_CONTROLLER_REQUEST,
+        VIEW_ACTIVATED_NOTIFICATION,
+        VIEW_CHANGED_NOTIFICATION,
+        VIEW_CLOSE_NOTIFICATION, 
+        
+
+        CONDITION_STATE_UPDATE_REQUEST,
+        PATIENT_MEDICAL_HISTORY_NOTE_TAKER_REQUEST,
+        PATIENT_MEDICAL_HISTORY_NOTES_TAKEN_REQUEST,
+        PATIENT_MEDICAL_HISTORY_2_EDITOR_VIEW_REQUEST,
+        PATIENT_DOCTOR_CREATE_REQUEST,
+        PATIENT_DOCTOR_DELETE_REQUEST,
+        PATIENT_DOCTOR_UPDATE_REQUEST,
+        PATIENT_MEDICATION_CREATE_REQUEST,
+        PATIENT_MEDICATION_DELETE_REQUEST,
+        PATIENT_MEDICATION_UPDATE_REQUEST,
+        MODAL_VIEWER_ACTIVATED,
         PATIENT_EDITOR_VIEW_CHANGE,
         PATIENT_RECALL_EDITOR_VIEW_CHANGE,
         PATIENT_GUARDIAN_REQUEST,
         PATIENT_GUARDIANS_REQUEST,
-        DELETED_PATIENT_REQUEST,
-        PATIENT_REQUEST,
-        PATIENTS_REQUEST,
-        PATIENT_SELECTION_VIEW_REQUEST,
-        PATIENT_CREATE_REQUEST,
+        PATIENTS_REQUEST,     
         PATIENT_VIEW_CLOSED,
-        PATIENT_UPDATE_REQUEST,
-        PATIENT_DELETE_REQUEST,
-        PATIENT_RECOVER_REQUEST,
-        RECOVER_PATIENT_REQUEST,
-        VIEW_ACTIVATED_NOTIFICATION,
-        VIEW_CHANGED_NOTIFICATION,
-        VIEW_CLOSE_NOTIFICATION      
+        
+        
+        
+             
     }
     
     public static enum PatientViewControllerPropertyChangeEvent{
         NULL_PATIENT_RECEIVED,
+        PATIENT_MEDICAL_HISTORY_RECEIVED,
         PATIENT_GUARDIANS_RECEIVED,
         PATIENT_RECEIVED,
         PATIENTS_RECEIVED,
         PATIENT_VIEW_CONTROLLER_ERROR_RECEIVED,
         PATIENT_VIEW_CHANGE_NOTIFICATION,
         PATIENT_EDITOR_VIEW_CLOSED,
-        PATIENT_NOTES_RECEIVED
-        //PATIENT_RECALL_EDITOR_VIEW_CLOSED,
-        //PATIENT_PHONE_EMAIL_EDITOR_VIEW_CLOSED,
-        //PATIENT_GUARDIAN_EDITOR_VIEW_CLOSED,
-        //PATIENT_NOTES_EDITOR_VIEW_CLOSED
+        PATIENT_NOTES_RECEIVE,
+        MAKE_VIEW_VISIBLE,
+        MAKE_VIEW_INVISIBLE,
+        PATIENT_NOTES_RECEIVED,
+        MEDICATIONS_RECEIVED,
+        DOCTOR_RECEIVED
         
-        //PATIENT_VIEW_CONTROLLER_CHANGE_NOTIFICATION
     }
 
     public static enum PatientAppointmentContactListViewControllerActionEvent {

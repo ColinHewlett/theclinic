@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import javax.swing.JMenuItem;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -164,6 +165,28 @@ public class TemplateReader {
                         TemplateReaderException.ExceptionType.ELEMENT_NOT_FOUND_IN_TEMPLATE);
             }
             return element;
+        }
+        
+        public static ArrayList<String> extract(Patient.MedicalHistory mh){
+            setEntityTag("entity");
+            setEntityId("Patient");
+            ArrayList<String> result = new ArrayList<>();
+            Element element = null;
+            
+            try{
+                element = getSelectedRootFromTemplate();
+                NodeList nodes = element.getElementsByTagName("section");
+                for(int index = 0; index < nodes.getLength(); index++){
+                    if((nodes.item(index).getNodeType() == Node.ELEMENT_NODE)){
+                        element = (Element)nodes.item(index);
+                        String item = element.getAttribute("id");
+                        result.add(item);
+                    }
+                }
+            }catch (TemplateReaderException ex){
+                
+            }
+            return result;
         }
         
         public static HashMap extract(HashMap<String,String> map)throws TemplateReaderException{

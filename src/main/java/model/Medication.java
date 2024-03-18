@@ -18,7 +18,7 @@ public class Medication extends Entity implements IEntityStoreActions{
     private Integer key = null;
     private Integer patientKey = null;
     private Patient patient = null;
-    private String medication = null;
+    private String description = null;
     private String notes = null;
     private ArrayList<Medication> collection = new ArrayList<>();
     
@@ -52,12 +52,12 @@ public class Medication extends Entity implements IEntityStoreActions{
         this.key = key;
     }
     
-    public String getMedication() {
-        return medication;
+    public String getDescription() {
+        return description;
     }
 
-    public void setMedication(String value) {
-        this.medication = value;
+    public void setDescription(String value) {
+        this.description = value;
     }
     
     public String getNotes() {

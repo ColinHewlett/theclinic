@@ -56,14 +56,7 @@ public class DesktopViewController extends ViewController{
     private Descriptor entityDescriptor = null;
     private int count = 0;
     private int recordCount = 0;
-    private PrimaryCondition extractedPrimaryConditiomFromTemplate = null;
     
-    private PrimaryCondition getExtractedPrimaryConditionFromTemplate(){
-        return extractedPrimaryConditiomFromTemplate;
-    }
-    private void setExtractedPrimaryConditionFromTemplate(PrimaryCondition value){
-        extractedPrimaryConditiomFromTemplate = value;
-    }
     
     private DesktopViewController(){
                setDescriptor(new Descriptor());
@@ -325,13 +318,8 @@ public class DesktopViewController extends ViewController{
                 
             case MIGRATE_PRIMARY_CONDITION_DATA:
                 try{
-                    TemplateReader.setTemplateFile(
-                            new File(System.getenv("PMS_SYSTEM_DEFINITION")));
-                    TemplateReader.setEntityTag("entity");
-                    TemplateReader.setEntityId("Patient");
-                    TemplateReader.setSectionId("Medical history");
                     PrimaryCondition pc = 
-                            TemplateReader.extract(new PrimaryCondition());
+                            extractMedicalHistoryFromTemplate();
                     setExtractedPrimaryConditionFromTemplate(pc);
                     if (PMSStore.isSelected()) 
                            startBackgroundThread(pc, this);
@@ -923,7 +911,8 @@ public class DesktopViewController extends ViewController{
                         Patient patient = new Patient(1);
                         count = 1;
                         recordCount = 0;
-                        for(PrimaryCondition pCondition : pc.get()){
+                        for(Condition condition : pc.get()){
+                            PrimaryCondition pCondition = (PrimaryCondition)condition;
                             pCondition.setPatient(patient);
                             pCondition.insert();
                         }
@@ -982,13 +971,15 @@ public class DesktopViewController extends ViewController{
                         Patient patient = new Patient(1);
                         count = 1;
                         recordCount = 0;
-                        for(PrimaryCondition pCondition : pc.get()){
+                        for(Condition primaryCondition : pc.get()){
+                            PrimaryCondition pCondition = (PrimaryCondition)primaryCondition;
                             pCondition.setPatient(patient);
                             pCondition.setScope(Entity.Scope.SINGLE);
                             pConditionFromStore = pCondition.read();
 
-                            for(SecondaryCondition sCondition : 
+                            for(Condition secondaryCondition : 
                                     pCondition.getSecondaryCondition().get()){
+                                SecondaryCondition sCondition = (SecondaryCondition)secondaryCondition;
                                 sCondition.setPrimaryCondition(pConditionFromStore);
                                 sCondition.insert();
                             }
@@ -998,33 +989,6 @@ public class DesktopViewController extends ViewController{
                             Integer percentage = recordCount*100/count;
                             setProgress(percentage);
                         }
-                        /*
-                        Patient patient = new Patient();
-                        patient.setScope(Entity.Scope.ALL);
-                        patient = patient.read();
-                        count = patient.get().size();
-                        recordCount = 0;
-                        for(Patient pPatient : patient.get()){
-                            for(PrimaryCondition pCondition : pc.get()){
-                                pCondition.setPatient(pPatient);
-                                pCondition.setScope(Entity.Scope.SINGLE);
-                                pConditionFromStore = pCondition.read();
-                                for(SecondaryCondition sCondition : 
-                                        pCondition.getSecondaryCondition().get()){
-                                    sCondition.setPrimaryCondition(pConditionFromStore);
-                                    sCondition.insert();
-                                }
-                            }
-                            recordCount++;
-                            if (recordCount <= count){
-                                Integer percentage = recordCount*100/count;
-                                setProgress(percentage);
-                            }
-                            else {
-                                break;
-                            }
-                        }
-                        */
                     }
                 }catch (StoreException ex){
                     displayErrorMessage(ex.getMessage(), "Desktop view controller error",

@@ -4,7 +4,7 @@
  */
 package model;
 
-import java.awt.Point;
+import java.util.ArrayList;
 /**
  *
  * @author colin
@@ -12,7 +12,15 @@ import java.awt.Point;
 public class Condition extends Entity {
     private String description = null;
     private boolean state = false;
+    private ArrayList<Condition> collection = new ArrayList<>();
 
+    public ArrayList<Condition> get(){
+        return collection;
+    }
+    public void set(ArrayList<Condition> value){
+        collection = value;
+    }
+    
     public String getDescription(){
         return description;
     }

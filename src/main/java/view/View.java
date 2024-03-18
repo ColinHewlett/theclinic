@@ -6,6 +6,7 @@
 package view;
 
 
+import view.views.modal_views.ModalPatientMedicalHistory1EditorView;
 import view.views.non_modal_views.*;
 import view.views.modal_views.*;
 import controller.ViewController;
@@ -121,17 +122,27 @@ public class View extends JInternalFrame
             case APPOINTMENT_EMPTY_SLOT_SCAN_CONFIGURATION_VIEW:
                 setModalView(makeView(new ModalEmptySlotScanConfigurationView(viewer, controller, desktopView)));
                 break;
+            case NOTE_TAKER:
+                setModalView(makeView(new ModalNoteTaker(viewer, controller, desktopView)));
+                break;    
             case NOTIFICATION_EDITOR_VIEW:
                 setModalView(makeView(new ModalNotificationEditorView(viewer, controller, desktopView)));
                 break;
             case PATIENT_RECOVERY_SELECTION_VIEW:
                 setModalView(makeView(new ModalPatientSelectionView(viewer, controller, desktopView)));
                 break;
-            /*
-            case PATIENT_NOTES_EDITOR_VIEW:
-                setModalView(makeView(new ModalPatientNotesEditorView(viewer, controller,desktopView)));
+            case PATIENT_DOCTOR_EDITOR_VIEW:
+                setModalView(makeView(new ModalPatientDoctorEditorView(viewer, controller,desktopView)));
                 break;
-            */
+            case PATIENT_MEDICATION_EDITOR_VIEW:
+                setModalView(makeView(new ModalPatientMedicationEditorView(viewer, controller,desktopView)));
+                break;
+            case PATIENT_MEDICAL_HISTORY_1_EDITOR_VIEW:
+                setModalView(makeView(new ModalPatientMedicalHistory1EditorView(viewer, controller,desktopView)));
+                break;
+            case PATIENT_MEDICAL_HISTORY_2_EDITOR_VIEW:
+                setModalView(makeView(new ModalPatientMedicalHistory2EditorView(viewer, controller,desktopView)));
+                break;   
             case PATIENT_RECALL_EDITOR_VIEW:
                 setModalView(makeView(new ModalPatientRecallEditorView(viewer, controller,desktopView)));
                 break;
@@ -185,6 +196,11 @@ public class View extends JInternalFrame
         MIGRATION_MANAGER_VIEW,
         NON_SURGERY_DAY_EDITOR_VIEW,
         NOTES_VIEW,
+        NOTE_TAKER,
+        PATIENT_MEDICAL_HISTORY_1_EDITOR_VIEW,
+        PATIENT_MEDICAL_HISTORY_2_EDITOR_VIEW,
+        PATIENT_MEDICATION_EDITOR_VIEW,
+        PATIENT_DOCTOR_EDITOR_VIEW,
         PATIENT_RECALL_EDITOR_VIEW,
         PATIENT_PHONE_EMAIL_EDITOR_VIEW,
         PATIENT_GUARDIAN_EDITOR_VIEW,

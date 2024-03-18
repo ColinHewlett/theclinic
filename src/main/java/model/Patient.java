@@ -502,7 +502,8 @@ public class Patient extends Entity implements IEntityStoreActions {
         public PrimaryCondition getPrimaryCondition()throws StoreException{
             PrimaryCondition pc = new PrimaryCondition(Patient.this);
             pc.setScope(Scope.FOR_PATIENT);
-            for(PrimaryCondition p : pc.read().get()){
+            for(Condition condition : pc.read().get()){
+                PrimaryCondition p = (PrimaryCondition)condition;
                 SecondaryCondition s = new SecondaryCondition(p);
                 s.setScope(Scope.FOR_PRIMARY_CONDITION);
                 s.read();

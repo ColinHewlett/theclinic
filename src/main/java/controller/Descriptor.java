@@ -5,11 +5,7 @@
  */
 package controller;
 
-import model.Appointment;
-import model.Patient;
-import model.Notification;
-import model.SurgeryDaysAssignment;
-import model.PatientNote;
+import model.*;
 import java.awt.Point;
 import java.util.ArrayList;
 import java.time.Duration;
@@ -76,6 +72,9 @@ public class Descriptor {
     
     public class ControllerDescription{
         ViewController.ViewMode viewMode = null;
+        private Doctor doctor = null;
+        private Medication medication = null;
+        private Condition condition = null;
         private PatientNote patientNote = null;
         private ArrayList<PatientNote> patientNotes = null;
         private LocalDate scheduleDay = null;
@@ -106,9 +105,22 @@ public class Descriptor {
             if (scheduleDay == null) scheduleDay = LocalDate.now();
             return scheduleDay;
         }
-        
         public void setScheduleDay(LocalDate value){
             this.scheduleDay = value;
+        }
+        
+        public Doctor getDoctor(){
+            return doctor; 
+        }
+        public void setDoctor(Doctor value){
+            doctor = value;
+        }
+        
+        public Medication getMedication(){
+            return medication; 
+        }
+        public void setMedication(Medication value){
+            medication = value;
         }
         
         public LocalDateTime getAppointmentEarlyStart(){
@@ -211,18 +223,22 @@ public class Descriptor {
             this.patientNotification = value;
         }
         
+        public Condition getCondition() {
+            return condition;
+        }
+        protected void setCondition(Condition value){
+            condition = value;
+        }
+        
         public Patient getPatient() {
             return patient;
         }
-
         protected void setPatient(Patient value){
             patient = value;
         }
-        
         public ArrayList<Patient> getPatients(){
             return patients;
         }
-
         public void setPatients (ArrayList<Patient> value){
             patients = value;
         }
@@ -314,6 +330,9 @@ public class Descriptor {
         private ArrayList<Notification> patientNotifications = null;
         private Notification patientNotification = null;
         private SurgeryDaysAssignment surgeryDaysAssignment = null;
+        private Doctor doctor = null;
+        private Medication medication = null;
+        private Condition condition = null;
         
         private HashMap<DayOfWeek,Boolean> surgeryDaysAssignmentValue = null;
 
@@ -326,6 +345,27 @@ public class Descriptor {
             duration = Duration.ZERO; 
             HashMap<DayOfWeek,Boolean> surgeryDaysAssignmentValue = new HashMap<>();
             
+        }
+        
+        public Doctor getDoctor(){
+            return doctor; 
+        }
+        public void setDoctor(Doctor value){
+            doctor = value;
+        }
+        
+        public Medication getMedication(){
+            return medication; 
+        }
+        public void setMedication(Medication value){
+            medication = value;
+        }
+        
+        public Condition getCondition() {
+            return condition;
+        }
+        public void setCondition(Condition value){
+            condition = value;
         }
         
         public ViewController.ViewMode getViewMode(){
