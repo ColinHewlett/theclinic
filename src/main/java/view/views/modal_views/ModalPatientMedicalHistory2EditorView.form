@@ -76,7 +76,7 @@
         </Container>
         <Component class="javax.swing.JButton" name="btnEditNotes">
           <Properties>
-            <Property name="text" type="java.lang.String" value="Edit notes"/>
+            <Property name="text" type="java.lang.String" value="&lt;html&gt;&lt;center&gt;Edit&lt;/center&gt;&lt;center&gt;notes for&lt;/center&gt;&lt;center&gt;selection&lt;/center&gt;&lt;/html&gt;"/>
             <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
               <Dimension value="[87, 25]"/>
             </Property>

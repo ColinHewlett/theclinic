@@ -944,7 +944,6 @@ public class PatientViewController extends ViewController {
                 try{
                     if (condition.getIsPrimaryCondition()){
                         PrimaryCondition pc = (PrimaryCondition)condition;
-                        pc.setState(false);
                         pc.update();
                     }else if(condition.getIsSecondaryCondition()){
                         SecondaryCondition sc = (SecondaryCondition)condition;
@@ -1040,14 +1039,18 @@ public class PatientViewController extends ViewController {
     }
     
     private void doPatientDoctorEditorViewRequest(ActionEvent e){
-        Doctor doctor = getDescriptor().getViewDescription().getDoctor();
+        Doctor doctor = getDescriptor()
+                .getViewDescription().getDoctor();
+        Patient patient = getDescriptor()
+                .getControllerDescription().getPatient();
         try{
             switch(ViewController
                     .PatientViewControllerActionEvent.valueOf(e.getActionCommand())){ 
                 case PATIENT_DOCTOR_CREATE_REQUEST:
-                    doctor.create();
-                    doctor = new Doctor(getDescriptor()
-                            .getControllerDescription().getPatient());
+                    doctor.setPatient(patient);
+                    int key = doctor.insert();
+                    doctor = new Doctor(key);
+                    doctor.setPatient(patient);
                     doctor.setScope(Scope.FOR_PATIENT);
                     doctor = doctor.read();
                     getDescriptor().getControllerDescription().setDoctor(doctor);
@@ -1063,6 +1066,7 @@ public class PatientViewController extends ViewController {
                 case PATIENT_DOCTOR_DELETE_REQUEST:
                     doctor.setScope(Scope.SINGLE);
                     doctor.delete();
+                    doctor = new Doctor(patient);
                     doctor.setScope(Scope.FOR_PATIENT);
                     doctor = doctor.read();
                     getDescriptor().getControllerDescription().setDoctor(doctor);
@@ -1095,6 +1099,8 @@ public class PatientViewController extends ViewController {
             String message = ex.getMessage() + "\n"
                     + "Handled in "
                     + "PatientViewController::doPatientDoctorEditorViewRequest()";
+            displayErrorMessage(message,"Patient view controller error",
+                    JOptionPane.WARNING_MESSAGE);
         }
     }
     
@@ -1104,20 +1110,33 @@ public class PatientViewController extends ViewController {
             switch(ViewController
                     .PatientViewControllerActionEvent.valueOf(e.getActionCommand())){ 
                 case PATIENT_MEDICATION_CREATE_REQUEST:
-                    medication.insert();
-                    medication = new Medication(getDescriptor()
-                            .getControllerDescription().getPatient());
-                    medication.setScope(Scope.FOR_PATIENT);
-                    medication = medication.read();
-                    getDescriptor().getControllerDescription().setMedication(medication);
-                    firePropertyChangeEvent(
+                    String reply = JOptionPane.showInternalInputDialog(
+                            getView(), "",
+                            "Enter prescribed medicene", JOptionPane.OK_CANCEL_OPTION);
+                    if (reply!=null){
+                        if (!reply.trim().isEmpty()){
+                            medication = new Medication();
+                            medication.setDescription(reply);
+                            Patient patient = getDescriptor().
+                                    getControllerDescription().getPatient();
+                            medication.setPatient(patient);
+                            medication.insert();
+                            medication = new Medication(patient);
+                            medication.setScope(Scope.FOR_PATIENT);
+                            medication = medication.read();
+                            getDescriptor().getControllerDescription()
+                                    .setMedication(medication);
+                            firePropertyChangeEvent(
                             ViewController.PatientViewControllerPropertyChangeEvent.
-                                MEDICATIONS_RECEIVED.toString(),
+                                CLOSE_VIEW_REQUEST_RECEIVED.toString(),
                             (View)e.getSource(),
                             this,
                             null,
                             null
-                    );
+                            );
+                            doMedicationEditorViewRequest();
+                        }
+                    }
                     break;
                 case PATIENT_MEDICATION_DELETE_REQUEST:
                     medication.setScope(Scope.SINGLE);
@@ -1127,28 +1146,39 @@ public class PatientViewController extends ViewController {
                     getDescriptor().getControllerDescription().setMedication(medication);
                     firePropertyChangeEvent(
                             ViewController.PatientViewControllerPropertyChangeEvent.
-                                MEDICATIONS_RECEIVED.toString(),
+                                CLOSE_VIEW_REQUEST_RECEIVED.toString(),
                             (View)e.getSource(),
                             this,
                             null,
                             null
                     );
+                    doMedicationEditorViewRequest();
                     break;
                 case PATIENT_MEDICATION_UPDATE_REQUEST:
-                    medication.update();
-                    medication.setScope(Scope.FOR_PATIENT);
-                    medication = medication.read();
+                    reply = JOptionPane.showInternalInputDialog(getView(), 
+                                    medication.getDescription(),
+                                    "Update selected medicene", JOptionPane.OK_CANCEL_OPTION);
+                    if (reply!=null){
+                        if (!reply.trim().isEmpty()){
+                            medication.setDescription(reply);
+                            medication.setPatient(getDescriptor().
+                                    getControllerDescription().getPatient());
+                            medication.update();
+                            medication.setScope(Scope.FOR_PATIENT);
+                            medication = medication.read();
+                        }
+                    }
                     getDescriptor().getControllerDescription().setMedication(medication);
                     firePropertyChangeEvent(
                             ViewController.PatientViewControllerPropertyChangeEvent.
-                                MEDICATIONS_RECEIVED.toString(),
+                                CLOSE_VIEW_REQUEST_RECEIVED.toString(),
                             (View)e.getSource(),
                             this,
                             null,
                             null
                     );
+                    doMedicationEditorViewRequest();
                     break;
-
             }
         }catch(StoreException ex){
             String message = ex.getMessage() + "\n"

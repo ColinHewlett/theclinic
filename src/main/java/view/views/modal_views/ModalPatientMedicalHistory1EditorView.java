@@ -94,9 +94,7 @@ public class ModalPatientMedicalHistory1EditorView extends ModalView
         this.tblConditions.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         ListSelectionModel lsm = this.tblConditions.getSelectionModel();
         lsm.addListSelectionListener(this);
-        this.btnEditNotes.setText("<html><center>Add notes</center>"
-                + "<center>to</center>"
-                + "<center>selection</center></html>");
+        this.btnEditNotes.setText("<html><center>Edit</center><center>notes for</center><center>selection</center></html>");
     }
     
     @Override
@@ -198,6 +196,7 @@ public class ModalPatientMedicalHistory1EditorView extends ModalView
                 break;
             case MAKE_VIEW_VISIBLE:
                 this.setVisible(true);
+                this.tblConditions.clearSelection();
                 break;
         }
     }
@@ -215,12 +214,15 @@ public class ModalPatientMedicalHistory1EditorView extends ModalView
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jLabel1 = new javax.swing.JLabel();
         pnlRoot = new javax.swing.JPanel();
         scrConditionsTable = new javax.swing.JScrollPane();
         btnEditNotes = new javax.swing.JButton();
         btnCloseView = new javax.swing.JButton();
 
-        btnEditNotes.setText("Edit notes");
+        jLabel1.setText("jLabel1");
+
+        btnEditNotes.setText("<html><center>Edit</center><center>notes for</center><center>selection</center></html>");
         btnEditNotes.setMaximumSize(new java.awt.Dimension(87, 25));
         btnEditNotes.setMinimumSize(new java.awt.Dimension(87, 25));
         btnEditNotes.setOpaque(false);
@@ -285,6 +287,7 @@ public class ModalPatientMedicalHistory1EditorView extends ModalView
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnCloseView;
     private javax.swing.JButton btnEditNotes;
+    private javax.swing.JLabel jLabel1;
     private javax.swing.JPanel pnlRoot;
     private javax.swing.JScrollPane scrConditionsTable;
     // End of variables declaration//GEN-END:variables
@@ -303,7 +306,7 @@ public class ModalPatientMedicalHistory1EditorView extends ModalView
         btnEditNotes = new javax.swing.JButton();
         btnCloseView = new javax.swing.JButton();
 
-        btnEditNotes.setText("Edit notes");
+        btnEditNotes.setText("<html><center>Edit</center><center>notes for</center><center>selection</center></html>");
         btnEditNotes.setMaximumSize(new java.awt.Dimension(87, 25));
         btnEditNotes.setMinimumSize(new java.awt.Dimension(87, 25));
         btnEditNotes.setOpaque(false);

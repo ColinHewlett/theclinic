@@ -1018,7 +1018,7 @@ public class Repository implements IStoreActions {
                 try{
                     PreparedStatement preparedStatement = getPMSStoreConnection().prepareStatement(sql);
                     preparedStatement.setLong(1,doctor.getKey());
-                    preparedStatement.setLong(2,doctor.getPatientKey());
+                    preparedStatement.setLong(2,doctor.getPatient().getKey());
                     preparedStatement.setString(3,doctor.getTitle());
                     preparedStatement.setString(4,doctor.getLine1());
                     preparedStatement.setString(5,doctor.getLine2());
@@ -1027,6 +1027,7 @@ public class Repository implements IStoreActions {
                     preparedStatement.setString(8,doctor.getPostcode());
                     preparedStatement.setString(9,doctor.getPhone());
                     preparedStatement.setString(10,doctor.getEmail());
+                    preparedStatement.setBoolean(11,doctor.getIsDeleted());
                     preparedStatement.executeUpdate();
                 }catch(SQLException ex){
                     throw new StoreException("SQLException message -> " + ex.getMessage() + "\n"
@@ -3220,7 +3221,8 @@ public class Repository implements IStoreActions {
                 sql = "SELECT * "
                         + "FROM SecondaryCondition "
                         + "WHERE primaryConditionKey = ? "
-                        + "AND isDeleted = false; ";
+                        + "AND isDeleted = false "
+                        + "ORDER BY description ASC";
                 result = doReadSecondaryConditionForPatient(sql, entity);
                 break;
             case READ_ALL_SECONDARY_CONDITION:

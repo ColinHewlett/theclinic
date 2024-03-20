@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
 <Form version="1.3" maxVersion="1.9" type="org.netbeans.modules.form.forminfo.JInternalFrameFormInfo">
+  <NonVisualComponents>
+    <Component class="javax.swing.JLabel" name="jLabel1">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="jLabel1"/>
+      </Properties>
+    </Component>
+  </NonVisualComponents>
   <SyntheticProperties>
     <SyntheticProperty name="formSizePolicy" type="int" value="1"/>
   </SyntheticProperties>
@@ -71,7 +78,7 @@
         </Container>
         <Component class="javax.swing.JButton" name="btnEditNotes">
           <Properties>
-            <Property name="text" type="java.lang.String" value="Edit notes"/>
+            <Property name="text" type="java.lang.String" value="&lt;html&gt;&lt;center&gt;Edit&lt;/center&gt;&lt;center&gt;notes for&lt;/center&gt;&lt;center&gt;selection&lt;/center&gt;&lt;/html&gt;"/>
             <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
               <Dimension value="[87, 25]"/>
             </Property>

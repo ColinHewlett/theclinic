@@ -106,11 +106,15 @@ public class ModalPatientMedicationEditorView extends ModalView
         ViewController.PatientViewControllerPropertyChangeEvent propertyName =
                 ViewController.PatientViewControllerPropertyChangeEvent.valueOf(e.getPropertyName());
         switch(propertyName){
-            case MEDICATIONS_RECEIVED:
-                Medication medication = getMyController()
-                .getDescriptor().getControllerDescription().getMedication();
-                populateTable(medication);
+            
+            case CLOSE_VIEW_REQUEST_RECEIVED:
+                try{
+                    this.setClosed(true);   
+                }catch (PropertyVetoException ex){
+                    
+                }
                 break;
+            
         }
     }
     
@@ -144,6 +148,8 @@ public class ModalPatientMedicationEditorView extends ModalView
         ActionEvent actionEvent = null;
         switch(Action.valueOf(e.getActionCommand())){
             case REQUEST_CLOSE_VIEW:
+                getMyController().getDescriptor().
+                                        getViewDescription().setMedication(medication);
                 try{
                     this.setClosed(true);   
                 }catch (PropertyVetoException ex){
@@ -153,44 +159,26 @@ public class ModalPatientMedicationEditorView extends ModalView
             case REQUEST_MEDICATION_ADDITION_OR_UPDATE:
                 switch(getViewMode()){
                     case CREATE:
-                        setVisible(false);
-                        reply = JOptionPane.showInternalInputDialog(this, "","Enter prescribed medicene", JOptionPane.OK_CANCEL_OPTION);
-                        if (reply!=null){
-                            if (!reply.trim().isEmpty()){
-                                medication = new Medication();
-                                medication.setDescription(reply);
-                                Patient patient = getMyController().getDescriptor().
-                                        getControllerDescription().getPatient();
-                                medication.setPatient(patient);
-                                getMyController().getDescriptor().
+                        medication = new Medication();
+                        getMyController().getDescriptor().
                                         getViewDescription().setMedication(medication);
-                                actionEvent = new ActionEvent(
+                        actionEvent = new ActionEvent(
                                     this,ActionEvent.ACTION_PERFORMED,
                                     ViewController.PatientViewControllerActionEvent.
                                             PATIENT_MEDICATION_CREATE_REQUEST.toString());
                                 this.getMyController().actionPerformed(actionEvent);
-                            }
-                        }
                         break;
                     case UPDATE:
-                        setVisible(false);
                         int selectedRow = tblMedication.getSelectedRow();
                         if (selectedRow != -1){
                             medication = (Medication)model.getElementAt(selectedRow);
-                            reply = JOptionPane.showInternalInputDialog(this, 
-                                    medication.getDescription(),"Update selected medicene", JOptionPane.OK_CANCEL_OPTION);
-                            if (!reply.isEmpty()){
-                                medication.setDescription(reply);
-                                medication.setPatient(getMyController().getDescriptor().
-                                        getControllerDescription().getPatient());
-                                getMyController().getDescriptor().
+                            getMyController().getDescriptor().
                                         getViewDescription().setMedication(medication);
-                                actionEvent = new ActionEvent(
+                            actionEvent = new ActionEvent(
                                     this,ActionEvent.ACTION_PERFORMED,
                                     ViewController.PatientViewControllerActionEvent.
                                             PATIENT_MEDICATION_UPDATE_REQUEST.toString());
                                 this.getMyController().actionPerformed(actionEvent);
-                            }
                         }else{
                             String message = "No medicene selected so cannot update the selection";
                             JOptionPane.showInternalConfirmDialog(this,message, 
@@ -204,8 +192,6 @@ public class ModalPatientMedicationEditorView extends ModalView
             case REQUEST_MEDICATION_REMOVAL: {       
                 int selectedRow = tblMedication.getSelectedRow();
                 if (selectedRow!=-1){
-                    setVisible(false);
-                    model = (MedicationTableModel)tblMedication.getModel();
                     medication = (Medication)model.getElementAt(selectedRow);
                     getMyController().getDescriptor().getViewDescription().setMedication(medication);
                     actionEvent = new ActionEvent(

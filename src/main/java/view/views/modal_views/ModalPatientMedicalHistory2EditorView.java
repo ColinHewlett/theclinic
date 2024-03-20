@@ -126,11 +126,8 @@ public class ModalPatientMedicalHistory2EditorView extends ModalView
                 doSaveEditorChanges();
                 /**
                  * -- check if any secondary is ticked
-                 * -- if not untick the parent primary condition
-                 * ---- achieved by sending VC CONDITION_STATE_UPDATE_REQUEST msg
-                 * ------ on receipt if specified condition is a secondary condition that sc is updated
-                 * ------ but if specified condition is primary condition its updated
-                 * ------ but VC needs to know which to call the correct model entity
+                 * -- if a secondary condition ticked and parent primary condition not ticked
+                 * ---- set parent condition true and send CONDITION_STATE_UPDATE_REQUEST to VC
                  */ 
                 boolean tickedStateFound = false;
                 model = (MedicalHistoryTableModel)tblConditions.getModel();
@@ -140,19 +137,14 @@ public class ModalPatientMedicalHistory2EditorView extends ModalView
                         break;
                     }
                 }
-                if (!tickedStateFound){
-                    getMyController().getDescriptor()
-                        .getViewDescription().setCondition(getParentPrimaryCondition());
-                    String message = "Because nothing specific selected from the '" 
-                            + getParentPrimaryCondition().getDescription() 
-                            + "' options, untick the '" 
-                            + getParentPrimaryCondition().getDescription() 
-                            + "' group on the questionnaire?";
-                    int reply = JOptionPane.showInternalConfirmDialog(this,message,
-                            "Medical condition selection query",JOptionPane.YES_NO_OPTION); 
-                    if (reply == JOptionPane.YES_OPTION){
+                if (tickedStateFound){
+                    PrimaryCondition pc = getParentPrimaryCondition();
+                    if (!pc.getState()){
+                        pc.setState(true);
+                        getMyController().getDescriptor()
+                                .getViewDescription().setCondition(pc);
                         actionEvent = new ActionEvent(
-                            this,ActionEvent.ACTION_PERFORMED,
+                        this,ActionEvent.ACTION_PERFORMED,
                             ViewController.PatientViewControllerActionEvent
                                     .CONDITION_STATE_UPDATE_REQUEST.toString());
                         this.getMyController().actionPerformed(actionEvent);
@@ -192,6 +184,7 @@ public class ModalPatientMedicalHistory2EditorView extends ModalView
                 break;
             case MAKE_VIEW_VISIBLE:
                 this.setVisible(true);
+                this.tblConditions.clearSelection();
                 break;
         }
     }
@@ -214,7 +207,7 @@ public class ModalPatientMedicalHistory2EditorView extends ModalView
         btnEditNotes = new javax.swing.JButton();
         btnCloseView = new javax.swing.JButton();
 
-        btnEditNotes.setText("Edit notes");
+        btnEditNotes.setText("<html><center>Edit</center><center>notes for</center><center>selection</center></html>");
         btnEditNotes.setMaximumSize(new java.awt.Dimension(87, 25));
         btnEditNotes.setMinimumSize(new java.awt.Dimension(87, 25));
         btnEditNotes.setOpaque(false);
@@ -299,7 +292,7 @@ public class ModalPatientMedicalHistory2EditorView extends ModalView
         btnEditNotes = new javax.swing.JButton();
         btnCloseView = new javax.swing.JButton();
 
-        btnEditNotes.setText("Edit notes");
+        btnEditNotes.setText("<html><center>Edit</center><center>notes for</center><center>selection</center></html>");
         btnEditNotes.setMaximumSize(new java.awt.Dimension(87, 25));
         btnEditNotes.setMinimumSize(new java.awt.Dimension(87, 25));
         btnEditNotes.setOpaque(false);

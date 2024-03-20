@@ -7,15 +7,34 @@ package view.views.modal_views;
 import controller.ViewController;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyVetoException;
+import javax.swing.SwingUtilities;
+import javax.swing.JOptionPane;
 import javax.swing.SwingConstants;
+import model.Doctor;
+import model.Patient;
 import view.View;
 import view.views.non_modal_views.DesktopView;
+
 /**
  *
  * @author colin
  */
-public class ModalPatientDoctorEditorView extends ModalView implements ActionListener {
+public class ModalPatientDoctorEditorView extends ModalView 
+        implements ActionListener, PropertyChangeListener {
 
+    enum Action {
+        REQUEST_DOCTOR_CREATE_OR_UPDATE,
+        REQUEST_DOCTOR_REMOVAL,
+        REQUEST_CLOSE_VIEW
+    }
+    
+    enum ViewMode {
+        CREATE,
+        UPDATE
+    }
     /**
      * Creates new form ModalPatientMedicationEditorView
      */
@@ -29,16 +48,196 @@ public class ModalPatientDoctorEditorView extends ModalView implements ActionLis
     }
     
     @Override
-    public void actionPerformed(ActionEvent e){
-        
+    /**
+     * on receipt of DOCTOR_RECEIVED property change event
+     * -- received doctor object's collection is either empty or not
+     * ---- if empty 
+     * ------ ViewMode.CREATE entered, and doctor details cleared
+     * ---- else 
+     * ------ ViewMode.UPDATE entered, and doctor details initialised
+     */
+    public void propertyChange(PropertyChangeEvent e){
+        Doctor doctor = getMyController().getDescriptor()
+                        .getControllerDescription().getDoctor();
+        Patient patient = getMyController().getDescriptor()
+                        .getControllerDescription().getPatient();
+        ViewController.PatientViewControllerPropertyChangeEvent propertyName =
+                ViewController.PatientViewControllerPropertyChangeEvent
+                        .valueOf(e.getPropertyName());
+        switch (propertyName){  
+            case DOCTOR_RECEIVED:
+                if (doctor.get().isEmpty()){ 
+                    doctor = new Doctor(patient);
+                    setViewDataForDoctor(doctor);
+                    setViewMode(ViewMode.CREATE);
+                }else{
+                    doctor = doctor.get().get(0);
+                    setViewDataForDoctor(doctor);
+                    setViewMode(ViewMode.UPDATE);
+                }
+                SwingUtilities.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                      txtTitle.requestFocus();
+                    }
+                });
+                break;
+                
+        }
     }
     
     @Override
+    public void actionPerformed(ActionEvent e){
+        Doctor doctor = getMyController().getDescriptor()
+                .getControllerDescription().getDoctor();
+        String reply = null;
+        ActionEvent actionEvent = null;
+        switch(Action.valueOf(e.getActionCommand())){
+            case REQUEST_CLOSE_VIEW:
+                try{
+                    this.setClosed(true);   
+                }catch (PropertyVetoException ex){
+                    
+                }
+                break;
+            case REQUEST_DOCTOR_CREATE_OR_UPDATE:
+                switch(getViewMode()){
+                    case CREATE:
+                        doctor = new Doctor();
+                        getViewDataForDoctor(doctor);
+                        if (getIsAnyDataEnteredFor(doctor)){
+                            getMyController().getDescriptor().
+                                            getViewDescription().setDoctor(doctor);
+                            actionEvent = new ActionEvent(
+                                this,ActionEvent.ACTION_PERFORMED,
+                                ViewController.PatientViewControllerActionEvent.
+                                        PATIENT_DOCTOR_CREATE_REQUEST.toString());
+                            this.getMyController().actionPerformed(actionEvent);
+                        }else{
+                            String message = "No data has been entered for the "
+                                    + "doctor, so attempt to create new doctor data is aborted";
+                            JOptionPane.showInternalConfirmDialog(this, message); 
+                        }
+                        break;
+                    case UPDATE:
+                        boolean isAnyDataEntered = false;
+                        getViewDataForDoctor(doctor);
+                        if (getIsAnyDataEnteredFor(doctor)){
+                            getMyController().getDescriptor().
+                                        getViewDescription().setDoctor(doctor);
+                            actionEvent = new ActionEvent(
+                                this,ActionEvent.ACTION_PERFORMED,
+                                ViewController.PatientViewControllerActionEvent.
+                                        PATIENT_MEDICATION_UPDATE_REQUEST.toString());
+                            this.getMyController().actionPerformed(actionEvent);
+                        }else{
+                            String message = "No data has been entered for the "
+                                    + "doctor, so attempt to update the doctor data is aborted";
+                            JOptionPane.showInternalConfirmDialog(this, message);
+                        }
+                        break;
+                }
+                break;        
+            case REQUEST_DOCTOR_REMOVAL: { 
+                getViewDataForDoctor(doctor);
+                if (getIsAnyDataEnteredFor(doctor)){
+                    actionEvent = new ActionEvent(
+                        this,ActionEvent.ACTION_PERFORMED,
+                        ViewController.PatientViewControllerActionEvent.
+                                PATIENT_DOCTOR_DELETE_REQUEST.toString());
+                    this.getMyController().actionPerformed(actionEvent);
+                }else{
+                    String message = "No data has been entered for the "
+                            + "doctor, so attempt to delete the doctor data is aborted";
+                    JOptionPane.showInternalConfirmDialog(this, message);
+                }
+                break;
+            }
+        }
+    }
+     
+    private boolean getIsAnyDataEnteredFor(Doctor doctor){
+        boolean isAnyDataEntered = false;
+        if (!doctor.getTitle().isEmpty()) isAnyDataEntered = true;
+        if (!doctor.getLine1().isEmpty()) isAnyDataEntered = true;
+        if (!doctor.getLine2().isEmpty()) isAnyDataEntered = true;
+        if (!doctor.getTown().isEmpty()) isAnyDataEntered = true;
+        if (!doctor.getCounty().isEmpty()) isAnyDataEntered = true;
+        if (!doctor.getPostcode().isEmpty()) isAnyDataEntered = true;
+        if (!doctor.getPhone().isEmpty()) isAnyDataEntered = true;
+        if (!doctor.getEmail().isEmpty()) isAnyDataEntered = true;
+        return isAnyDataEntered;
+    }
+    
+    private void setViewDataForDoctor(Doctor doctor){
+        txtTitle.setText(doctor.getTitle());
+        txtLine1.setText(doctor.getLine1());
+        txtLine2.setText(doctor.getLine2());
+        txtTown.setText(doctor.getTown());
+        txtCounty.setText(doctor.getCounty());
+        txtPostcode.setText(doctor.getPostcode());
+        txtPhone.setText(doctor.getPhone());
+        txtEmail.setText(doctor.getEmail());
+    }
+    
+    private Doctor getViewDataForDoctor(Doctor doctor){
+        doctor.setTitle(this.txtTitle.getText());
+        doctor.setLine1(txtLine1.getText());
+        doctor.setLine2(txtLine2.getText());
+        doctor.setTown(txtTown.getText());
+        doctor.setCounty(txtCounty.getText());
+        doctor.setPostcode(txtPostcode.getText());
+        doctor.setPhone(txtPhone.getText());
+        doctor.setEmail(txtEmail.getText());
+        return doctor;
+    }
+            
+    @Override
     public void initialiseView(){
         initComponents();
-        setVisible(true);
+        /**
+         * if on entry the Doctor's collection is empty
+         */
+        Doctor doctor = getMyController()
+                .getDescriptor().getControllerDescription().getDoctor();
+        if (doctor.get().isEmpty()) setViewMode(ViewMode.CREATE);
+        else {
+            setViewMode(ViewMode.UPDATE);
+            setViewDataForDoctor(doctor.get().get(0));
+        }
+        
+        this.btnCloseView.setActionCommand(
+                Action.REQUEST_CLOSE_VIEW.toString());
+        this.btnCreateUpdateDoctor.setActionCommand(
+                Action.REQUEST_DOCTOR_CREATE_OR_UPDATE.toString());
+        this.btnDeleteDoctor.setActionCommand(
+                Action.REQUEST_DOCTOR_REMOVAL.toString());
+        this.btnCloseView.addActionListener(this);
+        this.btnCreateUpdateDoctor.addActionListener(this);
+        this.btnDeleteDoctor.addActionListener(this);
     }
 
+    private ViewMode viewMode = null;
+    private ViewMode getViewMode(){
+        return viewMode;
+    }
+    private void setViewMode(ViewMode value){
+        String s = null;
+        viewMode = value;
+        switch(viewMode){
+            case CREATE:
+                s = btnCreateUpdateDoctor.getText();
+                s = s.replace("Update", "Add");
+                btnCreateUpdateDoctor.setText(s);
+                break;
+            case UPDATE:
+                s = btnCreateUpdateDoctor.getText();
+                s = s.replace("Add", "Update");
+                btnCreateUpdateDoctor.setText(s);
+                break;
+        }
+    }
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -58,7 +257,7 @@ public class ModalPatientDoctorEditorView extends ModalView implements ActionLis
         jLabel6 = new javax.swing.JLabel();
         jLabel7 = new javax.swing.JLabel();
         jLabel8 = new javax.swing.JLabel();
-        txtDoctor = new javax.swing.JTextField();
+        txtTitle = new javax.swing.JTextField();
         txtLine1 = new javax.swing.JTextField();
         txtLine2 = new javax.swing.JTextField();
         txtTown = new javax.swing.JTextField();
@@ -68,6 +267,7 @@ public class ModalPatientDoctorEditorView extends ModalView implements ActionLis
         txtEmail = new javax.swing.JTextField();
         btnCreateUpdateDoctor = new javax.swing.JButton();
         btnCloseView = new javax.swing.JButton();
+        btnDeleteDoctor = new javax.swing.JButton();
 
         jPanel1.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(153, 204, 255)));
 
@@ -114,7 +314,7 @@ public class ModalPatientDoctorEditorView extends ModalView implements ActionLis
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(txtLine2)
                     .addComponent(txtLine1)
-                    .addComponent(txtDoctor)
+                    .addComponent(txtTitle)
                     .addComponent(txtEmail)
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -136,7 +336,7 @@ public class ModalPatientDoctorEditorView extends ModalView implements ActionLis
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel1)
-                    .addComponent(txtDoctor, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txtTitle, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(txtLine1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -161,10 +361,13 @@ public class ModalPatientDoctorEditorView extends ModalView implements ActionLis
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(txtEmail, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel8))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(11, 11, 11))
         );
 
         btnCreateUpdateDoctor.setText("<html><center>Update</center><center>doctor</center><center>details</center></html>");
+        btnCreateUpdateDoctor.setMaximumSize(new java.awt.Dimension(2147483647, 65));
+        btnCreateUpdateDoctor.setMinimumSize(new java.awt.Dimension(71, 65));
+        btnCreateUpdateDoctor.setPreferredSize(new java.awt.Dimension(71, 65));
         //btnCreateUpdateDoctor.setSize(btnCreateUpdateDoctor.getWidth(), 94);
 
         btnCloseView.setText("<html><center>Close</center><center>view</cen ter></html>");
@@ -175,6 +378,11 @@ public class ModalPatientDoctorEditorView extends ModalView implements ActionLis
             }
         });
 
+        btnDeleteDoctor.setText("<html><center>Delete</center><center>doctor</center></html>");
+        btnDeleteDoctor.setMaximumSize(new java.awt.Dimension(2147483647, 65));
+        btnDeleteDoctor.setMinimumSize(new java.awt.Dimension(67, 65));
+        btnDeleteDoctor.setPreferredSize(new java.awt.Dimension(67, 65));
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -184,21 +392,24 @@ public class ModalPatientDoctorEditorView extends ModalView implements ActionLis
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(btnCreateUpdateDoctor)
-                    .addComponent(btnCloseView))
+                    .addComponent(btnCreateUpdateDoctor, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(btnCloseView)
+                    .addComponent(btnDeleteDoctor, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addGap(12, 12, 12))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(btnCreateUpdateDoctor, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnCloseView, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addComponent(btnCreateUpdateDoctor, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(1, 1, 1)
+                        .addComponent(btnDeleteDoctor, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGap(1, 1, 1)
+                        .addComponent(btnCloseView, javax.swing.GroupLayout.PREFERRED_SIZE, 65, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap())
         );
 
         pack();
@@ -212,6 +423,7 @@ public class ModalPatientDoctorEditorView extends ModalView implements ActionLis
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnCloseView;
     private javax.swing.JButton btnCreateUpdateDoctor;
+    private javax.swing.JButton btnDeleteDoctor;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
@@ -222,12 +434,12 @@ public class ModalPatientDoctorEditorView extends ModalView implements ActionLis
     private javax.swing.JLabel jLabel8;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JTextField txtCounty;
-    private javax.swing.JTextField txtDoctor;
     private javax.swing.JTextField txtEmail;
     private javax.swing.JTextField txtLine1;
     private javax.swing.JTextField txtLine2;
     private javax.swing.JTextField txtPhone;
     private javax.swing.JTextField txtPostcode;
+    private javax.swing.JTextField txtTitle;
     private javax.swing.JTextField txtTown;
     // End of variables declaration//GEN-END:variables
 }

@@ -408,7 +408,7 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         MAKE_VIEW_VISIBLE,
         MAKE_VIEW_INVISIBLE,
         PATIENT_NOTES_RECEIVED,
-        MEDICATIONS_RECEIVED,
+        CLOSE_VIEW_REQUEST_RECEIVED,
         DOCTOR_RECEIVED
         
     }

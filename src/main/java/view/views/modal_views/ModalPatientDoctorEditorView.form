@@ -26,6 +26,7 @@
               <Group type="103" groupAlignment="0" max="-2" attributes="0">
                   <Component id="btnCreateUpdateDoctor" max="32767" attributes="0"/>
                   <Component id="btnCloseView" max="32767" attributes="0"/>
+                  <Component id="btnDeleteDoctor" max="32767" attributes="0"/>
               </Group>
               <EmptySpace min="-2" pref="12" max="-2" attributes="0"/>
           </Group>
@@ -35,15 +36,17 @@
       <Group type="103" groupAlignment="0" attributes="0">
           <Group type="102" alignment="0" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                  <Component id="jPanel1" min="-2" max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="0" attributes="0">
+                  <Component id="jPanel1" max="32767" attributes="0"/>
                   <Group type="102" attributes="0">
-                      <Component id="btnCreateUpdateDoctor" min="-2" pref="85" max="-2" attributes="0"/>
-                      <EmptySpace max="-2" attributes="0"/>
-                      <Component id="btnCloseView" min="-2" pref="85" max="-2" attributes="0"/>
+                      <Component id="btnCreateUpdateDoctor" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace min="-2" pref="1" max="-2" attributes="0"/>
+                      <Component id="btnDeleteDoctor" max="32767" attributes="0"/>
+                      <EmptySpace min="-2" pref="1" max="-2" attributes="0"/>
+                      <Component id="btnCloseView" min="-2" pref="65" max="-2" attributes="0"/>
                   </Group>
               </Group>
-              <EmptySpace max="32767" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -80,7 +83,7 @@
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Component id="txtLine2" max="32767" attributes="0"/>
                       <Component id="txtLine1" max="32767" attributes="0"/>
-                      <Component id="txtDoctor" max="32767" attributes="0"/>
+                      <Component id="txtTitle" max="32767" attributes="0"/>
                       <Component id="txtEmail" alignment="0" max="32767" attributes="0"/>
                       <Group type="102" alignment="0" attributes="0">
                           <Group type="103" groupAlignment="0" attributes="0">
@@ -109,7 +112,7 @@
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="3" attributes="0">
                       <Component id="jLabel1" alignment="3" min="-2" max="-2" attributes="0"/>
-                      <Component id="txtDoctor" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="txtTitle" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="3" attributes="0">
@@ -140,7 +143,7 @@
                       <Component id="txtEmail" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="jLabel8" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
-                  <EmptySpace max="32767" attributes="0"/>
+                  <EmptySpace min="-2" pref="11" max="-2" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -219,7 +222,7 @@
             <AuxValue name="JavaCodeGenerator_InitCodePost" type="java.lang.String" value="jLabel8.setHorizontalAlignment(SwingConstants.RIGHT);"/>
           </AuxValues>
         </Component>
-        <Component class="javax.swing.JTextField" name="txtDoctor">
+        <Component class="javax.swing.JTextField" name="txtTitle">
         </Component>
         <Component class="javax.swing.JTextField" name="txtLine1">
         </Component>
@@ -240,6 +243,15 @@
     <Component class="javax.swing.JButton" name="btnCreateUpdateDoctor">
       <Properties>
         <Property name="text" type="java.lang.String" value="&lt;html&gt;&lt;center&gt;Update&lt;/center&gt;&lt;center&gt;doctor&lt;/center&gt;&lt;center&gt;details&lt;/center&gt;&lt;/html&gt;"/>
+        <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+          <Dimension value="[2147483647, 65]"/>
+        </Property>
+        <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+          <Dimension value="[71, 65]"/>
+        </Property>
+        <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+          <Dimension value="[71, 65]"/>
+        </Property>
       </Properties>
       <AuxValues>
         <AuxValue name="JavaCodeGenerator_InitCodePost" type="java.lang.String" value="//btnCreateUpdateDoctor.setSize(btnCreateUpdateDoctor.getWidth(), 94);"/>
@@ -255,6 +267,20 @@
       <AuxValues>
         <AuxValue name="JavaCodeGenerator_InitCodePost" type="java.lang.String" value="//btnCloseView.setSize(btnCloseView.getWidth(),94);"/>
       </AuxValues>
+    </Component>
+    <Component class="javax.swing.JButton" name="btnDeleteDoctor">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="&lt;html&gt;&lt;center&gt;Delete&lt;/center&gt;&lt;center&gt;doctor&lt;/center&gt;&lt;/html&gt;"/>
+        <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+          <Dimension value="[2147483647, 65]"/>
+        </Property>
+        <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+          <Dimension value="[67, 65]"/>
+        </Property>
+        <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+          <Dimension value="[67, 65]"/>
+        </Property>
+      </Properties>
     </Component>
   </SubComponents>
 </Form>

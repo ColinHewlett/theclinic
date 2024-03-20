@@ -103,7 +103,7 @@ public class PatientView extends View implements ActionListener{
     private final String DISPLAY_RECALL_EDITOR_VIEW ="Recall details";
     //28/02/2024 07:45
     private final String DISPLAY_MEDICAL_PROFILE = "Medical history";
-    //private final String DISPLAY_GUARDIAN_EDITOR_VIEW = "Guardian (if patient)";
+    private final String DISPLAY_GUARDIAN_EDITOR_VIEW = "Guardian (if patient)";
     private final String DISPLAY_PHONE_EMAIL_EDITOR_VIEW = "Phone/email";
     private final String DISPLAY_PATIENT_NOTES_EDITOR_VIEW = "Patient notes editor";
     
@@ -574,14 +574,11 @@ public class PatientView extends View implements ActionListener{
                             PatientViewControllerActionEvent.
                             PATIENT_RECALL_EDITOR_VIEW_REQUEST;   
                 break;
-            /**
-             * 28/02/2024 07:45 
             case DISPLAY_GUARDIAN_EDITOR_VIEW:
                 request = ViewController.
                         PatientViewControllerActionEvent.
                         PATIENT_GUARDIAN_EDITOR_VIEW_REQUEST;
                 break;
-            */
             case DISPLAY_MEDICAL_PROFILE:
                 if (this.cmbPatientSelector.getSelectedIndex()!=-1){
                     doDisplayMedicalProfileRequest();
@@ -598,12 +595,14 @@ public class PatientView extends View implements ActionListener{
                             PatientViewControllerActionEvent.
                             PATIENT_PHONE_EMAIL_EDITOR_VIEW_REQUEST;
                 break;
+            /*
             case DISPLAY_PATIENT_NOTES_EDITOR_VIEW:
                 request = ViewController.
                             PatientViewControllerActionEvent.
                             PATIENT_NOTES_EDITOR_VIEW_REQUEST;
                 rdbGroup.clearSelection();
                 break;
+                */
         }
         if (request!=null){
             ActionEvent actionEvent = new ActionEvent(
@@ -1710,28 +1709,29 @@ public class PatientView extends View implements ActionListener{
             //28/02/2024 07:45
             rdbRequestModalPhoneEmailEditorView = new javax.swing.JRadioButton();
             rdbRequestModalRecallEditorView = new javax.swing.JRadioButton();
-            //rdbRequestModalGuardianEditorView = new javax.swing.JRadioButton();
-            rdbRequestModalNotesEditorView = new javax.swing.JRadioButton();
+            rdbRequestModalGuardianEditorView = new javax.swing.JRadioButton();
+            //rdbRequestModalNotesEditorView = new javax.swing.JRadioButton();
             rdbRequestModalMedicalProfilePopup = new javax.swing.JRadioButton();
-            rdbRequestModalNotesEditorView.setText("Patient notes editor");
+            //rdbRequestModalNotesEditorView.setText("Patient notes editor");
             rdbRequestModalPhoneEmailEditorView.setText(DISPLAY_PHONE_EMAIL_EDITOR_VIEW);
             rdbRequestModalPhoneEmailEditorView.setActionCommand(DISPLAY_PHONE_EMAIL_EDITOR_VIEW);
             rdbRequestModalRecallEditorView.setText(DISPLAY_RECALL_EDITOR_VIEW);
             rdbRequestModalRecallEditorView.setActionCommand(DISPLAY_RECALL_EDITOR_VIEW);
-            //rdbRequestModalGuardianEditorView.setText(DISPLAY_GUARDIAN_EDITOR_VIEW);
-            //rdbRequestModalGuardianEditorView.setActionCommand(DISPLAY_GUARDIAN_EDITOR_VIEW);
+            rdbRequestModalGuardianEditorView.setText(DISPLAY_GUARDIAN_EDITOR_VIEW);
+            rdbRequestModalGuardianEditorView.setActionCommand(DISPLAY_GUARDIAN_EDITOR_VIEW);
             rdbRequestModalMedicalProfilePopup.setText(DISPLAY_MEDICAL_PROFILE);
             rdbRequestModalMedicalProfilePopup.setActionCommand(DISPLAY_MEDICAL_PROFILE);
             rdbGroup = new javax.swing.ButtonGroup();
             rdbGroup.add(rdbRequestModalPhoneEmailEditorView);
             rdbGroup.add(rdbRequestModalRecallEditorView);
-            //rdbGroup.add(rdbRequestModalGuardianEditorView);
+            rdbGroup.add(rdbRequestModalGuardianEditorView);
             rdbGroup.add(rdbRequestModalMedicalProfilePopup);
-            rdbGroup.add(rdbRequestModalNotesEditorView);
+            //rdbGroup.add(rdbRequestModalNotesEditorView);
             rdbRequestModalPhoneEmailEditorView.addActionListener(this);
             rdbRequestModalRecallEditorView.addActionListener(this);
             rdbRequestModalMedicalProfilePopup.addActionListener(this);
-            rdbRequestModalNotesEditorView.addActionListener(this);
+            rdbRequestModalGuardianEditorView.addActionListener(this);
+            //rdbRequestModalNotesEditorView.addActionListener(this);
         }catch (Exception exc){
             String message = exc.getMessage() + "\n";
             ViewController.displayErrorMessage(message + "Raised in PatientView::initComponents()", 
@@ -1953,7 +1953,7 @@ public class PatientView extends View implements ActionListener{
         */
 //</editor-fold>
 //<editor-fold defaultstate="collapsed" desc="Further selectable information panel layout">
-        rdbRequestModalNotesEditorView.setText(DISPLAY_PATIENT_NOTES_EDITOR_VIEW);
+        //rdbRequestModalNotesEditorView.setText(DISPLAY_PATIENT_NOTES_EDITOR_VIEW);
 
         javax.swing.GroupLayout pnlFurtherDetailsLayout = new javax.swing.GroupLayout(pnlFurtherDetails);
         pnlFurtherDetails.setLayout(pnlFurtherDetailsLayout);
@@ -1970,7 +1970,7 @@ public class PatientView extends View implements ActionListener{
                 .addGap(23,23,23)
                 .addGroup(pnlFurtherDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(rdbRequestModalMedicalProfilePopup)
-                    .addComponent(rdbRequestModalNotesEditorView))
+                    .addComponent(rdbRequestModalGuardianEditorView))
                 .addGap(20,20,20))
         );
         pnlFurtherDetailsLayout.setVerticalGroup(
@@ -1983,7 +1983,7 @@ public class PatientView extends View implements ActionListener{
                 .addGap(28, 28, 28)
                 .addGroup(pnlFurtherDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(rdbRequestModalRecallEditorView)
-                    .addComponent(rdbRequestModalNotesEditorView))
+                    .addComponent(rdbRequestModalGuardianEditorView))
                 .addGap(27, 27, 27))
         );
 //</editor-fold>
@@ -3271,7 +3271,7 @@ public class PatientView extends View implements ActionListener{
     private javax.swing.JRadioButton rdbRequestModalGuardianEditorView;
     private javax.swing.JRadioButton rdbRequestModalRecallEditorView;
     private javax.swing.JRadioButton rdbRequestModalPhoneEmailEditorView;
-    private javax.swing.JRadioButton rdbRequestModalNotesEditorView;
+    //private javax.swing.JRadioButton rdbRequestModalNotesEditorView;
     private javax.swing.JScrollPane scrAppointmentHistory;
     private javax.swing.JTextArea txtPatientNotes;
     
