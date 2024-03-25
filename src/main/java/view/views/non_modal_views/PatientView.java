@@ -1,33 +1,25 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JInternalFrame.java to edit this template
  */
 package view.views.non_modal_views;
 
 import model.SystemDefinition;
-import view.views.modal_views.dialogs.Dialog;
-import controller.exceptions.TemplateReaderException;
-import controller.TemplateReader;
 import view.views.view_support_classes.models.Appointments3ColumnTableModel;
 import view.views.view_support_classes.renderers.AppointmentsTableLocalDateTimeRenderer;
 import view.views.view_support_classes.renderers.AppointmentsTableDurationRenderer;
-import view.views.view_support_classes.components.FatCheckBox;
 import controller.Descriptor;
 import controller.ViewController;
-import repository.StoreException;
 import view.View;
 import model.Patient;
 import model.Appointment;
 import model.Entity;
-import view.views.exceptions.CrossCheckErrorException; 
 import com.github.lgooddatepicker.components.DatePickerSettings;
 import com.github.lgooddatepicker.optionalusertools.DateChangeListener;
 import com.github.lgooddatepicker.zinternaltools.DateChangeEvent;
+import controller.TemplateReader;
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.event.*;
-import java.io.IOException;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyVetoException;
 import java.time.Duration;
@@ -38,67 +30,53 @@ import java.time.LocalDateTime;
 import java.time.Period;
 import java.util.ArrayList;
 import java.util.Iterator;
-import javax.swing.SwingConstants;
-import javax.swing.JCheckBox;
-import javax.swing.JList;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
-//import javax.swing.event.InternalFrameListener;
 import javax.swing.JComboBox;
-import javax.swing.JPopupMenu;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JInternalFrame;
+import javax.swing.JLabel;
+import javax.swing.JPopupMenu;
+import javax.swing.JMenuItem;
+import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.JTextField;
 import javax.swing.border.TitledBorder;
 import model.PatientNote;
 import view.views.view_support_classes.renderers.AppointmentsTablePatientNoteRenderer;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.ParserConfigurationException;
-import org.w3c.dom.Document;
-import org.w3c.dom.NodeList;
-import org.w3c.dom.Node;
-import org.w3c.dom.Element;
-import org.xml.sax.SAXException;
-import java.io.File;
-import view.views.modal_views.ModalView;
-
-
-/**
- * 
- * -- The view receives an image of the patient details in the received
- * EntityDescriptor.Patient, which also encapsulates a patient's guardian (if 
- * exists) and appointment history
- * -- The view sends an updated image of the patient in 
- * EntityDescriptor.Selection.Patient 
- * -- 
- * -- The view receives a collection of all patients on the system in the
- * received EntityDescriptor.Collection.Patients
- * @author colin
- */
-
 /**
  *
  * @author colin
  */
 public class PatientView extends View implements ActionListener{
-    private final String patientRecoveryCaption = "<html><center>Recover patient</center></html>";
-    private final String patientCreateCaption = "<html><center>Create</center><center> new patient</center></html>";
+    private JTextField txtAddressLine2 = null;
+    private javax.swing.ButtonGroup rdbGroup = null;
+    //private JTable tblAppointmentHistory = null;
+    
     private final String cancelPatientRecoveryCaption = "<html><center>Cancel</center><center>patient</center><center>recovery</center>";
-    private final String patientUpdateCaption = "<html><center>Update</center>selected</center><center>patient</center></html>";
-    private final String panelPatientSelectionTitle = "Select patient";
+    
+    private final String panelPatientAppointmentHistoryCaption = "Appointment history";
+    private final String panelPatientActionsCaption = "Actions";
+    private final String panelPatientAddressCaption = "Address";
+    private final String panelPatientDetailsCaption = "Name & particulars";
+    private final String panelPatientFurtherDetailsCaption = "Further patient information";
     private final String panelPatientRecoveryTitle = "Select patient to recover";
+    private final String panelPatientSelectionCaption = "Select patient";
+    
+    
+    private final String patientFetchScheduleCaption = "<html><center>Schedule</center><center>for selected</center><center>appointment</center></html>";
+    private final String patientClearSelectionCaption = "Clear selection";
+    private final String patientCloseViewCaption = "Close view";
+    private final String patientClinicalNotesCaption = "<html><center>Clinical</center><center>notes for</center><center>patient</center></html>";
+    private final String patientCreateCaption = "<html><center>Create</center><center>new</center><center>patient</center></html>";
+    private final String patientRecoveryCaption = "<html><center>Recover patient</center></html>";
+    private final String patientUpdateCaption = "<html><center>Update</center><center>selected</center><center>patient</center></html>";
+    
+    
   
     private final String DISPLAY_RECALL_EDITOR_VIEW ="Recall details";
     //28/02/2024 07:45
@@ -109,11 +87,31 @@ public class PatientView extends View implements ActionListener{
     
     private enum PatientSelectionMode{ PATIENT_SELECTION, 
                                        PATIENT_RECOVERY}
-    private enum BorderTitles { Appointment_history,
-                                Contact_details,
-                                Guardian_details,
-                                Recall_details,
-                                Notes}
+    private enum Actions{
+        REQUEST_CLOSE_VIEW,
+        REQUEST_CLINICAL_NOTES,
+        REQUEST_CREATE_RECOVER_PATIENT,
+        REQUEST_DOCTOR,
+        REQUEST_GUARDIAN_EDITOR_VIEW,
+        REQUEST_MEDICAL_HISTORY_POPUP,
+        REQUEST_MEDICAL_HISTORY,
+        REQUEST_MEDICATION,
+        REQUEST_NULL_PATIENT,
+        REQUEST_PATIENT,
+        REQUEST_PATIENT_DELETE,
+        REQUEST_PATIENT_RECOVER,
+        REQUEST_PHONE_EMAIL_EDITOR_VIEW,
+        REQUEST_RECALL_EDITOR_VIEW,
+        REQUEST_SCHEDULE_VIEW_CONTROLLER,
+        REQUEST_UNTITLED_NAME,
+        REQUEST_UPDATE_RECOVER_PATIENT 
+    }
+    private enum BorderTitles { APPOINTMENT_HISTORY,
+                                ACTIONS,
+                                PATIENT_ADDRESS,
+                                PATIENT_DETAILS,
+                                PATIENT_EXTRA_DETAILS,
+                                PATIENT_SELECTION}
     private enum TitleItem {Dr,
                             Mr,
                             Miss,
@@ -143,7 +141,54 @@ public class PatientView extends View implements ActionListener{
     private PatientSelectionMode getPatientSelectionMode(){
         return patientSelectionMode;
     }
-
+    
+    private void setBorderTitles(BorderTitles borderTitles){
+        JPanel panel = null;
+        String caption = null;
+        boolean isPanelBackgroundDefault = false;
+        switch (borderTitles){
+            case ACTIONS:
+                panel = pnlOperations;
+                caption = panelPatientActionsCaption;
+                isPanelBackgroundDefault = false;
+                break;
+            case APPOINTMENT_HISTORY:
+                panel = pnlAppointmentHistory;
+                caption = panelPatientAppointmentHistoryCaption;
+                isPanelBackgroundDefault = false;
+                break;
+            case PATIENT_ADDRESS:
+                panel = pnlAddress;
+                caption = panelPatientAddressCaption;
+                isPanelBackgroundDefault = true;
+                break;
+            case PATIENT_DETAILS:
+                panel = pnlName;
+                caption = panelPatientDetailsCaption;
+                isPanelBackgroundDefault = true;
+                break;
+            case PATIENT_EXTRA_DETAILS:
+                panel = pnlFurtherDetails;
+                caption = panelPatientFurtherDetailsCaption;
+                isPanelBackgroundDefault = false;
+                break;
+            case PATIENT_SELECTION:
+                panel = pnlPatientSelection;
+                caption = panelPatientSelectionCaption;
+                isPanelBackgroundDefault = false;
+                break;        
+        }
+        panel.setBorder(
+                javax.swing.BorderFactory.createTitledBorder(
+                        javax.swing.BorderFactory.createEtchedBorder(), 
+                        caption, 
+                        javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, 
+                        javax.swing.border.TitledBorder.DEFAULT_POSITION, 
+                        getBorderTitleFont(), 
+                        getBorderTitleColor())); // NOI18N
+        if (!isPanelBackgroundDefault)
+            panel.setBackground(new java.awt.Color(220, 220, 220));
+    }
     
     private void setPatientSelectionMode(PatientSelectionMode value){
         patientSelectionMode = value;
@@ -152,20 +197,20 @@ public class PatientView extends View implements ActionListener{
             case PATIENT_RECOVERY:
                 titledBorder.setTitle(panelPatientRecoveryTitle);
                 titledBorder.setTitleColor(Color.RED);
-                btnCreateNewPatient.setText(patientRecoveryCaption);
-                btnCreateNewPatient.setForeground(Color.RED);
-                btnUpdateSelectedPatient.setEnabled(true);
-                btnUpdateSelectedPatient.setText(cancelPatientRecoveryCaption);
-                btnUpdateSelectedPatient.setForeground(Color.RED);
+                btnCreateRecoverPatient.setText(patientRecoveryCaption);
+                btnCreateRecoverPatient.setForeground(Color.RED);
+                btnUpdateRecoverPatient.setEnabled(true);
+                btnUpdateRecoverPatient.setText(cancelPatientRecoveryCaption);
+                btnUpdateRecoverPatient.setForeground(Color.RED);
                 
                 break;
             case PATIENT_SELECTION:
-                titledBorder.setTitle(panelPatientSelectionTitle);
+                titledBorder.setTitle(panelPatientSelectionCaption);
                 titledBorder.setTitleColor(getBorderTitleColor());
-                btnCreateNewPatient.setText(patientCreateCaption);
-                btnCreateNewPatient.setForeground(Color.BLACK);
-                btnUpdateSelectedPatient.setText(patientUpdateCaption);
-                btnUpdateSelectedPatient.setForeground(Color.BLACK);
+                btnCreateRecoverPatient.setText(patientCreateCaption);
+                btnCreateRecoverPatient.setForeground(Color.BLACK);
+                btnUpdateRecoverPatient.setText(patientUpdateCaption);
+                btnUpdateRecoverPatient.setForeground(Color.BLACK);
                 break;
         }
         /**
@@ -174,311 +219,10 @@ public class PatientView extends View implements ActionListener{
         this.pnlPatientSelection.repaint();
     }
 
-    static int mPatientViewWidth = 905;
-    static int wPatientViewWidth = 875;
-    static int mPatientViewHeight = 525;
-    static int wPatientViewHeight = 515;
-    static int mBeforeCreateNewPatientButtonGap = 86; 
-    static int wBeforeCreateNewPatientButtonGap = 83;
-    static int mBeforeDOBGap = 9;
-    static int wBeforeDOBGap = 18;
-    static int mBeforeFetchButtonGap = 15;
-    static int wBeforeFetchButtonGap = 25; 
-    static int mBeforeFrequencyLabelGap = 80;
-    static int wBeforeFrequencyLabelGap = 120;
-    static int mBelowClearSelection = 27;
-    static int wBelowClearSelection = 32;
-    static int mBelowPhonesGap = 23;
-    static int wBelowPhonesGap = 17;
-    static int mBetweenFrequencyLabelAndSpinnerGap = 11;
-    static int wBetweenFrequencyLabelAndSpinnerGap = 10;
-    static int mBetweenPhonesAndGuardianPanelsGap = 20;
-    static int wBetweenPhonesAndGuardianPanelsGap = 34;
-    static int mBetweenGuardianAndRecallPanelsGap = 21;
-    static int wBetweenGuardianAndRecallPanelsGap = 33;
-    static int mDatePickerWidth = 119;
-    static int wDatePickerWidth = 114;
-    static int mLine2Width = 180;
-    static int wLine2Width = 182;
-    static int mFurtherDetailsGapWidth = 50;
-    static int wFurtherDetailsGapWidth = 15;
-    static int mOperationsBottomGap = 322;
-    static int wOperationsBottomGap = 313;
-    static int mAppointmentHistoryScrollPaneWidth = 710;
-    static int wAppointmentHistoryScrollPaneWidth = 683;
-    static int mAppointmentHistoryTableWidth = 692;
-    static int wAppointmentHistoryTableWidth = 660;
-    static int mBetweenAppointmentHistoryAndFetchButtonGap = 33;
-    static int wBetweenAppointmentHistoryAndFetchButtonGap = 35;
-    
-    private int getPatientViewWidth()throws StoreException{
-        int result = 0;
-        
-        String lookAndFeel = SystemDefinition.getPMSLookAndFeel();
-        switch (lookAndFeel){
-            case "Metal":
-                result = mPatientViewWidth ;
-                break;
-            case "Windows":
-                result = wPatientViewWidth ;
-                break;
-        }
-        return result;
-    }
-    
-    private int getBetweenAppointmentHistoryAndFetchButtonGap()throws StoreException{
-        int result = 0;
-        String lookAndFeel = SystemDefinition.getPMSLookAndFeel();
-        switch (lookAndFeel){
-            case "Metal":
-                result = mBetweenAppointmentHistoryAndFetchButtonGap ;
-                break;
-            case "Windows":
-                result = wBetweenAppointmentHistoryAndFetchButtonGap ;
-                break;
-        }
-        return result;
-    }
-    
-    private int getAppointmentHistoryScrollPaneWidth()throws StoreException{
-        int result = 0;
-        String lookAndFeel = SystemDefinition.getPMSLookAndFeel();
-        switch (lookAndFeel){
-            case "Metal":
-                result = mAppointmentHistoryScrollPaneWidth ;
-                break;
-            case "Windows":
-                result = wAppointmentHistoryScrollPaneWidth ;
-                break;
-        }
-        return result;
-    }
-    
-    private int getAppointmentHistoryTableWidth()throws StoreException{
-        int result = 0;
-        String lookAndFeel = SystemDefinition.getPMSLookAndFeel();
-        switch (lookAndFeel){
-            case "Metal":
-                result = mAppointmentHistoryTableWidth ;
-                break;
-            case "Windows":
-                result = wAppointmentHistoryTableWidth ;
-                break;
-        }
-        return result;
-    }
-    
-    private int getOperationsHeight()throws StoreException{
-        int result = 0;
-        String lookAndFeel = SystemDefinition.getPMSLookAndFeel();
-        switch (lookAndFeel){
-            case "Metal":
-                result = mOperationsBottomGap ;
-                break;
-            case "Windows":
-                result = wOperationsBottomGap ;
-                break;
-        }
-        return result;
-    }
-    
-    private int getFurtherDetailsGapWidth ()throws StoreException{
-        int result = 0;
-        String lookAndFeel = SystemDefinition.getPMSLookAndFeel();
-        switch (lookAndFeel){
-            case "Metal":
-                result = mFurtherDetailsGapWidth ;
-                break;
-            case "Windows":
-                result = wFurtherDetailsGapWidth ;
-                break;
-        }
-        return result;
-    }
-    
-    private int getPatientViewHeight ()throws StoreException{
-        int result = 0;
-        String lookAndFeel = SystemDefinition.getPMSLookAndFeel();
-        switch (lookAndFeel){
-            case "Metal":
-                result = mPatientViewHeight ;
-                break;
-            case "Windows":
-                result = wPatientViewHeight ;
-                break;
-        }
-        return result;
-    }
-    
-    private int getBeforeCreateNewPatientButtonGap ()throws StoreException{
-        int result = 0;
-        String lookAndFeel = SystemDefinition.getPMSLookAndFeel();
-        switch (lookAndFeel){
-            case "Metal":
-                result = mBeforeCreateNewPatientButtonGap ;
-                break;
-            case "Windows":
-                result = wBeforeCreateNewPatientButtonGap ;
-                break;
-        }
-        return result;
-    }
-    
-    private int getBetweenFrequencyLabelAndSpinnerGap()throws StoreException{
-        int result = 0;
-        String lookAndFeel = SystemDefinition.getPMSLookAndFeel();
-        switch (lookAndFeel){
-            case "Metal":
-                result = mBetweenFrequencyLabelAndSpinnerGap;
-                break;
-            case "Windows":
-                result = wBetweenFrequencyLabelAndSpinnerGap;
-                break;
-        }
-        return result;
-    }
-    
-    private int getBeforeFrequencyLabelGap()throws StoreException{
-        int result = 0;
-        String lookAndFeel = SystemDefinition.getPMSLookAndFeel();
-        switch (lookAndFeel){
-            case "Metal":
-                result = mBeforeFrequencyLabelGap;
-                break;
-            case "Windows":
-                result = wBeforeFrequencyLabelGap;
-                break;
-        }
-        return result;
-    }
-    
-    private int getBetweenGuardianAndRecallPanelsGap()throws StoreException{
-        int result = 0;
-        String lookAndFeel = SystemDefinition.getPMSLookAndFeel();
-        switch (lookAndFeel){
-            case "Metal":
-                result = mBetweenGuardianAndRecallPanelsGap;
-                break;
-            case "Windows":
-                result = wBetweenGuardianAndRecallPanelsGap;
-                break;
-        }
-        return result;
-    }
-    
-    private int getBetweenPhonesAndGuardianPanelsGap()throws StoreException{
-        int result = 0;
-        String lookAndFeel = SystemDefinition.getPMSLookAndFeel();
-        switch (lookAndFeel){
-            case "Metal":
-                result = mBetweenPhonesAndGuardianPanelsGap;
-                break;
-            case "Windows":
-                result = wBetweenPhonesAndGuardianPanelsGap;
-                break;
-        }
-        return result;
-    }
-    
-    private int getBelowPhonesGap()throws StoreException{
-        int result = 0;
-        String lookAndFeel = SystemDefinition.getPMSLookAndFeel();
-        switch (lookAndFeel){
-            case "Metal":
-                result = mBelowPhonesGap;
-                break;
-            case "Windows":
-                result = wBelowPhonesGap;
-                break;
-        }
-        return result;
-    }
-    
-    private int getLine2Width()throws StoreException{
-        int result = 0;
-        String lookAndFeel = SystemDefinition.getPMSLookAndFeel();
-        switch (lookAndFeel){
-            case "Metal":
-                result = mLine2Width;
-                break;
-            case "Windows":
-                result = wLine2Width;
-                break;
-        }
-        return result;
-    }
-    
-    private int getDatePickerWidth()throws StoreException{
-        int result = 0;
-        String lookAndFeel = SystemDefinition.getPMSLookAndFeel();
-        switch (lookAndFeel){
-            case "Metal":
-                result = mDatePickerWidth;
-                break;
-            case "Windows":
-                result = wDatePickerWidth;
-                break;
-        }
-        return result;
-    }
-
-    private int getDOBGap()throws StoreException{
-        int result = 0;
-        String lookAndFeel = SystemDefinition.getPMSLookAndFeel();
-        switch (lookAndFeel){
-            case "Metal":
-                result = mBeforeDOBGap;
-                break;
-            case "Windows":
-                result = wBeforeDOBGap;
-                break;
-        }
-        return result;
-    }
-    
-    private int getFetchButtonGap()throws StoreException{
-        int result = 0;
-        String lookAndFeel = SystemDefinition.getPMSLookAndFeel();
-        switch (lookAndFeel){
-            case "Metal":
-                result = mBeforeFetchButtonGap;
-                break;
-            case "Windows":
-                result = wBeforeFetchButtonGap;
-                break;
-        }
-        return result;
-    }
-    
-    private int getGapBelowClearSelection()throws StoreException{
-        int result = 0;
-        String lookAndFeel = SystemDefinition.getPMSLookAndFeel();
-        switch (lookAndFeel){
-            case "Metal":
-                result = mBelowClearSelection;
-                break;
-            case "Windows":
-                result = wBelowClearSelection;
-                break;
-        }
-        return result;
-    }
     /**
-     * 
-     * @param myController ActionListener
-     * @param ed EntityDescriptor
+     * Creates new form TestPatientView
      */
-
-    /**
-     * 
-     * @param myViewType; View.Viewer  which identifies the type of view this view is
-     * -- enables the ViewController to identify which view is the sender of an ActionEvent to it
-     * @param myController; ViewController object responsible for this View
-     * -- enables access to the Descriptor settings created by the controller
-     * @param desktopView
-     */
-    public PatientView(
-            View.Viewer myViewType, 
+    public PatientView(View.Viewer myViewType, 
             ViewController myController, DesktopView desktopView) {
         setTitle("Patient view");
         setMyViewType(myViewType);
@@ -489,199 +233,133 @@ public class PatientView extends View implements ActionListener{
     @Override
     public void initialiseView(){ 
         initComponents();
+        setVisible(true);
+        setClosable(false);
+        setMaximizable(false);
+        setIconifiable(true);
+        setResizable(false);
+        //setSelected(true);
+        //setSize(getPatientViewWidth(),getPatientViewHeight());
+        //some loose ends
+        txtAddressLine2 = new javax.swing.JTextField();
+        rdbGroup = new javax.swing.ButtonGroup();
+        rdbGroup.add(rdbRequestPhoneEmailEditorView);
+        rdbGroup.add(rdbRequestModalRecallEditorView);
+        rdbGroup.add(rdbRequestModalGuardianEditorView);
+        rdbGroup.add(rdbRequestModalMedicalProfilePopup);
+        rdbRequestPhoneEmailEditorView.setActionCommand(Actions.REQUEST_PHONE_EMAIL_EDITOR_VIEW.toString());
+        rdbRequestModalRecallEditorView.setActionCommand(Actions.REQUEST_RECALL_EDITOR_VIEW.toString());
+        rdbRequestModalGuardianEditorView.setActionCommand(Actions.REQUEST_GUARDIAN_EDITOR_VIEW.toString());
+        rdbRequestModalMedicalProfilePopup.setActionCommand(Actions.REQUEST_MEDICAL_HISTORY_POPUP.toString());
+        rdbRequestPhoneEmailEditorView.addActionListener(this);
+        rdbRequestModalRecallEditorView.addActionListener(this);
+        rdbRequestModalGuardianEditorView.addActionListener(this);
+        rdbRequestModalMedicalProfilePopup.addActionListener(this);
+        
+        cmbPatientSelector.setActionCommand(Actions.REQUEST_PATIENT.toString());
+        cmbPatientSelector.addActionListener(this);
+        
+        //tblAppointmentHistory = new javax.swing.JTable();
+        //tblAppointmentHistory.addMouseListener(mouseListener);
+        //tblAppointmentHistory.setModel(new Appointments3ColumnTableModel());
+        //scrAppointmentHistory = new javax.swing.JScrollPane();
+        
+        /*
+        scrAppointmentHistory.setPreferredSize(new Dimension(
+                710,100));*/
+        
+        //scrAppointmentHistory.setRowHeaderView(null);
+        //scrAppointmentHistory.setViewportView(tblAppointmentHistory);
+        /*
+        ViewController.setJTableColumnProperties(tblAppointmentHistory, 
+                scrAppointmentHistory.getPreferredSize().width, 
+                20,20,60);
+        */
+        addInternalFrameListeners();
+
+        dobDatePicker.addDateChangeListener((new PatientView.DOBDatePickerDateChangeListener()));
+        ImageIcon icon = new ImageIcon(this.getClass().getResource("/datepickerbutton1.png"));
+        JButton datePickerButton = dobDatePicker.getComponentToggleCalendarButton();
+        datePickerButton.setText("");
+        datePickerButton.setIcon(icon);
+        DatePickerSettings dateSettings = new DatePickerSettings();
+        dateSettings.setVisibleDateTextField(false);
+        dateSettings.setGapBeforeButtonPixels(0);
+        dateSettings.setFormatForDatesCommonEra(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+        dateSettings.setAllowKeyboardEditing(false);
+        dobDatePicker = new com.github.lgooddatepicker.components.DatePicker(dateSettings);
+        
+        setBorderTitles(BorderTitles.ACTIONS);
+        setBorderTitles(BorderTitles.APPOINTMENT_HISTORY);
+        setBorderTitles(BorderTitles.PATIENT_ADDRESS);
+        setBorderTitles(BorderTitles.PATIENT_DETAILS);
+        setBorderTitles(BorderTitles.PATIENT_EXTRA_DETAILS);
+        setBorderTitles(BorderTitles.PATIENT_SELECTION);
+        this.btnClearSelection.setText(this.patientClearSelectionCaption);
+        this.btnCloseView.setText(this.patientCloseViewCaption);
+        this.btnCreateRecoverPatient.setText(this.patientCreateCaption);
+        this.btnFetchClinicalNotes.setText(this.patientClinicalNotesCaption);
+        this.btnFetchScheduleForSelectedAppointment.setText(this.patientFetchScheduleCaption);
+        this.btnUpdateRecoverPatient.setText(this.patientUpdateCaption);
+        btnClearSelection.setActionCommand(Actions.REQUEST_NULL_PATIENT.toString());
+        btnCloseView.setActionCommand(Actions.REQUEST_CLOSE_VIEW.toString());
+        btnCreateRecoverPatient.setActionCommand(Actions.REQUEST_CREATE_RECOVER_PATIENT.toString());
+        btnFetchClinicalNotes.setActionCommand(Actions.REQUEST_CLINICAL_NOTES.toString());
+        btnFetchScheduleForSelectedAppointment.setActionCommand(Actions.REQUEST_SCHEDULE_VIEW_CONTROLLER.toString());
+        btnUpdateRecoverPatient.setActionCommand(Actions.REQUEST_UPDATE_RECOVER_PATIENT.toString());
+        btnClearSelection.addActionListener(this);
+        btnCloseView.addActionListener(this);
+        btnCreateRecoverPatient.addActionListener(this);
+        btnFetchClinicalNotes.addActionListener(this);
+        btnFetchScheduleForSelectedAppointment.addActionListener(this);
+        btnUpdateRecoverPatient.addActionListener(this);
+        
+        this.mniCloseView.setActionCommand(Actions.REQUEST_CLOSE_VIEW.toString());
+        this.mniCreateNewPatient.setActionCommand(Actions.REQUEST_CREATE_RECOVER_PATIENT.toString());
+        this.mniDeleteSelectedPatient.setActionCommand(Actions.REQUEST_PATIENT_DELETE.toString());
+        this.mniUpdateSelectedPatient.setActionCommand(Actions.REQUEST_UPDATE_RECOVER_PATIENT.toString());
+        this.mniCloseView.addActionListener(this);
+        this.mniCreateNewPatient.addActionListener(this);
+        this.mniDeleteSelectedPatient.addActionListener(this);
+        this.mniUpdateSelectedPatient.addActionListener(this);
+        
+        
+
+        cmbNameTitle.addItemListener(itemListener);
+        cmbNameTitle.setEditable(true);
+        cmbNameTitle.setModel(new javax.swing.DefaultComboBoxModel<>(PatientView.TitleItem.values()));
+        cmbNameTitle.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+
+        cmbNameGender.addItemListener(itemListener);
+        cmbNameGender.setEditable(true);
+        cmbNameGender.setModel(new javax.swing.DefaultComboBoxModel<>(PatientView.GenderItem.values()));
+        cmbNameGender.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        
         setPatientSelectionMode(PatientSelectionMode.PATIENT_SELECTION);
-        try{
-            setVisible(true);
-            setClosable(false);
-            setMaximizable(false);
-            setIconifiable(true);
-            setResizable(false);
-            setSelected(true);
-            setSize(getPatientViewWidth(),getPatientViewHeight());
+        populatePatientSelector(cmbPatientSelector);
         
-        
-            this.addInternalFrameListeners();
-            btnFetchScheduleForSelectedAppointment.setText(
-                    "<html><center>Fetch day schedule</center><center>for selected</center><center>appointment</center></html>");
-            btnFetchScheduleForSelectedAppointment.addActionListener(new java.awt.event.ActionListener() {
-                public void actionPerformed(java.awt.event.ActionEvent evt) {
-                    btnFetchScheduleForSelectedAppointmentActionPerformed(evt);
-                }
-            });
-
-            populatePatientSelector(this.cmbPatientSelector); 
-            //populatePatientSelector(this.cmbSelectGuardian);
-            this.cmbPatientSelector.addActionListener((ActionEvent e) -> cmbPatientSelectorActionPerformed(e));
-            DatePickerSettings settings = new DatePickerSettings();
-            dobDatePicker.addDateChangeListener((new PatientView.DOBDatePickerDateChangeListener()));
-            //recallDatePicker.addDateChangeListener(new PatientView.RecallDatePickerDateChangeListener()); 
-
-            ImageIcon icon = new ImageIcon(this.getClass().getResource("/datepickerbutton1.png"));
-            JButton datePickerButton = dobDatePicker.getComponentToggleCalendarButton();
-            datePickerButton.setText("");
-            datePickerButton.setIcon(icon);
-
-            ActionEvent actionEvent = new ActionEvent(
-                    this,ActionEvent.ACTION_PERFORMED,
-                    ViewController.PatientViewControllerActionEvent.NULL_PATIENT_REQUEST.toString());
-            this.getMyController().actionPerformed(actionEvent);
-
+        ActionEvent actionEvent = new ActionEvent(
+                this,ActionEvent.ACTION_PERFORMED,
+                ViewController.PatientViewControllerActionEvent.NULL_PATIENT_REQUEST.toString());
+        this.getMyController().actionPerformed(actionEvent);
+    }
+    
+    class DOBDatePickerDateChangeListener implements DateChangeListener {
+        @Override
+        public void dateChanged(DateChangeEvent event) {
             /**
-             * 18/02/2024 07:53 code update to support note taking data entry
+             * Update logged at 30/10/2021 08:32
+             * inherited view status (set if any changes have been made to form since its initialisation)
+             * is initialised to true (date changed)
              */
-            /*
-            String noteTakingMode = SystemDefinition.getPMSNotesTemplateMode();
-            switch(noteTakingMode){
-                case "ENABLED":
-                    doEnableNoteTaking();
-                    break;
-                case "DISABLED":
-                    doDisableNoteTaking();
-                    break;
-                default:
-
-            }
-            */
-            mbaPatientView.add(mnuActions);
-            setJMenuBar(mbaPatientView);
-        }catch(PropertyVetoException ex){
-            
-        }catch (Exception exc){
-            String message = exc.getMessage() + "\n";
-            ViewController.displayErrorMessage(message + "Raised in PatientView::iniialiseView()", 
-                    "Patient view error", JOptionPane.WARNING_MESSAGE);
-        }
-        
-        
-        javax.swing.SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                 cmbPatientSelector.requestFocus();
-              }
-           });
-    };
-
-    @Override
-    public void actionPerformed(ActionEvent e){
-        ViewController.PatientViewControllerActionEvent request = null;
-        Patient patient = initialisePatientFromView(getMyController()
-                .getDescriptor().getControllerDescription().getPatient());
-        getMyController().getDescriptor()
-                .getViewDescription().setPatient(patient);
-        switch(e.getActionCommand()){
-            case DISPLAY_RECALL_EDITOR_VIEW:
-                request = ViewController.
-                            PatientViewControllerActionEvent.
-                            PATIENT_RECALL_EDITOR_VIEW_REQUEST;   
-                break;
-            case DISPLAY_GUARDIAN_EDITOR_VIEW:
-                request = ViewController.
-                        PatientViewControllerActionEvent.
-                        PATIENT_GUARDIAN_EDITOR_VIEW_REQUEST;
-                break;
-            case DISPLAY_MEDICAL_PROFILE:
-                if (this.cmbPatientSelector.getSelectedIndex()!=-1){
-                    doDisplayMedicalProfileRequest();
-                }else{
-                    JOptionPane.showInternalMessageDialog(this, 
-                            "a patient has to be selected before a medical history "
-                                    + "can be displayed","Patient view error", 
-                                    JOptionPane.WARNING_MESSAGE);
-                    rdbGroup.clearSelection();
-                }
-                break;
-            case DISPLAY_PHONE_EMAIL_EDITOR_VIEW:
-                request = ViewController.
-                            PatientViewControllerActionEvent.
-                            PATIENT_PHONE_EMAIL_EDITOR_VIEW_REQUEST;
-                break;
-            /*
-            case DISPLAY_PATIENT_NOTES_EDITOR_VIEW:
-                request = ViewController.
-                            PatientViewControllerActionEvent.
-                            PATIENT_NOTES_EDITOR_VIEW_REQUEST;
-                rdbGroup.clearSelection();
-                break;
-                */
-        }
-        if (request!=null){
-            ActionEvent actionEvent = new ActionEvent(
-                this,ActionEvent.ACTION_PERFORMED,
-                request.toString());
-            this.getMyController().actionPerformed(actionEvent);
-            actionEvent = new ActionEvent(
-                this,ActionEvent.ACTION_PERFORMED,
-                ViewController.PatientViewControllerActionEvent.
-                        VIEW_CHANGED_NOTIFICATION.toString());
-            this.getMyController().actionPerformed(actionEvent);
-            
-        }
-    }
-    
-    /**
-     * Establish an InternalFrameListener for when the view is closed 
-     * Setting DISPOSE_ON_CLOSE action when the window "X" is clicked, fires
-     * InternalFrameEvent.INTERNAL_FRAME_CLOSED event for the listener to let 
-     * the view controller know what's happening
-     */
-    public void addInternalFrameListeners(){
-        /**
-         * Establish an InternalFrameListener for when the view is closed 
-         */
-        internalFrameAdapter = new InternalFrameAdapter(){
-            @Override  
-            public void internalFrameClosed(InternalFrameEvent e) {
-                ActionEvent actionEvent = new ActionEvent(
-                        PatientView.this,ActionEvent.ACTION_PERFORMED,
-                        ViewController.PatientViewControllerActionEvent.VIEW_CLOSE_NOTIFICATION.toString());
-                getMyController().actionPerformed(actionEvent);
-            }
-            @Override
-            public void internalFrameActivated(InternalFrameEvent e) {
-                ActionEvent actionEvent = new ActionEvent(
-                        PatientView.this,ActionEvent.ACTION_PERFORMED,
-                        ViewController.PatientViewControllerActionEvent.VIEW_ACTIVATED_NOTIFICATION.toString());
-                getMyController().actionPerformed(actionEvent);
-            }
-        };
-        this.addInternalFrameListener(internalFrameAdapter);
-        this.setDefaultCloseOperation(JInternalFrame.DISPOSE_ON_CLOSE);
-    }
-    
-    ItemListener itemListener = new ItemListener() {
-        public void itemStateChanged(ItemEvent e){
             setViewStatus(true);
+            LocalDate date = event.getNewDate();
+            if (date != null) {
+                lblNameAge.setText("(" + String.valueOf(getAge(date)) + " yrs)");
+            }         
         }
-    };
-    /*
-    private void setAppointmentHistoryTableListener(){
-        this.tblAppointmentHistory.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        ListSelectionModel lsm = this.tblAppointmentHistory.getSelectionModel();
-        
-        lsm.addListSelectionListener(new ListSelectionListener() {
-            @Override
-            public void valueChanged(ListSelectionEvent e) {
-                if (!e.getValueIsAdjusting()) {   // Ensure the event is not fired multiple times
-                    int selectedRow = tblAppointmentHistory.getSelectedRow();
-                    if (selectedRow!=-1){
-                        tableValueChangedListenerActivated = true;
-                        //Patient patient = (Patient)tblAppointments.getModel().getValueAt(selectedRow, 0);
-                        //doScheduleTitleRefresh(patient);
-                    }
-                    //else doScheduleTitleRefresh(null);  
-                }
-            }
-        });    
     }
-    */
-    /**
-     * 07/11/2021 11:07 dev. log update
-     * Implements appointment double click event which displays appointment schedule day
-     * for row in appointment history table that's been double clicked
-     * Mouse listener added in the initialisation code for the JTable component 
-     * in "initComponents")
-     */
-    //private boolean tableValueChangedListenerActivated = true;
+    
     MouseAdapter mouseListener = new MouseAdapter() {
         public void mouseClicked(MouseEvent me) {
             if (me.getClickCount() == 2) {     // to detect doble click events
@@ -698,69 +376,6 @@ public class PatientView extends View implements ActionListener{
         }
     };
     
-    /**
-     * Update logged at 30/10/2021 08:32
-     * The ItemListener tracks any change made in cmbSelectGuardian
-     * if cmbIsGuardianAPatient has "Yes" selected
-     */
-    ItemListener itemSelectGuardianListener = new ItemListener(){
-        public void itemStateChanged(ItemEvent e){
-            /*
-            if (String.valueOf(cmbIsGuardianAPatient.getSelectedItem()).equals("Yes")){
-                if (cmbIsGuardianAPatient.getSelectedIndex() == -1) setViewStatus(false);
-                else setViewStatus(true);
-            }
-            else setViewStatus(false); 
-            */
-        }  
-    };
-    /**
-     * Update logged at 30/10/2021 08:32
-     * The DocumentListener tracks any change made to any JTextField on form
-     */
-    DocumentListener documentListener = new DocumentListener() {
-        public void changedUpdate(DocumentEvent documentEvent) {
-          setViewStatus(true);
-        }
-        public void insertUpdate(DocumentEvent documentEvent) {
-          setViewStatus(true);
-        }
-        public void removeUpdate(DocumentEvent documentEvent) {
-          setViewStatus(true);
-        } 
-    };
-    
-    private void setViewTitle(Patient patient){
-        this.setTitle (patient.toString()
-                + " [phone: " + patient.getPhone1()
-                + " email: " + patient.getEmail() +"]");
-    }
-    
-    private void populatePatientSelector(JComboBox<Patient> selector){
-        DefaultComboBoxModel<Patient> model = 
-                new DefaultComboBoxModel<>();
-        ArrayList<Patient> patients = 
-                getMyController().getDescriptor().getControllerDescription().getPatients();
-        Iterator<Patient> it = patients.iterator();
-        while (it.hasNext()){
-            Patient patient = it.next();
-            model.addElement(patient);
-        }
-        selector.setModel(model);
-        selector.setSelectedIndex(-1);
-    }
-  
-    /**
-     * Method processes the PropertyChangeEvent its received from the view
-     * controller
-     * @param e PropertyChangeEvent
-     *   -- PATIENT_RECORDS_RECEIVED the received Descriptor.Collection object 
-     *   contains the collection of all the patients recorded on the system
-     *   -- PATIENT_RECORD_RECEIVED the new Descriptor.Patient contains the 
-     *   full details of a patient as a result of the view controller having
-     *   received a request from the view to either create a new patient, update 
-     *   an existing patient, or fetch the details of a newly selected patient. 
-     */
     @Override
     public void propertyChange(PropertyChangeEvent e){
         initialiseFromControllerViewMode();
@@ -847,283 +462,406 @@ public class PatientView extends View implements ActionListener{
                 //break;
             
         }
-        
-        /**
-         * The view checks the details it requested in the create / update 
-         * patient message to the view controller, tally with what it receives
-         * back from the controller 
-         */
-        
-        /*
-        else if (e.getPropertyName().equals(
-                ViewController.PatientViewControllerPropertyChangeEvent.PATIENT_RECEIVED.toString())){
-            setViewDescriptor((Descriptor)e.getNewValue());
-            Descriptor oldEntity = (Descriptor)e.getOldValue();
-            try{
-                crossCheck(getViewDescriptor().getControllerDescription().getPatient(),
-                        oldEntity.getControllerDescription().getPatient());
-                String frameTitle = getViewDescriptor().getControllerDescription().getPatient().toString();
-                this.setTitle(frameTitle);
-            }
-            catch (CrossCheckErrorException ex){
-                //UnpecifiedError action
-            }
-        */
     }
     
-    private void initialiseFromControllerViewMode(){
-        switch(getMyController().getDescriptor()
-                .getControllerDescription().getViewMode()){
-            case CREATE:
-                this.btnCreateNewPatient.setEnabled(true);
-                this.btnUpdateSelectedPatient.setEnabled(false);
+    @Override
+    public void actionPerformed(ActionEvent e){
+        switch(Actions.valueOf(e.getActionCommand())){
+            case REQUEST_CLOSE_VIEW:
+                doCloseViewRequest();
                 break;
-            case UPDATE:
-                this.btnCreateNewPatient.setEnabled(false);
-                this.btnUpdateSelectedPatient.setEnabled(true);
+            case REQUEST_CREATE_RECOVER_PATIENT:
+                doCreateRecoverPatientRequest();
                 break;
+            case REQUEST_CLINICAL_NOTES:
+                doClinicalNotesRequest();
+                break;
+            case REQUEST_DOCTOR:
+                doDoctorRequest();
+                break;
+            case REQUEST_GUARDIAN_EDITOR_VIEW:
+                doGuardianEditorViewRequest();
+                break;
+            case REQUEST_MEDICAL_HISTORY:
+                doMedicalHistoryRequest();
+                break;
+            case REQUEST_MEDICAL_HISTORY_POPUP:
+                if (this.cmbPatientSelector.getSelectedIndex()!=-1){
+                    doMedicalHistoryPopupRequest();
+                }else{
+                    JOptionPane.showInternalMessageDialog(this, 
+                            "a patient has to be selected before a medical history "
+                                    + "can be displayed","Patient view error", 
+                                    JOptionPane.WARNING_MESSAGE);
+                    rdbGroup.clearSelection();
+                }
+                break;
+            case REQUEST_MEDICATION:
+                doMedicationRequest();
+                break;
+            case REQUEST_NULL_PATIENT:
+                doNullPatientRequest();
+                break;
+            case REQUEST_PATIENT:
+                doPatientRequest();
+                break;
+            case REQUEST_PATIENT_DELETE:
+                doPatientDeleteRequest();
+                break;
+            case REQUEST_PATIENT_RECOVER:
+                doPatientRecoverRequest();
+                break;
+            case REQUEST_PHONE_EMAIL_EDITOR_VIEW:
+                doPhoneEmailEditorViewRequest();
+                break;
+            case REQUEST_RECALL_EDITOR_VIEW:
+                doRecallEditorViewRequest();
+                break;
+            case REQUEST_SCHEDULE_VIEW_CONTROLLER:
+                doScheduleViewControllerRequest();
+                break;
+            case REQUEST_UNTITLED_NAME:
+                doUntitledNameRequest();
+                break;
+            case REQUEST_UPDATE_RECOVER_PATIENT:
+                doUpdateRecoverPatientRequest();
+                break;     
         }
     }
-
-    private void crossCheck(Patient newPatientValues, 
-            Patient oldPatientValues) throws CrossCheckErrorException {
-        String errorMessage = null;
-        boolean isCrossCheckError = false;
-        String errorType = null;
-        ArrayList<String> errorLog = new ArrayList<>();
-        boolean isTitle = false;
-        boolean isForenames = false;
-        boolean isSurname = false;
-        boolean isLine1 = false;
-        boolean isLine2 = false;
-        boolean isTown = false;
-        boolean isCounty = false;
-        boolean isPostcode = false;
-        boolean isPhone1 = false;
-        boolean isPhone2 = false;
-        boolean isGender = false;
-        boolean isDOB = false;
-        boolean isGuardianAPatient = false;
-        boolean isNotes = false;
-        boolean isDentalRecallDate = false;
-        boolean isHygieneRecallDate = false;
-        boolean isDentalRecallFrequency = false;
-        boolean isHygieneRecallFrequency = false;
-        boolean isLastDentalAppointment = false;
-        boolean isNextDentalAppointment = false;
-        boolean isNextHygieneAppointment = false;
-         
-        for (int index = 0; index < 2; index ++){
-            for (Descriptor.PatientField pf: Descriptor.PatientField.values()){
-                switch (pf){
-                    case TITLE:
-                        if (newPatientValues.getName().getTitle().equals(
-                            oldPatientValues.getName().getTitle())){isTitle = true;}
-                        break;
-                    case FORENAMES:
-                        if (newPatientValues.getName().getForenames().equals(
-                            oldPatientValues.getName().getForenames())){isForenames = true;
-                        }
-                        break;
-                    case SURNAME:
-                        if (newPatientValues.getName().getSurname().equals(
-                            oldPatientValues.getName().getSurname())){isSurname = true;
-                        }
-                        break;
-                    case LINE1:
-                        if (newPatientValues.getAddress().getLine1().equals(
-                            oldPatientValues.getAddress().getLine1())){isLine1 = true;
-                        }
-                        break;
-                    case LINE2: 
-                        if (newPatientValues.getAddress().getLine2().equals(
-                            oldPatientValues.getAddress().getLine2())){isLine2 = true;
-                        }
-                        break;
-                    case TOWN:
-                        if (newPatientValues.getAddress().getTown().equals(
-                            oldPatientValues.getAddress().getTown())){isTown = true;
-                        };
-                        break;
-                    case COUNTY:
-                        if (newPatientValues.getAddress().getCounty().equals(
-                            oldPatientValues.getAddress().getCounty())){isCounty = true;
-                        }
-                        break;
-                    case POSTCODE:
-                        if (newPatientValues.getAddress().getPostcode().equals(
-                            oldPatientValues.getAddress().getPostcode())){isPostcode = true;
-                        }
-                        break;
-                    case PHONE1:
-                        if (newPatientValues.getPhone1().equals(
-                            oldPatientValues.getPhone1())){isPhone1 = true;
-                        }
-                        break;
-                    case PHONE2:if (newPatientValues.getPhone2().equals(
-                            oldPatientValues.getPhone2())){isPhone2 = true;
-                    }
-                    break;
-                    case GENDER:
-                        if (newPatientValues.getGender().equals(
-                            oldPatientValues.getGender())){isGender = true;
-                        }
-                        break;
-                    case DOB:
-                        if ((newPatientValues.getDOB().compareTo(
-                            oldPatientValues.getDOB())) == 0){isDOB = true;
-                        }
-                        break;
-                    case IS_GUARDIAN_A_PATIENT:
-                        if (newPatientValues.getIsGuardianAPatient() &&
-                            oldPatientValues.getIsGuardianAPatient()){isGuardianAPatient = true;
-                        }
-                        break;
-                    case NOTES:
-                        if (newPatientValues.getNotes().equals(
-                            oldPatientValues.getNotes())){isNotes = true;
-                        }
-                        break;
-                    /*
-                    case DENTAL_RECALL_DATE:
-                        if (newPatientValues.getRecall().getDentalDate().equals(
-                            oldPatientValues.getRecall().getDentalDate())){isDentalRecallDate = true;
-                        }
-                        break;
-                    case HYGIENE_RECALL_DATE:
-                        break;
-                    case DENTAL_RECALL_FREQUENCY:
-                        if (newPatientValues.getRecall().getDentalFrequency()==
-                            oldPatientValues.getRecall().getDentalFrequency()){isDentalRecallFrequency = true;
-                        }
-                        break;
-                    case HYGIENE_RECALL_FREQUENCY:
-                        break;
+    
+    private void doCloseViewRequest(){
+        if (getViewStatus()){
+            String[] options = {"Yes", "No"};
+            int close = JOptionPane.showOptionDialog(this,
+                "Any changes to patient record will be lost. Cancel anyway?",null,
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.INFORMATION_MESSAGE,
+                null,
+                options,
+                null);
+            if (close == JOptionPane.YES_OPTION){
+                try{
+                    /**
+                    * setClosed will fire INTERNAL_FRAME_CLOSED event for the
+                    * listener to send ActionEvent to the view controller
                     */
+                    this.setClosed(true);
                 }
-                if (errorType == null){
-                    errorType = "patient";
+                catch (PropertyVetoException e){
+                    //UnspecifiedError action
                 }
-                else {
-                    errorType = "guardian";
-                }
-                
-                errorMessage = "Errors in cross check of requested " + errorType + " details and received " + errorType + "details listed below\n";
-                if (!isTitle) {errorMessage = errorMessage + errorType + 
-                        ".title field\n"; isCrossCheckError = true;} 
-                if (!isForenames) {errorMessage = errorMessage + errorType + 
-                        ".forenames field\n"; isCrossCheckError = true;} 
-                if (!isSurname) {errorMessage = errorMessage + errorType + 
-                        ".surname field\n"; isCrossCheckError = true;} 
-                if (!isLine1) {errorMessage = errorMessage + errorType + 
-                        ".line1 field\n"; isCrossCheckError = true;} 
-                if (!isLine2) {errorMessage = errorMessage + errorType + 
-                        ".line2 field\n"; isCrossCheckError = true;} 
-                if (!isTown) {errorMessage = errorMessage + errorType + 
-                        ".town field\n"; isCrossCheckError = true;} 
-                if (!isCounty) {errorMessage = errorMessage + errorType + 
-                        ".county field\n"; isCrossCheckError = true;}
-                if (!isPostcode) {errorMessage = errorMessage + errorType + 
-                        ".line1 field\n"; isCrossCheckError = true;} 
-                if (!isPhone1) {errorMessage = errorMessage + errorType + 
-                        ".phone1 field\n"; isCrossCheckError = true;} 
-                if (!isPhone2) {errorMessage = errorMessage + errorType + 
-                        ".phone2 field\n"; isCrossCheckError = true;}
-                if (!isGender) {errorMessage = errorMessage + errorType + 
-                        ".gender field\n"; isCrossCheckError = true;}
-                if (!isDOB) {errorMessage = errorMessage + errorType + 
-                        ".dob field\n"; isCrossCheckError = true;}
-                if (!isGuardianAPatient) {errorMessage = errorMessage + errorType + 
-                        ".isGuardianAParent field\n"; isCrossCheckError = true;}
-                if (!isNotes) {errorMessage = errorMessage + errorType + 
-                        ".notes field\n"; isCrossCheckError = true;}
-                if (!isDentalRecallDate) {errorMessage = errorMessage + errorType + 
-                        ".dentalRecalldate field\n"; isCrossCheckError = true;}
-                if (!isHygieneRecallDate) {errorMessage = errorMessage + errorType + 
-                        ".hygieneRecalldate field\n"; isCrossCheckError = true;}
-                if (!isDentalRecallFrequency) {errorMessage = errorMessage + errorType + 
-                        ".dentalRecallFrequency field\n"; isCrossCheckError = true;}
-                if (!isHygieneRecallFrequency) {errorMessage = errorMessage + errorType + 
-                        ".hygieneRecallFrequency field\n"; isCrossCheckError = true;}
-                if (!isLastDentalAppointment){errorMessage = errorMessage + errorType + 
-                        ".lastDentalAppointment field\n"; isCrossCheckError = true;}
-                if (!isNextDentalAppointment){errorMessage = errorMessage + errorType + 
-                        ".nextDentalAppointment field\n"; isCrossCheckError = true;}
-                if (!isNextHygieneAppointment){errorMessage = errorMessage + errorType + 
-                        ".NextHygieneAppointment field\n"; isCrossCheckError = true;}
-                
-            }
-            errorLog.add(errorMessage);
-            
-            /**
-             * break process anyway if there is no guardian details to process 
-             */
-            if (!newPatientValues.getIsGuardianAPatient()){
-                break;
-            }
-            
-            //re-initialise error markers to process guardian details
-            isTitle = false;
-            isForenames = false;
-            isSurname = false;
-            isLine1 = false;
-            isLine2 = false;
-            isTown = false;
-            isCounty = false;
-            isPostcode = false;
-            isPhone1 = false;
-            isPhone2 = false;
-            isGender = false;
-            isDOB = false;
-            isGuardianAPatient = false;
-            isNotes = false;
-            isDentalRecallDate = false;
-            isHygieneRecallDate = false;
-            isDentalRecallFrequency = false;
-            isHygieneRecallFrequency = false;
-            isLastDentalAppointment = false;
-            isNextDentalAppointment = false;
-            isNextHygieneAppointment = false;
+            }   
         }
-        if (isCrossCheckError){
-            String message = null;
-            Iterator<String> it = errorLog.iterator();
-            while(it.hasNext()){
-                message = it.next();
-                message = message + "\n";
+        else {
+            try{
+                    /**
+                    * setClosed will fire INTERNAL_FRAME_CLOSED event for the
+                    * listener to send ActionEvent to the view controller
+                    */
+                    this.setClosed(true);
+                }
+            catch (PropertyVetoException e){
+                //UnspecifiedError action
             }
-            throw new CrossCheckErrorException(message);
         }
     }
-    /**
-     * The method initialises the guardian component of the view state from the 
-     * current entity state
-     * -- note update 30/07/2021 09:05 applied
-     */
-    
-    private void initialisePatientGuardianViewComponent(){
-        /*
-        //Descriptor ed = getViewDescriptor();
+    private void doCreateRecoverPatientRequest(){
+        switch (getPatientSelectionMode()){
+            case PATIENT_RECOVERY:
+                switch(cmbPatientSelector.getSelectedIndex()){
+                    case -1:
+                        JOptionPane.showMessageDialog(
+                                this, 
+                                "A patient has not been selected for recovery");
+                        break;
+                    default:
+                        getMyController().getDescriptor().getViewDescription()
+                                .setPatient(initialisePatientFromView(
+                                        (Patient)cmbPatientSelector.getSelectedItem())
+                                );
+                        setPatientSelectionMode(PatientSelectionMode.PATIENT_SELECTION);
+                        ActionEvent actionEvent = new ActionEvent(
+                                this,ActionEvent.ACTION_PERFORMED,
+                                ViewController.PatientViewControllerActionEvent.RECOVER_PATIENT_REQUEST.toString());
+                        this.getMyController().actionPerformed(actionEvent);
+                        break;
+                }
+                break;
+            case PATIENT_SELECTION:
+                //setPatientSelectionMode(PatientSelectionMode.PATIENT_SELECTION);
+                createNewPatientActionPerformed();
+                break;
+        }
         
-        this.cmbIsGuardianAPatient.setEnabled(true);
-        boolean test = this.cmbIsGuardianAPatient.getSelectedItem().equals(PatientView.YesNoItem.Yes);
-        if (this.cmbIsGuardianAPatient.getSelectedItem().equals(PatientView.YesNoItem.Yes)){
-            this.cmbIsGuardianAPatient.setSelectedItem(PatientView.YesNoItem.Yes);
-            this.cmbSelectGuardian.setEnabled(true);
-            
-            if (this.cmbSelectGuardian.getSelectedIndex()==-1){
-                if (getMyController().getDescriptor().
-                        getControllerDescription().getPatient().getIsGuardianAPatient()){
-                    this.cmbSelectGuardian.setSelectedItem(
-                            getMyController().getDescriptor().getControllerDescription().getPatient().getGuardian());
-                }   
+    }
+    private void doClinicalNotesRequest(){
+        
+    }
+    private void doDoctorRequest(){
+        ViewController.PatientViewControllerActionEvent request = 
+                ViewController.PatientViewControllerActionEvent.
+                PATIENT_DOCTOR_EDITOR_VIEW_REQUEST;
+        doActionFor(request);
+    }
+    private void doGuardianEditorViewRequest(){
+        ViewController.PatientViewControllerActionEvent request = 
+                ViewController.PatientViewControllerActionEvent.
+                PATIENT_GUARDIAN_EDITOR_VIEW_REQUEST;
+        doActionFor(request);
+    }
+    private void doMedicalHistoryRequest(){
+        ViewController.PatientViewControllerActionEvent request = 
+                ViewController.PatientViewControllerActionEvent.
+                PATIENT_MEDICAL_HISTORY_1_EDITOR_VIEW_REQUEST;
+        doActionFor(request);
+    }
+    private void doMedicalHistoryPopupRequest(){
+        JMenuItem menuItem = null;
+        JPopupMenu popup = new JPopupMenu("Select option");
+        JLabel title = new JLabel("       Select options");
+        popup.add(title);    
+        popup.addSeparator();
+        
+        popup.setVisible(true);
+        Patient patient = (Patient)cmbPatientSelector.getSelectedItem();
+        
+        ArrayList<String> items = 
+                TemplateReader.extract(patient.getMedicalHistory());
+        Iterator itemsIterator = items.iterator();
+        while(itemsIterator.hasNext()){
+            String item = (String)itemsIterator.next();
+            switch(item){
+                case "History":
+                    menuItem = popup.add(item);
+                    menuItem.setActionCommand(
+                            Actions.REQUEST_MEDICAL_HISTORY.toString());
+                    menuItem.addActionListener(this);
+                            /*
+                    popup.add(item).addActionListener(new java.awt.event.ActionListener() {
+                        public void actionPerformed(java.awt.event.ActionEvent evt) {
+                            mniMedicalHistoryActionPerformed(evt);
+                        }
+                    });*/
+                    break;
+                case "Medication":
+                    menuItem = popup.add(item);
+                    menuItem.setActionCommand(
+                            Actions.REQUEST_MEDICATION.toString());
+                    menuItem.addActionListener(this);
+                    /*
+                    popup.add(item).addActionListener(new java.awt.event.ActionListener() {
+                        public void actionPerformed(java.awt.event.ActionEvent evt) {
+                            mniMedicationActionPerformed(evt);
+                        }
+                    });*/
+                    break;
+                case "Doctor":
+                    menuItem = popup.add(item);
+                    menuItem.setActionCommand(
+                            Actions.REQUEST_DOCTOR.toString());
+                    menuItem.addActionListener(this);
+                    /*
+                    popup.add(item).addActionListener(new java.awt.event.ActionListener() {
+                        public void actionPerformed(java.awt.event.ActionEvent evt) {
+                            mniDoctorActionPerformed(evt);
+                        }
+                    });*/
+                    break;        
             }
         }
-        else{//under 18 patient does not have a guardian who is also a patient
-            this.cmbIsGuardianAPatient.setSelectedItem(PatientView.YesNoItem.No);
-            this.cmbSelectGuardian.setEnabled(false);
+        popup.show(this.rdbRequestModalMedicalProfilePopup, 
+                rdbRequestModalMedicalProfilePopup.getX()-50,
+                rdbRequestModalMedicalProfilePopup.getY()-50 );
+    }
+    private void doMedicationRequest(){
+        ViewController.PatientViewControllerActionEvent request = 
+                ViewController.PatientViewControllerActionEvent.
+                PATIENT_MEDICATION_EDITOR_VIEW_REQUEST;
+        doActionFor(request);
+    }
+    private void doNullPatientRequest(){
+        getMyController().getDescriptor().
+                getViewDescription().setPatient(new Patient());
+        this.cmbPatientSelector.setSelectedIndex(-1);
+        ActionEvent actionEvent = new ActionEvent(
+            this,ActionEvent.ACTION_PERFORMED,
+            ViewController.PatientViewControllerActionEvent
+                    .NULL_PATIENT_REQUEST.toString());
+        this.getMyController().actionPerformed(actionEvent);
+    }
+    private void doPatientDeleteRequest(){
+        int response;
+        Patient patient = getMyController().getDescriptor().getControllerDescription().getPatient();
+        getMyController().getDescriptor().getViewDescription().setPatient(patient);
+        if (patient.getIsKeyDefined()){
+            String message ="Are you sure you want to delete patient " + patient.toString() + "'s details?";
+            response = JOptionPane.showConfirmDialog(this,message, "Action selected patient notifications", JOptionPane.YES_NO_OPTION);
+            if (response==JOptionPane.YES_OPTION){
+                ActionEvent actionEvent = new ActionEvent(
+                    this,ActionEvent.ACTION_PERFORMED,
+                    ViewController.PatientViewControllerActionEvent.PATIENT_DELETE_REQUEST.toString());
+                this.getMyController().actionPerformed(actionEvent);
+            }
         }
-        */
+        else
+            JOptionPane.showMessageDialog(this, "A patient has not yet been selected for deletion\n"
+                    + "Click the 'Select/clear patient details' from the menu options to select a patient");
+    }
+    private void doPatientRecoverRequest(){
+        setPatientSelectionMode(PatientSelectionMode.PATIENT_RECOVERY);
+        ActionEvent actionEvent = new ActionEvent(
+            this,ActionEvent.ACTION_PERFORMED,
+            ViewController.PatientViewControllerActionEvent.PATIENT_RECOVER_REQUEST.toString());
+        this.getMyController().actionPerformed(actionEvent);
+        mniRecoverDeletedPatient.setEnabled(false);
+        mniCreateNewPatient.setEnabled(false);
+        this.btnUpdateRecoverPatient.setEnabled(true);
+    }
+    private void doPatientRequest(){
+        ViewController.PatientViewControllerActionEvent event = null; 
+        switch(getPatientSelectionMode()){
+            case PATIENT_SELECTION:
+                event = ViewController.PatientViewControllerActionEvent.PATIENT_REQUEST;
+                break;
+            case PATIENT_RECOVERY:
+                event = ViewController.PatientViewControllerActionEvent.DELETED_PATIENT_REQUEST;
+                break;
+        }
+        if (cmbPatientSelector.getSelectedIndex()!=-1){
+            getMyController().getDescriptor().getViewDescription().
+                    setPatient((Patient)cmbPatientSelector.getSelectedItem());
+            ActionEvent actionEvent = new ActionEvent(
+                    this,ActionEvent.ACTION_PERFORMED, 
+                    event.toString());
+            this.getMyController().actionPerformed(actionEvent);
+        }
+    }
+    private void doPhoneEmailEditorViewRequest(){
+        ViewController.PatientViewControllerActionEvent request = 
+                ViewController.PatientViewControllerActionEvent.
+                PATIENT_PHONE_EMAIL_EDITOR_VIEW_REQUEST;
+        doActionFor(request);
+    }
+    private void doRecallEditorViewRequest(){
+        ViewController.PatientViewControllerActionEvent request = 
+                ViewController.PatientViewControllerActionEvent.
+                PATIENT_RECALL_EDITOR_VIEW_REQUEST;
+        doActionFor(request);
+    }
+    private void doScheduleViewControllerRequest(){
+        if (this.tblAppointmentHistory.getSelectedRow()==-1){
+            JOptionPane.showMessageDialog(this, "An appointment has not been selected");
+        }
+        else{
+            int row = this.tblAppointmentHistory.getSelectedRow();
+            LocalDate day = ((LocalDateTime)this.tblAppointmentHistory.getValueAt(row,0)).toLocalDate();
+            getMyController().getDescriptor().getViewDescription().setScheduleDay(day);
+            ActionEvent actionEvent = new ActionEvent(
+                    this,ActionEvent.ACTION_PERFORMED,
+                    ViewController.PatientViewControllerActionEvent.SCHEDULE_VIEW_CONTROLLER_REQUEST.toString());
+            this.getMyController().actionPerformed(actionEvent);
+        }
+    }
+    private void doUntitledNameRequest(){
+        if (this.cmbNameTitle.getSelectedItem() != null){
+            if (this.cmbNameTitle.getSelectedItem().equals(TitleItem.Untitled)){
+                this.cmbNameTitle.setSelectedIndex(-1);
+            }
+        }
+    }
+    private void doUpdateRecoverPatientRequest(){
+        switch (getPatientSelectionMode()){
+            case PATIENT_SELECTION:
+                updateSelectedPatientActionPerformed();
+                break;
+            case PATIENT_RECOVERY:
+                setPatientSelectionMode(PatientSelectionMode.PATIENT_SELECTION);
+                doNullPatientRequest();
+                break;
+        }
+    }
+    
+    private void updateSelectedPatientActionPerformed(){
+        Patient patient = null;
+        
+        if (getMyController().getDescriptor().getControllerDescription().getPatient().getIsKeyDefined()){
+            
+            if (this.validateMinimumPatientDetails()){
+                patient = getMyController().getDescriptor().getControllerDescription().getPatient();
+                getMyController().getDescriptor().getViewDescription().setPatient(
+                        initialisePatientFromView(patient));
+                ActionEvent actionEvent = new ActionEvent(
+                        this,ActionEvent.ACTION_PERFORMED,
+                        ViewController.PatientViewControllerActionEvent.PATIENT_UPDATE_REQUEST.toString());
+                this.getMyController().actionPerformed(actionEvent);
+            }
+        }
+        else
+            JOptionPane.showMessageDialog(this, "Update operation cannot proceed unless an existing patient is currently selected");
+    }
+    
+    private void doActionFor(
+            ViewController.PatientViewControllerActionEvent request){
+        ActionEvent actionEvent = new ActionEvent(
+            this,ActionEvent.ACTION_PERFORMED,
+            request.toString());
+        this.getMyController().actionPerformed(actionEvent);
+        actionEvent = new ActionEvent(
+            this,ActionEvent.ACTION_PERFORMED,
+            ViewController.PatientViewControllerActionEvent.
+                    VIEW_CHANGED_NOTIFICATION.toString());
+        this.getMyController().actionPerformed(actionEvent);
+        rdbGroup.clearSelection();
+    }
+    
+    private void createNewPatientActionPerformed(){
+        
+        if (!getMyController().getDescriptor().getControllerDescription().getPatient().getIsKeyDefined()){
+            if (this.validateMinimumPatientDetails()){
+                getMyController().getDescriptor().getViewDescription()
+                        .setPatient(initialisePatientFromView(
+                                getMyController().getDescriptor()
+                                        .getControllerDescription().getPatient()));
+                ActionEvent actionEvent = new ActionEvent(
+                        this,ActionEvent.ACTION_PERFORMED,
+                        ViewController.PatientViewControllerActionEvent.PATIENT_CREATE_REQUEST.toString());
+                this.getMyController().actionPerformed(actionEvent);
+            }
+        }
+        else
+            JOptionPane.showMessageDialog(this, "A new patient cannot be created until the currently selected patient is deselected\n"
+                    + "Click the 'Select/clear patient details' from the menu options to deselect the selected patient");
+    }
+    
+    private boolean validateMinimumPatientDetails(){
+        boolean errorOnExit = false;
+        if (this.cmbNameGender.getSelectedIndex()==-1){
+            JOptionPane.showMessageDialog(this, "Patient gender must be specified");
+            errorOnExit = true;
+        }
+        else if (this.getSurname()==null){
+            JOptionPane.showMessageDialog(this, "Patient surname must be specified");
+            errorOnExit = true;
+        }
+        else if (this.getSurname().isEmpty()){
+            JOptionPane.showMessageDialog(this, "Patient surname must be specified");
+            errorOnExit = true;
+        }
+        return !errorOnExit;
+    }
+    
+    private void populatePatientSelector(JComboBox<Patient> selector){
+        DefaultComboBoxModel<Patient> model = 
+                new DefaultComboBoxModel<>();
+        ArrayList<Patient> patients = 
+                getMyController().getDescriptor().getControllerDescription().getPatients();
+        Iterator<Patient> it = patients.iterator();
+        while (it.hasNext()){
+            Patient patient = it.next();
+            model.addElement(patient);
+        }
+        selector.setModel(model);
+        selector.setSelectedIndex(-1);
     }
     
     private void populateAppointmentsHistoryTable(Patient patient){
@@ -1158,20 +896,56 @@ public class PatientView extends View implements ActionListener{
             this.pnlAppointmentHistory.repaint();
             
         }catch(Exception ex){
-            JOptionPane.showMessageDialog(this, "Following StoreException raised in PatientView::populateAppointmentsHistoryTable()\n"
+            JOptionPane.showMessageDialog(this, "Following Exception raised in PatientView::populateAppointmentsHistoryTable()\n"
                     + ex.getMessage());
         }
         
     }
-   
-    private int getAge(LocalDate dob){
-        return Period.between(dob, LocalDate.now()).getYears();
+    
+    private void initialiseFromControllerViewMode(){
+        switch(getMyController().getDescriptor()
+                .getControllerDescription().getViewMode()){
+            case CREATE:
+                this.btnCreateRecoverPatient.setEnabled(true);
+                this.btnUpdateRecoverPatient.setEnabled(false);
+                break;
+            case UPDATE:
+                this.btnCreateRecoverPatient.setEnabled(false);
+                this.btnUpdateRecoverPatient.setEnabled(true);
+                break;
+        }
     }
     
-    /**
-     * The method initialises the patient component of the view state from the
-     * current entity state
-     */
+    ItemListener itemListener = new ItemListener() {
+        public void itemStateChanged(ItemEvent e){
+            setViewStatus(true);
+        }
+    };
+    
+    private void addInternalFrameListeners(){
+        /**
+         * Establish an InternalFrameListener for when the view is closed 
+         */
+        internalFrameAdapter = new InternalFrameAdapter(){
+            @Override  
+            public void internalFrameClosed(InternalFrameEvent e) {
+                ActionEvent actionEvent = new ActionEvent(
+                        PatientView.this,ActionEvent.ACTION_PERFORMED,
+                        ViewController.PatientViewControllerActionEvent.VIEW_CLOSE_NOTIFICATION.toString());
+                getMyController().actionPerformed(actionEvent);
+            }
+            @Override
+            public void internalFrameActivated(InternalFrameEvent e) {
+                ActionEvent actionEvent = new ActionEvent(
+                        PatientView.this,ActionEvent.ACTION_PERFORMED,
+                        ViewController.PatientViewControllerActionEvent.VIEW_ACTIVATED_NOTIFICATION.toString());
+                getMyController().actionPerformed(actionEvent);
+            }
+        };
+        this.addInternalFrameListener(internalFrameAdapter);
+        this.setDefaultCloseOperation(JInternalFrame.DISPOSE_ON_CLOSE);
+    }
+    
     private void initialisePatientViewComponentFromED(){  
         Patient patient = getMyController().getDescriptor().
                 getControllerDescription().getPatient();
@@ -1187,50 +961,37 @@ public class PatientView extends View implements ActionListener{
         setCounty(patient.getAddress().getCounty());
         setPostcode(patient.getAddress().getPostcode());
         setGender(patient.getGender());
-        setNotes(patient.getNotes());
+        //setNotes(patient.getNotes());
         setDOB(patient.getDOB());
         populateAppointmentsHistoryTable(patient);
     }
     
-    
     private Patient initialisePatientFromView(Patient patient){
-        //if (patient== null) patient = new Patient();
-        /**
-         * 31/1/24 
-         * -- there is always a patient object although it might not have a key defined yet
-         */
             patient.getAddress().setCounty(getCounty());
-            /*
-            patient.getRecall().setDentalDate(getDentalRecallDate());
-            */
+  
             patient.setDOB(getDOB());
             patient.getName().setForenames(getForenames());
             patient.setGender(getGender());
-            /*
-            patient.getRecall().setDentalDate(getDentalRecallDate());
-            patient.getRecall().setDentalFrequency(getDentalRecallFrequency());
-            patient.setIsGuardianAPatient(getIsGuardianAPatient());
-            */
+
             patient.getAddress().setLine1(getLine1());
             patient.getAddress().setLine2(getLine2());
             
-            patient.setNotes(getNotes());
-            /*
-            patient.setPhone1(getPhone1());
-            patient.setPhone2(getPhone2());
-            */
+            //patient.setNotes(getNotes());
+
             patient.getAddress().setPostcode(getPostcode());
             patient.getName().setSurname(getSurname());
             patient.getName().setTitle(getPatientTitle());
             patient.getAddress().setTown(getTown());
-            /*
-            if (getGuardian() != null){
-                patient.setGuardian(getGuardian());
-            }
-            */
+
         return patient;
     }
-
+    
+    private void setViewTitle(Patient patient){
+        this.setTitle (patient.toString()
+                + " [phone: " + patient.getPhone1()
+                + " email: " + patient.getEmail() +"]");
+    }
+    
     private String getPatientTitle(){
         String value = "";
         if(PatientView.TitleItem.Dr.ordinal()==this.cmbNameTitle.getSelectedIndex()){
@@ -1271,6 +1032,7 @@ public class PatientView extends View implements ActionListener{
             }
         }
     }
+    
     private String getForenames(){
         return this.txtNameForename.getText();
     }
@@ -1368,655 +1130,85 @@ public class PatientView extends View implements ActionListener{
         }
     }
     
-    /*
-    private boolean getIsGuardianAPatient(){
-        boolean value = false;
-        if(PatientView.YesNoItem.Yes.ordinal()==this.cmbIsGuardianAPatient.getSelectedIndex()){
-            value = true;
-        }
-        else if(PatientView.YesNoItem.No.ordinal()==this.cmbIsGuardianAPatient.getSelectedIndex()){
-            value = false;
-        }
-        return value;
+    private int getAge(LocalDate dob){
+        return Period.between(dob, LocalDate.now()).getYears();
     }
-    private void setIsGuardianAPatient(boolean isGuardianAPatient){
-        if (isGuardianAPatient){
-            cmbIsGuardianAPatient.setSelectedItem(PatientView.YesNoItem.Yes);
-        }
-        else{
-            cmbIsGuardianAPatient.setSelectedItem(PatientView.YesNoItem.No);
-        }
-    }
-    */
-    /*
-    private Patient getGuardian(){
-        if (cmbSelectGuardian.getSelectedIndex() == -1){
-            return null;
-        }
-        else {
-            return (Patient)cmbSelectGuardian.getSelectedItem();
-        }
-    }
-    private void setGuardian(Patient guardian){
-        if (guardian == null){
-            this.cmbSelectGuardian.setSelectedIndex(-1);
-            this.cmbSelectGuardian.setEnabled(false);
-        }
-    }
-    private LocalDate getDentalRecallDate(){
-        return this.recallDatePicker.getDate();
-    }
-    private void setRecallDate(LocalDate dentalRecallDate){
-        this.recallDatePicker.setDate(dentalRecallDate);
-    }
-    private Integer getDentalRecallFrequency(){
-        return (Integer)this.spnDentalRecallFrequency.getValue();
-    }
-    private void setDentalRecallFrequency(Integer value){
-        if (value == null) this.spnDentalRecallFrequency.setValue(0);
-        else this.spnDentalRecallFrequency.setValue(value);
-    }
-    */
-    private String getNotes(){
-        return this.txtPatientNotes.getText();
-    }
-    private void setNotes(String notes){
-        if (notes == null) this.txtPatientNotes.setText("");
-        else this.txtPatientNotes.setText(notes);
-    }
-    
-    /*
-    private String getPhone1(){
-        return txtPhone1.getText();
-    }
-    private void setPhone1(String value){
-        if (value == null) txtPhone1.setText("");
-        else txtPhone1.setText(value);
-    }
-    private String getPhone2(){
-        return txtPhone2.getText();
-    }
-    private void setPhone2(String value){
-        if (value == null) txtPhone2.setText("");
-        else txtPhone2.setText(value);
-    }
-    */
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
      * regenerated by the Form Editor.
      */
-    
-        
-    private void initComponents(){ 
-    //<editor-fold defaultstate="collapsed" desc="Component Definitions">
-    //<editor-fold defaultstate="collapsed" desc="Panel definitions">
-        pnlOperations = new javax.swing.JPanel();
-        pnlAddress = new javax.swing.JPanel();
-        pnlAppointmentHistory = new javax.swing.JPanel();
-        //pnlGuardianDetails = new javax.swing.JPanel();
-        pnlName = new javax.swing.JPanel();
-        pnlPatientNotes = new javax.swing.JPanel();
-        //pnlPhones = new javax.swing.JPanel();
-        //pnlRecall = new javax.swing.JPanel();
-    
+    @SuppressWarnings("unchecked")
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    private void initComponents() {
+
+        buttonGroup1 = new javax.swing.ButtonGroup();
         pnlPatientSelection = new javax.swing.JPanel();
-        pnlPatientSelection.setBackground(new java.awt.Color(220, 220, 220));
-        pnlPatientSelection.setBorder(
-                javax.swing.BorderFactory.createTitledBorder(
-                        javax.swing.BorderFactory.createEtchedBorder(), 
-                        "Select patient to recover", 
-                        javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, 
-                        javax.swing.border.TitledBorder.DEFAULT_POSITION, 
-                        getBorderTitleFont(), 
-                        getBorderTitleColor())); // NOI18N 
-        
-        pnlAppointmentHistory.setBorder(
-                javax.swing.BorderFactory.createTitledBorder(
-                        javax.swing.BorderFactory.createEtchedBorder(), 
-                        "Appointment history (latest apppointment top of list)", 
-                        javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, 
-                        javax.swing.border.TitledBorder.DEFAULT_POSITION, 
-                        getBorderTitleFont(), 
-                        getBorderTitleColor())); // NOI18N
-        pnlAppointmentHistory.setBackground(new java.awt.Color(220, 220, 220));
-
-        pnlName.setBorder(
-                javax.swing.BorderFactory.createTitledBorder(
-                        javax.swing.BorderFactory.createEtchedBorder(), 
-                        "Name & particulars", 
-                        javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, 
-                        javax.swing.border.TitledBorder.DEFAULT_POSITION, 
-                        getBorderTitleFont(), 
-                        getBorderTitleColor())); // NOI18N
-        
-        pnlAddress.setBorder(
-                javax.swing.BorderFactory.createTitledBorder(
-                        javax.swing.BorderFactory.createEtchedBorder(), 
-                        "Address", 
-                        javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, 
-                        javax.swing.border.TitledBorder.DEFAULT_POSITION, 
-                        getBorderTitleFont(), 
-                        getBorderTitleColor())); // NOI18N
-        /*
-        pnlPatientNotes.setBorder(
-                javax.swing.BorderFactory.createTitledBorder(
-                        javax.swing.BorderFactory.createEtchedBorder(), 
-                        "Patient notes", 
-                        javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, 
-                        javax.swing.border.TitledBorder.DEFAULT_POSITION, 
-                        getBorderTitleFont(),
-                        getBorderTitleColor())); // NOI18N
-        */
-        
-        //pnlPhones.setBorder(
-        //        javax.swing.BorderFactory.createTitledBorder(
-        //                javax.swing.BorderFactory.createEtchedBorder(), 
-        //                "Phone number(s) & email", 
-        //                javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, 
-        //                javax.swing.border.TitledBorder.DEFAULT_POSITION, 
-        //                getBorderTitleFont(),
-        //                getBorderTitleColor())); // NOI18N
-
-        //pnlGuardianDetails.setBorder(
-        //        javax.swing.BorderFactory.createTitledBorder(
-        //                javax.swing.BorderFactory.createEtchedBorder(), 
-        //                "Guardian details (patient < 18)", 
-        //                javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, 
-        //                javax.swing.border.TitledBorder.DEFAULT_POSITION, 
-        //                getBorderTitleFont(),
-        //                getBorderTitleColor())); // NOI18N
-
-        //pnlRecall.setBorder(
-        //        javax.swing.BorderFactory.createTitledBorder(
-        //                javax.swing.BorderFactory.createEtchedBorder(), 
-        //                "Recall details", 
-        //                javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, 
-        //                javax.swing.border.TitledBorder.DEFAULT_POSITION, 
-        //                getBorderTitleFont(),
-        //                getBorderTitleColor())); // NOI18N
-        
-        pnlOperations.setBorder(
-                javax.swing.BorderFactory.createTitledBorder(
-                        javax.swing.BorderFactory.createEtchedBorder(), 
-                        "Actions", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, 
-                        javax.swing.border.TitledBorder.DEFAULT_POSITION, 
-                        getBorderTitleFont(),
-                        getBorderTitleColor())); // NOI18N
-        pnlOperations.setBackground(new java.awt.Color(220, 220, 220));
-        
-        
-    //</editor-fold>
-        btnFetchScheduleForSelectedAppointment = new javax.swing.JButton("<html><center>Fetch day schedule</center><center>for selected</center><center>appointment</center></html>");
-        
-        btnClearSelection = new javax.swing.JButton("Clear patient selection");
-        btnClearSelection.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnClearSelectionActionPerformed(evt);
-            }
-        });
-        
-        btnUpdateSelectedPatient = new javax.swing.JButton("Update selected patient");
-        btnUpdateSelectedPatient.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnUpdateSelectedPatientActionPerformed(evt);
-            }
-        });
-        
-        btnCloseView = new javax.swing.JButton("Close view");
-        btnCloseView.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnCloseViewActionPerformed(evt);
-            }
-        });
- 
-        btnCreateNewPatient = new javax.swing.JButton("Create new patient");
-        btnCreateNewPatient.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnCreateNewPatientActionPerformed(evt);
-            }
-        });
-        
-        //cmbSelectGuardian = new javax.swing.JComboBox<model.Patient>();
-        //cmbIsGuardianAPatient = new javax.swing.JComboBox<PatientView.YesNoItem>();
-        cmbPatientSelector = new javax.swing.JComboBox<Patient>();
-        cmbNameTitle = new javax.swing.JComboBox<>();
+        cmbPatientSelector = new javax.swing.JComboBox<>();
+        btnClearSelection = new javax.swing.JButton();
+        pnlName = new javax.swing.JPanel();
+        pnlNameContent = new javax.swing.JPanel();
+        txtNameForename = new javax.swing.JTextField();
+        lblNameForename = new javax.swing.JLabel();
+        txtNameSurname = new javax.swing.JTextField();
+        lblNameSurname = new javax.swing.JLabel();
+        lblNameGender = new javax.swing.JLabel();
         cmbNameGender = new javax.swing.JComboBox<>();
-        
-        lblNameAge = new javax.swing.JLabel("age");
-        lblNameDOB = new javax.swing.JLabel("DOB");
-        lblNameForename = new javax.swing.JLabel("Forename");
-        lblNameSurname = new javax.swing.JLabel("Surname");
-        lblNameTitle = new javax.swing.JLabel("Title");
-        lblNameGender = new javax.swing.JLabel("Gender");
-        lblAddressCounty = new javax.swing.JLabel("County");
-        lblAddressLine1 = new javax.swing.JLabel("Line 1");
-        lblAddressLine2 = new javax.swing.JLabel("Line 2");
-        lblAddressTown = new javax.swing.JLabel("Town");
-        lblAddressPostcode = new javax.swing.JLabel("Postcode");
-
-        
-        //menu bits
+        lblNameTitle = new javax.swing.JLabel();
+        cmbNameTitle = new javax.swing.JComboBox<>();
+        lblNameDOB = new javax.swing.JLabel();
+        dobDatePicker = new com.github.lgooddatepicker.components.DatePicker();
+        DatePickerSettings settings = new DatePickerSettings();
+        settings.setFormatForDatesCommonEra(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+        settings.setAllowKeyboardEditing(false);
+        dobDatePicker.setSettings(settings);
+        ;
+        lblNameAge = new javax.swing.JLabel();
+        pnlOperations = new javax.swing.JPanel();
+        btnUpdateRecoverPatient = new javax.swing.JButton();
+        btnCloseView = new javax.swing.JButton();
+        btnCreateRecoverPatient = new javax.swing.JButton();
+        btnFetchScheduleForSelectedAppointment = new javax.swing.JButton();
+        btnFetchClinicalNotes = new javax.swing.JButton();
+        pnlAddress = new javax.swing.JPanel();
+        pnlPatientAddressContent = new javax.swing.JPanel();
+        txtAddressLine1 = new javax.swing.JTextField();
+        lblAddressLine1 = new javax.swing.JLabel();
+        txtNameLine2 = new javax.swing.JTextField();
+        lblAddressLine2 = new javax.swing.JLabel();
+        lblAddressCounty = new javax.swing.JLabel();
+        lblAddressTown = new javax.swing.JLabel();
+        lblAddressPostcode = new javax.swing.JLabel();
+        txtAddressTown = new javax.swing.JTextField();
+        txtAddressCounty = new javax.swing.JTextField();
+        txtAddressPostcode = new javax.swing.JTextField();
+        pnlAppointmentHistory = new javax.swing.JPanel();
+        scrAppointmentHistory = new javax.swing.JScrollPane();
+        tblAppointmentHistory = new javax.swing.JTable();
+        pnlFurtherDetails = new javax.swing.JPanel();
+        rdbRequestPhoneEmailEditorView = new javax.swing.JRadioButton();
+        rdbRequestModalRecallEditorView = new javax.swing.JRadioButton();
+        rdbRequestModalGuardianEditorView = new javax.swing.JRadioButton();
+        rdbRequestModalMedicalProfilePopup = new javax.swing.JRadioButton();
         mbaPatientView = new javax.swing.JMenuBar();
         mnuActions = new javax.swing.JMenu();
         mniCreateNewPatient = new javax.swing.JMenuItem();
         mniUpdateSelectedPatient = new javax.swing.JMenuItem();
-        jSeparator2 = new javax.swing.JPopupMenu.Separator();
+        jSeparator1 = new javax.swing.JPopupMenu.Separator();
         mniDeleteSelectedPatient = new javax.swing.JMenuItem();
         mniRecoverDeletedPatient = new javax.swing.JMenuItem();
-        jSeparator3 = new javax.swing.JPopupMenu.Separator();
+        jSeparator2 = new javax.swing.JPopupMenu.Separator();
         mniCloseView = new javax.swing.JMenuItem();
 
-        tblAppointmentHistory = new javax.swing.JTable();
-        tblAppointmentHistory.addMouseListener(mouseListener);
-        tblAppointmentHistory.setModel(new Appointments3ColumnTableModel());
-        //tblAppointmentHistory.setPreferredSize(new Dimension(getAppointmentHistoryTableWidth(),110));
+        pnlPatientSelection.setBorder(javax.swing.BorderFactory.createTitledBorder("Select patient"));
 
-        try{
-            scrAppointmentHistory = new javax.swing.JScrollPane();
-            scrAppointmentHistory.setPreferredSize(new Dimension(
-                    getAppointmentHistoryScrollPaneWidth(),100));
-            scrAppointmentHistory.setRowHeaderView(null);
-            scrAppointmentHistory.setViewportView(tblAppointmentHistory);
-
-            ViewController.setJTableColumnProperties(tblAppointmentHistory, 
-                    scrAppointmentHistory.getPreferredSize().width, 
-                    20,20,60);
-            //spnDentalRecallFrequency = new javax.swing.JSpinner();
-
-            txtNameForename = new javax.swing.JTextField();
-            txtNameSurname = new javax.swing.JTextField();
-            txtAddressLine2 = new javax.swing.JTextField();
-            txtAddressLine1 = new javax.swing.JTextField();
-            txtAddressTown = new javax.swing.JTextField();
-            txtAddressCounty = new javax.swing.JTextField();
-            txtPatientNotes = new javax.swing.JTextArea();
-            txtAddressPostcode = new javax.swing.JTextField();
-            //txtRecallDate = new javax.swing.JTextField();
-            //txtPhone1 = new javax.swing.JTextField();
-            //txtPhone2 = new javax.swing.JTextField();
-            //txtPhonesEmail = new javax.swing.JTextField();
-
-            DatePickerSettings dateSettings = new DatePickerSettings();
-            dateSettings.setVisibleDateTextField(false);
-            dateSettings.setGapBeforeButtonPixels(0);
-            //recallDatePicker = new com.github.lgooddatepicker.components.DatePicker(dateSettings);
-
-            DatePickerSettings settings = new DatePickerSettings();
-            settings.setFormatForDatesCommonEra(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-            settings.setAllowKeyboardEditing(false);
-            dobDatePicker = new com.github.lgooddatepicker.components.DatePicker(settings);
-
-            cmbNameTitle.addItemListener(itemListener);
-            cmbNameTitle.setEditable(true);
-            cmbNameTitle.setModel(new javax.swing.DefaultComboBoxModel<>(PatientView.TitleItem.values()));
-            cmbNameTitle.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-
-            cmbNameGender.addItemListener(itemListener);
-            cmbNameGender.setEditable(true);
-            cmbNameGender.setModel(new javax.swing.DefaultComboBoxModel<>(PatientView.GenderItem.values()));
-            cmbNameGender.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-
-            lblNameTitle.setText("Title");
-            lblNameForename.setText("Forenames");
-            lblNameSurname.setText("Surname");
-            lblNameGender.setText("Gender");
-
-            lblNameAge.setText("(age)");
-
-            lblNameDOB.setText("DOB");
-
-
-            txtAddressLine1.getDocument().addDocumentListener(documentListener);
-            txtAddressLine1.addActionListener(new java.awt.event.ActionListener() {
-                public void actionPerformed(java.awt.event.ActionEvent evt) {
-                    txtAddressLine1ActionPerformed(evt);
-                }
-            });
-
-            lblAddressLine1.setText("Line 1");
-
-            lblAddressLine2.setText("Line 2");
-
-            txtAddressLine2.getDocument().addDocumentListener(documentListener);
-            txtAddressLine2.addActionListener(new java.awt.event.ActionListener() {
-                public void actionPerformed(java.awt.event.ActionEvent evt) {
-                    txtAddressLine2ActionPerformed(evt);
-                }
-            });
-
-            //pnlPatientNotes.setBorder(javax.swing.BorderFactory.createTitledBorder("Patient notes"));
-
-            txtPatientNotes.setColumns(20);
-            txtPatientNotes.setLineWrap(true);
-            txtPatientNotes.setRows(5);
-
-            scrPatientNotes = new javax.swing.JScrollPane();
-            scrPatientNotes.setViewportView(txtPatientNotes);
-
-            pnlNameContent = new javax.swing.JPanel();
-            pnlPatientAddressContent = new javax.swing.JPanel();
-            pnlFurtherDetails = new javax.swing.JPanel();
-
-            pnlFurtherDetails.setBorder(
-                    javax.swing.BorderFactory.createTitledBorder(
-                            javax.swing.BorderFactory.createEtchedBorder(), 
-                            "Patient information selectable for viewing", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, 
-                            javax.swing.border.TitledBorder.DEFAULT_POSITION, 
-                            getBorderTitleFont(),
-                            getBorderTitleColor())); // NOI18N
-
-            //28/02/2024 07:45
-            rdbRequestModalPhoneEmailEditorView = new javax.swing.JRadioButton();
-            rdbRequestModalRecallEditorView = new javax.swing.JRadioButton();
-            rdbRequestModalGuardianEditorView = new javax.swing.JRadioButton();
-            //rdbRequestModalNotesEditorView = new javax.swing.JRadioButton();
-            rdbRequestModalMedicalProfilePopup = new javax.swing.JRadioButton();
-            //rdbRequestModalNotesEditorView.setText("Patient notes editor");
-            rdbRequestModalPhoneEmailEditorView.setText(DISPLAY_PHONE_EMAIL_EDITOR_VIEW);
-            rdbRequestModalPhoneEmailEditorView.setActionCommand(DISPLAY_PHONE_EMAIL_EDITOR_VIEW);
-            rdbRequestModalRecallEditorView.setText(DISPLAY_RECALL_EDITOR_VIEW);
-            rdbRequestModalRecallEditorView.setActionCommand(DISPLAY_RECALL_EDITOR_VIEW);
-            rdbRequestModalGuardianEditorView.setText(DISPLAY_GUARDIAN_EDITOR_VIEW);
-            rdbRequestModalGuardianEditorView.setActionCommand(DISPLAY_GUARDIAN_EDITOR_VIEW);
-            rdbRequestModalMedicalProfilePopup.setText(DISPLAY_MEDICAL_PROFILE);
-            rdbRequestModalMedicalProfilePopup.setActionCommand(DISPLAY_MEDICAL_PROFILE);
-            rdbGroup = new javax.swing.ButtonGroup();
-            rdbGroup.add(rdbRequestModalPhoneEmailEditorView);
-            rdbGroup.add(rdbRequestModalRecallEditorView);
-            rdbGroup.add(rdbRequestModalGuardianEditorView);
-            rdbGroup.add(rdbRequestModalMedicalProfilePopup);
-            //rdbGroup.add(rdbRequestModalNotesEditorView);
-            rdbRequestModalPhoneEmailEditorView.addActionListener(this);
-            rdbRequestModalRecallEditorView.addActionListener(this);
-            rdbRequestModalMedicalProfilePopup.addActionListener(this);
-            rdbRequestModalGuardianEditorView.addActionListener(this);
-            //rdbRequestModalNotesEditorView.addActionListener(this);
-        }catch (Exception exc){
-            String message = exc.getMessage() + "\n";
-            ViewController.displayErrorMessage(message + "Raised in PatientView::initComponents()", 
-                    "Patient view error", JOptionPane.WARNING_MESSAGE);
-        }
-
-//</editor-fold>
-//<editor-fold defaultstate="Collapsed" desc="Menu configuration">
-    mnuActions.setText("Actions");
-
-        mniCreateNewPatient.setText("Create new patient");
-        mniCreateNewPatient.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                mniCreateNewPatientActionPerformed(evt);
-            }
-        });
-        mnuActions.add(mniCreateNewPatient);
-
-        mniUpdateSelectedPatient.setText("Update selected patient details");
-        mniUpdateSelectedPatient.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                mniUpdateSelectedPatientActionPerformed(evt);
-            }
-        });
-        mnuActions.add(mniUpdateSelectedPatient);
-        mnuActions.add(jSeparator2);
-
-        mniDeleteSelectedPatient.setText("Delete selected patient");
-        mniDeleteSelectedPatient.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                mniDeleteSelectedPatientActionPerformed(evt);
-            }
-        });
-        mnuActions.add(mniDeleteSelectedPatient);
-
-        mniRecoverDeletedPatient.setText("Recover deleted patient");
-        mniRecoverDeletedPatient.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                mniRecoverDeletedPatientActionPerformed(evt);
-            }
-        });
-        mnuActions.add(mniRecoverDeletedPatient);
-        mnuActions.add(jSeparator3);
-
-        mniCloseView.setText("Close view");
-        mniCloseView.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                mniCloseViewActionPerformed(evt);
-            }
-        });
-        mnuActions.add(mniCloseView);
- 
-        /**
-         * 18/02/2024 07:53 code update to support note taking data entry
-         */
-        //mbaPatientView.add(mnuActions);
-
-        //setJMenuBar(mbaPatientView);
-    //</editor-fold>
-
-//<editor-fold defaultstate="collapsed" desc="Patient address content panel layout">
-    javax.swing.GroupLayout pnlPatientAddressContentLayout = new javax.swing.GroupLayout(pnlPatientAddressContent);
-        pnlPatientAddressContent.setLayout(pnlPatientAddressContentLayout);
-        pnlPatientAddressContentLayout.setHorizontalGroup(
-            pnlPatientAddressContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlPatientAddressContentLayout.createSequentialGroup()
-                .addGroup(pnlPatientAddressContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlPatientAddressContentLayout.createSequentialGroup()
-                        .addComponent(lblAddressTown)
-                        .addGap(30, 30, 30))
-                    .addGroup(pnlPatientAddressContentLayout.createSequentialGroup()
-                        .addGroup(pnlPatientAddressContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(lblAddressLine1)
-                            .addComponent(lblAddressLine2))
-                        .addGap(10, 10, 10))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlPatientAddressContentLayout.createSequentialGroup()
-                        .addComponent(lblAddressPostcode)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)))
-                .addGroup(pnlPatientAddressContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(pnlPatientAddressContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(txtAddressLine2)
-                        .addGroup(pnlPatientAddressContentLayout.createSequentialGroup()
-                            .addGroup(pnlPatientAddressContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                                .addComponent(txtAddressPostcode, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 102, Short.MAX_VALUE)
-                                .addComponent(txtAddressTown, javax.swing.GroupLayout.Alignment.LEADING))
-                            .addGap(18, 18, 18)
-                            .addComponent(lblAddressCounty)
-                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                            .addComponent(txtAddressCounty, javax.swing.GroupLayout.PREFERRED_SIZE, 81, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addComponent(txtAddressLine1)))
-        );
-        pnlPatientAddressContentLayout.setVerticalGroup(
-            pnlPatientAddressContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlPatientAddressContentLayout.createSequentialGroup()
-                .addGroup(pnlPatientAddressContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(txtAddressLine1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(lblAddressLine1))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(pnlPatientAddressContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(txtAddressLine2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(lblAddressLine2))
-                .addGap(10, 10, 10)
-                .addGroup(pnlPatientAddressContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(lblAddressCounty)
-                    .addComponent(txtAddressCounty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(lblAddressTown)
-                    .addComponent(txtAddressTown, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(9, 9, 9)
-                .addGroup(pnlPatientAddressContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(txtAddressPostcode, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(lblAddressPostcode)))
-        );
-//</editor-fold>
-//<editor-fold defaultstate="collapsed" desc="Address panel layout">
-        javax.swing.GroupLayout pnlAddressLayout = new javax.swing.GroupLayout(pnlAddress);
-        pnlAddress.setLayout(pnlAddressLayout);
-        pnlAddressLayout.setHorizontalGroup(
-            pnlAddressLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlAddressLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(pnlPatientAddressContent, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addContainerGap())
-        );
-        pnlAddressLayout.setVerticalGroup(
-            pnlAddressLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlAddressLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(pnlPatientAddressContent, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGap(10, 10, 10))
-        );
-//</editor-fold> 
-//<editor-fold defaultstate="collapsed" desc="Patient notes panel layout">
         /*
-        javax.swing.GroupLayout pnlPatientNotesLayout = new javax.swing.GroupLayout(pnlPatientNotes);
-        pnlPatientNotes.setLayout(pnlPatientNotesLayout);
-        pnlPatientNotesLayout.setHorizontalGroup(
-            pnlPatientNotesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlPatientNotesLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(scrPatientNotes, javax.swing.GroupLayout.DEFAULT_SIZE, 104, Short.MAX_VALUE)
-                .addContainerGap())
-        );
-        pnlPatientNotesLayout.setVerticalGroup(
-            pnlPatientNotesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlPatientNotesLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(scrPatientNotes)
-                .addContainerGap())
-        );
+        cmbPatientSelector.setModel(new javax.swing.DefaultComboBoxModel<Patient>());
         */
-//</editor-fold>
-//<editor-fold defaultstate="collapsed" desc="Appointment history panel layout">    
-        try{
-            javax.swing.GroupLayout pnlAppointmentHistoryLayout = new javax.swing.GroupLayout(pnlAppointmentHistory);
-            pnlAppointmentHistory.setLayout(pnlAppointmentHistoryLayout);
-            pnlAppointmentHistoryLayout.setHorizontalGroup(
-                pnlAppointmentHistoryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addGroup(pnlAppointmentHistoryLayout.createSequentialGroup()
-                    .addContainerGap()
-                    .addComponent(scrAppointmentHistory, javax.swing.GroupLayout.PREFERRED_SIZE, 
-                            getAppointmentHistoryScrollPaneWidth(), javax.swing.GroupLayout.PREFERRED_SIZE)
-                    //.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGap(getBetweenAppointmentHistoryAndFetchButtonGap(),
-                            getBetweenAppointmentHistoryAndFetchButtonGap(),
-                            getBetweenAppointmentHistoryAndFetchButtonGap())
-                    .addComponent(btnFetchScheduleForSelectedAppointment, javax.swing.GroupLayout.PREFERRED_SIZE, 102, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    //.addContainerGap())
-                    .addGap(7)
-                )
-            );
-            pnlAppointmentHistoryLayout.setVerticalGroup(
-                pnlAppointmentHistoryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlAppointmentHistoryLayout.createSequentialGroup()
-                    .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(pnlAppointmentHistoryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                        .addComponent(btnFetchScheduleForSelectedAppointment, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(scrAppointmentHistory, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addContainerGap())
-                    //.addGap(5,5,5))
-            );
-        }catch (Exception exc){
-            String message = exc.getMessage() + "\n";
-            ViewController.displayErrorMessage(message + "Raised in PatientView::initComponents()", 
-                    "Patient view error", JOptionPane.WARNING_MESSAGE);
-        }
-        
-//</editor-fold>
-//<editor-fold defaultstate="collapsed" desc="Further details panel layout">
-        /*
-        javax.swing.GroupLayout pnlFurtherDetailsLayout = new javax.swing.GroupLayout(pnlFurtherDetails);
-        pnlFurtherDetails.setLayout(pnlFurtherDetailsLayout);
-        pnlFurtherDetailsLayout.setHorizontalGroup(
-            pnlFurtherDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlFurtherDetailsLayout.createSequentialGroup()
-                //.addContainerGap()
-                .addGap(getFurtherDetailsGapWidth(),
-                        getFurtherDetailsGapWidth(),
-                        getFurtherDetailsGapWidth())
-                .addGroup(pnlFurtherDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(rdbRequestModalGuardianEditorView)
-                    .addComponent(rdbRequestModalRecallEditorView)
-                    .addComponent(rdbRequestModalPhoneEmailEditorView))
-                //.addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(getFurtherDetailsGapWidth(),
-                        getFurtherDetailsGapWidth(),
-                        getFurtherDetailsGapWidth()))
-        );
-        pnlFurtherDetailsLayout.setVerticalGroup(
-            pnlFurtherDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlFurtherDetailsLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(rdbRequestModalPhoneEmailEditorView)
-                .addGap(17, 17, 17)
-                .addComponent(rdbRequestModalRecallEditorView)
-                .addGap(18, 18, 18)
-                .addComponent(rdbRequestModalGuardianEditorView)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-        */
-//</editor-fold>
-//<editor-fold defaultstate="collapsed" desc="Further selectable information panel layout">
-        //rdbRequestModalNotesEditorView.setText(DISPLAY_PATIENT_NOTES_EDITOR_VIEW);
 
-        javax.swing.GroupLayout pnlFurtherDetailsLayout = new javax.swing.GroupLayout(pnlFurtherDetails);
-        pnlFurtherDetails.setLayout(pnlFurtherDetailsLayout);
-        pnlFurtherDetailsLayout.setHorizontalGroup(
-            pnlFurtherDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlFurtherDetailsLayout.createSequentialGroup()
-                //.addContainerGap()
-                .addGap(20,20,20)
-                .addGroup(pnlFurtherDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    
-                    .addComponent(rdbRequestModalPhoneEmailEditorView)
-                    .addComponent(rdbRequestModalRecallEditorView))
-                //.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGap(23,23,23)
-                .addGroup(pnlFurtherDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(rdbRequestModalMedicalProfilePopup)
-                    .addComponent(rdbRequestModalGuardianEditorView))
-                .addGap(20,20,20))
-        );
-        pnlFurtherDetailsLayout.setVerticalGroup(
-            pnlFurtherDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlFurtherDetailsLayout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGroup(pnlFurtherDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(rdbRequestModalPhoneEmailEditorView)
-                    .addComponent(rdbRequestModalMedicalProfilePopup))
-                .addGap(28, 28, 28)
-                .addGroup(pnlFurtherDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(rdbRequestModalRecallEditorView)
-                    .addComponent(rdbRequestModalGuardianEditorView))
-                .addGap(27, 27, 27))
-        );
-//</editor-fold>
-//<editor-fold defaultstate="collapsed" desc="Operations panel layout">
-        javax.swing.GroupLayout pnlOperationsLayout = new javax.swing.GroupLayout(pnlOperations);
-        pnlOperations.setLayout(pnlOperationsLayout);
-        pnlOperationsLayout.setHorizontalGroup(
-            pnlOperationsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlOperationsLayout.createSequentialGroup()
-                //.addContainerGap(15, Short.MAX_VALUE)
-                .addGap(8,8,8)
-                .addGroup(pnlOperationsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
-                    .addComponent(btnCloseView, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 103, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnUpdateSelectedPatient, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 103, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnCreateNewPatient, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 103, javax.swing.GroupLayout.PREFERRED_SIZE))
-                //.addContainerGap())
-                //.addGap(15,15,15)
-            )
-        );
-        pnlOperationsLayout.setVerticalGroup(
-            pnlOperationsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlOperationsLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(btnCreateNewPatient, javax.swing.GroupLayout.PREFERRED_SIZE, 51, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(55,55,55)
-                .addComponent(btnUpdateSelectedPatient, javax.swing.GroupLayout.PREFERRED_SIZE, 51, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(55,55,55)
-                //.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 51, Short.MAX_VALUE)
-                .addComponent(btnCloseView, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(55,55,55))
-        );
-//</editor-fold>
-//<editor-fold defaultstate="collapsed" desc="Patient selection panel layout">
+        btnClearSelection.setText("Clear selection");
+
         javax.swing.GroupLayout pnlPatientSelectionLayout = new javax.swing.GroupLayout(pnlPatientSelection);
         pnlPatientSelection.setLayout(pnlPatientSelectionLayout);
         pnlPatientSelectionLayout.setHorizontalGroup(
@@ -2029,9 +1221,7 @@ public class PatientView extends View implements ActionListener{
                         .addGap(28, 28, 28)
                         .addComponent(btnClearSelection, javax.swing.GroupLayout.PREFERRED_SIZE, 187, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(0, 58, Short.MAX_VALUE)))
-                            
-                //.addContainerGap())
-                .addGap(20,20,20))
+                .addContainerGap())
         );
         pnlPatientSelectionLayout.setVerticalGroup(
             pnlPatientSelectionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -2042,8 +1232,29 @@ public class PatientView extends View implements ActionListener{
                 .addComponent(btnClearSelection)
                 .addGap(36, 36, 36))
         );
-//</editor-fold>
-//<editor-fold defaultstate="collapsed" desc="Name content panel layout">
+
+        pnlName.setBorder(javax.swing.BorderFactory.createTitledBorder("Name"));
+
+        lblNameForename.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        lblNameForename.setText("Forenames");
+
+        lblNameSurname.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        lblNameSurname.setText("Surname");
+
+        lblNameGender.setText("Gender");
+
+        cmbNameGender.setModel(new javax.swing.DefaultComboBoxModel<>(PatientView.GenderItem.values()));
+
+        lblNameTitle.setText("Title");
+
+        cmbNameTitle.setModel(new javax.swing.DefaultComboBoxModel<>(PatientView.TitleItem.values()));
+        cmbNameTitle.setMinimumSize(new java.awt.Dimension(132, 26));
+        cmbNameTitle.setPreferredSize(new java.awt.Dimension(132, 26));
+
+        lblNameDOB.setText("DOB");
+
+        lblNameAge.setText("(age)");
+
         javax.swing.GroupLayout pnlNameContentLayout = new javax.swing.GroupLayout(pnlNameContent);
         pnlNameContent.setLayout(pnlNameContentLayout);
         pnlNameContentLayout.setHorizontalGroup(
@@ -2095,8 +1306,7 @@ public class PatientView extends View implements ActionListener{
                     .addComponent(lblNameAge))
                 .addGap(0, 0, 0))
         );
-//</editor-fold>
-//<editor-fold defaultstate="collapsed" desc="Name & particulars panel layout">
+
         javax.swing.GroupLayout pnlNameLayout = new javax.swing.GroupLayout(pnlName);
         pnlName.setLayout(pnlNameLayout);
         pnlNameLayout.setHorizontalGroup(
@@ -2113,443 +1323,147 @@ public class PatientView extends View implements ActionListener{
                 .addComponent(pnlNameContent, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
         );
-//</editor-fold>
 
+        pnlOperations.setBorder(javax.swing.BorderFactory.createTitledBorder("Operations"));
+        pnlOperations.setPreferredSize(new java.awt.Dimension(142, 500));
 
-//<editor-fold defaultstate="collapsed" desc="View layout">
-        try{
-            javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
-            getContentPane().setLayout(layout);
-            layout.setHorizontalGroup(
-                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addGroup(layout.createSequentialGroup()
-                    .addContainerGap()
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(layout.createSequentialGroup()
-                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                .addGroup(layout.createSequentialGroup()
-                                    .addComponent(pnlFurtherDetails, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                    //.addComponent(pnlPatientNotes, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    //.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                    //.addComponent(pnlPatientNotes, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                    //.addComponent(pnlFurtherDetails, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addComponent(pnlPatientSelection, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            //.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                            .addGap(10)
-                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                .addComponent(pnlAddress, javax.swing.GroupLayout.DEFAULT_SIZE, /*javax.swing.GroupLayout.DEFAULT_SIZE*/ 150, Short.MAX_VALUE)
-                                .addComponent(pnlName, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                            //.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                              .addGap(10)
-                            .addComponent(pnlOperations, javax.swing.GroupLayout.PREFERRED_SIZE, /*javax.swing.GroupLayout.DEFAULT_SIZE*/ 130, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addGap(0, 0, Short.MAX_VALUE))
-                        //.addComponent(pnlAppointmentHistory, javax.swing.GroupLayout.DEFAULT_SIZE, /*javax.swing.GroupLayout.DEFAULT_SIZE*/ 500, Short.MAX_VALUE))
-                        .addComponent(pnlAppointmentHistory))
-                    .addContainerGap())
-            );
-            layout.setVerticalGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addGroup(layout.createSequentialGroup()
-                    //.addContainerGap()
-                    .addGap(4,4,4)
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(layout.createSequentialGroup()
-                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                .addComponent(pnlPatientSelection, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(pnlName, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                            .addGap(4,4,4)
-                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                .addComponent(pnlAddress, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                //.addComponent(pnlPatientNotes, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(pnlFurtherDetails, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                        .addComponent(pnlOperations, javax.swing.GroupLayout.PREFERRED_SIZE, getOperationsHeight(), javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                    .addComponent(pnlAppointmentHistory, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-            );
-        }catch (Exception exc){
-            String message = exc.getMessage() + "\n";
-            ViewController.displayErrorMessage(message + "Raised in PatientView::iniialiseView()", 
-                    "Patient view error", JOptionPane.WARNING_MESSAGE);
-        }
-//</editor-fold>    
+        btnUpdateRecoverPatient.setText("<html><center>Update</center><center>selected</center><center>patient</center></html>");
+        btnUpdateRecoverPatient.setMaximumSize(new java.awt.Dimension(2147483647, 82));
+        btnUpdateRecoverPatient.setMinimumSize(new java.awt.Dimension(99, 82));
+        btnUpdateRecoverPatient.setPreferredSize(new java.awt.Dimension(99, 82));
 
-        pack();
+        btnCloseView.setText("<html><center>Close</center><center>view</center></html>");
+        btnCloseView.setMaximumSize(new java.awt.Dimension(2147483647, 82));
+        btnCloseView.setMinimumSize(new java.awt.Dimension(99, 82));
+        btnCloseView.setPreferredSize(new java.awt.Dimension(99, 82));
 
-    }
-    
-    
-    /*
-//    @SuppressWarnings("unchecked")
-    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
-    private void initComponents() {
-
-        pnlGuardianDetails = new javax.swing.JPanel();
-        cmbSelectGuardian = new javax.swing.JComboBox<model.Patient>();
-        lblGuardianPatientName = new javax.swing.JLabel();
-        lblGuardianIsAPatient = new javax.swing.JLabel();
-        cmbIsGuardianAPatient = new javax.swing.JComboBox<YesNoItem>();
-        pnlPatientNotes = new javax.swing.JPanel();
-        txtPatientNotes = new javax.swing.JTextField();
-        pnlAppointmentHistory = new javax.swing.JPanel();
-        scrAppointmentHistory = new javax.swing.JScrollPane();
-        tblAppointmentHistory = new javax.swing.JTable();
-        btnFetchScheduleForSelectedAppointment = new javax.swing.JButton();
-        pnlPatientSelection = new javax.swing.JPanel();
-        cmbPatientSelector = new javax.swing.JComboBox<Patient>();
-        btnClearSelection = new javax.swing.JButton();
-        pnlRecall = new javax.swing.JPanel();
-        recallDatePicker = null;
-        //
-        DatePickerSettings dateSettings = new DatePickerSettings();
-        dateSettings.setVisibleDateTextField(false);
-        dateSettings.setGapBeforeButtonPixels(0);
-
-        recallDatePicker = new com.github.lgooddatepicker.components.DatePicker(dateSettings);
-        txtRecallDate = new javax.swing.JTextField();
-        txtRecallDate.getDocument().addDocumentListener(documentListener);
-        txtRecallDate.setEditable(false);
-        ;
-        jLabel2 = new javax.swing.JLabel();
-        spnDentalRecallFrequency = new javax.swing.JSpinner();
-        pnlPhones = new javax.swing.JPanel();
-        txtPhone1 = new javax.swing.JTextField();
-        txtPhone2 = new javax.swing.JTextField();
-        lblPhone1 = new javax.swing.JLabel();
-        lblPhone2 = new javax.swing.JLabel();
-        txtEmail = new javax.swing.JTextField();
-        lblEmail = new javax.swing.JLabel();
-        pnlAddress = new javax.swing.JPanel();
-        txtAddressLine1 = new javax.swing.JTextField();
-        lblLine1 = new javax.swing.JLabel();
-        lblline2 = new javax.swing.JLabel();
-        txtAddressLine2 = new javax.swing.JTextField();
-        lblTown = new javax.swing.JLabel();
-        txtAddressTown = new javax.swing.JTextField();
-        lblCounty = new javax.swing.JLabel();
-        txtAddressCounty = new javax.swing.JTextField();
-        lblPostcode = new javax.swing.JLabel();
-        txtAddressPostcode = new javax.swing.JTextField();
-        pnlName = new javax.swing.JPanel();
-        txtNameForenames = new javax.swing.JTextField();
-        txtNameSurname = new javax.swing.JTextField();
-        cmbNameTitle = new javax.swing.JComboBox<TitleItem>();
-        cmbNameGender = new javax.swing.JComboBox<GenderItem>();
-        lblTitle = new javax.swing.JLabel();
-        lblGender = new javax.swing.JLabel();
-        dobDatePicker = new com.github.lgooddatepicker.components.DatePicker();
-        DatePickerSettings settings = new DatePickerSettings();
-        settings.setFormatForDatesCommonEra(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-        settings.setAllowKeyboardEditing(false);
-        dobDatePicker.setSettings(settings);
-        ;
-        lblNameAge = new javax.swing.JLabel();
-        lblGender1 = new javax.swing.JLabel();
-        pnlActions = new javax.swing.JPanel();
-        btnCreateNewPatient = new javax.swing.JButton();
-        btnUpdateSelectedPatient = new javax.swing.JButton();
-        btnCloseView = new javax.swing.JButton();
-        mbaPatientView = new javax.swing.JMenuBar();
-        mnuActions = new javax.swing.JMenu();
-        mniCreateNewPatient = new javax.swing.JMenuItem();
-        mniUpdateSelectedPatient = new javax.swing.JMenuItem();
-        jSeparator2 = new javax.swing.JPopupMenu.Separator();
-        mniDeleteSelectedPatient = new javax.swing.JMenuItem();
-        mniRecoverDeletedPatient = new javax.swing.JMenuItem();
-        jSeparator3 = new javax.swing.JPopupMenu.Separator();
-        mniCloseView = new javax.swing.JMenuItem();
-
-        pnlGuardianDetails.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createEtchedBorder(), "Guardian details (patient < 18)", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Segoe UI", 1, 12), new java.awt.Color(51, 0, 204))); // NOI18N
-
-        cmbSelectGuardian.addItemListener(itemSelectGuardianListener);
-        cmbSelectGuardian.setEditable(false);
-        cmbSelectGuardian.setModel(new DefaultComboBoxModel<model.Patient>());
-        cmbSelectGuardian.setMinimumSize(new java.awt.Dimension(175, 22));
-        cmbSelectGuardian.setPreferredSize(new java.awt.Dimension(194, 22));
-        cmbSelectGuardian.addActionListener(new java.awt.event.ActionListener() {
+        btnCreateRecoverPatient.setText("<html><center>Create</center><center>new</center><center>patient</center></html>");
+        btnCreateRecoverPatient.setMaximumSize(new java.awt.Dimension(2147483647, 82));
+        btnCreateRecoverPatient.setMinimumSize(new java.awt.Dimension(99, 82));
+        btnCreateRecoverPatient.setPreferredSize(new java.awt.Dimension(99, 82));
+        btnCreateRecoverPatient.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cmbSelectGuardianActionPerformed(evt);
+                btnCreateRecoverPatientActionPerformed(evt);
             }
         });
 
-        lblGuardianPatientName.setText("Select guardian");
-
-        lblGuardianIsAPatient.setText("Guardian is a patient?");
-
-        cmbIsGuardianAPatient.addItemListener(itemListener);
-        cmbIsGuardianAPatient.setEditable(true);
-        cmbIsGuardianAPatient.setModel(new javax.swing.DefaultComboBoxModel<YesNoItem>(YesNoItem.values()));
-        cmbIsGuardianAPatient.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-        cmbIsGuardianAPatient.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cmbIsGuardianAPatientActionPerformed(evt);
-            }
-        });
-
-        javax.swing.GroupLayout pnlGuardianDetailsLayout = new javax.swing.GroupLayout(pnlGuardianDetails);
-        pnlGuardianDetails.setLayout(pnlGuardianDetailsLayout);
-        pnlGuardianDetailsLayout.setHorizontalGroup(
-            pnlGuardianDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlGuardianDetailsLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(pnlGuardianDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(pnlGuardianDetailsLayout.createSequentialGroup()
-                        .addComponent(lblGuardianIsAPatient)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(cmbIsGuardianAPatient, javax.swing.GroupLayout.PREFERRED_SIZE, 53, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(pnlGuardianDetailsLayout.createSequentialGroup()
-                        .addComponent(lblGuardianPatientName)
-                        .addGap(18, 18, 18)
-                        .addComponent(cmbSelectGuardian, javax.swing.GroupLayout.PREFERRED_SIZE, 194, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-        pnlGuardianDetailsLayout.setVerticalGroup(
-            pnlGuardianDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlGuardianDetailsLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(pnlGuardianDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(lblGuardianIsAPatient)
-                    .addComponent(cmbIsGuardianAPatient, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(pnlGuardianDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(lblGuardianPatientName)
-                    .addComponent(cmbSelectGuardian, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(25, Short.MAX_VALUE))
-        );
-
-        pnlPatientNotes.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createEtchedBorder(), "Notes", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 1, 11))); // NOI18N
-        pnlPatientNotes.setPreferredSize(new java.awt.Dimension(351, 115));
-
-        txtPatientNotes.setText("jTextField2");
-
-        javax.swing.GroupLayout pnlPatientNotesLayout = new javax.swing.GroupLayout(pnlPatientNotes);
-        pnlPatientNotes.setLayout(pnlPatientNotesLayout);
-        pnlPatientNotesLayout.setHorizontalGroup(
-            pnlPatientNotesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlPatientNotesLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(txtPatientNotes)
-                .addContainerGap())
-        );
-        pnlPatientNotesLayout.setVerticalGroup(
-            pnlPatientNotesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlPatientNotesLayout.createSequentialGroup()
-                .addComponent(txtPatientNotes, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 3, Short.MAX_VALUE))
-        );
-
-        pnlAppointmentHistory.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createEtchedBorder(), "Appointment history (latest apppointment top of list)", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Segoe UI", 1, 12))); // NOI18N
-        pnlAppointmentHistory.setBackground(new java.awt.Color(220, 220, 220));
-
-        scrAppointmentHistory.setRowHeaderView(null);
-
-        tblAppointmentHistory.addMouseListener(mouseListener);
-        scrAppointmentHistory.setViewportView(tblAppointmentHistory);
-
-        btnFetchScheduleForSelectedAppointment.setText("selected appointment");
+        btnFetchScheduleForSelectedAppointment.setText("<html><center>Schedule</center><center>for selected</center><center>appointment</center></html>");
+        btnFetchScheduleForSelectedAppointment.setMaximumSize(new java.awt.Dimension(2147483647, 82));
+        btnFetchScheduleForSelectedAppointment.setMinimumSize(new java.awt.Dimension(99, 82));
+        btnFetchScheduleForSelectedAppointment.setPreferredSize(new java.awt.Dimension(99, 82));
         btnFetchScheduleForSelectedAppointment.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnFetchScheduleForSelectedAppointmentActionPerformed(evt);
             }
         });
 
-        javax.swing.GroupLayout pnlAppointmentHistoryLayout = new javax.swing.GroupLayout(pnlAppointmentHistory);
-        pnlAppointmentHistory.setLayout(pnlAppointmentHistoryLayout);
-        pnlAppointmentHistoryLayout.setHorizontalGroup(
-            pnlAppointmentHistoryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlAppointmentHistoryLayout.createSequentialGroup()
+        btnFetchClinicalNotes.setText("<html><center>Clinical</center><center>notes for</center><center>patient</center></html>");
+        btnFetchClinicalNotes.setMaximumSize(new java.awt.Dimension(2147483647, 82));
+        btnFetchClinicalNotes.setMinimumSize(new java.awt.Dimension(99, 82));
+        btnFetchClinicalNotes.setPreferredSize(new java.awt.Dimension(99, 82));
+
+        javax.swing.GroupLayout pnlOperationsLayout = new javax.swing.GroupLayout(pnlOperations);
+        pnlOperations.setLayout(pnlOperationsLayout);
+        pnlOperationsLayout.setHorizontalGroup(
+            pnlOperationsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlOperationsLayout.createSequentialGroup()
+                .addGap(12, 12, 12)
+                .addGroup(pnlOperationsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(btnCloseView, javax.swing.GroupLayout.PREFERRED_SIZE, 106, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(pnlOperationsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                        .addComponent(btnFetchScheduleForSelectedAppointment, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(btnUpdateRecoverPatient, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(btnFetchClinicalNotes, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(btnCreateRecoverPatient, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 106, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGap(10, 10, 10))
+        );
+        pnlOperationsLayout.setVerticalGroup(
+            pnlOperationsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlOperationsLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(scrAppointmentHistory, javax.swing.GroupLayout.PREFERRED_SIZE, 492, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(btnFetchScheduleForSelectedAppointment, javax.swing.GroupLayout.PREFERRED_SIZE, 126, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-        pnlAppointmentHistoryLayout.setVerticalGroup(
-            pnlAppointmentHistoryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlAppointmentHistoryLayout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGroup(pnlAppointmentHistoryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(scrAppointmentHistory, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                    .addComponent(btnFetchScheduleForSelectedAppointment, javax.swing.GroupLayout.DEFAULT_SIZE, 90, Short.MAX_VALUE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(btnCreateRecoverPatient, javax.swing.GroupLayout.PREFERRED_SIZE, 82, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(5, 5, 5)
+                .addComponent(btnUpdateRecoverPatient, javax.swing.GroupLayout.PREFERRED_SIZE, 82, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(5, 5, 5)
+                .addComponent(btnFetchClinicalNotes, javax.swing.GroupLayout.PREFERRED_SIZE, 82, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(5, 5, 5)
+                .addComponent(btnFetchScheduleForSelectedAppointment, javax.swing.GroupLayout.PREFERRED_SIZE, 83, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(5, 5, 5)
+                .addComponent(btnCloseView, javax.swing.GroupLayout.PREFERRED_SIZE, 84, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(14, 14, 14))
         );
 
-        pnlPatientSelection.setBackground(new java.awt.Color(220, 220, 220));
-        pnlPatientSelection.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createEtchedBorder(), "Select patient to recover", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Segoe UI", 1, 12))); // NOI18N
+        pnlAddress.setBorder(javax.swing.BorderFactory.createTitledBorder("Address"));
 
-        cmbPatientSelector.addActionListener(new java.awt.event.ActionListener() {
+        lblAddressLine1.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        lblAddressLine1.setText("Line 1");
+
+        lblAddressLine2.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        lblAddressLine2.setText("Line 2");
+
+        lblAddressCounty.setText("County");
+
+        lblAddressTown.setText("Town");
+
+        lblAddressPostcode.setText("Postcode");
+
+        txtAddressTown.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cmbPatientSelectorActionPerformed(evt);
+                txtAddressTownActionPerformed(evt);
             }
         });
 
-        btnClearSelection.setText("Cancel recovery");
-        btnClearSelection.setText("Clear patient selection");
-        btnClearSelection.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnClearSelectionActionPerformed(evt);
-            }
-        });
-
-        javax.swing.GroupLayout pnlPatientSelectionLayout = new javax.swing.GroupLayout(pnlPatientSelection);
-        pnlPatientSelection.setLayout(pnlPatientSelectionLayout);
-        pnlPatientSelectionLayout.setHorizontalGroup(
-            pnlPatientSelectionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlPatientSelectionLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(pnlPatientSelectionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(cmbPatientSelector, javax.swing.GroupLayout.PREFERRED_SIZE, 230, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnClearSelection, javax.swing.GroupLayout.PREFERRED_SIZE, 177, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        javax.swing.GroupLayout pnlPatientAddressContentLayout = new javax.swing.GroupLayout(pnlPatientAddressContent);
+        pnlPatientAddressContent.setLayout(pnlPatientAddressContentLayout);
+        pnlPatientAddressContentLayout.setHorizontalGroup(
+            pnlPatientAddressContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlPatientAddressContentLayout.createSequentialGroup()
+                .addGroup(pnlPatientAddressContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlPatientAddressContentLayout.createSequentialGroup()
+                        .addComponent(lblAddressTown)
+                        .addGap(30, 30, 30))
+                    .addGroup(pnlPatientAddressContentLayout.createSequentialGroup()
+                        .addGroup(pnlPatientAddressContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(lblAddressLine1)
+                            .addComponent(lblAddressLine2))
+                        .addGap(10, 10, 10))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlPatientAddressContentLayout.createSequentialGroup()
+                        .addComponent(lblAddressPostcode)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)))
+                .addGroup(pnlPatientAddressContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(txtNameLine2)
+                    .addGroup(pnlPatientAddressContentLayout.createSequentialGroup()
+                        .addGroup(pnlPatientAddressContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                            .addComponent(txtAddressPostcode, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 102, Short.MAX_VALUE)
+                            .addComponent(txtAddressTown, javax.swing.GroupLayout.Alignment.LEADING))
+                        .addGap(18, 18, 18)
+                        .addComponent(lblAddressCounty)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(txtAddressCounty, javax.swing.GroupLayout.PREFERRED_SIZE, 81, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txtAddressLine1)))
         );
-        pnlPatientSelectionLayout.setVerticalGroup(
-            pnlPatientSelectionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlPatientSelectionLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(cmbPatientSelector, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 24, Short.MAX_VALUE)
-                .addComponent(btnClearSelection)
-                .addGap(28, 28, 28))
-        );
-
-        pnlRecall.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createEtchedBorder(), "Recall date", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Segoe UI", 1, 12))); // NOI18N
-        pnlRecall.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
-
-        txtRecallDate.setPreferredSize(new Dimension(100,20));
-        //pnlRecallDatePicker.add(txtRecallDate);
-        //pnlRecallDatePicker.setLayout(new FlowLayout());
-
-        txtRecallDate.setText(null);
-        txtRecallDate.setPreferredSize(new java.awt.Dimension(85, 20));
-
-        jLabel2.setText("frequency");
-
-        spnDentalRecallFrequency.setModel(new javax.swing.SpinnerNumberModel(0, 0, null, 1));
-        spnDentalRecallFrequency.setModel(new SpinnerNumberModel(6,0,12,3));
-        spnDentalRecallFrequency.setToolTipText("recall frequency (months)");
-        JTextField jtf = ((javax.swing.JSpinner.DefaultEditor)spnDentalRecallFrequency.getEditor()).getTextField();
-        jtf.getDocument().addDocumentListener(documentListener);
-
-        javax.swing.GroupLayout pnlRecallLayout = new javax.swing.GroupLayout(pnlRecall);
-        pnlRecall.setLayout(pnlRecallLayout);
-        pnlRecallLayout.setHorizontalGroup(
-            pnlRecallLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlRecallLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(pnlRecallLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(pnlRecallLayout.createSequentialGroup()
-                        .addComponent(txtRecallDate, javax.swing.GroupLayout.PREFERRED_SIZE, 106, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(spnDentalRecallFrequency, javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(pnlRecallLayout.createSequentialGroup()
-                        .addComponent(recallDatePicker, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 48, Short.MAX_VALUE)
-                        .addComponent(jLabel2)))
-                .addGap(30, 30, 30))
-        );
-        pnlRecallLayout.setVerticalGroup(
-            pnlRecallLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlRecallLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(pnlRecallLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(recallDatePicker, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGroup(pnlRecallLayout.createSequentialGroup()
-                        .addGap(2, 2, 2)
-                        .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 14, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(pnlRecallLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtRecallDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(spnDentalRecallFrequency, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-
-        txtRecallDate.setHorizontalAlignment(JTextField.CENTER);
-
-        pnlPhones.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createEtchedBorder(), "Phone number(s) & email", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Segoe UI", 1, 12))); // NOI18N
-
-        txtPhone1.getDocument().addDocumentListener(documentListener);
-        txtPhone1.setText("07582265943");
-
-        txtPhone2.getDocument().addDocumentListener(documentListener);
-        txtPhone2.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txtPhone2ActionPerformed(evt);
-            }
-        });
-
-        lblPhone1.setText("[1]");
-
-        lblPhone2.setText("[2]");
-
-        lblEmail.setText("Email");
-
-        javax.swing.GroupLayout pnlPhonesLayout = new javax.swing.GroupLayout(pnlPhones);
-        pnlPhones.setLayout(pnlPhonesLayout);
-        pnlPhonesLayout.setHorizontalGroup(
-            pnlPhonesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlPhonesLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(pnlPhonesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(lblPhone1)
-                    .addComponent(lblEmail))
+        pnlPatientAddressContentLayout.setVerticalGroup(
+            pnlPatientAddressContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlPatientAddressContentLayout.createSequentialGroup()
+                .addGroup(pnlPatientAddressContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(txtAddressLine1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblAddressLine1))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(pnlPhonesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addGroup(pnlPhonesLayout.createSequentialGroup()
-                        .addComponent(txtPhone1, javax.swing.GroupLayout.PREFERRED_SIZE, 97, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(lblPhone2)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(txtPhone2, javax.swing.GroupLayout.PREFERRED_SIZE, 106, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(txtEmail))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGroup(pnlPatientAddressContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(txtNameLine2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblAddressLine2))
+                .addGap(10, 10, 10)
+                .addGroup(pnlPatientAddressContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(txtAddressTown, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(pnlPatientAddressContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(lblAddressCounty)
+                        .addComponent(txtAddressCounty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(lblAddressTown)))
+                .addGap(9, 9, 9)
+                .addGroup(pnlPatientAddressContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(txtAddressPostcode, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblAddressPostcode)))
         );
-        pnlPhonesLayout.setVerticalGroup(
-            pnlPhonesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlPhonesLayout.createSequentialGroup()
-                .addGap(6, 6, 6)
-                .addGroup(pnlPhonesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(txtPhone2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(txtPhone1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(lblPhone1)
-                    .addComponent(lblPhone2))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGroup(pnlPhonesLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(txtEmail, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(lblEmail))
-                .addGap(21, 21, 21))
-        );
-
-        pnlAddress.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createEtchedBorder(), "Address", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Segoe UI", 1, 12))); // NOI18N
-
-        txtAddressLine1.getDocument().addDocumentListener(documentListener);
-        txtAddressLine1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txtAddressLine1ActionPerformed(evt);
-            }
-        });
-
-        lblLine1.setText("Line 1");
-
-        lblline2.setText("Line 2");
-
-        txtAddressLine2.getDocument().addDocumentListener(documentListener);
-        txtAddressLine2.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txtAddressLine2ActionPerformed(evt);
-            }
-        });
-
-        lblTown.setText("Town");
-
-        txtAddressTown.getDocument().addDocumentListener(documentListener);
-
-        lblCounty.setText("County");
-
-        txtAddressCounty.getDocument().addDocumentListener(documentListener);
-
-        lblPostcode.setText("Postcode");
-
-        txtAddressPostcode.getDocument().addDocumentListener(documentListener);
-        txtAddressPostcode.setPreferredSize(new java.awt.Dimension(20, 20));
 
         javax.swing.GroupLayout pnlAddressLayout = new javax.swing.GroupLayout(pnlAddress);
         pnlAddress.setLayout(pnlAddressLayout);
@@ -2557,199 +1471,103 @@ public class PatientView extends View implements ActionListener{
             pnlAddressLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlAddressLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(lblLine1, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(txtAddressLine1, javax.swing.GroupLayout.PREFERRED_SIZE, 149, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(lblline2)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(txtAddressLine2, javax.swing.GroupLayout.PREFERRED_SIZE, 171, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(lblTown, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(txtAddressTown, javax.swing.GroupLayout.PREFERRED_SIZE, 93, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(lblCounty)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(txtAddressCounty, javax.swing.GroupLayout.PREFERRED_SIZE, 124, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(lblPostcode)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(txtAddressPostcode, javax.swing.GroupLayout.PREFERRED_SIZE, 81, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(pnlPatientAddressContent, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap())
         );
         pnlAddressLayout.setVerticalGroup(
             pnlAddressLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlAddressLayout.createSequentialGroup()
-                .addGap(4, 4, 4)
-                .addGroup(pnlAddressLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(lblLine1)
-                    .addComponent(txtAddressLine1, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(lblline2)
-                    .addComponent(txtAddressLine2, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(lblTown)
-                    .addComponent(txtAddressTown, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(lblCounty)
-                    .addComponent(txtAddressCounty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(lblPostcode)
-                    .addComponent(txtAddressPostcode, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(0, 8, Short.MAX_VALUE))
-        );
-
-        pnlName.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createEtchedBorder(), "Name & particulars", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Segoe UI", 1, 14), new java.awt.Color(0, 0, 204))); // NOI18N
-
-        txtNameForenames.getDocument().addDocumentListener(documentListener);
-        txtNameForenames.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txtNameForenamesActionPerformed(evt);
-            }
-        });
-
-        txtNameSurname.getDocument().addDocumentListener(documentListener);
-        txtNameSurname.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txtNameSurnameActionPerformed(evt);
-            }
-        });
-
-        cmbNameTitle.addItemListener(itemListener);
-        cmbNameTitle.setEditable(true);
-        cmbNameTitle.setModel(new javax.swing.DefaultComboBoxModel<>(TitleItem.values()));
-        cmbNameTitle.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-        cmbNameTitle.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cmbNameTitleActionPerformed(evt);
-            }
-        });
-
-        cmbNameGender.addItemListener(itemListener);
-        cmbNameGender.setEditable(true);
-        cmbNameGender.setModel(new javax.swing.DefaultComboBoxModel<>(GenderItem.values()));
-        cmbNameGender.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-
-        lblTitle.setText("Title");
-
-        lblGender.setText("Gender");
-
-        lblNameAge.setText("(age)");
-
-        lblGender1.setText("DOB");
-
-        javax.swing.GroupLayout pnlNameLayout = new javax.swing.GroupLayout(pnlName);
-        pnlName.setLayout(pnlNameLayout);
-        pnlNameLayout.setHorizontalGroup(
-            pnlNameLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlNameLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(txtNameForenames, javax.swing.GroupLayout.PREFERRED_SIZE, 134, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addComponent(txtNameSurname, javax.swing.GroupLayout.PREFERRED_SIZE, 206, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addComponent(lblTitle, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(cmbNameTitle, javax.swing.GroupLayout.PREFERRED_SIZE, 68, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addComponent(lblGender)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(cmbNameGender, javax.swing.GroupLayout.PREFERRED_SIZE, 92, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addComponent(lblGender1)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(dobDatePicker, javax.swing.GroupLayout.PREFERRED_SIZE, 141, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addComponent(lblNameAge)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-        pnlNameLayout.setVerticalGroup(
-            pnlNameLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlNameLayout.createSequentialGroup()
-                .addGroup(pnlNameLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(txtNameForenames, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(txtNameSurname, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(cmbNameTitle, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(cmbNameGender, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(lblTitle)
-                    .addComponent(lblGender)
-                    .addComponent(dobDatePicker, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(lblNameAge)
-                    .addComponent(lblGender1))
-                .addGap(0, 4, Short.MAX_VALUE))
+                .addComponent(pnlPatientAddressContent, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGap(10, 10, 10))
         );
 
-        pnlActions.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createEtchedBorder(), "Actions", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Segoe UI", 1, 12))); // NOI18N
-        pnlActions.setBackground(new java.awt.Color(220, 220, 220));
+        pnlAppointmentHistory.setBorder(javax.swing.BorderFactory.createTitledBorder("Appointment history"));
 
-        btnCreateNewPatient.setText("Update selected patient");
+        tblAppointmentHistory.setModel(new Appointments3ColumnTableModel());
+        scrAppointmentHistory.setViewportView(tblAppointmentHistory);
+        ViewController.setJTableColumnProperties(tblAppointmentHistory,
+            scrAppointmentHistory.getPreferredSize().width,
+            20,20,60);
+        tblAppointmentHistory.addMouseListener(mouseListener);
 
-        btnUpdateSelectedPatient.setText("Close patient view");
+        javax.swing.GroupLayout pnlAppointmentHistoryLayout = new javax.swing.GroupLayout(pnlAppointmentHistory);
+        pnlAppointmentHistory.setLayout(pnlAppointmentHistoryLayout);
+        pnlAppointmentHistoryLayout.setHorizontalGroup(
+            pnlAppointmentHistoryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlAppointmentHistoryLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(scrAppointmentHistory)
+                .addGap(10, 10, 10))
+        );
+        pnlAppointmentHistoryLayout.setVerticalGroup(
+            pnlAppointmentHistoryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlAppointmentHistoryLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(scrAppointmentHistory, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(13, 13, 13))
+        );
 
-        btnCloseView.setText("Create new patient");
+        pnlFurtherDetails.setBorder(javax.swing.BorderFactory.createTitledBorder("Further details"));
 
-        javax.swing.GroupLayout pnlActionsLayout = new javax.swing.GroupLayout(pnlActions);
-        pnlActions.setLayout(pnlActionsLayout);
-        pnlActionsLayout.setHorizontalGroup(
-            pnlActionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlActionsLayout.createSequentialGroup()
-                .addGap(78, 78, 78)
-                .addComponent(btnCloseView, javax.swing.GroupLayout.PREFERRED_SIZE, 159, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(141, 141, 141)
-                .addComponent(btnCreateNewPatient, javax.swing.GroupLayout.PREFERRED_SIZE, 159, javax.swing.GroupLayout.PREFERRED_SIZE)
+        rdbRequestPhoneEmailEditorView.setText("Phone/email");
+        rdbRequestPhoneEmailEditorView.setBackground(new java.awt.Color(220, 220, 220));
+
+        rdbRequestModalRecallEditorView.setText("Recall data");
+        rdbRequestModalRecallEditorView.setBackground(new java.awt.Color(220, 220, 220));
+
+        rdbRequestModalGuardianEditorView.setText("Guardian (if patient)");
+        rdbRequestModalGuardianEditorView.setBackground(new java.awt.Color(220, 220, 220));
+
+        rdbRequestModalMedicalProfilePopup.setText("Medical history");
+        rdbRequestModalMedicalProfilePopup.setBackground(new java.awt.Color(220, 220, 220));
+
+        javax.swing.GroupLayout pnlFurtherDetailsLayout = new javax.swing.GroupLayout(pnlFurtherDetails);
+        pnlFurtherDetails.setLayout(pnlFurtherDetailsLayout);
+        pnlFurtherDetailsLayout.setHorizontalGroup(
+            pnlFurtherDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlFurtherDetailsLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(pnlFurtherDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(rdbRequestPhoneEmailEditorView)
+                    .addComponent(rdbRequestModalRecallEditorView))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(btnUpdateSelectedPatient, javax.swing.GroupLayout.PREFERRED_SIZE, 159, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(80, 80, 80))
+                .addGroup(pnlFurtherDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(rdbRequestModalGuardianEditorView)
+                    .addComponent(rdbRequestModalMedicalProfilePopup))
+                .addGap(25, 25, 25))
         );
-        pnlActionsLayout.setVerticalGroup(
-            pnlActionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlActionsLayout.createSequentialGroup()
-                .addGroup(pnlActionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(btnUpdateSelectedPatient, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(btnCloseView, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(btnCreateNewPatient, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap())
+        pnlFurtherDetailsLayout.setVerticalGroup(
+            pnlFurtherDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlFurtherDetailsLayout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(pnlFurtherDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(rdbRequestPhoneEmailEditorView)
+                    .addComponent(rdbRequestModalGuardianEditorView))
+                .addGap(28, 28, 28)
+                .addGroup(pnlFurtherDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(rdbRequestModalRecallEditorView)
+                    .addComponent(rdbRequestModalMedicalProfilePopup))
+                .addGap(27, 27, 27))
         );
 
         mnuActions.setText("Actions");
 
         mniCreateNewPatient.setText("Create new patient");
-        mniCreateNewPatient.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                mniCreateNewPatientActionPerformed(evt);
-            }
-        });
         mnuActions.add(mniCreateNewPatient);
 
         mniUpdateSelectedPatient.setText("Update selected patient details");
-        mniUpdateSelectedPatient.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                mniUpdateSelectedPatientActionPerformed(evt);
-            }
-        });
         mnuActions.add(mniUpdateSelectedPatient);
-        mnuActions.add(jSeparator2);
+        mnuActions.add(jSeparator1);
 
         mniDeleteSelectedPatient.setText("Delete selected patient");
-        mniDeleteSelectedPatient.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                mniDeleteSelectedPatientActionPerformed(evt);
-            }
-        });
         mnuActions.add(mniDeleteSelectedPatient);
 
         mniRecoverDeletedPatient.setText("Recover deleted patient");
-        mniRecoverDeletedPatient.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                mniRecoverDeletedPatientActionPerformed(evt);
-            }
-        });
         mnuActions.add(mniRecoverDeletedPatient);
-        mnuActions.add(jSeparator3);
+        mnuActions.add(jSeparator2);
 
         mniCloseView.setText("Close view");
-        mniCloseView.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                mniCloseViewActionPerformed(evt);
-            }
-        });
         mnuActions.add(mniCloseView);
 
         mbaPatientView.add(mnuActions);
@@ -2761,68 +1579,45 @@ public class PatientView extends View implements ActionListener{
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                        .addComponent(pnlPatientNotes, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 944, Short.MAX_VALUE)
-                        .addComponent(pnlAddress, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(pnlName, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGroup(layout.createSequentialGroup()
-                            .addComponent(pnlPatientSelection, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                            .addComponent(pnlAppointmentHistory, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                        .addComponent(pnlActions, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGroup(layout.createSequentialGroup()
-                            .addComponent(pnlRecall, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                            .addComponent(pnlGuardianDetails, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                            .addComponent(pnlPhones, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))))
+                .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(pnlAppointmentHistory, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(pnlPatientSelection, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(pnlFurtherDetails, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(pnlAddress, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(pnlName, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(pnlOperations, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(5, 5, 5)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(pnlAppointmentHistory, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(pnlPatientSelection, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(9, 9, 9)
-                .addComponent(pnlName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(pnlAddress, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 9, Short.MAX_VALUE)
-                .addComponent(pnlPatientNotes, javax.swing.GroupLayout.PREFERRED_SIZE, 47, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(pnlRecall, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(pnlGuardianDetails, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(pnlPhones, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(8, 8, 8)
-                .addComponent(pnlActions, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(pnlOperations, javax.swing.GroupLayout.PREFERRED_SIZE, 475, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(pnlPatientSelection, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(pnlName, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGap(12, 12, 12)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(pnlAddress, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(pnlFurtherDetails, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(pnlAppointmentHistory, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addContainerGap())
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-    */
-    private void cmbSelectGuardianActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbSelectGuardianActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_cmbSelectGuardianActionPerformed
 /*
-    private void cmbIsGuardianAPatientActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbIsGuardianAPatientActionPerformed
-        if (this.cmbIsGuardianAPatient.getSelectedItem()!=null){
-            switch ((YesNoItem)this.cmbIsGuardianAPatient.getSelectedItem()){
-                case Yes:
-                    this.cmbSelectGuardian.setEnabled(true);
-                    break;
-                case No:
-                    this.cmbSelectGuardian.setEnabled(false);
-                    break;
-            }
-        }
-    }//GEN-LAST:event_cmbIsGuardianAPatientActionPerformed
-*/
     private void btnFetchScheduleForSelectedAppointmentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnFetchScheduleForSelectedAppointmentActionPerformed
         // TODO add your handling code here:
         if (this.tblAppointmentHistory.getSelectedRow()==-1){
@@ -2833,420 +1628,35 @@ public class PatientView extends View implements ActionListener{
             LocalDate day = ((LocalDateTime)this.tblAppointmentHistory.getValueAt(row,0)).toLocalDate();
             getMyController().getDescriptor().getViewDescription().setScheduleDay(day);
             ActionEvent actionEvent = new ActionEvent(
-                    this,ActionEvent.ACTION_PERFORMED,
-                    ViewController.PatientViewControllerActionEvent.SCHEDULE_VIEW_CONTROLLER_REQUEST.toString());
+                this,ActionEvent.ACTION_PERFORMED,
+                ViewController.PatientViewControllerActionEvent.SCHEDULE_VIEW_CONTROLLER_REQUEST.toString());
             this.getMyController().actionPerformed(actionEvent);
         }
     }//GEN-LAST:event_btnFetchScheduleForSelectedAppointmentActionPerformed
-
-    private void mniDeleteSelectedPatientActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mniDeleteSelectedPatientActionPerformed
-        int response;
-        Patient patient = getMyController().getDescriptor().getControllerDescription().getPatient();
-        getMyController().getDescriptor().getViewDescription().setPatient(patient);
-        if (patient.getIsKeyDefined()){
-            String message ="Are you sure you want to delete patient " + patient.toString() + "'s details?";
-            response = JOptionPane.showConfirmDialog(this,message, "Action selected patient notifications", JOptionPane.YES_NO_OPTION);
-            if (response==JOptionPane.YES_OPTION){
-                ActionEvent actionEvent = new ActionEvent(
-                    this,ActionEvent.ACTION_PERFORMED,
-                    ViewController.PatientViewControllerActionEvent.PATIENT_DELETE_REQUEST.toString());
-                this.getMyController().actionPerformed(actionEvent);
-            }
-        }
-        else
-            JOptionPane.showMessageDialog(this, "A patient has not yet been selected for deletion\n"
-                    + "Click the 'Select/clear patient details' from the menu options to select a patient");
-    }//GEN-LAST:event_mniDeleteSelectedPatientActionPerformed
-
-    private void createNewPatientActionPerformed(){
-        
-        if (!getMyController().getDescriptor().getControllerDescription().getPatient().getIsKeyDefined()){
-            if (this.validateMinimumPatientDetails()){
-                getMyController().getDescriptor().getViewDescription()
-                        .setPatient(initialisePatientFromView(
-                                getMyController().getDescriptor()
-                                        .getControllerDescription().getPatient()));
-                ActionEvent actionEvent = new ActionEvent(
-                        this,ActionEvent.ACTION_PERFORMED,
-                        ViewController.PatientViewControllerActionEvent.PATIENT_CREATE_REQUEST.toString());
-                this.getMyController().actionPerformed(actionEvent);
-            }
-        }
-        else
-            JOptionPane.showMessageDialog(this, "A new patient cannot be created until the currently selected patient is deselected\n"
-                    + "Click the 'Select/clear patient details' from the menu options to deselect the selected patient");
-    }
-    
-    private void btnCreateNewPatientActionPerformed(java.awt.event.ActionEvent evt){
-        switch (getPatientSelectionMode()){
-            case PATIENT_RECOVERY:
-                switch(cmbPatientSelector.getSelectedIndex()){
-                    case -1:
-                        JOptionPane.showMessageDialog(
-                                this, 
-                                "A patient has not been selected for recovery");
-                        break;
-                    default:
-                        getMyController().getDescriptor().getViewDescription()
-                                .setPatient(initialisePatientFromView(
-                                        (Patient)cmbPatientSelector.getSelectedItem())
-                                );
-                        setPatientSelectionMode(PatientSelectionMode.PATIENT_SELECTION);
-                        ActionEvent actionEvent = new ActionEvent(
-                                this,ActionEvent.ACTION_PERFORMED,
-                                ViewController.PatientViewControllerActionEvent.RECOVER_PATIENT_REQUEST.toString());
-                        this.getMyController().actionPerformed(actionEvent);
-                        break;
-                }
-                break;
-            case PATIENT_SELECTION:
-                //setPatientSelectionMode(PatientSelectionMode.PATIENT_SELECTION);
-                createNewPatientActionPerformed();
-                break;
-        }
-        
-    }
-    
-    private void mniCreateNewPatientActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mniCreateNewPatientActionPerformed
-        createNewPatientActionPerformed();
-    }//GEN-LAST:event_mniCreateNewPatientActionPerformed
-
-    private void updateSelectedPatientActionPerformed(){
-        Patient patient = null;
-        
-        if (getMyController().getDescriptor().getControllerDescription().getPatient().getIsKeyDefined()){
-            
-            if (this.validateMinimumPatientDetails()){
-                patient = getMyController().getDescriptor().getControllerDescription().getPatient();
-                getMyController().getDescriptor().getViewDescription().setPatient(
-                        initialisePatientFromView(patient));
-                ActionEvent actionEvent = new ActionEvent(
-                        this,ActionEvent.ACTION_PERFORMED,
-                        ViewController.PatientViewControllerActionEvent.PATIENT_UPDATE_REQUEST.toString());
-                this.getMyController().actionPerformed(actionEvent);
-            }
-        }
-        else
-            JOptionPane.showMessageDialog(this, "Update operation cannot proceed unless an existing patient is currently selected");
-    }
-    
-    private void btnUpdateSelectedPatientActionPerformed(java.awt.event.ActionEvent evt){
-        switch (getPatientSelectionMode()){
-            case PATIENT_SELECTION:
-                updateSelectedPatientActionPerformed();
-                break;
-            case PATIENT_RECOVERY:
-                setPatientSelectionMode(PatientSelectionMode.PATIENT_SELECTION);
-                btnClearSelectionActionPerformed(evt);
-                break;
-        }
-        
-    }
-    
-    private void mniUpdateSelectedPatientActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mniUpdateSelectedPatientActionPerformed
-        updateSelectedPatientActionPerformed();
-    }//GEN-LAST:event_mniUpdateSelectedPatientActionPerformed
-
-    private void closeViewActionPerformed(){
-        if (getViewStatus()){
-            String[] options = {"Yes", "No"};
-            int close = JOptionPane.showOptionDialog(this,
-                "Any changes to patient record will be lost. Cancel anyway?",null,
-                JOptionPane.YES_NO_OPTION,
-                JOptionPane.INFORMATION_MESSAGE,
-                null,
-                options,
-                null);
-            if (close == JOptionPane.YES_OPTION){
-                try{
-                    /**
-                    * setClosed will fire INTERNAL_FRAME_CLOSED event for the
-                    * listener to send ActionEvent to the view controller
-                    */
-                    this.setClosed(true);
-                }
-                catch (PropertyVetoException e){
-                    //UnspecifiedError action
-                }
-            }   
-        }
-        else {
-            try{
-                    /**
-                    * setClosed will fire INTERNAL_FRAME_CLOSED event for the
-                    * listener to send ActionEvent to the view controller
-                    */
-                    this.setClosed(true);
-                }
-            catch (PropertyVetoException e){
-                //UnspecifiedError action
-            }
-        }
-    }
-    
-    private void btnCloseViewActionPerformed(java.awt.event.ActionEvent evt){
-        closeViewActionPerformed();
-    }
-    
-    private void mniCloseViewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mniCloseViewActionPerformed
-        closeViewActionPerformed();
-        
-    }//GEN-LAST:event_mniCloseViewActionPerformed
-
-    private void txtPhone2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtPhone2ActionPerformed
+*/
+    private void txtAddressTownActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtAddressTownActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_txtPhone2ActionPerformed
+    }//GEN-LAST:event_txtAddressTownActionPerformed
 
-    private void txtAddressLine2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtAddressLine2ActionPerformed
+    private void btnCreateRecoverPatientActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCreateRecoverPatientActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_txtAddressLine2ActionPerformed
+    }//GEN-LAST:event_btnCreateRecoverPatientActionPerformed
 
-    private void txtAddressLine1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtAddressLine1ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_txtAddressLine1ActionPerformed
 
-    private void cmbNameTitleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbNameTitleActionPerformed
-        if (this.cmbNameTitle.getSelectedItem() != null){
-            if (this.cmbNameTitle.getSelectedItem().equals(TitleItem.Untitled)){
-                this.cmbNameTitle.setSelectedIndex(-1);
-            }
-        }
-    }//GEN-LAST:event_cmbNameTitleActionPerformed
-
-    private void txtNameForenamesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtNameForenamesActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_txtNameForenamesActionPerformed
-
-    private void mniRecoverDeletedPatientActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mniRecoverDeletedPatientActionPerformed
-        setPatientSelectionMode(PatientSelectionMode.PATIENT_RECOVERY);
-        ActionEvent actionEvent = new ActionEvent(
-            this,ActionEvent.ACTION_PERFORMED,
-            ViewController.PatientViewControllerActionEvent.PATIENT_RECOVER_REQUEST.toString());
-        this.getMyController().actionPerformed(actionEvent);
-        mniRecoverDeletedPatient.setEnabled(false);
-        mniCreateNewPatient.setEnabled(false);
-        this.btnUpdateSelectedPatient.setEnabled(true);
-    }//GEN-LAST:event_mniRecoverDeletedPatientActionPerformed
-    
-    
-    private void cmbPatientSelectorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbPatientSelectorActionPerformed
-        ViewController.PatientViewControllerActionEvent event = null; 
-        switch(getPatientSelectionMode()){
-            case PATIENT_SELECTION:
-                event = ViewController.PatientViewControllerActionEvent.PATIENT_REQUEST;
-                break;
-            case PATIENT_RECOVERY:
-                event = ViewController.PatientViewControllerActionEvent.DELETED_PATIENT_REQUEST;
-                break;
-        }
-        if (cmbPatientSelector.getSelectedIndex()!=-1){
-            getMyController().getDescriptor().getViewDescription().
-                    setPatient((Patient)cmbPatientSelector.getSelectedItem());
-            ActionEvent actionEvent = new ActionEvent(
-                    this,ActionEvent.ACTION_PERFORMED, 
-                    event.toString());
-            this.getMyController().actionPerformed(actionEvent);
-        }
-    }//GEN-LAST:event_cmbPatientSelectorActionPerformed
-
-    private void txtNameSurnameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtNameSurnameActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_txtNameSurnameActionPerformed
-
-    private void btnClearSelectionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClearSelectionActionPerformed
-        getMyController().getDescriptor().getViewDescription().setPatient(new Patient());
-        this.cmbPatientSelector.setSelectedIndex(-1);
-        ActionEvent actionEvent = new ActionEvent(
-            this,ActionEvent.ACTION_PERFORMED,
-            ViewController.PatientViewControllerActionEvent.NULL_PATIENT_REQUEST.toString());
-        this.getMyController().actionPerformed(actionEvent);
-    }//GEN-LAST:event_btnClearSelectionActionPerformed
-
-    /*
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnClearSelection;
     private javax.swing.JButton btnCloseView;
-    private javax.swing.JButton btnCreateNewPatient;
+    private javax.swing.JButton btnCreateRecoverPatient;
+    private javax.swing.JButton btnFetchClinicalNotes;
     private javax.swing.JButton btnFetchScheduleForSelectedAppointment;
-    private javax.swing.JButton btnUpdateSelectedPatient;
-    private javax.swing.JComboBox<YesNoItem> cmbIsGuardianAPatient;
-    private javax.swing.JComboBox<GenderItem> cmbNameGender;
-    private javax.swing.JComboBox<TitleItem> cmbNameTitle;
-    private javax.swing.JComboBox<Patient> cmbPatientSelector;
-    private javax.swing.JComboBox<model.Patient> cmbSelectGuardian;
-    private com.github.lgooddatepicker.components.DatePicker dobDatePicker;
-    private javax.swing.JLabel jLabel2;
-    private javax.swing.JPopupMenu.Separator jSeparator2;
-    private javax.swing.JPopupMenu.Separator jSeparator3;
-    private javax.swing.JLabel lblCounty;
-    private javax.swing.JLabel lblEmail;
-    private javax.swing.JLabel lblGender;
-    private javax.swing.JLabel lblGender1;
-    private javax.swing.JLabel lblGuardianIsAPatient;
-    private javax.swing.JLabel lblGuardianPatientName;
-    private javax.swing.JLabel lblLine1;
-    private javax.swing.JLabel lblNameAge;
-    private javax.swing.JLabel lblPhone1;
-    private javax.swing.JLabel lblPhone2;
-    private javax.swing.JLabel lblPostcode;
-    private javax.swing.JLabel lblTitle;
-    private javax.swing.JLabel lblTown;
-    private javax.swing.JLabel lblline2;
-    private javax.swing.JMenuBar mbaPatientView;
-    private javax.swing.JMenuItem mniCloseView;
-    private javax.swing.JMenuItem mniCreateNewPatient;
-    private javax.swing.JMenuItem mniDeleteSelectedPatient;
-    private javax.swing.JMenuItem mniRecoverDeletedPatient;
-    private javax.swing.JMenuItem mniUpdateSelectedPatient;
-    private javax.swing.JMenu mnuActions;
-    private javax.swing.JPanel pnlActions;
-    private javax.swing.JPanel pnlAddress;
-    private javax.swing.JPanel pnlAppointmentHistory;
-    private javax.swing.JPanel pnlGuardianDetails;
-    private javax.swing.JPanel pnlName;
-    private javax.swing.JPanel pnlPatientNotes;
-    private javax.swing.JPanel pnlPatientSelection;
-    private javax.swing.JPanel pnlPhones;
-    private javax.swing.JPanel pnlRecall;
-    private com.github.lgooddatepicker.components.DatePicker recallDatePicker;
-    private javax.swing.JScrollPane scrAppointmentHistory;
-    private javax.swing.JSpinner spnDentalRecallFrequency;
-    private javax.swing.JTable tblAppointmentHistory;
-    private javax.swing.JTextField txtAddressCounty;
-    private javax.swing.JTextField txtAddressLine1;
-    private javax.swing.JTextField txtAddressLine2;
-    private javax.swing.JTextField txtAddressPostcode;
-    private javax.swing.JTextField txtAddressTown;
-    private javax.swing.JTextField txtEmail;
-    private javax.swing.JTextField txtNameForenames;
-    private javax.swing.JTextField txtNameSurname;
-    private javax.swing.JTextField txtPatientNotes;
-    private javax.swing.JTextField txtPhone1;
-    private javax.swing.JTextField txtPhone2;
-    private javax.swing.JTextField txtRecallDate;
-    // End of variables declaration//GEN-END:variables
-   */
-    /*
-    private javax.swing.JButton btnClearSelection;
-    private javax.swing.JButton btnFetchScheduleForSelectedAppointment;
-    private javax.swing.JComboBox<PatientView.GenderItem> cmbNameGender;
-    private javax.swing.JComboBox<PatientView.YesNoItem> cmbIsGuardianAPatient;
-    private javax.swing.JComboBox<Patient> cmbPatientSelector;
-    private javax.swing.JComboBox<model.Patient> cmbSelectGuardian;
-    private javax.swing.JComboBox<PatientView.TitleItem> cmbNameTitle;
-    private com.github.lgooddatepicker.components.DatePicker dobDatePicker;
-    private javax.swing.JButton btnUpdateSelectedPatient;
-    private javax.swing.JButton btnCloseView;
-    private javax.swing.JButton btnCreateNewPatient;
-    private javax.swing.JLabel lblPhone1;
-    private javax.swing.JLabel lblFrequency;
-    private javax.swing.JLabel lblPhone2;
-    private javax.swing.JLabel lblEmail;
-    private javax.swing.JMenuBar mbaPatientView;
-    private javax.swing.JPopupMenu.Separator jSeparator2;
-    private javax.swing.JPopupMenu.Separator jSeparator3;
-    private javax.swing.JTextField txtPhonesEmail;
-    private javax.swing.JLabel lblNameAge;
-    private javax.swing.JLabel lblAddressCounty;
-    private javax.swing.JLabel lblNameGender;
-    private javax.swing.JLabel lblNameDOB;
-    private javax.swing.JLabel lblGuardianIsAPatient;
-    private javax.swing.JLabel lblGuardianPatientName;
-    private javax.swing.JLabel lblAddressLine1;
-    private javax.swing.JLabel lblAddressPostcode;
-    private javax.swing.JLabel lblNameForename;
-    private javax.swing.JLabel lblNameSurname;
-    private javax.swing.JLabel lblNameTitle;
-    private javax.swing.JLabel lblAddressTown;
-    private javax.swing.JLabel lblAddressline2;
-    private javax.swing.JMenuItem mniCloseView;
-    private javax.swing.JMenuItem mniCreateNewPatient;
-    private javax.swing.JMenuItem mniDeleteSelectedPatient;
-    private javax.swing.JMenuItem mniRecoverDeletedPatient;
-    private javax.swing.JMenuItem mniUpdateSelectedPatient;
-    private javax.swing.JMenu mnuActions;
-    private javax.swing.JPanel pnlActions;
-    private javax.swing.JPanel pnlAddress;
-    private javax.swing.JPanel pnlAppointmentHistory;
-    private javax.swing.JPanel pnlGuardianDetails;
-    private javax.swing.JPanel pnlName;
-    private javax.swing.JPanel pnlPatientNotes;
-    private javax.swing.JPanel pnlPhones;
-    private javax.swing.JPanel pnlRecall;
-    private javax.swing.JPanel pnlPatientSelection;
-    private com.github.lgooddatepicker.components.DatePicker recallDatePicker;
-    private javax.swing.JScrollPane scrAppointmentHistory;
-    private javax.swing.JSpinner spnDentalRecallFrequency;
-    private javax.swing.JTable tblAppointmentHistory;
-    private javax.swing.JTextField txtAddressCounty;
-    private javax.swing.JTextField txtAddressLine1;
-    private javax.swing.JTextField txtAddressLine2;
-    private javax.swing.JTextField txtAddressPostcode;
-    private javax.swing.JTextField txtAddressTown;
-    private javax.swing.JTextField txtNameForenames;
-    private javax.swing.JTextField txtPatientNotes;
-    private javax.swing.JTextField txtPhone1;
-    private javax.swing.JTextField txtPhone2;
-    private javax.swing.JTextField txtRecallDate;
-    private javax.swing.JTextField txtNameSurname;
-    private DatePicker dobPicker;
-    private DatePicker dentalRecallPicker;
-    private DatePicker hygieneRecallPicker;
-    */
-    
-    private boolean validateMinimumPatientDetails(){
-        boolean errorOnExit = false;
-        //
-        //if (String.valueOf(cmbIsGuardianAPatient.getSelectedItem()).equals("Yes")){
-        //    if (this.cmbSelectGuardian.getSelectedIndex() == -1){
-        //        JOptionPane.showMessageDialog(this, "Patient guardian has not been specified");
-        //        errorOnExit = true;
-        //    }
-        //}
-        //
-        //else 
-        if (this.cmbNameGender.getSelectedIndex()==-1){
-            JOptionPane.showMessageDialog(this, "Patient gender must be specified");
-            errorOnExit = true;
-        }
-        else if (this.getSurname()==null){
-            JOptionPane.showMessageDialog(this, "Patient surname must be specified");
-            errorOnExit = true;
-        }
-        else if (this.getSurname().isEmpty()){
-            JOptionPane.showMessageDialog(this, "Patient surname must be specified");
-            errorOnExit = true;
-        }
-        //else if (this.getPhone1()==null){
-        //    JOptionPane.showMessageDialog(this, "Patient phone 1 must be specified");
-        //    errorOnExit = true;
-        //}
-        //else if (this.getPhone1().isEmpty()){
-        //    JOptionPane.showMessageDialog(this, "Patient phone 1 must be specified");
-        //    errorOnExit = true;
-        //}
-        return !errorOnExit;
-    }
-    
-    // Variables declaration - do not modify  
-    private javax.swing.ButtonGroup rdbGroup;
-    private javax.swing.JTable tblAppointmentHistory;
-    private javax.swing.JMenuBar mbaPatientView;
-    private javax.swing.JMenu mnuNotes;
-    private javax.swing.JMenuItem mniCloseView;
-    private javax.swing.JPopupMenu.Separator jSeparator2;
-    private javax.swing.JPopupMenu.Separator jSeparator3;
-    private javax.swing.JButton btnClearSelection;
-    private javax.swing.JButton btnCloseView;
-    private javax.swing.JButton btnCreateNewPatient;
-    private javax.swing.JButton btnFetchScheduleForSelectedAppointment;
-    private javax.swing.JButton btnUpdateSelectedPatient;
+    private javax.swing.JButton btnUpdateRecoverPatient;
     private javax.swing.ButtonGroup buttonGroup1;
     private javax.swing.JComboBox<PatientView.GenderItem> cmbNameGender;
     private javax.swing.JComboBox<PatientView.TitleItem> cmbNameTitle;
     private javax.swing.JComboBox<Patient> cmbPatientSelector;
     private com.github.lgooddatepicker.components.DatePicker dobDatePicker;
-    private javax.swing.JScrollPane scrPatientNotes;
+    private javax.swing.JPopupMenu.Separator jSeparator1;
+    private javax.swing.JPopupMenu.Separator jSeparator2;
     private javax.swing.JLabel lblAddressCounty;
     private javax.swing.JLabel lblAddressLine1;
     private javax.swing.JLabel lblAddressLine2;
@@ -3258,6 +1668,13 @@ public class PatientView extends View implements ActionListener{
     private javax.swing.JLabel lblNameGender;
     private javax.swing.JLabel lblNameSurname;
     private javax.swing.JLabel lblNameTitle;
+    private javax.swing.JMenuBar mbaPatientView;
+    private javax.swing.JMenuItem mniCloseView;
+    private javax.swing.JMenuItem mniCreateNewPatient;
+    private javax.swing.JMenuItem mniDeleteSelectedPatient;
+    private javax.swing.JMenuItem mniRecoverDeletedPatient;
+    private javax.swing.JMenuItem mniUpdateSelectedPatient;
+    private javax.swing.JMenu mnuActions;
     private javax.swing.JPanel pnlAddress;
     private javax.swing.JPanel pnlAppointmentHistory;
     private javax.swing.JPanel pnlFurtherDetails;
@@ -3265,524 +1682,23 @@ public class PatientView extends View implements ActionListener{
     private javax.swing.JPanel pnlNameContent;
     private javax.swing.JPanel pnlOperations;
     private javax.swing.JPanel pnlPatientAddressContent;
-    private javax.swing.JPanel pnlPatientNotes;
     private javax.swing.JPanel pnlPatientSelection;
-    private javax.swing.JRadioButton rdbRequestModalMedicalProfilePopup;
     private javax.swing.JRadioButton rdbRequestModalGuardianEditorView;
+    private javax.swing.JRadioButton rdbRequestModalMedicalProfilePopup;
     private javax.swing.JRadioButton rdbRequestModalRecallEditorView;
-    private javax.swing.JRadioButton rdbRequestModalPhoneEmailEditorView;
-    //private javax.swing.JRadioButton rdbRequestModalNotesEditorView;
+    private javax.swing.JRadioButton rdbRequestPhoneEmailEditorView;
     private javax.swing.JScrollPane scrAppointmentHistory;
-    private javax.swing.JTextArea txtPatientNotes;
-    
+    private javax.swing.JTable tblAppointmentHistory;
     private javax.swing.JTextField txtAddressCounty;
     private javax.swing.JTextField txtAddressLine1;
     private javax.swing.JTextField txtAddressPostcode;
     private javax.swing.JTextField txtAddressTown;
     private javax.swing.JTextField txtNameForename;
-    private javax.swing.JTextField txtAddressLine2;
+    private javax.swing.JTextField txtNameLine2;
     private javax.swing.JTextField txtNameSurname;
-    private javax.swing.JMenuItem mniCreateNewPatient;
-    private javax.swing.JMenuItem mniDeleteSelectedPatient;
-    private javax.swing.JMenuItem mniRecoverDeletedPatient;
-    private javax.swing.JMenuItem mniUpdateSelectedPatient;
-    private javax.swing.JMenu mnuActions;
-    // End of variables declaration   
+    // End of variables declaration//GEN-END:variables
 
-    class DOBDatePickerDateChangeListener implements DateChangeListener {
-        @Override
-        public void dateChanged(DateChangeEvent event) {
-            /**
-             * Update logged at 30/10/2021 08:32
-             * inherited view status (set if any changes have been made to form since its initialisation)
-             * is initialised to true (date changed)
-             */
-            setViewStatus(true);
-            LocalDate date = event.getNewDate();
-            if (date != null) {
-                lblNameAge.setText("(" + String.valueOf(getAge(date)) + " yrs)");
-            }         
-        }
-    }
-    
-    private MenuMaker menuMaker = null;
-    private void setMenuMaker(MenuMaker value){
-        menuMaker = value;
-    }
-    private MenuMaker getMenuMaker(){
-        return menuMaker;
-    }
-    
-    private void doEnableNoteTaking(){
-        
-   
-        
-        try{
-            setMenuMaker(new MenuMaker(
-                    mbaPatientView,
-                    "Patient",
-                    "Medical history"));
-            getMenuMaker().addMenuToViewMenubar();
-            setJMenuBar(mbaPatientView);
-        }catch(TemplateReaderException ex){
-           ViewController.displayErrorMessage(
-                   ex.getMessage(), 
-                   "Patient view error",
-                   JOptionPane.WARNING_MESSAGE);
-        }
-    }
-    
-    private void doDisableNoteTaking(){
-        mbaPatientView.add(mnuActions);
-        setJMenuBar(mbaPatientView);
-    }
-       
-    class MenuMaker{
-        private String viewElementID = null;
-        private JMenuBar menuBar = null;
-        private String selectedMenuBarID = null;
-        private JPopupMenu popupMenu;
-  
-
-        /**
-         * 
-         * @param menuBarValue JMenubar which is the parent of the first menu element to be processed
-         *  -- the first menu element should have a node name = "menu1"
-         * @param nextMenuNodeName String constant = "menu1"
-         */
-        MenuMaker(JMenuBar menuBarValue, 
-                String viewElementIDValue,
-                String selectedMenuBarIDValue)throws TemplateReaderException{
-            viewElementID = viewElementIDValue;
-            menuBar = menuBarValue; 
-            selectedMenuBarID = selectedMenuBarIDValue;
-        }
-        
-        MenuMaker(JPopupMenu popupMenuValue, String viewElementIDValue){
-            viewElementID = viewElementIDValue;
-            popupMenu = popupMenuValue;
-        }
-        
-        private JPopupMenu getPopupMenu(){
-            return popupMenu;
-        }
-    
-        private JMenu rootMenu = null;
-        private JMenu getRootMenu(){
-            return rootMenu;
-        }
-        private void setRootMenu(JMenu value){
-            rootMenu = value;
-        }
-        
-        private JMenuBar getMenuBar(){
-            return menuBar;
-        }
-        private void setMenuBar(JMenuBar value){
-            menuBar = value;
-        }
-        
-        private String getViewElementID(){
-            return viewElementID;
-        }
-        
-        private String getSelectedMenuBarID(){
-            return selectedMenuBarID;
-        }
-
-        void addMenuToViewMenubar() throws TemplateReaderException{
-            Element element = null;
-            boolean isElementFound = false;
-            Element selectedViewElement = null /*= getSelectedViewElementFromTemplate(getTemplate())*/;
-            NodeList nodes = selectedViewElement.getElementsByTagName("menubar");
-            if (nodes.getLength() == 0){
-                String message = "View element tagged 'menubar' not found\n"
-                        + "Raised in getSelectedViewElementFromTemplate() method";
-                //throw new TemplateReaderException(message);
-            }
-            for (int temp = 0; temp < nodes.getLength(); temp++) {
-                Node node = nodes.item(temp);
-                if (node.getNodeType() == Node.ELEMENT_NODE) {
-                    element = (Element)node;
-                    if (element.getAttribute("id").equals(getSelectedMenuBarID())){
-                        isElementFound = true;
-                        break;
-                    } 
-                }
-            }
-            if (isElementFound) {
-                makeMenuBarMenuFrom(element);
-            }
-            else{
-                String message = "menubar element in template with id = '" 
-                        + getSelectedMenuBarID() + "' not found\n"
-                        + "Raised in MenuMaker::addMenuToViewMenubar() method";
-                //throw new TemplateReaderException(message);
-            }
-        }
-        
-        private void makePopupMenu1From(Element element){
-            NodeList nodes = element.getElementsByTagName("menu1");
-            for (int temp = 0; temp < nodes.getLength(); temp++) {
-                Node node = nodes.item(temp);
-                if (node.getNodeType() == Node.ELEMENT_NODE) {
-                    element = (Element)node;
-                    JMenuItem menuItem = new JMenuItem();
-                    menuItem.setText(element.getAttribute("id"));
-                    getPopupMenu().add(menuItem);
-                    makeMenu2CollectionsFrom(element); 
-                }
-            }
-        }
-        
-        private void makeMenu2CollectionsFrom(Element elementValue){
-            Element element = null;
-            ArrayList<Element> elements = null;
-            NodeList nodes = elementValue.getElementsByTagName("menu2");
-            for (int temp = 0; temp < nodes.getLength(); temp++) {
-                Node node = nodes.item(temp);
-                if (node.getNodeType() == Node.ELEMENT_NODE) {
-                    element = (Element)node;
-                    elements.add(element);
-                }
-            }
-            switch(element.getAttribute("id")){
-                case "Medical conditions":
-                    makeMedicalConditionDialog(elements);
-                    break;
-                case "Prescribed medication":
-                    break;
-                case "Patient doctor's details":
-                    break;
-            }
-            
-        }
-        
-        private void makeMedicalConditionDialog(ArrayList<Element> elements){
-            ArrayList<JCheckBox> checkBoxs = new ArrayList<>();
-            Iterator medicalConditionIT = elements.iterator();
-            while(medicalConditionIT.hasNext()){
-                Element element = (Element)medicalConditionIT.next();
-                switch(element.getAttribute("type")){
-                    case "option":
-                        JCheckBox checkBox = new JCheckBox();
-                        checkBox.setText(element.getAttribute("id"));
-                        checkBoxs.add(checkBox);
-                    case "menu":{
-                        ArrayList<Element> menu3Elements = new ArrayList<>();
-                        NodeList nodes = element.getElementsByTagName("menu3");
-                        for (int temp = 0; temp < nodes.getLength(); temp++) {
-                            Node node = nodes.item(temp);
-                            if (node.getNodeType() == Node.ELEMENT_NODE) {
-                                Element menu3Element = (Element)node;
-                                menu3Elements.add(menu3Element);
-                            }
-                        }
-                        FatCheckBox fatCheckBox = new FatCheckBox(menu3Elements); 
-                        fatCheckBox.setText(element.getAttribute("id"));
-                        checkBoxs.add(fatCheckBox);
-                        break;
-                    }
-                } 
-            }
-            new Dialog(getDesktopView(), 
-                    true,
-                    checkBoxs,
-                    getMyController());
-        }
-        
-        private void makeMenuBarMenuFrom(Element element){
-            JMenu newMenu = new JMenu();
-            newMenu.setText(element.getAttribute("id"));
-            setRootMenu(newMenu);
-            getMenuBar().add(newMenu);
-            NodeList nodes = element.getElementsByTagName("menu1");
-            for (int temp = 0; temp < nodes.getLength(); temp++) {
-                Node node = nodes.item(temp);
-                if (node.getNodeType() == Node.ELEMENT_NODE) {
-                    element = (Element)node;
-                    makeMenu1From(element); 
-                }
-            }
-        }
-        
-        private void makeMenu1From(Element element){
-            
-            switch (element.getAttribute("type")){
-                case "menu":
-                    JMenu newMenu = new JMenu();
-                    newMenu.setText(element.getAttribute("id"));
-                    getRootMenu().add(newMenu);
-                    NodeList nodes = element.getElementsByTagName("menu2");
-                    for (int temp = 0; temp < nodes.getLength(); temp++) {
-                        Node node = nodes.item(temp);
-                        if (node.getNodeType() == Node.ELEMENT_NODE) {
-                            element = (Element)node;
-                            makeMenu2From(element, newMenu); 
-                        }
-                    }
-                    break;
-                case "action":
-                    JMenuItem newMenuItem = new JMenuItem();
-                    newMenuItem.setText(element.getAttribute("id"));
-                    getRootMenu().add(newMenuItem);
-                    break;
-                case "option":
-                case "exclusive_option":
-                    JMenuItem newOptionMenuItem = null;
-                    if(element.getAttribute("type").equals("option"))
-                        newOptionMenuItem = new JCheckBoxMenuItem();
-                    else if(element.getAttribute("type").equals("exclusive_option"))
-                        newOptionMenuItem = new JRadioButtonMenuItem();
-                    newOptionMenuItem.setText(element.getAttribute("id"));
-                    getRootMenu().add(newOptionMenuItem);
-                    //addItemListenerFor(newOptionMenuItem);
-                    break;
-            }
-        }
-        
-        private void makeMenu2CheckBoxListViewFrom(Element element){
-            ArrayList<JCheckBox> checkBoxList = new ArrayList<>();
-            NodeList nodes = element.getElementsByTagName(("menu2"));
-            for (int temp = 0; temp < nodes.getLength(); temp++) {
-                Node node = nodes.item(temp);
-                if (node.getNodeType() == Node.ELEMENT_NODE) {
-                    JCheckBox checkBox = new JCheckBox();
-                    checkBox.setText(element.getAttribute("id"));
-                    checkBoxList.add(checkBox); 
-                }
-            }
-            getMyController().setModalView((ModalView)new View().make(
-                    View.Viewer.CHECKBOX_LIST_VIEW,
-                    getMyController(), 
-                    getMyController().getDesktopView()).getModalView());
-
-        }
-        
-        private void makeMenu2From(Element element, JMenu parentMenu){
-            
-            switch (element.getAttribute("type")){
-                case "menu":
-                    JMenu newMenu = new JMenu();
-                    newMenu.setText(element.getAttribute("id"));
-                    parentMenu.add(newMenu);
-                    NodeList nodes = element.getElementsByTagName("menu3");
-                    for (int temp = 0; temp < nodes.getLength(); temp++) {
-                        Node node = nodes.item(temp);
-                        if (node.getNodeType() == Node.ELEMENT_NODE) {
-                            element = (Element)node;
-                            makeMenu3From(element, newMenu); 
-                        }
-                    }
-                    break;
-                case "action":
-                    break;
-                case "option":
-                case "exclusive_option":
-                    JMenuItem newOptionMenuItem = null;
-                    if(element.getAttribute("type").equals("option"))
-                        newOptionMenuItem = new JCheckBoxMenuItem();
-                    else if(element.getAttribute("type").equals("exclusive_option"))
-                        newOptionMenuItem = new JRadioButtonMenuItem();
-                    newOptionMenuItem.setText(element.getAttribute("id"));
-                    parentMenu.add(newOptionMenuItem);
-                    //addItemListenerFor(newOptionMenuItem);
-                    break;
-            }
-        }
-        
-        private void makeMenu3From(Element element, JMenu parentMenu){
-            
-            switch (element.getAttribute("type")){
-                case "menu":
-                    JMenu newMenu = new JMenu();
-                    newMenu.setText(element.getAttribute("id"));
-                    parentMenu.add(newMenu);
-                    NodeList nodes = element.getElementsByTagName("menu4");
-                    for (int temp = 0; temp < nodes.getLength(); temp++) {
-                        Node node = nodes.item(temp);
-                        if (node.getNodeType() == Node.ELEMENT_NODE) {
-                            element = (Element)node;
-                            makeMenu4From(element, newMenu); 
-                        }
-                    }
-                    break;
-                case "action":
-                    break;
-                case "option":
-                case "exclusive_option":
-                    JMenuItem newOptionMenuItem = null;
-                    if(element.getAttribute("type").equals("option"))
-                        newOptionMenuItem = new JCheckBoxMenuItem();
-                    else if(element.getAttribute("type").equals("exclusive_option"))
-                        newOptionMenuItem = new JRadioButtonMenuItem();
-                    newOptionMenuItem.setText(element.getAttribute("id"));
-                    parentMenu.add(newOptionMenuItem);
-                    //addItemListenerFor(newOptionMenuItem);
-                    break;
-            }
-        }
-        
-        private void makeMenu4From(Element element, JMenu parentMenu){
-            //JMenu newMenu = new JMenu();
-            //newMenu.setText(element.getAttribute("id"));
-            //parentMenu.add(newMenu);
-            switch (element.getAttribute("type")){
-                case "action":
-                    break;
-                case "option":
-                case "exclusive_option":
-                    JMenuItem newOptionMenuItem = null;
-                    if(element.getAttribute("type").equals("option"))
-                        newOptionMenuItem = new JCheckBoxMenuItem();
-                    else if(element.getAttribute("type").equals("exclusive_option"))
-                        newOptionMenuItem = new JRadioButtonMenuItem();
-                    newOptionMenuItem.setText(element.getAttribute("id"));
-                    parentMenu.add(newOptionMenuItem);
-                    //addItemListenerFor(newOptionMenuItem);
-                    break;
-            }
-        }
-    }//class MenuMaker
-   
-    /*
-        private void addActionListenerFor(Element element, javax.swing.JMenuItem menuItem){
-            switch (menuItem.getText()){
-                case "Medical condition":
-                    menuItem.addActionListener((ActionEvent e) ->
-                            makeMedicalConditionDialog(element));
-                    break;                  
-                case "Who recommended The Clinic to you?":
-                    menuItem.addActionListener((ActionEvent e) -> 
-                            mniEnterWhoRecommendedClinicActionPerformed());
-                case "Patient's doctor details":
-                    menuItem.addActionListener((ActionEvent e) -> 
-                            mniEnterPatientDoctorActionPerformed());  
-                
-            }
-        }
-        */
-        
-    private void menuItemDisplayMenu2Options(){
-
-    }
-    
-    private void mniEnterAllergyDescriptionActionPerformed(){
+    private void btnFetchScheduleForSelectedAppointmentActionPerformed(ActionEvent evt){
         
     }
-    
-    private void mniEnterRecallFrequencyActionPerformed(){
-        
-    }
-    
-    private void mniEnterRecallDateActionPerformed(){
-        
-    }
-    
-    private void mniEnterPatientDOBActionPerformed(){
-        
-    }
-    
-    private void mniEnterPatientNameActionPerformed(){
-        
-    }
-    
-    private void mniEnterWhoRecommendedClinicActionPerformed(){
-        
-    }
-    
-    private void mniEnterPatientDoctorActionPerformed(){
-        
-    }
-    
-    private String doComboboxDialog(String dialogPurpose){
-        return null;
-    }
-    
-    private String doTextEntryDialog(String dialogPurpose){
-        return null;
-    }      
-
-    private void doDisplayMedicalProfileRequest(){
-        JPopupMenu popup = new JPopupMenu("Select option");
-        JLabel title = new JLabel("       Select options");
-        popup.add(title);    
-        popup.addSeparator();
-        
-        popup.setVisible(true);
-        Patient patient = (Patient)cmbPatientSelector.getSelectedItem();
-        
-        ArrayList<String> items = 
-                TemplateReader.extract(patient.getMedicalHistory());
-        Iterator itemsIterator = items.iterator();
-        while(itemsIterator.hasNext()){
-            String item = (String)itemsIterator.next();
-            switch(item){
-                case "History":
-                    popup.add(item).addActionListener(new java.awt.event.ActionListener() {
-                        public void actionPerformed(java.awt.event.ActionEvent evt) {
-                            mniMedicalHistoryActionPerformed(evt);
-                        }
-                    });
-                   // rdbGroup.clearSelection();
-                    break;
-                case "Medication":
-                    popup.add(item).addActionListener(new java.awt.event.ActionListener() {
-                        public void actionPerformed(java.awt.event.ActionEvent evt) {
-                            mniMedicationActionPerformed(evt);
-                        }
-                    });
-                    //rdbGroup.clearSelection();
-                    break;
-                case "Doctor":
-                    popup.add(item).addActionListener(new java.awt.event.ActionListener() {
-                        public void actionPerformed(java.awt.event.ActionEvent evt) {
-                            mniDoctorActionPerformed(evt);
-                        }
-                    });
-                    //rdbGroup.clearSelection();
-                    break;        
-            }
-        }
-        popup.show(this.rdbRequestModalMedicalProfilePopup, 
-                rdbRequestModalMedicalProfilePopup.getX()-50,
-                rdbRequestModalMedicalProfilePopup.getY()-50 );
-    }
-    
-    private void mniMedicalHistoryActionPerformed(ActionEvent e){
-        ViewController.PatientViewControllerActionEvent request = 
-                ViewController.PatientViewControllerActionEvent.
-                PATIENT_MEDICAL_HISTORY_1_EDITOR_VIEW_REQUEST;
-        doPopupWithAction(request);
-    }
-    
-    private void mniMedicationActionPerformed(ActionEvent e){
-        ViewController.PatientViewControllerActionEvent request = 
-                ViewController.PatientViewControllerActionEvent.
-                PATIENT_MEDICATION_EDITOR_VIEW_REQUEST;
-        doPopupWithAction(request);
-    }
-    
-    private void mniDoctorActionPerformed(ActionEvent e){
-        ViewController.PatientViewControllerActionEvent request = 
-                ViewController.PatientViewControllerActionEvent.
-                PATIENT_DOCTOR_EDITOR_VIEW_REQUEST;
-        doPopupWithAction(request);
-    }
-    
-    private void doPopupWithAction(ViewController.PatientViewControllerActionEvent request){
-        ActionEvent actionEvent = new ActionEvent(
-            this,ActionEvent.ACTION_PERFORMED,
-            request.toString());
-        this.getMyController().actionPerformed(actionEvent);
-        actionEvent = new ActionEvent(
-            this,ActionEvent.ACTION_PERFORMED,
-            ViewController.PatientViewControllerActionEvent.
-                    VIEW_CHANGED_NOTIFICATION.toString());
-        this.getMyController().actionPerformed(actionEvent);
-        rdbGroup.clearSelection();
-    }
-
 }
-
-
