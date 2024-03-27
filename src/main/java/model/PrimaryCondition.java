@@ -17,7 +17,6 @@ public class PrimaryCondition extends Condition implements IEntityStoreActions {
     private Integer key = null;
     private SecondaryCondition secondaryCondition = null;
     private ArrayList<PrimaryCondition> collection = new ArrayList<>();
-    private String notes = null;
     private Integer patientKey = null;
     private Patient patient = null;
             
@@ -56,21 +55,6 @@ public class PrimaryCondition extends Condition implements IEntityStoreActions {
         secondaryCondition = value;
     }
 
-    /*
-    public Integer getPatientKey(){
-        return patientKey;
-    }
-    protected void setPatientKey(Integer value){
-        patientKey = value;
-    }
-    */
-    public String getNotes(){
-        return notes;
-    }
-    public void setNotes(String value){
-        notes = value;
-    }
-    
     @Override 
     public Point count()throws StoreException{
         return new Repository().count(this);

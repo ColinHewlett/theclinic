@@ -91,10 +91,7 @@
           <Group type="102" alignment="0" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Group type="102" attributes="0">
-                      <Component id="pnlOperations" min="-2" pref="475" max="-2" attributes="0"/>
-                      <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
-                  </Group>
+                  <Component id="pnlOperations" pref="497" max="32767" attributes="0"/>
                   <Group type="102" attributes="0">
                       <Group type="103" groupAlignment="0" max="-2" attributes="0">
                           <Component id="pnlPatientSelection" max="32767" attributes="0"/>
@@ -331,7 +328,7 @@
             </Component>
             <Component class="com.github.lgooddatepicker.components.DatePicker" name="dobDatePicker">
               <AuxValues>
-                <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new com.github.lgooddatepicker.components.DatePicker();&#xa;DatePickerSettings settings = new DatePickerSettings();&#xa;settings.setFormatForDatesCommonEra(DateTimeFormatter.ofPattern(&quot;dd/MM/yyyy&quot;));&#xa;settings.setAllowKeyboardEditing(false);&#xa;dobDatePicker.setSettings(settings);&#xa;"/>
+                <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new com.github.lgooddatepicker.components.DatePicker();&#xa;ImageIcon icon = new ImageIcon(this.getClass().getResource(&quot;/datepickerbutton1.png&quot;));&#xa;JButton datePickerButton = dobDatePicker.getComponentToggleCalendarButton();&#xa;datePickerButton.setText(&quot;&quot;);&#xa;datePickerButton.setIcon(icon);&#xa;DatePickerSettings settings = new DatePickerSettings();&#xa;settings.setFormatForDatesCommonEra(DateTimeFormatter.ofPattern(&quot;dd/MM/yyyy&quot;));&#xa;settings.setAllowKeyboardEditing(false);&#xa;dobDatePicker.setSettings(settings);&#xa;dobDatePicker.addDateChangeListener(new DOBDatePickerDateChangeListener());&#xa;"/>
               </AuxValues>
             </Component>
             <Component class="javax.swing.JLabel" name="lblNameAge">
@@ -378,15 +375,15 @@
               <Group type="102" alignment="0" attributes="0">
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="btnCreateRecoverPatient" min="-2" pref="82" max="-2" attributes="0"/>
-                  <EmptySpace min="-2" pref="5" max="-2" attributes="0"/>
+                  <EmptySpace min="-2" pref="6" max="-2" attributes="0"/>
                   <Component id="btnUpdateRecoverPatient" min="-2" pref="82" max="-2" attributes="0"/>
-                  <EmptySpace min="-2" pref="5" max="-2" attributes="0"/>
+                  <EmptySpace min="-2" pref="6" max="-2" attributes="0"/>
                   <Component id="btnFetchClinicalNotes" min="-2" pref="82" max="-2" attributes="0"/>
                   <EmptySpace min="-2" pref="5" max="-2" attributes="0"/>
                   <Component id="btnFetchScheduleForSelectedAppointment" min="-2" pref="83" max="-2" attributes="0"/>
-                  <EmptySpace min="-2" pref="5" max="-2" attributes="0"/>
+                  <EmptySpace min="-2" pref="6" max="-2" attributes="0"/>
                   <Component id="btnCloseView" min="-2" pref="84" max="-2" attributes="0"/>
-                  <EmptySpace min="-2" pref="14" max="-2" attributes="0"/>
+                  <EmptySpace min="-2" pref="20" max="-2" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -467,6 +464,9 @@
               <Dimension value="[99, 82]"/>
             </Property>
           </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnFetchClinicalNotesActionPerformed"/>
+          </Events>
         </Component>
       </SubComponents>
     </Container>

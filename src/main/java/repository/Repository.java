@@ -963,6 +963,7 @@ public class Repository implements IStoreActions {
                     preparedStatement.setString(3,sc.getDescription());
                     preparedStatement.setBoolean(4,sc.getState());
                     preparedStatement.setBoolean(5,sc.getIsDeleted());
+                    preparedStatement.setString(6,sc.getNotes());
                     preparedStatement.executeUpdate();
                 }catch(SQLException ex){
                     throw new StoreException("SQLException message -> " + ex.getMessage() + "\n"
@@ -1537,11 +1538,13 @@ public class Repository implements IStoreActions {
                         Integer pid = rs.getInt("pid");
                         Integer primaryConditionKey = rs.getInt("primaryConditionKey");
                         String description = rs.getString("description");
+                        String notes = rs.getString("notes");
                         Boolean state = rs.getBoolean("state");
                         Boolean isDeleted = rs.getBoolean("isDeleted");
                         secondaryCondition = new SecondaryCondition(pid);
                         secondaryCondition.setPrimaryCondition(new PrimaryCondition(primaryConditionKey));
                         secondaryCondition.setDescription(description);
+                        secondaryCondition.setNotes(notes);
                         secondaryCondition.setState(state);
                         secondaryCondition.setIsDeleted(isDeleted);
                         result = secondaryCondition;
@@ -1553,11 +1556,13 @@ public class Repository implements IStoreActions {
                             Integer pid = rs.getInt("pid");
                             Integer primaryConditionKey = rs.getInt("primaryConditionKey");
                             String description = rs.getString("description");
+                            String notes = rs.getString("notes");
                             Boolean state = rs.getBoolean("state");
                             Boolean isDeleted = rs.getBoolean("isDeleted");
                             secondaryCondition = new SecondaryCondition(pid);
                             secondaryCondition.setPrimaryCondition(new PrimaryCondition(primaryConditionKey));
                             secondaryCondition.setDescription(description);
+                            secondaryCondition.setNotes(notes);
                             secondaryCondition.setState(state);
                             secondaryCondition.setIsDeleted(isDeleted);
                             collection.add(secondaryCondition);
@@ -2282,8 +2287,9 @@ public class Repository implements IStoreActions {
                     preparedStatement.setLong(1, sc.getPrimaryCondition().getKey());
                     preparedStatement.setString(2, sc.getDescription());
                     preparedStatement.setBoolean(3, sc.getState());
-                    preparedStatement.setBoolean(4, sc.getIsDeleted());
-                    preparedStatement.setLong(5, sc.getKey());
+                    preparedStatement.setString(4, sc.getNotes());
+                    preparedStatement.setBoolean(5, sc.getIsDeleted());
+                    preparedStatement.setLong(6, sc.getKey());
                     preparedStatement.executeUpdate();   
                 }catch(SQLException ex){
                     throw new StoreException("SQLException message -> " + ex.getMessage() + "\n"
@@ -3203,6 +3209,7 @@ public class Repository implements IStoreActions {
                         + "pid LONG SECONDARY KEY, "
                         + "description Char(100), "
                         + "state YesNo, "
+                        + "notes Char(255), "
                         + "isDeleted YesNo, "
                         + "primaryConditionKey LONG NOT NULL REFERENCES PrimaryCondition(pid);";
                 doCreatePrimaryConditionTable(sql);
@@ -3239,8 +3246,8 @@ public class Repository implements IStoreActions {
             case INSERT_SECONDARY_CONDITION:
                 sql
                     = "INSERT INTO SecondaryCondition "
-                    + "(pid, primaryConditionKey, description,state,isDeleted) "
-                    + "VALUES (?,?,?,?,?);";
+                    + "(pid, primaryConditionKey, description, state,isDeleted, notes) "
+                    + "VALUES (?,?,?,?,?,?);";
                 doInsertSecondaryCondition(sql, entity);
                 break;
             case UPDATE_SECONDARY_CONDITION:
@@ -3248,6 +3255,7 @@ public class Repository implements IStoreActions {
                         + "SET primaryConditionKey = ?, "
                         + "description = ?, "
                         + "state = ?, "
+                        + "notes = ?, "
                         + "isDeleted = ? "
                         + "WHERE pid = ?";
                 doUpdateSecondaryCondition(sql, entity);

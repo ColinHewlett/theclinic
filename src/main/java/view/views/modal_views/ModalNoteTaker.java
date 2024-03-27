@@ -18,7 +18,7 @@ import model.*;
  * @author colin
  */
 public class ModalNoteTaker extends ModalView implements ActionListener{
-
+    
     enum Action{
         REQUEST_TO_SAVE_NOTES,
         REQUEST_TO_CANCEL
@@ -45,11 +45,12 @@ public class ModalNoteTaker extends ModalView implements ActionListener{
                 }
                 break;
             case REQUEST_TO_SAVE_NOTES:
-                Condition condition = getMyController().getDescriptor().getControllerDescription().getCondition();
+                //Condition condition = getMyController().getDescriptor().getControllerDescription().getCondition();
                 //PrimaryCondition pc = (PrimaryCondition)condition;
-                PrimaryCondition pc = ((SecondaryCondition)condition).getPrimaryCondition();
-                pc.setNotes(txaNotepad.getText());
-                getMyController().getDescriptor().getViewDescription().setCondition(pc);
+                //PrimaryCondition pc = ((SecondaryCondition)getConditionOnEntry()).getPrimaryCondition();
+                
+                getConditionOnEntry().setNotes(txaNotepad.getText());
+                getMyController().getDescriptor().getViewDescription().setCondition(getConditionOnEntry());
                 ActionEvent actionEvent = new ActionEvent(
                     this,ActionEvent.ACTION_PERFORMED,
                     ViewController.PatientViewControllerActionEvent.
@@ -78,23 +79,29 @@ public class ModalNoteTaker extends ModalView implements ActionListener{
                 .getControllerDescription().getPatient();
         setTitle(patient.toString() + ": medical history notes editor");
         
-        Condition condition = getMyController().getDescriptor()
+        conditionOnEntry = getMyController().getDescriptor()
                 .getControllerDescription().getCondition();
         
         PrimaryCondition pc = null;
-        if (condition.getIsPrimaryCondition()){
+        if (getConditionOnEntry().getIsPrimaryCondition()){
             TitledBorder titledBorder = (TitledBorder)this.pnlNotepad.getBorder();
-            titledBorder.setTitle("'" + condition.getDescription() + "' notes" );
-            pc = (PrimaryCondition)condition;
+            titledBorder.setTitle("'" + getConditionOnEntry().getDescription() + "' notes" );
+            pc = (PrimaryCondition)getConditionOnEntry();
+            txaNotepad.setText(pc.getNotes());
             
-        }else if(condition.getIsSecondaryCondition()){
+        }else if(getConditionOnEntry().getIsSecondaryCondition()){
             TitledBorder titledBorder = (TitledBorder)this.pnlNotepad.getBorder();
-            SecondaryCondition sc = (SecondaryCondition)condition;
+            SecondaryCondition sc = (SecondaryCondition)getConditionOnEntry();
             pc = sc.getPrimaryCondition();
             titledBorder.setTitle("'" + pc.getDescription() 
-                    + " (" +  sc.getDescription() + ")' notes" );   
+                    + " (" +  sc.getDescription() + ")' notes" );
+            txaNotepad.setText(sc.getNotes());
         }
-        txaNotepad.setText(pc.getNotes());
+    }
+    
+    private Condition conditionOnEntry = null;
+    private Condition getConditionOnEntry(){
+        return conditionOnEntry;
     }
 
     /**

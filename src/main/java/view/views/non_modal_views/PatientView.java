@@ -277,18 +277,13 @@ public class PatientView extends View implements ActionListener{
         */
         addInternalFrameListeners();
 
-        dobDatePicker.addDateChangeListener((new PatientView.DOBDatePickerDateChangeListener()));
-        ImageIcon icon = new ImageIcon(this.getClass().getResource("/datepickerbutton1.png"));
-        JButton datePickerButton = dobDatePicker.getComponentToggleCalendarButton();
-        datePickerButton.setText("");
-        datePickerButton.setIcon(icon);
-        DatePickerSettings dateSettings = new DatePickerSettings();
-        dateSettings.setVisibleDateTextField(false);
-        dateSettings.setGapBeforeButtonPixels(0);
-        dateSettings.setFormatForDatesCommonEra(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-        dateSettings.setAllowKeyboardEditing(false);
-        dobDatePicker = new com.github.lgooddatepicker.components.DatePicker(dateSettings);
         
+        //ImageIcon icon = new ImageIcon(this.getClass().getResource("/datepickerbutton1.png"));
+       // JButton datePickerButton = dobDatePicker.getComponentToggleCalendarButton();
+        //datePickerButton.setText("");
+        //datePickerButton.setIcon(icon);
+        
+        //dobDatePicker.addDateChangeListener(new DOBDatePickerDateChangeListener());
         setBorderTitles(BorderTitles.ACTIONS);
         setBorderTitles(BorderTitles.APPOINTMENT_HISTORY);
         setBorderTitles(BorderTitles.PATIENT_ADDRESS);
@@ -355,7 +350,7 @@ public class PatientView extends View implements ActionListener{
             setViewStatus(true);
             LocalDate date = event.getNewDate();
             if (date != null) {
-                lblNameAge.setText("(" + String.valueOf(getAge(date)) + " yrs)");
+                lblNameAge.setText("<" + String.valueOf(getAge(date)) + " yrs)");
             }         
         }
     }
@@ -1159,10 +1154,15 @@ public class PatientView extends View implements ActionListener{
         cmbNameTitle = new javax.swing.JComboBox<>();
         lblNameDOB = new javax.swing.JLabel();
         dobDatePicker = new com.github.lgooddatepicker.components.DatePicker();
+        ImageIcon icon = new ImageIcon(this.getClass().getResource("/datepickerbutton1.png"));
+        JButton datePickerButton = dobDatePicker.getComponentToggleCalendarButton();
+        datePickerButton.setText("");
+        datePickerButton.setIcon(icon);
         DatePickerSettings settings = new DatePickerSettings();
         settings.setFormatForDatesCommonEra(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
         settings.setAllowKeyboardEditing(false);
         dobDatePicker.setSettings(settings);
+        dobDatePicker.addDateChangeListener(new DOBDatePickerDateChangeListener());
         ;
         lblNameAge = new javax.swing.JLabel();
         pnlOperations = new javax.swing.JPanel();
@@ -1361,6 +1361,11 @@ public class PatientView extends View implements ActionListener{
         btnFetchClinicalNotes.setMaximumSize(new java.awt.Dimension(2147483647, 82));
         btnFetchClinicalNotes.setMinimumSize(new java.awt.Dimension(99, 82));
         btnFetchClinicalNotes.setPreferredSize(new java.awt.Dimension(99, 82));
+        btnFetchClinicalNotes.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnFetchClinicalNotesActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout pnlOperationsLayout = new javax.swing.GroupLayout(pnlOperations);
         pnlOperations.setLayout(pnlOperationsLayout);
@@ -1382,15 +1387,15 @@ public class PatientView extends View implements ActionListener{
             .addGroup(pnlOperationsLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(btnCreateRecoverPatient, javax.swing.GroupLayout.PREFERRED_SIZE, 82, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(5, 5, 5)
+                .addGap(6, 6, 6)
                 .addComponent(btnUpdateRecoverPatient, javax.swing.GroupLayout.PREFERRED_SIZE, 82, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(5, 5, 5)
+                .addGap(6, 6, 6)
                 .addComponent(btnFetchClinicalNotes, javax.swing.GroupLayout.PREFERRED_SIZE, 82, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(5, 5, 5)
                 .addComponent(btnFetchScheduleForSelectedAppointment, javax.swing.GroupLayout.PREFERRED_SIZE, 83, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(5, 5, 5)
+                .addGap(6, 6, 6)
                 .addComponent(btnCloseView, javax.swing.GroupLayout.PREFERRED_SIZE, 84, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(14, 14, 14))
+                .addGap(20, 20, 20))
         );
 
         pnlAddress.setBorder(javax.swing.BorderFactory.createTitledBorder("Address"));
@@ -1599,9 +1604,7 @@ public class PatientView extends View implements ActionListener{
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(pnlOperations, javax.swing.GroupLayout.PREFERRED_SIZE, 475, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addComponent(pnlOperations, javax.swing.GroupLayout.DEFAULT_SIZE, 497, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(pnlPatientSelection, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -1641,6 +1644,10 @@ public class PatientView extends View implements ActionListener{
     private void btnCreateRecoverPatientActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCreateRecoverPatientActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_btnCreateRecoverPatientActionPerformed
+
+    private void btnFetchClinicalNotesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnFetchClinicalNotesActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btnFetchClinicalNotesActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

@@ -17,6 +17,11 @@ import java.time.LocalDateTime;
 import java.util.Iterator;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import javax.swing.ListSelectionModel;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.JTableHeader;
@@ -32,7 +37,7 @@ import view.views.view_support_classes.renderers.TableHeaderCellBorderRenderer;
  * @author colin
  */
 public class ModalPatientMedicalHistory2EditorView extends ModalView 
-        implements ActionListener, TableModelListener{
+        implements ActionListener, TableModelListener, ListSelectionListener{
     private JTable tblConditions = null;
     /**
      * 
@@ -81,6 +86,7 @@ public class ModalPatientMedicalHistory2EditorView extends ModalView
         }
     }
     
+    private boolean tableValueChangedListenerActivated = false;
     private void initialiseTable(){
         tblConditions = new JTable();
         tblConditions.setModel(new MedicalHistoryTableModel());
@@ -88,6 +94,18 @@ public class ModalPatientMedicalHistory2EditorView extends ModalView
         this.scrConditionsTable.setViewportView(tblConditions);
         ViewController.setJTableColumnProperties(
                 tblConditions, scrConditionsTable.getPreferredSize().width, 20,70);
+        ListSelectionModel lsm = this.tblConditions.getSelectionModel();
+        lsm.addListSelectionListener(this);
+        tblConditions.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (!tableValueChangedListenerActivated){
+                    int selectedRow = tblConditions.rowAtPoint(e.getPoint());
+                    if (selectedRow!=-1 && tblConditions.isRowSelected(selectedRow))
+                    tblConditions.clearSelection(); // Deselect the clicked row
+                }else tableValueChangedListenerActivated = false;
+            }
+        });
     }
     
     @Override
@@ -115,6 +133,22 @@ public class ModalPatientMedicalHistory2EditorView extends ModalView
     }
     private void setParentPrimaryCondition(PrimaryCondition value){
         parentPrimaryCondition = value;
+    }
+    
+    @Override
+    public void valueChanged(ListSelectionEvent e){
+        if (!e.getValueIsAdjusting()) {   // Ensure the event is not fired multiple times
+            int selectedRow = tblConditions.getSelectedRow();
+            if (selectedRow!=-1){
+                tableValueChangedListenerActivated = true;
+                MedicalHistoryTableModel model = 
+                        (MedicalHistoryTableModel)tblConditions.getModel();
+                SecondaryCondition sc = 
+                        (SecondaryCondition) model.getElementAt(selectedRow);
+                
+                if(!sc.getState()) tblConditions.clearSelection();
+            }
+        }
     }
     
     @Override
@@ -185,6 +219,13 @@ public class ModalPatientMedicalHistory2EditorView extends ModalView
             case MAKE_VIEW_VISIBLE:
                 this.setVisible(true);
                 this.tblConditions.clearSelection();
+                break;
+            case CLOSE_VIEW_REQUEST_RECEIVED:
+                try{
+                    this.setClosed(true);   
+                }catch (PropertyVetoException ex){
+                    
+                }
                 break;
         }
     }

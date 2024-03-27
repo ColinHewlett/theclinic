@@ -71,6 +71,7 @@ public class ModalPatientMedicalHistory1EditorView extends ModalView
         btnCloseView.addActionListener(this); 
         
         initialiseTable();
+        
         populateConditionsTable(getMyController()
                 .getDescriptor().getControllerDescription().getCondition());
     }
@@ -84,6 +85,7 @@ public class ModalPatientMedicalHistory1EditorView extends ModalView
         }
     }
     
+    private boolean tableValueChangedListenerActivated = false;
     private void initialiseTable(){
         tblConditions = new JTable();
         tblConditions.setModel(new MedicalHistoryTableModel());
@@ -95,6 +97,17 @@ public class ModalPatientMedicalHistory1EditorView extends ModalView
         ListSelectionModel lsm = this.tblConditions.getSelectionModel();
         lsm.addListSelectionListener(this);
         this.btnEditNotes.setText("<html><center>Edit</center><center>notes for</center><center>selection</center></html>");
+        
+        tblConditions.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (!tableValueChangedListenerActivated){
+                    int selectedRow = tblConditions.rowAtPoint(e.getPoint());
+                    if (selectedRow!=-1 && tblConditions.isRowSelected(selectedRow))
+                    tblConditions.clearSelection(); // Deselect the clicked row
+                }else tableValueChangedListenerActivated = false;
+            }
+        });
     }
     
     @Override
@@ -102,11 +115,12 @@ public class ModalPatientMedicalHistory1EditorView extends ModalView
         if (!e.getValueIsAdjusting()) {   // Ensure the event is not fired multiple times
             int selectedRow = tblConditions.getSelectedRow();
             if (selectedRow!=-1){
-                //tableValueChangedListenerActivated = true;
+                tableValueChangedListenerActivated = true;
                 MedicalHistoryTableModel model = 
                         (MedicalHistoryTableModel)tblConditions.getModel();
                 PrimaryCondition pc = 
                         (PrimaryCondition) model.getElementAt(selectedRow);
+
                 if (!pc.getSecondaryCondition().get().isEmpty()){
                     getMyController().getDescriptor().getViewDescription().setCondition(pc);
                     ActionEvent actionEvent = new ActionEvent(
@@ -114,7 +128,7 @@ public class ModalPatientMedicalHistory1EditorView extends ModalView
                         ViewController.PatientViewControllerActionEvent.
                                 PATIENT_MEDICAL_HISTORY_2_EDITOR_VIEW_REQUEST.toString());
                     this.getMyController().actionPerformed(actionEvent);
-                }
+                }else if(!pc.getState()) tblConditions.clearSelection();
             }
         }
     }
@@ -197,6 +211,13 @@ public class ModalPatientMedicalHistory1EditorView extends ModalView
             case MAKE_VIEW_VISIBLE:
                 this.setVisible(true);
                 this.tblConditions.clearSelection();
+                break;
+            case CLOSE_VIEW_REQUEST_RECEIVED:
+                try{
+                    this.setClosed(true);   
+                }catch (PropertyVetoException ex){
+                    
+                }
                 break;
         }
     }
