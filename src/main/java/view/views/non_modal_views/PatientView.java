@@ -259,31 +259,11 @@ public class PatientView extends View implements ActionListener{
         cmbPatientSelector.setActionCommand(Actions.REQUEST_PATIENT.toString());
         cmbPatientSelector.addActionListener(this);
         
-        //tblAppointmentHistory = new javax.swing.JTable();
-        //tblAppointmentHistory.addMouseListener(mouseListener);
-        //tblAppointmentHistory.setModel(new Appointments3ColumnTableModel());
-        //scrAppointmentHistory = new javax.swing.JScrollPane();
         
-        /*
-        scrAppointmentHistory.setPreferredSize(new Dimension(
-                710,100));*/
-        
-        //scrAppointmentHistory.setRowHeaderView(null);
-        //scrAppointmentHistory.setViewportView(tblAppointmentHistory);
-        /*
-        ViewController.setJTableColumnProperties(tblAppointmentHistory, 
-                scrAppointmentHistory.getPreferredSize().width, 
-                20,20,60);
-        */
         addInternalFrameListeners();
 
         
-        //ImageIcon icon = new ImageIcon(this.getClass().getResource("/datepickerbutton1.png"));
-       // JButton datePickerButton = dobDatePicker.getComponentToggleCalendarButton();
-        //datePickerButton.setText("");
-        //datePickerButton.setIcon(icon);
-        
-        //dobDatePicker.addDateChangeListener(new DOBDatePickerDateChangeListener());
+       
         setBorderTitles(BorderTitles.ACTIONS);
         setBorderTitles(BorderTitles.APPOINTMENT_HISTORY);
         setBorderTitles(BorderTitles.PATIENT_ADDRESS);
