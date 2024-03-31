@@ -286,4 +286,57 @@ public class TemplateReader {
             }
             return thePrimaryCondition;
         }
+        
+        public static Treatment extract(Treatment theTreatment)throws TemplateReaderException{
+            Treatment treatment = null;
+            boolean isElementFound = false;
+            Element eSection = null;
+            Element pElement;
+            Element sElement;
+
+            Element element = getSelectedRootFromTemplate();
+            NodeList pNodes = element.getElementsByTagName("section");
+            if (pNodes.getLength() == 0){
+                String message = "Template element tagged 'section' not found in "
+                        + "TemplateReader::extract(Treatment) method";
+                throw new TemplateReaderException(message,
+                        TemplateReaderException.ExceptionType.ELEMENT_NOT_FOUND_IN_TEMPLATE);
+            }
+            
+            for(int pIndex = 0; pIndex < pNodes.getLength(); pIndex++){
+                if((pNodes.item(pIndex).getNodeType() == Node.ELEMENT_NODE)){
+                    eSection = (Element)pNodes.item(pIndex);
+                    if (eSection.getAttribute("id").equals(getSectionId())){
+                        isElementFound = true;
+                        break;
+                    }
+                }
+            }
+            if (!isElementFound){
+                String message = "Unable to locate sectionId = '" + getSectionId() 
+                        + "' in TemplateReader::extract(Treatment)";
+                throw new TemplateReaderException(message, 
+                        TemplateReaderException.ExceptionType.ELEMENT_NOT_FOUND_IN_TEMPLATE);
+            }
+            
+            pNodes = eSection.getElementsByTagName("primary");
+            if (pNodes.getLength() == 0){
+                String message = "Template element tagged 'primary' not found in "
+                        +  "TemplateReader::extract(Treatment) method";
+                throw new TemplateReaderException(message,
+                        TemplateReaderException.ExceptionType.ELEMENT_NOT_FOUND_IN_TEMPLATE);
+            }
+            for(int pIndex = 0; pIndex < pNodes.getLength(); pIndex++){
+                if((pNodes.item(pIndex).getNodeType() == Node.ELEMENT_NODE)){
+                    pElement = (Element)pNodes.item(pIndex);
+                    treatment = new Treatment();
+                    treatment.setDescription(pElement.getAttribute("id"));
+                }
+                //adds this treatment to the collection of extracted treatment objects
+                theTreatment.get().add(treatment);
+            }
+            return theTreatment;
+        }
     }
+
+

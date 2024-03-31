@@ -352,6 +352,28 @@ public class DesktopViewController extends ViewController{
                 }
                 break;
                 
+            case MIGRATE_TREATMENT_DATA:
+                try{
+                    Treatment treatment = 
+                            extractTreatmentFromTemplate();
+                    //setExtractedTreatmentFromTemplate(treatment);
+                    if (PMSStore.isSelected()) 
+                           startBackgroundThread(treatment, this);
+                }catch (TemplateReaderException ex){
+                    displayErrorMessage(ex.getMessage() + "\nTemplateReaderException handled"
+                            + " in case MIGRATE_TREATMENT_DATA inside "
+                            + "doExportProgressViewControllerAction()",
+                            "Desktop View Controller error",
+                            JOptionPane.WARNING_MESSAGE);
+                }catch (StoreException ex){
+                    displayErrorMessage(ex.getMessage() + "\nStoreException handled"
+                            + " in case MIGRATE_PATIENT_MEDICAL_HISTORY inside "
+                            + "doExportProgressViewControllerAction()",
+                            "Desktop View Controller error",
+                            JOptionPane.WARNING_MESSAGE);
+                }
+                break;
+                
             case MIGRATE_PATIENT_DATA:
                 try{
                     if (PMSStore.isSelected()) 
@@ -376,6 +398,7 @@ public class DesktopViewController extends ViewController{
                             JOptionPane.WARNING_MESSAGE);    
                 }
                 break;
+            /*28/03/2024
             case MIGRATE_PATIENT_NOTE_DATA:
                 try{
                     if (PMSStore.isSelected()) 
@@ -387,7 +410,7 @@ public class DesktopViewController extends ViewController{
                             "Desktop View Controller error",
                             JOptionPane.WARNING_MESSAGE);    
                 }
-                break;   
+                break;  */ 
             case MIGRATE_SURGERY_DAYS_ASSIGNMENT_DATA:
                 SurgeryDaysAssignment surgeryDaysAssignment = new SurgeryDaysAssignment();       
                 try{
@@ -471,8 +494,9 @@ public class DesktopViewController extends ViewController{
                             getDescriptor()
                     );
                     break;
+                /*
                 case COUNT_PATIENT_NOTE_TABLE_REQUEST:
-                    theCount = doRequestCountForPatientNoteTable();
+                    theCount = COUNT_CLINIC_NOTE_TABLE_REQUEST();
                     getDescriptor().getControllerDescription().setTableRowCount(theCount);
                     firePropertyChangeEvent(
                             ViewController.DesktopViewControllerPropertyChangeEvent.
@@ -482,6 +506,32 @@ public class DesktopViewController extends ViewController{
                             null,
                             getDescriptor()
                     );
+                    break;
+                    */
+                case COUNT_CLINIC_NOTE_TABLE_REQUEST:
+                    theCount = doRequestCountForClinicNoteTable();
+                    getDescriptor().getControllerDescription().setTableRowCount(theCount);
+                    firePropertyChangeEvent(
+                            ViewController.DesktopViewControllerPropertyChangeEvent.
+                                    CLINIC_NOTE_TABLE_COUNT_RECEIVED.toString(),
+                            (PropertyChangeListener)e.getSource(),
+                            this,
+                            null,
+                            getDescriptor()
+                    );
+                    break;
+                case COUNT_TREATMENT_TABLE_REQUEST:
+                    theCount = doRequestCountForTreatmentTable();
+                    getDescriptor().getControllerDescription().setTableRowCount(theCount);
+                    firePropertyChangeEvent(
+                            ViewController.DesktopViewControllerPropertyChangeEvent.
+                                    TREATMENT_TABLE_COUNT_RECEIVED.toString(),
+                            (PropertyChangeListener)e.getSource(),
+                            this,
+                            null,
+                            getDescriptor()
+                    );
+                    break;
                 case COUNT_PRIMARY_CONDITION_TABLE_REQUEST:
                     theCount = doRequestCountForPrimaryConditionTable();
                     getDescriptor().getControllerDescription().setTableRowCount(theCount);
@@ -899,6 +949,19 @@ public class DesktopViewController extends ViewController{
                                 }
                             }
                         dbfRecords.clear();  
+                    
+                    }else if (entity.getIsTreatment()){
+                        Treatment treatment = (Treatment)entity;
+                        count = 1;
+                        recordCount = 0;
+                        for(Treatment t : treatment.get()){
+                            t.insert();
+                        }
+                        recordCount++;
+                        if (recordCount <= count){
+                            Integer percentage = recordCount*100/count;
+                            setProgress(percentage);
+                        }
                         
                     }else if (entity.getIsPrimaryCondition()){
                         /**
@@ -941,6 +1004,7 @@ public class DesktopViewController extends ViewController{
                         }//end of dbfRecords iteration
                         dbfRecords.clear();
                     }
+                    /*28/03/2024
                     else if(entity.getIsPatientNote()){
                         recordCount = 0;
                         Appointment appointment = new Appointment();
@@ -957,7 +1021,7 @@ public class DesktopViewController extends ViewController{
                                 setProgress(percentage);
                             }
                         }
-                    }else if (entity.getIsSecondaryCondition()){
+                    }*/else if (entity.getIsSecondaryCondition()){
                         /**
                          * entity = SecondaryCondition
                          * -- SecondaryCondition.getPrimaryCondition
@@ -1061,6 +1125,10 @@ public class DesktopViewController extends ViewController{
                     event = DesktopViewControllerActionEvent.MIGRATE_SECONDARY_CONDITION_DATA_COMPLETED;
                 }
                 
+                if (entity.getIsTreatment()){
+                    event = DesktopViewControllerActionEvent.MIGRATE_TREATMENT_DATA_COMPLETED;
+                }
+                
                 DataMigrationProgressViewController evc = importProgressViewControllers.get(0);
                 if (event!=null){
                     ActionEvent actionEvent = new ActionEvent(
@@ -1126,6 +1194,7 @@ public class DesktopViewController extends ViewController{
         return result;
     }
     
+    /*
     private Point doRequestCountForPatientNoteTable(){
         Point result = null;
         //07/08/2022
@@ -1136,6 +1205,36 @@ public class DesktopViewController extends ViewController{
         }catch (StoreException ex){
             displayErrorMessage(
                     ex.getMessage() + "\n Exception handled in doPatientNoteTableCountRequest()",
+                    "Desktop View Controller error", JOptionPane.WARNING_MESSAGE);
+        }
+        return result;
+    }
+    */
+    private Point doRequestCountForClinicNoteTable(){
+        Point result = null;
+        //07/08/2022
+        ClinicNote clinicNote = new ClinicNote();
+        clinicNote.setScope(Entity.Scope.ALL);
+        try{
+            result = clinicNote.count();
+        }catch (StoreException ex){
+            displayErrorMessage(
+                    ex.getMessage() + "\n Exception handled in doClinicNoteTableCountRequest()",
+                    "Desktop View Controller error", JOptionPane.WARNING_MESSAGE);
+        }
+        return result;
+    }
+    
+    private Point doRequestCountForTreatmentTable(){
+        Point result = null;
+        //07/08/2022
+        Treatment treatment = new Treatment();
+        treatment.setScope(Entity.Scope.ALL);
+        try{
+            result = treatment.count();
+        }catch (StoreException ex){
+            displayErrorMessage(
+                    ex.getMessage() + "\n Exception handled in doTreatmentTableCountRequest()",
                     "Desktop View Controller error", JOptionPane.WARNING_MESSAGE);
         }
         return result;
@@ -1326,7 +1425,7 @@ public class DesktopViewController extends ViewController{
             displayErrorMessage(ex.getMessage(),
                     "Desktop view controller",JOptionPane.WARNING_MESSAGE);
         }
-        
+        /*28/03/2024
         try{
             PatientNote patientNote = new PatientNote();
             patientNote.setScope(Entity.Scope.ALL);
@@ -1334,7 +1433,7 @@ public class DesktopViewController extends ViewController{
         }catch (StoreException ex){
             displayErrorMessage(ex.getMessage(),
                     "Desktop view controller",JOptionPane.WARNING_MESSAGE);
-        }
+        }*/
         
         try{
             Patient patient = new Patient();
@@ -1402,14 +1501,14 @@ public class DesktopViewController extends ViewController{
                     TemplateReader.extract(new HashMap<String,String>()));
             Class.forName("net.ucanaccess.jdbc.UcanaccessDriver");
             if ((SystemDefinition.getPMSDebug().equals("ENABLED"))){
-                PatientNote patientNote = new PatientNote();
+                /*28/03/2024PatientNote patientNote = new PatientNote();
                 try{
                     patientNote.createNotesFromAppointmentTable();
                 }catch(StoreException ex){
                     displayErrorMessage(ex.getMessage() + "\n",
                             "Raised in Desktop view controller",
                             JOptionPane.WARNING_MESSAGE);
-                }
+                }*/
                 System.exit(0);
             }
             if (SystemDefinition.getPMSOperationMode().equals("DATA_MIGRATION_ENABLED"))
@@ -1548,7 +1647,7 @@ public class DesktopViewController extends ViewController{
                                 Entity.createPMSDatabase();
                                 Patient patientTable = new Patient();
                                 patientTable.create();
-                                PatientNote patientNoteTable = new PatientNote();
+                                /*28/03/2024PatientNote patientNoteTable = new PatientNote();*/
                                 patientTable.create();
                                 Notification patientNotificationTable = new Notification();
                                 patientNotificationTable.create();

@@ -46,8 +46,8 @@ import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.JTextField;
 import javax.swing.border.TitledBorder;
-import model.PatientNote;
-import view.views.view_support_classes.renderers.AppointmentsTablePatientNoteRenderer;
+/*28/03/2024import model.PatientNote;*/
+/*28/03/2024import view.views.view_support_classes.renderers.AppointmentsTablePatientNoteRenderer;*/
 /**
  *
  * @author colin
@@ -855,7 +855,7 @@ public class PatientView extends View implements ActionListener{
             }
             this.tblAppointmentHistory.setDefaultRenderer(Duration.class, new AppointmentsTableDurationRenderer());
             this.tblAppointmentHistory.setDefaultRenderer(LocalDateTime.class, new AppointmentsTableLocalDateTimeRenderer());;
-            this.tblAppointmentHistory.setDefaultRenderer(PatientNote.class, new AppointmentsTablePatientNoteRenderer());
+            /*28/03/2024this.tblAppointmentHistory.setDefaultRenderer(PatientNote.class, new AppointmentsTablePatientNoteRenderer());*/
             //this.tblAppointmentHistory.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
             
             //this.tblAppointmentHistory.setPreferredScrollableViewportSize(tblAppointmentHistory.getPreferredSize());

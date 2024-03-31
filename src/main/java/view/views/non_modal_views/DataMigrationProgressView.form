@@ -22,31 +22,44 @@
   <Layout>
     <DimensionLayout dim="0">
       <Group type="103" groupAlignment="0" attributes="0">
-          <Group type="102" attributes="0">
-              <EmptySpace max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="0" attributes="0">
-                  <Component id="barPatients" pref="456" max="32767" attributes="0"/>
-                  <Component id="barAppointments" alignment="0" max="32767" attributes="0"/>
-                  <Component id="barPrimaryCondition" alignment="0" max="32767" attributes="0"/>
-                  <Component id="barSecondaryCondition" alignment="0" max="32767" attributes="0"/>
+          <Group type="102" alignment="1" attributes="0">
+              <Group type="103" groupAlignment="1" attributes="0">
                   <Group type="102" attributes="0">
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="barTreatment" max="32767" attributes="0"/>
+                  </Group>
+                  <Group type="102" alignment="0" attributes="0">
+                      <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" attributes="0">
-                          <Component id="lblPatientsProgressBar" alignment="0" min="-2" max="-2" attributes="0"/>
-                          <Component id="lblAppointmentsProgressBar" alignment="0" min="-2" max="-2" attributes="0"/>
-                          <Component id="lblPrimaryCondition" alignment="0" min="-2" max="-2" attributes="0"/>
-                          <Component id="lblSecondaryCondition" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Component id="barPatients" pref="456" max="32767" attributes="0"/>
+                          <Component id="barAppointments" alignment="0" max="32767" attributes="0"/>
+                          <Component id="barPrimaryCondition" alignment="0" max="32767" attributes="0"/>
+                          <Component id="barSecondaryCondition" alignment="0" max="32767" attributes="0"/>
+                          <Group type="102" attributes="0">
+                              <Group type="103" groupAlignment="0" attributes="0">
+                                  <Component id="lblPatientsProgressBar" alignment="0" min="-2" max="-2" attributes="0"/>
+                                  <Component id="lblAppointmentsProgressBar" alignment="0" min="-2" max="-2" attributes="0"/>
+                                  <Component id="lblPrimaryCondition" alignment="0" min="-2" max="-2" attributes="0"/>
+                                  <Component id="lblSecondaryCondition" alignment="0" min="-2" max="-2" attributes="0"/>
+                              </Group>
+                              <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                          </Group>
                       </Group>
-                      <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                  </Group>
+                  <Group type="102" alignment="0" attributes="0">
+                      <EmptySpace min="-2" pref="72" max="-2" attributes="0"/>
+                      <Component id="btnStart" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace max="32767" attributes="0"/>
+                      <Component id="btnClose" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace min="-2" pref="79" max="-2" attributes="0"/>
                   </Group>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
           </Group>
           <Group type="102" alignment="0" attributes="0">
-              <EmptySpace min="-2" pref="68" max="-2" attributes="0"/>
-              <Component id="btnStart" min="-2" max="-2" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
+              <Component id="lblTreatment" min="-2" max="-2" attributes="0"/>
               <EmptySpace max="32767" attributes="0"/>
-              <Component id="btnClose" min="-2" max="-2" attributes="0"/>
-              <EmptySpace min="-2" pref="97" max="-2" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -69,12 +82,16 @@
               <Component id="lblSecondaryCondition" min="-2" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
               <Component id="barSecondaryCondition" min="-2" pref="19" max="-2" attributes="0"/>
-              <EmptySpace type="separate" max="-2" attributes="0"/>
+              <EmptySpace pref="13" max="32767" attributes="0"/>
+              <Component id="lblTreatment" min="-2" max="-2" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
+              <Component id="barTreatment" min="-2" pref="19" max="-2" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
                   <Component id="btnStart" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="btnClose" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
-              <EmptySpace pref="23" max="32767" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -132,6 +149,16 @@
       </Properties>
     </Component>
     <Component class="javax.swing.JProgressBar" name="barSecondaryCondition">
+      <AuxValues>
+        <AuxValue name="JavaCodeGenerator_InitCodePre" type="java.lang.String" value="barSecondaryCondition.setMinimum(0);&#xa;barSecondaryCondition.setMaximum(100);&#xa;barSecondaryCondition.setStringPainted(true);"/>
+      </AuxValues>
+    </Component>
+    <Component class="javax.swing.JLabel" name="lblTreatment">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Treatment"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JProgressBar" name="barTreatment">
       <AuxValues>
         <AuxValue name="JavaCodeGenerator_InitCodePre" type="java.lang.String" value="barSecondaryCondition.setMinimum(0);&#xa;barSecondaryCondition.setMaximum(100);&#xa;barSecondaryCondition.setStringPainted(true);"/>
       </AuxValues>

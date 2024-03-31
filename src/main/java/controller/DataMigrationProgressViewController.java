@@ -121,6 +121,32 @@ public class DataMigrationProgressViewController extends ViewController{
                 break;
                 
             case MIGRATE_SECONDARY_CONDITION_DATA_COMPLETED:
+                firePropertyChangeEvent(
+                        DataMigrationViewControllerPropertyChangeEvent.
+                                    PREPARE_FOR_RECEIPT_OF_TREATMENT_MIGRATION_PROGRESS.toString(),
+                        getView(),
+                        this,
+                        null,
+                        null
+                );
+                break;
+            
+                /*
+            case MIGRATE_SECONDARY_CONDITION_DATA_COMPLETED:
+                actionEvent = new ActionEvent(
+                    this,ActionEvent.ACTION_PERFORMED,
+                    ViewController.DesktopViewControllerActionEvent.MIGRATE_TREATMENT_DATA.toString());
+                getMyController().actionPerformed(actionEvent);
+                firePropertyChangeEvent(
+                        DataMigrationViewControllerPropertyChangeEvent
+                                .DATA_MIGRATION_COMPLETED.toString(),
+                        getView(),
+                        this,
+                        null,
+                        null
+                );*/
+                
+            case MIGRATE_TREATMENT_DATA_COMPLETED:
                 actionEvent = new ActionEvent(
                     this,ActionEvent.ACTION_PERFORMED,
                     ViewController.DesktopViewControllerActionEvent.MIGRATE_SURGERY_DAYS_ASSIGNMENT_DATA.toString());
@@ -192,6 +218,13 @@ public class DataMigrationProgressViewController extends ViewController{
                     actionEvent = new ActionEvent(
                         this,ActionEvent.ACTION_PERFORMED,
                         ViewController.DesktopViewControllerActionEvent.MIGRATE_SECONDARY_CONDITION_DATA.toString());
+                    getMyController().actionPerformed(actionEvent);
+                    break;
+                    
+                case READY_FOR_RECEIPT_OF_TREATMENT_MIGRATION_PROGRESS:
+                    actionEvent = new ActionEvent(
+                        this,ActionEvent.ACTION_PERFORMED,
+                        ViewController.DesktopViewControllerActionEvent.MIGRATE_TREATMENT_DATA.toString());
                     getMyController().actionPerformed(actionEvent);
                     break;
 

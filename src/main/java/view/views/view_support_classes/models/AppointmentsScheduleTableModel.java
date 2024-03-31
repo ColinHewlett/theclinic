@@ -7,7 +7,7 @@ package view.views.view_support_classes.models;
 
 import model.Appointment;
 import model.Patient;
-import model.PatientNote;
+/*28/03/2024import model.PatientNote;*/
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -36,7 +36,7 @@ public class AppointmentsScheduleTableModel extends DefaultTableModel{
         LocalTime.class, 
         LocalTime.class, 
         Duration.class, 
-        PatientNote.class,
+        /*28/03/2024PatientNote*/String.class,
         Boolean.class};
 
     public AppointmentsScheduleTableModel(){
@@ -152,7 +152,7 @@ public class AppointmentsScheduleTableModel extends DefaultTableModel{
                             result = duration;
                             break;
                         case Notes:
-                            result = appointment.getPatientNote(); 
+                            result = /*28/03/2024appointment.getPatientNote()*/""; 
                             break;
                         case Reminded:
                             result = contactStatus;

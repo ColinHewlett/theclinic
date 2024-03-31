@@ -9,11 +9,11 @@ import model.SystemDefinition;
 import view.views.view_support_classes.renderers.AppointmentsTableDurationRenderer;
 import view.views.view_support_classes.renderers.AppointmentsTableLocalDateTimeRenderer;
 import view.views.view_support_classes.renderers.AppointmentsTablePatientRenderer;
-import view.views.view_support_classes.renderers.AppointmentsTablePatientNoteRenderer;
+/*28/03/2024import view.views.view_support_classes.renderers.AppointmentsTablePatientNoteRenderer;*/
 import view.views.view_support_classes.models.AppointmentsScheduleTableModel;
 import model.Appointment;
 import model.Patient;
-import model.PatientNote;
+/*28/03/2024import model.PatientNote;*/
 import controller.ViewController;
 import view.views.view_support_classes.AppointmentDateVetoPolicy;
 import view.views.view_support_classes.renderers.TableHeaderCellBorderRenderer;
@@ -1104,7 +1104,7 @@ public class ScheduleView extends View{
                 to = ((LocalTime)model.getValueAt(row, toColumn)).format(DateTimeFormatter.ofPattern("HH:mm"));
                 Patient p = (Patient)model.getValueAt(row, patientColumn);
                 //String notes = (String)model.getValueAt(row, notesColumn);
-                PatientNote patientNote = (PatientNote)model.getValueAt(row, notesColumn);
+                /*28/03/2024PatientNote patientNote = (PatientNote)model.getValueAt(row, notesColumn);*/
                 //if (model.getValueAt(row, patientColumn)==null) {
                 if (p==null){
                     patient = "AVAILABLE SLOT";
@@ -1119,14 +1119,14 @@ public class ScheduleView extends View{
                         centreString(PATIENT_WIDTH, patient) +
                         centreString(FROM_WIDTH, from) +
                         centreString(TO_WIDTH, to) +
-                        leftAlignString(NOTES_WIDTH, patientNote.getNote()));   
+                        leftAlignString(NOTES_WIDTH, /*28/03/2024patientNote.getNote()*/""));   
                 }else {
                     patient = model.getValueAt(row,patientColumn).toString();
                     stringToPrint = stringToPrint + String.format(
                         leftAlignString(PATIENT_WIDTH, patient) +
                         centreString(FROM_WIDTH, from) +
                         centreString(TO_WIDTH, to) +
-                        leftAlignString(NOTES_WIDTH, patientNote.getNote()));
+                        leftAlignString(NOTES_WIDTH, /*28/03/2024patientNote.getNote()*/""));
                 }
                 stringToPrint = stringToPrint + "\n";
             }
@@ -1945,7 +1945,7 @@ public class ScheduleView extends View{
         this.tblAppointments.setDefaultRenderer(Duration.class, new AppointmentsTableDurationRenderer());
         this.tblAppointments.setDefaultRenderer(LocalDateTime.class, new AppointmentsTableLocalDateTimeRenderer());
         this.tblAppointments.setDefaultRenderer(Patient.class, new AppointmentsTablePatientRenderer());
-        this.tblAppointments.setDefaultRenderer(PatientNote.class, new AppointmentsTablePatientNoteRenderer());
+        /*28/03/2024this.tblAppointments.setDefaultRenderer(PatientNote.class, new AppointmentsTablePatientNoteRenderer());*/
         //this.tblAppointments.setModel(tableModel);
         //this.tblAppointments.setRowSelectionAllowed(false);
         this.tblAppointments.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);

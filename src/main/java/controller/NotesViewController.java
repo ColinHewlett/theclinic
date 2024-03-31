@@ -14,11 +14,11 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
 import model.Entity;
-import model.PatientNote;
+/*28/03/2024import model.PatientNote;*/
 import repository.StoreException;
 import view.View;
 import view.views.modal_views.ModalView;
-import view.views.non_modal_views.NotesView;
+/*28/03/2024import view.views.non_modal_views.NotesView;*/
 import view.views.non_modal_views.DesktopView;
 
 /**
@@ -112,6 +112,7 @@ public class NotesViewController extends ViewController{
     }
     
     private void doPrimaryViewActionRequest(ActionEvent e){
+        /*28/03/2024
         ActionEvent actionEvent = null;
         boolean isPatientSpecified = true;
         Patient patient = new Patient();
@@ -200,7 +201,7 @@ public class NotesViewController extends ViewController{
                     + "Raised in PatientViewController::doPatientNotesEditorViewChange()",
                     "Patient view controller error",
                     JOptionPane.WARNING_MESSAGE);
-        }
+        }*/
     }
     
     private void doSecondaryViewActionRequest(ActionEvent e){

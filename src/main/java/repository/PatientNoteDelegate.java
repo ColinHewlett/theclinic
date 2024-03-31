@@ -4,7 +4,7 @@
  */
 package repository;
 
-import model.PatientNote;
+import patient_view_original_class.PatientNote;
 /**
  *
  * @author colin

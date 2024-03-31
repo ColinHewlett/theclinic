@@ -6,7 +6,7 @@
 package view.views.view_support_classes.models;
 
 import model.Appointment;
-import model.PatientNote;
+/*28/03/2024import model.PatientNote;*/
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -25,7 +25,7 @@ public class Appointments3ColumnTableModel extends AbstractTableModel{
     private final Class[] columnClass = new Class[] {
         LocalDateTime.class, 
         Duration.class,
-        PatientNote.class};
+        /*28/03/2024PatientNote*/String.class};
     
     public ArrayList<Appointment> getAppointments(){
         return appointments;
@@ -83,7 +83,7 @@ public class Appointments3ColumnTableModel extends AbstractTableModel{
                             result = appointment.getStart();
                             break;
                         case Notes:
-                            result = appointment.getPatientNote();
+                            result = /*28/03/2024appointment.getPatientNote()*/"";
                             break;
                     }
                     break;

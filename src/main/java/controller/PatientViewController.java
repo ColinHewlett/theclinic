@@ -12,7 +12,7 @@ import model.Entity.Scope;
 import view.views.non_modal_views.DesktopView;
 import view.View;
 import view.views.modal_views.ModalView;
-import view.views.modal_views.ModalPatientNotesEditorView;
+/*28/03/2024import view.views.modal_views.ModalPatientNotesEditorView;*/
 import view.views.modal_views.ModalPatientMedicalHistory1EditorView;
 import repository.StoreException;//01/03/2023
 import static controller.ViewController.displayErrorMessage;
@@ -548,6 +548,7 @@ public class PatientViewController extends ViewController {
                 patient.insert();
                 patient.setScope(Scope.SINGLE);
                 patient = patient.read();
+                /*28/03/2024
                 PatientNote patientNote = new PatientNote(patient);
                 patientNote.setDatestamp(LocalDateTime.now());
                 patientNote.setNote(patient.getName()
@@ -555,9 +556,9 @@ public class PatientViewController extends ViewController {
                         + patient.getName().getForenames() 
                         + " " + patient.getName().getSurname() 
                         + " registered as a new patient on the system.");
-                patientNote.setLastUpdated(LocalDateTime.now());
+                patientNote.setLastUpdated(LocalDateTime.now());*/
                 patient.setScope(Entity.Scope.ALL);
-                patientNote.insert();
+                /*28/03/2024patientNote.insert();*/
                 patient.read(); 
                 getDescriptor().getControllerDescription().setPatients(patient.get());
                 firePropertyChangeEvent(
@@ -756,10 +757,10 @@ public class PatientViewController extends ViewController {
                                     " from " + fromTime.format(DateTimeFormatter.ofPattern("HH:mm")) +
                                     " to " + toTime.format(DateTimeFormatter.ofPattern("HH:mm")) +
                                     " has been cancelled";            
-                        }else{//assume no collision returning this appointment to schedule
+                        }/*28/03/2024else{//assume no collision returning this appointment to schedule
                             PatientNote patientNote = a.getPatientNote();
                             patientNote.recover();
-                        }
+                        }*/
                     }
                 } 
                 //patient.setScope(Scope.DELETED);
@@ -861,6 +862,7 @@ public class PatientViewController extends ViewController {
         }
     }
     
+    /*28/03/2024
     private void doPatientNotesEditorViewChange(ActionEvent e){
         PatientNote patientNote = getDescriptor().getViewDescription().getPatientNote();
         try{
@@ -891,7 +893,7 @@ public class PatientViewController extends ViewController {
                     "Patient view controller error",
                     JOptionPane.WARNING_MESSAGE);
         }
-    }
+    }*/
     
     private View patientMedicalHistory2View = null;
     private void setPatientMedicalHistory2View(View view){

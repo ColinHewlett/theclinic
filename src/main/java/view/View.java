@@ -105,9 +105,10 @@ public class View extends JInternalFrame
             case NOTIFICATION_VIEW:
                 setView(makeView(new NotificationView(viewer, controller, desktopView)));
                 break;
+            /*28/03/2024
             case NOTES_VIEW:
                 setView(makeView(new NotesView(viewer, controller, desktopView)));
-                break;
+                break;*/
             case SCHEDULE_VIEW:
                 setView(makeView(new ScheduleView(viewer, controller, desktopView)));
                 break;

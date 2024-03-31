@@ -2,8 +2,9 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package view.views.non_modal_views;
+package patient_view_original_class;
 
+import view.views.non_modal_views.DesktopView;
 import com.github.lgooddatepicker.components.DatePickerSettings;
 import com.github.lgooddatepicker.components.DateTimePicker;
 import com.github.lgooddatepicker.components.TimePickerSettings;
@@ -38,9 +39,9 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumnModel;
 import model.Patient;
-import model.PatientNote;
+/*28/03/2024import model.PatientNote;*/
 import view.View;
-import view.views.modal_views.ModalPatientNotesEditorView;
+/*28/03/2024import view.views.modal_views.ModalPatientNotesEditorView;*/
 import view.views.view_support_classes.models.PatientNote2ColumnTableModel;
 import view.views.view_support_classes.renderers.TableHeaderCellBorderRenderer;
 
@@ -120,10 +121,11 @@ public class NotesView extends View {
     }
     
     private void doRefreshNoteIndex(){
+        /*28/03/2024
         populateNotesIndexTable(getMyController()
                 .getDescriptor()
                 .getControllerDescription()
-                .getPatientNotes());
+                .getPatientNotes());*/
     }
 
     private enum State{OPEN,SHUT};
@@ -269,7 +271,7 @@ public class NotesView extends View {
             int row;
             @Override
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                if (!model.getPatientNotes().isEmpty()){//any rows in the table
+                /*28/03/2024if (!model.getPatientNotes().isEmpty()){//any rows in the table
                     row = tblNotesIndex.getSelectedRow();
                     if ((row+1) < model.getPatientNotes().size()){
                         tblNotesIndex.setRowSelectionInterval(row+1,row+1);
@@ -277,14 +279,14 @@ public class NotesView extends View {
                                 new Rectangle(tblNotesIndex.
                                         getCellRect(row+1, 0, true)));
                     }
-                }
+                }*/
             }
         });
         this.btnPreviousNote.addActionListener(new java.awt.event.ActionListener() {
             int row;
             @Override
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                if (!model.getPatientNotes().isEmpty()){//any rows in the table
+                /*28/03/2024if (!model.getPatientNotes().isEmpty()){//any rows in the table
                     row = tblNotesIndex.getSelectedRow();
                     if ((row-1) >= 0){
                         tblNotesIndex.setRowSelectionInterval(row-1,row-1);
@@ -294,7 +296,7 @@ public class NotesView extends View {
                                 new Rectangle(tblNotesIndex.
                                         getCellRect(row-1, 0, true)));
                     }
-                }
+                }*/
             }
         });
     }
@@ -353,7 +355,7 @@ public class NotesView extends View {
         if (row!=null){
             PatientNote2ColumnTableModel model = 
                     (PatientNote2ColumnTableModel)tblNotesIndex.getModel();
-            setPatientNote((PatientNote)model.getElementAt(row));
+            /*28/03/2024setPatientNote((PatientNote)model.getElementAt(row));*/
             titledBorder.setTitle("Note index (selection last updated " 
                     + getPatientNote().getLastUpdated().toLocalDate()
                             .format(DateTimeFormatter.ofPattern("dd/MM/yy"))
@@ -374,17 +376,17 @@ public class NotesView extends View {
         PatientNote2ColumnTableModel model;
         
         if (this.tblNotesIndex==null){
-            this.tblNotesIndex = new JTable(new PatientNote2ColumnTableModel());
+            /*28/03/2024this.tblNotesIndex = new JTable(new PatientNote2ColumnTableModel());*/
             scrNoteIndex.setViewportView(this.tblNotesIndex);
             //this.scrNoteIndex.remove(this.tblNotesIndex);   
         }
 
         model = (PatientNote2ColumnTableModel)this.tblNotesIndex.getModel();
-        model.removeAllElements();
+        /*28/03/2024model.removeAllElements();*/
         Iterator<PatientNote> it = patientNotes.iterator();
-        while (it.hasNext()){
+       /*28/03/2024while (it.hasNext()){
             ((PatientNote2ColumnTableModel)this.tblNotesIndex.getModel()).addElement(it.next());
-        }
+        }*/
 
         JTableHeader tableHeader = this.tblNotesIndex.getTableHeader();
         tableHeader.setBackground(new Color(220,220,220));
@@ -435,7 +437,7 @@ public class NotesView extends View {
         scrNotepad.setViewportView(txaNotepad);
         
         tblNotesIndex = new javax.swing.JTable();
-        tblNotesIndex.setModel(new PatientNote2ColumnTableModel());
+        /*28/03/2024tblNotesIndex.setModel(new PatientNote2ColumnTableModel());*/
         //tblNotesIndex.setModel(new javax.swing.table.DefaultTableModel(
         
         scrNoteIndex.setViewportView(tblNotesIndex);
@@ -743,10 +745,10 @@ public class NotesView extends View {
                 }
                 if (!isDatestampError){
                     setPatientNote(patientNote);
-                    getMyController()
+                    /*28/03/2024getMyController()
                             .getDescriptor()
                             .getViewDescription()
-                            .setPatientNote(getPatientNote());
+                            .setPatientNote(getPatientNote());*/
                     getMyController()
                             .getDescriptor()
                             .getViewDescription()

@@ -2,11 +2,12 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package view.views.modal_views;
+package patient_view_original_class;
 
 import controller.Descriptor;
 import controller.ViewController;
-import model.PatientNote;
+/*28/03/2024import model.PatientNote;*/
+import view.views.modal_views.ModalView;
 import model.Patient;
 import java.awt.Color;
 import java.awt.Rectangle;
@@ -84,10 +85,10 @@ public class ModalPatientNotesEditorView extends ModalView
         //txaNotepad.setEnabled(false);
         //txaNotepad.setBackground(getNotepadDisabledColor());
         setViewMode(ViewController.ViewMode.UPDATE);
-        ArrayList<PatientNote> patientNotes = getMyController()
-                .getDescriptor().getControllerDescription().getPatientNotes();
+        /*28/03/2024ArrayList<PatientNote> patientNotes = getMyController()
+                .getDescriptor().getControllerDescription().getPatientNotes();*/
         setNotesIndexTableListener();
-        populateNotesIndexTable(patientNotes); 
+        /*28/03/2024populateNotesIndexTable(patientNotes); */
     }
     
     @Override
@@ -96,10 +97,10 @@ public class ModalPatientNotesEditorView extends ModalView
                 ViewController.PatientViewControllerPropertyChangeEvent.valueOf(e.getPropertyName());
         switch (propertyName){
             case PATIENT_NOTES_RECEIVED:
-                populateNotesIndexTable(getMyController()
+                /*28/03/2024populateNotesIndexTable(getMyController()
                         .getDescriptor()
                         .getControllerDescription()
-                        .getPatientNotes());
+                        .getPatientNotes());*/
                 break;
         }
     }
@@ -113,14 +114,14 @@ public class ModalPatientNotesEditorView extends ModalView
     private Notepad getNotepad(){
         return notepad;
     }
-    
+    /*28/03/2024
     private PatientNote patientNote = null;
     private PatientNote getPatientNote(){
         return patientNote;
     }
     private void setPatientNote(PatientNote value){
         patientNote = value;
-    }
+    }*/
     
     private Patient patient = null;
     private Patient getPatient(){
@@ -147,10 +148,10 @@ public class ModalPatientNotesEditorView extends ModalView
     }
     
     private void addListeners(){
-        ArrayList<PatientNote> patientNotes = new ArrayList<>();
+        /*28/03/2024ArrayList<PatientNote> patientNotes = new ArrayList<>();*/
         PatientNote2ColumnTableModel model = 
                 (PatientNote2ColumnTableModel)tblNotesIndex.getModel();
-        PatientNote patientNote;
+        /*28/03/2024PatientNote patientNote;*/
 
         btnCloseView.addActionListener(new java.awt.event.ActionListener() {
             @Override
@@ -219,7 +220,7 @@ public class ModalPatientNotesEditorView extends ModalView
             int row;
             @Override
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                if (!model.getPatientNotes().isEmpty()){//any rows in the table
+                /*28/03/2024if (!model.getPatientNotes().isEmpty()){//any rows in the table
                     row = tblNotesIndex.getSelectedRow();
                     if ((row+1) < model.getPatientNotes().size()){
                         tblNotesIndex.setRowSelectionInterval(row+1,row+1);
@@ -227,14 +228,14 @@ public class ModalPatientNotesEditorView extends ModalView
                                 new Rectangle(tblNotesIndex.
                                         getCellRect(row+1, 0, true)));
                     }
-                }
+                }*/
             }
         });
         this.btnPreviousNote.addActionListener(new java.awt.event.ActionListener() {
             int row;
             @Override
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                if (!model.getPatientNotes().isEmpty()){//any rows in the table
+                /*28/03/2024if (!model.getPatientNotes().isEmpty()){//any rows in the table
                     row = tblNotesIndex.getSelectedRow();
                     if ((row-1) >= 0){
                         tblNotesIndex.setRowSelectionInterval(row-1,row-1);
@@ -244,7 +245,7 @@ public class ModalPatientNotesEditorView extends ModalView
                                 new Rectangle(tblNotesIndex.
                                         getCellRect(row-1, 0, true)));
                     }
-                }
+                }*/
             }
         });
     }
@@ -287,8 +288,8 @@ public class ModalPatientNotesEditorView extends ModalView
     }
     
     private void doPatientNotesIndexTableRowSelection(int row){
-        PatientNote patientNote = 
-                ((PatientNote2ColumnTableModel)this.tblNotesIndex.getModel()).getElementAt(row);
+        /*28/03/2024PatientNote patientNote = 
+                ((PatientNote2ColumnTableModel)this.tblNotesIndex.getModel()).getElementAt(row);*/
         Notepad notepad = getNotepad();
         notepad.shut();
         /*
@@ -299,14 +300,14 @@ public class ModalPatientNotesEditorView extends ModalView
             }
         }
         */
-        setPatientNote(patientNote);
+        /*28/03/2024setPatientNote(patientNote);
         notepad.open(patientNote);
         notepad.setDatestamp(patientNote.getDatestamp());
-        notepad.setContent(patientNote.getNote());
+        notepad.setContent(patientNote.getNote());*/
         setViewMode(ViewController.ViewMode.UPDATE);
         
     }
-    
+    /*28/03/2024
     private void populateNotesIndexTable(ArrayList<PatientNote> patientNotes){
         if (patientNotes==null) patientNotes = new ArrayList<PatientNote>();
         PatientNote2ColumnTableModel model;
@@ -331,7 +332,7 @@ public class ModalPatientNotesEditorView extends ModalView
         TableColumnModel columnModel = this.tblNotesIndex.getColumnModel();
         columnModel.getColumn(0).setHeaderRenderer(new TableHeaderCellBorderRenderer(Color.LIGHT_GRAY));
         columnModel.getColumn(1).setHeaderRenderer(new TableHeaderCellBorderRenderer(Color.LIGHT_GRAY));
-    }
+    }*/
     
     private void initComponents() {
 
@@ -373,7 +374,7 @@ public class ModalPatientNotesEditorView extends ModalView
         scrNotepad.setViewportView(txaNotepad);
         
         tblNotesIndex = new javax.swing.JTable();
-        tblNotesIndex.setModel(new PatientNote2ColumnTableModel());
+        /*28/03/2024tblNotesIndex.setModel(new PatientNote2ColumnTableModel());*/
         //tblNotesIndex.setModel(new javax.swing.table.DefaultTableModel(
         
         scrNoteIndex.setViewportView(tblNotesIndex);
@@ -639,20 +640,20 @@ public class ModalPatientNotesEditorView extends ModalView
                     else isDatestampError = true;
                     break;
                 case UPDATE:
-                    patientNote = getPatientNote();
+                    /*28/03/2024patientNote = getPatientNote();
                     getPatientNote().setNote(getContent());
                     patientNote.setLastUpdated(LocalDateTime.now());
                     if (getDatestamp()!=null)
                         patientNote.setDatestamp(getDatestamp());
-                    else isDatestampError = true;
+                    else isDatestampError = true;*/
                     break;
             }
             if (!isDatestampError){
-                setPatientNote(patientNote);
+                /*28/03/2024setPatientNote(patientNote);
                 getMyController()
                         .getDescriptor()
                         .getViewDescription()
-                        .setPatientNote(getPatientNote());
+                        .setPatientNote(getPatientNote());*/
                 getMyController()
                         .getDescriptor()
                         .getViewDescription()

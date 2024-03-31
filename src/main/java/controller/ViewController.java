@@ -34,7 +34,7 @@ import java.util.Iterator;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.table.TableColumn;
-import model.PatientNote;
+/*28/03/2024import model.PatientNote;*/
 import model.SystemDefinition;
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;
@@ -94,6 +94,16 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         TemplateReader.setSectionId("History");
         PrimaryCondition pc = TemplateReader.extract(new PrimaryCondition());
         return pc;
+    }
+    
+    protected Treatment extractTreatmentFromTemplate()throws TemplateReaderException{
+        TemplateReader.setTemplateFile(
+                        new File(SystemDefinition.getPMSSystemDefinition()));
+        TemplateReader.setEntityTag("entity");
+        TemplateReader.setEntityId("Appointment");
+        TemplateReader.setSectionId("Treatment");
+        Treatment treatment = TemplateReader.extract(new Treatment());
+        return treatment;
     }
     
     /**
@@ -220,11 +230,13 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         CLINIC_LOGO_VIEW_MODE_NOTIFICATION,
         COUNT_APPOINTMENT_TABLE_REQUEST,
         COUNT_PATIENT_TABLE_REQUEST,
-        COUNT_PATIENT_NOTE_TABLE_REQUEST,
+        COUNT_CLINIC_NOTE_TABLE_REQUEST,
+        //COUNT_PATIENT_NOTE_TABLE_REQUEST,
         COUNT_PATIENT_NOTIFICATION_TABLE_REQUEST,
         COUNT_PRIMARY_CONDITION_TABLE_REQUEST,
         COUNT_SECONDARY_CONDITION_TABLE_REQUEST,
         COUNT_SURGERY_DAYS_ASSIGNMENT_TABLE_REQUEST,
+        COUNT_TREATMENT_TABLE_REQUEST,
         DELETE_DATA_FROM_PMS_DATABASE_REQUEST,
         DESKTOP_VIEW_MODE_NOTIFICATION,
         GET_APPOINTMENT_CSV_PATH_REQUEST,
@@ -242,6 +254,8 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         MIGRATE_PRIMARY_CONDITION_DATA_COMPLETED,
         MIGRATE_SECONDARY_CONDITION_DATA,
         MIGRATE_SECONDARY_CONDITION_DATA_COMPLETED,
+        MIGRATE_TREATMENT_DATA,
+        MIGRATE_TREATMENT_DATA_COMPLETED,
         MODAL_VIEWER_ACTIVATED,
         MODAL_VIEWER_CLOSED,
         NOTES_VIEW_CONTROLLER_REQUEST,
@@ -271,12 +285,14 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         PATIENT_CSV_PATH_RECEIVED,
         PMS_STORE_PATH_RECEIVED,
         APPOINTMENT_TABLE_COUNT_RECEIVED,
+        CLINIC_NOTE_TABLE_COUNT_RECEIVED,
         PATIENT_TABLE_COUNT_RECEIVED,
-        PATIENT_NOTE_TABLE_COUNT_RECEIVED,
+        //PATIENT_NOTE_TABLE_COUNT_RECEIVED,
         PATIENT_NOTIFICATION_TABLE_COUNT_RECEIVED,
         PRIMARY_CONDITION_TABLE_COUNT_RECEIVED,
         SECONDARY_CONDITION_TABLE_COUNT_RECEIVED,
         SURGERY_DAYS_ASSIGNMENT_TABLE_COUNT_RECEIVED,
+        TREATMENT_TABLE_COUNT_RECEIVED,
         MIGRATION_ACTION_COMPLETE,
         PATIENTS_RECEIVED
     }
@@ -288,7 +304,8 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         READY_FOR_RECEIPT_OF_PATIENT_NOTE_MIGRATION_PROGRESS,
         READY_FOR_RECEIPT_OF_PATIENT_MIGRATION_PROGRESS,
         READY_FOR_RECEIPT_OF_PRIMARY_CONDITION_MIGRATION_PROGRESS,
-        READY_FOR_RECEIPT_OF_SECONDARY_CONDITION_MIGRATION_PROGRESS
+        READY_FOR_RECEIPT_OF_SECONDARY_CONDITION_MIGRATION_PROGRESS,
+        READY_FOR_RECEIPT_OF_TREATMENT_MIGRATION_PROGRESS
     }
     
     public static enum DataMigrationViewControllerPropertyChangeEvent{
@@ -301,7 +318,8 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         PREPARE_FOR_RECEIPT_OF_PATIENT_MIGRATION_PROGRESS,
         PREPARE_FOR_RECEIPT_OF_PATIENT_NOTE_MIGRATION_PROGRESS,
         PREPARE_FOR_RECEIPT_OF_PRIMARY_CONDITION_MIGRATION_PROGRESS,
-        PREPARE_FOR_RECEIPT_OF_SECONDARY_CONDITION_MIGRATION_PROGRESS
+        PREPARE_FOR_RECEIPT_OF_SECONDARY_CONDITION_MIGRATION_PROGRESS,
+        PREPARE_FOR_RECEIPT_OF_TREATMENT_MIGRATION_PROGRESS
         }
     
     public static enum NotesViewControllerActionEvent{
@@ -511,7 +529,7 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
 
     protected Appointment doChangeAppointmentScheduleForDayRequest(ViewMode mode, Appointment rSlot) throws StoreException{
         Appointment result = null;
-        PatientNote patientNote = null;
+        /*28/03/2024PatientNote patientNote = null;*/
         LocalDate day = rSlot.getStart().toLocalDate();
         Appointment appointment = new Appointment(); 
         appointment.setStart(day.atStartOfDay());
@@ -532,12 +550,12 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
                      *
                      */
                     //if (!rSlot.getIsUnbookableSlot()){
-                        patientNote = new PatientNote(rSlot.getPatient());
+                        /*28/03/2024patientNote = new PatientNote(rSlot.getPatient());
                         patientNote.setDatestamp(rSlot.getStart());
                         patientNote.setNote(rSlot.getPatientNote().getNote());
                         patientNote.setLastUpdated(LocalDateTime.now());
                         Integer patientNoteKey = patientNote.insert();
-                        rSlot.setPatientNote(new PatientNote(patientNoteKey));
+                        rSlot.setPatientNote(new PatientNote(patientNoteKey));*/
                         //rSlot.setPatientNoteKey(patientNoteKey);
                     //}
                     rSlot.insert(); 

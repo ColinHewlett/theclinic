@@ -75,8 +75,8 @@ public class Descriptor {
         private Doctor doctor = null;
         private Medication medication = null;
         private Condition condition = null;
-        private PatientNote patientNote = null;
-        private ArrayList<PatientNote> patientNotes = null;
+        /*28/03/2024private PatientNote patientNote = null;*/
+        /*28/03/2024private ArrayList<PatientNote> patientNotes = null;*/
         private LocalDate scheduleDay = null;
         private LocalDateTime appointmentEarlyStart = null;
         private LocalDateTime appointmentLateStart = null;
@@ -150,22 +150,23 @@ public class Descriptor {
         public void setViewMode(ViewController.ViewMode value){
             viewMode = value;
         }
-        
+        /*28/03/2024
         public PatientNote getPatientNote(){
             return patientNote;
         }
         
         public void setPatientNotes(PatientNote value){
             patientNote = value;
-        }
+        }*/
         
+        /*28/03/2024
         public ArrayList<PatientNote> getPatientNotes(){
             return patientNotes;
         }
         
         public void setPatientNotes(ArrayList<PatientNote> value){
             patientNotes = value;
-        }
+        }*/
         
         public ArrayList<Appointment> getAppointmentCancellations(){
             return appointmentCancellations;
@@ -320,7 +321,7 @@ public class Descriptor {
     
     public class ViewDescription {
         ViewController.ViewMode viewMode = null;
-        private PatientNote patientNote = null;
+        /*28/03/2024private PatientNote patientNote = null;*/
         private Appointment appointment = null;
         private Patient thePatient = null;
         private Patient theGuardian = null;
@@ -398,14 +399,14 @@ public class Descriptor {
         public void setPatient(Patient patient){
             thePatient = patient;
         }
-        
+        /*28/03/2024
         public PatientNote getPatientNote(){
             return patientNote;
         }
         
         public void setPatientNote(PatientNote value){
             patientNote = value;
-        }
+        }*/
         
         public Notification getNotification(){
             return patientNotification;

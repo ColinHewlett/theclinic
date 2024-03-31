@@ -26,7 +26,7 @@ public class AppointmentDelegate extends Appointment{
         super.setHasPatientBeenContacted(appointment.getHasPatientBeenContacted());
         super.setIsDeleted(appointment.getIsDeleted());
         super.setIsCancelled(appointment.getIsCancelled());
-        super.setPatientNote(appointment.getPatientNote());
+        /*28/03/2024super.setPatientNote(appointment.getPatientNote());*/
     }
     
     protected Integer getAppointmentKey(){

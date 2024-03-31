@@ -11,7 +11,7 @@ import controller.Descriptor;
 import controller.ViewController;
 import view.View;
 import model.Patient;
-import model.PatientNote;
+/*28/03/2024import model.PatientNote;*/
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
@@ -233,18 +233,18 @@ public class ModalAppointmentEditorView extends ModalView {
         this.cmbSelectPatient.setSelectedItem(getMyController().getDescriptor()
             .getControllerDescription().getAppointment().getPatient());       
 
-        PatientNote patientNote = getMyController().getDescriptor().
-            getControllerDescription().getAppointment().getPatientNote();
+        /*28/03/2024PatientNote patientNote = getMyController().getDescriptor().
+            getControllerDescription().getAppointment().getPatientNote();*/
         
         if (getViewMode().equals(ViewController.ViewMode.UPDATE)){
-            this.txaNotepad.setText(getMyController().getDescriptor().
-            getControllerDescription().getAppointment().getPatientNote().getNote());
+            /*28/03/2024this.txaNotepad.setText(getMyController().getDescriptor().
+            getControllerDescription().getAppointment().getPatientNote().getNote());*/
             
             
             this.cmbSelectPatient.setEnabled(false);
-            this.btnCreateUpdateAppointment.setText(UPDATE_BUTTON);
+            this.btnSaveChanges.setText(UPDATE_BUTTON);
         }else{
-            this.btnCreateUpdateAppointment.setText(CREATE_BUTTON);
+            this.btnSaveChanges.setText(CREATE_BUTTON);
         }
 
         this.setTitle("Apppointment editor for " + day.format(ddMMyyyyFormat));
@@ -259,8 +259,8 @@ public class ModalAppointmentEditorView extends ModalView {
      */
     private void initialiseEntityDescriptorFromView(){
         //get the appointment with  which the view was initialised (in particular the appointment key)
-        PatientNote patientNote = getMyController().getDescriptor().
-                            getControllerDescription().getAppointment().getPatientNote();
+        /*28/03/2024PatientNote patientNote = getMyController().getDescriptor().
+                            getControllerDescription().getAppointment().getPatientNote();*/
         getMyController().getDescriptor().getViewDescription().setAppointment(
                     getMyController().getDescriptor().
                             getControllerDescription().getAppointment());
@@ -277,7 +277,7 @@ public class ModalAppointmentEditorView extends ModalView {
         getMyController().getDescriptor().getViewDescription().getAppointment().
                 setNotes(this.txaNotepad.getText());
         
-        if (getViewMode().equals(ViewController.ViewMode.CREATE))
+        /*28/03/2024if (getViewMode().equals(ViewController.ViewMode.CREATE))
             patientNote = new PatientNote();
         patientNote.setNote(this.txaNotepad.getText());
         patientNote.setDatestamp(getMyController()
@@ -291,7 +291,7 @@ public class ModalAppointmentEditorView extends ModalView {
         patientNote.setLastUpdated(LocalDateTime.now());
         
         getMyController().getDescriptor().getViewDescription()
-                .getAppointment().setPatientNote(patientNote);
+                .getAppointment().setPatientNote(patientNote);*/
     }
     private Duration getDurationFromView(){
         return Duration.ofMinutes(
@@ -306,11 +306,11 @@ public class ModalAppointmentEditorView extends ModalView {
         //this.spnStartTime.setValue(getViewDescriptor().getAppointment().getData().getStart().format(hhmmFormat)); 
         this.spnDurationHours.setValue(getHoursFromDuration(getMyController().getDescriptor().getControllerDescription().getAppointment().getDuration().toMinutes()));
         this.spnDurationMinutes.setValue(getMinutesFromDuration(getMyController().getDescriptor().getControllerDescription().getAppointment().getDuration().toMinutes()));
-        this.txaNotepad.setText(
+        /*28/03/2024this.txaNotepad.setText(
                 getMyController()
                         .getDescriptor()
                         .getControllerDescription()
-                        .getAppointment().getPatientNote().getNote());
+                        .getAppointment().getPatientNote().getNote());*/
         populatePatientSelector(this.cmbSelectPatient);
         if (getMyController().getDescriptor().getControllerDescription().
                 getAppointment().getPatient().getIsKeyDefined()){
@@ -367,8 +367,8 @@ public class ModalAppointmentEditorView extends ModalView {
         scrNotepad = new javax.swing.JScrollPane();
         txaNotepad = new javax.swing.JTextArea();
         pnlOperations = new javax.swing.JPanel();
-        btnCreateUpdateAppointment = new javax.swing.JButton();
-        btnCancel = new javax.swing.JButton();
+        btnSaveChanges = new javax.swing.JButton();
+        btnCloseView = new javax.swing.JButton();
 
         pnlAppointmentDetails.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
 
@@ -394,15 +394,15 @@ public class ModalAppointmentEditorView extends ModalView {
         txaNotepad.setLineWrap(true);
         scrNotepad.setViewportView(txaNotepad);
         
-        btnCreateUpdateAppointment.setText("Update appointment");
-        btnCreateUpdateAppointment.addActionListener(new java.awt.event.ActionListener() {
+        btnSaveChanges.setText("Update appointment");
+        btnSaveChanges.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnCreateUpdateAppointmentActionPerformed(evt);
             }
         });
 
-        btnCancel.setText("Close view");
-        btnCancel.addActionListener(new java.awt.event.ActionListener() {
+        btnCloseView.setText("Close view");
+        btnCloseView.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnCloseViewActionPerformed(evt);
             }
@@ -532,9 +532,9 @@ public class ModalAppointmentEditorView extends ModalView {
             pnlOperationsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlOperationsLayout.createSequentialGroup()
                 .addGap(27, 27, 27)
-                .addComponent(btnCreateUpdateAppointment)
+                .addComponent(btnSaveChanges)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(btnCancel)
+                .addComponent(btnCloseView)
                 .addContainerGap())
         );
         pnlOperationsLayout.setVerticalGroup(
@@ -542,8 +542,8 @@ public class ModalAppointmentEditorView extends ModalView {
             .addGroup(pnlOperationsLayout.createSequentialGroup()
                 .addGap(8, 8, 8)
                 .addGroup(pnlOperationsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(btnCreateUpdateAppointment)
-                    .addComponent(btnCancel))
+                    .addComponent(btnSaveChanges)
+                    .addComponent(btnCloseView))
                 .addGap(8, 8, 8))
         );
 
@@ -724,7 +724,7 @@ public class ModalAppointmentEditorView extends ModalView {
             }
             else {
                 //if (getMyController().getDescriptor().getViewDescription().getAppointment().getNotes().isEmpty()){
-                PatientNote patientNote = getMyController().getDescriptor()
+                /*28/03/2024PatientNote patientNote = getMyController().getDescriptor()
                         .getViewDescription().getAppointment().getPatientNote();
                 if (patientNote.getNote().isEmpty()){
                     String[] options = {"Yes", "No"};
@@ -735,7 +735,7 @@ public class ModalAppointmentEditorView extends ModalView {
                         null,
                         options,
                         null);
-                }
+                }*/
                 if (OKToSaveAppointment==JOptionPane.YES_OPTION){
                     switch (getMyController().getDescriptor().getControllerDescription().getViewMode()){
                         case CREATE:
@@ -780,8 +780,8 @@ public class ModalAppointmentEditorView extends ModalView {
     }
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton btnCancel;
-    private javax.swing.JButton btnCreateUpdateAppointment;
+    private javax.swing.JButton btnCloseView;
+    private javax.swing.JButton btnSaveChanges;
     private javax.swing.JComboBox<Patient> cmbSelectPatient;
     private javax.swing.JComboBox<LocalDateTime> cmbSelectStartTime;
     private javax.swing.JLabel lblHours;

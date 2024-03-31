@@ -2,7 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package view.views.view_support_classes.renderers;
+package patient_view_original_class;
 
 import model.SystemDefinition;
 import java.awt.Component;
@@ -10,7 +10,7 @@ import java.awt.Font;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
-import model.PatientNote;
+/*28/03/2024import model.PatientNote;*/
 
 /**
  *

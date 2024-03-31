@@ -62,8 +62,8 @@ import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JInternalFrame;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.border.TitledBorder;
-import model.PatientNote;
-import view.views.view_support_classes.renderers.AppointmentsTablePatientNoteRenderer;
+
+/*28/03/2024import view.views.view_support_classes.renderers.AppointmentsTablePatientNoteRenderer;*/
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.ParserConfigurationException;

@@ -104,11 +104,13 @@ public class DesktopView extends javax.swing.JFrame implements PropertyChangeLis
             //private final String PMS_DATABASE_URL = "PMS database URL";
             private final String APPOINTMENT_TABLE_RECORD_COUNT_TITLE = "Appointment table ";
             private final String PATIENT_TABLE_RECORD_COUNT_TITLE = "Patient table ";
-            private final String PATIENT_NOTE_TABLE_RECORD_COUNT_TITLE = "PatientNote table ";
+            //private final String PATIENT_NOTE_TABLE_RECORD_COUNT_TITLE = "PatientNote table ";
+            private final String CLINIC_NOTE_TABLE_RECORD_COUNT_TITLE = "ClinicNote table ";
             private final String PATIENT_PRIMARY_TABLE_RECORD_COUNT_TITLE = "PatientPrimary table ";
             private final String PATIENT_SECONDARY_TABLE_RECORD_COUNT_TITLE = "PatientSecondary table ";
             private final String PATIENT_NOTIFICATION_TABLE_RECORD_COUNT_TITLE = "PatientNotification table ";
             private final String SURGERY_DAYS_ASSIGNMENT_TABLE_RECORD_COUNT_TITLE = "SurgeryDaysAssignment table ";    
+            private final String TREATMENT_TABLE_RECORD_COUNT_TITLE = "Treatment table ";
         private final String CSV_SOURCE_FILES_TITLE = "CSV source files selection";
             private final String APPOINTMENT_CSV_SELECTION_REQUEST_TITLE = "Select appointment CSV file to use";
             private final String PATIENT_CSV_SELECTION_REQUEST_TITLE = "Select patient CSV file to use";
@@ -128,11 +130,13 @@ public class DesktopView extends javax.swing.JFrame implements PropertyChangeLis
             private JMenuItem mniPMSDatabaseURL = null;
             private JMenuItem mniAppointmentTableRecordCount = null;
             private JMenuItem mniPatientTableRecordCount = null;
-            private JMenuItem mniPatientNoteTableRecordCount = null;
+            //private JMenuItem mniPatientNoteTableRecordCount = null;
+            private JMenuItem mniClinicNoteTableRecordCount = null;
             private JMenuItem mniPatientPrimaryTableRecordCount = null;
             private JMenuItem mniPatientSecondaryTableRecordCount = null;
             private JMenuItem mniPatientNotificationTableRecordCount = null;
             private JMenuItem mniSurgeryDaysAssignmentTableRecordCount = null;
+            private JMenuItem mniTreatmentTableRecordCount = null;
         private JMenu mnuCSVSourceFiles = null;
             private JMenuItem mniAppointmentCSVSelectionRequest = null;
             private JMenuItem mniPatientCSVSelectionRequest = null;
@@ -231,20 +235,24 @@ public class DesktopView extends javax.swing.JFrame implements PropertyChangeLis
     private void makeMigrationDatabaseContentsPopupMenu(){
         this.mniPMSDatabaseURL = new JMenuItem(PMS_DATABASE_PROFILE_TITLE);
         this.mniAppointmentTableRecordCount = new JMenuItem(APPOINTMENT_TABLE_RECORD_COUNT_TITLE);
+        this.mniClinicNoteTableRecordCount = new JMenuItem(CLINIC_NOTE_TABLE_RECORD_COUNT_TITLE);
         this.mniPatientTableRecordCount = new JMenuItem(PATIENT_TABLE_RECORD_COUNT_TITLE);
-        this.mniPatientNoteTableRecordCount = new JMenuItem(PATIENT_NOTE_TABLE_RECORD_COUNT_TITLE);
+        //this.mniPatientNoteTableRecordCount = new JMenuItem(PATIENT_NOTE_TABLE_RECORD_COUNT_TITLE);
         this.mniPatientPrimaryTableRecordCount = new JMenuItem(PATIENT_PRIMARY_TABLE_RECORD_COUNT_TITLE);
         this.mniPatientSecondaryTableRecordCount = new JMenuItem(PATIENT_SECONDARY_TABLE_RECORD_COUNT_TITLE);
         this.mniPatientNotificationTableRecordCount = new JMenuItem(PATIENT_NOTIFICATION_TABLE_RECORD_COUNT_TITLE);
         this.mniSurgeryDaysAssignmentTableRecordCount = new JMenuItem(SURGERY_DAYS_ASSIGNMENT_TABLE_RECORD_COUNT_TITLE);
+        this.mniTreatmentTableRecordCount = new JMenuItem(TREATMENT_TABLE_RECORD_COUNT_TITLE);
         mnuPMSDatabaseProfile.add(mniPMSDatabaseURL);
         mnuPMSDatabaseProfile.add(mniAppointmentTableRecordCount);
+        mnuPMSDatabaseProfile.add(mniClinicNoteTableRecordCount);
         mnuPMSDatabaseProfile.add(mniPatientTableRecordCount);
-        mnuPMSDatabaseProfile.add(mniPatientNoteTableRecordCount);
+        //mnuPMSDatabaseProfile.add(mniPatientNoteTableRecordCount);
         mnuPMSDatabaseProfile.add(mniPatientPrimaryTableRecordCount);
         mnuPMSDatabaseProfile.add(mniPatientSecondaryTableRecordCount);
         mnuPMSDatabaseProfile.add(mniPatientNotificationTableRecordCount);
         mnuPMSDatabaseProfile.add(mniSurgeryDaysAssignmentTableRecordCount);
+        mnuPMSDatabaseProfile.add(mniTreatmentTableRecordCount);
     }
   
     private ActionListener controller = null;
@@ -370,12 +378,14 @@ public class DesktopView extends javax.swing.JFrame implements PropertyChangeLis
         doActionEventRequest(ViewController.DesktopViewControllerActionEvent.GET_PATIENT_CSV_PATH_REQUEST);
         doActionEventRequest(ViewController.DesktopViewControllerActionEvent.GET_PMS_STORE_PATH_REQUEST);
         doActionEventRequest(ViewController.DesktopViewControllerActionEvent.COUNT_APPOINTMENT_TABLE_REQUEST);
+        doActionEventRequest(ViewController.DesktopViewControllerActionEvent.COUNT_CLINIC_NOTE_TABLE_REQUEST);
         doActionEventRequest(ViewController.DesktopViewControllerActionEvent.COUNT_PATIENT_TABLE_REQUEST);
-        doActionEventRequest(ViewController.DesktopViewControllerActionEvent.COUNT_PATIENT_NOTE_TABLE_REQUEST);
+        //doActionEventRequest(ViewController.DesktopViewControllerActionEvent.COUNT_PATIENT_NOTE_TABLE_REQUEST);
         doActionEventRequest(ViewController.DesktopViewControllerActionEvent.COUNT_PRIMARY_CONDITION_TABLE_REQUEST);
         doActionEventRequest(ViewController.DesktopViewControllerActionEvent.COUNT_SECONDARY_CONDITION_TABLE_REQUEST);
         doActionEventRequest(ViewController.DesktopViewControllerActionEvent.COUNT_PATIENT_NOTIFICATION_TABLE_REQUEST);
         doActionEventRequest(ViewController.DesktopViewControllerActionEvent.COUNT_SURGERY_DAYS_ASSIGNMENT_TABLE_REQUEST);
+        doActionEventRequest(ViewController.DesktopViewControllerActionEvent.COUNT_TREATMENT_TABLE_REQUEST);
     }
     
     private void doActionEventRequest(DesktopViewController.DesktopViewControllerActionEvent action){
@@ -426,10 +436,20 @@ public class DesktopView extends javax.swing.JFrame implements PropertyChangeLis
                 setViewDescriptor((Descriptor)e.getNewValue());
                 doCountSecondaryConditionTableReceived();
                 break;
+            case CLINIC_NOTE_TABLE_COUNT_RECEIVED:
+                setViewDescriptor((Descriptor)e.getNewValue());
+                doCountClinicNoteTableReceived();
+                break;
+            case TREATMENT_TABLE_COUNT_RECEIVED:
+                setViewDescriptor((Descriptor)e.getNewValue());
+                doCountTreatmentTableReceived();
+                break;
+            /*28/03/2024
             case PATIENT_NOTE_TABLE_COUNT_RECEIVED:
                 setViewDescriptor((Descriptor)e.getNewValue());
-                doCountPatientNoteTableReceived();
+                doCountClinicNoteTableReceived();
                 break;
+                */
             case PATIENT_NOTIFICATION_TABLE_COUNT_RECEIVED:
                 setViewDescriptor((Descriptor)e.getNewValue());
                 doCountPatientNotificationTableReceived();
@@ -663,6 +683,17 @@ public class DesktopView extends javax.swing.JFrame implements PropertyChangeLis
                 + "(missing table)");
     }
     
+    private void doCountClinicNoteTableReceived(){
+        Point count = getViewDescriptor().getControllerDescription().getTableRowCount();
+        if (count!=null)
+            this.mniClinicNoteTableRecordCount.setText(this.CLINIC_NOTE_TABLE_RECORD_COUNT_TITLE
+                + "(records = " + String.valueOf(count.x) + "; deletions = " + count.y + ")");
+        else
+            this.mniClinicNoteTableRecordCount.setText(this.CLINIC_NOTE_TABLE_RECORD_COUNT_TITLE
+                + "(missing table)");
+    }
+    
+    /*
     private void doCountPatientNoteTableReceived(){
         Point count = getViewDescriptor().getControllerDescription().getTableRowCount();
         if (count!=null)
@@ -672,7 +703,7 @@ public class DesktopView extends javax.swing.JFrame implements PropertyChangeLis
             this.mniPatientNoteTableRecordCount.setText(this.PATIENT_NOTE_TABLE_RECORD_COUNT_TITLE
                 + "(missing table)");
     }
-    
+    */
     private void doCountPatientTableReceived(){
         Point count = getViewDescriptor().getControllerDescription().getTableRowCount();
         if (count!=null)
@@ -701,6 +732,16 @@ public class DesktopView extends javax.swing.JFrame implements PropertyChangeLis
                 + "(records = " + String.valueOf(count.x) + "; deletions = " + count.y + ")");
         else
             this.mniSurgeryDaysAssignmentTableRecordCount.setText(this.SURGERY_DAYS_ASSIGNMENT_TABLE_RECORD_COUNT_TITLE
+                + "(missing table)");
+    }
+    
+    private void doCountTreatmentTableReceived(){
+        Point count = getViewDescriptor().getControllerDescription().getTableRowCount();
+        if (count!=null)
+            this.mniTreatmentTableRecordCount.setText(this.TREATMENT_TABLE_RECORD_COUNT_TITLE
+                + "(records = " + String.valueOf(count.x) + "; deletions = " + count.y + ")");
+        else
+            this.mniTreatmentTableRecordCount.setText(this.TREATMENT_TABLE_RECORD_COUNT_TITLE
                 + "(missing table)");
     }
     
@@ -747,9 +788,14 @@ public class DesktopView extends javax.swing.JFrame implements PropertyChangeLis
             this.mniPatientTableRecordCount.setText(
                     this.PATIENT_TABLE_RECORD_COUNT_TITLE
                     + "(PMS store undefined)");
+            this.mniClinicNoteTableRecordCount.setText(
+                    this.CLINIC_NOTE_TABLE_RECORD_COUNT_TITLE
+                    + "(PMS store undefined)");
+            /*
             this.mniPatientNoteTableRecordCount.setText(
                     this.PATIENT_NOTE_TABLE_RECORD_COUNT_TITLE
                     + "(PMS store undefined)");
+            */
             this.mniPatientPrimaryTableRecordCount.setText(
                     this.PATIENT_PRIMARY_TABLE_RECORD_COUNT_TITLE
                     + "(PMS store undefined)");
@@ -761,6 +807,9 @@ public class DesktopView extends javax.swing.JFrame implements PropertyChangeLis
                     + "(PMS store undefined)");
             this.mniSurgeryDaysAssignmentTableRecordCount.setText(
                     this.SURGERY_DAYS_ASSIGNMENT_TABLE_RECORD_COUNT_TITLE
+                    + "(PMS store undefined)");
+            this.mniTreatmentTableRecordCount.setText(
+                    this.TREATMENT_TABLE_RECORD_COUNT_TITLE
                     + "(PMS store undefined)");
         }
         

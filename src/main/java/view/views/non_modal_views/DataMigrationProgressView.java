@@ -24,14 +24,23 @@ public class DataMigrationProgressView extends View {
         PATIENT_NOTE, 
         PRIMARY_CONDITION,
         SECONDARY_CONDITION,
+        TREATMENT,
         NONE};
     enum Operation {EXPORT, IMPORT};
     
     private final boolean hasSystemGCed = false;
     private final static String IMPORT_TITLE_HEADER = "Data migration progress monitor";
-    private final static String IMPORT_APPOINTMENT_PROGRESS_HEADER = "Appointment table data migrated from CSV source";
-    private final static String IMPORT_PATIENT_PROGRESS_HEADER = "Patient table data migrated from CSV source";
-    private final static String IMPORT_PATIENT_NOTES_PROGRESS_HEADER = "PatientNotes table data migrated from appointment table";
+    private final static String IMPORT_APPOINTMENT_PROGRESS_HEADER = 
+            "Appointment table data migrated from CSV source";
+    private final static String IMPORT_PATIENT_PROGRESS_HEADER = 
+            "Patient table data migrated from CSV source";
+    private final static String IMPORT_PRIMARY_CONDITION_PROGRESS_HEADER = 
+            "PrimaryCondition table data migrated from SystemDefinition.xml template";
+    private final static String IMPORT_SECONDARY_CONDITION_PROGRESS_HEADER = 
+            "SecondaryCondition table data migrated from SystemDefinition.xml template";
+    private final static String IMPORT_TREATMENT_PROGRESS_HEADER = 
+            "Treatment table data migrated from SystemDefinition.xml template";
+    /*28/03/2024private final static String IMPORT_PATIENT_NOTES_PROGRESS_HEADER = "PatientNotes table data migrated from appointment table";*/
     private final static String IMPORT_START_PROCESS_HEADER = "Start import";
     
     
@@ -66,6 +75,8 @@ public class DataMigrationProgressView extends View {
         lblPrimaryCondition = new javax.swing.JLabel();
         lblSecondaryCondition = new javax.swing.JLabel();
         barSecondaryCondition = new javax.swing.JProgressBar();
+        lblTreatment = new javax.swing.JLabel();
+        barTreatment = new javax.swing.JProgressBar();
 
         setTitle("Exported data progress");
 
@@ -108,31 +119,46 @@ public class DataMigrationProgressView extends View {
         barSecondaryCondition.setMaximum(100);
         barSecondaryCondition.setStringPainted(true);
 
+        lblTreatment.setText("Treatment");
+
+        barSecondaryCondition.setMinimum(0);
+        barSecondaryCondition.setMaximum(100);
+        barSecondaryCondition.setStringPainted(true);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(barPatients, javax.swing.GroupLayout.DEFAULT_SIZE, 456, Short.MAX_VALUE)
-                    .addComponent(barAppointments, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(barPrimaryCondition, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(barSecondaryCondition, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(barTreatment, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                        .addContainerGap()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(lblPatientsProgressBar)
-                            .addComponent(lblAppointmentsProgressBar)
-                            .addComponent(lblPrimaryCondition)
-                            .addComponent(lblSecondaryCondition))
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                            .addComponent(barPatients, javax.swing.GroupLayout.DEFAULT_SIZE, 456, Short.MAX_VALUE)
+                            .addComponent(barAppointments, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(barPrimaryCondition, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(barSecondaryCondition, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(lblPatientsProgressBar)
+                                    .addComponent(lblAppointmentsProgressBar)
+                                    .addComponent(lblPrimaryCondition)
+                                    .addComponent(lblSecondaryCondition))
+                                .addGap(0, 0, Short.MAX_VALUE))))
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                        .addGap(72, 72, 72)
+                        .addComponent(btnStart)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(btnClose)
+                        .addGap(79, 79, 79)))
                 .addContainerGap())
             .addGroup(layout.createSequentialGroup()
-                .addGap(68, 68, 68)
-                .addComponent(btnStart)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(btnClose)
-                .addGap(97, 97, 97))
+                .addContainerGap()
+                .addComponent(lblTreatment)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -153,11 +179,15 @@ public class DataMigrationProgressView extends View {
                 .addComponent(lblSecondaryCondition)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(barSecondaryCondition, javax.swing.GroupLayout.PREFERRED_SIZE, 19, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 13, Short.MAX_VALUE)
+                .addComponent(lblTreatment)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(barTreatment, javax.swing.GroupLayout.PREFERRED_SIZE, 19, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnStart)
                     .addComponent(btnClose))
-                .addContainerGap(23, Short.MAX_VALUE))
+                .addContainerGap())
         );
 
         pack();
@@ -187,12 +217,14 @@ public class DataMigrationProgressView extends View {
     private javax.swing.JProgressBar barPatients;
     private javax.swing.JProgressBar barPrimaryCondition;
     private javax.swing.JProgressBar barSecondaryCondition;
+    private javax.swing.JProgressBar barTreatment;
     private javax.swing.JButton btnClose;
     private javax.swing.JButton btnStart;
     private javax.swing.JLabel lblAppointmentsProgressBar;
     private javax.swing.JLabel lblPatientsProgressBar;
     private javax.swing.JLabel lblPrimaryCondition;
     private javax.swing.JLabel lblSecondaryCondition;
+    private javax.swing.JLabel lblTreatment;
     // End of variables declaration//GEN-END:variables
 
     /**
@@ -214,9 +246,10 @@ public class DataMigrationProgressView extends View {
         addInternalFrameListeners();
         lblPatientsProgressBar.setText(DataMigrationProgressView.IMPORT_PATIENT_PROGRESS_HEADER);
         lblAppointmentsProgressBar.setText(DataMigrationProgressView.IMPORT_APPOINTMENT_PROGRESS_HEADER);
-        //lblPatientNotesProgressBar.setText(DataMigrationProgressView.IMPORT_PATIENT_NOTES_PROGRESS_HEADER);
-        this.lblPrimaryCondition.setText("PrimaryCondition table migrated from template");
-        this.lblSecondaryCondition.setText("SecondaryCondition table migrated from template");
+        this.lblPrimaryCondition.setText(IMPORT_PRIMARY_CONDITION_PROGRESS_HEADER);
+        this.lblSecondaryCondition.setText(IMPORT_SECONDARY_CONDITION_PROGRESS_HEADER);
+        this.lblTreatment.setText(IMPORT_TREATMENT_PROGRESS_HEADER);
+        /*28/03/2024lblPatientNotesProgressBar.setText(DataMigrationProgressView.IMPORT_PATIENT_NOTES_PROGRESS_HEADER);*/
         btnStart.setText(DataMigrationProgressView.IMPORT_START_PROCESS_HEADER);
         this.setTitle(DataMigrationProgressView.IMPORT_TITLE_HEADER);
     }
@@ -242,11 +275,11 @@ public class DataMigrationProgressView extends View {
     public void initialiseView(){
         
         this.setVisible(true);
-        lblPatientsProgressBar.setText(DataMigrationProgressView.IMPORT_PATIENT_PROGRESS_HEADER);
-        lblAppointmentsProgressBar.setText(DataMigrationProgressView.IMPORT_APPOINTMENT_PROGRESS_HEADER);
+        //lblPatientsProgressBar.setText(DataMigrationProgressView.IMPORT_PATIENT_PROGRESS_HEADER);
+        //lblAppointmentsProgressBar.setText(DataMigrationProgressView.IMPORT_APPOINTMENT_PROGRESS_HEADER);
         btnStart.setText(DataMigrationProgressView.IMPORT_START_PROCESS_HEADER);
         this.setTitle(DataMigrationProgressView.IMPORT_TITLE_HEADER);
-        this.setSize(520,325);
+        this.setSize(520,350);
     }
     
     /**
@@ -286,6 +319,10 @@ public class DataMigrationProgressView extends View {
                     case SECONDARY_CONDITION:
                         barSecondaryCondition.setIndeterminate(false);
                         barSecondaryCondition.setValue(progress);
+                        break;
+                    case TREATMENT:
+                        barTreatment.setIndeterminate(false);
+                        barTreatment.setValue(progress);
                         break;
                 }
                 break;
@@ -343,6 +380,15 @@ public class DataMigrationProgressView extends View {
                 actionEvent = new ActionEvent(
                         DataMigrationProgressView.this,ActionEvent.ACTION_PERFORMED,
                         ViewController.DataMigrationViewControllerActionEvent.READY_FOR_RECEIPT_OF_SECONDARY_CONDITION_MIGRATION_PROGRESS.toString());
+                getMyController().actionPerformed(actionEvent);
+                break;
+            case PREPARE_FOR_RECEIPT_OF_TREATMENT_MIGRATION_PROGRESS:
+                barTreatment.setIndeterminate(true);
+                barTreatment.setValue(0);
+                setMode(Mode.TREATMENT);
+                actionEvent = new ActionEvent(
+                        DataMigrationProgressView.this,ActionEvent.ACTION_PERFORMED,
+                        ViewController.DataMigrationViewControllerActionEvent.READY_FOR_RECEIPT_OF_TREATMENT_MIGRATION_PROGRESS.toString());
                 getMyController().actionPerformed(actionEvent);
                 break;
         }

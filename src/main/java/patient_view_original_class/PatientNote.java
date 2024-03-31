@@ -2,8 +2,9 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package model;
+package patient_view_original_class;
 
+import model.*;
 //<editor-fold defaultstate="collapsed" desc="Imports">
 
 import repository.Repository;
@@ -133,7 +134,8 @@ public class PatientNote extends Entity implements IEntityStoreActions{
      */
     @Override
     public Point count()throws StoreException{
-        return new Repository().count(this);
+        /*28/03/2024return new Repository().count(this);*/
+        return null;
     }
     
     /**
@@ -142,7 +144,8 @@ public class PatientNote extends Entity implements IEntityStoreActions{
      */
     @Override
     public void create() throws StoreException{
-        new Repository().create(this);
+        /*28/03/2024new Repository().create(this);*/
+
     }
     
     /**
@@ -151,7 +154,7 @@ public class PatientNote extends Entity implements IEntityStoreActions{
      */
     @Override
     public void delete() throws StoreException{
-        new Repository().delete(this, getDatestamp(), getPatientKey());
+        /*28/03/2024new Repository().delete(this, getDatestamp(), getPatientKey());*/
     }
     
     /**
@@ -169,7 +172,7 @@ public class PatientNote extends Entity implements IEntityStoreActions{
      */
     @Override
     public Integer insert() throws StoreException{
-        setKey(new Repository().insert(this));
+        /*28/03/2024setKey(new Repository().insert(this));*/
         return getKey();
     }
     
@@ -191,7 +194,7 @@ public class PatientNote extends Entity implements IEntityStoreActions{
         PatientNote patientNote = null;  
         switch (getScope()){
             case SINGLE:
-                patientNote = new Repository().read(this, getKey());
+                /*28/03/2024patientNote = new Repository().read(this, getKey());*/
                 if (this.getPatient()==null){
                     p = new Patient(patientNote.getPatientKey());
                     p.setScope(Scope.SINGLE);
@@ -206,7 +209,7 @@ public class PatientNote extends Entity implements IEntityStoreActions{
               
                 break;
             case FOR_PATIENT:
-                this.set((new Repository().read(this, null)).get());
+                /*28/03/2024this.set((new Repository().read(this, null)).get());*/
                 it = this.get().iterator();
                 while(it.hasNext()){
                     patientNote = (PatientNote)it.next();
@@ -223,12 +226,12 @@ public class PatientNote extends Entity implements IEntityStoreActions{
     
     public void recover()throws StoreException{
         this.setScope(Scope.DELETED);
-        new Repository().recover(this,getKey());
+        /*28/03/2024new Repository().recover(this,getKey());*/
     }
     
     @Override
     public void update()throws StoreException{
-        new Repository().update(this, getKey());
+        /*28/03/2024new Repository().update(this, getKey());*/
     }
     /**
      * Part of data migration facility; refer to DesktopVC main() method for its invocation
@@ -246,8 +249,8 @@ public class PatientNote extends Entity implements IEntityStoreActions{
                 patientNote.setDatestamp(a.getStart());
                 patientNote.setNote(a.getNotes());
                 patientNote.setLastUpdated(LocalDateTime.now());
-                patientNote.setKey(new Repository().insert(patientNote));
-                a.setPatientNote(patientNote);
+                /*28/03/2024patientNote.setKey(new Repository().insert(patientNote));*/
+                /*28/03/2024a.setPatientNote(patientNote);*/
                 a.update();
             }
     }
@@ -257,8 +260,8 @@ public class PatientNote extends Entity implements IEntityStoreActions{
         patientNote.setDatestamp(a.getStart());
         patientNote.setNote(a.getNotes());
         patientNote.setLastUpdated(LocalDateTime.now());
-        patientNote.setKey(new Repository().insert(patientNote));
-        a.setPatientNote(patientNote);
+        /*28/03/2024patientNote.setKey(new Repository().insert(patientNote));*/
+        /*28/03/2024a.setPatientNote(patientNote);*/
         a.update();
     }
     
