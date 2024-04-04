@@ -1436,6 +1436,15 @@ public class DesktopViewController extends ViewController{
         }*/
         
         try{
+            Treatment treatment = new Treatment();
+            treatment.setScope(Entity.Scope.ALL);
+            treatment.delete();
+        }catch (StoreException ex){
+            displayErrorMessage(ex.getMessage(),
+                    "Desktop view controller",JOptionPane.WARNING_MESSAGE);
+        }
+        
+        try{
             Patient patient = new Patient();
             patient.setScope(Entity.Scope.ALL);
             patient.delete();

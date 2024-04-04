@@ -33,6 +33,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Optional;
 import javax.swing.JOptionPane;
+import model.AppointmentTreatment;
+import model.Entity;
+import model.Treatment;
+import model.TreatmentWithState;
 
 /**
  *
@@ -334,10 +338,11 @@ public class ScheduleViewController extends ViewController{
                  * -- note: View.factory when opening a modal JInternalFrame does not return until the JInternalFrame has been closed
                  * -- at which stage its appropriate to re-enable the View menu on the Desktop View Controller's view
                  */
+                /*
                 ActionEvent actionEvent = new ActionEvent(
                         this,ActionEvent.ACTION_PERFORMED,
                         DesktopViewController.DesktopViewControllerActionEvent.MODAL_VIEWER_CLOSED.toString());
-                this.getMyController().actionPerformed(actionEvent);
+                this.getMyController().actionPerformed(actionEvent);*/
             }
             catch (StoreException ex){
                 String message = ex.getMessage();
@@ -672,6 +677,9 @@ public class ScheduleViewController extends ViewController{
                 break;
             case APPOINTMENT_EMPTY_SLOT_SCAN_CONFIGURATION_VIEW:
                 doEmptySlotScanConfigurationViewAction(e);
+                break;
+            case APPOINTMENT_TREATMENT_VIEW:
+                doAppointmentTreatmentViewAction(e);
                 break;
             case NON_SURGERY_DAY_EDITOR_VIEW:
                 doNonSurgeryDayScheduleEditorViewAction(e);
@@ -1084,18 +1092,81 @@ getDescriptor().getViewDescription().getScheduleDay());
         }
     }
     
-    /**
-     * handles both CREATE and UPDATE actions in the secondary view, ModalAppointmentCreateEditorView; thus
-     * -- APPOINTMENT_SCHEDULE_CREATE_REQUEST & APPOINTMENT_EDITOR_UPDATE_REQUEST
- ---- on receipt of ActionEvent the secondary view is closed
- ---- the requested change is validated for correctness
- ------ if correct the current appointment schedule is updated
- ------ and a APPOINTMENT_SCHEDULE_VIEW_CONTROLLER_CHANGE_NOTIFICATION property change event fired to this ciew controller's controller (DesktopViewController) 
- ------ if the change is not correct an error message is fired off to the secondary view
- ------ and the appointment schedule refreshed
- ------ this shouldn't be necessary but changes made to objects in the secondary view copy though to the primary view independently of the program code (?)
-     * @param e, ActionEvent 
-     */
+    private void doAppointmentTreatmentViewAction(ActionEvent e){
+        boolean isError = false;
+        AppointmentTreatment appointmentTreatment = null;
+        Appointment appointment = getDescriptor()
+                .getControllerDescription().getAppointment();
+        Treatment treatment = getDescriptor()
+                .getViewDescription().getTreatmentWithState().getTreatment();
+        appointmentTreatment = 
+                        new AppointmentTreatment(appointment, treatment);
+        appointmentTreatment.setScope(Scope.SINGLE);
+        ViewController.ScheduleViewControllerActionEvent actionCommand =
+               ViewController.ScheduleViewControllerActionEvent.valueOf(e.getActionCommand());
+        switch (actionCommand){
+            case APPOINTMENT_TREATMENT_STATE_SET_REQUEST:
+                try{
+                    appointmentTreatment.insert();
+                }catch(StoreException ex){
+                    String message = ex.getMessage() + "\n"
+                            + "StoreException handled in "
+                            + "ScheduleViewController::doAppointmentTreatmentViewAction("
+                            + actionCommand.toString() + ")";
+                    displayErrorMessage(message, 
+                            "Schedule view controller error",
+                            JOptionPane.WARNING_MESSAGE);
+                    isError = true;
+                }
+                break;
+            case APPOINTMENT_TREATMENT_STATE_RESET_REQUEST:
+                try{
+                    appointmentTreatment.delete();
+                }catch(StoreException ex){
+                    String message = ex.getMessage() + "\n"
+                            + "StoreException handled in "
+                            + "ScheduleViewController::doAppointmentTreatmentViewAction("
+                            + actionCommand.toString() + ")";
+                    displayErrorMessage(message, 
+                            "Schedule view controller error",
+                            JOptionPane.WARNING_MESSAGE);
+                    isError = true;
+                }
+                break;
+        }
+        if (!isError){
+            try{
+                TreatmentWithState treatmentWithState =
+                        getTreatmentsWithState(appointment);
+                getDescriptor().getControllerDescription()
+                        .setTreatmentWithState(treatmentWithState);
+                String appointmentNotes = null;
+                for(TreatmentWithState tws : treatmentWithState.get()){
+                    if (tws.getState()) 
+                        appointmentNotes = 
+                                appointmentNotes + tws.getDescription() + "; ";
+                }
+                doAppointmentForDayRequest(appointment.getStart().toLocalDate());
+                firePropertyChangeEvent(
+                        ViewController.ScheduleViewControllerPropertyChangeEvent.
+                                APPOINTMENT_TREATMENT_WITH_STATE_RECEIVED.toString(),
+                        (View)e.getSource(),
+                        this,
+                        null,
+                        null
+                );
+            }catch(StoreException ex){
+                String message = ex.getMessage() + "\n"
+                            + "StoreException handled in "
+                            + "ScheduleViewController::doAppointmentTreatmentViewAction()";
+                    displayErrorMessage(message, 
+                            "Schedule view controller error",
+                            JOptionPane.WARNING_MESSAGE);
+
+            }
+        }
+    }
+
     private void doAppointmentCreatorEditorViewAction(ActionEvent e){
         Appointment result;
         Appointment changedSlotRequest = 
@@ -1106,6 +1177,20 @@ getDescriptor().getViewDescription().getScheduleDay());
         ViewController.ScheduleViewControllerActionEvent actionCommand =
                ViewController.ScheduleViewControllerActionEvent.valueOf(e.getActionCommand());        
         switch (actionCommand){
+            case APPOINTMENT_EDITOR_TREATMENT_VIEW_REQUEST:
+                /**
+                 * -- check ModalAppointmentEditorView viewmode == CREATE
+                 * -- send message to ModalAppointmentEditorView to close view
+                 * ---- assumes current ControllerDescription will re-launch view ok
+                 * -- launch ModalTreatmetView
+                 * -- when that closes relaunch ModalAppointmentEditorView
+                 */
+                
+                View view = (View)e.getSource();
+                doRequestCloseModalAppointmentEditorView(view);
+                doOpenTreatmentView();
+                doReopenModelAppointmentEditorView();
+                break;
             case APPOINTMENT_EDITOR_CREATE_REQUEST:
                 setScheduleReport(new ScheduleReport());
                 result = doAppointmentCreateRequest(e, changedSlotRequest);
@@ -1175,6 +1260,74 @@ getDescriptor().getViewDescription().getScheduleDay());
                 break;
             
         } 
+    }
+    
+    private TreatmentWithState getTreatmentsWithState(
+            Appointment appointment)throws StoreException{
+        TreatmentWithState theTreatmentWithState = new TreatmentWithState();
+        Treatment treatment = new Treatment();
+        treatment.setScope(Entity.Scope.ALL);
+        treatment = treatment.read();
+        AppointmentTreatment appointmentTreatment = new AppointmentTreatment(appointment);
+        appointmentTreatment.setScope(Entity.Scope.FOR_APPOINTMENT);
+        appointmentTreatment = appointmentTreatment.read();
+        for(Treatment t : treatment.get()){
+            TreatmentWithState treatmentWithState = new TreatmentWithState(t);
+            //treatmentWithState.setDescription(t.getDescription());
+            for(AppointmentTreatment at : appointmentTreatment.get()){
+                if (t.getKey().equals(at.getTreatment().getKey()))   
+                    treatmentWithState.setState(true); 
+            }
+            theTreatmentWithState.get().add(treatmentWithState);
+        }
+        return theTreatmentWithState;
+    }
+    
+    private void doReopenModelAppointmentEditorView(){
+        setModalView((ModalView)new View().make(
+                    View.Viewer.APPOINTMENT_EDITOR_VIEW,
+                    this, 
+                    this.getDesktopView()).getModalView());
+        ActionEvent actionEvent = new ActionEvent(
+                this,ActionEvent.ACTION_PERFORMED,
+                DesktopViewController.DesktopViewControllerActionEvent.MODAL_VIEWER_CLOSED.toString());
+        this.getMyController().actionPerformed(actionEvent);
+    }
+    
+    private void doOpenTreatmentView(){
+        Appointment appointment = getDescriptor()
+                .getControllerDescription().getAppointment();
+        try{
+            TreatmentWithState treatmentWithState =
+                    getTreatmentsWithState(appointment);
+            getDescriptor().getControllerDescription()
+                    .setTreatmentWithState(treatmentWithState);
+            setModalView((ModalView)new View().make(
+                        View.Viewer.APPOINTMENT_TREATMENT_VIEW,
+                        this, 
+                        this.getDesktopView()).getModalView());
+            ActionEvent actionEvent = new ActionEvent(
+                    this,ActionEvent.ACTION_PERFORMED,
+                    DesktopViewController.DesktopViewControllerActionEvent.MODAL_VIEWER_CLOSED.toString());
+            this.getMyController().actionPerformed(actionEvent);
+            doReopenModelAppointmentEditorView();
+        }catch(StoreException ex){
+            String message = ex.getMessage() + "\n"
+                    + "StoreException handled in ScheduleViewController:: getTreatmentWithState()";
+            displayErrorMessage(message, "Schedule view controller error",
+                    JOptionPane.WARNING_MESSAGE);
+        }
+    }
+    
+    private void doRequestCloseModalAppointmentEditorView(View view){
+        firePropertyChangeEvent(
+            ViewController.PatientViewControllerPropertyChangeEvent.
+                CLOSE_VIEW_REQUEST_RECEIVED.toString(),
+            view,
+            this,
+            null,
+            null
+        );
     }
 
     private void doDesktopViewControllerAction(ActionEvent e){

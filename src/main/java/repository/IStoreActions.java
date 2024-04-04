@@ -7,7 +7,6 @@ package repository;
 
 import model.*;
 import java.awt.Point;
-import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -23,6 +22,7 @@ public interface IStoreActions {
     public Point count(Medication medication)throws StoreException;
     public Point count(ClinicNote clinicNote)throws StoreException;
     public Point count(Treatment treatment)throws StoreException;
+    public Point count(AppointmentTreatment appointmentTreatment)throws StoreException;
     
     public void create(Appointment a) throws StoreException;
     public void create(Notification pn) throws StoreException;
@@ -35,6 +35,7 @@ public interface IStoreActions {
     public void create(PrimaryCondition pc)throws StoreException;
     public void create(SecondaryCondition sc)throws StoreException;
     public void create(Treatment treatment)throws StoreException;
+    public void create(AppointmentTreatment appointmentTreatment)throws StoreException;
     
     public void delete(Appointment a, Integer key) throws StoreException;
     public void delete(Patient p, Integer patientKey) throws StoreException;
@@ -46,6 +47,7 @@ public interface IStoreActions {
     public void delete(Medication medication)throws StoreException;
     public void delete(ClinicNote clinicNote)throws StoreException;
     public void delete(Treatment treatment)throws StoreException;
+    public void delete(AppointmentTreatment appointmentTreatment)throws StoreException;
     
     public List<String[]> importEntityFromCSV(Entity entity) throws StoreException;
     
@@ -60,6 +62,7 @@ public interface IStoreActions {
     public Integer insert(SecondaryCondition sc)throws StoreException;
     public Integer insert(ClinicNote clinicNote)throws StoreException;
     public Integer insert(Treatment treatment)throws StoreException;
+    public Integer insert(AppointmentTreatment appointmentTreatment)throws StoreException;
     
     //public void populate(SurgeryDaysAssignment data)throws StoreException;
     
@@ -74,6 +77,7 @@ public interface IStoreActions {
     public SecondaryCondition read(SecondaryCondition sc)throws StoreException;
     public ClinicNote read(ClinicNote clinicNote)throws StoreException;
     public Treatment read(Treatment treatment)throws StoreException;
+    public AppointmentTreatment read(AppointmentTreatment appointmentTreatment)throws StoreException;
     
     public void recover(Appointment a, Integer key) throws StoreException;
     public void recover(Patient p, Integer key) throws StoreException;
@@ -90,4 +94,5 @@ public interface IStoreActions {
     public void update(SecondaryCondition sc)throws StoreException;
     public void update(ClinicNote clinicNote)throws StoreException;
     public void update(Treatment treatment)throws StoreException;
+    public void update(AppointmentTreatment appointmentTreatment)throws StoreException;
 }

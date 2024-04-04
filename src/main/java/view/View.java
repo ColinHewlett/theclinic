@@ -123,6 +123,9 @@ public class View extends JInternalFrame
             case APPOINTMENT_EMPTY_SLOT_SCAN_CONFIGURATION_VIEW:
                 setModalView(makeView(new ModalEmptySlotScanConfigurationView(viewer, controller, desktopView)));
                 break;
+            case APPOINTMENT_TREATMENT_VIEW:
+                setModalView(makeView(new ModalAppointmentTreatmentView(viewer, controller, desktopView)));
+                break;
             case NOTE_TAKER:
                 setModalView(makeView(new ModalNoteTaker(viewer, controller, desktopView)));
                 break;    
@@ -162,6 +165,7 @@ public class View extends JInternalFrame
             case SURGERY_DAY_EDITOR_VIEW:
                 setModalView(makeView(new ModalSurgeryDaysEditorView(viewer,controller,desktopView)));
                 break;
+            
             case UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_VIEW:
                 setModalView(makeView(new ModalUnbookableAppointmentSlotEditorView(viewer, controller, desktopView)));
                 break;
@@ -190,6 +194,7 @@ public class View extends JInternalFrame
         
         APPOINTMENT_CREATOR_VIEW,
         APPOINTMENT_EDITOR_VIEW,
+        APPOINTMENT_TREATMENT_VIEW,
         APPOINTMENT_EMPTY_SLOT_SCAN_CONFIGURATION_VIEW,
         APPOINTMENTS_CANCELLED_VIEW,
         CHECKBOX_LIST_VIEW,

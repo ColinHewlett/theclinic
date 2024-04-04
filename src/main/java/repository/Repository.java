@@ -43,8 +43,9 @@ public class Repository implements IStoreActions {
     
     protected enum EntitySQL {
                             APPOINTMENT,
-                            DOCTOR,
+                            APPOINTMENT_TREATMENT,
                             CLINIC_NOTE,
+                            DOCTOR,
                             MEDICATION,
                             PATIENT,
                             PATIENT_NOTIFICATION,
@@ -133,6 +134,19 @@ public class Repository implements IStoreActions {
                                 READ_TREATMENT_FOR_PATIENT,
                                 READ_TREATMENT_NEXT_HIGHEST_KEY,
                                 UPDATE_TREATMENT,
+                                
+                                CREATE_APPOINTMENT_TREATMENT_TABLE,
+                                COUNT_APPOINTMENT_TREATMENT,
+                                DELETE_ALL_APPOINTMENT_TREATMENT,
+                                DELETE_APPOINTMENT_TREATMENT,
+                                INSERT_APPOINTMENT_TREATMENT,
+                                READ_APPOINTMENT_TREATMENT,
+                                READ_APPOINTMENT_TREATMENT_FOR_APPOINTMENT,
+                                READ_APPOINTMENT_TREATMENT_FOR_TREATMENT,
+                                READ_ALL_APPOINTMENT_TREATMENT,
+                                //READ_APPOINTMENT_TREATMENT_FOR_PATIENT,
+                                //READ_APPOINTMENT_TREATMENT_NEXT_HIGHEST_KEY,
+                                UPDATE_APPOINTMENT_TREATMENT,
                                 
                                 CREATE_DOCTOR_TABLE,
                                 COUNT_DOCTOR,
@@ -273,6 +287,9 @@ public class Repository implements IStoreActions {
                 case APPOINTMENT:
                     result = doPMSSQLforAppointment(pmsSQL, (Entity)client);
                     break;
+                case APPOINTMENT_TREATMENT:
+                    result = doPMSSQLforAppointmentTreatment(pmsSQL, (Entity)client);
+                    break;
                 case CLINIC_NOTE:
                     result = doPMSSQLforClinicNote(pmsSQL, (Entity)client);
                     break;    
@@ -405,6 +422,7 @@ public class Repository implements IStoreActions {
         if (entity.getIsMedication()) return "Medication";
         if (entity.getIsDoctor()) return "Doctor";
         if (entity.getIsTreatment()) return "Treatment";
+        if (entity.getIsAppointmentTreatment()) return "AppointmentTreatment";
         return null;
     }
     
@@ -1065,6 +1083,30 @@ public class Repository implements IStoreActions {
             }else{
                 String message = "Entity not defined as a Condition\n"
                         + "StoreException raised in repository::doInsertTreatment()";
+                throw new StoreException(message, 
+                        StoreException.ExceptionType.UNEXPECTED_DATA_TYPE_ENCOUNTERED);
+            }
+        }
+    }
+    
+    private void doInsertAppointmentTreatment(String sql, Entity entity)throws StoreException{
+        AppointmentTreatment appointmentTreatment = null;
+        if (entity != null){
+            if (entity.getIsAppointmentTreatment()){
+                appointmentTreatment = (AppointmentTreatment)entity;
+                try{
+                    PreparedStatement preparedStatement = getPMSStoreConnection().prepareStatement(sql);
+                    preparedStatement.setLong(1,appointmentTreatment.getAppointment().getKey());
+                    preparedStatement.setLong(2,appointmentTreatment.getTreatment().getKey());
+                    preparedStatement.executeUpdate();
+                }catch(SQLException ex){
+                    throw new StoreException("SQLException message -> " + ex.getMessage() + "\n"
+                            + "StoreException message -> exception raised in Repository::doInsertAppointmentTreatment()",
+                            StoreException.ExceptionType.SQL_EXCEPTION);
+                }
+            }else{
+                String message = "Entity not defined as a Condition\n"
+                        + "StoreException raised in repository::doInsertAppointmentTreatment()";
                 throw new StoreException(message, 
                         StoreException.ExceptionType.UNEXPECTED_DATA_TYPE_ENCOUNTERED);
             }
@@ -1892,6 +1934,47 @@ public class Repository implements IStoreActions {
         }
     }
     
+    private AppointmentTreatment get(AppointmentTreatment appointmentTreatment, ResultSet rs)throws StoreException{
+        AppointmentTreatment result = null;
+        ArrayList<AppointmentTreatment> collection = new ArrayList<>();
+        try{
+            switch (appointmentTreatment.getScope()){
+                case SINGLE:
+                    if (!rs.wasNull()){
+                        rs.next();
+                        Integer appointmentKey = rs.getInt("appointmentKey");
+                        Integer treatmentKey = rs.getInt("treatmentKey");
+                        Appointment appointment = new Appointment(appointmentKey);
+                        Treatment treatment = new Treatment(treatmentKey);
+                        appointmentTreatment = new AppointmentTreatment(appointment,treatment);
+
+                    }
+                    break;
+                default://specifically Scope.FOR_APPOINMENT or FOR_TREATMENT 
+                    if (!rs.wasNull()){
+                        while (rs.next()){
+                            Integer appointmentKey = rs.getInt("appointmentKey");
+                            Integer treatmentKey = rs.getInt("treatmentKey");
+                            AppointmentTreatment theAppointmentTreatment = 
+                                    new AppointmentTreatment(
+                                            new Appointment(appointmentKey),
+                                            new Treatment(treatmentKey));
+                            collection.add(theAppointmentTreatment);
+                        }
+                        appointmentTreatment.set(collection);
+                    }
+                    result = appointmentTreatment;
+                    break;
+            }
+            return result;
+             
+        }catch (SQLException ex) {
+            throw new StoreException("SQLException message -> " + ex.getMessage() + "\n"
+                    + "StoreException -> raised in Repository::get(Treatment,ResultSet)",
+                    StoreException.ExceptionType.SQL_EXCEPTION);
+        }
+    }
+    
     private Entity doReadPatientNotifications(String sql, Entity entity)throws StoreException{
         Entity result;
         try {
@@ -2170,6 +2253,43 @@ public class Repository implements IStoreActions {
         }
     }
     
+    private Entity doReadAppointmentTreatmentWithKey(String sql, Entity entity)throws StoreException{
+        AppointmentTreatment appointmentTreatment = null;
+        if (entity != null) {
+            if (entity.getIsAppointmentTreatment()) {
+                appointmentTreatment = (AppointmentTreatment) entity;
+                
+                try {
+                    PreparedStatement preparedStatement = getPMSStoreConnection().prepareStatement(sql);
+                    switch(appointmentTreatment.getScope()){
+                        case SINGLE:
+                            preparedStatement.setLong(1, appointmentTreatment.getAppointment().getKey());
+                            preparedStatement.setLong(2, appointmentTreatment.getTreatment().getKey());
+                        case FOR_APPOINTMENT:
+                            preparedStatement.setLong(1, appointmentTreatment.getAppointment().getKey());
+                            break;
+                        case FOR_TREATMENT:
+                            preparedStatement.setLong(1, appointmentTreatment.getTreatment().getKey());
+                            break;
+                    }
+                    ResultSet rs = preparedStatement.executeQuery();
+                    //appointmentTreatment.setScope(Entity.Scope.SINGLE);
+                    return get(appointmentTreatment, rs);
+                } catch (SQLException ex) {
+                    throw new StoreException("SQLException message -> " + ex.getMessage() + "\n"
+                            + "StoreException message -> exception raised in Repository::doReadAppointmentTreatmentWithKey()",
+                            StoreException.ExceptionType.SQL_EXCEPTION);
+                }
+            } else {
+                String msg = "StoreException -> unexpected entity type encountered in Repository::doReadAppointmentTreatmentWithKey()";
+                throw new StoreException(msg, StoreException.ExceptionType.UNEXPECTED_DATA_TYPE_ENCOUNTERED);
+            }
+        } else {
+            String msg = "StoreException -> patient note undefined in doReadAppointmentTreatmentWithKey()";
+            throw new StoreException(msg, StoreException.ExceptionType.NULL_KEY_EXCEPTION);
+        }
+    }
+    
     private Entity doReadPrimaryConditionForPatient(String sql, Entity entity)throws StoreException{
         PrimaryCondition pc = null;
         if (entity != null) {
@@ -2431,6 +2551,30 @@ public class Repository implements IStoreActions {
             }   
         }else {
                 String msg = "StoreException -> undefined entity type in doDeleteTreatment(sql, entity)";
+                throw new StoreException(msg, StoreException.ExceptionType.UNEXPECTED_DATA_TYPE_ENCOUNTERED);
+        }
+    }
+    
+    private void doDeleteAppointmentTreatment(String sql, Entity entity)throws StoreException{
+        if (entity != null){
+            if (entity.getIsAppointmentTreatment()){
+                AppointmentTreatment appointmentTreatment = (AppointmentTreatment)entity;
+                try{
+                    PreparedStatement preparedStatement = getPMSStoreConnection().prepareStatement(sql);
+                    preparedStatement.setLong(1, appointmentTreatment.getAppointment().getKey());
+                    preparedStatement.setLong(2, appointmentTreatment.getTreatment().getKey());
+                    preparedStatement.executeUpdate();
+                }catch (SQLException ex){
+                    throw new StoreException("SQLException message -> " + ex.getMessage() + "\n"
+                            + "StoreException message -> exception raised in Repository::doDeleteAppointmentTreatment(sql, entity)",
+                            StoreException.ExceptionType.SQL_EXCEPTION);
+                }
+            } else {
+                String msg = "StoreException -> unexpected entity type in doDeleteAppointmentTreatment(sql, entity)";
+                throw new StoreException(msg, StoreException.ExceptionType.UNEXPECTED_DATA_TYPE_ENCOUNTERED);
+            }   
+        }else {
+                String msg = "StoreException -> undefined entity type in doDeleteAppointmentTreatment(sql, entity)";
                 throw new StoreException(msg, StoreException.ExceptionType.UNEXPECTED_DATA_TYPE_ENCOUNTERED);
         }
     }
@@ -2818,6 +2962,16 @@ public class Repository implements IStoreActions {
         }
     }
     
+    private void doCreateAppointmentTreatmentTable(String sql) throws StoreException{
+        try {
+            PreparedStatement preparedStatement = getPMSStoreConnection().prepareStatement(sql);
+            preparedStatement.execute();
+        } catch (SQLException ex) {
+            throw new StoreException("SQLException message -> " + ex.getMessage() + "\n"
+                    + "StoreException message -> exception raised during doCreateAppointmentTreatmentTable(sql)",
+                    StoreException.ExceptionType.SQL_EXCEPTION);
+        }
+    }
     
     private void doCreateMedicationTable(String sql) throws StoreException{
         try {
@@ -3223,7 +3377,7 @@ public class Repository implements IStoreActions {
                         + "Start = ?,"
                         + "Duration = ?,"
                         /*28/03/2024+ "Notes = ?, "*/
-                        + "hasPatientBeenContacted = ?, "
+                        + "hasPatientBeenContacted = ? "
                         /*28/03/2024+ "patientNoteKey = ? "*/
                         + "WHERE pid = ? ;";
                 doUpdateAppointment(sql, entity);
@@ -3506,7 +3660,8 @@ public class Repository implements IStoreActions {
             case READ_ALL_TREATMENT:
                 sql = "SELECT * "
                         + "FROM Treatment "
-                        + "WHERE isDeleted = false; ";
+                        + "WHERE isDeleted = false "
+                        + "ORDER BY description ASC; ";
                 result = doReadTreatmentAll(sql, (Treatment)entity);
                 break;
             case READ_TREATMENT_NEXT_HIGHEST_KEY:
@@ -3520,6 +3675,93 @@ public class Repository implements IStoreActions {
                         + "isDeleted = ? "
                         + "WHERE pid = ?;";
                 doUpdateTreatment(sql, entity);
+        }
+        return result;
+    }
+    
+    private Entity doPMSSQLforAppointmentTreatment(Repository.PMSSQL q, Entity entity) throws StoreException{
+        Entity result = new Entity();
+        String sql;
+        switch (q){
+            case COUNT_APPOINTMENT_TREATMENT:
+                sql = "SELECT COUNT(*) as row_count "
+                        + "FROM AppointmentTreatment ;";
+                result.setValue(doCount(sql,entity).getValue());
+                sql = "SELECT COUNT(*) as row_count "
+                        + "FROM AppointmentTreatment "
+                        + "WHERE isDeleted = true;";
+                result.setValue(new Point(result.getValue().x,
+                        doCount(sql,entity).getValue().x));
+                break;
+            case CREATE_APPOINTMENT_TREATMENT_TABLE:
+                sql = "CREATE TABLE AppointmentTreatment ("
+                        + "appointmentKey LONG PRIMARY KEY, "
+                        + "treatmentKey LONG PRIMARY KEY;";
+                doCreateAppointmentTreatmentTable(sql);
+                break; 
+            case DELETE_ALL_APPOINTMENT_TREATMENT:
+                sql = "DELETE FROM AppointmentTreatment;";
+                doDelete(sql);
+                break;
+            case DELETE_APPOINTMENT_TREATMENT:
+                sql = "DELETE FROM AppointmentTreatment "
+                        + "WHERE appointmentKey = ? "
+                        + "AND treatmentKey = ?;";
+                doDeleteAppointmentTreatment(sql,entity);
+                break;
+            case INSERT_APPOINTMENT_TREATMENT:
+                sql = "INSERT INTO AppointmentTreatment "
+                        + "(appointmentKey, treatmentKey) "
+                        + "VALUES(?,?);";
+                doInsertAppointmentTreatment(sql, entity);
+                break; 
+            case READ_APPOINTMENT_TREATMENT:
+                sql = "SELECT * "
+                        + "FROM AppointmentTreatment "
+                        + "WHERE appointmentKey = ? "
+                        + "AND treatmentKey = ?; ";
+                result = doReadAppointmentTreatmentWithKey(sql, entity);
+                break;
+            case READ_APPOINTMENT_TREATMENT_FOR_APPOINTMENT:
+                sql = "SELECT * "
+                        + "FROM AppointmentTreatment "
+                        + "WHERE appointmentKey = ?; ";                       
+                result = doReadAppointmentTreatmentWithKey(sql, entity);
+                break;
+            case READ_APPOINTMENT_TREATMENT_FOR_TREATMENT:
+                sql = "SELECT * "
+                        + "FROM AppointmentTreatment "
+                        + "WHERE treatmntKey = ?; ";                       
+                result = doReadAppointmentTreatmentWithKey(sql, entity);
+                break;
+            /*
+            case READ_APPOINTMENT_TREATMENT_FOR_TREATMENT:
+                sql = "SELECT * "
+                        + "FROM AppointmentTreatment "
+                        + "WHERE treatmentKey = ?; ";                       
+                result = doReadAppointmentTreatmentWithKey(sql, entity);
+                break;#
+                */
+            /*
+            case READ_ALL_APPOINTMENT_TREATMENT:
+                sql = "SELECT * "
+                        + "FROM AppointmentTreatment; ";
+                result = doReadAppointmentTreatmentAll(sql, (AppointmentTreatment)entity);
+                break;*/
+            /*
+            case READ_APPOINTMENT_TREATMENT_NEXT_HIGHEST_KEY:
+                sql = "SELECT MAX(pid) as highest_key "
+                        + "FROM AppointmentTreatment;";
+                result = doReadHighestKey(sql);
+                break;*/
+            /*
+            case UPDATE_APPOINTMENT_TREATMENT:
+                sql = "UPDATE AppointmentTreatment "
+                        + "SET description = ?, "
+                        + "isDeleted = ? "
+                        + "WHERE pid = ?;";
+                doUpdateAppointmentTreatment(sql, entity);
+                */
         }
         return result;
     }
@@ -4238,6 +4480,23 @@ public class Repository implements IStoreActions {
     }
     
     @Override
+    public Integer insert(AppointmentTreatment appointmentTreatment)throws StoreException{
+        Entity key = null;
+        Entity entity;
+        IStoreClient client;
+        /*
+        client = runSQL(Repository.EntitySQL.APPOINTMENT_TREATMENT,
+                    Repository.PMSSQL.READ_APPOINTMENT_TREATMENT_NEXT_HIGHEST_KEY,appointmentTreatment);
+        entity = (Entity)client;
+        appointmentTreatment.setKey(entity.getValue().x + 1);*/
+
+        runSQL(Repository.EntitySQL.APPOINTMENT_TREATMENT,
+                Repository.PMSSQL.INSERT_APPOINTMENT_TREATMENT, appointmentTreatment);
+        
+        return null;
+    }
+    
+    @Override
     public Integer insert(PrimaryCondition pc)throws StoreException{
         Entity key = null;
         Entity entity;
@@ -4649,6 +4908,32 @@ public class Repository implements IStoreActions {
         }
     }
     
+    @Override
+    public void delete(AppointmentTreatment appointmentTreatment)throws StoreException{
+        if (appointmentTreatment.getScope()!=null){
+            switch(appointmentTreatment.getScope()){
+               case SINGLE:
+                    runSQL(Repository.EntitySQL.APPOINTMENT_TREATMENT,Repository.PMSSQL.DELETE_APPOINTMENT_TREATMENT,appointmentTreatment);
+                    break;
+               case ALL:
+                    runSQL(Repository.EntitySQL.APPOINTMENT_TREATMENT,Repository.PMSSQL.DELETE_ALL_APPOINTMENT_TREATMENT,null);
+                    break;
+               default:
+                    String error = "Unexpected scope encountered (" 
+                            + appointmentTreatment.getScope().toString() + ")\n" 
+                            + "Raised in Repository.delete(AppointmentTreatment)";
+                    throw new StoreException(error, 
+                            StoreException.ExceptionType.STORE_EXCEPTION);
+            }
+        }else{
+            String error = "Scope of appointmentTreatment delete operation undefined (" 
+                    + appointmentTreatment.getScope().toString() + ")\n" 
+                    + "Raised in Repository.delete(AppointmentTreatment)";
+            throw new StoreException(error, 
+                    StoreException.ExceptionType.STORE_EXCEPTION);
+        }
+    }
+    
    /**
     * Method 'deletes' the specified Notification record from the system via an update to the record's isDeleted field
     * @param patientNotification
@@ -5006,6 +5291,61 @@ public class Repository implements IStoreActions {
     }
     
     @Override
+    public AppointmentTreatment read(AppointmentTreatment appointmentTreatment)throws StoreException{
+        AppointmentTreatment result = null;
+        Entity entity = null;
+
+        switch(appointmentTreatment.getScope()){
+            case SINGLE:{
+                try{
+                    entity = (Entity)runSQL(Repository.EntitySQL.APPOINTMENT_TREATMENT, 
+                            Repository.PMSSQL.READ_APPOINTMENT_TREATMENT, appointmentTreatment);
+                }catch(StoreException ex){
+                    String message = "";
+                    throw new StoreException(
+                        message + "StoreException raised -> null value returned from persistent store "
+                            + "in method Repository::read(AppointmentTreatment)" 
+                                + appointmentTreatment.getScope().toString() + "])\n",
+                        StoreException.ExceptionType.UNEXPECTED_DATA_TYPE_ENCOUNTERED);
+                }
+                break;
+            }
+            case ALL:
+                entity = (Entity)runSQL(Repository.EntitySQL.APPOINTMENT_TREATMENT,
+                            Repository.PMSSQL.READ_ALL_APPOINTMENT_TREATMENT, appointmentTreatment);
+                break;
+            case FOR_APPOINTMENT:
+                entity = (Entity)runSQL(Repository.EntitySQL.APPOINTMENT_TREATMENT,
+                            Repository.PMSSQL.READ_APPOINTMENT_TREATMENT_FOR_APPOINTMENT, appointmentTreatment);
+                break;
+            case FOR_TREATMENT:
+                entity = (Entity)runSQL(Repository.EntitySQL.APPOINTMENT_TREATMENT,
+                            Repository.PMSSQL.READ_APPOINTMENT_TREATMENT_FOR_TREATMENT, appointmentTreatment);
+                break;
+        }
+        if (entity!=null){
+            if (entity.getIsAppointmentTreatment()){
+                result = (AppointmentTreatment)entity;
+                return result;
+            }else{
+                String message = "";
+                throw new StoreException(
+
+                    message + "StoreException raised -> unexpected entity type returned from persistent store "
+                        + "in method Repository::read(AppointmentTreatment)\n",
+                    StoreException.ExceptionType.UNEXPECTED_DATA_TYPE_ENCOUNTERED); 
+            }
+        }else{
+            String message = "";
+            throw new StoreException(
+                message + "StoreException raised -> null value returned from persistent store "
+                    + "in method Repository::read(AppointmentTreatment)" 
+                        + appointmentTreatment.getScope().toString() + "])\n",
+                StoreException.ExceptionType.UNEXPECTED_DATA_TYPE_ENCOUNTERED);
+        }
+    }
+    
+    @Override
     public Doctor read(Doctor doctor)throws StoreException{
         Doctor result = null;
         Entity entity = null;
@@ -5259,6 +5599,18 @@ public class Repository implements IStoreActions {
     }
     
     @Override
+    public Point count(AppointmentTreatment appointmentTreatment)throws StoreException{
+        Entity result = null;
+        if (appointmentTreatment !=null){
+            Repository.PMSSQL sqlStatement = null;
+            sqlStatement = Repository.PMSSQL.COUNT_APPOINTMENT_TREATMENT;
+            result = (Entity)runSQL(Repository.EntitySQL.APPOINTMENT_TREATMENT, 
+                    sqlStatement, appointmentTreatment);
+        }
+        return result.getValue();
+    }
+    
+    @Override
     public Point count(Medication medication)throws StoreException{
         Entity result = null;
         if (medication !=null){
@@ -5421,6 +5773,14 @@ public class Repository implements IStoreActions {
     public void create(Treatment table) throws StoreException{
         Entity value = null;
         runSQL(Repository.EntitySQL.TREATMENT,Repository.PMSSQL.CREATE_TREATMENT_TABLE, value);
+    }
+    
+    
+    
+    @Override
+    public void create(AppointmentTreatment table) throws StoreException{
+        Entity value = null;
+        runSQL(Repository.EntitySQL.APPOINTMENT_TREATMENT,Repository.PMSSQL.CREATE_APPOINTMENT_TREATMENT_TABLE, value);
     }
     
     @Override
@@ -5624,6 +5984,11 @@ public class Repository implements IStoreActions {
     @Override
     public void update(Treatment treatment)throws StoreException{
         runSQL(Repository.EntitySQL.TREATMENT, Repository.PMSSQL.UPDATE_TREATMENT,treatment); 
+    }
+    
+    @Override
+    public void update(AppointmentTreatment treatment)throws StoreException{
+        runSQL(Repository.EntitySQL.APPOINTMENT_TREATMENT, Repository.PMSSQL.UPDATE_APPOINTMENT_TREATMENT,treatment); 
     }
     
     /*28/03/2024

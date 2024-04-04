@@ -1,8 +1,8 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JInternalFrame.java to edit this template
  */
+
 package view.views.modal_views;
 
 import view.views.view_support_classes.renderers.SelectStartTimeLocalDateTimeRenderer;
@@ -10,7 +10,7 @@ import view.views.non_modal_views.DesktopView;
 import controller.Descriptor;
 import controller.ViewController;
 import view.View;
-import model.Patient;
+import model.*;
 /*28/03/2024import model.PatientNote;*/
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -31,17 +31,24 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JSeparator;
 import javax.swing.JOptionPane;
-
+import javax.swing.JPanel;
+import view.views.non_modal_views.PatientView;
 
 /**
  *
  * @author colin
  */
-public class ModalAppointmentEditorView extends ModalView {
+public class ModalAppointmentEditorView extends ModalView implements ActionListener {
     private final String SETTINGS = "Settings";
     private final String FIRST_APPOINTMENT_START_TIME = "First appointment start time";
     private final String LAST_APPOINTMENT_START_TIME = "Last appointment start time";
     private final String EXIT_VIEW = "Close view";
+    private final String CLOSE_CAPTION = "<html><center>Close</center><center>view</center></html>";
+    private final String CREATE_CAPTION = "<html><center>Create</center><center>appointment</center></html>";
+    private final String UPDATE_CAPTION = "<html><center>Update</center><center>appointment</center></html>";
+    private final String TREATMENT_CAPTION = "<html><center>Select</center><center>treatment</center></html>";
+    private final String PANEL_START_DURATION_CAPTION = "Start & duration";
+    private final String PANEL_SCHEDULE_DETAILS_CAPTION = "Schedule details";
     private JMenuBar mbrView = null;
     private JMenu mnuSelectSettings = null; 
     private JMenuItem mniFirstAppointmentStartTime = null;
@@ -55,21 +62,21 @@ public class ModalAppointmentEditorView extends ModalView {
     private final String UPDATE_BUTTON = "Update appointment";
     private DateTimeFormatter appointmentScheduleFormat = DateTimeFormatter.ofPattern("EEEE, MMMM dd yyyy ");
     private DateTimeFormatter ddMMyyyyFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-    
+    /** Creates new form ModalAppointmentCreateView */
     /**
      * 
      * @param myViewType
      * @param myController
      * @param desktopView 
      */
-    public ModalAppointmentEditorView(
-            View.Viewer myViewType, 
+    public ModalAppointmentEditorView(View.Viewer myViewType, 
             ViewController myController,
-            DesktopView desktopView) {//ViewMode arg
+            DesktopView desktopView) {//ViewMode arg) {
         setTitle("Appointment configuration view");
         setMyController(myController);
         setMyViewType(myViewType);
-        setDesktopView(desktopView);  
+        setDesktopView(desktopView); 
+        //initComponents();
     }
     
     private void makeSelectSettingsMenu(){
@@ -141,9 +148,112 @@ public class ModalAppointmentEditorView extends ModalView {
             
         }
     }
-
+    
+    enum Action{
+            REQUEST_CREATE_UPDATE_APPOINTMENT,
+            REQUEST_TREATMENT_SELECTION,
+            REQUEST_CLOSE_VIEW};
+    @Override 
+    public void actionPerformed(ActionEvent e){
+        switch(Action.valueOf(e.getActionCommand())){
+            case REQUEST_CREATE_UPDATE_APPOINTMENT:
+                if (doCreateUpdateAppointmentRequest()){
+                    switch(getViewMode()){
+                        case CREATE:
+                            doCreateAppointmentRequest();
+                            break;
+                        case UPDATE:
+                            doUpdateAppointmentRequest();
+                            break;
+                    }
+                }
+                break;
+            case REQUEST_TREATMENT_SELECTION:
+                doTreatmentSelectionRequest();
+                break;
+            case REQUEST_CLOSE_VIEW:
+                doCloseViewRequest();
+                break;   
+        }
+    }
+    
+    private boolean doCreateUpdateAppointmentRequest(){
+        //int OKToSaveAppointment = JOptionPane.YES_OPTION;
+        //evt = null;
+        boolean OKToSaveAppointment = false;
+        if (this.cmbSelectPatient.getSelectedIndex()!=-1){
+            initialiseEntityDescriptorFromView();
+            if (getMyController().getDescriptor().getViewDescription().getAppointment().getPatient()== null){
+                JOptionPane.showMessageDialog(this, 
+                        "A patient has not been selected for this appointment");
+            }
+            else if (getMyController().getDescriptor().getControllerDescription().getAppointment().getDuration().isZero()){
+                JOptionPane.showMessageDialog(this, 
+                        "Defined duration for appointment must be longer than zero minutes");
+            }
+            else OKToSaveAppointment = true;
+        }  
+        else{
+            JOptionPane.showMessageDialog(this, 
+                    "A patient has not been selected for this appointment");
+        }
+        return OKToSaveAppointment;
+    }
+    
+    private ActionEvent actionEvent = null;
+    private void doCreateAppointmentRequest(){
+        if (doCreateUpdateAppointmentRequest()){
+            actionEvent = new ActionEvent(
+                    this, ActionEvent.ACTION_PERFORMED,
+                    ViewController.ScheduleViewControllerActionEvent.
+                            APPOINTMENT_EDITOR_CREATE_REQUEST.toString());
+            getMyController().actionPerformed(actionEvent);
+        }
+    }
+    
+    private void doUpdateAppointmentRequest(){
+        if (doCreateUpdateAppointmentRequest()){
+            actionEvent = new ActionEvent(
+                    this, ActionEvent.ACTION_PERFORMED,
+                    ViewController.ScheduleViewControllerActionEvent.
+                            APPOINTMENT_EDITOR_UPDATE_REQUEST.toString());
+            getMyController().actionPerformed(actionEvent);
+        }
+    }
+    
+    private void doTreatmentSelectionRequest(){
+        actionEvent = new ActionEvent(
+                this, ActionEvent.ACTION_PERFORMED,
+                ViewController.ScheduleViewControllerActionEvent.
+                        APPOINTMENT_EDITOR_TREATMENT_VIEW_REQUEST.toString());
+        getMyController().actionPerformed(actionEvent);
+    }
+    
+    private void doCloseViewRequest(){
+        try{
+            this.setClosed(true);
+        }
+        catch (PropertyVetoException ex){
+            
+        }
+    }
+    
     @Override
     public void propertyChange(PropertyChangeEvent e){
+        ViewController.ScheduleViewControllerPropertyChangeEvent propertyName =
+                ViewController.ScheduleViewControllerPropertyChangeEvent.valueOf(e.getPropertyName());
+        switch(propertyName){
+            case APPOINTMENT_SCHEDULE_ERROR_RECEIVED:
+                String error = getMyController().getDescriptor().
+                        getControllerDescription().getError();
+                ViewController.displayErrorMessage(error,
+                                                   "Appointment editor dialog error",
+                                                   JOptionPane.ERROR_MESSAGE);
+                break;
+            case CLOSE_VIEW_REQUEST_RECEIVED:
+                doCloseViewRequest();
+                break;
+        }
         if (e.getPropertyName().equals(
             ViewController.ScheduleViewControllerPropertyChangeEvent.APPOINTMENT_SCHEDULE_ERROR_RECEIVED.toString())){
             //Descriptor ed = (Descriptor)e.getNewValue();
@@ -155,14 +265,6 @@ public class ModalAppointmentEditorView extends ModalView {
         }
     }
     
-    /**
-     * method checks if an early appointment slot exists (i.e a slot which starts prior to the FIRST_APPOINTMENT_SLOT start time)
-     * -- yes -> enter the start time first in the list displayed
-     * -- no -> first start time in list is FIRST_APPOINTMENT_SLOT
-     * also checks if a late appointment slot exists (after LAST_APPOINTMENT_SLOT start time)
-     * In either event the list of available times at view initialisation can be lengthened in either direction
-     * @param day; LocalDate represents the schedule day 
-     */
     private void populateSelectStartTime(LocalDate day){
         DefaultComboBoxModel<LocalDateTime> model = new DefaultComboBoxModel<>();
         LocalDateTime value;
@@ -192,18 +294,35 @@ public class ModalAppointmentEditorView extends ModalView {
         }        
         this.cmbSelectStartTime.setModel(model);
     }
-
+    
     @Override
     public void initialiseView(){
         initComponents();
+        this.setClosable(true);
         //initialiseViewMode();
         
         this.setVisible(true);
-        this.setSize(this.getWidth(), 550);
+        this.setSize(this.getWidth(), 360);
         makeSelectSettingsMenu();
         mbrView = new JMenuBar();
         mbrView.add(this.mnuSelectSettings);
         setJMenuBar(mbrView);
+        
+        setViewMode(getMyController().getDescriptor()
+                .getControllerDescription().getViewMode());
+        this.btnCloseView.setText(this.CLOSE_CAPTION);
+        
+        this.btnSelectTreatment.setActionCommand(Action.REQUEST_TREATMENT_SELECTION.toString());
+        this.btnCloseView.setActionCommand(Action.REQUEST_CLOSE_VIEW.toString());
+        this.btnSaveChanges.setActionCommand(Action.REQUEST_CREATE_UPDATE_APPOINTMENT.toString());
+        this.btnSelectTreatment.setActionCommand(Action.REQUEST_TREATMENT_SELECTION.toString());
+        this.btnCloseView.removeActionListener(this);
+        this.btnCloseView.addActionListener(this);
+        this.btnSaveChanges.addActionListener(this);
+        this.btnSelectTreatment.addActionListener(this);
+                
+        setBorderTitles(BorderTitles.SCHEDULE_DETAILS);        
+        setBorderTitles(BorderTitles.START_DURATION); 
         
         LocalDate day = getMyController().getDescriptor().getViewDescription().getScheduleDay();
         this.cmbSelectStartTime.setMaximumRowCount(20);
@@ -217,8 +336,7 @@ public class ModalAppointmentEditorView extends ModalView {
         setViewMode(
                 getMyController()
                         .getDescriptor()
-                        .getControllerDescription().getViewMode()
-        );
+                        .getControllerDescription().getViewMode());
         
         populatePatientSelector(this.cmbSelectPatient);
         this.cmbSelectPatient.setEditable(false);
@@ -235,23 +353,12 @@ public class ModalAppointmentEditorView extends ModalView {
 
         /*28/03/2024PatientNote patientNote = getMyController().getDescriptor().
             getControllerDescription().getAppointment().getPatientNote();*/
-        
-        if (getViewMode().equals(ViewController.ViewMode.UPDATE)){
-            /*28/03/2024this.txaNotepad.setText(getMyController().getDescriptor().
-            getControllerDescription().getAppointment().getPatientNote().getNote());*/
-            
-            
-            this.cmbSelectPatient.setEnabled(false);
-            this.btnSaveChanges.setText(UPDATE_BUTTON);
-        }else{
-            this.btnSaveChanges.setText(CREATE_BUTTON);
-        }
 
         this.setTitle("Apppointment editor for " + day.format(ddMMyyyyFormat));
         
         this.setLayer(JLayeredPane.MODAL_LAYER);
     }
-
+    
     /**
      * the method process
      * -- collects data about appointment (start, duration, notes)
@@ -274,24 +381,8 @@ public class ModalAppointmentEditorView extends ModalView {
                 setStart((LocalDateTime)this.cmbSelectStartTime.getSelectedItem());
         getMyController().getDescriptor().getViewDescription().getAppointment().
                 setDuration(getDurationFromView());
-        getMyController().getDescriptor().getViewDescription().getAppointment().
-                setNotes(this.txaNotepad.getText());
-        
-        /*28/03/2024if (getViewMode().equals(ViewController.ViewMode.CREATE))
-            patientNote = new PatientNote();
-        patientNote.setNote(this.txaNotepad.getText());
-        patientNote.setDatestamp(getMyController()
-                .getDescriptor()
-                .getViewDescription()
-                .getAppointment().getStart());
-        patientNote.setPatient((getMyController()
-                .getDescriptor()
-                .getViewDescription()
-                .getAppointment().getPatient()));
-        patientNote.setLastUpdated(LocalDateTime.now());
-        
-        getMyController().getDescriptor().getViewDescription()
-                .getAppointment().setPatientNote(patientNote);*/
+        /*getMyController().getDescriptor().getViewDescription().getAppointment().
+                setNotes(this.txaNotepad.getText());*/
     }
     private Duration getDurationFromView(){
         return Duration.ofMinutes(
@@ -343,208 +434,212 @@ public class ModalAppointmentEditorView extends ModalView {
             selector.setSelectedIndex(-1);
         }
     }
-    /**
-     * This method is called from within the constructor to initialize the form.
-     * WARNING: Do NOT modify this code. The content of this method is always
-     * regenerated by the Form Editor.
+    
+    private ViewController.ViewMode getViewMode(){
+        return viewMode;
+    }
+    
+    enum BorderTitles{
+        SCHEDULE_DETAILS,
+        START_DURATION
+    };
+    
+    private void setBorderTitles(BorderTitles borderTitles){
+        JPanel panel = null;
+        String caption = null;
+        boolean isPanelBackgroundDefault = false;
+        switch (borderTitles){
+            case START_DURATION:
+                panel = pnlStartAndDuration;
+                caption = PANEL_START_DURATION_CAPTION;
+                isPanelBackgroundDefault = true;
+                break;
+            case SCHEDULE_DETAILS:
+                panel = pnlScheduleDetails;
+                caption = this.PANEL_SCHEDULE_DETAILS_CAPTION;
+                isPanelBackgroundDefault = true;
+                break;
+        }
+        panel.setBorder(
+                javax.swing.BorderFactory.createTitledBorder(
+                        javax.swing.BorderFactory.createEtchedBorder(), 
+                        caption, 
+                        javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, 
+                        javax.swing.border.TitledBorder.DEFAULT_POSITION, 
+                        getBorderTitleFont(), 
+                        getBorderTitleColor())); // NOI18N
+        if (!isPanelBackgroundDefault)
+            panel.setBackground(new java.awt.Color(220, 220, 220));
+    }
+    
+    private void setViewMode(ViewController.ViewMode value){
+        viewMode = value;
+        switch(viewMode){
+            case CREATE:
+                this.btnSaveChanges.setText(CREATE_CAPTION);
+                this.btnSelectTreatment.setEnabled(false);
+                break;
+            case UPDATE:
+                this.btnSaveChanges.setText(UPDATE_CAPTION);
+                this.btnSelectTreatment.setEnabled(true);
+                break;
+        }
+        
+    }
+    
+    
+
+    /** This method is called from within the constructor to
+     * initialize the form.
+     * WARNING: Do NOT modify this code. The content of this method is
+     * always regenerated by the Form Editor.
      */
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
-        pnlAppointmentDetails = new javax.swing.JPanel();
-        lblPatient = new javax.swing.JLabel();
-        lblStart = new javax.swing.JLabel();
-        pnlDuration = new javax.swing.JPanel();
-        pnlScheduleDetails = new javax.swing.JPanel();
-        pnlPatient = new javax.swing.JPanel();
-        spnDurationHours = new javax.swing.JSpinner(new SpinnerNumberModel(0,0,8,1));
-        spnDurationMinutes = new javax.swing.JSpinner(new SpinnerNumberModel(0,0,55,5));
-        lblHours = new javax.swing.JLabel();
-        lblMinutes = new javax.swing.JLabel();
+
+        jPanel1 = new javax.swing.JPanel();
         cmbSelectPatient = new javax.swing.JComboBox<Patient>();
-        cmbSelectStartTime = new javax.swing.JComboBox<LocalDateTime>();
-        pnlNotepad = new javax.swing.JPanel();
-        scrNotepad = new javax.swing.JScrollPane();
-        txaNotepad = new javax.swing.JTextArea();
-        pnlOperations = new javax.swing.JPanel();
+        pnlScheduleDetails = new javax.swing.JPanel();
+        pnlStartAndDuration = new javax.swing.JPanel();
+        cmbSelectStartTime = cmbSelectStartTime = new javax.swing.JComboBox<LocalDateTime>();
+        spnDurationHours = new javax.swing.JSpinner();
+        spnDurationMinutes = new javax.swing.JSpinner();
+        jLabel2 = new javax.swing.JLabel();
+        jLabel3 = new javax.swing.JLabel();
+        jLabel4 = new javax.swing.JLabel();
+        jLabel1 = new javax.swing.JLabel();
+        jPanel2 = new javax.swing.JPanel();
         btnSaveChanges = new javax.swing.JButton();
+        btnSelectTreatment = new javax.swing.JButton();
         btnCloseView = new javax.swing.JButton();
 
-        pnlAppointmentDetails.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        jPanel1.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
-        lblPatient.setText("Patient");
-
-        lblStart.setText("Start");
-
-        pnlDuration.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createEtchedBorder(), "Duration"));
-        pnlScheduleDetails.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createEtchedBorder(), "Schedule details"));
-        lblHours.setText("hours");
-
-        lblMinutes.setText("minutes");
-        
         cmbSelectPatient.setModel(new javax.swing.DefaultComboBoxModel<Patient>());
-        cmbSelectPatient.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+
+        pnlScheduleDetails.setBorder(javax.swing.BorderFactory.createTitledBorder("Schedule details"));
+
+        pnlStartAndDuration.setBorder(javax.swing.BorderFactory.createTitledBorder("Start & duration"));
 
         cmbSelectStartTime.setModel(new javax.swing.DefaultComboBoxModel<LocalDateTime>());
 
-        pnlNotepad.setBorder(javax.swing.BorderFactory.createTitledBorder("Notes"));
+        jLabel2.setText("Start");
 
-        txaNotepad.setColumns(20);
-        txaNotepad.setRows(5);
-        txaNotepad.setLineWrap(true);
-        scrNotepad.setViewportView(txaNotepad);
-        
-        btnSaveChanges.setText("Update appointment");
-        btnSaveChanges.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnCreateUpdateAppointmentActionPerformed(evt);
-            }
-        });
+        jLabel3.setText("Hours");
 
-        btnCloseView.setText("Close view");
-        btnCloseView.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnCloseViewActionPerformed(evt);
-            }
-        });
-       
-        
-        
+        jLabel4.setText("Minutes");
+
+        javax.swing.GroupLayout pnlStartAndDurationLayout = new javax.swing.GroupLayout(pnlStartAndDuration);
+        pnlStartAndDuration.setLayout(pnlStartAndDurationLayout);
+        pnlStartAndDurationLayout.setHorizontalGroup(
+            pnlStartAndDurationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlStartAndDurationLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(pnlStartAndDurationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel2)
+                    .addComponent(jLabel3)
+                    .addComponent(jLabel4))
+                .addGroup(pnlStartAndDurationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(pnlStartAndDurationLayout.createSequentialGroup()
+                        .addGap(65, 65, 65)
+                        .addGroup(pnlStartAndDurationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(spnDurationMinutes, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 50, Short.MAX_VALUE)
+                            .addComponent(spnDurationHours, javax.swing.GroupLayout.Alignment.TRAILING)))
+                    .addGroup(pnlStartAndDurationLayout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(cmbSelectStartTime, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap())
+        );
+        pnlStartAndDurationLayout.setVerticalGroup(
+            pnlStartAndDurationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlStartAndDurationLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(pnlStartAndDurationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(cmbSelectStartTime, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel2))
+                .addGap(18, 18, 18)
+                .addGroup(pnlStartAndDurationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(spnDurationHours, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel3))
+                .addGap(18, 18, 18)
+                .addGroup(pnlStartAndDurationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(spnDurationMinutes, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel4))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
         javax.swing.GroupLayout pnlScheduleDetailsLayout = new javax.swing.GroupLayout(pnlScheduleDetails);
         pnlScheduleDetails.setLayout(pnlScheduleDetailsLayout);
         pnlScheduleDetailsLayout.setHorizontalGroup(
             pnlScheduleDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlScheduleDetailsLayout.createSequentialGroup()
-                .addComponent(lblMinutes)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 61, Short.MAX_VALUE)
-                .addComponent(spnDurationMinutes, javax.swing.GroupLayout.PREFERRED_SIZE, 57, javax.swing.GroupLayout.PREFERRED_SIZE))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlScheduleDetailsLayout.createSequentialGroup()
-                .addGroup(pnlScheduleDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(lblStart)
-                    .addComponent(lblHours))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGroup(pnlScheduleDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addGroup(pnlScheduleDetailsLayout.createSequentialGroup()
-                        .addGap(10, 10, 10)
-                        .addComponent(spnDurationHours))
-                    .addComponent(cmbSelectStartTime, javax.swing.GroupLayout.PREFERRED_SIZE, 67, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGap(12, 12, 12)
+                .addComponent(pnlStartAndDuration, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(12, 12, 12))
         );
         pnlScheduleDetailsLayout.setVerticalGroup(
             pnlScheduleDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlScheduleDetailsLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(pnlScheduleDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(lblStart)
-                    .addComponent(cmbSelectStartTime, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(pnlScheduleDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(lblHours)
-                    .addComponent(spnDurationHours, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(pnlScheduleDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(spnDurationMinutes)
-                    .addComponent(lblMinutes, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap(19, Short.MAX_VALUE))
+                .addComponent(pnlStartAndDuration, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        javax.swing.GroupLayout pnlDurationLayout = new javax.swing.GroupLayout(pnlDuration);
-        pnlDuration.setLayout(pnlDurationLayout);
-        pnlDurationLayout.setHorizontalGroup(
-            pnlDurationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlDurationLayout.createSequentialGroup()
-                .addGap(42, 42, 42)
+        jLabel1.setText("Patient");
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(23, 23, 23)
+                .addComponent(jLabel1)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(cmbSelectPatient, javax.swing.GroupLayout.PREFERRED_SIZE, 164, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                .addGap(12, 12, 12)
+                .addComponent(pnlScheduleDetails, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(12, 12, 12))
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(23, 23, 23)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(cmbSelectPatient, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel1))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(pnlScheduleDetails, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
-        pnlDurationLayout.setVerticalGroup(
-            pnlDurationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlDurationLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(pnlScheduleDetails, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addContainerGap())
-        );
-        
-        javax.swing.GroupLayout pnlPatientLayout = new javax.swing.GroupLayout(pnlPatient);
-        pnlPatient.setLayout(pnlPatientLayout);
-        pnlPatientLayout.setHorizontalGroup(
-            pnlPatientLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlPatientLayout.createSequentialGroup()
-                .addGap(6, 6, 6)
-                .addComponent(lblPatient)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(cmbSelectPatient, javax.swing.GroupLayout.PREFERRED_SIZE, 199, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-        pnlPatientLayout.setVerticalGroup(
-            pnlPatientLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlPatientLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(pnlPatientLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(lblPatient)
-                    .addComponent(cmbSelectPatient, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-        
-        javax.swing.GroupLayout pnlNotepadLayout = new javax.swing.GroupLayout(pnlNotepad);
-        pnlNotepad.setLayout(pnlNotepadLayout);
-        pnlNotepadLayout.setHorizontalGroup(
-            pnlNotepadLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlNotepadLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(scrNotepad)
-                .addContainerGap())
-        );
-        pnlNotepadLayout.setVerticalGroup(
-            pnlNotepadLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlNotepadLayout.createSequentialGroup()
-                .addComponent(scrNotepad, javax.swing.GroupLayout.DEFAULT_SIZE, 116, Short.MAX_VALUE)
-                .addContainerGap())
-        );
 
-        javax.swing.GroupLayout pnlAppointmentDetailsLayout = new javax.swing.GroupLayout(pnlAppointmentDetails);
-        pnlAppointmentDetails.setLayout(pnlAppointmentDetailsLayout);
-        pnlAppointmentDetailsLayout.setHorizontalGroup(
-            pnlAppointmentDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlAppointmentDetailsLayout.createSequentialGroup()
-                .addGap(20, 20, 20)
-                .addGroup(pnlAppointmentDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(pnlNotepad, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(pnlAppointmentDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                        .addComponent(pnlDuration, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(pnlPatient, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                .addContainerGap(20, Short.MAX_VALUE))
-        );
-        pnlAppointmentDetailsLayout.setVerticalGroup(
-            pnlAppointmentDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlAppointmentDetailsLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(pnlPatient, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addComponent(pnlDuration, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(pnlNotepad, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addContainerGap())
-        );
-        
-        javax.swing.GroupLayout pnlOperationsLayout = new javax.swing.GroupLayout(pnlOperations);
-        pnlOperations.setLayout(pnlOperationsLayout);
-        pnlOperationsLayout.setHorizontalGroup(
-            pnlOperationsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlOperationsLayout.createSequentialGroup()
-                .addGap(27, 27, 27)
-                .addComponent(btnSaveChanges)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(btnCloseView)
-                .addContainerGap())
-        );
-        pnlOperationsLayout.setVerticalGroup(
-            pnlOperationsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlOperationsLayout.createSequentialGroup()
-                .addGap(8, 8, 8)
-                .addGroup(pnlOperationsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+        btnSaveChanges.setText("<html><center>Create</center><center>appointment</center></html>");
+
+        btnSelectTreatment.setText("<html><center>Select</center><center>treatment</center></html>");
+
+        btnCloseView.setText("Close view");
+
+        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
+        jPanel2.setLayout(jPanel2Layout);
+        jPanel2Layout.setHorizontalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(btnSaveChanges)
-                    .addComponent(btnCloseView))
-                .addGap(8, 8, 8))
+                    .addComponent(btnSelectTreatment))
+                .addGap(0, 0, Short.MAX_VALUE))
+            .addComponent(btnCloseView, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        );
+        jPanel2Layout.setVerticalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                .addComponent(btnSaveChanges, javax.swing.GroupLayout.PREFERRED_SIZE, 78, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(20, 20, 20)
+                .addComponent(btnSelectTreatment, javax.swing.GroupLayout.PREFERRED_SIZE, 78, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(23, 23, 23)
+                .addComponent(btnCloseView, javax.swing.GroupLayout.PREFERRED_SIZE, 78, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -553,250 +648,41 @@ public class ModalAppointmentEditorView extends ModalView {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(pnlOperations, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(pnlAppointmentDetails, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(12, 12, 12))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(pnlAppointmentDetails, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(pnlOperations, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(8, 8, 8))
-        );
-        
-        /*
-        javax.swing.GroupLayout pnlDurationLayout = new javax.swing.GroupLayout(pnlDuration);
-        pnlDuration.setLayout(pnlDurationLayout);
-        pnlDurationLayout.setHorizontalGroup(pnlDurationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlDurationLayout.createSequentialGroup()
-                .addContainerGap(33, Short.MAX_VALUE)
-                .addGroup(pnlDurationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlDurationLayout.createSequentialGroup()
-                        .addComponent(lblMinutes, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        //.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addGap(15)
-                        .addComponent(spnDurationMinutes, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlDurationLayout.createSequentialGroup()
-                        .addComponent(lblHours, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(spnDurationHours, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addGap(8, 8, 8))
-        );
-        pnlDurationLayout.setVerticalGroup(pnlDurationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlDurationLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(pnlDurationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(spnDurationHours, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(lblHours))
-                .addGap(18, 18, 18)
-                .addGroup(pnlDurationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(spnDurationMinutes, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(lblMinutes))
-                .addContainerGap(22, Short.MAX_VALUE))
-        );
-
-        
-
-        javax.swing.GroupLayout pnlNotepadLayout = new javax.swing.GroupLayout(pnlNotepad);
-        pnlNotepad.setLayout(pnlNotepadLayout);
-        pnlNotepadLayout.setHorizontalGroup(pnlNotepadLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlNotepadLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(scrNotepad)
-                .addContainerGap())
-        );
-        pnlNotepadLayout.setVerticalGroup(pnlNotepadLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlNotepadLayout.createSequentialGroup()
-                .addComponent(scrNotepad, javax.swing.GroupLayout.DEFAULT_SIZE, 111, Short.MAX_VALUE)
-                .addContainerGap())
-        );
-
-        javax.swing.GroupLayout pnlAppointmentDetailsLayout = new javax.swing.GroupLayout(pnlAppointmentDetails);
-        pnlAppointmentDetails.setLayout(pnlAppointmentDetailsLayout);
-        pnlAppointmentDetailsLayout.setHorizontalGroup(
-            pnlAppointmentDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlAppointmentDetailsLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(pnlAppointmentDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlAppointmentDetailsLayout.createSequentialGroup()
-                        .addComponent(lblPatient, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(15,15,15)
-                        //.addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 22, Short.MAX_VALUE)
-                        .addComponent(cmbSelectPatient, javax.swing.GroupLayout.PREFERRED_SIZE, 222, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(6, 6, 6))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlAppointmentDetailsLayout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
-                        .addGroup(pnlAppointmentDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(pnlDuration, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addGroup(pnlAppointmentDetailsLayout.createSequentialGroup()
-                                .addComponent(lblStart, javax.swing.GroupLayout.PREFERRED_SIZE, 53, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                //.addGap(10,10,10)
-                                .addComponent(cmbSelectStartTime, javax.swing.GroupLayout.PREFERRED_SIZE, 89, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addGap(70, 70, 70))
-                    .addComponent(pnlNotepad, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap())
-        );
-        pnlAppointmentDetailsLayout.setVerticalGroup(
-            pnlAppointmentDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlAppointmentDetailsLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(pnlAppointmentDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(lblPatient, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(cmbSelectPatient, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
-                .addGroup(pnlAppointmentDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(lblStart, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(cmbSelectStartTime, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
-                .addComponent(pnlDuration, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addComponent(pnlNotepad, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        
-
-        javax.swing.GroupLayout pnlOperationsLayout = new javax.swing.GroupLayout(pnlOperations);
-        pnlOperations.setLayout(pnlOperationsLayout);
-        pnlOperationsLayout.setHorizontalGroup(pnlOperationsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlOperationsLayout.createSequentialGroup()
-                .addComponent(btnCreateUpdateAppointment, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGap(33, 33, 33)
-                .addComponent(btnCancel, javax.swing.GroupLayout.PREFERRED_SIZE, 96, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
-        );
-        pnlOperationsLayout.setVerticalGroup(pnlOperationsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlOperationsLayout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGroup(pnlOperationsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(btnCreateUpdateAppointment)
-                    .addComponent(btnCancel))
-                .addContainerGap())
-        );
-
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(pnlAppointmentDetails, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGap(10, 10, 10))
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(pnlOperations, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(27, 27, 27))
-        );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(pnlAppointmentDetails, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(pnlOperations, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(10, 10, 10))
-        );
-        */
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void btnCreateUpdateAppointmentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCreateUpdateAppointmentActionPerformed
-        int OKToSaveAppointment = JOptionPane.YES_OPTION;
-        evt = null;
-        if (this.cmbSelectPatient.getSelectedIndex()!=-1){
-            initialiseEntityDescriptorFromView();
-            /**
-            * check if an appointee has been defined
-            * -- note this is defined in ed.getRequest().getPatient()
-            * -- appointee for appointment is not defined in ed.getRequest().getAppointment().getAppointee()!!
-            * check if a non zero duration value has been defined
-            * check if no notes have been defined if still ok to save appointment
-            */
-            if (getMyController().getDescriptor().getViewDescription().getAppointment().getPatient()== null){
-                JOptionPane.showMessageDialog(this, "A patient has not been selected for this appointment");
-            }
-            else if (getMyController().getDescriptor().getControllerDescription().getAppointment().getDuration().isZero()){
-                JOptionPane.showMessageDialog(this, "Defined duration for appointment must be longer than zero minutes");
-            }
-            else {
-                //if (getMyController().getDescriptor().getViewDescription().getAppointment().getNotes().isEmpty()){
-                /*28/03/2024PatientNote patientNote = getMyController().getDescriptor()
-                        .getViewDescription().getAppointment().getPatientNote();
-                if (patientNote.getNote().isEmpty()){
-                    String[] options = {"Yes", "No"};
-                    OKToSaveAppointment = JOptionPane.showOptionDialog(this,
-                        "No notes defined for appointment. Save anyway?",null,
-                        JOptionPane.YES_NO_OPTION,
-                        JOptionPane.INFORMATION_MESSAGE,
-                        null,
-                        options,
-                        null);
-                }*/
-                if (OKToSaveAppointment==JOptionPane.YES_OPTION){
-                    switch (getMyController().getDescriptor().getControllerDescription().getViewMode()){
-                        case CREATE:
-                            evt = new ActionEvent(ModalAppointmentEditorView.this,
-                                ActionEvent.ACTION_PERFORMED,
-                                ViewController.ScheduleViewControllerActionEvent.
-                                APPOINTMENT_EDITOR_CREATE_REQUEST.toString());
-                            ModalAppointmentEditorView.this.getMyController().actionPerformed(evt);
-                            break;
-                        case UPDATE:
-                            evt = new ActionEvent(ModalAppointmentEditorView.this,
-                                ActionEvent.ACTION_PERFORMED,
-                                ViewController.ScheduleViewControllerActionEvent.
-                                APPOINTMENT_EDITOR_UPDATE_REQUEST.toString());
-                            ModalAppointmentEditorView.this.getMyController().actionPerformed(evt);
-                            break;
-                    }
-                }
-            }
-        }else{
-            JOptionPane.showMessageDialog(this, "A patient has not been selected for this appointment");
-        }
-    }//GEN-LAST:event_btnCreateUpdateAppointmentActionPerformed
 
-    private void btnCloseViewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelActionPerformed
-        try{
-            this.setClosed(true);
-        }
-        catch (PropertyVetoException ex){
-            
-        }
-    }//GEN-LAST:event_btnCancelActionPerformed
-
-    /**
-     * 10/02/24
-     */
-    private ViewController.ViewMode getViewMode(){
-        return viewMode;
-    }
-    private void setViewMode(ViewController.ViewMode value){
-        viewMode = value;
-    }
-    
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnCloseView;
     private javax.swing.JButton btnSaveChanges;
+    private javax.swing.JButton btnSelectTreatment;
     private javax.swing.JComboBox<Patient> cmbSelectPatient;
     private javax.swing.JComboBox<LocalDateTime> cmbSelectStartTime;
-    private javax.swing.JLabel lblHours;
-    private javax.swing.JLabel lblMinutes;
-    private javax.swing.JPanel pnlNotepad;
-    private javax.swing.JPanel pnlOperations;
-    private javax.swing.JPanel pnlDuration;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel pnlScheduleDetails;
-    private javax.swing.JPanel pnlPatient;
-    private javax.swing.JScrollPane scrNotepad;
-    private javax.swing.JLabel lblPatient;
-    private javax.swing.JLabel lblStart;
-    private javax.swing.JPanel pnlAppointmentDetails;
+    private javax.swing.JPanel pnlStartAndDuration;
     private javax.swing.JSpinner spnDurationHours;
     private javax.swing.JSpinner spnDurationMinutes;
-    private javax.swing.JTextArea txaNotepad;
     // End of variables declaration//GEN-END:variables
+
 }
