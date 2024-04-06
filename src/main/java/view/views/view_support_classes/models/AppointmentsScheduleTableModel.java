@@ -30,7 +30,7 @@ import javax.swing.table.DefaultTableModel;
 public class AppointmentsScheduleTableModel extends DefaultTableModel{
     //public ArrayList<Appointment> appointments = new ArrayList<>();
     private ArrayList<Appointment> appointments = null;
-    private enum COLUMN{Patient, From,To,Duration,Notes,Reminded};
+    private enum COLUMN{Patient, From,To,Duration,Treatment,Reminded};
     private final Class[] columnClass = new Class[] {
         Patient.class,
         LocalTime.class, 
@@ -151,8 +151,9 @@ public class AppointmentsScheduleTableModel extends DefaultTableModel{
                         case Duration:
                             result = duration;
                             break;
-                        case Notes:
+                        case Treatment:
                             result = /*28/03/2024appointment.getPatientNote()*/""; 
+                            result = appointment.getNotes();
                             break;
                         case Reminded:
                             result = contactStatus;

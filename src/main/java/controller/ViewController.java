@@ -463,6 +463,11 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
                                         Object newPropertyValue
                                         ){
         PropertyChangeSupport pcSupport = new PropertyChangeSupport(this);
+        /*
+        for(PropertyChangeListener pcl : pcSupport.getPropertyChangeListeners()){
+            pcSupport.removePropertyChangeListener(pcl);
+        }
+        */
         pcSupport.addPropertyChangeListener(pcListener);
         PropertyChangeEvent pcEvent = new PropertyChangeEvent(
                 pcSource,
@@ -569,6 +574,12 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
                     
                     break;
                 case UPDATE:
+                    /*05/04/2024 19:31 code update */
+                    Appointment temp = new Appointment(rSlot.getKey());
+                    temp.setScope(Entity.Scope.SINGLE);
+                    temp = temp.read();
+                    rSlot.setNotes(temp.getNotes());
+                    /*end of code update*/
                     rSlot.update();
                     rSlot.setScope(Entity.Scope.SINGLE);
                     result = rSlot.read();
@@ -890,6 +901,12 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
                 //merge first and second appointments
                 first.setDuration(first.getDuration().plus(second.getDuration()));
                 try{
+                    /*05/04/2024 19:31 code update */
+                    Appointment temp = new Appointment(first.getKey());
+                    temp.setScope(Entity.Scope.SINGLE);
+                    temp = temp.read();
+                    first.setNotes(temp.getNotes());
+                    /*end of code update*/
                     first.update();
                     second.setScope(Entity.Scope.SINGLE);
                     second.delete();

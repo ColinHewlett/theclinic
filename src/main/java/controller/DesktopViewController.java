@@ -1509,7 +1509,8 @@ public class DesktopViewController extends ViewController{
             SystemDefinition.setSystemDefinitions(
                     TemplateReader.extract(new HashMap<String,String>()));
             Class.forName("net.ucanaccess.jdbc.UcanaccessDriver");
-            if ((SystemDefinition.getPMSDebug().equals("ENABLED"))){
+            
+            //if ((SystemDefinition.getPMSDebug().equals("ENABLED"))){
                 /*28/03/2024PatientNote patientNote = new PatientNote();
                 try{
                     patientNote.createNotesFromAppointmentTable();
@@ -1518,8 +1519,8 @@ public class DesktopViewController extends ViewController{
                             "Raised in Desktop view controller",
                             JOptionPane.WARNING_MESSAGE);
                 }*/
-                System.exit(0);
-            }
+                /*System.exit(0);
+            }*/
             if (SystemDefinition.getPMSOperationMode().equals("DATA_MIGRATION_ENABLED"))
                 isDataMigrationOptionEnabled = true;
             

@@ -43,13 +43,5 @@ public class TreatmentWithState{
     public void setState(Boolean value){
         state = value;
     }
-      
-    private String description = null;
-    public String getDescription(){
-        return description;
-    }
-    public void setDescription(String value){
-        description = value;
-    }
-    
+
 }

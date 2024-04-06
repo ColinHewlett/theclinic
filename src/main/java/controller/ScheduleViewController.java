@@ -390,6 +390,24 @@ public class ScheduleViewController extends ViewController{
                 }else getDescriptor().getControllerDescription().
                             setAppointmentLateStart(null);
             }
+            /**
+             * generate appointment note from treatments selected
+             */
+            
+            for (Appointment a : appointment.get()){
+                if ((a.getPatient()!=null) ||
+                        (!a.getPatient().toString().equals(
+                                SystemDefinition.APPOINTMENT_UNBOOKABILITY_MARKER))){
+                    TreatmentWithState treatmentWithState = getTreatmentsWithState(a);
+                    String note = new String();
+                    for(TreatmentWithState tws : treatmentWithState.get()){
+                        if (tws.getState()) {
+                            note = note + tws.getTreatment().getDescription() + "; ";
+                            a.setNotes(note);
+                        }  
+                    } 
+                }
+            }
             getDescriptor().getControllerDescription().setAppointments(appointment.get());
             getDescriptor().getControllerDescription().setScheduleDay(day);
             doAppointeeReminderCount(appointment.get());
@@ -524,7 +542,15 @@ public class ScheduleViewController extends ViewController{
                 Appointment appointment = 
                         getDescriptor().getViewDescription().getAppointment();
                 try{
+                    /*05/04/2024 19:31 code update */
+                    Appointment temp = new Appointment(appointment.getKey());
+                    temp.setScope(Entity.Scope.SINGLE);
+                    temp = temp.read();
+                    appointment.setNotes(temp.getNotes());
+                    /*end of code update*/
                     appointment.update();
+                    /*05/04/2024 19:31 next line required to refresh schedule view*/
+                    doAppointmentForDayRequest(appointment.getStart().toLocalDate());
                 }catch (StoreException ex){
                     displayErrorMessage(ex.getMessage(), 
                             "Schedule view controller",JOptionPane.WARNING_MESSAGE);
@@ -919,6 +945,7 @@ getDescriptor().getViewDescription().getScheduleDay());
         /**
          * fire event over to APPOINTMENT_CREATOR_EDITOR_VIEW
          */
+        
         firePropertyChangeEvent(
                 ScheduleViewControllerPropertyChangeEvent.
                         APPOINTMENT_SCHEDULE_ERROR_RECEIVED.toString(),
@@ -1140,12 +1167,6 @@ getDescriptor().getViewDescription().getScheduleDay());
                         getTreatmentsWithState(appointment);
                 getDescriptor().getControllerDescription()
                         .setTreatmentWithState(treatmentWithState);
-                String appointmentNotes = null;
-                for(TreatmentWithState tws : treatmentWithState.get()){
-                    if (tws.getState()) 
-                        appointmentNotes = 
-                                appointmentNotes + tws.getDescription() + "; ";
-                }
                 doAppointmentForDayRequest(appointment.getStart().toLocalDate());
                 firePropertyChangeEvent(
                         ViewController.ScheduleViewControllerPropertyChangeEvent.
@@ -1189,7 +1210,7 @@ getDescriptor().getViewDescription().getScheduleDay());
                 View view = (View)e.getSource();
                 doRequestCloseModalAppointmentEditorView(view);
                 doOpenTreatmentView();
-                doReopenModelAppointmentEditorView();
+                //doReopenModelAppointmentEditorView();
                 break;
             case APPOINTMENT_EDITOR_CREATE_REQUEST:
                 setScheduleReport(new ScheduleReport());
@@ -1306,11 +1327,13 @@ getDescriptor().getViewDescription().getScheduleDay());
                         View.Viewer.APPOINTMENT_TREATMENT_VIEW,
                         this, 
                         this.getDesktopView()).getModalView());
+            /*
             ActionEvent actionEvent = new ActionEvent(
                     this,ActionEvent.ACTION_PERFORMED,
                     DesktopViewController.DesktopViewControllerActionEvent.MODAL_VIEWER_CLOSED.toString());
             this.getMyController().actionPerformed(actionEvent);
             doReopenModelAppointmentEditorView();
+            */
         }catch(StoreException ex){
             String message = ex.getMessage() + "\n"
                     + "StoreException handled in ScheduleViewController:: getTreatmentWithState()";

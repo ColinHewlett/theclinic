@@ -172,7 +172,11 @@ public class ModalAppointmentEditorView extends ModalView implements ActionListe
                 doTreatmentSelectionRequest();
                 break;
             case REQUEST_CLOSE_VIEW:
-                doCloseViewRequest();
+                int reply = JOptionPane.showInternalConfirmDialog(this, 
+                        "Any outstanding appointment changes will not be saved. "
+                                + "Close view anyway?");
+                if (reply == JOptionPane.YES_OPTION)
+                    doCloseViewRequest();
                 break;   
         }
     }
@@ -253,15 +257,6 @@ public class ModalAppointmentEditorView extends ModalView implements ActionListe
             case CLOSE_VIEW_REQUEST_RECEIVED:
                 doCloseViewRequest();
                 break;
-        }
-        if (e.getPropertyName().equals(
-            ViewController.ScheduleViewControllerPropertyChangeEvent.APPOINTMENT_SCHEDULE_ERROR_RECEIVED.toString())){
-            //Descriptor ed = (Descriptor)e.getNewValue();
-            String error = getMyController().getDescriptor().
-                    getControllerDescription().getError();
-            ViewController.displayErrorMessage(error,
-                                               "Appointment editor dialog error",
-                                               JOptionPane.ERROR_MESSAGE);
         }
     }
     

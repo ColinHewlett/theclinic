@@ -10,6 +10,8 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.beans.PropertyVetoException;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import model.TreatmentWithState;
@@ -21,7 +23,7 @@ import view.views.view_support_classes.models.TreatmentWithStateTableModel;
  * @author colin
  */
 public class ModalAppointmentTreatmentView extends ModalView 
-        implements ActionListener, TableModelListener {
+        implements ActionListener, TableModelListener, PropertyChangeListener {
 
     enum Action {
         REQUEST_CLOSE_VIEW
@@ -48,6 +50,17 @@ public class ModalAppointmentTreatmentView extends ModalView
                 }catch (PropertyVetoException ex){
                     
                 }
+                break;
+        }
+    }
+    
+    @Override 
+    public void propertyChange(PropertyChangeEvent e){
+        ViewController.ScheduleViewControllerPropertyChangeEvent propertyName =
+                ViewController.ScheduleViewControllerPropertyChangeEvent.valueOf(e.getPropertyName());
+        switch (propertyName){
+            case APPOINTMENT_TREATMENT_WITH_STATE_RECEIVED:
+                populateTreatmentTable();
                 break;
         }
     }

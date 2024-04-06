@@ -387,6 +387,7 @@ public class Repository implements IStoreActions {
         appointment.setStart(rs.getObject("Start", LocalDateTime.class));
         appointment.setDuration(Duration.ofMinutes(rs.getLong("Duration")));
         /*28/03/2024appointment.setNotes(rs.getString("Notes"));*/
+        appointment.setNotes(rs.getString("Notes"));
         appointment.setHasPatientBeenContacted(rs.getBoolean("hasPatientBeenContacted"));
         appointment.setIsDeleted(rs.getBoolean("isDeleted"));
         appointment.setIsCancelled(rs.getBoolean("isCancelled"));
@@ -628,8 +629,8 @@ public class Repository implements IStoreActions {
                         ((PatientDelegate)delegate.getPatient()).getPatientKey());
                 preparedStatement.setTimestamp(2, Timestamp.valueOf(delegate.getStart()));
                 preparedStatement.setLong(3, delegate.getDuration().toMinutes());
-                /*preparedStatement.setString(4, delegate.getNotes());*/
-                preparedStatement.setLong(4, delegate.getAppointmentKey());
+                preparedStatement.setString(4, delegate.getNotes());
+                preparedStatement.setLong(5, delegate.getAppointmentKey());
                 /*Integer patientNoteKey =
                         ((PatientNoteDelegate)delegate.getPatientNote()).getKey();
                 if (patientNoteKey == null)
@@ -882,10 +883,11 @@ public class Repository implements IStoreActions {
                     preparedStatement.setTimestamp(2, Timestamp.valueOf(delegate.getStart()));
                     preparedStatement.setLong(3, delegate.getDuration().toMinutes());
                     /*28/03/2024preparedStatement.setString(4, delegate.getNotes());*/
-                    preparedStatement.setBoolean(4, delegate.getHasPatientBeenContacted());
+                    preparedStatement.setString(4, delegate.getNotes());
+                    preparedStatement.setBoolean(5, delegate.getHasPatientBeenContacted());
                     /*28/03/2024preparedStatement.setLong(6, 
                             ((repository.PatientNoteDelegate)delegate.getPatientNote()).getKey());*/
-                    preparedStatement.setLong(5, delegate.getAppointmentKey());
+                    preparedStatement.setLong(6, delegate.getAppointmentKey());
                     preparedStatement.executeUpdate();
                 }catch (SQLException ex){
                     throw new StoreException("SQLException message -> " + ex.getMessage() + "\n"
@@ -2990,7 +2992,7 @@ public class Repository implements IStoreActions {
             preparedStatement.execute();
         } catch (SQLException ex) {
             throw new StoreException("SQLException message -> " + ex.getMessage() + "\n"
-                    + "StoreException message -> exception raised during doCreateDctorTable(sql)",
+                    + "StoreException message -> exception raised during doCreateDoctorTable(sql)",
                     StoreException.ExceptionType.SQL_EXCEPTION);
         }
     }
@@ -3246,12 +3248,12 @@ public class Repository implements IStoreActions {
                 switch(repositoryName){
                     case "ACCESS":
                         sql = "CREATE TABLE Appointment ("
-                        + "pid LONG SECONDARY KEY, "
+                        + "pid LONG PRIMARY KEY, "
                         + "patientKey LONG NOT NULL REFERENCES Patient(pid), "
                         /*+ "patientNoteKey LONG NOT NULL REFERENCES PatientNote(pid), "*/
                         + "start DateTime, "
                         + "duration LONG, "
-                        + "notes char, "
+                        + "notes char(255), "
                         + "isDeleted YesNo, "
                         + "hasPatientBeenContacted YesNo, "
                         + "isCancelled YesNo);";
@@ -3276,8 +3278,8 @@ public class Repository implements IStoreActions {
             case INSERT_APPOINTMENT:
                 sql = "INSERT INTO Appointment "
                         /*+ "(PatientKey, Start, Duration, Notes,pid, patientNoteKey) "*/
-                        + "(PatientKey, Start, Duration,pid) "
-                        + "VALUES (?,?,?,?);";
+                        + "(PatientKey, Start, Duration, notes, pid) "
+                        + "VALUES (?,?,?,?,?);";
                 doInsertAppointment(sql, entity);
                 break;
             case RECOVER_APPOINTMENT:
@@ -3376,6 +3378,7 @@ public class Repository implements IStoreActions {
                         + "SET PatientKey = ?, "
                         + "Start = ?,"
                         + "Duration = ?,"
+                        + "Notes = ?, "
                         /*28/03/2024+ "Notes = ?, "*/
                         + "hasPatientBeenContacted = ? "
                         /*28/03/2024+ "patientNoteKey = ? "*/
@@ -3400,7 +3403,7 @@ public class Repository implements IStoreActions {
                 break;
             case CREATE_PATIENT_TABLE:
                 sql = "CREATE TABLE Patient ("
-                        + "pid Long SECONDARY KEY,"
+                        + "pid Long PRIMARY KEY,"
                         + "title Char(10),"
                         + "forenames Char(25), "
                         + "surname Char(25), "
@@ -3552,10 +3555,10 @@ public class Repository implements IStoreActions {
                 break;
             case CREATE_CLINIC_NOTE_TABLE:
                 sql = "CREATE TABLE ClinicNote ("
-                        + "pid LONG PRIMARY KEY, "
-                        + "appointmentKey LONG NOT NULL REFERENCES Appointment(pid), "
-                        + "notes LONGTEXT, "
-                        + "isDeleted YesNo;";
+                        + "pid LONG CONSTRAINT PK_ClinicNote PRIMARY KEY "
+                        + "REFERENCES Appointment(pid), "
+                        + "notes VarChar, "
+                        + "isDeleted YesNo);";
                 doCreateClinicNoteTable(sql);
                 break; 
             case DELETE_ALL_CLINIC_NOTE:
@@ -3630,8 +3633,8 @@ public class Repository implements IStoreActions {
             case CREATE_TREATMENT_TABLE:
                 sql = "CREATE TABLE Treatment ("
                         + "pid LONG PRIMARY KEY, "
-                        + "description SHORTTEXT, "
-                        + "isDeleted YesNo;";
+                        + "description CHAR(255), "
+                        + "isDeleted YesNo);";
                 doCreateTreatmentTable(sql);
                 break; 
             case DELETE_ALL_TREATMENT:
@@ -3695,8 +3698,11 @@ public class Repository implements IStoreActions {
                 break;
             case CREATE_APPOINTMENT_TREATMENT_TABLE:
                 sql = "CREATE TABLE AppointmentTreatment ("
-                        + "appointmentKey LONG PRIMARY KEY, "
-                        + "treatmentKey LONG PRIMARY KEY;";
+                        + "appointmentKey LONG NOT NULL CONSTRAINT FK_AppointmentKey "
+                        + "REFERENCES Appointment(pid), "
+                        + "treatmentKey LONG NOT NULL CONSTRAINT FK_TreatmentKey "
+                        + "REFERENCES Treatment(pid), "
+                        + "CONSTRAINT PK_AppointmentTreatment PRIMARY KEY(appointmentKey,treatmentKey));";
                 doCreateAppointmentTreatmentTable(sql);
                 break; 
             case DELETE_ALL_APPOINTMENT_TREATMENT:
@@ -3793,7 +3799,7 @@ public class Repository implements IStoreActions {
                         + "phone1 Char(30), " 
                         + "email Char(30), " 
                         + "isDeleted YesNo, "
-                        + "lastUpdated DateTime;";
+                        + "lastUpdated DateTime);";
                 doCreateDoctorTable(sql);
                 break; 
             case DELETE_ALL_DOCTOR:
@@ -3873,7 +3879,7 @@ public class Repository implements IStoreActions {
                         + "description Char(50), "
                         + "notes Char(255), "
                         + "isDeleted YesNo, "
-                        + "patientKey LONG NOT NULL REFERENCES Patient(pid);";
+                        + "patientKey LONG NOT NULL REFERENCES Patient(pid));";
                 doCreateMedicationTable(sql);
                 break;
             case DELETE_ALL_MEDICATION:
@@ -3942,10 +3948,10 @@ public class Repository implements IStoreActions {
                 sql = "CREATE TABLE PrimaryCondition ("
                         + "pid LONG PRIMARY KEY, "
                         + "description Char(100), "
-                        + "notes Char(255) "
+                        + "notes Char(255), "
                         + "state YesNo, "
                         + "isDeleted YesNo, "
-                        + "patientKey LONG NOT NULL REFERENCES Patient(pid);";
+                        + "patientKey LONG NOT NULL REFERENCES Patient(pid));";
                 doCreatePrimaryConditionTable(sql);
                 break;
             case DELETE_ALL_PRIMARY_CONDITION:
@@ -4013,13 +4019,13 @@ public class Repository implements IStoreActions {
                 break;
             case CREATE_SECONDARY_CONDITION_TABLE:
                 sql = "CREATE TABLE SecondaryCondition ("
-                        + "pid LONG SECONDARY KEY, "
+                        + "pid LONG PRIMARY KEY, "
                         + "description Char(100), "
                         + "state YesNo, "
                         + "notes Char(255), "
                         + "isDeleted YesNo, "
-                        + "primaryConditionKey LONG NOT NULL REFERENCES PrimaryCondition(pid);";
-                doCreatePrimaryConditionTable(sql);
+                        + "primaryConditionKey LONG NOT NULL REFERENCES PrimaryCondition(pid));";
+                doCreateSecondaryConditionTable(sql);
             case DELETE_ALL_SECONDARY_CONDITION:
                 sql = "DELETE FROM SecondaryCondition;";
                 doDelete(sql);
@@ -4087,7 +4093,7 @@ public class Repository implements IStoreActions {
                 break;
             case CREATE_PATIENT_NOTE_TABLE:
                 sql = "CREATE TABLE PatientNote ("
-                        + "pid LONG SECONDARY KEY, "
+                        + "pid LONG PRIMARY KEY, "
                         + "datestamp DateTime, "
                         + "patientKey LONG NOT NULL REFERENCES Patient(pid), "
                         + "note Long Text, "
@@ -4188,7 +4194,7 @@ public class Repository implements IStoreActions {
                 break;
             case CREATE_NOTIFICATION_TABLE:
                 sql = "CREATE TABLE PatientNotification ("
-                        + "pid LONG SECONDARY KEY, "
+                        + "pid LONG PRIMARY KEY, "
                         + "patientToNotify LONG NOT NULL REFERENCES Patient(pid), "
                         + "notificationDate DateTime, "
                         + "notificationText char,"
@@ -6079,10 +6085,16 @@ public class Repository implements IStoreActions {
                             //01/03/2023
                             create(new Patient());
                             /*28/03/2024create(new PatientNote());*/
+                            create(new PrimaryCondition());
+                            create(new SecondaryCondition());
+                            create(new Doctor());
+                            create(new Medication());
                             create(new Notification());
                             create(new SurgeryDaysAssignment());
                             create(new Appointment());
                             create(new ClinicNote());
+                            create(new Treatment());
+                            create(new AppointmentTreatment());
                         }
                         
                     }catch (IOException io) {
@@ -6155,7 +6167,7 @@ public class Repository implements IStoreActions {
                                         "guardiankey integer,\n" +
                                         "pid integer NOT NULL,\n" +
                                         "isdeleted boolean DEFAULT false,\n" +
-                                        "CONSTRAINT patient_pk SECONDARY KEY (pid),\n" +
+                                        "CONSTRAINT patient_pk PRIMARY KEY (pid),\n" +
                                         "CONSTRAINT patient_fk1 FOREIGN KEY (guardiankey)\n" +
                                         "    REFERENCES public.patient (pid) MATCH SIMPLE\n" +
                                         "    ON UPDATE NO ACTION\n" +
@@ -6169,7 +6181,7 @@ public class Repository implements IStoreActions {
                                     "isdeleted boolean DEFAULT false,\n" +
                                     "lastupdated timestamp without time zone,\n" +
                                     "patientkey integer NOT NULL,\n" +
-                                    "CONSTRAINT patientnote_pk SECONDARY KEY (pid),\n" +
+                                    "CONSTRAINT patientnote_pk PRIMARY KEY (pid),\n" +
                                     "CONSTRAINT patient_fk2 FOREIGN KEY (patientkey)\n" +
                                     "    REFERENCES public.patient (pid) MATCH SIMPLE\n" +
                                     "     ON UPDATE NO ACTION\n" +
@@ -6187,7 +6199,7 @@ public class Repository implements IStoreActions {
                                     "isdeleted boolean DEFAULT false,\n" +
                                     "haspatientbeencontacted boolean DEFAULT false,\n" +
                                     "isCancelled boolean DEFAULT false,\n" +
-                                    "CONSTRAINT appointment_pk SECONDARY KEY (pid),\n" +
+                                    "CONSTRAINT appointment_pk PRIMARY KEY (pid),\n" +
                                     "CONSTRAINT appointment_fk1 FOREIGN KEY (patientkey) \n" +
                                     "   REFERENCES public.patient (pid) MATCH SIMPLE\n" +
                                     "    ON UPDATE NO ACTION\n" +
@@ -6206,7 +6218,7 @@ public class Repository implements IStoreActions {
                                     "    notificationtext character varying(255) COLLATE pg_catalog.\"default\",\n" +
                                     "    patienttonotify integer,\n" +
                                     "    isCancelled boolean DEFAULT false,\n" +
-                                    "    CONSTRAINT patientnotification_pk SECONDARY KEY (pid),\n" +
+                                    "    CONSTRAINT patientnotification_pk PRIMARY KEY (pid),\n" +
                                     "    CONSTRAINT patientnotification_fk1 FOREIGN KEY (patienttonotify)\n" +
                                     "    REFERENCES public.patient (pid) MATCH SIMPLE\n" +
                                     "    ON UPDATE NO ACTION\n" +
@@ -6216,7 +6228,7 @@ public class Repository implements IStoreActions {
                             sql = "CREATE TABLE public.surgerydays(\n" +
                                     "  day character varying(255) COLLATE pg_catalog.\"default\" NOT NULL,\n"+
                                     "  issurgery boolean DEFAULT false,\n" +
-                                    "  CONSTRAINT surgery_days_assignment_pk SECONDARY KEY (day))";
+                                    "  CONSTRAINT surgery_days_assignment_pk PRIMARY KEY (day))";
                             preparedStatement = getPMSStoreConnection().prepareStatement(sql);
                             preparedStatement.execute();
                             instance = this;
