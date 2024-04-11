@@ -49,7 +49,7 @@ public class DesktopViewController extends ViewController{
     private ArrayList<ScheduleViewController>appointmentScheduleViewControllers = null;
     private ArrayList<NotificationViewController> notificationViewControllers = null;
     private ArrayList<PatientViewController> patientViewControllers = null;
-    private ArrayList<NotesViewController> notesViewControllers = null;
+    private ArrayList<TreatmentViewController> treatmentViewControllers = null;
     private ArrayList<DataMigrationProgressViewController> importProgressViewControllers = null;
     private static Boolean isDataMigrationOptionEnabled = null;
     private PropertyChangeSupport pcSupport = null;
@@ -77,7 +77,7 @@ public class DesktopViewController extends ViewController{
         patientViewControllers = new ArrayList<>();
         importProgressViewControllers = new ArrayList<>();
         notificationViewControllers = new ArrayList<>();
-        notesViewControllers = new ArrayList<>();
+        treatmentViewControllers = new ArrayList<>();
         boolean isPMSStoreDefined;
         try{
             new Repository();
@@ -102,9 +102,9 @@ public class DesktopViewController extends ViewController{
         }
     }
     
-    private void doActionEventForNotesViewController(ActionEvent e){
+    private void doActionEventForTreatmentViewController(ActionEvent e){
         String message = null;
-        NotesViewController nvc = (NotesViewController)e.getSource();
+        TreatmentViewController nvc = (TreatmentViewController)e.getSource();
         ViewController.DesktopViewControllerActionEvent actionCommand =
                     ViewController.DesktopViewControllerActionEvent.valueOf(e.getActionCommand());
         switch(actionCommand){
@@ -119,14 +119,14 @@ public class DesktopViewController extends ViewController{
                 );
                 break;
             case VIEW_CONTROLLER_CLOSE_NOTIFICATION:{
-                switch (this.notesViewControllers.size()){
+                switch (this.treatmentViewControllers.size()){
                     case 0:
                         message = "No Notes view controllers found in "
                                                     + "DesktopViewController collection.";
                         break;
                     case 1:
-                        if (nvc.equals(this.notesViewControllers.get(0))){
-                            this.notesViewControllers.remove(0);
+                        if (nvc.equals(this.treatmentViewControllers.get(0))){
+                            this.treatmentViewControllers.remove(0);
                         }
                         else{
                             message = "Could not find Notes view controller in "
@@ -288,8 +288,8 @@ public class DesktopViewController extends ViewController{
                     }
                 }
                 break;
-            case NOTES_VIEW_CONTROLLER_REQUEST:
-                doRequestForNotesViewController(e);
+            case TREAMENT_VIEW_CONTROLLER_REQUEST:
+                doRequestForTreatmentViewController(e);
                 break;
             case SCHEDULE_VIEW_CONTROLLER_REQUEST:
                 /**
@@ -580,9 +580,9 @@ public class DesktopViewController extends ViewController{
                             getDescriptor()
                     );
                     break;
-                case NOTES_VIEW_CONTROLLER_REQUEST:
+                case TREAMENT_VIEW_CONTROLLER_REQUEST:
                     //getDescriptor().getControllerDescription().setPatient(null);
-                    doRequestForNotesViewController(e);
+                    doRequestForTreatmentViewController(e);
                     break;
                     
                 case NOTIFICATION_VIEW_CONTROLLER_REQUEST:
@@ -778,35 +778,41 @@ public class DesktopViewController extends ViewController{
         }
     }
     
-    private void doRequestForNotesViewController(ActionEvent e){
-        NotesViewController nvc = null;
+    private void doRequestForTreatmentViewController(ActionEvent e){
+        TreatmentViewController tvc = null;
+        /*
         PatientViewController pvc = null;
         if (e.getSource() instanceof PatientViewController){
             pvc = (PatientViewController)e.getSource();
             this.getDescriptor().getControllerDescription().setPatient(
                     pvc.getDescriptor().getControllerDescription().getPatient());  
         }
-        if (notesViewControllers.isEmpty()){
-            notesViewControllers.add(
-                    new NotesViewController(
+        */
+        if (treatmentViewControllers.isEmpty()){
+            treatmentViewControllers.add(
+                    new TreatmentViewController(
                             this,
                             getDesktopView()));
-            nvc = notesViewControllers.get(notesViewControllers.size()-1);
+            tvc = treatmentViewControllers.get(treatmentViewControllers.size()-1);
+            setView(new View().make(View.Viewer.TREATMENT_VIEW,
+                        tvc, 
+                        getDesktopView()));
 
             /**
              * 12/02/2024 code logic update
              */
+            /*
             if (e.getSource() instanceof PatientViewController){
                 pvc = (PatientViewController)e.getSource();
-                nvc.getDescriptor().getControllerDescription().setPatient(
+                tvc.getDescriptor().getControllerDescription().setPatient(
                         pvc.getDescriptor().getControllerDescription().getPatient());
             }
-            else nvc.getDescriptor().getControllerDescription().setPatient(null);
-            
+            else tvc.getDescriptor().getControllerDescription().setPatient(null);
+            */
             ActionEvent actionEvent = new ActionEvent(
                     this,ActionEvent.ACTION_PERFORMED,
                     DesktopViewController.DesktopViewControllerActionEvent.INITIALISE_VIEW.toString());
-             nvc.actionPerformed(actionEvent);
+             tvc.actionPerformed(actionEvent);
             /* 
             nvc.setView(new View().make(View.Viewer.NOTES_VIEW,
                     nvc, 
@@ -818,7 +824,7 @@ public class DesktopViewController extends ViewController{
                     doSetupDesktopViewMode();
             }
         }else {
-            notesViewControllers.get(0).getView().toFront();
+            treatmentViewControllers.get(0).getView().toFront();
         }//do nothing because only one patient notification VC allowed
     }
 
@@ -1364,6 +1370,24 @@ public class DesktopViewController extends ViewController{
      */
     private void doRequestForDeleteDataFromPMSDatabase(){
         try{
+            AppointmentTreatment at = new AppointmentTreatment();
+            at.setScope(Entity.Scope.ALL); 
+            at.delete();
+        }catch(StoreException ex){
+            displayErrorMessage(ex.getMessage(),
+                    "Desktop view controller",JOptionPane.WARNING_MESSAGE);
+        }
+        
+        try{
+            Treatment treatment = new Treatment();
+            treatment.setScope(Entity.Scope.ALL); 
+            treatment.delete();
+        }catch(StoreException ex){
+            displayErrorMessage(ex.getMessage(),
+                    "Desktop view controller",JOptionPane.WARNING_MESSAGE);
+        }
+        
+        try{
             Appointment appointment = new Appointment();
             appointment.setScope(Entity.Scope.ALL);
             appointment.delete();
@@ -1480,8 +1504,8 @@ public class DesktopViewController extends ViewController{
                 case "NotificationViewController":
                     doActionEventForNotificationViewController(e);
                     break;
-                case "NotesViewController":
-                    doActionEventForNotesViewController(e);
+                case "TreatmentViewController":
+                    doActionEventForTreatmentViewController(e);
                     break;
                 case "PatientViewController":
                     doActionEventForPatientViewController(e);

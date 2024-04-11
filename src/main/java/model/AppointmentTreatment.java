@@ -54,6 +54,14 @@ public class AppointmentTreatment extends Entity implements IEntityStoreActions 
         treatment = value;
     }
     
+    private String comment = null;
+    public String getComment(){
+        return comment;
+    }
+    public void setComment(String value){
+        comment = value;
+    }
+    
     @Override
     public Point count() throws StoreException{
         return new Repository().count(this);

@@ -16,16 +16,15 @@ import javax.swing.table.AbstractTableModel;
  *
  * @author colin
  */
-public class Appointments6ColumnTableModel extends AbstractTableModel{
+public class CancelledAppointmentsTableModel extends AbstractTableModel{
     public ArrayList<Appointment> appointments = new ArrayList<>();
-    private enum COLUMN{Date,Patient, From,To, Duration, Notes};
+    private enum COLUMN{Date,Patient, From,To, Duration};
     private final Class[] columnClass = new Class[] {
         LocalDateTime.class,
         Patient.class, 
         LocalTime.class, 
         LocalTime.class,
-        Duration.class,
-        String.class};
+        Duration.class};
     
     public ArrayList<Appointment> getAppointments(){
         return this.appointments;
@@ -101,8 +100,6 @@ public class Appointments6ColumnTableModel extends AbstractTableModel{
                         case Duration:
                             result = appointment.getDuration();
                             break;
-                        case Notes:
-                            result = appointment.getNotes();
                     }
                     break;
                 }

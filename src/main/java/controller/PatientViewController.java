@@ -123,7 +123,7 @@ public class PatientViewController extends ViewController {
                     actionEvent = new ActionEvent(
                         this,ActionEvent.ACTION_PERFORMED,
                         ViewController.DesktopViewControllerActionEvent
-                            .NOTES_VIEW_CONTROLLER_REQUEST.toString());
+                            .TREAMENT_VIEW_CONTROLLER_REQUEST.toString());
                     this.getMyController().actionPerformed(actionEvent);
                 }else{
                     JOptionPane.showMessageDialog(getView(), 
@@ -1332,6 +1332,7 @@ public class PatientViewController extends ViewController {
                 Patient p = patient.read();
                 setCurrentlySelectedPatient(p);
                 getDescriptor().getControllerDescription().setPatient(p);
+                doConvertAppointmentNoteToTreatment(p);
                 firePropertyChangeEvent(
                        ViewController.PatientViewControllerPropertyChangeEvent.
                         PATIENT_RECEIVED.toString(),
@@ -1399,16 +1400,24 @@ public class PatientViewController extends ViewController {
                         valueOf(e.getPropertyName());
         switch(propertyName){
             case PATIENT_VIEW_CHANGE_NOTIFICATION:{
+                Patient patient = null;
                 try{
                     Descriptor descriptor = (Descriptor)e.getNewValue();
                     //Patient patient = entityDescriptor.getAppointment().getPatient();
-                    Patient patient = descriptor.getControllerDescription().getPatient();
+                    /*09/04/2024 06:21 updated code to ensure auto refresh of patient view*/
+                    //Patient patient = descriptor.getControllerDescription().getPatient();
+                    Appointment appointment = descriptor
+                            .getControllerDescription().getAppointment();
+                    if (appointment!=null)
+                        patient = descriptor.getControllerDescription()
+                                .getAppointment().getPatient();
                     if (patient != null){
                         if (getDescriptor().getControllerDescription().getPatient()!=null){
                             if (getDescriptor().getControllerDescription().getPatient().getIsKeyDefined()){
                                 if (patient.equals(getDescriptor().getControllerDescription().getPatient())){    
                                         patient.setScope(Scope.SINGLE);
                                         descriptor.getControllerDescription().setPatient(patient.read());
+                                        patient.getAppointmentHistory();
                                         firePropertyChangeEvent(
                                                 ViewController.PatientViewControllerPropertyChangeEvent.
                                                         PATIENT_RECEIVED.toString(),
@@ -1673,5 +1682,27 @@ public class PatientViewController extends ViewController {
                 }
                 break;
         }
+    }
+    
+    private void doConvertAppointmentNoteToTreatment(Patient p)throws StoreException{
+        ArrayList<Appointment> appointments = p.getAppointmentHistory();
+        for(Appointment a : appointments){
+            TreatmentWithState treatmentWithState = getTreatmentsWithState(a);
+            String note = new String();
+            for(TreatmentWithState tws : treatmentWithState.get()){
+                if (tws.getState()) {
+                    note = note + tws.getTreatment().getDescription(); 
+                    if (tws.getComment()!=null){
+                        if (!tws.getComment().trim().isEmpty()){
+                            note = note +" (" + 
+                                    tws.getComment() + "); ";
+                        }
+                    }
+                    a.setNotes(note);
+                }  
+            }
+        }
+        getDescriptor().getControllerDescription()
+                .setAppointments(appointments);
     }
 }

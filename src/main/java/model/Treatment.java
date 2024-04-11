@@ -60,6 +60,8 @@ public class Treatment extends Entity implements IEntityStoreActions{
         description = value;
     }
     
+    
+    
     private boolean state = false;
     public boolean getSttate(){
         return state;

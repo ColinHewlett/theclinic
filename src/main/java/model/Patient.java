@@ -125,7 +125,7 @@ public class Patient extends Entity implements IEntityStoreActions {
     public ArrayList<Appointment> getAppointmentHistory()throws StoreException{
         Appointment appointment = new Appointment();
         appointment.setPatient(this);
-        appointment.setScope(getScope());
+        appointment.setScope(Scope.FOR_PATIENT);
         appointment.read();
         return appointment.get();
     }

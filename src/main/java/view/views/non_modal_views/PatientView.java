@@ -330,7 +330,7 @@ public class PatientView extends View implements ActionListener{
             setViewStatus(true);
             LocalDate date = event.getNewDate();
             if (date != null) {
-                lblNameAge.setText("<" + String.valueOf(getAge(date)) + " yrs)");
+                lblNameAge.setText("(" + String.valueOf(getAge(date)) + " yrs)");
             }         
         }
     }
@@ -840,16 +840,19 @@ public class PatientView extends View implements ActionListener{
     }
     
     private void populateAppointmentsHistoryTable(Patient patient){
-        int appointments = 0;
+        int appointmentHistoryCount = 0;
+        ArrayList<Appointment> appointments = getMyController().getDescriptor()
+                .getControllerDescription().getAppointments();
         Appointments3ColumnTableModel tableModel = 
                 (Appointments3ColumnTableModel)tblAppointmentHistory.getModel(); 
         tableModel.removeAllElements();
+        
         try{
             if (patient.getIsKeyDefined()){//if patient data in view has just been cleared  
                 patient.setScope(Entity.Scope.FOR_PATIENT);
-                appointments = patient.getAppointmentHistory().size();
-                Iterator<Appointment> it = patient.getAppointmentHistory().iterator();
-                while (it.hasNext()){
+                appointmentHistoryCount = appointments.size();
+                Iterator<Appointment> it = appointments.iterator();
+                while (it.hasNext()){        
                     tableModel.addElement(it.next());
                 }
             }
@@ -862,7 +865,7 @@ public class PatientView extends View implements ActionListener{
             TitledBorder titledBorder =
                     (TitledBorder)this.pnlAppointmentHistory.getBorder();
             
-            if (appointments < 3)
+            if (appointmentHistoryCount < 3)
                 titledBorder.setTitle("Appointment history ");
             else titledBorder.setTitle("Appointment history "
                     + "(top of the list is latest of " + patient.getAppointmentHistory().size() 
@@ -1473,7 +1476,7 @@ public class PatientView extends View implements ActionListener{
         scrAppointmentHistory.setViewportView(tblAppointmentHistory);
         ViewController.setJTableColumnProperties(tblAppointmentHistory,
             scrAppointmentHistory.getPreferredSize().width,
-            20,20,60);
+            10,10,80);
         tblAppointmentHistory.addMouseListener(mouseListener);
 
         javax.swing.GroupLayout pnlAppointmentHistoryLayout = new javax.swing.GroupLayout(pnlAppointmentHistory);
@@ -1584,7 +1587,7 @@ public class PatientView extends View implements ActionListener{
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(pnlOperations, javax.swing.GroupLayout.DEFAULT_SIZE, 497, Short.MAX_VALUE)
+                    .addComponent(pnlOperations, javax.swing.GroupLayout.DEFAULT_SIZE, 501, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(pnlPatientSelection, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)

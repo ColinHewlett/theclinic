@@ -1949,17 +1949,17 @@ public class ScheduleView extends View{
         //this.tblAppointments.setModel(tableModel);
         //this.tblAppointments.setRowSelectionAllowed(false);
         this.tblAppointments.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-        
+   
         TableColumnModel columnModel = this.tblAppointments.getColumnModel();
-        columnModel.getColumn(0).setPreferredWidth(205);
+        columnModel.getColumn(0).setPreferredWidth(185);
         columnModel.getColumn(0).setHeaderRenderer(new TableHeaderCellBorderRenderer(Color.LIGHT_GRAY));
         columnModel.getColumn(1).setPreferredWidth(36);
         columnModel.getColumn(1).setHeaderRenderer(new TableHeaderCellBorderRenderer(Color.LIGHT_GRAY));
         columnModel.getColumn(2).setPreferredWidth(36);
         columnModel.getColumn(2).setHeaderRenderer(new TableHeaderCellBorderRenderer(Color.LIGHT_GRAY));
-        columnModel.getColumn(3).setPreferredWidth(/*96*/120);
+        columnModel.getColumn(3).setPreferredWidth(/*96*/110);
         columnModel.getColumn(3).setHeaderRenderer(new TableHeaderCellBorderRenderer(Color.LIGHT_GRAY));
-        columnModel.getColumn(4).setMinWidth(248);
+        columnModel.getColumn(4).setMinWidth(278);
         columnModel.getColumn(4).setHeaderRenderer(new TableHeaderCellBorderRenderer(Color.LIGHT_GRAY));
         columnModel.getColumn(5).setMinWidth(/*20*/50);
         columnModel.getColumn(5).setHeaderRenderer(new TableHeaderCellBorderRenderer(Color.LIGHT_GRAY));

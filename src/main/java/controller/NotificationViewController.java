@@ -245,7 +245,7 @@ public class NotificationViewController extends ViewController{
             //note: View.factory when opening a modal JInternalFrame does not return until the JInternalFrame has been closed
             ActionEvent actionEvent = new ActionEvent(
                    this,ActionEvent.ACTION_PERFORMED,
-                   DesktopViewController.DesktopViewControllerActionEvent.MODAL_VIEWER_CLOSED.toString());
+                   DesktopViewController.DesktopViewControllerActionEvent.MODAL_VIEWER_CLOSED_NOTIFICATION.toString());
             this.getMyController().actionPerformed(actionEvent);
         }catch (StoreException ex){
             String message = ex.getMessage();
@@ -285,7 +285,7 @@ public class NotificationViewController extends ViewController{
             //note: View.factory when opening a modal JInternalFrame does not return until the JInternalFrame has been closed
             ActionEvent actionEvent = new ActionEvent(
                    this,ActionEvent.ACTION_PERFORMED,
-                   DesktopViewController.DesktopViewControllerActionEvent.MODAL_VIEWER_CLOSED.toString());
+                   DesktopViewController.DesktopViewControllerActionEvent.MODAL_VIEWER_CLOSED_NOTIFICATION.toString());
             this.getMyController().actionPerformed(actionEvent);
         }catch (StoreException ex){
             String message = ex.getMessage();

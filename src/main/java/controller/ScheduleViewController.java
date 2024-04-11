@@ -133,6 +133,7 @@ public class ScheduleViewController extends ViewController{
      * 
      */
     private void doAppointmentCancelRequest(){ 
+        Appointment theCancelledAppointment = null;
         //?if (getDescriptorFromView().getViewDescription().getAppointment().getPatient().getIsKeyDefined()){
         if (getDescriptor().getViewDescription().getAppointment().getPatient().getIsKeyDefined()){    
             try{
@@ -146,6 +147,7 @@ public class ScheduleViewController extends ViewController{
                     appointment.delete();
                 }
                 else appointment.cancel();
+                theCancelledAppointment = appointment;
                 if (day.equals(getDescriptor().getControllerDescription().getScheduleDay())){
                     appointment = new Appointment();
                     appointment.setStart(day.atStartOfDay());
@@ -155,7 +157,17 @@ public class ScheduleViewController extends ViewController{
                     getDescriptor().getControllerDescription().setAppointments(appointment.get());
                     getDescriptor().getControllerDescription().setScheduleDay(day);
                     //doAppointeeReminderCount(appointment.get());
-                    getUpdatedAppointmentSlotsForDay(appointment);   
+                    getUpdatedAppointmentSlotsForDay(appointment);  
+                    getDescriptor().getControllerDescription()
+                            .setAppointment(theCancelledAppointment);
+                    firePropertyChangeEvent(
+                        ViewController.DesktopViewControllerPropertyChangeEvent.
+                                APPOINTMENT_SCHEDULE_VIEW_CONTROLLER_CHANGE_NOTIFICATION.toString(),
+                        (DesktopViewController)getMyController(),
+                        this,
+                        null,
+                        getDescriptor()
+                    );
                 }
              
             }
@@ -229,7 +241,7 @@ public class ScheduleViewController extends ViewController{
                  */
                 ActionEvent actionEvent = new ActionEvent(
                        this,ActionEvent.ACTION_PERFORMED,
-                       ViewController.DesktopViewControllerActionEvent.MODAL_VIEWER_CLOSED.toString());
+                       ViewController.DesktopViewControllerActionEvent.MODAL_VIEWER_CLOSED_NOTIFICATION.toString());
                 this.getMyController().actionPerformed(actionEvent);
             }else{
                 if (getDescriptor().getControllerDescription().
@@ -302,7 +314,7 @@ public class ScheduleViewController extends ViewController{
          */
         ActionEvent actionEvent = new ActionEvent(
                this,ActionEvent.ACTION_PERFORMED,
-               ViewController.DesktopViewControllerActionEvent.MODAL_VIEWER_CLOSED.toString());
+               ViewController.DesktopViewControllerActionEvent.MODAL_VIEWER_CLOSED_NOTIFICATION.toString());
         this.getMyController().actionPerformed(actionEvent);
     }
     
@@ -402,7 +414,12 @@ public class ScheduleViewController extends ViewController{
                     String note = new String();
                     for(TreatmentWithState tws : treatmentWithState.get()){
                         if (tws.getState()) {
-                            note = note + tws.getTreatment().getDescription() + "; ";
+                            note = note + tws.getTreatment().getDescription();
+                            if(tws.getComment()!=null){
+                                if(!tws.getComment().trim().isEmpty())
+                                    note = note + " (" + tws.getComment() + ")" + "; ";
+                            }
+                            else note = note + "; ";
                             a.setNotes(note);
                         }  
                     } 
@@ -452,7 +469,7 @@ public class ScheduleViewController extends ViewController{
              */
             ActionEvent actionEvent = new ActionEvent(
                    this,ActionEvent.ACTION_PERFORMED,
-                   DesktopViewController.DesktopViewControllerActionEvent.MODAL_VIEWER_CLOSED.toString());
+                   DesktopViewController.DesktopViewControllerActionEvent.MODAL_VIEWER_CLOSED_NOTIFICATION.toString());
             this.getMyController().actionPerformed(actionEvent);
         }
         catch (StoreException ex){
@@ -476,7 +493,7 @@ public class ScheduleViewController extends ViewController{
              */
             ActionEvent actionEvent = new ActionEvent(
                    this,ActionEvent.ACTION_PERFORMED,
-                   DesktopViewController.DesktopViewControllerActionEvent.MODAL_VIEWER_CLOSED.toString());
+                   DesktopViewController.DesktopViewControllerActionEvent.MODAL_VIEWER_CLOSED_NOTIFICATION.toString());
             this.getMyController().actionPerformed(actionEvent);
         }
         catch (StoreException ex){
@@ -501,7 +518,7 @@ public class ScheduleViewController extends ViewController{
          */
         ActionEvent actionEvent = new ActionEvent(
                 this,ActionEvent.ACTION_PERFORMED,
-                DesktopViewController.DesktopViewControllerActionEvent.MODAL_VIEWER_CLOSED.toString());
+                DesktopViewController.DesktopViewControllerActionEvent.MODAL_VIEWER_CLOSED_NOTIFICATION.toString());
         this.getMyController().actionPerformed(actionEvent);
     }
 
@@ -746,7 +763,7 @@ public class ScheduleViewController extends ViewController{
              */
             ActionEvent actionEvent = new ActionEvent(
                     this,ActionEvent.ACTION_PERFORMED,
-                    ViewController.DesktopViewControllerActionEvent.MODAL_VIEWER_ACTIVATED.toString());
+                    ViewController.DesktopViewControllerActionEvent.MODAL_VIEWER_ACTIVATED_NOTIFICATION.toString());
             this.actionPerformed(actionEvent);     
         }
     }
@@ -839,7 +856,7 @@ public class ScheduleViewController extends ViewController{
              */
             ActionEvent actionEvent = new ActionEvent(
                     this,ActionEvent.ACTION_PERFORMED,
-                    ViewController.DesktopViewControllerActionEvent.MODAL_VIEWER_ACTIVATED.toString());
+                    ViewController.DesktopViewControllerActionEvent.MODAL_VIEWER_ACTIVATED_NOTIFICATION.toString());
             this.actionPerformed(actionEvent); 
             
         }
@@ -981,6 +998,7 @@ getDescriptor().getViewDescription().getScheduleDay());
                 }
                 break;
             case APPOINTMENT_UNCANCEL_REQUEST:{
+                Appointment theUncancelledAppointment = null;
                 Appointment appointment = getDescriptor().getViewDescription().getAppointment();
                 setScheduleReport(new ScheduleReport());
                 try{
@@ -997,7 +1015,7 @@ getDescriptor().getViewDescription().getScheduleDay());
                         Patient patient = appointment.getPatient();
                         getDescriptor().getControllerDescription().setPatient(patient);
                         LocalDate day = appointment.getStart().toLocalDate();
-
+                        theUncancelledAppointment = appointment;
                         appointment.uncancel();
                         appointment.setScope(Scope.CANCELLED);
                         appointment.read();
@@ -1048,6 +1066,7 @@ getDescriptor().getViewDescription().getScheduleDay());
                                    getDescriptor()//event related data        
                            );   
                         }
+                        getDescriptor().getControllerDescription().setAppointment(theUncancelledAppointment);
                         firePropertyChangeEvent(
                             ViewController.DesktopViewControllerPropertyChangeEvent.
                                     APPOINTMENT_SCHEDULE_VIEW_CONTROLLER_CHANGE_NOTIFICATION.toString(),
@@ -1055,7 +1074,7 @@ getDescriptor().getViewDescription().getScheduleDay());
                             this,
                             null,
                             getDescriptor()
-                            );
+                        );
                     }
                 }catch(StoreException ex){
                         String error = ex.getMessage() + "\n"
@@ -1120,18 +1139,143 @@ getDescriptor().getViewDescription().getScheduleDay());
     }
     
     private void doAppointmentTreatmentViewAction(ActionEvent e){
+        Treatment treatment = null;
         boolean isError = false;
         AppointmentTreatment appointmentTreatment = null;
         Appointment appointment = getDescriptor()
                 .getControllerDescription().getAppointment();
-        Treatment treatment = getDescriptor()
-                .getViewDescription().getTreatmentWithState().getTreatment();
+        TreatmentWithState tws = getDescriptor()
+                .getViewDescription().getTreatmentWithState();
         appointmentTreatment = 
-                        new AppointmentTreatment(appointment, treatment);
+                        new AppointmentTreatment(appointment, tws.getTreatment());
         appointmentTreatment.setScope(Scope.SINGLE);
         ViewController.ScheduleViewControllerActionEvent actionCommand =
                ViewController.ScheduleViewControllerActionEvent.valueOf(e.getActionCommand());
         switch (actionCommand){
+            case TREATMENT_CREATE_REQUEST:
+                treatment = tws.getTreatment();
+                try{
+                    treatment.insert();
+                }catch(StoreException ex){
+                    String message = ex.getMessage() + "\n"
+                            + "StoreException handled in "
+                            + "ScheduleViewController::doAppointmentTreatmentViewAction("
+                            + actionCommand.toString() + ")";
+                    displayErrorMessage(message, 
+                            "Schedule view controller error",
+                            JOptionPane.WARNING_MESSAGE);
+                    isError = true;
+                }
+                break;
+            case APPOINTMENT_TREATMENT_CREATE_REQUEST:
+                try{
+                    /*new AppointmentTreatment(
+                            appointment,tws.getTreatment()).insert();*/
+                    appointmentTreatment.insert();
+                }catch(StoreException ex){
+                    String message = ex.getMessage() + "\n"
+                            + "StoreException handled in "
+                            + "ScheduleViewController::doAppointmentTreatmentViewAction("
+                            + actionCommand.toString() + ")";
+                    displayErrorMessage(message, 
+                            "Schedule view controller error",
+                            JOptionPane.WARNING_MESSAGE);
+                    isError = true;
+                }
+                break;
+            case APPOINTMENT_TREATMENT_COMMENT_UPDATE_REQUEST:
+                try{
+                    /*AppointmentTreatment at = new AppointmentTreatment(
+                            appointment, tws.getTreatment());*/
+                    
+                    appointmentTreatment.setComment(tws.getComment());
+                    appointmentTreatment.update();
+                }catch(StoreException ex){
+                    String message = ex.getMessage() + "\n"
+                            + "StoreException handled in "
+                            + "ScheduleViewController::doAppointmentTreatmentViewAction("
+                            + actionCommand.toString() + ")";
+                    displayErrorMessage(message, 
+                            "Schedule view controller error",
+                            JOptionPane.WARNING_MESSAGE);
+                    isError = true;
+                }
+                break;
+            case APPOINTMENT_TREATMENT_DELETE_REQUEST:
+                /**
+                 * Because treatment is not actually being deleted (its 'isDeleted' column is set true)
+                 * Referential integrity between Treatment and AppointmentTreatment tables must be  handled by the code
+                 * So on delete treatment request
+                 * -- check an entry an A table does not exist for the treatment to be deleted
+                 * ---- if it does send error message to view
+                 * ---- else continue with the deletion process
+                 */
+                String error = null;
+                treatment = tws.getTreatment();
+                AppointmentTreatment at = new AppointmentTreatment(
+                        new Appointment(), treatment);
+                at.setScope(Entity.Scope.FOR_TREATMENT);
+                try{
+                    at = at.read();
+                    if (!at.get().isEmpty()) {
+                        error = "<html><center>'" + tws.getTreatment().getDescription() +"' "
+                                + "treatment is currently selected "
+                                + "by one or more appointments</center>"
+                                + "<center>Request to delete aborted</center></html>";
+                        getDescriptor().getControllerDescription().setError(error);
+                        isError = true;
+                    }
+                }catch(StoreException ex){
+                    String message = ex.getMessage() + "\nHandled in "
+                            + "TreatmentViewController::actionPerformed("
+                            + actionCommand + ") after an AppointmentTreatment table read";
+                    displayErrorMessage(message, 
+                            "Treatment view controller error", 
+                            JOptionPane.WARNING_MESSAGE);
+                    getDescriptor().getControllerDescription().setError(null);
+                    isError = true;
+                }
+                if (isError){
+                    firePropertyChangeEvent(
+                        ViewController.ScheduleViewControllerPropertyChangeEvent.
+                                APPOINTMENT_SCHEDULE_ERROR_RECEIVED.toString(),
+                        (View)e.getSource(),
+                        this,
+                        null,
+                        getDescriptor()
+                    );
+                }else{
+                    try{
+                        treatment.setScope(Entity.Scope.SINGLE);
+                        treatment.delete();
+                    }catch(StoreException ex){
+                        String message = ex.getMessage() + "\n"
+                                + "StoreException handled in "
+                                + "ScheduleViewController::doAppointmentTreatmentViewAction("
+                                + actionCommand.toString() + ")";
+                        displayErrorMessage(message, 
+                                "Schedule view controller error",
+                                JOptionPane.WARNING_MESSAGE);
+                        isError = true;
+                    }
+                }
+                break;
+            case APPOINTMENT_TREATMENT_NAME_UPDATE_REQUEST:
+                treatment = tws.getTreatment();
+                try{
+                    treatment.update();
+                }catch(StoreException ex){
+                    String message = ex.getMessage() + "\n"
+                            + "StoreException handled in "
+                            + "ScheduleViewController::doAppointmentTreatmentViewAction("
+                            + actionCommand.toString() + ")";
+                    displayErrorMessage(message, 
+                            "Schedule view controller error",
+                            JOptionPane.WARNING_MESSAGE);
+                    isError = true;
+                }
+                break;
+                
             case APPOINTMENT_TREATMENT_STATE_SET_REQUEST:
                 try{
                     appointmentTreatment.insert();
@@ -1176,6 +1320,14 @@ getDescriptor().getViewDescription().getScheduleDay());
                         null,
                         null
                 );
+                firePropertyChangeEvent(
+                        ViewController.DesktopViewControllerPropertyChangeEvent.
+                                APPOINTMENT_SCHEDULE_VIEW_CONTROLLER_CHANGE_NOTIFICATION.toString(),
+                        (DesktopViewController)getMyController(),
+                        this,
+                        null,
+                        getDescriptor()
+                );
             }catch(StoreException ex){
                 String message = ex.getMessage() + "\n"
                             + "StoreException handled in "
@@ -1183,7 +1335,6 @@ getDescriptor().getViewDescription().getScheduleDay());
                     displayErrorMessage(message, 
                             "Schedule view controller error",
                             JOptionPane.WARNING_MESSAGE);
-
             }
         }
     }
@@ -1210,7 +1361,7 @@ getDescriptor().getViewDescription().getScheduleDay());
                 View view = (View)e.getSource();
                 doRequestCloseModalAppointmentEditorView(view);
                 doOpenTreatmentView();
-                //doReopenModelAppointmentEditorView();
+                doReopenModelAppointmentEditorView();
                 break;
             case APPOINTMENT_EDITOR_CREATE_REQUEST:
                 setScheduleReport(new ScheduleReport());
@@ -1283,6 +1434,7 @@ getDescriptor().getViewDescription().getScheduleDay());
         } 
     }
     
+    /*
     private TreatmentWithState getTreatmentsWithState(
             Appointment appointment)throws StoreException{
         TreatmentWithState theTreatmentWithState = new TreatmentWithState();
@@ -1303,7 +1455,7 @@ getDescriptor().getViewDescription().getScheduleDay());
         }
         return theTreatmentWithState;
     }
-    
+    */
     private void doReopenModelAppointmentEditorView(){
         setModalView((ModalView)new View().make(
                     View.Viewer.APPOINTMENT_EDITOR_VIEW,
@@ -1311,7 +1463,7 @@ getDescriptor().getViewDescription().getScheduleDay());
                     this.getDesktopView()).getModalView());
         ActionEvent actionEvent = new ActionEvent(
                 this,ActionEvent.ACTION_PERFORMED,
-                DesktopViewController.DesktopViewControllerActionEvent.MODAL_VIEWER_CLOSED.toString());
+                DesktopViewController.DesktopViewControllerActionEvent.MODAL_VIEWER_CLOSED_NOTIFICATION.toString());
         this.getMyController().actionPerformed(actionEvent);
     }
     

@@ -12,7 +12,7 @@ import controller.ViewController;
 import model.Appointment;
 import model.Patient;
 import view.views.view_support_classes.renderers.TableHeaderCellBorderRenderer;
-import view.views.view_support_classes.models.Appointments6ColumnTableModel;
+import view.views.view_support_classes.models.CancelledAppointmentsTableModel;
 import view.View;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
@@ -52,9 +52,9 @@ public class ModalAppointmentsCancelledView extends ModalView{
     
     private void populateCancelledAppointmentsTable(){
         if (tblCancelledAppointments.getModel() == null)
-            tblCancelledAppointments.setModel(new Appointments6ColumnTableModel());
-        Appointments6ColumnTableModel model = 
-                (Appointments6ColumnTableModel)tblCancelledAppointments.getModel();
+            tblCancelledAppointments.setModel(new CancelledAppointmentsTableModel());
+        CancelledAppointmentsTableModel model = 
+                (CancelledAppointmentsTableModel)tblCancelledAppointments.getModel();
         model.removeAllElements();
         Iterator<Appointment> it = 
                 getMyController().getDescriptor().getControllerDescription().getAppointmentCancellations().iterator();
@@ -94,7 +94,7 @@ public class ModalAppointmentsCancelledView extends ModalView{
                 btnCloseCancelledAppointmentsViewActionPerformed());
         this.btnUncancelSelectedAppointment.addActionListener((ActionEvent e) ->
                 btnUncancelSelectedAppointmentActionPerformed());
-        tblCancelledAppointments = new JTable(new Appointments6ColumnTableModel());
+        tblCancelledAppointments = new JTable(new CancelledAppointmentsTableModel());
         TableColumnModel columnModel = this.tblCancelledAppointments.getColumnModel();
         columnModel.getColumn(0).setPreferredWidth(70);
         columnModel.getColumn(1).setPreferredWidth(190);
@@ -148,8 +148,7 @@ public class ModalAppointmentsCancelledView extends ModalView{
     private void btnUncancelSelectedAppointmentActionPerformed(){
         int row = this.tblCancelledAppointments.getSelectedRow();
         if (row != -1){
-            getMyController().getDescriptor().getViewDescription().setAppointment(
-                    ((Appointments6ColumnTableModel)tblCancelledAppointments.
+            getMyController().getDescriptor().getViewDescription().setAppointment(((CancelledAppointmentsTableModel)tblCancelledAppointments.
                             getModel()).getElementAt(row)); 
             ActionEvent actionEvent = new ActionEvent(this, 
                     ActionEvent.ACTION_PERFORMED,

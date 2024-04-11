@@ -376,22 +376,10 @@ public class Appointment extends Entity implements IEntityStoreActions{
                             patient.setScope(Scope.SINGLE);
                             a.setPatient(patient.read());
                         }else{
-                        String message = "A key has not been defined for the appointee object in the read Appointment, "
-                                + "raised in Appointment::Read(scope = " + this.getScope().toString() + ")";
-                        throw new StoreException(message, StoreException.ExceptionType.NULL_KEY_EXCEPTION);
+                            String message = "A key has not been defined for the appointee object in the read Appointment, "
+                                    + "raised in Appointment::Read(scope = " + this.getScope().toString() + ")";
+                            throw new StoreException(message, StoreException.ExceptionType.NULL_KEY_EXCEPTION);
                         }
-                        int test = 0;
-                        /**
-                         * 29/03/2024  code logic update
-                         */
-                        /*
-                        if (a.getPatientNote().getKey()>0){
-                            patientNote = new PatientNote(a.getPatientNote().getKey());
-                            patientNote.setScope(Scope.SINGLE);
-                            //System.out.println(patientNote.getKey());
-                            a.setPatientNote(patientNote.read());
-                        }
-                        */
                     }
                     result = this;
                 }catch(NullPointerException ex){

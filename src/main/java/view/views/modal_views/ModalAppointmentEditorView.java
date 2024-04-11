@@ -173,8 +173,10 @@ public class ModalAppointmentEditorView extends ModalView implements ActionListe
                 break;
             case REQUEST_CLOSE_VIEW:
                 int reply = JOptionPane.showInternalConfirmDialog(this, 
-                        "Any outstanding appointment changes will not be saved. "
-                                + "Close view anyway?");
+                        "<html><center>Any outstanding appointment start and duration "
+                                + "changes will not be saved</center>"
+                                + "<center>Close view anyway?</center></html>",
+                        "Confirm view closure", JOptionPane.YES_NO_OPTION);
                 if (reply == JOptionPane.YES_OPTION)
                     doCloseViewRequest();
                 break;   

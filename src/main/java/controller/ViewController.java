@@ -201,6 +201,11 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         APPOINTMENTS_FOR_NON_SURGERY_DAY_REQUEST,
         APPOINTMENT_EDITOR_UPDATE_REQUEST,
         APPOINTMENT_EDITOR_TREATMENT_VIEW_REQUEST,
+        APPOINTMENT_TREATMENT_UPDATE_REQUEST, 
+        APPOINTMENT_TREATMENT_COMMENT_UPDATE_REQUEST,
+        APPOINTMENT_TREATMENT_CREATE_REQUEST,
+        APPOINTMENT_TREATMENT_NAME_UPDATE_REQUEST,
+        APPOINTMENT_TREATMENT_DELETE_REQUEST,
         APPOINTMENT_TREATMENT_STATE_SET_REQUEST,
         APPOINTMENT_TREATMENT_STATE_RESET_REQUEST,
         EMPTY_SLOTS_FROM_DAY_REQUEST,
@@ -208,7 +213,8 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         SCHEDULE_VIEW_CONTROLLER_REQUEST,
         SURGERY_DAYS_EDIT_REQUEST,
         UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_CREATE_REQUEST,
-        UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_UPDATE_REQUEST    
+        UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_UPDATE_REQUEST,
+        TREATMENT_CREATE_REQUEST
     }
     
     public static enum ScheduleViewControllerPropertyChangeEvent{
@@ -261,9 +267,9 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         MIGRATE_SECONDARY_CONDITION_DATA_COMPLETED,
         MIGRATE_TREATMENT_DATA,
         MIGRATE_TREATMENT_DATA_COMPLETED,
-        MODAL_VIEWER_ACTIVATED,
-        MODAL_VIEWER_CLOSED,
-        NOTES_VIEW_CONTROLLER_REQUEST,
+        MODAL_VIEWER_ACTIVATED_NOTIFICATION,
+        MODAL_VIEWER_CLOSED_NOTIFICATION,
+        TREAMENT_VIEW_CONTROLLER_REQUEST,
         NOTIFICATION_VIEW_CONTROLLER_REQUEST,
         PATIENT_SELECTION_VIEW_CONTROLLER_REQUEST,
         PATIENT_VIEW_CONTROLLER_REQUEST,
@@ -411,11 +417,7 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         PATIENT_GUARDIAN_REQUEST,
         PATIENT_GUARDIANS_REQUEST,
         PATIENTS_REQUEST,     
-        PATIENT_VIEW_CLOSED,
-        
-        
-        
-             
+        PATIENT_VIEW_CLOSED, 
     }
     
     public static enum PatientViewControllerPropertyChangeEvent{
@@ -439,6 +441,19 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
     public static enum PatientAppointmentContactListViewControllerActionEvent {
         PATIENT_APPOINTMENT_CONTACT_VIEW_CLOSED,
         PATIENT_APPOINTMENT_CONTACT_VIEW_REQUEST
+    }
+    
+    public static enum TreatmentViewControllerActionEvent{
+        TREATMENT_CREATE_REQUEST,
+        TREATMENT_DELETE_REQUEST,
+        TREATMENTS_READ_REQUEST,
+        TREATMENT_RENAME_REQUEST,
+        VIEW_CLOSE_NOTIFICATION
+    }
+    
+    public static enum TreatmentViewControllerPropertyChangeEvent{
+        TREATMENT_RECEIVED,
+        TREATMENT_ERROR_RECEIVED
     }
 
     public enum ViewMode {
@@ -1056,200 +1071,28 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
             return "Dear " + names[0] + "\n";
         }       
     }
-    /*
-    public class TemplateReaderx{
-        private File templateFile = null;
-        private String entityId = null;
-        private String sectionId = null;
-        private Patient patient = null;
-        private Appointment appointment = null;
-
-        public String getEntityId(){
-            return entityId;
-        }
-
-        public String getSectionId(){
-            return sectionId;
-        }
-        
-        private File getTemplateFile(){
-            return templateFile;
-        }
-        
-        private Patient getPatient(){
-            return patient;
-        }
-        
-        private Appointment getAppointment(){
-            return appointment;
-        }
-        
-        public TemplateReaderx(File templateFile, 
-                String entityId, String sectionId){
-            this.entityId = entityId;
-            this.sectionId = sectionId; 
-            this.templateFile = templateFile;
-        }
-
-        public TemplateReaderx(Patient patient,String sectionId) {
-            
-        }
-        
-        public TemplateReaderx(Appointment appointment, String sectionId){
-
-        }
-
-        Element getTemplate()throws TemplateReaderException{
-            Element result = null;
-            try{
-                DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-                DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-                Document doc = dBuilder.parse(getTemplateFile());
-                doc.getDocumentElement().normalize();  
-                
-                return doc.getDocumentElement();
-            }
-            catch(ParserConfigurationException ex){
-                String message = ex.getMessage() + "\n"
-                        + "ParserConfigurationException raised in getTemplate() method";
-                throw new TemplateReaderException(message, 
-                        TemplateReaderException
-                                .ExceptionType.PARSER_CONFIGURATION_ERROR);
-            }
-            catch(SAXException ex){
-                String message = ex.getMessage() + "\n"
-                        + "Raised in MenuMaker.getTemplate() method";
-                throw new TemplateReaderException(message,
-                        TemplateReaderException.ExceptionType.SAX_EXCEPTION);
-            }
-            catch(IOException ex){
-                String message = ex.getMessage() + "\n"
-                        + "Raised in MenuMaker.getTemplate() method";
-                throw new TemplateReaderException(message,
-                        TemplateReaderException.ExceptionType.IO_EXCEPTION);
-            }
-        }
-        
-        Element getSelectedRootFromTemplate()throws TemplateReaderException{
-            Element result = null;
-            Element element = null;
-            NodeList nodes = null;
-            Node node = null;
-            boolean isElementFound = false;
-            
-            Element template = getTemplate();
-            
-            nodes = template.getElementsByTagName(getEntityId());
-            if (nodes.getLength() == 0){
-                String message = "Template element tagged 'entity' not found in '"
-                        + getTemplateFile() + "'\n"
-                        + "Raised in getSelectedRootFromTemplate() method";
-                throw new TemplateReaderException(message,
-                        TemplateReaderException.ExceptionType.ELEMENT_NOT_FOUND_IN_TEMPLATE);
-            }
-            
-            for (int temp = 0; temp < nodes.getLength(); temp++) {
-                node = nodes.item(temp);
-                if (node.getNodeType() == Node.ELEMENT_NODE) {
-                    element = (Element)node;
-                    if (element.getAttribute("id").equals(getEntityId())){
-                        isElementFound = true;
-                        break;
-                    }
+    
+    protected TreatmentWithState getTreatmentsWithState(
+            Appointment appointment)throws StoreException{
+        TreatmentWithState theTreatmentWithState = new TreatmentWithState();
+        Treatment treatment = new Treatment();
+        treatment.setScope(Entity.Scope.ALL);
+        treatment = treatment.read();
+        AppointmentTreatment appointmentTreatment = new AppointmentTreatment(appointment);
+        appointmentTreatment.setScope(Entity.Scope.FOR_APPOINTMENT);
+        appointmentTreatment = appointmentTreatment.read();
+        for(Treatment t : treatment.get()){       
+            TreatmentWithState treatmentWithState = new TreatmentWithState(t);
+            for(AppointmentTreatment at : appointmentTreatment.get()){
+                if (t.getKey().equals(at.getTreatment().getKey())) {  
+                    treatmentWithState.setState(true); 
+                    treatmentWithState.setComment(at.getComment());//08/04/2024 07:41
                 }
             }
-            if (!isElementFound){
-                String message = "Template entity element with id '" + getEntityId() + "' not found in '"
-                        + getTemplateFile() + "'\n"
-                        + "Raised in getSelectedRootFromTemplate() method";
-                throw new TemplateReaderException(message,
-                        TemplateReaderException.ExceptionType.ELEMENT_NOT_FOUND_IN_TEMPLATE);
-            }
-            
-            nodes = template.getElementsByTagName("section");
-            if (nodes.getLength() == 0){
-                String message = "Template element tagged 'section' not found in '"
-                        + getTemplateFile() + "'\n"
-                        + "Raised in getSelectedRootFromTemplate() method";
-                throw new TemplateReaderException(message,
-                        TemplateReaderException.ExceptionType.ELEMENT_NOT_FOUND_IN_TEMPLATE);
-            }
-            
-            if (getSectionId()!=null){
-                for (int temp = 0; temp < nodes.getLength(); temp++) {
-                    node = nodes.item(temp);
-                    if (node.getNodeType() == Node.ELEMENT_NODE) {
-                        element = (Element)node;
-                        if (element.getAttribute("id").equals(getSectionId())){
-                            isElementFound = true;
-                            result = element;
-                            break;
-                        }
-                    }
-                }
-                if (!isElementFound){
-                    String message = "Template secrtion element with id '" + getSectionId() + "' not found in '"
-                            + getTemplateFile() + "'\n"
-                            + "Raised in getSelectedRootFromTemplate() method";
-                    throw new TemplateReaderException(message,
-                            TemplateReaderException.ExceptionType.ELEMENT_NOT_FOUND_IN_TEMPLATE);
-                }
-            }//end of if getSectionId !=null
-            return result;
+            theTreatmentWithState.get().add(treatmentWithState);
         }
-        
-        public HashMap extract(HashMap<String,String> map)throws TemplateReaderException{
-            //Map<String,String> myMap = new HashMap<>();
-            Element eSection;
-            Element ePrimary;
-            
-            Element element = getSelectedRootFromTemplate();
-            NodeList sNodes = element.getElementsByTagName("section");
-            for(int sIndex = 0; sIndex < sNodes.getLength(); sIndex++){
-                if((sNodes.item(sIndex).getNodeType() == Node.ENTITY_NODE)){
-                    eSection = (Element)sNodes.item(sIndex);
-                    NodeList pNodes = eSection.getElementsByTagName("primary");
-                    for(int pIndex = 0; pIndex < pNodes.getLength(); pIndex++){
-                        if((pNodes.item(pIndex).getNodeType() == Node.ENTITY_NODE)){
-                            ePrimary = (Element)pNodes.item(pIndex);
-                            map.put(eSection.getAttribute("id"), 
-                                      ePrimary.getAttribute("id"));
-                        }
-                    }
-                }
-            }
-            return map;
-        }
-             
-        public Patient.MedicalHistory extract(Patient.MedicalHistory mh)throws TemplateReaderException{
-            Patient.MedicalHistory.PrimaryCondition pc;
-            Patient.MedicalHistory.PrimaryCondition.SecondaryCondition sc;
-            Element pElement;
-            Element sElement;
-
-            Element element = getSelectedRootFromTemplate();
-            NodeList pNodes = element.getElementsByTagName("primary");
-            mh.set(new ArrayList<>());
-            for(int pIndex = 0; pIndex < pNodes.getLength(); pIndex++){
-                if((pNodes.item(pIndex).getNodeType() == Node.ENTITY_NODE)){
-                    pElement = (Element)pNodes.item(pIndex);
-                    pc = mh.new PrimaryCondition();
-                    pc.setDescription(pElement.getAttribute("id"));
-                    NodeList sNodes = element.getElementsByTagName("secondary");
-                    for(int sIndex = 0; sIndex < sNodes.getLength(); sIndex++){
-                        if((sNodes.item(sIndex).getNodeType() == Node.ENTITY_NODE)){
-                            sElement = (Element)sNodes.item(sIndex);
-                            sc = pc.new SecondaryCondition();
-                            sc.setDescription(sElement.getAttribute("id"));
-                            pc.get().add(sc);
-                        }
-                    }
-                    mh.get().add(pc);
-                }
-            }
-            return mh;
-        }
+        return theTreatmentWithState;
     }
-    */
+    
 }
 

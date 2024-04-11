@@ -124,6 +124,14 @@ public class Descriptor {
             treatmentWithState = value;
         }
         
+        private Treatment treatment = null;
+        public Treatment getTreatment(){
+            return treatment; 
+        }
+        public void setTreatment(Treatment value){
+            treatment = value;
+        }
+        
         public Medication getMedication(){
             return medication; 
         }
@@ -383,6 +391,14 @@ public class Descriptor {
         }
         public void setTreatmentWithState(TreatmentWithState value){
             treatmentWithState = value;
+        }
+        
+        private Treatment treatment = null;
+        public Treatment getTreatment(){
+            return treatment; 
+        }
+        public void setTreatment(Treatment value){
+            treatment = value;
         }
         
         public ViewController.ViewMode getViewMode(){

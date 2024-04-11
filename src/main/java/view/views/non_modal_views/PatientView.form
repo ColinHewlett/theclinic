@@ -91,7 +91,7 @@
           <Group type="102" alignment="0" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Component id="pnlOperations" pref="497" max="32767" attributes="0"/>
+                  <Component id="pnlOperations" pref="501" max="32767" attributes="0"/>
                   <Group type="102" attributes="0">
                       <Group type="103" groupAlignment="0" max="-2" attributes="0">
                           <Component id="pnlPatientSelection" max="32767" attributes="0"/>
@@ -656,7 +656,7 @@
                 </Property>
               </Properties>
               <AuxValues>
-                <AuxValue name="JavaCodeGenerator_AddingCodePost" type="java.lang.String" value="ViewController.setJTableColumnProperties(tblAppointmentHistory, &#xa;                scrAppointmentHistory.getPreferredSize().width, &#xa;                20,20,60);&#xa;tblAppointmentHistory.addMouseListener(mouseListener);"/>
+                <AuxValue name="JavaCodeGenerator_AddingCodePost" type="java.lang.String" value="ViewController.setJTableColumnProperties(tblAppointmentHistory, &#xa;                scrAppointmentHistory.getPreferredSize().width, &#xa;                10,10,80);&#xa;tblAppointmentHistory.addMouseListener(mouseListener);"/>
               </AuxValues>
             </Component>
           </SubComponents>

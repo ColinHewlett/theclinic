@@ -1100,6 +1100,7 @@ public class Repository implements IStoreActions {
                     PreparedStatement preparedStatement = getPMSStoreConnection().prepareStatement(sql);
                     preparedStatement.setLong(1,appointmentTreatment.getAppointment().getKey());
                     preparedStatement.setLong(2,appointmentTreatment.getTreatment().getKey());
+                    preparedStatement.setString(3,appointmentTreatment.getComment());
                     preparedStatement.executeUpdate();
                 }catch(SQLException ex){
                     throw new StoreException("SQLException message -> " + ex.getMessage() + "\n"
@@ -1946,9 +1947,11 @@ public class Repository implements IStoreActions {
                         rs.next();
                         Integer appointmentKey = rs.getInt("appointmentKey");
                         Integer treatmentKey = rs.getInt("treatmentKey");
+                        String comment = rs.getString("comment");
                         Appointment appointment = new Appointment(appointmentKey);
                         Treatment treatment = new Treatment(treatmentKey);
-                        appointmentTreatment = new AppointmentTreatment(appointment,treatment);
+                        result = new AppointmentTreatment(appointment,treatment);
+                        result.setComment(comment);
 
                     }
                     break;
@@ -1957,10 +1960,12 @@ public class Repository implements IStoreActions {
                         while (rs.next()){
                             Integer appointmentKey = rs.getInt("appointmentKey");
                             Integer treatmentKey = rs.getInt("treatmentKey");
+                            String comment = rs.getString("comment");
                             AppointmentTreatment theAppointmentTreatment = 
                                     new AppointmentTreatment(
                                             new Appointment(appointmentKey),
                                             new Treatment(treatmentKey));
+                            theAppointmentTreatment.setComment(comment);
                             collection.add(theAppointmentTreatment);
                         }
                         appointmentTreatment.set(collection);
@@ -2853,6 +2858,33 @@ public class Repository implements IStoreActions {
         }
     }
     
+    private void doUpdateAppointmentTreatment(String sql, Entity entity) throws StoreException{
+        AppointmentTreatment appointmentTreatment;
+        if (entity != null) {
+            if (entity.getIsAppointmentTreatment()){
+                    appointmentTreatment = (AppointmentTreatment)entity;
+                try{
+                    PreparedStatement preparedStatement = getPMSStoreConnection().prepareStatement(sql);
+                    preparedStatement.setString(1, appointmentTreatment.getComment());
+                    //preparedStatement.setBoolean(2, appointmentTreatment.getIsDeleted());
+                    preparedStatement.setLong(2, appointmentTreatment.getAppointment().getKey());
+                    preparedStatement.setLong(3, appointmentTreatment.getTreatment().getKey());
+                    preparedStatement.executeUpdate();   
+                }catch(SQLException ex){
+                    throw new StoreException("SQLException message -> " + ex.getMessage() + "\n"
+                            + "StoreException message -> exception raised in Repository::doUpdateAppointmentTreatment()",
+                            StoreException.ExceptionType.SQL_EXCEPTION);
+                }
+            }else{
+                String msg = "StoreException -> patient note defined invalidly in doUpdateAppointmentTreatment()";
+                throw new StoreException(msg, StoreException.ExceptionType.UNEXPECTED_DATA_TYPE_ENCOUNTERED);
+            }
+        } else {
+            String msg = "StoreException -> patient note undefined in doUpdateAppointmentTreatment()";
+            throw new StoreException(msg, StoreException.ExceptionType.NULL_KEY_EXCEPTION);
+        }
+    }
+    
     private void doUpdateTreatment(String sql, Entity entity) throws StoreException{
         Treatment treatment;
         if (entity != null) {
@@ -3702,6 +3734,7 @@ public class Repository implements IStoreActions {
                         + "REFERENCES Appointment(pid), "
                         + "treatmentKey LONG NOT NULL CONSTRAINT FK_TreatmentKey "
                         + "REFERENCES Treatment(pid), "
+                        + "comment CHAR(255), "
                         + "CONSTRAINT PK_AppointmentTreatment PRIMARY KEY(appointmentKey,treatmentKey));";
                 doCreateAppointmentTreatmentTable(sql);
                 break; 
@@ -3717,8 +3750,8 @@ public class Repository implements IStoreActions {
                 break;
             case INSERT_APPOINTMENT_TREATMENT:
                 sql = "INSERT INTO AppointmentTreatment "
-                        + "(appointmentKey, treatmentKey) "
-                        + "VALUES(?,?);";
+                        + "(appointmentKey, treatmentKey, comment) "
+                        + "VALUES(?,?,?);";
                 doInsertAppointmentTreatment(sql, entity);
                 break; 
             case READ_APPOINTMENT_TREATMENT:
@@ -3737,7 +3770,7 @@ public class Repository implements IStoreActions {
             case READ_APPOINTMENT_TREATMENT_FOR_TREATMENT:
                 sql = "SELECT * "
                         + "FROM AppointmentTreatment "
-                        + "WHERE treatmntKey = ?; ";                       
+                        + "WHERE treatmentKey = ?; ";                       
                 result = doReadAppointmentTreatmentWithKey(sql, entity);
                 break;
             /*
@@ -3760,14 +3793,15 @@ public class Repository implements IStoreActions {
                         + "FROM AppointmentTreatment;";
                 result = doReadHighestKey(sql);
                 break;*/
-            /*
+            
             case UPDATE_APPOINTMENT_TREATMENT:
                 sql = "UPDATE AppointmentTreatment "
-                        + "SET description = ?, "
-                        + "isDeleted = ? "
-                        + "WHERE pid = ?;";
+                        + "SET comment = ? "
+                        //+ "isDeleted = ? "
+                        + "WHERE appointmentKey = ? "
+                        + "AND treatmentKey = ?;";
                 doUpdateAppointmentTreatment(sql, entity);
-                */
+                
         }
         return result;
     }

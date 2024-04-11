@@ -21,7 +21,7 @@ import model.Appointment;
 import model.Patient;
 import view.View;
 import view.views.non_modal_views.DesktopView;
-import view.views.view_support_classes.models.Appointments6ColumnTableModel;
+import view.views.view_support_classes.models.CancelledAppointmentsTableModel;
 import view.views.view_support_classes.renderers.AppointmentsTableDurationRenderer;
 import view.views.view_support_classes.renderers.AppointmentsTableLocalDateRenderer;
 import view.views.view_support_classes.renderers.AppointmentsTablePatientRenderer;
@@ -141,20 +141,18 @@ public class ModalCancelledAppointmentsView extends ModalView {
 
         pnlCancelledAppointments.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
-        tblCancelledAppointments.setModel(new Appointments6ColumnTableModel());
+        tblCancelledAppointments.setModel(new CancelledAppointmentsTableModel());
         TableColumnModel columnModel = this.tblCancelledAppointments.getColumnModel();
         columnModel.getColumn(0).setPreferredWidth(70);
         columnModel.getColumn(1).setPreferredWidth(190);
         columnModel.getColumn(2).setPreferredWidth(50);
         columnModel.getColumn(3).setPreferredWidth(50);
         columnModel.getColumn(4).setPreferredWidth(105);
-        columnModel.getColumn(5).setPreferredWidth(250);
         columnModel.getColumn(0).setHeaderRenderer(new TableHeaderCellBorderRenderer(Color.LIGHT_GRAY));
         columnModel.getColumn(1).setHeaderRenderer(new TableHeaderCellBorderRenderer(Color.LIGHT_GRAY));
         columnModel.getColumn(2).setHeaderRenderer(new TableHeaderCellBorderRenderer(Color.LIGHT_GRAY));
         columnModel.getColumn(3).setHeaderRenderer(new TableHeaderCellBorderRenderer(Color.LIGHT_GRAY));
         columnModel.getColumn(4).setHeaderRenderer(new TableHeaderCellBorderRenderer(Color.LIGHT_GRAY));
-        columnModel.getColumn(5).setHeaderRenderer(new TableHeaderCellBorderRenderer(Color.LIGHT_GRAY));
         JTableHeader tableHeader = this.tblCancelledAppointments.getTableHeader();
         tableHeader.setBackground(new Color(220,220,220));
         tableHeader.setOpaque(true);
@@ -265,20 +263,19 @@ public class ModalCancelledAppointmentsView extends ModalView {
 
         pnlCancelledAppointments.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
-        tblCancelledAppointments.setModel(new Appointments6ColumnTableModel());
+        tblCancelledAppointments.setModel(new CancelledAppointmentsTableModel());
         TableColumnModel columnModel = this.tblCancelledAppointments.getColumnModel();
         columnModel.getColumn(0).setPreferredWidth(70);
         columnModel.getColumn(1).setPreferredWidth(150);
         columnModel.getColumn(2).setPreferredWidth(40);
         columnModel.getColumn(3).setPreferredWidth(40);
         columnModel.getColumn(4).setPreferredWidth(105);
-        columnModel.getColumn(5).setPreferredWidth(50);
         columnModel.getColumn(0).setHeaderRenderer(new TableHeaderCellBorderRenderer(Color.LIGHT_GRAY));
         columnModel.getColumn(1).setHeaderRenderer(new TableHeaderCellBorderRenderer(Color.LIGHT_GRAY));
         columnModel.getColumn(2).setHeaderRenderer(new TableHeaderCellBorderRenderer(Color.LIGHT_GRAY));
         columnModel.getColumn(3).setHeaderRenderer(new TableHeaderCellBorderRenderer(Color.LIGHT_GRAY));
         columnModel.getColumn(4).setHeaderRenderer(new TableHeaderCellBorderRenderer(Color.LIGHT_GRAY));
-        columnModel.getColumn(5).setHeaderRenderer(new TableHeaderCellBorderRenderer(Color.LIGHT_GRAY));
+        
         JTableHeader tableHeader = this.tblCancelledAppointments.getTableHeader();
         tableHeader.setBackground(new Color(220,220,220));
         tableHeader.setOpaque(true);
@@ -328,9 +325,9 @@ public class ModalCancelledAppointmentsView extends ModalView {
     
     private void populateCancelledAppointmentsTable(){
         if (tblCancelledAppointments.getModel() == null)
-            tblCancelledAppointments.setModel(new Appointments6ColumnTableModel());
-        Appointments6ColumnTableModel model = 
-                (Appointments6ColumnTableModel)tblCancelledAppointments.getModel();
+            tblCancelledAppointments.setModel(new CancelledAppointmentsTableModel());
+        CancelledAppointmentsTableModel model = 
+                (CancelledAppointmentsTableModel)tblCancelledAppointments.getModel();
         model.removeAllElements();
         Iterator<Appointment> it = 
                 getMyController().getDescriptor().getControllerDescription().getAppointmentCancellations().iterator();
@@ -350,8 +347,7 @@ public class ModalCancelledAppointmentsView extends ModalView {
     private void btnUncancelSelectedAppointmentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUncancelSelectedAppointmentActionPerformed
         int row = this.tblCancelledAppointments.getSelectedRow();
         if (row != -1){
-            getMyController().getDescriptor().getViewDescription().setAppointment(
-                    ((Appointments6ColumnTableModel)tblCancelledAppointments.
+            getMyController().getDescriptor().getViewDescription().setAppointment(((CancelledAppointmentsTableModel)tblCancelledAppointments.
                             getModel()).getElementAt(row)); 
             ActionEvent actionEvent = new ActionEvent(this, 
                     ActionEvent.ACTION_PERFORMED,

@@ -109,12 +109,13 @@ public class View extends JInternalFrame
             case NOTES_VIEW:
                 setView(makeView(new NotesView(viewer, controller, desktopView)));
                 break;*/
+            case TREATMENT_VIEW:
+                setView(makeView(new TreatmentView(viewer, controller, desktopView)));
+                break;
             case SCHEDULE_VIEW:
                 setView(makeView(new ScheduleView(viewer, controller, desktopView)));
                 break;
             case APPOINTMENTS_CANCELLED_VIEW:
-                //result = new ModalAppointmentsCancelledFactoryMethod(controller,dtView).makeView(viewer);
-                //setModalView(makeView(new ModalAppointmentsCancelledView(viewer, controller, desktopView)));
                 setModalView(makeView(new ModalCancelledAppointmentsView(viewer, controller, desktopView)));
                 break;
             case APPOINTMENT_EDITOR_VIEW:
@@ -201,7 +202,7 @@ public class View extends JInternalFrame
         EXPORT_PROGRESS_VIEW,
         MIGRATION_MANAGER_VIEW,
         NON_SURGERY_DAY_EDITOR_VIEW,
-        NOTES_VIEW,
+        TREATMENT_VIEW,
         NOTE_TAKER,
         PATIENT_MEDICAL_HISTORY_1_EDITOR_VIEW,
         PATIENT_MEDICAL_HISTORY_2_EDITOR_VIEW,
@@ -222,7 +223,7 @@ public class View extends JInternalFrame
         UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_VIEW,
         TEST_PATIENT_VIEW
     }
-    
+   
     protected Boolean getViewStatus(){
         return viewChangedSinceLastSaved;
     }

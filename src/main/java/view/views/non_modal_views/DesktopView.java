@@ -93,7 +93,7 @@ public class DesktopView extends javax.swing.JFrame implements PropertyChangeLis
         private final String APPOINTMENT_VIEW_REQUEST_TITLE = "Appointments";
         private final String PATIENT_VIEW_REQUEST_TITLE = "Patients";
         private final String PATIENT_NOTIFICATION_VIEW_REQUEST = "Notifications";
-        private final String PATIENT_NOTES_VIEW_REQUEST = "Notes";
+        private final String TREATMENT_VIEW_REQUEST = "Treatments";
         
         private final String EXIT_VIEW_REQUEST_TITLE = "Exit the Clinic practice management system";
     
@@ -122,7 +122,7 @@ public class DesktopView extends javax.swing.JFrame implements PropertyChangeLis
         private JMenuItem mniAppointmentViewRequest = null;
         private JMenuItem mniPatientViewRequest = null;
         private JMenuItem mniPatientNotificationViewRequest = null;
-        private JMenuItem mniPatientNotesViewRequest = null;
+        private JMenuItem mniTreatmentViewRequest = null;
         private JMenuItem mniExitViewRequest = null;
         
     private JMenu mnuMigrationManagement = null; 
@@ -174,11 +174,11 @@ public class DesktopView extends javax.swing.JFrame implements PropertyChangeLis
         mniAppointmentViewRequest = new JMenuItem(APPOINTMENT_VIEW_REQUEST_TITLE);
         mniPatientViewRequest = new JMenuItem(PATIENT_VIEW_REQUEST_TITLE);
         mniPatientNotificationViewRequest = new JMenuItem(PATIENT_NOTIFICATION_VIEW_REQUEST);
-        mniPatientNotesViewRequest = new JMenuItem(PATIENT_NOTES_VIEW_REQUEST);
+        mniTreatmentViewRequest = new JMenuItem(TREATMENT_VIEW_REQUEST);
         mniExitViewRequest = new JMenuItem(EXIT_VIEW_REQUEST_TITLE);
         mnuSelectView.add(mniPatientViewRequest);
         mnuSelectView.add(mniAppointmentViewRequest);
-        mnuSelectView.add(mniPatientNotesViewRequest);
+        mnuSelectView.add(mniTreatmentViewRequest);
         mnuSelectView.add(mniPatientNotificationViewRequest);
         mnuSelectView.add(new JSeparator());
         setTopDynamicFrameListDelimiter(mnuSelectView.getItemCount()-1);
@@ -186,7 +186,7 @@ public class DesktopView extends javax.swing.JFrame implements PropertyChangeLis
         
         mniAppointmentViewRequest.addActionListener((ActionEvent e) -> mniAppointmentViewRequestActionPerformed());
         mniPatientViewRequest.addActionListener((ActionEvent e) -> mniPatientViewRequestActionPerformed());
-        mniPatientNotesViewRequest.addActionListener((ActionEvent e) -> mniNotesViewRequestActionPerformed());
+        mniTreatmentViewRequest.addActionListener((ActionEvent e) -> mniTreatmentViewRequestActionPerformed());
         mniPatientNotificationViewRequest.addActionListener((ActionEvent e) -> mniNotificationViewRequestActionPerformed());
         mniExitViewRequest.addActionListener((ActionEvent e) -> mniExitRequestViewActionPerformed());
     }
@@ -561,10 +561,10 @@ public class DesktopView extends javax.swing.JFrame implements PropertyChangeLis
                 this.getController().actionPerformed(actionEvent);
     }
     
-    private void mniNotesViewRequestActionPerformed() {    
+    private void mniTreatmentViewRequestActionPerformed() {    
         ActionEvent actionEvent = new ActionEvent(this, 
                 ActionEvent.ACTION_PERFORMED,
-                DesktopViewController.DesktopViewControllerActionEvent.NOTES_VIEW_CONTROLLER_REQUEST.toString());
+                DesktopViewController.DesktopViewControllerActionEvent.TREAMENT_VIEW_CONTROLLER_REQUEST.toString());
         this.getController().actionPerformed(actionEvent);
         
     }

@@ -21,7 +21,7 @@ import javax.swing.table.AbstractTableModel;
  */
 public class Appointments3ColumnTableModel extends AbstractTableModel{
     public ArrayList<Appointment> appointments = new ArrayList<>();
-    private enum COLUMN{From,Duration,Notes};
+    private enum COLUMN{From,Duration,Treatment};
     private final Class[] columnClass = new Class[] {
         LocalDateTime.class, 
         Duration.class,
@@ -82,8 +82,9 @@ public class Appointments3ColumnTableModel extends AbstractTableModel{
                         case From:
                             result = appointment.getStart();
                             break;
-                        case Notes:
-                            result = /*28/03/2024appointment.getPatientNote()*/"";
+                        case Treatment:
+                            //result = /*28/03/2024appointment.getPatientNote()*/"";
+                            result = appointment.getNotes();
                             break;
                     }
                     break;
