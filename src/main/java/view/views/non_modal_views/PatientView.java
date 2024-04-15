@@ -40,6 +40,9 @@ import javax.swing.event.InternalFrameEvent;
 import javax.swing.JComboBox;
 import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
+import javax.swing.ListSelectionModel;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.JPopupMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JTable;
@@ -52,7 +55,8 @@ import javax.swing.border.TitledBorder;
  *
  * @author colin
  */
-public class PatientView extends View implements ActionListener{
+public class PatientView extends View 
+        implements ActionListener, ListSelectionListener{
     private JTextField txtAddressLine2 = null;
     private javax.swing.ButtonGroup rdbGroup = null;
     //private JTable tblAppointmentHistory = null;
@@ -231,6 +235,27 @@ public class PatientView extends View implements ActionListener{
     }
     
     @Override
+    public void valueChanged(ListSelectionEvent e){
+        if (e.getValueIsAdjusting()) return;
+            ListSelectionModel lsm = (ListSelectionModel)e.getSource();
+            if (!lsm.isSelectionEmpty()) {
+                this.btnFetchClinicalNotes.setEnabled(true);
+                this.btnFetchScheduleForSelectedAppointment.setEnabled(true);
+                int selectedRow = this.tblAppointmentHistory.getSelectedRow();
+                Appointments3ColumnTableModel model = 
+                        (Appointments3ColumnTableModel)tblAppointmentHistory.getModel();
+                Appointment appointment = model.getElementAt(selectedRow);
+                getMyController().getDescriptor().getViewDescription()
+                        .setAppointment(appointment);
+            }else{
+                this.btnFetchClinicalNotes.setEnabled(false);
+                this.btnFetchScheduleForSelectedAppointment.setEnabled(false);
+                //int selectedRow = lsm.getMinSelectionIndex();
+                //doEmptySlotAvailabilityTableRowSelection(selectedRow);
+            }
+    }
+    
+    @Override
     public void initialiseView(){ 
         initComponents();
         setVisible(true);
@@ -380,22 +405,15 @@ public class PatientView extends View implements ActionListener{
                         .getControllerDescription()
                         .getPatient();
                 setViewTitle(patient);
-               
-                //this.setTitle(frameTitle);
-                /**
-                 * disable "Create new patient" menu item
-                 * -- this disables attempt to create a new patient whilst an existing patientis selected
-                 */
+
                 this.mniCreateNewPatient.setEnabled(false);
                 this.mniRecoverDeletedPatient.setEnabled(false);
                 this.mniDeleteSelectedPatient.setEnabled(true);
                 this.mniUpdateSelectedPatient.setEnabled(true);
+                
+                this.btnFetchClinicalNotes.setEnabled(false);
+                this.btnFetchScheduleForSelectedAppointment.setEnabled(false);
 
-                /**
-                 * Update logged at 30/10/2021 08:32
-                 * inherited view status (set if any changes have been made to form since its initialisation)
-                 * is initialised to false
-                 */
                 setViewStatus(false);
                 
                 ActionEvent actionEvent = new ActionEvent(
@@ -415,6 +433,9 @@ public class PatientView extends View implements ActionListener{
                 this.mniRecoverDeletedPatient.setEnabled(true);
                 this.mniDeleteSelectedPatient.setEnabled(false);
                 this.mniUpdateSelectedPatient.setEnabled(false);
+                
+                this.btnFetchClinicalNotes.setEnabled(false);
+                this.btnFetchScheduleForSelectedAppointment.setEnabled(false);
                 /**
                  * Update logged at 30/10/2021 08:32
                  * inherited view status (set if any changes have been made to form since its initialisation)
@@ -569,9 +590,14 @@ public class PatientView extends View implements ActionListener{
         }
         
     }
+    
     private void doClinicalNotesRequest(){
-        
+        ViewController.PatientViewControllerActionEvent request = 
+                ViewController.PatientViewControllerActionEvent
+                .CLINICAL_NOTE_VIEW_CONTROLLER_REQUEST;
+        doActionFor(request);
     }
+    
     private void doDoctorRequest(){
         ViewController.PatientViewControllerActionEvent request = 
                 ViewController.PatientViewControllerActionEvent.
@@ -1479,6 +1505,9 @@ public class PatientView extends View implements ActionListener{
             10,10,80);
         tblAppointmentHistory.addMouseListener(mouseListener);
 
+        ListSelectionModel lsm = tblAppointmentHistory.getSelectionModel();
+        lsm.addListSelectionListener(this);
+
         javax.swing.GroupLayout pnlAppointmentHistoryLayout = new javax.swing.GroupLayout(pnlAppointmentHistory);
         pnlAppointmentHistory.setLayout(pnlAppointmentHistoryLayout);
         pnlAppointmentHistoryLayout.setHorizontalGroup(
@@ -1587,7 +1616,7 @@ public class PatientView extends View implements ActionListener{
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(pnlOperations, javax.swing.GroupLayout.DEFAULT_SIZE, 501, Short.MAX_VALUE)
+                    .addComponent(pnlOperations, javax.swing.GroupLayout.DEFAULT_SIZE, 505, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(pnlPatientSelection, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)

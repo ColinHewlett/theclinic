@@ -127,6 +127,9 @@ public class View extends JInternalFrame
             case APPOINTMENT_TREATMENT_VIEW:
                 setModalView(makeView(new ModalAppointmentTreatmentView(viewer, controller, desktopView)));
                 break;
+            case CLINICAL_NOTE_VIEW:
+                setView(makeView(new ClinicalNoteView(viewer, controller, desktopView)));
+                break;
             case NOTE_TAKER:
                 setModalView(makeView(new ModalNoteTaker(viewer, controller, desktopView)));
                 break;    
@@ -198,6 +201,7 @@ public class View extends JInternalFrame
         APPOINTMENT_TREATMENT_VIEW,
         APPOINTMENT_EMPTY_SLOT_SCAN_CONFIGURATION_VIEW,
         APPOINTMENTS_CANCELLED_VIEW,
+        CLINICAL_NOTE_VIEW,
         CHECKBOX_LIST_VIEW,
         EXPORT_PROGRESS_VIEW,
         MIGRATION_MANAGER_VIEW,
@@ -268,9 +272,7 @@ public class View extends JInternalFrame
     
     
     
-    public void initialiseView(){
-        
-    }
+    public void initialiseView(){}
     
     //public abstract void startModal();
     

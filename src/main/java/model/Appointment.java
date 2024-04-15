@@ -91,6 +91,11 @@ public class Appointment extends Entity implements IEntityStoreActions{
         return result;
     }
     
+    public String getAppointmentDate(){
+        return getStart().toLocalDate()
+                .format(DateTimeFormatter.ofPattern("dd/MM/yy"));
+    }
+    
     public boolean getIsUnbookableSlot(){
         return getPatient().getKey() == SystemDefinition.UNBOOKABLE_APPOINTMENT_SLOT;
     }

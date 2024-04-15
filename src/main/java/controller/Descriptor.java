@@ -124,6 +124,14 @@ public class Descriptor {
             treatmentWithState = value;
         }
         
+        private ClinicalNote clinicalNote = null;
+        public ClinicalNote getClinicalNote(){
+            return clinicalNote; 
+        }
+        public void setClinicalNote(ClinicalNote value){
+            clinicalNote = value;
+        }
+        
         private Treatment treatment = null;
         public Treatment getTreatment(){
             return treatment; 
@@ -399,6 +407,14 @@ public class Descriptor {
         }
         public void setTreatment(Treatment value){
             treatment = value;
+        }
+        
+        private ClinicalNote clinicalNote = null;
+        public ClinicalNote getClinicalNote(){
+            return clinicalNote; 
+        }
+        public void setClinicalNote(ClinicalNote value){
+            clinicalNote = value;
         }
         
         public ViewController.ViewMode getViewMode(){

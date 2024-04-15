@@ -5,14 +5,9 @@
 package controller;
 
 import static controller.ViewController.displayErrorMessage;
-import controller.ViewController.NotesViewControllerActionEvent;
-import static controller.ViewController.displayErrorMessage;
-import java.awt.Dimension;
 import model.Treatment;
 import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeEvent;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
 import model.Appointment;
 import model.AppointmentTreatment;
@@ -20,7 +15,7 @@ import model.Entity;
 /*28/03/2024import model.PatientNote;*/
 import repository.StoreException;
 import view.View;
-import view.views.modal_views.ModalView;
+
 /*28/03/2024import view.views.non_modal_views.NotesView;*/
 import view.views.non_modal_views.DesktopView;
 

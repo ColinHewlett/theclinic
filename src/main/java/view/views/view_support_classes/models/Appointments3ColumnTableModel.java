@@ -35,6 +35,10 @@ public class Appointments3ColumnTableModel extends AbstractTableModel{
         appointments.add(a);
     }
     
+    public Appointment getElementAt(int row){
+        return appointments.get(row);
+    }
+    
     public void removeAllElements(){
         appointments.clear();
         this.fireTableDataChanged();

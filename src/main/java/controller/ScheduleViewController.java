@@ -259,6 +259,15 @@ public class ScheduleViewController extends ViewController{
         }
     }
     
+    private void doClinicalNoteViewControllerRequest(){
+        getDescriptor().getControllerDescription().setAppointment(
+                getDescriptor().getViewDescription().getAppointment());
+        ActionEvent actionEvent = new ActionEvent(
+            this,ActionEvent.ACTION_PERFORMED,
+            ViewController.PatientViewControllerActionEvent.CLINICAL_NOTE_VIEW_CONTROLLER_REQUEST.toString());
+        this.getMyController().actionPerformed(actionEvent);
+    }
+    
     private void doUnbookableAppointmentSlotEditorViewRequest(){
         getDescriptor().getControllerDescription().setViewMode(null);
         View.setViewer(View.Viewer.UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_VIEW);
@@ -635,6 +644,9 @@ public class ScheduleViewController extends ViewController{
                 break;
             case UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_VIEW_REQUEST:
                 doUnbookableAppointmentSlotEditorViewRequest();
+                break;
+            case CLINICAL_NOTE_VIEW_CONTROLLER_REQUEST:
+                doClinicalNoteViewControllerRequest();
                 break;
             case APPOINTMENT_CREATE_VIEW_REQUEST:
                 getDescriptor().getControllerDescription().

@@ -12,8 +12,6 @@ import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyVetoException;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Iterator;
 import javax.swing.JOptionPane;
@@ -22,7 +20,6 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
-import model.Appointment;
 import model.Treatment;
 import view.View;
 import view.views.view_support_classes.models.TreatmentTableModel;
@@ -167,8 +164,7 @@ public class TreatmentView extends View
                 break;
         }
     }
-    
-    
+
     @Override 
     public void propertyChange(PropertyChangeEvent e){
         ViewController.TreatmentViewControllerPropertyChangeEvent propertyName =

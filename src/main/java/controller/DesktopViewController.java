@@ -50,6 +50,7 @@ public class DesktopViewController extends ViewController{
     private ArrayList<NotificationViewController> notificationViewControllers = null;
     private ArrayList<PatientViewController> patientViewControllers = null;
     private ArrayList<TreatmentViewController> treatmentViewControllers = null;
+    private ArrayList<ClinicalNoteViewController> clinicalNoteViewControllers = null;
     private ArrayList<DataMigrationProgressViewController> importProgressViewControllers = null;
     private static Boolean isDataMigrationOptionEnabled = null;
     private PropertyChangeSupport pcSupport = null;
@@ -78,6 +79,7 @@ public class DesktopViewController extends ViewController{
         importProgressViewControllers = new ArrayList<>();
         notificationViewControllers = new ArrayList<>();
         treatmentViewControllers = new ArrayList<>();
+        clinicalNoteViewControllers = new ArrayList<>();
         boolean isPMSStoreDefined;
         try{
             new Repository();
@@ -102,9 +104,56 @@ public class DesktopViewController extends ViewController{
         }
     }
     
+    private void doActionEventForClinicalNoteViewController(ActionEvent e){
+        String message = null;
+        ClinicalNoteViewController cvc = (ClinicalNoteViewController)e.getSource();
+        ViewController.DesktopViewControllerActionEvent actionCommand =
+                    ViewController.DesktopViewControllerActionEvent.valueOf(e.getActionCommand());
+        switch(actionCommand){
+            case VIEW_CONTROLLER_CHANGED_NOTIFICATION:
+                firePropertyChangeEvent(
+                        ViewController.DesktopViewControllerPropertyChangeEvent.
+                                DESKTOP_VIEW_CHANGED_NOTIFICATION.toString(),
+                        getDesktopView(),
+                        this,
+                        null,
+                        null
+                );
+                break;
+            case VIEW_CONTROLLER_CLOSE_NOTIFICATION:{
+                boolean hasFoundViewConroller = false;
+                Iterator<ClinicalNoteViewController> viewControllerIterator = 
+                        this.clinicalNoteViewControllers.iterator();
+                while(viewControllerIterator.hasNext()){
+                    cvc = viewControllerIterator.next();
+                    if (cvc.equals(e.getSource())){
+                        hasFoundViewConroller = true;
+                        break;
+                    }
+                }
+                if (hasFoundViewConroller){
+                    if (!this.clinicalNoteViewControllers.remove(cvc)){
+                        message = "Problem arose on attempt to remove a "
+                                + "ClinicalNotte view conroller";
+                        displayErrorMessage(
+                                message,"DesktopViewController error",
+                                JOptionPane.WARNING_MESSAGE);
+                    }/*else System.out.println("CVC removed("
+                            + clinicalNoteViewControllers.size() + ")");*/
+                }else{
+                    message = "Could not locate the ClinicalNote view controller "
+                            + "which requested tto be removed";
+                        displayErrorMessage(
+                                message,"DesktopViewController error",
+                                JOptionPane.WARNING_MESSAGE);
+                }
+            }   
+        }
+    }
+    
     private void doActionEventForTreatmentViewController(ActionEvent e){
         String message = null;
-        TreatmentViewController nvc = (TreatmentViewController)e.getSource();
+        TreatmentViewController tvc = (TreatmentViewController)e.getSource();
         ViewController.DesktopViewControllerActionEvent actionCommand =
                     ViewController.DesktopViewControllerActionEvent.valueOf(e.getActionCommand());
         switch(actionCommand){
@@ -125,7 +174,7 @@ public class DesktopViewController extends ViewController{
                                                     + "DesktopViewController collection.";
                         break;
                     case 1:
-                        if (nvc.equals(this.treatmentViewControllers.get(0))){
+                        if (tvc.equals(this.treatmentViewControllers.get(0))){
                             this.treatmentViewControllers.remove(0);
                         }
                         else{
@@ -210,6 +259,9 @@ public class DesktopViewController extends ViewController{
         ViewController.DesktopViewControllerActionEvent actionCommand =
                     ViewController.DesktopViewControllerActionEvent.valueOf(e.getActionCommand());
         switch(actionCommand){
+            case CLINICAL_NOTE_VIEW_CONTROLLER_REQUEST:
+                doRequestForClinicalNoteViewController(e);
+                break;
             case SCHEDULE_VIEW_CONTROLLER_REQUEST:  
                 doRequestForScheduleViewController(avc);
                 break;
@@ -288,9 +340,14 @@ public class DesktopViewController extends ViewController{
                     }
                 }
                 break;
+            case CLINICAL_NOTE_VIEW_CONTROLLER_REQUEST:
+                doRequestForClinicalNoteViewController(e);
+                break;
+            /*
             case TREAMENT_VIEW_CONTROLLER_REQUEST:
                 doRequestForTreatmentViewController(e);
                 break;
+            */
             case SCHEDULE_VIEW_CONTROLLER_REQUEST:
                 /**
                  * VC receives a request for a new AppointmentVC from a PatientVC
@@ -778,16 +835,42 @@ public class DesktopViewController extends ViewController{
         }
     }
     
+    /**
+     * Initialise new VC's descriptor with the Appointment property defined ActionEvent source's descriptor
+     * @param e ActionEvent
+     */
+    private void doRequestForClinicalNoteViewController(ActionEvent e){
+        ClinicalNoteViewController cvc = null;
+        Descriptor descriptor = new Descriptor();
+        ViewController vc = (ViewController)e.getSource();
+        Appointment appointment = vc.getDescriptor()
+                .getControllerDescription().getAppointment();
+        clinicalNoteViewControllers.add(
+                new ClinicalNoteViewController(
+                        this,
+                        getDesktopView()));
+        cvc = clinicalNoteViewControllers
+                .get(clinicalNoteViewControllers.size()-1);
+        cvc.getDescriptor().getControllerDescription()
+                .setAppointment(appointment);
+        setView(new View().make(View.Viewer.CLINICAL_NOTE_VIEW,
+                    cvc, 
+                    getDesktopView()));
+        clinicalNoteViewControllers
+                .get(clinicalNoteViewControllers.size()-1).getView().toFront();
+
+        ActionEvent actionEvent = new ActionEvent(
+                this,ActionEvent.ACTION_PERFORMED,
+                DesktopViewController.DesktopViewControllerActionEvent.INITIALISE_VIEW.toString());
+         cvc.actionPerformed(actionEvent);
+
+        if (getDesktopViewMode().equals(DesktopViewMode.CLINIC_LOGO)){
+                doSetupDesktopViewMode();
+        }
+    }
+    
     private void doRequestForTreatmentViewController(ActionEvent e){
         TreatmentViewController tvc = null;
-        /*
-        PatientViewController pvc = null;
-        if (e.getSource() instanceof PatientViewController){
-            pvc = (PatientViewController)e.getSource();
-            this.getDescriptor().getControllerDescription().setPatient(
-                    pvc.getDescriptor().getControllerDescription().getPatient());  
-        }
-        */
         if (treatmentViewControllers.isEmpty()){
             treatmentViewControllers.add(
                     new TreatmentViewController(
@@ -798,27 +881,10 @@ public class DesktopViewController extends ViewController{
                         tvc, 
                         getDesktopView()));
 
-            /**
-             * 12/02/2024 code logic update
-             */
-            /*
-            if (e.getSource() instanceof PatientViewController){
-                pvc = (PatientViewController)e.getSource();
-                tvc.getDescriptor().getControllerDescription().setPatient(
-                        pvc.getDescriptor().getControllerDescription().getPatient());
-            }
-            else tvc.getDescriptor().getControllerDescription().setPatient(null);
-            */
             ActionEvent actionEvent = new ActionEvent(
                     this,ActionEvent.ACTION_PERFORMED,
                     DesktopViewController.DesktopViewControllerActionEvent.INITIALISE_VIEW.toString());
              tvc.actionPerformed(actionEvent);
-            /* 
-            nvc.setView(new View().make(View.Viewer.NOTES_VIEW,
-                    nvc, 
-                    getDesktopView()));
-            nvc.initialiseView();
-            */
 
             if (getDesktopViewMode().equals(DesktopViewMode.CLINIC_LOGO)){
                     doSetupDesktopViewMode();
@@ -1219,7 +1285,7 @@ public class DesktopViewController extends ViewController{
     private Point doRequestCountForClinicNoteTable(){
         Point result = null;
         //07/08/2022
-        ClinicNote clinicNote = new ClinicNote();
+        ClinicalNote clinicNote = new ClinicalNote();
         clinicNote.setScope(Entity.Scope.ALL);
         try{
             result = clinicNote.count();
@@ -1503,6 +1569,9 @@ public class DesktopViewController extends ViewController{
                     break;
                 case "NotificationViewController":
                     doActionEventForNotificationViewController(e);
+                    break;
+                case "ClinicalNoteViewController":
+                    doActionEventForClinicalNoteViewController(e);
                     break;
                 case "TreatmentViewController":
                     doActionEventForTreatmentViewController(e);

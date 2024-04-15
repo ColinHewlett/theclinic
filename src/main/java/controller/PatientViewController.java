@@ -90,6 +90,9 @@ public class PatientViewController extends ViewController {
                                 VIEW_CONTROLLER_CHANGED_NOTIFICATION.toString());
                 this.getMyController().actionPerformed(actionEvent);
                 break;
+            case CLINICAL_NOTE_VIEW_CONTROLLER_REQUEST: //on selection of row in appointment history table
+                doClinicalNoteViewControllerRequest();
+                break;
             case SCHEDULE_VIEW_CONTROLLER_REQUEST: //on selection of row in appointment history table
                 doScheduleViewControllerRequest();
                 break;
@@ -259,12 +262,16 @@ public class PatientViewController extends ViewController {
             }
         }
     }  
+
+    private void doClinicalNoteViewControllerRequest(){
+        getDescriptor().getControllerDescription().setAppointment(
+                getDescriptor().getViewDescription().getAppointment());
+        ActionEvent actionEvent = new ActionEvent(
+            this,ActionEvent.ACTION_PERFORMED,
+            ViewController.PatientViewControllerActionEvent.CLINICAL_NOTE_VIEW_CONTROLLER_REQUEST.toString());
+        this.getMyController().actionPerformed(actionEvent);
+    }
     
-    /**
-     * appointment in Patient view's appointment history has been selected to request the appointment schedule for that day 
- -- ViewDescription is forwarded onto the Desktop VC
- -- the forwarded request references the Patient VC's EntityDescriptorFromView which contains details of the selected appointment for this patient; and thus the appointment schedule requested
-     */
     private void doScheduleViewControllerRequest(){  
         //setEntityDescriptorFromView(view.getViewDescriptor());
         getDescriptor().getControllerDescription().setScheduleDay(
