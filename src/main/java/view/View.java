@@ -225,7 +225,8 @@ public class View extends JInternalFrame
         UNACTIONED_PATIENT_NOTIFICATION_VIEW,
         SURGERY_DAY_EDITOR_VIEW,
         UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_VIEW,
-        TEST_PATIENT_VIEW
+        TEST_PATIENT_VIEW,
+        NOTES_VIEW
     }
    
     protected Boolean getViewStatus(){

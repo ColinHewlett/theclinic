@@ -71,6 +71,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JSeparator;
 import org.apache.commons.io.FilenameUtils;
 
@@ -78,8 +79,11 @@ import org.apache.commons.io.FilenameUtils;
  *
  * @author colin
  */
-public class DesktopView extends javax.swing.JFrame implements PropertyChangeListener{
+public class DesktopView extends javax.swing.JFrame 
+        implements ActionListener, 
+                   PropertyChangeListener {
 //public class DesktopView extends View implements PropertyChangeListener{
+    enum Action{REQUEST_CASCADE_WINDOWS};
     private JMenu activeMenu = null;
     private int topDynamicFrameListDelimiter;
     private HashMap<JMenuItem, JInternalFrame> menuItemFrameMap = null;
@@ -179,7 +183,7 @@ public class DesktopView extends javax.swing.JFrame implements PropertyChangeLis
         mnuSelectView.add(mniPatientViewRequest);
         mnuSelectView.add(mniAppointmentViewRequest);
         mnuSelectView.add(mniTreatmentViewRequest);
-        mnuSelectView.add(mniPatientNotificationViewRequest);
+        //mnuSelectView.add(mniPatientNotificationViewRequest);
         mnuSelectView.add(new JSeparator());
         setTopDynamicFrameListDelimiter(mnuSelectView.getItemCount()-1);
         mnuSelectView.add(mniExitViewRequest);
@@ -187,7 +191,7 @@ public class DesktopView extends javax.swing.JFrame implements PropertyChangeLis
         mniAppointmentViewRequest.addActionListener((ActionEvent e) -> mniAppointmentViewRequestActionPerformed());
         mniPatientViewRequest.addActionListener((ActionEvent e) -> mniPatientViewRequestActionPerformed());
         mniTreatmentViewRequest.addActionListener((ActionEvent e) -> mniTreatmentViewRequestActionPerformed());
-        mniPatientNotificationViewRequest.addActionListener((ActionEvent e) -> mniNotificationViewRequestActionPerformed());
+        //mniPatientNotificationViewRequest.addActionListener((ActionEvent e) -> mniNotificationViewRequestActionPerformed());
         mniExitViewRequest.addActionListener((ActionEvent e) -> mniExitRequestViewActionPerformed());
     }
     
@@ -352,6 +356,31 @@ public class DesktopView extends javax.swing.JFrame implements PropertyChangeLis
         doActionEventRequest(ViewController.DesktopViewControllerActionEvent.CLINIC_LOGO_VIEW_MODE_NOTIFICATION);
     }
     
+    public void actionPerformed(ActionEvent e){
+        switch (Action.valueOf(e.getActionCommand())){
+            case REQUEST_CASCADE_WINDOWS:
+                break;
+        }
+    }
+    
+    private void cascadeInternalFrames() {
+        JInternalFrame[] frames = getDeskTop().getAllFrames();
+        int x = 0;
+        int y = 0;
+        int offset = 30;
+        for (JInternalFrame frame : frames) {
+            frame.setLocation(x, y);
+            x += offset;
+            y += offset;
+            if (x + frame.getWidth() > getDeskTop().getWidth()) {
+                x = 0;
+            }
+            if (y + frame.getHeight() > getDeskTop().getHeight()) {
+                y = 0;
+            }
+        }
+    }
+    
     public ActionListener getMyController(){
         return this.controller;
     }
@@ -374,6 +403,7 @@ public class DesktopView extends javax.swing.JFrame implements PropertyChangeLis
     }
     
     public void initialiseView(){
+        //this.setComponentPopupMenu(this.makePopupMenu());
         doActionEventRequest(ViewController.DesktopViewControllerActionEvent.GET_APPOINTMENT_CSV_PATH_REQUEST);
         doActionEventRequest(ViewController.DesktopViewControllerActionEvent.GET_PATIENT_CSV_PATH_REQUEST);
         doActionEventRequest(ViewController.DesktopViewControllerActionEvent.GET_PMS_STORE_PATH_REQUEST);
@@ -386,6 +416,17 @@ public class DesktopView extends javax.swing.JFrame implements PropertyChangeLis
         doActionEventRequest(ViewController.DesktopViewControllerActionEvent.COUNT_PATIENT_NOTIFICATION_TABLE_REQUEST);
         doActionEventRequest(ViewController.DesktopViewControllerActionEvent.COUNT_SURGERY_DAYS_ASSIGNMENT_TABLE_REQUEST);
         doActionEventRequest(ViewController.DesktopViewControllerActionEvent.COUNT_TREATMENT_TABLE_REQUEST);
+    }
+    
+    private JPopupMenu makePopupMenu(){
+        javax.swing.JMenuItem popupMenuItem = null;
+        JPopupMenu popup = new JPopupMenu();
+        popupMenuItem = popup.add("Paste note");
+        popupMenuItem.setActionCommand(
+                ClinicalNoteView.Action.REQUEST_PASTE_NOTE.toString());
+        popupMenuItem.addActionListener(this);
+        return popup;
+                    
     }
     
     private void doActionEventRequest(DesktopViewController.DesktopViewControllerActionEvent action){

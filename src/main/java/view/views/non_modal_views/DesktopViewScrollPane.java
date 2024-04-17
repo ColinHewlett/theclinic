@@ -291,7 +291,7 @@ public class DesktopViewScrollPane extends JScrollPane {
       @Override
       public void componentMoved(ComponentEvent e) {
           //resizeDesktop();
-          shortenResizeDesktop();
+          //shortenResizeDesktop();
       }
 
       @Override
