@@ -119,7 +119,5 @@
                 <directory>src/my_resources</directory>
             </resource>
         </resources>-->
-    
-
-    
+    <name>PMS local</name>
 </project>

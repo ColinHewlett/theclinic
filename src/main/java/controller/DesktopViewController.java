@@ -493,7 +493,7 @@ public class DesktopViewController extends ViewController{
              * 11/01/2023 19:08 update
              * -- modified PMSStore.getPath() method creates a new Access database file if one doesn't already exists
              */
-            PMSStore.getPath();
+            //PMSStore.getPath();
             ViewController.DesktopViewControllerActionEvent actionCommand =
                     ViewController.DesktopViewControllerActionEvent.valueOf(e.getActionCommand());
             switch (actionCommand){
@@ -671,7 +671,8 @@ public class DesktopViewController extends ViewController{
                     break;
                 }
                 case MIGRATE_DATA_FROM_SOURCE_VIEW_REQUEST:{                  
-                        doRequestForImportProgressViewController();
+                    PMSStore.getPath();   
+                    doRequestForImportProgressViewController();
                     break;
                 }
 
@@ -1769,8 +1770,12 @@ public class DesktopViewController extends ViewController{
                         }
 
                     }catch (StoreException ex){
-                        displayErrorMessage("Exception message raised in doDesktopViewAction(), case IMPORT_DATA_FROM_SOURCE\n"
-                                + ex.getMessage(),"Desktop View Controller error", JOptionPane.WARNING_MESSAGE);
+                        String message = ex.getMessage() + "\n"
+                                + "Exception message raised in "
+                                + "DesktopViewController.PMSStore.getPath(ACCESS)";
+                        displayErrorMessage(message,
+                                "Desktop View Controller error", 
+                                JOptionPane.WARNING_MESSAGE);
                     }
                     
                     break;

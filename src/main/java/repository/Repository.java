@@ -547,10 +547,12 @@ public class Repository implements IStoreActions {
                 sql = "UPDATE PatientNotification SET IsDeleted = true WHERE patientToNotify = ?;";
                 preparedStatement = getPMSStoreConnection().prepareStatement(sql); 
                 preparedStatement.setLong(1, patient.getPatientKey());
+                /*
                 sql = "UPDATE PatientNote SET IsDeleted = true WHERE patientKey = ?;";
                 preparedStatement = getPMSStoreConnection().prepareStatement(sql); 
                 preparedStatement.setLong(1, patient.getPatientKey());
                 preparedStatement.executeUpdate();
+                */
                 sql = "UPDATE Patient SET isDeleted = true WHERE pid = ?;";
                 preparedStatement = getPMSStoreConnection().prepareStatement(sql); 
                 preparedStatement.setLong(1, patient.getPatientKey());

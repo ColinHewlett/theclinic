@@ -12,6 +12,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.io.File;
 
 /**
  *
@@ -21,6 +22,11 @@ public class CSVReader {
     public List<String[]> getAppointmentDBFRecords(String path) throws StoreException{
         List<String[]> result = null;
         Path sourcePath = Path.of(path);
+        int test = 0;
+        File file = new File(path);
+        if (!file.exists()){
+            test++;
+        }
         try{
             BufferedReader appointmentReader = Files.newBufferedReader(sourcePath,StandardCharsets.ISO_8859_1);
             com.opencsv.CSVReader csvDBFAppointments = new com.opencsv.CSVReader(appointmentReader);
@@ -45,9 +51,29 @@ public class CSVReader {
         return result;
     }
     
+    private void debug1(String path){
+        String result = "";
+        String[] parts = path.split("/");
+        int size = parts.length;
+        size = size;
+        for (int index = 0; index < 9; index++){
+            result = result + parts[index];
+            if (index < 8) result = result + "/";
+        }
+        File directory = new File(result);
+        File[] files = directory.listFiles();
+        result = result;
+    }
+    
     public List<String[]> getPatientDBFRecords(String path) throws StoreException{
         List<String[]> result = null;
         Path patientsPath = Path.of(path);
+        File file = new File(path);
+        int test = 0;
+        if (!file.exists()){
+            debug1(path);
+        }
+            
         String message = null;
         try{
             BufferedReader patientReader = Files.newBufferedReader(patientsPath,StandardCharsets.ISO_8859_1);
