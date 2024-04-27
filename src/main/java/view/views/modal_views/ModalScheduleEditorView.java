@@ -38,7 +38,7 @@ import view.views.non_modal_views.PatientView;
  *
  * @author colin
  */
-public class ModalAppointmentEditorView extends ModalView implements ActionListener {
+public class ModalScheduleEditorView extends ModalView implements ActionListener {
     private final String SETTINGS = "Settings";
     private final String FIRST_APPOINTMENT_START_TIME = "First appointment start time";
     private final String LAST_APPOINTMENT_START_TIME = "Last appointment start time";
@@ -69,7 +69,7 @@ public class ModalAppointmentEditorView extends ModalView implements ActionListe
      * @param myController
      * @param desktopView 
      */
-    public ModalAppointmentEditorView(View.Viewer myViewType, 
+    public ModalScheduleEditorView(View.Viewer myViewType, 
             ViewController myController,
             DesktopView desktopView) {//ViewMode arg) {
         setTitle("Appointment configuration view");

@@ -81,9 +81,11 @@ public class ClinicalNoteView extends View
             this.mniPasteNote.addActionListener(this);
             this.mniCloseView.addActionListener(this);
             
+            /*
             this.mniPasteNote.setAccelerator(
                     KeyStroke.getKeyStroke('V', 
                             Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()));
+            */
             
             titledBorder = (TitledBorder)pnlClinicalNote.getBorder();
             titledBorder.setTitleColor(getBorderTitleColor());
@@ -168,10 +170,7 @@ public class ClinicalNoteView extends View
                     actionCommand = ViewController.ClinicalNoteViewControllerActionEvent
                             .CLINICAL_NOTE_CREATE_REQUEST;
                     doSendActionEvent(actionCommand);
-                    /*
-                    if (getClinicalNote()!=null) 
-                        txaNotepad.setText(getClinicalNote().getNotes());
-                    */
+                    pnlClinicalNote.repaint();
                 }
                 break;
             }
@@ -339,10 +338,16 @@ public class ClinicalNoteView extends View
     
     private JPopupMenu makePopupMenu(){
         JPopupMenu popup = new JPopupMenu();
-        popupMenuItem = popup.add("Paste note");
-        popupMenuItem.setActionCommand(
+        pastePopupMenuItem = popup.add("Paste note");
+        pastePopupMenuItem.setActionCommand(
                 Action.REQUEST_PASTE_NOTE.toString());
-        popupMenuItem.addActionListener(this);
+        pastePopupMenuItem.addActionListener(this);
+        popup.add(new JPopupMenu.Separator());
+        savePopupMenuItem = popup.add("Save note");
+        savePopupMenuItem.setActionCommand(
+                Action.REQUEST_CREATE_NOTE.toString());
+        savePopupMenuItem.addActionListener(this);
+        
         return popup;
                     
     }
@@ -496,5 +501,6 @@ public class ClinicalNoteView extends View
     // End of variables declaration//GEN-END:variables
     private ViewController.ClinicalNoteViewControllerActionEvent actionCommand = null;
     private TitledBorder titledBorder = null;
-    private javax.swing.JMenuItem popupMenuItem = null;
+    private javax.swing.JMenuItem pastePopupMenuItem = null;
+    private javax.swing.JMenuItem savePopupMenuItem = null;
 }

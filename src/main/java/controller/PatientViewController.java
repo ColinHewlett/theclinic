@@ -708,6 +708,14 @@ public class PatientViewController extends ViewController {
                         null,
                         getDescriptor()
                 );
+                firePropertyChangeEvent(
+                        ViewController.DesktopViewControllerPropertyChangeEvent.
+                                PATIENT_VIEW_CONTROLLER_CHANGE_NOTIFICATION.toString(),
+                        (DesktopViewController)getMyController(),
+                        this,
+                        null,
+                        null     
+                );
             }catch (StoreException ex){
                 displayErrorMessage(ex.getMessage() +"\n"
                         + "Exception raised in PatientViewController::doPatientViewUpdateRequest()",
@@ -746,7 +754,7 @@ public class PatientViewController extends ViewController {
                         patient.getDeletedAppointmentHistory();
                 setScheduleReport(new ScheduleReport());
                 boolean collisionFromAppointmentRecovery = false;
-                for(var a : deletedAppointments){
+                for(Appointment a : deletedAppointments){
                     if (!a.getIsCancelled()){
                         a.setPatient(patient);
                         Appointment appointment = super.doChangeAppointmentScheduleForDayRequest(
@@ -836,13 +844,20 @@ public class PatientViewController extends ViewController {
             try{
                 patient.setScope(Scope.DELETED);
                 Patient the_patient = patient.read();
-                for(var p : the_patient.get()){
+                for(Patient p : the_patient.get()){
                     if (p.equals(patient)){
                         requestedDeletedPatient = p;
                         break;
                     }
                 }
                 if (requestedDeletedPatient!=null){
+                    /**
+                     * PATIENT VIEW TEST -- 24/04/2024 09:49
+                     
+                    if (requestedDeletedPatient.getAppointmentHistory()== null)
+                        getDescriptor().getControllerDescription()
+                                .setAppointments(new ArrayList<Appointment>());
+                     */
                     getDescriptor().getControllerDescription().setPatient(requestedDeletedPatient);
                     firePropertyChangeEvent(
                            ViewController.PatientViewControllerPropertyChangeEvent.
@@ -1407,12 +1422,44 @@ public class PatientViewController extends ViewController {
                         valueOf(e.getPropertyName());
         switch(propertyName){
             case PATIENT_VIEW_CHANGE_NOTIFICATION:{
+                /**
+                 * 26/04/2024 08:13 update
+                 */
+                if (getDescriptor().getControllerDescription().getPatient().getIsKeyDefined()){
+                    try{
+                        Patient patient = getDescriptor().getControllerDescription().getPatient();
+                        patient.setScope(Scope.SINGLE);
+                        patient = patient.read();
+                        getDescriptor().getControllerDescription().setPatient(patient);
+                        patient.setScope(Scope.ALL);
+                        patient = patient.read();
+                        getDescriptor().getControllerDescription().setPatients(patient.get());
+                        firePropertyChangeEvent(
+                                ViewController.PatientViewControllerPropertyChangeEvent.
+                                        PATIENTS_RECEIVED.toString(),
+                                getView(),
+                                this,
+                                null,
+                                getDescriptor()
+                        );
+                        firePropertyChangeEvent(
+                                ViewController.PatientViewControllerPropertyChangeEvent.
+                                        PATIENT_RECEIVED.toString(),
+                                getView(),
+                                this,
+                                null,
+                                getDescriptor()
+                        );
+                    }catch(StoreException ex){
+                        displayErrorMessage(ex.getMessage() + "\nRaised in propertyChange() method",
+                            "Patient view controller error", JOptionPane.WARNING_MESSAGE);
+                    }                           
+                }
+                
+                /*
                 Patient patient = null;
                 try{
                     Descriptor descriptor = (Descriptor)e.getNewValue();
-                    //Patient patient = entityDescriptor.getAppointment().getPatient();
-                    /*09/04/2024 06:21 updated code to ensure auto refresh of patient view*/
-                    //Patient patient = descriptor.getControllerDescription().getPatient();
                     Appointment appointment = descriptor
                             .getControllerDescription().getAppointment();
                     if (appointment!=null)
@@ -1440,9 +1487,10 @@ public class PatientViewController extends ViewController {
                 }catch(StoreException ex){
                     displayErrorMessage(ex.getMessage() + "\nRaised in propertyChange() method",
                             "Patient view controller error", JOptionPane.WARNING_MESSAGE);
-                }
+                }*/
                 break; 
-            }         
+            } 
+            
         }
     }
 
@@ -1693,22 +1741,35 @@ public class PatientViewController extends ViewController {
     
     private void doConvertAppointmentNoteToTreatment(Patient p)throws StoreException{
         ArrayList<Appointment> appointments = p.getAppointmentHistory();
-        for(Appointment a : appointments){
+        //doFormatAppointmentTreatmentNote(p.getAppointmentHistory());
+        
+        
+        for (Appointment a : appointments){
             TreatmentWithState treatmentWithState = getTreatmentsWithState(a);
-            String note = new String();
+            String note = "";
             for(TreatmentWithState tws : treatmentWithState.get()){
                 if (tws.getState()) {
-                    note = note + tws.getTreatment().getDescription(); 
-                    if (tws.getComment()!=null){
-                        if (!tws.getComment().trim().isEmpty()){
-                            note = note +" (" + 
-                                    tws.getComment() + "); ";
-                        }
+                    note = note + " " + tws.getTreatment().getDescription();
+                    if(tws.getComment()!=null){
+                        if(!tws.getComment().trim().isEmpty())
+                            note = note + " (" + tws.getComment() + ")" + " /";
+                        else note = note + " /";
                     }
+                    else note = note + " /";
                     a.setNotes(note);
                 }  
             }
+            note = a.getNotes();
+            if (note!=null){
+                if (note.substring(note.length()-1).equals("/")){
+                    note = note.substring(0, note.length() - 2);
+                    a.setNotes(note);
+                }
+            } 
         }
+        
+        
+        
         getDescriptor().getControllerDescription()
                 .setAppointments(appointments);
     }

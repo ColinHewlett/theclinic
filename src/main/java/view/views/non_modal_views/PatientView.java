@@ -49,6 +49,9 @@ import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.JTextField;
 import javax.swing.border.TitledBorder;
+import javax.swing.table.TableColumnModel;
+import model.TreatmentWithState;
+import view.views.view_support_classes.renderers.ScheduleTableCellRenderer;
 /*28/03/2024import model.PatientNote;*/
 /*28/03/2024import view.views.view_support_classes.renderers.AppointmentsTablePatientNoteRenderer;*/
 /**
@@ -103,12 +106,13 @@ public class PatientView extends View
         REQUEST_NULL_PATIENT,
         REQUEST_PATIENT,
         REQUEST_PATIENT_DELETE,
+        REQUEST_PATIENT_RECALLS,
         REQUEST_PATIENT_RECOVER,
         REQUEST_PHONE_EMAIL_EDITOR_VIEW,
         REQUEST_RECALL_EDITOR_VIEW,
         REQUEST_SCHEDULE_VIEW_CONTROLLER,
         REQUEST_UNTITLED_NAME,
-        REQUEST_UPDATE_RECOVER_PATIENT 
+        REQUEST_UPDATE_RECOVER_PATIENT
     }
     private enum BorderTitles { APPOINTMENT_HISTORY,
                                 ACTIONS,
@@ -318,10 +322,14 @@ public class PatientView extends View
         this.mniCreateNewPatient.setActionCommand(Actions.REQUEST_CREATE_RECOVER_PATIENT.toString());
         this.mniDeleteSelectedPatient.setActionCommand(Actions.REQUEST_PATIENT_DELETE.toString());
         this.mniUpdateSelectedPatient.setActionCommand(Actions.REQUEST_UPDATE_RECOVER_PATIENT.toString());
+        this.mniPatientRecallsRequest.setActionCommand(Actions.REQUEST_PATIENT_RECALLS.toString());
+        this.mniRecoverDeletedPatient.setActionCommand(Actions.REQUEST_PATIENT_RECOVER.toString());
         this.mniCloseView.addActionListener(this);
         this.mniCreateNewPatient.addActionListener(this);
         this.mniDeleteSelectedPatient.addActionListener(this);
         this.mniUpdateSelectedPatient.addActionListener(this);
+        this.mniPatientRecallsRequest.addActionListener(this);
+        this.mniRecoverDeletedPatient.addActionListener(this);
         
         
 
@@ -463,6 +471,9 @@ public class PatientView extends View
     @Override
     public void actionPerformed(ActionEvent e){
         switch(Actions.valueOf(e.getActionCommand())){
+            case REQUEST_PATIENT_RECALLS:
+                getMyController().sendNoOpMessage(this);
+                break;
             case REQUEST_CLOSE_VIEW:
                 doCloseViewRequest();
                 break;
@@ -479,7 +490,8 @@ public class PatientView extends View
                 doGuardianEditorViewRequest();
                 break;
             case REQUEST_MEDICAL_HISTORY:
-                doMedicalHistoryRequest();
+                getMyController().sendNoOpMessage(this);
+                //doMedicalHistoryRequest();
                 break;
             case REQUEST_MEDICAL_HISTORY_POPUP:
                 if (this.cmbPatientSelector.getSelectedIndex()!=-1){
@@ -869,6 +881,12 @@ public class PatientView extends View
         int appointmentHistoryCount = 0;
         ArrayList<Appointment> appointments = getMyController().getDescriptor()
                 .getControllerDescription().getAppointments();
+        /**
+         * PATIENT VIEW TEST 24/04/2024 09:49
+         * -- just in case ensure null pointer exception generated
+         */
+        if (appointments == null) appointments = new ArrayList<>();
+        
         Appointments3ColumnTableModel tableModel = 
                 (Appointments3ColumnTableModel)tblAppointmentHistory.getModel(); 
         tableModel.removeAllElements();
@@ -878,7 +896,7 @@ public class PatientView extends View
                 patient.setScope(Entity.Scope.FOR_PATIENT);
                 appointmentHistoryCount = appointments.size();
                 Iterator<Appointment> it = appointments.iterator();
-                while (it.hasNext()){        
+                while (it.hasNext()){   
                     tableModel.addElement(it.next());
                 }
             }
@@ -886,6 +904,9 @@ public class PatientView extends View
             this.tblAppointmentHistory.setDefaultRenderer(LocalDateTime.class, new AppointmentsTableLocalDateTimeRenderer());;
             /*28/03/2024this.tblAppointmentHistory.setDefaultRenderer(PatientNote.class, new AppointmentsTablePatientNoteRenderer());*/
             //this.tblAppointmentHistory.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+            
+            TableColumnModel columnModel = this.tblAppointmentHistory.getColumnModel();
+            columnModel.getColumn(2).setCellRenderer(new ScheduleTableCellRenderer());
             
             //this.tblAppointmentHistory.setPreferredScrollableViewportSize(tblAppointmentHistory.getPreferredSize());
             TitledBorder titledBorder =
@@ -991,9 +1012,19 @@ public class PatientView extends View
     }
     
     private void setViewTitle(Patient patient){
-        this.setTitle (patient.toString()
-                + " [phone: " + patient.getPhone1()
-                + " email: " + patient.getEmail() +"]");
+        if(patient.getEmail()!=null){
+            if(patient.getEmail().trim().length()>0){
+                this.setTitle (patient.toString()
+                        + " [phone: " + patient.getPhone1()
+                        + " email: " + patient.getEmail() +"]");
+            }else
+                this.setTitle (patient.toString()
+                        + " [phone: " + patient.getPhone1()
+                        + " email: undefined]");
+        }else
+            this.setTitle (patient.toString()
+                        + " [phone: " + patient.getPhone1()
+                        + " email: undefined]");
     }
     
     private String getPatientTitle(){
@@ -1205,6 +1236,8 @@ public class PatientView extends View
         mniCreateNewPatient = new javax.swing.JMenuItem();
         mniUpdateSelectedPatient = new javax.swing.JMenuItem();
         jSeparator1 = new javax.swing.JPopupMenu.Separator();
+        mniPatientRecallsRequest = new javax.swing.JMenuItem();
+        jSeparator3 = new javax.swing.JPopupMenu.Separator();
         mniDeleteSelectedPatient = new javax.swing.JMenuItem();
         mniRecoverDeletedPatient = new javax.swing.JMenuItem();
         jSeparator2 = new javax.swing.JPopupMenu.Separator();
@@ -1577,6 +1610,10 @@ public class PatientView extends View
         mnuActions.add(mniUpdateSelectedPatient);
         mnuActions.add(jSeparator1);
 
+        mniPatientRecallsRequest.setText("Patient recalls");
+        mnuActions.add(mniPatientRecallsRequest);
+        mnuActions.add(jSeparator3);
+
         mniDeleteSelectedPatient.setText("Delete selected patient");
         mnuActions.add(mniDeleteSelectedPatient);
 
@@ -1676,6 +1713,7 @@ public class PatientView extends View
     private com.github.lgooddatepicker.components.DatePicker dobDatePicker;
     private javax.swing.JPopupMenu.Separator jSeparator1;
     private javax.swing.JPopupMenu.Separator jSeparator2;
+    private javax.swing.JPopupMenu.Separator jSeparator3;
     private javax.swing.JLabel lblAddressCounty;
     private javax.swing.JLabel lblAddressLine1;
     private javax.swing.JLabel lblAddressLine2;
@@ -1691,6 +1729,7 @@ public class PatientView extends View
     private javax.swing.JMenuItem mniCloseView;
     private javax.swing.JMenuItem mniCreateNewPatient;
     private javax.swing.JMenuItem mniDeleteSelectedPatient;
+    private javax.swing.JMenuItem mniPatientRecallsRequest;
     private javax.swing.JMenuItem mniRecoverDeletedPatient;
     private javax.swing.JMenuItem mniUpdateSelectedPatient;
     private javax.swing.JMenu mnuActions;

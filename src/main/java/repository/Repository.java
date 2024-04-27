@@ -3584,7 +3584,7 @@ public class Repository implements IStoreActions {
                 sql = "CREATE TABLE ClinicalNote ("
                         + "pid LONG CONSTRAINT PK_ClinicalNote PRIMARY KEY "
                         + "REFERENCES Appointment(pid), "
-                        + "notes VarChar, "
+                        + "notes LONGTEXT, "
                         + "isDeleted YesNo);";
                 doCreateClinicalNoteTable(sql);
                 break; 

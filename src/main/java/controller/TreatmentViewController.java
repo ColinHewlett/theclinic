@@ -149,6 +149,14 @@ public class TreatmentViewController extends ViewController{
                                 JOptionPane.WARNING_MESSAGE);
                         isError = true;
                     }
+                    firePropertyChangeEvent(
+                        ViewController.DesktopViewControllerPropertyChangeEvent.
+                                TREATMENT_VIEW_CONTROLLER_CHANGE_NOTIFICATION.toString(),
+                        (DesktopViewController)getMyController(),
+                        this,
+                        null,
+                        null     
+                );
                     break;
             }
             if (!isError){

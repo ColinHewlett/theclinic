@@ -243,8 +243,9 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
     public static enum DesktopViewControllerPropertyChangeEvent{
         APPOINTEE_CONTACT_DETAILS_FOR_SCHEDULE_VIEW_CONTROLLER_REQUEST,
         APPOINTEE_CONTACT_DETAILS_FOR_SCHEDULE_VIEW_CONTROLLER_CHANGE_NOTIFICATION,
-        APPOINTMENT_SCHEDULE_VIEW_CONTROLLER_CHANGE_NOTIFICATION,
+        SCHEDULE_VIEW_CONTROLLER_CHANGE_NOTIFICATION,
         PATIENT_VIEW_CONTROLLER_CHANGE_NOTIFICATION,
+        TREATMENT_VIEW_CONTROLLER_CHANGE_NOTIFICATION,
         DESKTOP_VIEW_CHANGED_NOTIFICATION,
         SET_DESKTOP_VIEW_MODE,
         APPOINTMENT_CSV_PATH_RECEIVED,
@@ -943,6 +944,7 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
                     first.update();
                     second.setScope(Entity.Scope.SINGLE);
                     second.delete();
+                    second.cancel(); /*26/04/2024 13:41 UNBOOKABLE APPOINTMENT SLOT EDITOR VIEW log*/
                 }catch(StoreException ex){
                     
                 }
@@ -1111,6 +1113,44 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         }
         return theTreatmentWithState;
     }
+    
+    public void sendNoOpMessage(View view){
+        String message = "Currently this option is awaiting implementation";
+        JOptionPane.showInternalMessageDialog(
+                view, message,"View controller",JOptionPane.INFORMATION_MESSAGE);
+    }
+    
+    protected void doFormatAppointmentTreatmentNote(ArrayList<Appointment> appointments)throws StoreException{
+        for (Appointment a : appointments){
+            if ((a.getPatient()!=null) ||
+                    (!a.getPatient().toString().equals(
+                            SystemDefinition.APPOINTMENT_UNBOOKABILITY_MARKER))){
+                TreatmentWithState treatmentWithState = getTreatmentsWithState(a);
+                String note = new String();
+                for(TreatmentWithState tws : treatmentWithState.get()){
+                    if (tws.getState()) {
+                        note = note + " " + tws.getTreatment().getDescription();
+                        if(tws.getComment()!=null){
+                            if(!tws.getComment().trim().isEmpty())
+                                note = note + " (" + tws.getComment() + ")" + " /";
+                            else note = note + " /";
+                        }
+                        else note = note + " /";
+                        a.setNotes(note);
+                    }  
+                }
+                note = a.getNotes();
+
+                if (note!=null){
+                    if (note.substring(note.length()-1).equals("/")){
+                        note = note.substring(0, note.length() - 2);
+                        a.setNotes(note);
+                    }
+                }
+            }
+        }
+    }
+            
     
 }
 

@@ -5,6 +5,7 @@
  */
 package controller;
 
+//import static controller.ViewController.ScheduleViewControllerActionEvent.APPOINTMENT_EDITOR_TREATMENT_VIEW_REQUEST;
 import model.SystemDefinition;
 import static controller.ViewController.displayErrorMessage;
 import model.Entity.Scope;
@@ -162,7 +163,7 @@ public class ScheduleViewController extends ViewController{
                             .setAppointment(theCancelledAppointment);
                     firePropertyChangeEvent(
                         ViewController.DesktopViewControllerPropertyChangeEvent.
-                                APPOINTMENT_SCHEDULE_VIEW_CONTROLLER_CHANGE_NOTIFICATION.toString(),
+                                SCHEDULE_VIEW_CONTROLLER_CHANGE_NOTIFICATION.toString(),
                         (DesktopViewController)getMyController(),
                         this,
                         null,
@@ -414,7 +415,8 @@ public class ScheduleViewController extends ViewController{
             /**
              * generate appointment note from treatments selected
              */
-            
+            doFormatAppointmentTreatmentNote(appointment.get());
+            /*
             for (Appointment a : appointment.get()){
                 if ((a.getPatient()!=null) ||
                         (!a.getPatient().toString().equals(
@@ -423,17 +425,26 @@ public class ScheduleViewController extends ViewController{
                     String note = new String();
                     for(TreatmentWithState tws : treatmentWithState.get()){
                         if (tws.getState()) {
-                            note = note + tws.getTreatment().getDescription();
+                            note = note + " " + tws.getTreatment().getDescription();
                             if(tws.getComment()!=null){
                                 if(!tws.getComment().trim().isEmpty())
-                                    note = note + " (" + tws.getComment() + ")" + "; ";
+                                    note = note + " (" + tws.getComment() + ")" + " /";
+                                else note = note + " /";
                             }
-                            else note = note + "; ";
+                            else note = note + " /";
                             a.setNotes(note);
                         }  
-                    } 
-                }
-            }
+                    }
+                    note = a.getNotes();
+                    
+                    if (note!=null){
+                        if (note.substring(note.length()-1).equals("/")){
+                            note = note.substring(0, note.length() - 2);
+                            a.setNotes(note);
+                        }
+                    }
+                
+            }*/
             getDescriptor().getControllerDescription().setAppointments(appointment.get());
             getDescriptor().getControllerDescription().setScheduleDay(day);
             doAppointeeReminderCount(appointment.get());
@@ -635,7 +646,7 @@ public class ScheduleViewController extends ViewController{
                 
                 firePropertyChangeEvent(
                         ViewController.DesktopViewControllerPropertyChangeEvent.
-                                APPOINTMENT_SCHEDULE_VIEW_CONTROLLER_CHANGE_NOTIFICATION.toString(),
+                                SCHEDULE_VIEW_CONTROLLER_CHANGE_NOTIFICATION.toString(),
                         (DesktopViewController)getMyController(),
                         this,
                         null,
@@ -652,6 +663,9 @@ public class ScheduleViewController extends ViewController{
                 getDescriptor().getControllerDescription().
                     setViewMode(ViewController.ViewMode.CREATE);
                 doAppointmentCreateViewRequest();
+                break;
+            case APPOINTMENT_EDITOR_TREATMENT_VIEW_REQUEST:
+                doOpenTreatmentView();
                 break;
             case APPOINTMENT_UPDATE_VIEW_REQUEST:
                 getDescriptor().getControllerDescription().
@@ -679,7 +693,7 @@ public class ScheduleViewController extends ViewController{
                         getControllerDescription().getScheduleDay());
                 firePropertyChangeEvent(
                         ViewController.DesktopViewControllerPropertyChangeEvent.
-                                APPOINTMENT_SCHEDULE_VIEW_CONTROLLER_CHANGE_NOTIFICATION.toString(),
+                                SCHEDULE_VIEW_CONTROLLER_CHANGE_NOTIFICATION.toString(),
                         (DesktopViewController)getMyController(),
                         this,
                         null,
@@ -1081,7 +1095,7 @@ getDescriptor().getViewDescription().getScheduleDay());
                         getDescriptor().getControllerDescription().setAppointment(theUncancelledAppointment);
                         firePropertyChangeEvent(
                             ViewController.DesktopViewControllerPropertyChangeEvent.
-                                    APPOINTMENT_SCHEDULE_VIEW_CONTROLLER_CHANGE_NOTIFICATION.toString(),
+                                    SCHEDULE_VIEW_CONTROLLER_CHANGE_NOTIFICATION.toString(),
                             (DesktopViewController)getMyController(),
                             this,
                             null,
@@ -1131,7 +1145,7 @@ getDescriptor().getViewDescription().getScheduleDay());
 
             firePropertyChangeEvent(
                     ViewController.DesktopViewControllerPropertyChangeEvent.
-                            APPOINTMENT_SCHEDULE_VIEW_CONTROLLER_CHANGE_NOTIFICATION.toString(),
+                            SCHEDULE_VIEW_CONTROLLER_CHANGE_NOTIFICATION.toString(),
                     (DesktopViewController)getMyController(),
                     this,
                     null,
@@ -1334,7 +1348,7 @@ getDescriptor().getViewDescription().getScheduleDay());
                 );
                 firePropertyChangeEvent(
                         ViewController.DesktopViewControllerPropertyChangeEvent.
-                                APPOINTMENT_SCHEDULE_VIEW_CONTROLLER_CHANGE_NOTIFICATION.toString(),
+                                SCHEDULE_VIEW_CONTROLLER_CHANGE_NOTIFICATION.toString(),
                         (DesktopViewController)getMyController(),
                         this,
                         null,
@@ -1361,6 +1375,19 @@ getDescriptor().getViewDescription().getScheduleDay());
         ViewController.ScheduleViewControllerActionEvent actionCommand =
                ViewController.ScheduleViewControllerActionEvent.valueOf(e.getActionCommand());        
         switch (actionCommand){
+            case APPOINTMENTS_FOR_DAY_REQUEST:
+                doAppointmentForDayRequest(getDescriptor()
+                        .getControllerDescription().getScheduleDay());       
+                /*
+                firePropertyChangeEvent(
+                       ViewController.ScheduleViewControllerPropertyChangeEvent.
+                               APPOINTMENTS_FOR_DAY_RECEIVED.toString(),
+                       (View)e.getSource(),
+                       this,//event sender
+                       null,
+                       getDescriptor()//event related data        
+               ); */
+                break;
             case APPOINTMENT_EDITOR_TREATMENT_VIEW_REQUEST:
                 /**
                  * -- check ModalAppointmentEditorView viewmode == CREATE
@@ -1392,7 +1419,7 @@ getDescriptor().getViewDescription().getScheduleDay());
                     
                     firePropertyChangeEvent(
                             ViewController.DesktopViewControllerPropertyChangeEvent.
-                                    APPOINTMENT_SCHEDULE_VIEW_CONTROLLER_CHANGE_NOTIFICATION.toString(),
+                                    SCHEDULE_VIEW_CONTROLLER_CHANGE_NOTIFICATION.toString(),
                             (DesktopViewController)getMyController(),
                             this,
                             null,
@@ -1429,7 +1456,7 @@ getDescriptor().getViewDescription().getScheduleDay());
                     
                     firePropertyChangeEvent(
                             ViewController.DesktopViewControllerPropertyChangeEvent.
-                                    APPOINTMENT_SCHEDULE_VIEW_CONTROLLER_CHANGE_NOTIFICATION.toString(),
+                                    SCHEDULE_VIEW_CONTROLLER_CHANGE_NOTIFICATION.toString(),
                             (DesktopViewController)getMyController(),
                             this,
                             null,
@@ -1481,7 +1508,8 @@ getDescriptor().getViewDescription().getScheduleDay());
     
     private void doOpenTreatmentView(){
         Appointment appointment = getDescriptor()
-                .getControllerDescription().getAppointment();
+                .getViewDescription().getAppointment();
+        getDescriptor().getControllerDescription().setAppointment(appointment);
         try{
             TreatmentWithState treatmentWithState =
                     getTreatmentsWithState(appointment);

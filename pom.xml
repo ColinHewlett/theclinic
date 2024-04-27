@@ -8,8 +8,8 @@
     <packaging>jar</packaging>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>21</maven.compiler.source>
-        <maven.compiler.target>21</maven.compiler.target>
+        <maven.compiler.source>8</maven.compiler.source>
+        <maven.compiler.target>8</maven.compiler.target>
         <exec.mainClass>controller.DesktopViewController</exec.mainClass>
     </properties>
     <build>
@@ -23,8 +23,14 @@
                     </descriptorRefs>
                     <archive>
                         <manifest>
+                            <!--<addClasspath>true</addClasspath>-->
                             <mainClass>controller.DesktopViewController</mainClass>
                         </manifest>
+                        <!--
+                        <manifestEntries>
+                            <Class-Path>c:/pms/</Class-Path>
+                        </manifestEntries>
+                        -->
                     </archive>
                 </configuration>
                 <executions>

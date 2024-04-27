@@ -224,7 +224,7 @@ public class Notification extends Entity implements IEntityStoreActions {
                 if (patient.getIsKeyDefined()) {
                     patient.setScope(Scope.DELETED);
                     patient.read();
-                    for(var p : patient.get()){
+                    for(Patient p : patient.get()){
                         if (p.equals(patient)){
                             isPatientDeleted = true;
                             break;

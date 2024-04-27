@@ -119,7 +119,7 @@ public class View extends JInternalFrame
                 setModalView(makeView(new ModalCancelledAppointmentsView(viewer, controller, desktopView)));
                 break;
             case APPOINTMENT_EDITOR_VIEW:
-                setModalView(makeView(new ModalAppointmentEditorView(viewer, controller, desktopView)));
+                setModalView(makeView(new ModalScheduleEditorView(viewer, controller, desktopView)));
                 break;
             case APPOINTMENT_EMPTY_SLOT_SCAN_CONFIGURATION_VIEW:
                 setModalView(makeView(new ModalEmptySlotScanConfigurationView(viewer, controller, desktopView)));

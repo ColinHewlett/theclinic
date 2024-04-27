@@ -23,6 +23,13 @@
             </MenuItem>
             <MenuItem class="javax.swing.JPopupMenu$Separator" name="jSeparator1">
             </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="mniPatientRecallsRequest">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Patient recalls"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JPopupMenu$Separator" name="jSeparator3">
+            </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="mniDeleteSelectedPatient">
               <Properties>
                 <Property name="text" type="java.lang.String" value="Delete selected patient"/>

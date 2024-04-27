@@ -328,7 +328,7 @@ public class DesktopView extends javax.swing.JFrame
             makeSelectViewMenu();
                 mnbDesktop.add(mnuSelectView);        
         }
-        setSize(1004,650);
+        setSize(1250,812);
         Dimension test1 = getPreferredSize();
         setVisible(true);
         
@@ -403,6 +403,7 @@ public class DesktopView extends javax.swing.JFrame
     }
     
     public void initialiseView(){
+        
         //this.setComponentPopupMenu(this.makePopupMenu());
         doActionEventRequest(ViewController.DesktopViewControllerActionEvent.GET_APPOINTMENT_CSV_PATH_REQUEST);
         doActionEventRequest(ViewController.DesktopViewControllerActionEvent.GET_PATIENT_CSV_PATH_REQUEST);

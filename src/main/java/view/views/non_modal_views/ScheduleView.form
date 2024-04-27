@@ -36,12 +36,12 @@
             </MenuItem>
             <MenuItem class="javax.swing.JPopupMenu$Separator" name="jSeparator2">
             </MenuItem>
-            <MenuItem class="javax.swing.JMenuItem" name="mniClearScheduleSelection">
+            <MenuItem class="javax.swing.JMenuItem" name="mniPrintScheduleSelection">
               <Properties>
-                <Property name="text" type="java.lang.String" value="Clear schedule selection"/>
+                <Property name="text" type="java.lang.String" value="Print schedule"/>
               </Properties>
               <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="mniClearScheduleSelectionActionPerformed"/>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="mniPrintScheduleSelectionActionPerformed"/>
               </Events>
             </MenuItem>
             <MenuItem class="javax.swing.JPopupMenu$Separator" name="jSeparator3">
@@ -118,7 +118,7 @@
               <Component id="pnlAppointmentScheduleForDay" min="-2" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Component id="pnlScheduleOperations" min="-2" pref="72" max="-2" attributes="0"/>
+                  <Component id="pnlScheduleOperations" min="-2" max="-2" attributes="0"/>
                   <Group type="102" attributes="0">
                       <EmptySpace min="-2" pref="6" max="-2" attributes="0"/>
                       <Component id="btnPrintDayScheduleRequest" min="-2" max="-2" attributes="0"/>
@@ -203,7 +203,7 @@
         <DimensionLayout dim="0">
           <Group type="103" groupAlignment="0" attributes="0">
               <Group type="102" alignment="1" attributes="0">
-                  <EmptySpace max="32767" attributes="0"/>
+                  <EmptySpace pref="18" max="32767" attributes="0"/>
                   <Component id="scrPanelSlotAvailability" min="-2" pref="352" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
               </Group>
@@ -299,7 +299,7 @@
             <DimensionLayout dim="0">
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" alignment="1" attributes="0">
-                      <EmptySpace min="0" pref="15" max="32767" attributes="0"/>
+                      <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                       <Component id="btnPreviousPracticeDay" min="-2" pref="62" max="-2" attributes="0"/>
                       <EmptySpace type="separate" max="-2" attributes="0"/>
                       <Component id="btnNowDay" min="-2" max="-2" attributes="0"/>
@@ -319,7 +319,7 @@
                   <Group type="102" alignment="0" attributes="0">
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="dayDatePicker" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace pref="15" max="32767" attributes="0"/>
+                      <EmptySpace pref="30" max="32767" attributes="0"/>
                       <Group type="103" groupAlignment="3" attributes="0">
                           <Component id="btnPreviousPracticeDay" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="btnNowDay" alignment="3" min="-2" pref="9" max="-2" attributes="0"/>
@@ -411,7 +411,7 @@
                       <Component id="btnCancelSelectedAppointment" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="btnMarkSlotUnbookable" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
-                  <EmptySpace max="32767" attributes="0"/>
+                  <EmptySpace pref="20" max="32767" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>

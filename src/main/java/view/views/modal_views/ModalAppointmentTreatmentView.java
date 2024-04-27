@@ -42,9 +42,8 @@ public class ModalAppointmentTreatmentView extends ModalView
     enum Action {
         REQUEST_CLOSE_VIEW,
         REQUEST_TREATMENT_COMMENT_UPDATE,
-        REQUEST_TREATMENT_CREATE,
-        REQUEST_TREATMENT_DELETE,
-        REQUEST_TREATMENT_RENAME
+        REQUEST_TREATMENT_COMMENT_ADD,
+        REQUEST_TREATMENT_COMMENT_DELETE
     }
     /**
      * 
@@ -62,7 +61,7 @@ public class ModalAppointmentTreatmentView extends ModalView
     
     @Override
     public void valueChanged(ListSelectionEvent e){
-        this.lblTreatmentNote.setVisible(false);
+        //this.lblTreatmentNote.setVisible(false);
         if (!e.getValueIsAdjusting()) {   // Ensure the event is not fired multiple times
             int selectedRow = tblTreatmentWithState.getSelectedRow();
             if (selectedRow!=-1){
@@ -71,21 +70,37 @@ public class ModalAppointmentTreatmentView extends ModalView
                 TreatmentWithStateTableModel model = 
                         (TreatmentWithStateTableModel)tblTreatmentWithState.getModel();
                 TreatmentWithState tws = model.getElementAt(selectedRow);
+                
+                if (tws.getState() ){
+                    String comment = tws.getComment();
+                    if (comment!=null){
+                        if(!comment.trim().isEmpty()){
+                            this.lblTreatmentNote.setText("Added note to selected treatment:- " + comment);
+                            this.lblTreatmentNote.setVisible(true);
+                        }
+                        else {
+                            this.lblTreatmentNote.setText("Added note to selected treatment:- ");
+                        }
+                    }else this.lblTreatmentNote.setText("Added note to selected treatment:- ");
+                }else tblTreatmentWithState.clearSelection();
+                
+                /*
                 String comment = tws.getComment();
                 if (comment!=null){
                     if(!comment.trim().isEmpty()){
-                        this.lblTreatmentNote.setText("Treatment note:- " + comment);
+                        this.lblTreatmentNote.setText("Added note to selected treatment:- " + comment);
                         this.lblTreatmentNote.setVisible(true);
                     }
                     else {
-                        this.lblTreatmentNote.setVisible(false);
+                        this.lblTreatmentNote.setText("Added note to selected treatment:- ");
                     }
-                }else this.lblTreatmentNote.setVisible(false);
+                }else this.lblTreatmentNote.setText("Added note to selected treatment:- ");*/
             }
         }
     }
     
     public void actionPerformed(ActionEvent e){
+        int row = 0;
         TreatmentWithState tws = null;
         ViewController.ScheduleViewControllerActionEvent
                 actionCommand = null;
@@ -97,6 +112,28 @@ public class ModalAppointmentTreatmentView extends ModalView
                     
                 }
                 break;
+            case REQUEST_TREATMENT_COMMENT_ADD:
+                tws = doPrepForRequestTreatmentCommentUpdate();
+                if (tws!=null){
+                    row = this.tblTreatmentWithState.getSelectedRow();
+                    setTreatmentWithState(tws);
+                    actionCommand = ViewController.ScheduleViewControllerActionEvent
+                        .APPOINTMENT_TREATMENT_COMMENT_UPDATE_REQUEST;
+                    doSendActionEvent(actionCommand);
+                    this.tblTreatmentWithState.setRowSelectionInterval(row,row);
+                }
+                break;
+            case REQUEST_TREATMENT_COMMENT_DELETE:
+                tws = doPrepForRequestTreatmentCommentDelete();
+                if (tws!=null){
+                    row = this.tblTreatmentWithState.getSelectedRow();
+                    setTreatmentWithState(tws);
+                    actionCommand = ViewController.ScheduleViewControllerActionEvent
+                        .APPOINTMENT_TREATMENT_COMMENT_UPDATE_REQUEST;
+                    doSendActionEvent(actionCommand);
+                    this.tblTreatmentWithState.setRowSelectionInterval(row,row);
+                }
+                break;
             case REQUEST_TREATMENT_COMMENT_UPDATE:
                 tws = doPrepForRequestTreatmentCommentUpdate();
                 if (tws!=null){
@@ -104,20 +141,17 @@ public class ModalAppointmentTreatmentView extends ModalView
                     actionCommand = ViewController.ScheduleViewControllerActionEvent
                         .APPOINTMENT_TREATMENT_COMMENT_UPDATE_REQUEST;
                     doSendActionEvent(actionCommand);
-                    try{
-                        this.setClosed(true);   
-                    }catch (PropertyVetoException ex){
-
-                    }
+                    this.tblTreatmentWithState.setRowSelectionInterval(row,row);
                 }
                 break;
+            /*
             case REQUEST_TREATMENT_CREATE:
                 tws = doPrepForRequestTreatmentCreate();
                 if (tws!=null){
                     setTreatmentWithState(tws);
                     actionCommand = ViewController.ScheduleViewControllerActionEvent
                         .TREATMENT_CREATE_REQUEST;
-                    doSendActionEvent(actionCommand);
+                    doSendActionEvent(actionCommand);*/
                     /*11/04/2024 10:15
                     String message = "Treatment '" 
                             + tws.getTreatment().getDescription() +"' has been created";
@@ -128,9 +162,10 @@ public class ModalAppointmentTreatmentView extends ModalView
                     }catch (PropertyVetoException ex){
 
                     }
-                    */
+                    *//*
                 }
-                break;
+                break;*/
+            /*
             case REQUEST_TREATMENT_DELETE:
                 setIsErrorMessageReceived(false);
                 tws = doPrepForRequestTreatmentDelete();
@@ -149,7 +184,8 @@ public class ModalAppointmentTreatmentView extends ModalView
                         }
                     }
                 }
-                break;
+                break;*/
+            /*
             case REQUEST_TREATMENT_RENAME:
                 tws = doPrepForRequestTreatmentRename();
                 if (tws!=null){
@@ -158,7 +194,7 @@ public class ModalAppointmentTreatmentView extends ModalView
                         .APPOINTMENT_TREATMENT_NAME_UPDATE_REQUEST;
                     doSendActionEvent(actionCommand);
                 }
-                break;
+                break;*/
         }
     }
     
@@ -207,26 +243,32 @@ public class ModalAppointmentTreatmentView extends ModalView
                 + getAppointee() + " on " + getAppointmentDate());
         
         setVisible(true);
-        setSize(412, 463);
+        setSize(434, 536);
+        pnlOperations.setBackground(new java.awt.Color(220,220,220));
+        //this.lblTreatmentNote.setVisible(false);
         
-        this.lblTreatmentNote.setVisible(false);
-        
-        btnClose.setActionCommand(Action.REQUEST_CLOSE_VIEW.toString());
-        this.btnAddTreatment.setActionCommand(
-                Action.REQUEST_TREATMENT_CREATE.toString());
-        this.btnAddTreatmentComment.setActionCommand(
+        //btnClose.setActionCommand(Action.REQUEST_CLOSE_VIEW.toString());
+        /*this.btnAddTreatment.setActionCommand(
+                Action.REQUEST_TREATMENT_CREATE.toString());*/
+        /*this.btnAddTreatmentComment.setActionCommand(
+                Action.REQUEST_TREATMENT_COMMENT_ADD.toString());*/
+        this.btnUpdateTreatmentComment.setActionCommand(
                 Action.REQUEST_TREATMENT_COMMENT_UPDATE.toString());
+        this.btnDeleteTreatmentComment.setActionCommand(
+                Action.REQUEST_TREATMENT_COMMENT_DELETE.toString());
         this.btnClose.setActionCommand(
                 Action.REQUEST_CLOSE_VIEW.toString());
-        this.btnDeleteTreatment.setActionCommand(
-                Action.REQUEST_TREATMENT_DELETE.toString());
-        this.btnRenameTreatment.setActionCommand(
-                Action.REQUEST_TREATMENT_RENAME.toString());
-        this.btnAddTreatment.addActionListener(this);
-        this.btnAddTreatmentComment.addActionListener(this);
+        /*this.btnDeleteTreatment.setActionCommand(
+                Action.REQUEST_TREATMENT_DELETE.toString());*/
+        /*this.btnRenameTreatment.setActionCommand(
+                Action.REQUEST_TREATMENT_RENAME.toString());*/
+        //this.btnAddTreatment.addActionListener(this);
+        //this.btnAddTreatmentComment.addActionListener(this);
+        this.btnUpdateTreatmentComment.addActionListener(this);
+        this.btnDeleteTreatmentComment.addActionListener(this);
         btnClose.addActionListener(this);
-        this.btnDeleteTreatment.addActionListener(this);
-        this.btnRenameTreatment.addActionListener(this);
+        //this.btnDeleteTreatment.addActionListener(this);
+        //this.btnRenameTreatment.addActionListener(this);
         
         ListSelectionModel lsm = this.tblTreatmentWithState.getSelectionModel();
         lsm.addListSelectionListener(this);
@@ -307,6 +349,54 @@ public class ModalAppointmentTreatmentView extends ModalView
         getMyController().actionPerformed(actionEvent);
     }
     
+    private TreatmentWithState doPrepForRequestTreatmentCommentAdd(){
+        String reply = null;
+        TreatmentWithState result = null;
+        if (this.tblTreatmentWithState.getSelectedRow()!=-1){
+            int selectedRow = tblTreatmentWithState.getSelectedRow();
+            TreatmentWithStateTableModel model = 
+                    (TreatmentWithStateTableModel)tblTreatmentWithState.getModel();
+            result = model.getElementAt(selectedRow);
+            if (result.getComment()==null)
+                reply = JOptionPane.showInternalInputDialog(
+                        this,"","Enter treatment note",JOptionPane.INFORMATION_MESSAGE);
+            else reply = JOptionPane.showInternalInputDialog(
+                        this,"'" + result.getComment() + "'","Edit treatment note",JOptionPane.INFORMATION_MESSAGE);
+            if (reply!=null){
+                reply = reply.trim();
+                if (!reply.isEmpty()){
+                    result.setComment(reply);
+                }else{
+                JOptionPane.showInternalMessageDialog(
+                         this,"The requested treatment note is blank and has not been saved",
+                     "View error",JOptionPane.WARNING_MESSAGE);     
+                } 
+            }
+
+        }else{
+            JOptionPane.showInternalMessageDialog(
+                        this,"No treatment has been selected",
+                    "View error",JOptionPane.WARNING_MESSAGE);
+        }
+        return result;
+    }
+    
+    private TreatmentWithState doPrepForRequestTreatmentCommentDelete(){
+        TreatmentWithState result = null;
+        if (this.tblTreatmentWithState.getSelectedRow()!=-1){
+            int selectedRow = tblTreatmentWithState.getSelectedRow();
+            TreatmentWithStateTableModel model = 
+                    (TreatmentWithStateTableModel)tblTreatmentWithState.getModel();
+            result = model.getElementAt(selectedRow);
+            result.setComment(null);
+        }else{
+            JOptionPane.showInternalMessageDialog(
+                        this,"No treatment has been selected",
+                    "View error",JOptionPane.WARNING_MESSAGE);
+        }
+        return result;
+    }
+    
     private TreatmentWithState doPrepForRequestTreatmentCommentUpdate(){
         String reply = null;
         TreatmentWithState result = null;
@@ -315,13 +405,26 @@ public class ModalAppointmentTreatmentView extends ModalView
             TreatmentWithStateTableModel model = 
                     (TreatmentWithStateTableModel)tblTreatmentWithState.getModel();
             result = model.getElementAt(selectedRow);
-            if (result.getComment()!=null)
+            if (result.getComment()==null)
                 reply = JOptionPane.showInternalInputDialog(
                         this,"","Enter treatment note",JOptionPane.INFORMATION_MESSAGE);
             else reply = JOptionPane.showInternalInputDialog(
-                        this,result.getComment(),"Edit treatment note",JOptionPane.INFORMATION_MESSAGE);
-            if (reply!=null)
-                result.setComment(reply);
+                        this,"'" + result.getComment() + "'","Edit treatment note",JOptionPane.INFORMATION_MESSAGE);
+            if (reply!=null){
+                reply = reply.trim();
+                if (!reply.isEmpty()){
+                    result.setComment(reply);
+                }else{
+                JOptionPane.showInternalMessageDialog(
+                         this,"The requested treatment note is blank and has not been saved",
+                     "View error",JOptionPane.WARNING_MESSAGE);     
+                } 
+            }
+
+        }else{
+            JOptionPane.showInternalMessageDialog(
+                        this,"No treatment has been selected",
+                    "View error",JOptionPane.WARNING_MESSAGE);
         }
         return result;
     }
@@ -414,16 +517,27 @@ public class ModalAppointmentTreatmentView extends ModalView
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jPanel1 = new javax.swing.JPanel();
         pnlTreatmentTable = new javax.swing.JPanel();
         scrTreatment = new javax.swing.JScrollPane();
         tblTreatmentWithState = new javax.swing.JTable();
-        jPanel1 = new javax.swing.JPanel();
-        btnAddTreatment = new javax.swing.JButton();
-        btnDeleteTreatment = new javax.swing.JButton();
-        btnRenameTreatment = new javax.swing.JButton();
-        btnAddTreatmentComment = new javax.swing.JButton();
+        pnlOperations = new javax.swing.JPanel();
         btnClose = new javax.swing.JButton();
+        btnUpdateTreatmentComment = new javax.swing.JButton();
+        btnDeleteTreatmentComment = new javax.swing.JButton();
+        jPanel2 = new javax.swing.JPanel();
         lblTreatmentNote = new javax.swing.JLabel();
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 100, Short.MAX_VALUE)
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 100, Short.MAX_VALUE)
+        );
 
         tblTreatmentWithState.setModel(new TreatmentWithStateTableModel());
         tblTreatmentWithState.getModel().addTableModelListener(this);
@@ -431,90 +545,99 @@ public class ModalAppointmentTreatmentView extends ModalView
         ViewController.setJTableColumnProperties(
             tblTreatmentWithState, scrTreatment.getPreferredSize().width, 20,80);
 
-        btnAddTreatment.setText("<html><center>Add</center><center>new</center><center>treatment</center></html>");
-        btnAddTreatment.setVerifyInputWhenFocusTarget(false);
-
-        btnDeleteTreatment.setText("<html><center>Delete</center><center>selected</center><center>treatment</center></html>");
-
-        btnRenameTreatment.setText("<html><center>Rename</center><center>selected</center><center>treatment</center></html>");
-
-        btnAddTreatmentComment.setText("<html><center>Add note</center><center>to selected</center><center>treatment</center></html>");
+        pnlOperations.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        pnlOperations.setName(""); // NOI18N
 
         btnClose.setText("<html><center>Close</center><center>view</center></html>");
 
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(10, 10, 10)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(btnAddTreatment, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 106, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnRenameTreatment, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 106, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnDeleteTreatment, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 106, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnAddTreatmentComment, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 106, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnClose, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 106, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(10, 10, 10))
+        btnUpdateTreatmentComment.setText("<html><center>Update note</center><center>to selected</center><center>treatment</center></html>");
+
+        btnDeleteTreatmentComment.setText("<html><center>Delete note</center><center>from selected</center><center>treatment</center></html>");
+
+        javax.swing.GroupLayout pnlOperationsLayout = new javax.swing.GroupLayout(pnlOperations);
+        pnlOperations.setLayout(pnlOperationsLayout);
+        pnlOperationsLayout.setHorizontalGroup(
+            pnlOperationsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlOperationsLayout.createSequentialGroup()
+                .addGap(14, 14, 14)
+                .addGroup(pnlOperationsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(btnClose, javax.swing.GroupLayout.PREFERRED_SIZE, 106, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnUpdateTreatmentComment, javax.swing.GroupLayout.PREFERRED_SIZE, 106, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnDeleteTreatmentComment, javax.swing.GroupLayout.PREFERRED_SIZE, 106, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(14, Short.MAX_VALUE))
         );
-        jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addComponent(btnAddTreatment, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(10, 10, 10)
-                .addComponent(btnRenameTreatment, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(10, 10, 10)
-                .addComponent(btnDeleteTreatment, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(10, 10, 10)
-                .addComponent(btnAddTreatmentComment, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(10, 10, 10)
-                .addComponent(btnClose, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
+        pnlOperationsLayout.setVerticalGroup(
+            pnlOperationsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlOperationsLayout.createSequentialGroup()
+                .addGap(47, 47, 47)
+                .addComponent(btnUpdateTreatmentComment, javax.swing.GroupLayout.PREFERRED_SIZE, 74, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(47, 47, 47)
+                .addComponent(btnDeleteTreatmentComment, javax.swing.GroupLayout.PREFERRED_SIZE, 74, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(47, 47, 47)
+                .addComponent(btnClose, javax.swing.GroupLayout.PREFERRED_SIZE, 74, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(48, 48, 48))
         );
 
-        btnRenameTreatment.getAccessibleContext().setAccessibleDescription("");
-        btnAddTreatmentComment.getAccessibleContext().setAccessibleDescription("");
         btnClose.getAccessibleContext().setAccessibleDescription("");
 
-        lblTreatmentNote.setText("Treatment note");
+        lblTreatmentNote.setText("Added note to selected treatment:-");
+
+        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
+        jPanel2.setLayout(jPanel2Layout);
+        jPanel2Layout.setHorizontalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(lblTreatmentNote)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        jPanel2Layout.setVerticalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(lblTreatmentNote)
+                .addGap(10, 10, 10))
+        );
 
         javax.swing.GroupLayout pnlTreatmentTableLayout = new javax.swing.GroupLayout(pnlTreatmentTable);
         pnlTreatmentTable.setLayout(pnlTreatmentTableLayout);
         pnlTreatmentTableLayout.setHorizontalGroup(
             pnlTreatmentTableLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlTreatmentTableLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(pnlTreatmentTableLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGap(12, 12, 12)
+                .addGroup(pnlTreatmentTableLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(pnlTreatmentTableLayout.createSequentialGroup()
                         .addComponent(scrTreatment, javax.swing.GroupLayout.PREFERRED_SIZE, 250, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addGroup(pnlTreatmentTableLayout.createSequentialGroup()
-                        .addComponent(lblTreatmentNote)
-                        .addGap(0, 0, Short.MAX_VALUE))))
+                        .addComponent(pnlOperations, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGap(0, 0, Short.MAX_VALUE))
         );
         pnlTreatmentTableLayout.setVerticalGroup(
             pnlTreatmentTableLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlTreatmentTableLayout.createSequentialGroup()
-                .addGap(8, 8, 8)
-                .addComponent(lblTreatmentNote)
-                .addGap(7, 7, 7)
+                .addGap(31, 31, 31)
                 .addGroup(pnlTreatmentTableLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 391, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(scrTreatment, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
-                .addGap(12, 12, 12))
+                    .addComponent(scrTreatment)
+                    .addComponent(pnlOperations, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(5, 5, 5))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(pnlTreatmentTable, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addComponent(pnlTreatmentTable, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(12, 12, 12))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addComponent(pnlTreatmentTable, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGap(0, 0, 0))
+                .addComponent(pnlTreatmentTable, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 9, Short.MAX_VALUE))
         );
 
         pack();
@@ -522,13 +645,13 @@ public class ModalAppointmentTreatmentView extends ModalView
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton btnAddTreatment;
-    private javax.swing.JButton btnAddTreatmentComment;
     private javax.swing.JButton btnClose;
-    private javax.swing.JButton btnDeleteTreatment;
-    private javax.swing.JButton btnRenameTreatment;
+    private javax.swing.JButton btnDeleteTreatmentComment;
+    private javax.swing.JButton btnUpdateTreatmentComment;
     private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel2;
     private javax.swing.JLabel lblTreatmentNote;
+    private javax.swing.JPanel pnlOperations;
     private javax.swing.JPanel pnlTreatmentTable;
     private javax.swing.JScrollPane scrTreatment;
     private javax.swing.JTable tblTreatmentWithState;

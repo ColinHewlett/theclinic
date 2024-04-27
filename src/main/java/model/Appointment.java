@@ -374,7 +374,7 @@ public class Appointment extends Entity implements IEntityStoreActions{
                     
                     /*28/03/2024set(new Repository().read(this, key).get());*/
                     
-                    for(var a : this.get()){
+                    for(Appointment a : this.get()){
                         if (a.getPatient().getIsKeyDefined()){
                             Integer key = a.getPatient().getKey();
                             patient = new Patient(key);
@@ -400,7 +400,7 @@ public class Appointment extends Entity implements IEntityStoreActions{
                     /*28/03/2024 update*/
                     set(((Appointment)new Repository().read(this, key)).get());
                     
-                    for(var a : this.get()){
+                    for(Appointment a : this.get()){
                         if (a.getPatient().getIsKeyDefined()){
                             patient = new Patient(a.getPatient().getKey());
                             patient.setScope(Scope.DELETED);
@@ -455,7 +455,7 @@ public class Appointment extends Entity implements IEntityStoreActions{
                 /*28/03/2024set(new Repository().read(this, key).get());*/
                 set(((Appointment)new Repository().read(this, key)).get());
                 appointments = this.get();
-                for(var a : this.get()){
+                for(Appointment a : this.get()){
                     if (a.getPatient().getIsKeyDefined()){
                         patient = new Patient(a.getPatient().getKey());
                         patient.setScope(Scope.SINGLE);
@@ -478,7 +478,7 @@ public class Appointment extends Entity implements IEntityStoreActions{
                     /*28/03/2024set(new Repository().read(this, key).get());*/
                     set(((Appointment)new Repository().read(this, key)).get());
                     appointments = this.get();
-                    for(var a : this.get()){
+                    for(Appointment a : this.get()){
                         if (a.getPatient().getIsKeyDefined()){
                             patient = new Patient(a.getPatient().getKey());
                             patient.setScope(Scope.SINGLE);
@@ -525,7 +525,7 @@ public class Appointment extends Entity implements IEntityStoreActions{
                 if (patient.getIsKeyDefined()) {
                     patient.setScope(Scope.DELETED);
                     patient.read();
-                    for(var p : patient.get()){
+                    for(Patient p : patient.get()){
                         if (p.equals(patient)){
                             isPatientDeleted = true;
                             break;

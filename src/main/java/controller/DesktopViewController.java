@@ -5,6 +5,8 @@
  */
 package controller;
 
+import static controller.ViewController.DesktopViewControllerPropertyChangeEvent.PATIENT_VIEW_CONTROLLER_CHANGE_NOTIFICATION;
+import static controller.ViewController.DesktopViewControllerPropertyChangeEvent.SCHEDULE_VIEW_CONTROLLER_CHANGE_NOTIFICATION;
 import static controller.ViewController.displayErrorMessage;
 import static controller.ViewController.ViewControllers;
 import model.*;
@@ -46,7 +48,7 @@ public class DesktopViewController extends ViewController{
     private boolean isDesktopPendingClosure = false;
     private DesktopView desktopView = null;
     //private ArrayList<AppointmentRemindersViewController> appointmentRemindersViewControllers = null;
-    private ArrayList<ScheduleViewController>appointmentScheduleViewControllers = null;
+    private ArrayList<ScheduleViewController>scheduleViewControllers = null;
     private ArrayList<NotificationViewController> notificationViewControllers = null;
     private ArrayList<PatientViewController> patientViewControllers = null;
     private ArrayList<TreatmentViewController> treatmentViewControllers = null;
@@ -67,14 +69,14 @@ public class DesktopViewController extends ViewController{
          * -- Boolean signifying whether view enables data migration functions
          */
         DesktopView desktopView = new DesktopView(this, isDataMigrationOptionEnabled, getDescriptor() );
-
+        desktopView.setLocationRelativeTo(null);
         setDesktopView(desktopView);
         
         
         //view.setContentPane(view);
         pcSupport = new PropertyChangeSupport(this);
         //appointmentScheduleViewControllersMap = new HashMap<>();
-        appointmentScheduleViewControllers = new ArrayList<>();
+        scheduleViewControllers = new ArrayList<>();
         patientViewControllers = new ArrayList<>();
         importProgressViewControllers = new ArrayList<>();
         notificationViewControllers = new ArrayList<>();
@@ -277,14 +279,14 @@ public class DesktopViewController extends ViewController{
                 break;
             case VIEW_CONTROLLER_CLOSE_NOTIFICATION:{
                 Iterator<ScheduleViewController> viewControllerIterator = 
-                        this.appointmentScheduleViewControllers.iterator();
+                        this.scheduleViewControllers.iterator();
                 while(viewControllerIterator.hasNext()){
                     avc = viewControllerIterator.next();
                     if (avc.equals(e.getSource())){
                         break;
                     }
                 }
-                if (!this.appointmentScheduleViewControllers.remove(avc)){
+                if (!this.scheduleViewControllers.remove(avc)){
                     String message = "Could not find AppointmentViewController in "
                                             + "DesktopViewController collection.";
                     displayErrorMessage(message,"DesktopViewController error",JOptionPane.WARNING_MESSAGE);
@@ -293,7 +295,7 @@ public class DesktopViewController extends ViewController{
                     if (this.isDesktopPendingClosure){
                         this.requestViewControllersToCloseViews();
                     }
-                    if (this.appointmentScheduleViewControllers.isEmpty() && 
+                    if (this.scheduleViewControllers.isEmpty() && 
                             this.patientViewControllers.isEmpty()){ 
                     }
                 }
@@ -335,7 +337,7 @@ public class DesktopViewController extends ViewController{
                     if (this.isDesktopPendingClosure){
                         this.requestViewControllersToCloseViews();
                     }
-                    if (this.appointmentScheduleViewControllers.isEmpty() && 
+                    if (this.scheduleViewControllers.isEmpty() && 
                             this.patientViewControllers.isEmpty()){ 
                     }
                 }
@@ -694,8 +696,8 @@ public class DesktopViewController extends ViewController{
             }
         }
         
-        if (!this.appointmentScheduleViewControllers.isEmpty()){
-            Iterator<ScheduleViewController> avcIterator = appointmentScheduleViewControllers.iterator();
+        if (!this.scheduleViewControllers.isEmpty()){
+            Iterator<ScheduleViewController> avcIterator = scheduleViewControllers.iterator();
             while(avcIterator.hasNext()){
                 ScheduleViewController avc = avcIterator.next();
                 ActionEvent actionEvent = new ActionEvent(
@@ -704,7 +706,7 @@ public class DesktopViewController extends ViewController{
                 avc.actionPerformed(actionEvent);    
             }
         }
-        if ((appointmentScheduleViewControllers.isEmpty()) && (patientViewControllers.isEmpty())){
+        if ((scheduleViewControllers.isEmpty()) && (patientViewControllers.isEmpty())){
             if (this.isDesktopPendingClosure){
                 getDesktopView().dispose();
                 System.exit(0);
@@ -716,7 +718,7 @@ public class DesktopViewController extends ViewController{
         try{
             ScheduleViewController avc =
                     new ScheduleViewController(this, getDesktopView());
-            this.appointmentScheduleViewControllers.add(avc);
+            this.scheduleViewControllers.add(avc);
             try{
                 SurgeryDaysAssignment surgeryDaysAssignment = new SurgeryDaysAssignment();
                 surgeryDaysAssignment = surgeryDaysAssignment.read();
@@ -748,7 +750,7 @@ public class DesktopViewController extends ViewController{
     private void doRequestForViewClose(){
         String[] options = {"Yes", "No"};
         String message;
-        if (!appointmentScheduleViewControllers.isEmpty()||!patientViewControllers.isEmpty()){
+        if (!scheduleViewControllers.isEmpty()||!patientViewControllers.isEmpty()){
             message = "At least one patient or appointment view is active. Close application anyway?";
         }
         else {message = "Close The Clinic practice management system?";}
@@ -761,7 +763,7 @@ public class DesktopViewController extends ViewController{
                         null);
         if (close == JOptionPane.YES_OPTION){
             this.isDesktopPendingClosure = true;
-            if (!this.appointmentScheduleViewControllers.isEmpty()||!this.patientViewControllers.isEmpty()){
+            if (!this.scheduleViewControllers.isEmpty()||!this.patientViewControllers.isEmpty()){
                 requestViewControllersToCloseViews();
             }
             else {
@@ -797,7 +799,7 @@ public class DesktopViewController extends ViewController{
     
     private void doRequestForScheduleViewController(DesktopView desktopView){
         ScheduleViewController activeViewController = null;
-        for(ScheduleViewController svc : appointmentScheduleViewControllers){
+        for(ScheduleViewController svc : scheduleViewControllers){
             /**
              * the Schedule VC has been called from the Desktop view
              * -- hence  the need to check if a schedule for today already exists
@@ -819,7 +821,7 @@ public class DesktopViewController extends ViewController{
     
     private void doRequestForScheduleViewController(ScheduleViewController vc){
         ScheduleViewController activeViewController = null;
-        for(ScheduleViewController svc : appointmentScheduleViewControllers){
+        for(ScheduleViewController svc : scheduleViewControllers){
                 if(vc.getDescriptor().getViewDescription().getScheduleDay().
                         isEqual(svc.getDescriptor().getControllerDescription().getScheduleDay())){
                     activeViewController = svc;
@@ -1446,6 +1448,15 @@ public class DesktopViewController extends ViewController{
         }
         
         try{
+            ClinicalNote cn = new ClinicalNote();
+            cn.setScope(Entity.Scope.ALL); 
+            cn.delete();
+        }catch(StoreException ex){
+            displayErrorMessage(ex.getMessage(),
+                    "Desktop view controller",JOptionPane.WARNING_MESSAGE);
+        }
+        
+        try{
             Treatment treatment = new Treatment();
             treatment.setScope(Entity.Scope.ALL); 
             treatment.delete();
@@ -1657,46 +1668,95 @@ public class DesktopViewController extends ViewController{
     }
     
     
-    private void doPropertyChangeEventPatientViewController(PropertyChangeEvent e){
-        ViewController.DesktopViewControllerPropertyChangeEvent propertyName = 
-                ViewController.DesktopViewControllerPropertyChangeEvent.
-                        valueOf(e.getPropertyName());
-        switch(propertyName){
-            case PATIENT_VIEW_CONTROLLER_CHANGE_NOTIFICATION:
-                for(ScheduleViewController asvc: this.appointmentScheduleViewControllers){
-                    ActionEvent actionEvent = new ActionEvent(
-                            this,ActionEvent.ACTION_PERFORMED,
-                            ViewController.DesktopViewControllerActionEvent.
-                                    REFRESH_DISPLAY_REQUEST.toString());
-                    asvc.actionPerformed(actionEvent); 
-                }
-                for(NotificationViewController pnvc : this.notificationViewControllers){
-                    ActionEvent actionEvent = new ActionEvent(
-                            this,ActionEvent.ACTION_PERFORMED,
-                            ViewController.DesktopViewControllerActionEvent.
-                                    REFRESH_DISPLAY_REQUEST.toString());
-                    pnvc.actionPerformed(actionEvent); 
-                }
-                break;
+    private void doPatientViewControllerChangeNotification(PropertyChangeEvent e){
+        for(ScheduleViewController asvc: this.scheduleViewControllers){
+            ActionEvent actionEvent = new ActionEvent(
+                    this,ActionEvent.ACTION_PERFORMED,
+                    ViewController.DesktopViewControllerActionEvent.
+                            REFRESH_DISPLAY_REQUEST.toString());
+            asvc.actionPerformed(actionEvent); 
+        }
+        
+        PatientViewController requestingPVC = 
+                    (PatientViewController)e.getSource();
+        for(PatientViewController pvc: this.patientViewControllers){
+            if (!requestingPVC.equals(pvc)){
+                firePropertyChangeEvent(
+                    ViewController.PatientViewControllerPropertyChangeEvent.
+                            PATIENT_VIEW_CHANGE_NOTIFICATION.toString(),
+                    pvc,
+                    this,
+                    null,
+                    getDescriptor()       
+                );  
+            }
+        }
+        
+        for(NotificationViewController pnvc : this.notificationViewControllers){
+            ActionEvent actionEvent = new ActionEvent(
+                    this,ActionEvent.ACTION_PERFORMED,
+                    ViewController.DesktopViewControllerActionEvent.
+                            REFRESH_DISPLAY_REQUEST.toString());
+            pnvc.actionPerformed(actionEvent); 
         }
     }
     
-    /**
-     * handles the following property change events received from an ScheduleViewController
- -- APPOINTMENT_SCHEDULE_VIEW_CONTROLLER_CHANGE_NOTIFICATION
- ---- fires an APPOINTEE_CONTACT_DETAILS_FOR_SCHEDULE_VIEW_REFRESH_RECEIVED property change event to each AppointeeContactDetailsForscheduleVC (assumes there could be more than one)
- ---- on entry event newValue is an Descriptor whose Appointment, Appointments and Day properties represent the current state in the AppointmentScheduleView sender  
- 
- 
- --
-     * @param e 
-     */
+    private void doScheduleViewControllerChangeNotification(PropertyChangeEvent e){
+        setDescriptor((Descriptor)e.getNewValue());
+        for(PatientViewController pvc: this.patientViewControllers){
+            firePropertyChangeEvent(
+                    ViewController.PatientViewControllerPropertyChangeEvent.
+                            PATIENT_VIEW_CHANGE_NOTIFICATION.toString(),
+                    pvc,
+                    this,
+                    null,
+                    getDescriptor()       
+            ); 
+        }
+        
+        ScheduleViewController requestingSVC = 
+                    (ScheduleViewController)e.getSource();
+        for(ScheduleViewController svc: this.scheduleViewControllers){
+            if (!requestingSVC.equals(svc)){
+                ActionEvent actionEvent = new ActionEvent(
+                        this,ActionEvent.ACTION_PERFORMED,
+                        ViewController.DesktopViewControllerActionEvent.
+                                REFRESH_DISPLAY_REQUEST.toString());
+                svc.actionPerformed(actionEvent); 
+            }
+        }
+        
+        
+        
+    } 
+    
+    private void doTreatmentViewControllerChangeNotification(PropertyChangeEvent e){
+        setDescriptor((Descriptor)e.getNewValue());
+        for(PatientViewController pvc: this.patientViewControllers){
+            firePropertyChangeEvent(
+                    ViewController.PatientViewControllerPropertyChangeEvent.
+                            PATIENT_VIEW_CHANGE_NOTIFICATION.toString(),
+                    pvc,
+                    this,
+                    null,
+                    getDescriptor()       
+            ); 
+        }
+        for(ScheduleViewController svc: this.scheduleViewControllers){
+            ActionEvent actionEvent = new ActionEvent(
+                    this,ActionEvent.ACTION_PERFORMED,
+                    ViewController.DesktopViewControllerActionEvent.
+                            REFRESH_DISPLAY_REQUEST.toString());
+            svc.actionPerformed(actionEvent); 
+        }
+    } 
+    /*
     private void doPropertyChangeEventScheduleViewController(PropertyChangeEvent e){
         ViewController.DesktopViewControllerPropertyChangeEvent propertyName = 
                 ViewController.DesktopViewControllerPropertyChangeEvent.
                         valueOf(e.getPropertyName());
         switch(propertyName){
-            case APPOINTMENT_SCHEDULE_VIEW_CONTROLLER_CHANGE_NOTIFICATION:{
+            case SCHEDULE_VIEW_CONTROLLER_CHANGE_NOTIFICATION:{
                 setDescriptor((Descriptor)e.getNewValue());
                 for(PatientViewController pvc: this.patientViewControllers){
                     firePropertyChangeEvent(
@@ -1711,24 +1771,64 @@ public class DesktopViewController extends ViewController{
                 break;
             }
         }
-    }       
-    
+    } 
+    */
+    /*
+     private void doPropertyChangeEventScheduleViewController(PropertyChangeEvent e){
+        ViewController.DesktopViewControllerPropertyChangeEvent propertyName = 
+                ViewController.DesktopViewControllerPropertyChangeEvent.
+                        valueOf(e.getPropertyName());
+        switch(propertyName){
+            case SCHEDULE_VIEW_CONTROLLER_CHANGE_NOTIFICATION:{
+                setDescriptor((Descriptor)e.getNewValue());
+                for(PatientViewController pvc: this.patientViewControllers){
+                    firePropertyChangeEvent(
+                            ViewController.PatientViewControllerPropertyChangeEvent.
+                                    PATIENT_VIEW_CHANGE_NOTIFICATION.toString(),
+                            pvc,
+                            this,
+                            null,
+                            getDescriptor()       
+                    ); 
+                }
+                break;
+            }
+        }
+    } 
+    */
+    public void propertyChange(PropertyChangeEvent e){
+        ViewController.DesktopViewControllerPropertyChangeEvent propertyName =
+                ViewController.DesktopViewControllerPropertyChangeEvent.valueOf(e.getPropertyName());
+        switch(propertyName){
+            case PATIENT_VIEW_CONTROLLER_CHANGE_NOTIFICATION:
+                doPatientViewControllerChangeNotification(e);
+                break;
+            case SCHEDULE_VIEW_CONTROLLER_CHANGE_NOTIFICATION:
+                doScheduleViewControllerChangeNotification(e);
+                break;
+            case TREATMENT_VIEW_CONTROLLER_CHANGE_NOTIFICATION:
+                doTreatmentViewControllerChangeNotification(e);
+                break;
+                
+        }
+    }
+    /*
     public void propertyChange(PropertyChangeEvent e){
         String viewController = e.getSource().getClass().getSimpleName();
         switch(ViewControllers.valueOf(viewController)){
             case ScheduleViewController:
-                doPropertyChangeEventScheduleViewController(e);
+                doScheduleViewControllerChangeNotification(e);
                 break;
             case DesktopViewController:
                 break;
             case PatientNotificationViewController:
                 break;
             case PatientViewController:
-                doPropertyChangeEventPatientViewController(e);
+                doPatientViewControllerChangeNotification(e);
                 break;
   
         }
-    }
+    }*/
     
     static class PMSStore {  
 
