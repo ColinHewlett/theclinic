@@ -115,6 +115,7 @@ public class ModalAppointmentTreatmentView extends ModalView
             case REQUEST_TREATMENT_COMMENT_ADD:
                 tws = doPrepForRequestTreatmentCommentUpdate();
                 if (tws!=null){
+                    tws = doPrepForRequestTreatmentCommentUpdate();
                     row = this.tblTreatmentWithState.getSelectedRow();
                     setTreatmentWithState(tws);
                     actionCommand = ViewController.ScheduleViewControllerActionEvent
@@ -137,6 +138,7 @@ public class ModalAppointmentTreatmentView extends ModalView
             case REQUEST_TREATMENT_COMMENT_UPDATE:
                 tws = doPrepForRequestTreatmentCommentUpdate();
                 if (tws!=null){
+                    row = this.tblTreatmentWithState.getSelectedRow();
                     setTreatmentWithState(tws);
                     actionCommand = ViewController.ScheduleViewControllerActionEvent
                         .APPOINTMENT_TREATMENT_COMMENT_UPDATE_REQUEST;
