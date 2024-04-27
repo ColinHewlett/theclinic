@@ -30,6 +30,7 @@ public class Entity implements IStoreClient{
     private Boolean isClinicNote = false;
     private Boolean isTreatment = false;
     private Boolean isAppointmentTreatment = false;
+    private Boolean isPatientPrimaryCondition = false;
     private Scope scope = null;
     private Point value = null;
     protected Boolean isDeleted = false;
@@ -66,6 +67,7 @@ public class Entity implements IStoreClient{
         setIsClinicNote(false);
         setIsTreatment(false);
         setIsAppointmentTreatment(false);
+        setIsPatientPrimaryCondition(false);
     }
     
     /**
@@ -75,7 +77,7 @@ public class Entity implements IStoreClient{
                         APPOINTEE_REMINDERS,    //all entities
                         CANCELLED,              //cancelled appointments
                         FOR_APPOINTMENT,        //clinic note or treatment for appointment
-                        FOR_TREATMENT,          //appointment for treatmwnt
+                        FOR_TREATMENT,          //appointment for treatment
                         FOR_DAY,                //appointments for this day
                         FOR_PATIENT,            //appointments/notes for this patient
                         FOR_PRIMARY_CONDITION,  //secondary condition(s) for this primary condition
@@ -172,6 +174,15 @@ public class Entity implements IStoreClient{
     
     public Boolean getIsAppointmentTreatment(){
         return isAppointmentTreatment;
+    }
+    
+    public Boolean getIsPatientPrimaryCondition(){
+        return isPatientPrimaryCondition;
+    }
+    
+    protected void setIsPatientPrimaryCondition(Boolean value){
+        if (value) resetAll();
+        isPatientPrimaryCondition= value;
     }
     
     protected void setIsAppointmentTreatment(Boolean value){

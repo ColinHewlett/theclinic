@@ -28,6 +28,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import javax.swing.JOptionPane;
+import static model.Entity.Scope.ALL;
+import static model.Entity.Scope.FOR_APPOINTMENT;
+import static model.Entity.Scope.FOR_TREATMENT;
+import static model.Entity.Scope.SINGLE;
 
 /**
  *
@@ -50,6 +54,7 @@ public class Repository implements IStoreActions {
                             PATIENT,
                             PATIENT_NOTIFICATION,
                             PATIENT_NOTE,
+                            PATIENT_PRIMARY_CONDITION,
                             PRIMARY_CONDITION,
                             SECONDARY_CONDITION,
                             SYSTEM_DEFINITION,
@@ -147,6 +152,19 @@ public class Repository implements IStoreActions {
                                 //READ_APPOINTMENT_TREATMENT_FOR_PATIENT,
                                 //READ_APPOINTMENT_TREATMENT_NEXT_HIGHEST_KEY,
                                 UPDATE_APPOINTMENT_TREATMENT,
+                                
+                                CREATE_PATIENT_PRIMARY_CONDITION_TABLE,
+                                COUNT_PATIENT_PRIMARY_CONDITION,
+                                DELETE_ALL_PATIENT_PRIMARY_CONDITION,
+                                DELETE_PATIENT_PRIMARY_CONDITION,
+                                INSERT_PATIENT_PRIMARY_CONDITION,
+                                READ_PATIENT_PRIMARY_CONDITION,
+                                READ_PATIENT_PRIMARY_CONDITION_FOR_PATIENT,
+                                READ_PATIENT_PRIMARY_CONDITION_FOR_PRIMARY_CONDITION,
+                                READ_ALL_PATIENT_PRIMARY_CONDITION,
+                                //READ_PATIENT_PRIMARY_CONDITION_FOR_PATIENT,
+                                //READ_PATIENT_PRIMARY_CONDITION_NEXT_HIGHEST_KEY,
+                                UPDATE_PATIENT_PRIMARY_CONDITION,
                                 
                                 CREATE_DOCTOR_TABLE,
                                 COUNT_DOCTOR,
@@ -1092,6 +1110,30 @@ public class Repository implements IStoreActions {
         }
     }
     
+    private void doInsertPatientPrimaryCondition(String sql, Entity entity)throws StoreException{
+        PatientPrimaryCondition patientPrimaryCondition = null;
+        if (entity != null){
+            if (entity.getIsPatientPrimaryCondition()){
+                patientPrimaryCondition = (PatientPrimaryCondition)entity;
+                try{
+                    PreparedStatement preparedStatement = getPMSStoreConnection().prepareStatement(sql);
+                    preparedStatement.setLong(1,patientPrimaryCondition.getPatient().getKey());
+                    preparedStatement.setLong(2,patientPrimaryCondition.getPrimaryCondition().getKey());
+                    preparedStatement.execute();
+                }catch(SQLException ex){
+                    throw new StoreException("SQLException message -> " + ex.getMessage() + "\n"
+                            + "StoreException message -> exception raised in Repository::doInsertPatientPrimaryCondition()",
+                            StoreException.ExceptionType.SQL_EXCEPTION);
+                }
+            }else{
+                String message = "Entity not defined as a Condition\n"
+                        + "StoreException raised in repository::doInsertPatientPrimaryCondition()";
+                throw new StoreException(message, 
+                        StoreException.ExceptionType.UNEXPECTED_DATA_TYPE_ENCOUNTERED);
+            }
+        }
+    }
+    
     private void doInsertAppointmentTreatment(String sql, Entity entity)throws StoreException{
         AppointmentTreatment appointmentTreatment = null;
         if (entity != null){
@@ -1102,7 +1144,7 @@ public class Repository implements IStoreActions {
                     preparedStatement.setLong(1,appointmentTreatment.getAppointment().getKey());
                     preparedStatement.setLong(2,appointmentTreatment.getTreatment().getKey());
                     preparedStatement.setString(3,appointmentTreatment.getComment());
-                    preparedStatement.executeUpdate();
+                    preparedStatement.execute();
                 }catch(SQLException ex){
                     throw new StoreException("SQLException message -> " + ex.getMessage() + "\n"
                             + "StoreException message -> exception raised in Repository::doInsertAppointmentTreatment()",
@@ -1974,7 +2016,52 @@ public class Repository implements IStoreActions {
              
         }catch (SQLException ex) {
             throw new StoreException("SQLException message -> " + ex.getMessage() + "\n"
-                    + "StoreException -> raised in Repository::get(Treatment,ResultSet)",
+                    + "StoreException -> raised in Repository::get(AppointmentTreatment,ResultSet)",
+                    StoreException.ExceptionType.SQL_EXCEPTION);
+        }
+    }
+    
+    private PatientPrimaryCondition get(PatientPrimaryCondition patientPrimaryCondition, ResultSet rs)throws StoreException{
+        PatientPrimaryCondition result = null;
+        ArrayList<PatientPrimaryCondition> collection = new ArrayList<>();
+        try{
+            switch (patientPrimaryCondition.getScope()){
+                case SINGLE:
+                    if (!rs.wasNull()){
+                        rs.next();
+                        Integer patientKey = rs.getInt("patientKey");
+                        Integer primaryConditionKey = rs.getInt("primaryConditionKey");
+                        //String comment = rs.getString("comment");
+                        Patient patient = new Patient(patientKey);
+                        PrimaryCondition primaryCondition = new PrimaryCondition(primaryConditionKey);
+                        result = new PatientPrimaryCondition(patient,primaryCondition);
+                        //result.setComment(comment);
+
+                    }
+                    break;
+                default://specifically Scope.FOR_PATIENT or FOR_PRIMARY_CONDITION
+                    if (!rs.wasNull()){
+                        while (rs.next()){
+                            Integer patientKey = rs.getInt("patientKey");
+                            Integer primaryConditionKey = rs.getInt("primaryConditionKey");
+                            //String comment = rs.getString("comment");
+                            PatientPrimaryCondition thePatientPrimaryCondition = 
+                                    new PatientPrimaryCondition(
+                                            new Patient(patientKey),
+                                            new PrimaryCondition(primaryConditionKey));
+                            //thePatientPrimaryCondition.setComment(comment);
+                            collection.add(thePatientPrimaryCondition);
+                        }
+                        patientPrimaryCondition.set(collection);
+                    }
+                    result = patientPrimaryCondition;
+                    break;
+            }
+            return result;
+             
+        }catch (SQLException ex) {
+            throw new StoreException("SQLException message -> " + ex.getMessage() + "\n"
+                    + "StoreException -> raised in Repository::get(PatientPrimaryCondition,ResultSet)",
                     StoreException.ExceptionType.SQL_EXCEPTION);
         }
     }
@@ -2294,6 +2381,43 @@ public class Repository implements IStoreActions {
         }
     }
     
+    private Entity doReadPatientPrimaryConditionWithKey(String sql, Entity entity)throws StoreException{
+        PatientPrimaryCondition patientPrimaryCondition = null;
+        if (entity != null) {
+            if (entity.getIsPatientPrimaryCondition()) {
+                patientPrimaryCondition = (PatientPrimaryCondition) entity;
+                
+                try {
+                    PreparedStatement preparedStatement = getPMSStoreConnection().prepareStatement(sql);
+                    switch(patientPrimaryCondition.getScope()){
+                        case SINGLE:
+                            preparedStatement.setLong(1, patientPrimaryCondition.getPatient().getKey());
+                            preparedStatement.setLong(2, patientPrimaryCondition.getPrimaryCondition().getKey());
+                        case FOR_PATIENT:
+                            preparedStatement.setLong(1, patientPrimaryCondition.getPatient().getKey());
+                            break;
+                        case FOR_PRIMARY_CONDITION:
+                            preparedStatement.setLong(1, patientPrimaryCondition.getPrimaryCondition().getKey());
+                            break;
+                    }
+                    ResultSet rs = preparedStatement.executeQuery();
+                    //patientPrimaryCondition.setScope(Entity.Scope.SINGLE);
+                    return get(patientPrimaryCondition, rs);
+                } catch (SQLException ex) {
+                    throw new StoreException("SQLException message -> " + ex.getMessage() + "\n"
+                            + "StoreException message -> exception raised in Repository::doReadPatientPrimaryConditionWithKey()",
+                            StoreException.ExceptionType.SQL_EXCEPTION);
+                }
+            } else {
+                String msg = "StoreException -> unexpected entity type encountered in Repository::doReadPatientPrimaryConditionWithKey()";
+                throw new StoreException(msg, StoreException.ExceptionType.UNEXPECTED_DATA_TYPE_ENCOUNTERED);
+            }
+        } else {
+            String msg = "StoreException -> patient note undefined in doReadPatientPrimaryConditionWithKey()";
+            throw new StoreException(msg, StoreException.ExceptionType.NULL_KEY_EXCEPTION);
+        }
+    }
+    
     private Entity doReadPrimaryConditionForPatient(String sql, Entity entity)throws StoreException{
         PrimaryCondition pc = null;
         if (entity != null) {
@@ -2559,6 +2683,30 @@ public class Repository implements IStoreActions {
         }
     }
     
+    private void doDeletePatientPrimaryCondition(String sql, Entity entity)throws StoreException{
+        if (entity != null){
+            if (entity.getIsPatientPrimaryCondition()){
+                PatientPrimaryCondition patientPrimaryCondition = (PatientPrimaryCondition)entity;
+                try{
+                    PreparedStatement preparedStatement = getPMSStoreConnection().prepareStatement(sql);
+                    preparedStatement.setLong(1, patientPrimaryCondition.getPatient().getKey());
+                    preparedStatement.setLong(2, patientPrimaryCondition.getPrimaryCondition().getKey());
+                    preparedStatement.executeUpdate();
+                }catch (SQLException ex){
+                    throw new StoreException("SQLException message -> " + ex.getMessage() + "\n"
+                            + "StoreException message -> exception raised in Repository::doDeletePatientPrimaryCondition(sql, entity)",
+                            StoreException.ExceptionType.SQL_EXCEPTION);
+                }
+            } else {
+                String msg = "StoreException -> unexpected entity type in doDeletePatientPrimaryCondition(sql, entity)";
+                throw new StoreException(msg, StoreException.ExceptionType.UNEXPECTED_DATA_TYPE_ENCOUNTERED);
+            }   
+        }else {
+                String msg = "StoreException -> undefined entity type in doDeletePatientPrimaryCondition(sql, entity)";
+                throw new StoreException(msg, StoreException.ExceptionType.UNEXPECTED_DATA_TYPE_ENCOUNTERED);
+        }
+    }
+    
     private void doDeleteAppointmentTreatment(String sql, Entity entity)throws StoreException{
         if (entity != null){
             if (entity.getIsAppointmentTreatment()){
@@ -2567,7 +2715,7 @@ public class Repository implements IStoreActions {
                     PreparedStatement preparedStatement = getPMSStoreConnection().prepareStatement(sql);
                     preparedStatement.setLong(1, appointmentTreatment.getAppointment().getKey());
                     preparedStatement.setLong(2, appointmentTreatment.getTreatment().getKey());
-                    preparedStatement.executeUpdate();
+                    preparedStatement.execute();
                 }catch (SQLException ex){
                     throw new StoreException("SQLException message -> " + ex.getMessage() + "\n"
                             + "StoreException message -> exception raised in Repository::doDeleteAppointmentTreatment(sql, entity)",
@@ -2880,6 +3028,33 @@ public class Repository implements IStoreActions {
         }
     }
     
+    private void doUpdatePatientPrimaryCondition(String sql, Entity entity) throws StoreException{
+        PatientPrimaryCondition patientPrimaryCondition;
+        if (entity != null) {
+            if (entity.getIsPatientPrimaryCondition()){
+                    patientPrimaryCondition = (PatientPrimaryCondition)entity;
+                try{
+                    PreparedStatement preparedStatement = getPMSStoreConnection().prepareStatement(sql);
+                    //preparedStatement.setString(1, patientPrimaryCondition.getComment());
+                    //preparedStatement.setBoolean(2, patientPrimaryCondition.getIsDeleted());
+                    preparedStatement.setLong(1, patientPrimaryCondition.getPatient().getKey());
+                    preparedStatement.setLong(2, patientPrimaryCondition.getPrimaryCondition().getKey());
+                    preparedStatement.executeUpdate();   
+                }catch(SQLException ex){
+                    throw new StoreException("SQLException message -> " + ex.getMessage() + "\n"
+                            + "StoreException message -> exception raised in Repository::doUpdatePatientPrimaryCondition()",
+                            StoreException.ExceptionType.SQL_EXCEPTION);
+                }
+            }else{
+                String msg = "StoreException -> patient note defined invalidly in doUpdatePatientPrimaryCondition()";
+                throw new StoreException(msg, StoreException.ExceptionType.UNEXPECTED_DATA_TYPE_ENCOUNTERED);
+            }
+        } else {
+            String msg = "StoreException -> patient note undefined in doUpdatePatientPrimaryCondition()";
+            throw new StoreException(msg, StoreException.ExceptionType.NULL_KEY_EXCEPTION);
+        }
+    }
+    
     private void doUpdateTreatment(String sql, Entity entity) throws StoreException{
         Treatment treatment;
         if (entity != null) {
@@ -2998,6 +3173,17 @@ public class Repository implements IStoreActions {
         } catch (SQLException ex) {
             throw new StoreException("SQLException message -> " + ex.getMessage() + "\n"
                     + "StoreException message -> exception raised during doCreateAppointmentTreatmentTable(sql)",
+                    StoreException.ExceptionType.SQL_EXCEPTION);
+        }
+    }
+    
+    private void doCreatePatientPrimaryConditionTable(String sql) throws StoreException{
+        try {
+            PreparedStatement preparedStatement = getPMSStoreConnection().prepareStatement(sql);
+            preparedStatement.execute();
+        } catch (SQLException ex) {
+            throw new StoreException("SQLException message -> " + ex.getMessage() + "\n"
+                    + "StoreException message -> exception raised during doCreatePatientPrimaryConditionTable(sql)",
                     StoreException.ExceptionType.SQL_EXCEPTION);
         }
     }
@@ -3786,6 +3972,97 @@ public class Repository implements IStoreActions {
         return result;
     }
     
+    private Entity doPMSSQLforPatientPrimaryCondition(Repository.PMSSQL q, Entity entity) throws StoreException{
+        Entity result = new Entity();
+        String sql;
+        switch (q){
+            case COUNT_PATIENT_PRIMARY_CONDITION:
+                sql = "SELECT COUNT(*) as row_count "
+                        + "FROM PatientPrimaryCondition ;";
+                result.setValue(doCount(sql,entity).getValue());
+                sql = "SELECT COUNT(*) as row_count "
+                        + "FROM PatientPrimaryCondition "
+                        + "WHERE isDeleted = true;";
+                result.setValue(new Point(result.getValue().x,
+                        doCount(sql,entity).getValue().x));
+                break;
+            case CREATE_PATIENT_PRIMARY_CONDITION_TABLE:
+                sql = "CREATE TABLE PatientPrimaryCondition ("
+                        + "patientKey LONG NOT NULL CONSTRAINT FK_PatientKey "
+                        + "REFERENCES Patient(pid), "
+                        + "primaryConditionKey LONG NOT NULL CONSTRAINT FK_PrimaryConditionKey "
+                        + "REFERENCES PrimaryCondition(pid), "
+                        + "CONSTRAINT PK_PatientPrimaryCondition PRIMARY KEY(patientKey,primaryConditionKey));";
+                doCreatePatientPrimaryConditionTable(sql);
+                break; 
+            case DELETE_ALL_PATIENT_PRIMARY_CONDITION:
+                sql = "DELETE FROM PatientPrimaryCondition;";
+                doDelete(sql);
+                break;
+            case DELETE_PATIENT_PRIMARY_CONDITION:
+                sql = "DELETE FROM PatientPrimaryCondition "
+                        + "WHERE patientKey = ? "
+                        + "AND primaryConditionKey = ?;";
+                doDeletePatientPrimaryCondition(sql,entity);
+                break;
+            case INSERT_PATIENT_PRIMARY_CONDITION:
+                sql = "INSERT INTO PatientPrimaryCondition "
+                        + "(patientKey, primaryConditionKey) "
+                        + "VALUES(?,?);";
+                doInsertPatientPrimaryCondition(sql, entity);
+                break; 
+            case READ_PATIENT_PRIMARY_CONDITION:
+                sql = "SELECT * "
+                        + "FROM PatientPrimaryCondition "
+                        + "WHERE patientKey = ? "
+                        + "AND primaryConditionKey = ?; ";
+                result = doReadPatientPrimaryConditionWithKey(sql, entity);
+                break;
+            case READ_PATIENT_PRIMARY_CONDITION_FOR_PATIENT:
+                sql = "SELECT * "
+                        + "FROM PatientPrimaryCondition "
+                        + "WHERE patientKey = ?; ";                       
+                result = doReadPatientPrimaryConditionWithKey(sql, entity);
+                break;
+            case READ_PATIENT_PRIMARY_CONDITION_FOR_PRIMARY_CONDITION:
+                sql = "SELECT * "
+                        + "FROM PatientPrimaryCondition "
+                        + "WHERE primaryConditionKey = ?; ";                       
+                result = doReadPatientPrimaryConditionWithKey(sql, entity);
+                break;
+            /*
+            case READ_PATIENT_PRIMARY_CONDITION_FOR_PRIMARY_CONDITION:
+                sql = "SELECT * "
+                        + "FROM PatientPrimaryCondition "
+                        + "WHERE primaryConditionKey = ?; ";                       
+                result = doReadPatientPrimaryConditionWithKey(sql, entity);
+                break;#
+                */
+            /*
+            case READ_ALL_PATIENT_PRIMARY_CONDITION:
+                sql = "SELECT * "
+                        + "FROM PatientPrimaryCondition; ";
+                result = doReadPatientPrimaryConditionAll(sql, (PatientPrimaryCondition)entity);
+                break;*/
+            /*
+            case READ_PATIENT_PRIMARY_CONDITION_NEXT_HIGHEST_KEY:
+                sql = "SELECT MAX(pid) as highest_key "
+                        + "FROM PatientPrimaryCondition;";
+                result = doReadHighestKey(sql);
+                break;*/
+            /*
+            case UPDATE_PATIENT_PRIMARY_CONDITION:
+                sql = "UPDATE PatientPrimaryCondition "
+                        + "SET comment = ? "
+                        //+ "isDeleted = ? "
+                        + "WHERE patientKey = ? "
+                        + "AND primaryConditionKey = ?;";
+                doUpdatePatientPrimaryCondition(sql, entity);
+             */   
+        }
+        return result;
+    }
+    
     private Entity doPMSSQLforDoctor(Repository.PMSSQL q, Entity entity) throws StoreException{
         Entity result = new Entity();
         String sql;
@@ -4501,6 +4778,23 @@ public class Repository implements IStoreActions {
     }
     
     @Override
+    public Integer insert(PatientPrimaryCondition patientPrimaryCondition)throws StoreException{
+        Entity key = null;
+        Entity entity;
+        IStoreClient client;
+        /*
+        client = runSQL(Repository.EntitySQL.PATIENT_PRIMARY_CONDITION,
+                    Repository.PMSSQL.READ_Patient_PRIMARY_CONDITION_NEXT_HIGHEST_KEY,patientPrimaryCondition);
+        entity = (Entity)client;
+        patientPrimaryCondition.setKey(entity.getValue().x + 1);*/
+
+        runSQL(Repository.EntitySQL.PATIENT_PRIMARY_CONDITION,
+                Repository.PMSSQL.INSERT_PATIENT_PRIMARY_CONDITION, patientPrimaryCondition);
+        
+        return null;
+    }
+    
+    @Override
     public Integer insert(AppointmentTreatment appointmentTreatment)throws StoreException{
         Entity key = null;
         Entity entity;
@@ -4955,6 +5249,32 @@ public class Repository implements IStoreActions {
         }
     }
     
+    @Override
+    public void delete(PatientPrimaryCondition patientPrimaryCondition)throws StoreException{
+        if (patientPrimaryCondition.getScope()!=null){
+            switch(patientPrimaryCondition.getScope()){
+               case SINGLE:
+                    runSQL(Repository.EntitySQL.PATIENT_PRIMARY_CONDITION,Repository.PMSSQL.DELETE_PATIENT_PRIMARY_CONDITION,patientPrimaryCondition);
+                    break;
+               case ALL:
+                    runSQL(Repository.EntitySQL.PATIENT_PRIMARY_CONDITION,Repository.PMSSQL.DELETE_ALL_PATIENT_PRIMARY_CONDITION,null);
+                    break;
+               default:
+                    String error = "Unexpected scope encountered (" 
+                            + patientPrimaryCondition.getScope().toString() + ")\n" 
+                            + "Raised in Repository.delete(PatientPrimaryCondition)";
+                    throw new StoreException(error, 
+                            StoreException.ExceptionType.STORE_EXCEPTION);
+            }
+        }else{
+            String error = "Scope of patientPrimaryCondition delete operation undefined (" 
+                    + patientPrimaryCondition.getScope().toString() + ")\n" 
+                    + "Raised in Repository.delete(PatientPrimaryCondition)";
+            throw new StoreException(error, 
+                    StoreException.ExceptionType.STORE_EXCEPTION);
+        }
+    }
+    
    /**
     * Method 'deletes' the specified Notification record from the system via an update to the record's isDeleted field
     * @param patientNotification
@@ -5352,6 +5672,61 @@ public class Repository implements IStoreActions {
     }
     
     @Override
+    public PatientPrimaryCondition read(PatientPrimaryCondition patientPrimaryCondition)throws StoreException{
+        PatientPrimaryCondition result = null;
+        Entity entity = null;
+
+        switch(patientPrimaryCondition.getScope()){
+            case SINGLE:{
+                try{
+                    entity = (Entity)runSQL(Repository.EntitySQL.PATIENT_PRIMARY_CONDITION, 
+                            Repository.PMSSQL.READ_PATIENT_PRIMARY_CONDITION, patientPrimaryCondition);
+                }catch(StoreException ex){
+                    String message = "";
+                    throw new StoreException(
+                        message + "StoreException raised -> null value returned from persistent store "
+                            + "in method Repository::read(PatientPrimaryCondition)" 
+                                + patientPrimaryCondition.getScope().toString() + "])\n",
+                        StoreException.ExceptionType.UNEXPECTED_DATA_TYPE_ENCOUNTERED);
+                }
+                break;
+            }
+            case ALL:
+                entity = (Entity)runSQL(Repository.EntitySQL.PATIENT_PRIMARY_CONDITION,
+                            Repository.PMSSQL.READ_ALL_PATIENT_PRIMARY_CONDITION, patientPrimaryCondition);
+                break;
+            case FOR_PATIENT:
+                entity = (Entity)runSQL(Repository.EntitySQL.PATIENT_PRIMARY_CONDITION,
+                            Repository.PMSSQL.READ_PATIENT_PRIMARY_CONDITION_FOR_PATIENT, patientPrimaryCondition);
+                break;
+            case FOR_PRIMARY_CONDITION:
+                entity = (Entity)runSQL(Repository.EntitySQL.PATIENT_PRIMARY_CONDITION,
+                            Repository.PMSSQL.READ_PATIENT_PRIMARY_CONDITION_FOR_PRIMARY_CONDITION, patientPrimaryCondition);
+                break;
+        }
+        if (entity!=null){
+            if (entity.getIsPatientPrimaryCondition()){
+                result = (PatientPrimaryCondition)entity;
+                return result;
+            }else{
+                String message = "";
+                throw new StoreException(
+
+                    message + "StoreException raised -> unexpected entity type returned from persistent store "
+                        + "in method Repository::read(PatientPrimaryCondition)\n",
+                    StoreException.ExceptionType.UNEXPECTED_DATA_TYPE_ENCOUNTERED); 
+            }
+        }else{
+            String message = "";
+            throw new StoreException(
+                message + "StoreException raised -> null value returned from persistent store "
+                    + "in method Repository::read(PatientPrimaryCondition)" 
+                        + patientPrimaryCondition.getScope().toString() + "])\n",
+                StoreException.ExceptionType.UNEXPECTED_DATA_TYPE_ENCOUNTERED);
+        }
+    }
+    
+    @Override
     public Doctor read(Doctor doctor)throws StoreException{
         Doctor result = null;
         Entity entity = null;
@@ -5617,6 +5992,18 @@ public class Repository implements IStoreActions {
     }
     
     @Override
+    public Point count(PatientPrimaryCondition patientPrimaryCondition)throws StoreException{
+        Entity result = null;
+        if (patientPrimaryCondition !=null){
+            Repository.PMSSQL sqlStatement = null;
+            sqlStatement = Repository.PMSSQL.COUNT_PATIENT_PRIMARY_CONDITION;
+            result = (Entity)runSQL(Repository.EntitySQL.PATIENT_PRIMARY_CONDITION, 
+                    sqlStatement, patientPrimaryCondition);
+        }
+        return result.getValue();
+    }
+    
+    @Override
     public Point count(Medication medication)throws StoreException{
         Entity result = null;
         if (medication !=null){
@@ -5781,12 +6168,16 @@ public class Repository implements IStoreActions {
         runSQL(Repository.EntitySQL.TREATMENT,Repository.PMSSQL.CREATE_TREATMENT_TABLE, value);
     }
     
-    
-    
     @Override
     public void create(AppointmentTreatment table) throws StoreException{
         Entity value = null;
         runSQL(Repository.EntitySQL.APPOINTMENT_TREATMENT,Repository.PMSSQL.CREATE_APPOINTMENT_TREATMENT_TABLE, value);
+    }
+    
+    @Override
+    public void create(PatientPrimaryCondition table) throws StoreException{
+        Entity value = null;
+        runSQL(Repository.EntitySQL.PATIENT_PRIMARY_CONDITION,Repository.PMSSQL.CREATE_PATIENT_PRIMARY_CONDITION_TABLE, value);
     }
     
     @Override
