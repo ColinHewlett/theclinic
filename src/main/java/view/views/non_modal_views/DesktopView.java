@@ -83,7 +83,14 @@ public class DesktopView extends javax.swing.JFrame
         implements ActionListener, 
                    PropertyChangeListener {
 //public class DesktopView extends View implements PropertyChangeListener{
-    enum Action{REQUEST_CASCADE_WINDOWS};
+    enum Action{
+        REQUEST_CASCADE_VIEWS,
+        REQUEST_CLOSE_VIEW,
+        REQUEST_APPOINTMENT_VIEW,
+        REQUEST_MEDICAL_CONDITION_LIST_VIEW,
+        REQUEST_PATIENT_VIEW,
+        REQUEST_TREATMENT_LIST_VIEW
+    };
     private JMenu activeMenu = null;
     private int topDynamicFrameListDelimiter;
     private HashMap<JMenuItem, JInternalFrame> menuItemFrameMap = null;
@@ -100,7 +107,10 @@ public class DesktopView extends javax.swing.JFrame
         private final String TREATMENT_VIEW_REQUEST = "Treatments";
         
         private final String EXIT_VIEW_REQUEST_TITLE = "Exit the Clinic practice management system";
-    
+        
+    private final String LIST_MENU_TITLE = "List";
+        private final String MEDICAL_CONDITION_REQUEST_TITLE = "Medical history conditions";
+        private final String TREATMENTS_REQUEST_TITLE = "Treatments";
     private final String MIGRATION_MANAGEMENT_MENU_TITLE = "Migration management";
         
             
@@ -128,6 +138,10 @@ public class DesktopView extends javax.swing.JFrame
         private JMenuItem mniPatientNotificationViewRequest = null;
         private JMenuItem mniTreatmentViewRequest = null;
         private JMenuItem mniExitViewRequest = null;
+        
+    private JMenu mnuSelectList = null; 
+        private JMenuItem mniMedicalConditionViewRequest = null;
+        private JMenuItem mniTreatmentsViewRequest = null;
         
     private JMenu mnuMigrationManagement = null; 
         private JMenu mnuPMSDatabaseProfile = null; 
@@ -172,27 +186,47 @@ public class DesktopView extends javax.swing.JFrame
         isPMSStoreDefined = value;
     }
     
+    private void makeSelectListMenu(){
+        mnuSelectList = new JMenu(LIST_MENU_TITLE);
+        mniMedicalConditionViewRequest = new JMenuItem(MEDICAL_CONDITION_REQUEST_TITLE);
+        mniTreatmentsViewRequest = new JMenuItem(TREATMENTS_REQUEST_TITLE);
+        mnuSelectList.add(mniMedicalConditionViewRequest);
+        mnuSelectList.add(mniTreatmentsViewRequest);
+        mniMedicalConditionViewRequest.setActionCommand(Action.REQUEST_MEDICAL_CONDITION_LIST_VIEW.toString());
+        mniTreatmentsViewRequest.setActionCommand(Action.REQUEST_TREATMENT_LIST_VIEW.toString());
+        mniMedicalConditionViewRequest.addActionListener(this);
+        mniTreatmentsViewRequest.addActionListener(this);
+    }
+    
     private void makeSelectViewMenu(){
         mnuSelectView = new JMenu(SELECT_VIEW_MENU_TITLE);
         setActiveMenu(mnuSelectView);
         mniAppointmentViewRequest = new JMenuItem(APPOINTMENT_VIEW_REQUEST_TITLE);
         mniPatientViewRequest = new JMenuItem(PATIENT_VIEW_REQUEST_TITLE);
         mniPatientNotificationViewRequest = new JMenuItem(PATIENT_NOTIFICATION_VIEW_REQUEST);
-        mniTreatmentViewRequest = new JMenuItem(TREATMENT_VIEW_REQUEST);
+        //mniTreatmentViewRequest = new JMenuItem(TREATMENT_VIEW_REQUEST);
         mniExitViewRequest = new JMenuItem(EXIT_VIEW_REQUEST_TITLE);
         mnuSelectView.add(mniPatientViewRequest);
         mnuSelectView.add(mniAppointmentViewRequest);
-        mnuSelectView.add(mniTreatmentViewRequest);
+        //mnuSelectView.add(mniTreatmentViewRequest);
         //mnuSelectView.add(mniPatientNotificationViewRequest);
         mnuSelectView.add(new JSeparator());
         setTopDynamicFrameListDelimiter(mnuSelectView.getItemCount()-1);
         mnuSelectView.add(mniExitViewRequest);
         
+        mniAppointmentViewRequest.setActionCommand(Action.REQUEST_APPOINTMENT_VIEW.toString());
+        mniPatientViewRequest.setActionCommand(Action.REQUEST_PATIENT_VIEW.toString());
+        mniExitViewRequest.setActionCommand(Action.REQUEST_CLOSE_VIEW.toString());
+        mniAppointmentViewRequest.addActionListener(this);
+        mniPatientViewRequest.addActionListener(this);
+        mniExitViewRequest.addActionListener(this);
+        
+        /*
         mniAppointmentViewRequest.addActionListener((ActionEvent e) -> mniAppointmentViewRequestActionPerformed());
         mniPatientViewRequest.addActionListener((ActionEvent e) -> mniPatientViewRequestActionPerformed());
         mniTreatmentViewRequest.addActionListener((ActionEvent e) -> mniTreatmentViewRequestActionPerformed());
         //mniPatientNotificationViewRequest.addActionListener((ActionEvent e) -> mniNotificationViewRequestActionPerformed());
-        mniExitViewRequest.addActionListener((ActionEvent e) -> mniExitRequestViewActionPerformed());
+        mniExitViewRequest.addActionListener((ActionEvent e) -> mniExitRequestViewActionPerformed());*/
     }
     
     private void makeMigrationManagementMenu(){
@@ -321,12 +355,16 @@ public class DesktopView extends javax.swing.JFrame
             }
             else{
                 makeSelectViewMenu();
+                makeSelectListMenu();
                 mnbDesktop.add(mnuSelectView);
+                mnbDesktop.add(mnuSelectList);
             }
         }
         else{
             makeSelectViewMenu();
-                mnbDesktop.add(mnuSelectView);        
+            makeSelectListMenu();
+            mnbDesktop.add(mnuSelectView); 
+            mnbDesktop.add(mnuSelectList);
         }
         setSize(1250,812);
         Dimension test1 = getPreferredSize();
@@ -356,9 +394,24 @@ public class DesktopView extends javax.swing.JFrame
         doActionEventRequest(ViewController.DesktopViewControllerActionEvent.CLINIC_LOGO_VIEW_MODE_NOTIFICATION);
     }
     
+    @Override
     public void actionPerformed(ActionEvent e){
         switch (Action.valueOf(e.getActionCommand())){
-            case REQUEST_CASCADE_WINDOWS:
+            case REQUEST_CASCADE_VIEWS:
+                break;
+            case REQUEST_CLOSE_VIEW:
+                mniExitRequestViewActionPerformed();
+                break;
+            case REQUEST_APPOINTMENT_VIEW:
+                mniAppointmentViewRequestActionPerformed();
+                break;
+            case REQUEST_MEDICAL_CONDITION_LIST_VIEW:
+                break;
+            case REQUEST_PATIENT_VIEW:
+                mniPatientViewRequestActionPerformed();
+                break;
+            case REQUEST_TREATMENT_LIST_VIEW:
+                mniTreatmentViewRequestActionPerformed();
                 break;
         }
     }
