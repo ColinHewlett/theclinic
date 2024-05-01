@@ -49,7 +49,7 @@ public class ModalNoteTaker extends ModalView implements ActionListener{
                 //PrimaryCondition pc = (PrimaryCondition)condition;
                 //PrimaryCondition pc = ((SecondaryCondition)getConditionOnEntry()).getPrimaryCondition();
                 
-                getConditionOnEntry().setNotes(txaNotepad.getText());
+                //getConditionOnEntry().setNotes(txaNotepad.getText());
                 getMyController().getDescriptor().getViewDescription().setCondition(getConditionOnEntry());
                 ActionEvent actionEvent = new ActionEvent(
                     this,ActionEvent.ACTION_PERFORMED,
@@ -87,7 +87,7 @@ public class ModalNoteTaker extends ModalView implements ActionListener{
             TitledBorder titledBorder = (TitledBorder)this.pnlNotepad.getBorder();
             titledBorder.setTitle("'" + getConditionOnEntry().getDescription() + "' notes" );
             pc = (PrimaryCondition)getConditionOnEntry();
-            txaNotepad.setText(pc.getNotes());
+            //txaNotepad.setText(pc.getNotes());
             
         }else if(getConditionOnEntry().getIsSecondaryCondition()){
             TitledBorder titledBorder = (TitledBorder)this.pnlNotepad.getBorder();
@@ -95,7 +95,7 @@ public class ModalNoteTaker extends ModalView implements ActionListener{
             pc = sc.getPrimaryCondition();
             titledBorder.setTitle("'" + pc.getDescription() 
                     + " (" +  sc.getDescription() + ")' notes" );
-            txaNotepad.setText(sc.getNotes());
+           // txaNotepad.setText(sc.getNotes());
         }
     }
     

@@ -5,10 +5,13 @@
  */
 package controller;
 
+import static controller.ViewController.DesktopViewControllerActionEvent.VIEW_CONTROLLER_CHANGED_NOTIFICATION;
+import static controller.ViewController.DesktopViewControllerActionEvent.VIEW_CONTROLLER_CLOSE_NOTIFICATION;
 import static controller.ViewController.DesktopViewControllerPropertyChangeEvent.PATIENT_VIEW_CONTROLLER_CHANGE_NOTIFICATION;
 import static controller.ViewController.DesktopViewControllerPropertyChangeEvent.SCHEDULE_VIEW_CONTROLLER_CHANGE_NOTIFICATION;
 import static controller.ViewController.displayErrorMessage;
 import static controller.ViewController.ViewControllers;
+import static controller.ViewController.displayErrorMessage;
 import model.*;
 import controller.exceptions.TemplateReaderException;
 import repository.Repository;
@@ -52,6 +55,7 @@ public class DesktopViewController extends ViewController{
     private ArrayList<NotificationViewController> notificationViewControllers = null;
     private ArrayList<PatientViewController> patientViewControllers = null;
     private ArrayList<TreatmentViewController> treatmentViewControllers = null;
+    private ArrayList<MedicalConditionViewController> medicalConditionViewControllers = null;
     private ArrayList<ClinicalNoteViewController> clinicalNoteViewControllers = null;
     private ArrayList<DataMigrationProgressViewController> importProgressViewControllers = null;
     private static Boolean isDataMigrationOptionEnabled = null;
@@ -82,6 +86,7 @@ public class DesktopViewController extends ViewController{
         notificationViewControllers = new ArrayList<>();
         treatmentViewControllers = new ArrayList<>();
         clinicalNoteViewControllers = new ArrayList<>();
+        medicalConditionViewControllers = new ArrayList<>();
         boolean isPMSStoreDefined;
         try{
             new Repository();
@@ -172,7 +177,7 @@ public class DesktopViewController extends ViewController{
             case VIEW_CONTROLLER_CLOSE_NOTIFICATION:{
                 switch (this.treatmentViewControllers.size()){
                     case 0:
-                        message = "No Notes view controllers found in "
+                        message = "No Treatment view controllers found in "
                                                     + "DesktopViewController collection.";
                         break;
                     case 1:
@@ -180,17 +185,64 @@ public class DesktopViewController extends ViewController{
                             this.treatmentViewControllers.remove(0);
                         }
                         else{
-                            message = "Could not find Notes view controller in "
+                            message = "Could not find Treatment view controller in "
                                                     + "DesktopViewController collection.";
                         }
                         break;
                     default:
-                        message = "More than one Notes view controller found in "
+                        message = "More than one Treatment view controller found in "
                                                     + "DesktopViewController collection.";
                         break;
                 }
                 if (message!=null){
-                    displayErrorMessage("Raised in doActionEventForNotesViewController"
+                    displayErrorMessage("Raised in doActionEventForTreatmentViewController"
+                            + "(case VIEW_CONTROLLER_CLOSE_NOTIFICATION)\n"
+                            + message,
+                            "Desktop view controller error",
+                            JOptionPane.WARNING_MESSAGE);
+                }
+            }   
+        }
+    }
+    
+    private void doActionEventForMedicalConditionViewController(ActionEvent e){
+        String message = null;
+        MedicalConditionViewController mcvc = (MedicalConditionViewController)e.getSource();
+        ViewController.DesktopViewControllerActionEvent actionCommand =
+                    ViewController.DesktopViewControllerActionEvent.valueOf(e.getActionCommand());
+        switch(actionCommand){
+            case VIEW_CONTROLLER_CHANGED_NOTIFICATION:
+                firePropertyChangeEvent(
+                        ViewController.DesktopViewControllerPropertyChangeEvent.
+                                DESKTOP_VIEW_CHANGED_NOTIFICATION.toString(),
+                        getDesktopView(),
+                        this,
+                        null,
+                        null
+                );
+                break;
+            case VIEW_CONTROLLER_CLOSE_NOTIFICATION:{
+                switch (this.medicalConditionViewControllers.size()){
+                    case 0:
+                        message = "No Medical condition view controllers found in "
+                                                    + "DesktopViewController collection.";
+                        break;
+                    case 1:
+                        if (mcvc.equals(this.medicalConditionViewControllers.get(0))){
+                            this.medicalConditionViewControllers.remove(0);
+                        }
+                        else{
+                            message = "Could not find Medical condition view controller in "
+                                                    + "DesktopViewController collection.";
+                        }
+                        break;
+                    default:
+                        message = "More than one Medical condition view controller found in "
+                                                    + "DesktopViewController collection.";
+                        break;
+                }
+                if (message!=null){
+                    displayErrorMessage("Raised in doActionEventForMwedicalConditionViewController"
                             + "(case VIEW_CONTROLLER_CLOSE_NOTIFICATION)\n"
                             + message,
                             "Desktop view controller error",
@@ -488,17 +540,46 @@ public class DesktopViewController extends ViewController{
      * @param e source of event is X_DesktopView object
      */
     private void doActionEventForDesktopView(ActionEvent e){ 
+        ViewController.DesktopViewControllerActionEvent actionCommand = null;
         Point theCount = null;
-        
+        PrimaryCondition primaryCondition = null;
+        SecondaryCondition secondaryCondition = null;
+        Treatment treatment = null;
         try{
             /**
              * 11/01/2023 19:08 update
              * -- modified PMSStore.getPath() method creates a new Access database file if one doesn't already exists
              */
             //PMSStore.getPath();
-            ViewController.DesktopViewControllerActionEvent actionCommand =
+            actionCommand =
                     ViewController.DesktopViewControllerActionEvent.valueOf(e.getActionCommand());
             switch (actionCommand){
+                case IMPORT_LIST_FILES:
+                    /**
+                     * read the list files to populate the following tables
+                     * -- PrimaryCondition table
+                     * -- SecondaryCondition table
+                     * -- Treatment table
+                     */
+                    primaryCondition = extractMedicalHistoryFromTemplate();
+                    for(Condition condition : primaryCondition.get()){
+                        PrimaryCondition pCondition = (PrimaryCondition)condition;
+                        //pCondition.setPatient(patient);
+                        Integer pConditionKey = pCondition.insert();
+                        if (!pCondition.getSecondaryCondition().get().isEmpty()){
+                            for (Condition c : secondaryCondition.get()){
+                                SecondaryCondition sCondition = (SecondaryCondition)c;
+                                sCondition.setPrimaryCondition(new PrimaryCondition(pConditionKey));
+                                sCondition.insert();
+                            }
+                        }
+                    }
+                    
+                    treatment = extractTreatmentFromTemplate();
+                    for(Treatment t : treatment.get()){
+                        t.insert();
+                    }
+                    break;
                 case VIEW_ACTIVATED_NOTIFICATION:
                     break;
                     
@@ -639,7 +720,10 @@ public class DesktopViewController extends ViewController{
                             getDescriptor()
                     );
                     break;
-                case TREAMENT_VIEW_CONTROLLER_REQUEST:
+                case MEDICAL_CONDITION_VIEW_CONTROLLER_REQUEST:
+                    doRequestForMedicalConditionViewController(e);
+                    break;
+                case TREATMENT_VIEW_CONTROLLER_REQUEST:
                     //getDescriptor().getControllerDescription().setPatient(null);
                     doRequestForTreatmentViewController(e);
                     break;
@@ -677,10 +761,17 @@ public class DesktopViewController extends ViewController{
                     doRequestForImportProgressViewController();
                     break;
                 }
-
             }
         }catch (StoreException ex){
-            displayErrorMessage(ex.getMessage(), " Desktop ViewController error",JOptionPane.WARNING_MESSAGE);
+            String message = ex.getMessage() + "\n"
+                    + "Exception raised in DesktopViewController.doActionEventForDesktopView("
+                    + actionCommand + ")";
+            displayErrorMessage(message, " Desktop ViewController error",JOptionPane.WARNING_MESSAGE);
+        }catch (TemplateReaderException ex){
+            String message = ex.getMessage() + "\n"
+                    + "Exception raised in DesktopViewController.doActionEventForDesktopView("
+                    + actionCommand + ")";
+            displayErrorMessage(message, " Desktop ViewController error",JOptionPane.WARNING_MESSAGE);
         }          
     }
     
@@ -896,6 +987,31 @@ public class DesktopViewController extends ViewController{
             treatmentViewControllers.get(0).getView().toFront();
         }//do nothing because only one patient notification VC allowed
     }
+    
+    private void doRequestForMedicalConditionViewController(ActionEvent e){
+        MedicalConditionViewController mcvc = null;
+        if (medicalConditionViewControllers.isEmpty()){
+            medicalConditionViewControllers.add(
+                    new MedicalConditionViewController(
+                            this,
+                            getDesktopView()));
+            mcvc = medicalConditionViewControllers.get(medicalConditionViewControllers.size()-1);
+            setView(new View().make(View.Viewer.MEDICAL_CONDITION_VIEW,
+                        mcvc, 
+                        getDesktopView()));
+
+            ActionEvent actionEvent = new ActionEvent(
+                    this,ActionEvent.ACTION_PERFORMED,
+                    DesktopViewController.DesktopViewControllerActionEvent.INITIALISE_VIEW.toString());
+             mcvc.actionPerformed(actionEvent);
+
+            if (getDesktopViewMode().equals(DesktopViewMode.CLINIC_LOGO)){
+                    doSetupDesktopViewMode();
+            }
+        }else {
+            medicalConditionViewControllers.get(0).getView().toFront();
+        }//do nothing because only one medical condition VC allowed
+    }
 
     private void doRequestForNotificationViewController(){
         if (notificationViewControllers.isEmpty()){
@@ -1038,13 +1154,8 @@ public class DesktopViewController extends ViewController{
                             setProgress(percentage);
                         }
                         
-                    }else if (entity.getIsPrimaryCondition()){
-                        /**
-                         * entity PrimaryCondition.get()
-                         * -- returns all of the extracted PrimaryCondition objects
-                         * -- each PrimaryCondition.getSecondaryCondition.get()
-                         * -- returns the collection of extracted SecondaryCondition objects for this PrimaryCondition
-                         */
+                    /*}else if (entity.getIsPrimaryCondition()){
+
                         PrimaryCondition pc = (PrimaryCondition)entity;
                         Patient patient = new Patient(1);
                         count = 1;
@@ -1058,7 +1169,7 @@ public class DesktopViewController extends ViewController{
                         if (recordCount <= count){
                             Integer percentage = recordCount*100/count;
                             setProgress(percentage);
-                        }
+                        }*/
                     }else if (entity.getIsAppointment()){
                         Appointment appointmentTable = (Appointment)entity;
                         //appointmentTable.create();
@@ -1096,14 +1207,8 @@ public class DesktopViewController extends ViewController{
                                 setProgress(percentage);
                             }
                         }
-                    }*/else if (entity.getIsSecondaryCondition()){
-                        /**
-                         * entity = SecondaryCondition
-                         * -- SecondaryCondition.getPrimaryCondition
-                         * ---- returns the collection of extracted PrimaryCondition objects
-                         * ---- each extracted PrimaryCondition.getSecondaryCondition
-                         * ---- returns collection of SecondaryCondition objects for that PrimaryCondition
-                         */
+                    }else if (entity.getIsSecondaryCondition()){
+
                         SecondaryCondition sc = (SecondaryCondition)entity;
                         PrimaryCondition pc = sc.getPrimaryCondition();
                         PrimaryCondition pConditionFromStore = null;
@@ -1128,7 +1233,7 @@ public class DesktopViewController extends ViewController{
                             Integer percentage = recordCount*100/count;
                             setProgress(percentage);
                         }
-                    }
+                    }*/
                 }catch (StoreException ex){
                     displayErrorMessage(ex.getMessage(), "Desktop view controller error",
                             JOptionPane.WARNING_MESSAGE);
@@ -1585,6 +1690,9 @@ public class DesktopViewController extends ViewController{
                 case "ClinicalNoteViewController":
                     doActionEventForClinicalNoteViewController(e);
                     break;
+                case "MedicalConditionViewController":
+                    doActionEventForMedicalConditionViewController(e);
+                    break;
                 case "TreatmentViewController":
                     doActionEventForTreatmentViewController(e);
                     break;
@@ -1615,17 +1723,6 @@ public class DesktopViewController extends ViewController{
                     TemplateReader.extract(new HashMap<String,String>()));
             Class.forName("net.ucanaccess.jdbc.UcanaccessDriver");
             
-            //if ((SystemDefinition.getPMSDebug().equals("ENABLED"))){
-                /*28/03/2024PatientNote patientNote = new PatientNote();
-                try{
-                    patientNote.createNotesFromAppointmentTable();
-                }catch(StoreException ex){
-                    displayErrorMessage(ex.getMessage() + "\n",
-                            "Raised in Desktop view controller",
-                            JOptionPane.WARNING_MESSAGE);
-                }*/
-                /*System.exit(0);
-            }*/
             if (SystemDefinition.getPMSOperationMode().equals("DATA_MIGRATION_ENABLED"))
                 isDataMigrationOptionEnabled = true;
             
@@ -1665,6 +1762,10 @@ public class DesktopViewController extends ViewController{
                 }
             });  
         }else System.exit(0);
+    }
+    
+    private void importDataFromListFiles(){
+        
     }
     
     

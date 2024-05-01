@@ -128,7 +128,7 @@ public class ModalPatientMedicalHistory1EditorView extends ModalView
                         ViewController.PatientViewControllerActionEvent.
                                 PATIENT_MEDICAL_HISTORY_2_EDITOR_VIEW_REQUEST.toString());
                     this.getMyController().actionPerformed(actionEvent);
-                }else if(!pc.getState()) tblConditions.clearSelection();
+                }//else if(!pc.getState()) tblConditions.clearSelection();
             }
         }
     }
@@ -143,7 +143,7 @@ public class ModalPatientMedicalHistory1EditorView extends ModalView
                 (MedicalHistoryTableModel)e.getSource();
         Boolean value = (Boolean)model.getValueAt(row, column);
         condition = (Condition)model.getElementAt(row);
-        condition.setState(value);
+        //condition.setState(value);
         getMyController().getDescriptor().getViewDescription().setCondition(condition);
         tblConditions.clearSelection();
 
@@ -152,7 +152,7 @@ public class ModalPatientMedicalHistory1EditorView extends ModalView
             ViewController.PatientViewControllerActionEvent.CONDITION_STATE_UPDATE_REQUEST.toString());
         getMyController().actionPerformed(actionEvent);
         
-        if (condition.getState()){
+        /*if (condition.getState()){
             PrimaryCondition pCondition = (PrimaryCondition)condition;
             if (!pCondition.getSecondaryCondition().get().isEmpty()){
                 actionEvent = new ActionEvent(
@@ -160,7 +160,7 @@ public class ModalPatientMedicalHistory1EditorView extends ModalView
                     ViewController.PatientViewControllerActionEvent.PATIENT_MEDICAL_HISTORY_2_EDITOR_VIEW_REQUEST.toString());
                 getMyController().actionPerformed(actionEvent);
             }
-        }
+        }*/
     }
     
     @Override

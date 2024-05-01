@@ -11,8 +11,6 @@ import java.util.ArrayList;
  */
 public class Condition extends Entity {
     private String description = null;
-    private boolean state = false;
-     private String notes = null;
     private ArrayList<Condition> collection = new ArrayList<>();
 
     public ArrayList<Condition> get(){
@@ -20,26 +18,11 @@ public class Condition extends Entity {
     }
     public void set(ArrayList<Condition> value){
         collection = value;
-    }
-    
+    }    
     public String getDescription(){
         return description;
     }
     public void setDescription(String value){
         description = value;
-    }
-
-    public boolean getState(){
-        return state;
-    }
-    public void setState(boolean value){
-        state = value;
-    }
-    
-    public String getNotes(){
-        return notes;
-    }
-    public void setNotes(String value){
-        notes = value;
     }
 }

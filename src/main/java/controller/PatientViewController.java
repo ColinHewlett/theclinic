@@ -126,7 +126,7 @@ public class PatientViewController extends ViewController {
                     actionEvent = new ActionEvent(
                         this,ActionEvent.ACTION_PERFORMED,
                         ViewController.DesktopViewControllerActionEvent
-                            .TREAMENT_VIEW_CONTROLLER_REQUEST.toString());
+                            .TREATMENT_VIEW_CONTROLLER_REQUEST.toString());
                     this.getMyController().actionPerformed(actionEvent);
                 }else{
                     JOptionPane.showMessageDialog(getView(), 
@@ -994,7 +994,7 @@ public class PatientViewController extends ViewController {
     private PrimaryCondition makeFatPrimaryCondition()throws StoreException{
         PrimaryCondition fatPC = null;
         Patient patient = getDescriptor().getControllerDescription().getPatient();
-        fatPC = new PrimaryCondition(patient);
+        //fatPC = new PrimaryCondition(patient);
         fatPC.setScope(Scope.FOR_PATIENT);
         fatPC = fatPC.read();
         /**
@@ -1018,7 +1018,7 @@ public class PatientViewController extends ViewController {
                     Condition condition = getDescriptor().getViewDescription().getCondition();
                     if(condition.getIsPrimaryCondition()){
                         PrimaryCondition pc = (PrimaryCondition)condition;        
-                        pc.setPatient(getDescriptor().getControllerDescription().getPatient());
+                        //pc.setPatient(getDescriptor().getControllerDescription().getPatient());
                         pc.update();
                     }else if(condition.getIsSecondaryCondition()){
                         SecondaryCondition sc = (SecondaryCondition)condition;
@@ -1525,7 +1525,7 @@ public class PatientViewController extends ViewController {
         Patient patient = getDescriptor().getControllerDescription().getPatient();
         try{
             if (patient!=null){
-                pc = new PrimaryCondition(patient);
+                //pc = new PrimaryCondition(patient);
                 pc.setScope(Scope.FOR_PATIENT);
                 pc = pc.read();
                 if (pc.get().isEmpty()){// patient needs default medical history from template file

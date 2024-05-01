@@ -117,7 +117,7 @@ public class ModalPatientMedicalHistory2EditorView extends ModalView
                 (MedicalHistoryTableModel)e.getSource();
         Boolean value = (Boolean)model.getValueAt(row, column);
         condition = (Condition)model.getElementAt(row);
-        condition.setState(value);
+        //condition.setState(value);
         getMyController().getDescriptor().getViewDescription().setCondition(condition);
         tblConditions.clearSelection();
 
@@ -146,7 +146,7 @@ public class ModalPatientMedicalHistory2EditorView extends ModalView
                 SecondaryCondition sc = 
                         (SecondaryCondition) model.getElementAt(selectedRow);
                 
-                if(!sc.getState()) tblConditions.clearSelection();
+                //if(!sc.getState()) tblConditions.clearSelection();
             }
         }
     }
@@ -166,14 +166,15 @@ public class ModalPatientMedicalHistory2EditorView extends ModalView
                 boolean tickedStateFound = false;
                 model = (MedicalHistoryTableModel)tblConditions.getModel();
                 for(Condition condition : model.getConditions()){
+                    /*
                     if (condition.getState()){
                         tickedStateFound = true;
                         break;
-                    }
+                    }*/
                 }
                 if (tickedStateFound){
                     PrimaryCondition pc = getParentPrimaryCondition();
-                    if (!pc.getState()){
+                    /*if (!pc.getState()){
                         pc.setState(true);
                         getMyController().getDescriptor()
                                 .getViewDescription().setCondition(pc);
@@ -182,7 +183,7 @@ public class ModalPatientMedicalHistory2EditorView extends ModalView
                             ViewController.PatientViewControllerActionEvent
                                     .CONDITION_STATE_UPDATE_REQUEST.toString());
                         this.getMyController().actionPerformed(actionEvent);
-                    }
+                    }*/
                 }
                 try{
                     this.setClosed(true);   

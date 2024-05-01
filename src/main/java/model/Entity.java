@@ -31,6 +31,7 @@ public class Entity implements IStoreClient{
     private Boolean isTreatment = false;
     private Boolean isAppointmentTreatment = false;
     private Boolean isPatientPrimaryCondition = false;
+    private Boolean isPatientSecondaryCondition = false;
     private Scope scope = null;
     private Point value = null;
     protected Boolean isDeleted = false;
@@ -68,6 +69,7 @@ public class Entity implements IStoreClient{
         setIsTreatment(false);
         setIsAppointmentTreatment(false);
         setIsPatientPrimaryCondition(false);
+        setIsPatientSecondaryCondition(false);
     }
     
     /**
@@ -81,6 +83,7 @@ public class Entity implements IStoreClient{
                         FOR_DAY,                //appointments for this day
                         FOR_PATIENT,            //appointments/notes for this patient
                         FOR_PRIMARY_CONDITION,  //secondary condition(s) for this primary condition
+                        FOR_SECONDARY_CONDITION,
                         DELETED_FOR_PATIENT,    //deleted appointments for this patient (when a deleted patient is being recovered)         
                         DELETED,                //deleted patients
                         FROM_DAY,               //appointmens from this day
@@ -180,6 +183,15 @@ public class Entity implements IStoreClient{
         return isPatientPrimaryCondition;
     }
     
+    public Boolean getIsPatientSecondaryCondition(){
+        return isPatientSecondaryCondition;
+    }
+    
+    protected void setIsPatientSecondaryCondition(Boolean value){
+        if (value) resetAll();
+        isPatientSecondaryCondition= value;
+    }
+    
     protected void setIsPatientPrimaryCondition(Boolean value){
         if (value) resetAll();
         isPatientPrimaryCondition= value;
@@ -209,11 +221,11 @@ public class Entity implements IStoreClient{
         if (value) resetAll();
         isMedication= value;
     }
-    protected void setIsSecondaryCondition(Boolean value){
+    public void setIsSecondaryCondition(Boolean value){
         if (value) resetAll();
         isSecondaryCondition= value;
     }
-    protected void setIsPrimaryCondition(Boolean value){
+    public void setIsPrimaryCondition(Boolean value){
         if (value) resetAll();
         isPrimaryCondition= value;
     }

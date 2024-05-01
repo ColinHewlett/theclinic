@@ -13,53 +13,49 @@ import repository.StoreException;
  *
  * @author colin
  */
-public class PatientPrimaryCondition extends Entity implements IEntityStoreActions {
+public class PatientSecondaryCondition extends Entity implements IEntityStoreActions{
+    private Patient patient = null;
+    private String comment = null;
     
-    public PatientPrimaryCondition(){
-        this.setIsPatientPrimaryCondition(true);
-    }
-    
-    public PatientPrimaryCondition(Patient patient){
+    public PatientSecondaryCondition(Patient patient){
         this.patient = patient;
-        this.setIsPatientPrimaryCondition(true);
+        this.setIsPatientSecondaryCondition(true);
     }
     
-    public PatientPrimaryCondition(Patient patient, PrimaryCondition primaryCondition){
-        this.patient = patient;
-        this.primaryCondition = primaryCondition;
-        this.setIsPatientPrimaryCondition(true);
+    public PatientSecondaryCondition(Patient p, SecondaryCondition sc){
+        patient = p;
+        secondaryCondition = sc;
+        setIsPatientSecondaryCondition(true);
     }
     
-    private ArrayList<PatientPrimaryCondition> collection = new ArrayList<>();
-    public ArrayList<PatientPrimaryCondition> get(){
+    private ArrayList<PatientSecondaryCondition> collection = new ArrayList<>();
+    public ArrayList<PatientSecondaryCondition> get(){
         return collection;
     }
-    public void set(ArrayList<PatientPrimaryCondition> value){
+    public void set(ArrayList<PatientSecondaryCondition> value){
         collection = value;
     }
     
-    private String comment = null;
-    public String getComment(){
-        return comment;
-    }
     public void setComment(String value){
         comment = value;
     }
-    
-    private Patient patient = null;
-    public Patient getPatient(){
-        return patient;
+    public String getComment(){
+        return comment;
     }
+    
     public void setPatient(Patient value){
         patient = value;
     }
-    
-    private PrimaryCondition primaryCondition = null;
-    public PrimaryCondition getPrimaryCondition(){
-        return primaryCondition;
+    public Patient getPatient(){
+        return patient;
     }
-    public void setPrimaryCondition(PrimaryCondition value){
-        primaryCondition = value;
+    
+    private SecondaryCondition secondaryCondition = null;
+    public void setSecondaryCondition(SecondaryCondition p){
+        secondaryCondition = p;
+    }
+    public SecondaryCondition getSecondaryCondition(){
+        return secondaryCondition;
     }
     
     @Override
@@ -88,7 +84,7 @@ public class PatientPrimaryCondition extends Entity implements IEntityStoreActio
     }
     
     @Override
-    public PatientPrimaryCondition read() throws StoreException{
+    public PatientSecondaryCondition read() throws StoreException{
         set(new Repository().read(this).get());
         return this;
     }

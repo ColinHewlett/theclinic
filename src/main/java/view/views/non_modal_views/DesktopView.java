@@ -396,6 +396,7 @@ public class DesktopView extends javax.swing.JFrame
     
     @Override
     public void actionPerformed(ActionEvent e){
+        ActionEvent actionEvent = null;
         switch (Action.valueOf(e.getActionCommand())){
             case REQUEST_CASCADE_VIEWS:
                 break;
@@ -406,12 +407,21 @@ public class DesktopView extends javax.swing.JFrame
                 mniAppointmentViewRequestActionPerformed();
                 break;
             case REQUEST_MEDICAL_CONDITION_LIST_VIEW:
+                actionEvent = new ActionEvent(this, 
+                    ActionEvent.ACTION_PERFORMED,
+                    DesktopViewController.DesktopViewControllerActionEvent
+                            .MEDICAL_CONDITION_VIEW_CONTROLLER_REQUEST.toString());
+                    this.getController().actionPerformed(actionEvent);
                 break;
             case REQUEST_PATIENT_VIEW:
                 mniPatientViewRequestActionPerformed();
                 break;
             case REQUEST_TREATMENT_LIST_VIEW:
-                mniTreatmentViewRequestActionPerformed();
+                actionEvent = new ActionEvent(this, 
+                        ActionEvent.ACTION_PERFORMED,
+                        DesktopViewController.DesktopViewControllerActionEvent
+                                .TREATMENT_VIEW_CONTROLLER_REQUEST.toString());
+                this.getController().actionPerformed(actionEvent);
                 break;
         }
     }
@@ -659,7 +669,7 @@ public class DesktopView extends javax.swing.JFrame
     private void mniTreatmentViewRequestActionPerformed() {    
         ActionEvent actionEvent = new ActionEvent(this, 
                 ActionEvent.ACTION_PERFORMED,
-                DesktopViewController.DesktopViewControllerActionEvent.TREAMENT_VIEW_CONTROLLER_REQUEST.toString());
+                DesktopViewController.DesktopViewControllerActionEvent.TREATMENT_VIEW_CONTROLLER_REQUEST.toString());
         this.getController().actionPerformed(actionEvent);
         
     }

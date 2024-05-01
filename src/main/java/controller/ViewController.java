@@ -119,7 +119,7 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
          */
         for(Condition condition : pc.get()){
             PrimaryCondition pCondition = (PrimaryCondition)condition;
-            pCondition.setPatient(patient);
+            //pCondition.setPatient(patient);
             pCondition.insert();
         }
         PrimaryCondition pConditionFromStore = null;
@@ -128,7 +128,7 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
          */
         for(Condition primaryCondition : pc.get()){
             PrimaryCondition pCondition = (PrimaryCondition)primaryCondition;
-            pCondition.setPatient(patient);
+            //pCondition.setPatient(patient);
             pCondition.setScope(Entity.Scope.SINGLE);
             pConditionFromStore = pCondition.read();
             /**
@@ -144,9 +144,9 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         /**
          * fetch stored primary conditions for this patient
          */
-        pc = new PrimaryCondition(patient);
+        /*pc = new PrimaryCondition(patient);
         pc.setScope(Entity.Scope.FOR_PATIENT);
-        pc = pc.read();
+        pc = pc.read();*/
         return pc;
     }
     
@@ -188,12 +188,13 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
     
     public static enum DesktopViewControllerActionEvent{
         CLINICAL_NOTE_VIEW_CONTROLLER_REQUEST,
+        MEDICAL_CONDITION_VIEW_CONTROLLER_REQUEST,
         NOTIFICATION_VIEW_CONTROLLER_REQUEST,
         PATIENT_SELECTION_VIEW_CONTROLLER_REQUEST,
         PATIENT_VIEW_CONTROLLER_REQUEST,
         SCHEDULE_VIEW_CONTROLLER_REQUEST,
         TEST_PATIENT_VIEW_CONTROLLER_REQUEST,
-        TREAMENT_VIEW_CONTROLLER_REQUEST,
+        TREATMENT_VIEW_CONTROLLER_REQUEST,
 
         INITIALISE_VIEW,
         BRING_TO_FRONT_SCHEDULE_VIEW_IF_ACTIVE_REQUEST,
@@ -212,6 +213,7 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         GET_APPOINTMENT_CSV_PATH_REQUEST,
         GET_PATIENT_CSV_PATH_REQUEST,
         GET_PMS_STORE_PATH_REQUEST,
+        IMPORT_LIST_FILES,
         MIGRATE_DATA_FROM_SOURCE_VIEW_REQUEST,
         MIGRATE_APPOINTMENT_DATA,
         MIGRATE_APPOINTMENT_DATA_COMPLETED,
@@ -243,6 +245,7 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
     public static enum DesktopViewControllerPropertyChangeEvent{
         APPOINTEE_CONTACT_DETAILS_FOR_SCHEDULE_VIEW_CONTROLLER_REQUEST,
         APPOINTEE_CONTACT_DETAILS_FOR_SCHEDULE_VIEW_CONTROLLER_CHANGE_NOTIFICATION,
+        MEDICAL_CONDITION_VIEW_CONTROLLER_CHANGE_NOTIFICATION,
         SCHEDULE_VIEW_CONTROLLER_CHANGE_NOTIFICATION,
         PATIENT_VIEW_CONTROLLER_CHANGE_NOTIFICATION,
         TREATMENT_VIEW_CONTROLLER_CHANGE_NOTIFICATION,
@@ -288,6 +291,24 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         PREPARE_FOR_RECEIPT_OF_SECONDARY_CONDITION_MIGRATION_PROGRESS,
         PREPARE_FOR_RECEIPT_OF_TREATMENT_MIGRATION_PROGRESS
         }
+    
+    public static enum MedicalConditionViewControllerActionEvent{
+        PRIMARY_CONDITION_CREATE_REQUEST,
+        PRIMARY_CONDITION_DELETE_REQUEST,
+        PRIMARY_CONDITION_READ_REQUEST,
+        PRIMARY_CONDITION_RENAME_REQUEST,
+        SECONDARY_CONDITION_CREATE_REQUEST,
+        SECONDARY_CONDITION_DELETE_REQUEST,
+        SECONDARY_CONDITION_READ_REQUEST,
+        SECONDARY_CONDITION_RENAME_REQUEST,
+        VIEW_CLOSE_NOTIFICATION
+    }
+    
+    public static enum MedicalConditionViewControllerPropertyChangeEvent{
+        MEDICAL_CONDITION_VIEW_CONTROLLER_ERROR_RECEIVED,
+        PRIMARY_CONDITION_RECEIVED,
+        CONDITION_ERROR_RECEIVED
+    }
     
     public static enum NotesViewControllerActionEvent{
         NOTES_VIEW_CLOSE_REQUEST,

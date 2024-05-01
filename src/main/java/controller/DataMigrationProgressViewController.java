@@ -79,9 +79,13 @@ public class DataMigrationProgressViewController extends ViewController{
                 break;
                 
             case MIGRATE_APPOINTMENT_DATA_COMPLETED:
+                actionEvent = new ActionEvent(
+                    this,ActionEvent.ACTION_PERFORMED,
+                    ViewController.DesktopViewControllerActionEvent.MIGRATE_SURGERY_DAYS_ASSIGNMENT_DATA.toString());
+                getMyController().actionPerformed(actionEvent);
                 firePropertyChangeEvent(
-                        DataMigrationViewControllerPropertyChangeEvent.
-                                    PREPARE_FOR_RECEIPT_OF_PRIMARY_CONDITION_MIGRATION_PROGRESS.toString(),
+                        DataMigrationViewControllerPropertyChangeEvent
+                                .DATA_MIGRATION_COMPLETED.toString(),
                         getView(),
                         this,
                         null,
@@ -98,6 +102,7 @@ public class DataMigrationProgressViewController extends ViewController{
                 */
                 //setOldEntity(getNewEntity());
                 //setNewEntity(Entity.NONE);
+                /*
                 firePropertyChangeEvent(
                         DataMigrationViewControllerPropertyChangeEvent
                                 .PREPARE_FOR_RECEIPT_OF_PRIMARY_CONDITION_MIGRATION_PROGRESS
@@ -106,10 +111,11 @@ public class DataMigrationProgressViewController extends ViewController{
                         this,
                         null,
                         null
-                );
+                );*/
                 break;
                 
             case MIGRATE_PRIMARY_CONDITION_DATA_COMPLETED:
+                /*
                 firePropertyChangeEvent(
                         DataMigrationViewControllerPropertyChangeEvent.
                                     PREPARE_FOR_RECEIPT_OF_SECONDARY_CONDITION_MIGRATION_PROGRESS.toString(),
@@ -117,10 +123,11 @@ public class DataMigrationProgressViewController extends ViewController{
                         this,
                         null,
                         null
-                );
+                );*/
                 break;
                 
             case MIGRATE_SECONDARY_CONDITION_DATA_COMPLETED:
+                /*
                 firePropertyChangeEvent(
                         DataMigrationViewControllerPropertyChangeEvent.
                                     PREPARE_FOR_RECEIPT_OF_TREATMENT_MIGRATION_PROGRESS.toString(),
@@ -128,7 +135,7 @@ public class DataMigrationProgressViewController extends ViewController{
                         this,
                         null,
                         null
-                );
+                );*/
                 break;
             
                 /*
@@ -147,7 +154,7 @@ public class DataMigrationProgressViewController extends ViewController{
                 );*/
                 
             case MIGRATE_TREATMENT_DATA_COMPLETED:
-                actionEvent = new ActionEvent(
+                /*actionEvent = new ActionEvent(
                     this,ActionEvent.ACTION_PERFORMED,
                     ViewController.DesktopViewControllerActionEvent.MIGRATE_SURGERY_DAYS_ASSIGNMENT_DATA.toString());
                 getMyController().actionPerformed(actionEvent);
@@ -158,7 +165,7 @@ public class DataMigrationProgressViewController extends ViewController{
                         this,
                         null,
                         null
-                );
+                );*/
         }
     }
     

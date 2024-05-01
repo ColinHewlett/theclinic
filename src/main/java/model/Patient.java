@@ -500,6 +500,8 @@ public class Patient extends Entity implements IEntityStoreActions {
         }
         
         public PrimaryCondition getPrimaryCondition()throws StoreException{
+           
+            /*
             PrimaryCondition pc = new PrimaryCondition(Patient.this);
             pc.setScope(Scope.FOR_PATIENT);
             for(Condition condition : pc.read().get()){
@@ -508,8 +510,8 @@ public class Patient extends Entity implements IEntityStoreActions {
                 s.setScope(Scope.FOR_PRIMARY_CONDITION);
                 s.read();
                 p.setSecondaryCondition(s);
-            }
-            return pc;
+            }*/
+            return null;
         }
         
         /*

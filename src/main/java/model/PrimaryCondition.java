@@ -16,21 +16,18 @@ import repository.StoreException;
 public class PrimaryCondition extends Condition implements IEntityStoreActions {
     private Integer key = null;
     private SecondaryCondition secondaryCondition = null;
-    private ArrayList<PrimaryCondition> collection = new ArrayList<>();
-    private Integer patientKey = null;
-    private Patient patient = null;
             
     public PrimaryCondition(){
         setIsPrimaryCondition(true);
     }
     
-    public PrimaryCondition(Integer key){
-        this.key = key;
+    public PrimaryCondition(SecondaryCondition sc){
+        secondaryCondition = sc;
         setIsPrimaryCondition(true);
     }
     
-    public PrimaryCondition(Patient patient){
-        this.patient = patient;
+    public PrimaryCondition(Integer key){
+        this.key = key;
         setIsPrimaryCondition(true);
     }
 
@@ -39,13 +36,6 @@ public class PrimaryCondition extends Condition implements IEntityStoreActions {
     }
     public void setKey(Integer value){
         key = value;
-    }
-    
-    public Patient getPatient(){
-                return patient;
-    }
-    public void setPatient(Patient value){
-        patient = value;
     }
     
     public SecondaryCondition getSecondaryCondition(){

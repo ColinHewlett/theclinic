@@ -132,6 +132,14 @@ public class Descriptor {
             clinicalNote = value;
         }
         
+        private PrimaryCondition primaryCondition = null;
+        public PrimaryCondition getPrimaryCondition(){
+            return primaryCondition; 
+        }
+        protected void setPrimaryCondition(PrimaryCondition value){
+            primaryCondition = value;
+        }
+        
         private Treatment treatment = null;
         public Treatment getTreatment(){
             return treatment; 
@@ -377,6 +385,14 @@ public class Descriptor {
         }
         public void setDoctor(Doctor value){
             doctor = value;
+        }
+        
+        private PrimaryCondition primaryCondition = null;
+        public PrimaryCondition getPrimaryCondition(){
+            return primaryCondition; 
+        }
+        public void setPrimaryCondition(PrimaryCondition value){
+            primaryCondition = value;
         }
         
         public Medication getMedication(){

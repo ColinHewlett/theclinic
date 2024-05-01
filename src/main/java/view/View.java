@@ -112,6 +112,9 @@ public class View extends JInternalFrame
             case TREATMENT_VIEW:
                 setView(makeView(new TreatmentView(viewer, controller, desktopView)));
                 break;
+            case MEDICAL_CONDITION_VIEW:
+                setView(makeView(new MedicalConditionView(viewer, controller, desktopView)));
+                break;
             case SCHEDULE_VIEW:
                 setView(makeView(new ScheduleView(viewer, controller, desktopView)));
                 break;
@@ -195,7 +198,6 @@ public class View extends JInternalFrame
     }
 
     public static enum Viewer { 
-        
         APPOINTMENT_CREATOR_VIEW,
         APPOINTMENT_EDITOR_VIEW,
         APPOINTMENT_TREATMENT_VIEW,
@@ -204,6 +206,7 @@ public class View extends JInternalFrame
         CLINICAL_NOTE_VIEW,
         CHECKBOX_LIST_VIEW,
         EXPORT_PROGRESS_VIEW,
+        MEDICAL_CONDITION_VIEW,
         MIGRATION_MANAGER_VIEW,
         NON_SURGERY_DAY_EDITOR_VIEW,
         TREATMENT_VIEW,
