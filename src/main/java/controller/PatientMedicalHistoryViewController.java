@@ -80,7 +80,12 @@ public class PatientMedicalHistoryViewController extends ViewController{
             switch (actionCommand){
                 case PRINT_PATIENT_MEDICAL_HISTORY_REQUEST:
                     doPrintPatientMedicalHistoryRequest();
-                    break;
+                    /**
+                     * once print operation complete 
+                     * -- drop through to VIEW_CLOSE_NOTIFICATION action command
+                     * -- because current instance of VC is 'view-less'
+                     * -- this ensures Desktop VC closes down the instance anyway
+                     */
                 case VIEW_CLOSE_NOTIFICATION:
                     ActionEvent actionEvent = new ActionEvent(
                         this,ActionEvent.ACTION_PERFORMED,
