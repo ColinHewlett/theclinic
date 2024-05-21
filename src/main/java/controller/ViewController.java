@@ -190,8 +190,11 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         CLINICAL_NOTE_VIEW_CONTROLLER_REQUEST,
         MEDICAL_CONDITION_VIEW_CONTROLLER_REQUEST,
         NOTIFICATION_VIEW_CONTROLLER_REQUEST,
+        PATIENT_MEDICAL_HISTORY_VIEW_CONTROLLER_REQUEST,
+        PRINT_PATIENT_MEDICAL_HISTORY_REQUEST,//basically requires PMH videw controller to achieve this
         PATIENT_SELECTION_VIEW_CONTROLLER_REQUEST,
         PATIENT_VIEW_CONTROLLER_REQUEST,
+        
         SCHEDULE_VIEW_CONTROLLER_REQUEST,
         TEST_PATIENT_VIEW_CONTROLLER_REQUEST,
         TREATMENT_VIEW_CONTROLLER_REQUEST,
@@ -249,6 +252,8 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         SCHEDULE_VIEW_CONTROLLER_CHANGE_NOTIFICATION,
         PATIENT_VIEW_CONTROLLER_CHANGE_NOTIFICATION,
         TREATMENT_VIEW_CONTROLLER_CHANGE_NOTIFICATION,
+        PATIENT_MEDICAL_HISTORY_VIEW_CONTROLLER_CHANGE_NOTIFICATION,
+        PATIENT_MEDICAL_CONDITION_VIEW_CONTROLLER_CHANGE_NOTIFICATION,
         DESKTOP_VIEW_CHANGED_NOTIFICATION,
         SET_DESKTOP_VIEW_MODE,
         APPOINTMENT_CSV_PATH_RECEIVED,
@@ -351,6 +356,22 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         RECEIVED_UNACTIONED_NOTIFICATIONS,
     }
     
+    public static enum PatientMedicalHistoryViewControllerActionEvent{
+        PATIENT_CONDITION_READ_REQUEST,
+        PATIENT_CONDITION_CREATE_REQUEST,
+        PATIENT_CONDITION_DELETE_REQUEST,
+        PATIENT_CONDITION_COMMENT_UPDATE_REQUEST,
+        PATIENT_CONDITION_COMMENT_DELETE_REQUEST,
+        PRINT_PATIENT_MEDICAL_HISTORY_REQUEST,
+        VIEW_CLOSE_NOTIFICATION
+    }
+    
+    public static enum PatientMedicalHistoryViewControllerPropertyChangeEvent{
+        CONDITION_WITH_STATE_RECEIVED,
+        PATIENT_MEDICAL_HISTORY_VIEW_CONTROLLER_ERROR_RECEIVED,
+        PATIENT_MEDICAL_HISTORY_VIEW_CONTROLLER_CHANGE_NOTIFICATION
+    }
+    
     public static enum PatientViewControllerActionEvent{
         //primary view requests (commands)
         
@@ -360,8 +381,11 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         NULL_PATIENT_REQUEST,
         PATIENT_CREATE_REQUEST,
         PATIENT_DELETE_REQUEST,
+        PATIENT_ADDITIONAL_NOTES_VIEW_REQUEST,
+        
         PATIENT_DOCTOR_EDITOR_VIEW_REQUEST,
         PATIENT_GUARDIAN_EDITOR_VIEW_REQUEST,
+        PATIENT_MEDICAL_HISTORY_VIEW_CONTROLLER_REQUEST,
         PATIENT_MEDICAL_HISTORY_1_EDITOR_VIEW_REQUEST,
         PATIENT_MEDICATION_EDITOR_VIEW_REQUEST,
         PATIENT_NOTES_EDITOR_VIEW_REQUEST,
@@ -371,6 +395,7 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         PATIENT_REQUEST,
         PATIENT_SELECTION_VIEW_REQUEST,
         PATIENT_UPDATE_REQUEST,
+        PRINT_PATIENT_MEDICAL_HISTORY_REQUEST,
         RECOVER_PATIENT_REQUEST,
         SCHEDULE_VIEW_CONTROLLER_REQUEST,
         VIEW_ACTIVATED_NOTIFICATION,
@@ -1111,6 +1136,226 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
             String[] names = name.split(" ");
             return "Dear " + names[0] + "\n";
         }       
+    }
+    
+    /*
+    protected ConditionWithState getConditionWithState(
+            Condition signature, Patient patient)throws StoreException{
+        ConditionWithState result = null;
+        if (signature.getIsPrimaryCondition()){
+            PrimaryCondition pc = (PrimaryCondition) signature;
+            result = getConditionWithState(pc, patient); 
+        }else if(signature .getIsSecondaryCondition()){
+            SecondaryCondition sc = (SecondaryCondition) signature;
+            result = getConditionWithState(sc, patient); 
+        }
+        return result; //left to sender to handle case result = null;
+    }
+    */
+    /*
+    private ConditionWithState getConditionWithState(
+            PrimaryCondition signature, Patient patient)throws StoreException{
+        PrimaryConditionWithState thePrimaryConditionWithState = 
+                new PrimaryConditionWithState();
+        PrimaryCondition primaryCondition = new PrimaryCondition();
+        primaryCondition.setScope(Entity.Scope.ALL);
+        primaryCondition = primaryCondition.read();
+        
+        PatientPrimaryCondition patientPrimaryCondition =
+                new PatientPrimaryCondition(patient);
+        patientPrimaryCondition.setScope(Entity.Scope.FOR_PATIENT);
+        patientPrimaryCondition = (PatientPrimaryCondition)patientPrimaryCondition.read();
+        
+        for (Condition c : primaryCondition.get()){
+            PrimaryCondition pc = (PrimaryCondition)c;
+            PrimaryConditionWithState primaryConditionWithState = 
+                    new PrimaryConditionWithState(pc);
+            for(PatientCondition patientCondition : patientPrimaryCondition.get()){
+                if(pc.getKey().equals(patientCondition.getKey())){
+                    primaryConditionWithState.setState(true);
+                    primaryConditionWithState.setComment(patientCondition.getComment());
+                }
+            }
+            thePrimaryConditionWithState.get().add(primaryConditionWithState);
+        }
+        return thePrimaryConditionWithState;
+    }
+    */
+    protected ConditionWithState getConditionWithState(
+            PatientCondition patientCondition)throws StoreException{
+        
+        PrimaryCondition pc = null;
+        SecondaryCondition sc = null;
+        SecondaryCondition _sc = null;
+        Condition condition = null;
+        PatientCondition pac = null;
+        PrimaryConditionWithState pCWS = null;
+        SecondaryConditionWithState sCWS = null;
+        
+        Patient patient = patientCondition.getPatient();
+        ConditionWithState CWS = new ConditionWithState();
+
+        /**
+         * case patientCondition is a PatientPrimaryCondition
+         */
+        if(patientCondition.getIsPatientPrimaryCondition()){ 
+            /**
+             * fetch all primary conditions
+             */
+            pc = new PrimaryCondition();
+            pc.setScope(Entity.Scope.ALL);
+            pc = pc.read();
+            condition = pc;
+            
+            /**
+             * initialise each primary condition with their collection of secondary conditions (if any)
+             */
+            PrimaryCondition _pc = null;
+            for(Condition c : pc.get()){
+                _pc = (PrimaryCondition)c;
+                sc = new SecondaryCondition(_pc);
+                sc.setScope(Entity.Scope.FOR_PRIMARY_CONDITION);
+                sc = sc.read();
+                _pc.setSecondaryCondition(sc);
+            }
+            
+            /**
+             * fetch all PatientPrimaryConditions for this patient
+             */
+            pac = new PatientPrimaryCondition(patient,pc);
+            pac.setScope(Entity.Scope.FOR_PATIENT);
+            pac = pac.read();
+            
+            /**
+             * for each PrimaryCondition fetched
+             */
+            for(Condition c : condition.get()){ 
+                /**
+                 * create a new PrimaryConditionWitState object for this primary condition
+                 */
+                pCWS = new PrimaryConditionWithState((PrimaryCondition)c);
+                
+                /**
+                 * for each PatientCondition for this patient
+                 */
+                for(PatientCondition _pac : pac.get()){
+                    /**
+                     * check this primary condition is owned by this patient
+                     */
+                    if(c.getKey().equals(_pac.getCondition().getKey())){
+                        /**
+                         * initialise the new PrimaryConditionWitState object
+                         * -- set its state property true
+                         * -- initialise its comment property
+                         */
+                        pCWS.setState(true);
+                        pCWS.setComment(_pac.getComment());
+                    }
+
+                }
+                CWS.get().add(pCWS);
+            }
+        }
+        else {
+            /**
+             * fetch all secondary conditions for the specified primary condition
+             * -- but fetch all details of the secondary condition's parent prim,ary condition first
+             */
+            sc = (SecondaryCondition)patientCondition.getCondition();
+            pc = sc.getPrimaryCondition();
+            pc.setScope(Entity.Scope.SINGLE);
+            pc = pc.read();
+
+            sc.setScope(Entity.Scope.FOR_PRIMARY_CONDITION);
+            sc = sc.read();
+            sc.setPrimaryCondition(pc);
+            condition = sc;
+            
+            /**
+             * for each secondary condition child of the parent primary cxondition
+             * -- copy in the fully initialsed parent primary condition
+             * -- create from the secondary condition a secondary condition with state object
+             */
+            for (Condition c : condition.get()){
+                _sc = (SecondaryCondition)c;
+                _sc.setPrimaryCondition(pc);
+                sCWS = new SecondaryConditionWithState(_sc);
+                
+                /**
+                 * create a new PatientSecondaryCondition object from specified patient and secondary condition
+                 * -- use this to fetch the patient condition from the respository if it exists
+                 */
+                pac = new PatientSecondaryCondition(patient, (SecondaryCondition)c);
+                pac.setScope((Entity.Scope.SINGLE));
+                pac = pac.read();
+                
+                /**
+                 * if patient condition exists
+                 * -- initialise condition with state 'state' property
+                 * -- initialise the condition with state's 'comment property from the fetched patent condition
+                 */
+                if (pac!=null){
+                    sCWS.setComment(pac.getComment());
+                    sCWS.setState(true);
+                }
+                /**
+                 * add fetched the fully formed condition with state
+                 */
+                CWS.get().add(sCWS);
+            }
+        }
+        return CWS;
+    }
+    
+    
+    
+    protected void synchPrimaryConditionStateWithItsSecondaries(PatientCondition pac)throws StoreException{
+        Boolean shouldParentPPCExist = null;
+        PrimaryCondition pc = null;
+        SecondaryCondition sc = null;
+        Patient patient = pac.getPatient();
+        
+        if (pac.getIsPatientPrimaryCondition())
+            sc = new SecondaryCondition((PrimaryCondition)pac.getCondition());
+        else sc = (SecondaryCondition)pac.getCondition();
+        pc = sc.getPrimaryCondition();
+
+        sc.setScope(Entity.Scope.FOR_PRIMARY_CONDITION);
+        sc = sc.read();
+        
+        /**
+         * check if any PatientSecondaryConditions in store
+         */
+        for (Condition c : sc.get()){
+            pac = new PatientSecondaryCondition(patient, (SecondaryCondition)c);
+            pac.setScope((Entity.Scope.SINGLE));
+            pac = pac.read();
+            if (pac!=null){
+                shouldParentPPCExist = true;
+                break;
+            }else shouldParentPPCExist = false;
+        }
+        
+        if (shouldParentPPCExist!=null){//this primary condition has child secondaries
+            /**
+             * yes -- ensure parent PatientPrimaryCondition exists; if not insert a new one
+             * no  -- ensure a parent PatientPrimaryCondition does not exist; if one does delete it
+             */
+            pac = new PatientPrimaryCondition(patient, pc);
+            pac.setScope((Entity.Scope.SINGLE));
+            pac = pac.read();
+            if (shouldParentPPCExist){//yes
+                if (pac==null) {
+                    pac = new PatientPrimaryCondition(patient, pc);
+                    pac.insert();
+                }
+            }else{
+                if (pac!=null) {
+                    pac.setScope((Entity.Scope.SINGLE));
+                    pac.delete();
+                }
+            }
+        }//do noithinfg if this primary condition has no child secondaries
     }
     
     protected TreatmentWithState getTreatmentsWithState(

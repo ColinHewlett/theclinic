@@ -6,7 +6,7 @@
 package view;
 
 
-import view.views.modal_views.ModalPatientMedicalHistory1EditorView;
+/*import view.views.modal_views.ModalPatientMedicalHistory1EditorView;*/
 import view.views.non_modal_views.*;
 import view.views.modal_views.*;
 import controller.ViewController;
@@ -118,6 +118,9 @@ public class View extends JInternalFrame
             case SCHEDULE_VIEW:
                 setView(makeView(new ScheduleView(viewer, controller, desktopView)));
                 break;
+            case PATIENT_MEDICAL_HISTORY_VIEW:
+                setView(makeView(new PatientMedicalHistoryView(viewer, controller, desktopView)));
+                break;
             case APPOINTMENTS_CANCELLED_VIEW:
                 setModalView(makeView(new ModalCancelledAppointmentsView(viewer, controller, desktopView)));
                 break;
@@ -148,12 +151,12 @@ public class View extends JInternalFrame
             case PATIENT_MEDICATION_EDITOR_VIEW:
                 setModalView(makeView(new ModalPatientMedicationEditorView(viewer, controller,desktopView)));
                 break;
-            case PATIENT_MEDICAL_HISTORY_1_EDITOR_VIEW:
+            /*case PATIENT_MEDICAL_HISTORY_1_EDITOR_VIEW:
                 setModalView(makeView(new ModalPatientMedicalHistory1EditorView(viewer, controller,desktopView)));
-                break;
-            case PATIENT_MEDICAL_HISTORY_2_EDITOR_VIEW:
+                break;*/
+            /*case PATIENT_MEDICAL_HISTORY_2_EDITOR_VIEW:
                 setModalView(makeView(new ModalPatientMedicalHistory2EditorView(viewer, controller,desktopView)));
-                break;   
+                break; */  
             case PATIENT_RECALL_EDITOR_VIEW:
                 setModalView(makeView(new ModalPatientRecallEditorView(viewer, controller,desktopView)));
                 break;
@@ -211,8 +214,9 @@ public class View extends JInternalFrame
         NON_SURGERY_DAY_EDITOR_VIEW,
         TREATMENT_VIEW,
         NOTE_TAKER,
-        PATIENT_MEDICAL_HISTORY_1_EDITOR_VIEW,
-        PATIENT_MEDICAL_HISTORY_2_EDITOR_VIEW,
+        //PATIENT_MEDICAL_HISTORY_1_EDITOR_VIEW,
+        //PATIENT_MEDICAL_HISTORY_2_EDITOR_VIEW,
+        PATIENT_MEDICAL_HISTORY_VIEW,
         PATIENT_MEDICATION_EDITOR_VIEW,
         PATIENT_DOCTOR_EDITOR_VIEW,
         PATIENT_RECALL_EDITOR_VIEW,

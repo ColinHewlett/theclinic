@@ -10,44 +10,13 @@ import java.util.ArrayList;
  *
  * @author colin
  */
-public class PrimaryConditionWithState {
+public class PrimaryConditionWithState extends ConditionWithState {
     public PrimaryConditionWithState(){
         
     }
     
     public PrimaryConditionWithState(PrimaryCondition primaryCondition){
-        this.primaryCondition = primaryCondition;
+        this.condition = primaryCondition;
     }
-    
-    private ArrayList<PrimaryConditionWithState> collection = new ArrayList<>();
-    public ArrayList<PrimaryConditionWithState> get(){
-        return collection;
-    }
-    public void set(ArrayList<PrimaryConditionWithState> value){
-        collection = value;
-    }
-    
-    private PrimaryCondition primaryCondition = null;
-    public PrimaryCondition getPrimaryCondition(){
-        return primaryCondition;
-    }
-    public void setPrimaryCondition(PrimaryCondition value){
-        primaryCondition = value;
-    }
-    
-    private Boolean state = false;
-    public Boolean getState(){
-        return state;
-    }
-    public void setState(Boolean value){
-        state = value;
-    }
-    
-    private String comment = null;
-    public String getComment(){
-        return comment;
-    }
-    public void setComment(String value){
-        comment = value;
-    }
+
 }

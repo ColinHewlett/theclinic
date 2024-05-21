@@ -5,6 +5,7 @@
 package controller;
 
 import static controller.ViewController.displayErrorMessage;
+import controller.exceptions.TemplateReaderException;
 import model.Treatment;
 import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeEvent;
@@ -125,6 +126,12 @@ public class TreatmentViewController extends ViewController{
                     treatment.setScope(Entity.Scope.ALL);
                     try{
                         treatment = treatment.read();
+                        if (treatment.get().isEmpty()){
+                            treatment = extractTreatmentFromTemplate();
+                            for (Treatment t : treatment.get()){
+                                t.insert();
+                            }
+                        }  
                         getDescriptor().getControllerDescription()
                                 .setTreatment(treatment);
                     }catch(StoreException ex){
@@ -135,7 +142,9 @@ public class TreatmentViewController extends ViewController{
                                 "Treatment view controller error", 
                                 JOptionPane.WARNING_MESSAGE);
                         isError = true;
-                    }      
+                    }catch(TemplateReaderException ex){
+                        
+                    }     
                     break;
                 case TREATMENT_RENAME_REQUEST:
                     try{

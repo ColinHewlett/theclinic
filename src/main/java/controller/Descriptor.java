@@ -109,6 +109,14 @@ public class Descriptor {
             this.scheduleDay = value;
         }
         
+        private PatientCondition patientCondition = null;
+        public PatientCondition getPatientCondition(){
+            return patientCondition; 
+        }
+        public void setPatientCondition(PatientCondition value){
+            patientCondition = value;
+        }
+        
         public Doctor getDoctor(){
             return doctor; 
         }
@@ -122,6 +130,14 @@ public class Descriptor {
         }
         public void setTreatmentWithState(TreatmentWithState value){
             treatmentWithState = value;
+        }
+        
+        private ConditionWithState conditionWithState = null;
+        public ConditionWithState getConditionWithState(){
+            return conditionWithState; 
+        }
+        public void setConditionWithState(ConditionWithState value){
+            conditionWithState = value;
         }
         
         private ClinicalNote clinicalNote = null;
@@ -380,11 +396,27 @@ public class Descriptor {
             
         }
         
+        private ConditionWithState conditionWithState = null;
+        public ConditionWithState getConditionWithState(){
+            return conditionWithState; 
+        }
+        public void setConditionWithState(ConditionWithState value){
+            conditionWithState = value;
+        }
+        
         public Doctor getDoctor(){
             return doctor; 
         }
         public void setDoctor(Doctor value){
             doctor = value;
+        }
+        
+        private PatientCondition patientCondition = null;
+        public PatientCondition getPatientCondition(){
+            return patientCondition; 
+        }
+        public void setPatientCondition(PatientCondition value){
+            patientCondition = value;
         }
         
         private PrimaryCondition primaryCondition = null;

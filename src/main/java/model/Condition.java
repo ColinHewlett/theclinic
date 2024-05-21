@@ -10,6 +10,7 @@ import java.util.ArrayList;
  * @author colin
  */
 public class Condition extends Entity {
+    Integer key = null;
     private String description = null;
     private ArrayList<Condition> collection = new ArrayList<>();
 
@@ -24,5 +25,11 @@ public class Condition extends Entity {
     }
     public void setDescription(String value){
         description = value;
+    }
+     public Integer getKey(){
+                return key;
+    }
+    public void setKey(Integer value){
+        key = value;
     }
 }

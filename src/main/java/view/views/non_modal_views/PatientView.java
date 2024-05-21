@@ -95,6 +95,7 @@ public class PatientView extends View
     private enum PatientSelectionMode{ PATIENT_SELECTION, 
                                        PATIENT_RECOVERY}
     private enum Actions{
+        REQUEST_ADDITIONAL_NOTES,
         REQUEST_CLOSE_VIEW,
         REQUEST_CLINICAL_NOTES,
         REQUEST_CREATE_RECOVER_PATIENT,
@@ -109,6 +110,7 @@ public class PatientView extends View
         REQUEST_PATIENT_RECALLS,
         REQUEST_PATIENT_RECOVER,
         REQUEST_PHONE_EMAIL_EDITOR_VIEW,
+        REQUEST_PRINT_PATIENT_MEDICAL_HISTORY,
         REQUEST_RECALL_EDITOR_VIEW,
         REQUEST_SCHEDULE_VIEW_CONTROLLER,
         REQUEST_UNTITLED_NAME,
@@ -276,14 +278,17 @@ public class PatientView extends View
         rdbGroup.add(rdbRequestModalRecallEditorView);
         rdbGroup.add(rdbRequestModalGuardianEditorView);
         rdbGroup.add(rdbRequestModalMedicalProfilePopup);
+        rdbGroup.add(rdbRequestAdditionalNotes);
         rdbRequestPhoneEmailEditorView.setActionCommand(Actions.REQUEST_PHONE_EMAIL_EDITOR_VIEW.toString());
         rdbRequestModalRecallEditorView.setActionCommand(Actions.REQUEST_RECALL_EDITOR_VIEW.toString());
         rdbRequestModalGuardianEditorView.setActionCommand(Actions.REQUEST_GUARDIAN_EDITOR_VIEW.toString());
         rdbRequestModalMedicalProfilePopup.setActionCommand(Actions.REQUEST_MEDICAL_HISTORY_POPUP.toString());
+        rdbRequestAdditionalNotes.setActionCommand(Actions.REQUEST_ADDITIONAL_NOTES.toString());
         rdbRequestPhoneEmailEditorView.addActionListener(this);
         rdbRequestModalRecallEditorView.addActionListener(this);
         rdbRequestModalGuardianEditorView.addActionListener(this);
         rdbRequestModalMedicalProfilePopup.addActionListener(this);
+        rdbRequestAdditionalNotes.addActionListener(this);
         
         cmbPatientSelector.setActionCommand(Actions.REQUEST_PATIENT.toString());
         cmbPatientSelector.addActionListener(this);
@@ -471,6 +476,10 @@ public class PatientView extends View
     @Override
     public void actionPerformed(ActionEvent e){
         switch(Actions.valueOf(e.getActionCommand())){
+            case REQUEST_PRINT_PATIENT_MEDICAL_HISTORY:
+                doActionFor(ViewController.PatientViewControllerActionEvent
+                        .PRINT_PATIENT_MEDICAL_HISTORY_REQUEST);
+                break;
             case REQUEST_PATIENT_RECALLS:
                 getMyController().sendNoOpMessage(this);
                 break;
@@ -490,8 +499,9 @@ public class PatientView extends View
                 doGuardianEditorViewRequest();
                 break;
             case REQUEST_MEDICAL_HISTORY:
-                getMyController().sendNoOpMessage(this);
+                //getMyController().sendNoOpMessage(this);
                 //doMedicalHistoryRequest();
+                doPatientMedicalHistoryViewControllerRequest();
                 break;
             case REQUEST_MEDICAL_HISTORY_POPUP:
                 if (this.cmbPatientSelector.getSelectedIndex()!=-1){
@@ -501,8 +511,8 @@ public class PatientView extends View
                             "a patient has to be selected before a medical history "
                                     + "can be displayed","Patient view error", 
                                     JOptionPane.WARNING_MESSAGE);
-                    rdbGroup.clearSelection();
                 }
+                rdbGroup.clearSelection();
                 break;
             case REQUEST_MEDICATION:
                 doMedicationRequest();
@@ -518,6 +528,9 @@ public class PatientView extends View
                 break;
             case REQUEST_PATIENT_RECOVER:
                 doPatientRecoverRequest();
+                break;
+            case REQUEST_ADDITIONAL_NOTES:
+                doAdditionalNotesREquest();
                 break;
             case REQUEST_PHONE_EMAIL_EDITOR_VIEW:
                 doPhoneEmailEditorViewRequest();
@@ -622,12 +635,15 @@ public class PatientView extends View
                 PATIENT_GUARDIAN_EDITOR_VIEW_REQUEST;
         doActionFor(request);
     }
+    
+    /*
     private void doMedicalHistoryRequest(){
         ViewController.PatientViewControllerActionEvent request = 
                 ViewController.PatientViewControllerActionEvent.
                 PATIENT_MEDICAL_HISTORY_1_EDITOR_VIEW_REQUEST;
         doActionFor(request);
     }
+*/
     private void doMedicalHistoryPopupRequest(){
         JMenuItem menuItem = null;
         JPopupMenu popup = new JPopupMenu("Select option");
@@ -649,39 +665,26 @@ public class PatientView extends View
                     menuItem.setActionCommand(
                             Actions.REQUEST_MEDICAL_HISTORY.toString());
                     menuItem.addActionListener(this);
-                            /*
-                    popup.add(item).addActionListener(new java.awt.event.ActionListener() {
-                        public void actionPerformed(java.awt.event.ActionEvent evt) {
-                            mniMedicalHistoryActionPerformed(evt);
-                        }
-                    });*/
                     break;
                 case "Medication":
                     menuItem = popup.add(item);
                     menuItem.setActionCommand(
                             Actions.REQUEST_MEDICATION.toString());
                     menuItem.addActionListener(this);
-                    /*
-                    popup.add(item).addActionListener(new java.awt.event.ActionListener() {
-                        public void actionPerformed(java.awt.event.ActionEvent evt) {
-                            mniMedicationActionPerformed(evt);
-                        }
-                    });*/
                     break;
                 case "Doctor":
                     menuItem = popup.add(item);
                     menuItem.setActionCommand(
                             Actions.REQUEST_DOCTOR.toString());
                     menuItem.addActionListener(this);
-                    /*
-                    popup.add(item).addActionListener(new java.awt.event.ActionListener() {
-                        public void actionPerformed(java.awt.event.ActionEvent evt) {
-                            mniDoctorActionPerformed(evt);
-                        }
-                    });*/
                     break;        
             }
+            
         }
+        popup.addSeparator();
+        menuItem = popup.add("Print medical history");
+        menuItem.setActionCommand(Actions.REQUEST_PRINT_PATIENT_MEDICAL_HISTORY.toString());
+        menuItem.addActionListener(this);
         popup.show(this.rdbRequestModalMedicalProfilePopup, 
                 rdbRequestModalMedicalProfilePopup.getX()-50,
                 rdbRequestModalMedicalProfilePopup.getY()-50 );
@@ -749,6 +752,12 @@ public class PatientView extends View
             this.getMyController().actionPerformed(actionEvent);
         }
     }
+    private void doAdditionalNotesREquest(){
+        ViewController.PatientViewControllerActionEvent request = 
+                ViewController.PatientViewControllerActionEvent.
+                PATIENT_ADDITIONAL_NOTES_VIEW_REQUEST;
+        doActionFor(request);
+    }
     private void doPhoneEmailEditorViewRequest(){
         ViewController.PatientViewControllerActionEvent request = 
                 ViewController.PatientViewControllerActionEvent.
@@ -760,6 +769,18 @@ public class PatientView extends View
                 ViewController.PatientViewControllerActionEvent.
                 PATIENT_RECALL_EDITOR_VIEW_REQUEST;
         doActionFor(request);
+    }
+    private void doPatientMedicalHistoryViewControllerRequest(){
+        ActionEvent actionEvent = new ActionEvent(
+                this,ActionEvent.ACTION_PERFORMED,
+                ViewController.PatientViewControllerActionEvent.PATIENT_MEDICAL_HISTORY_VIEW_CONTROLLER_REQUEST.toString());
+        this.getMyController().actionPerformed(actionEvent);
+    }
+    private void doPrintPatientMedicalHistory(){
+        ActionEvent actionEvent = new ActionEvent(
+                this,ActionEvent.ACTION_PERFORMED,
+                ViewController.PatientViewControllerActionEvent.PRINT_PATIENT_MEDICAL_HISTORY_REQUEST.toString());
+        this.getMyController().actionPerformed(actionEvent);
     }
     private void doScheduleViewControllerRequest(){
         if (this.tblAppointmentHistory.getSelectedRow()==-1){
@@ -1231,6 +1252,7 @@ public class PatientView extends View
         rdbRequestModalRecallEditorView = new javax.swing.JRadioButton();
         rdbRequestModalGuardianEditorView = new javax.swing.JRadioButton();
         rdbRequestModalMedicalProfilePopup = new javax.swing.JRadioButton();
+        rdbRequestAdditionalNotes = new javax.swing.JRadioButton();
         mbaPatientView = new javax.swing.JMenuBar();
         mnuActions = new javax.swing.JMenu();
         mniCreateNewPatient = new javax.swing.JMenuItem();
@@ -1572,6 +1594,8 @@ public class PatientView extends View
         rdbRequestModalMedicalProfilePopup.setText("Medical history");
         rdbRequestModalMedicalProfilePopup.setBackground(new java.awt.Color(220, 220, 220));
 
+        rdbRequestAdditionalNotes.setText("Additional notes");
+
         javax.swing.GroupLayout pnlFurtherDetailsLayout = new javax.swing.GroupLayout(pnlFurtherDetails);
         pnlFurtherDetails.setLayout(pnlFurtherDetailsLayout);
         pnlFurtherDetailsLayout.setHorizontalGroup(
@@ -1579,27 +1603,36 @@ public class PatientView extends View
             .addGroup(pnlFurtherDetailsLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(pnlFurtherDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(rdbRequestPhoneEmailEditorView)
-                    .addComponent(rdbRequestModalRecallEditorView))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGroup(pnlFurtherDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(rdbRequestModalGuardianEditorView)
-                    .addComponent(rdbRequestModalMedicalProfilePopup))
-                .addGap(25, 25, 25))
+                    .addGroup(pnlFurtherDetailsLayout.createSequentialGroup()
+                        .addGroup(pnlFurtherDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(rdbRequestPhoneEmailEditorView)
+                            .addComponent(rdbRequestModalRecallEditorView))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGroup(pnlFurtherDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(rdbRequestModalGuardianEditorView)
+                            .addComponent(rdbRequestModalMedicalProfilePopup))
+                        .addGap(25, 25, 25))
+                    .addGroup(pnlFurtherDetailsLayout.createSequentialGroup()
+                        .addComponent(rdbRequestAdditionalNotes)
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
         );
         pnlFurtherDetailsLayout.setVerticalGroup(
             pnlFurtherDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlFurtherDetailsLayout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap()
                 .addGroup(pnlFurtherDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(rdbRequestPhoneEmailEditorView)
                     .addComponent(rdbRequestModalGuardianEditorView))
-                .addGap(28, 28, 28)
+                .addGap(18, 18, 18)
                 .addGroup(pnlFurtherDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(rdbRequestModalRecallEditorView)
                     .addComponent(rdbRequestModalMedicalProfilePopup))
-                .addGap(27, 27, 27))
+                .addGap(18, 18, 18)
+                .addComponent(rdbRequestAdditionalNotes)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
+
+        rdbRequestAdditionalNotes.setBackground(new java.awt.Color(220, 220, 220));
 
         mnuActions.setText("Actions");
 
@@ -1741,6 +1774,7 @@ public class PatientView extends View
     private javax.swing.JPanel pnlOperations;
     private javax.swing.JPanel pnlPatientAddressContent;
     private javax.swing.JPanel pnlPatientSelection;
+    private javax.swing.JRadioButton rdbRequestAdditionalNotes;
     private javax.swing.JRadioButton rdbRequestModalGuardianEditorView;
     private javax.swing.JRadioButton rdbRequestModalMedicalProfilePopup;
     private javax.swing.JRadioButton rdbRequestModalRecallEditorView;

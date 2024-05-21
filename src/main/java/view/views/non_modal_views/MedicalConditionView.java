@@ -58,19 +58,44 @@ public class MedicalConditionView extends View
     public void valueChanged(ListSelectionEvent e){
         if (!e.getValueIsAdjusting()) {   // Ensure the event is not fired multiple times
             int selectedRow = tblCondition.getSelectedRow();
-            if (selectedRow!=-1){
-                MedicalConditionTableModel model = 
-                        (MedicalConditionTableModel)tblCondition.getModel();
-                PrimaryCondition pc = (PrimaryCondition)model.getElementAt(selectedRow);
-                if (!pc.getSecondaryCondition().get().isEmpty())
-                    this.btnToggleBetweenPrimaryAndSecondaryViews.setEnabled(false);
-                else
-                    this.btnToggleBetweenPrimaryAndSecondaryViews.setEnabled(true);
-            }else this.btnToggleBetweenPrimaryAndSecondaryViews.setEnabled(false);
+                switch(getConditionViewMode()){
+                    case PRIMARY:
+                        if (selectedRow!=-1){
+                            MedicalConditionTableModel model = 
+                                    (MedicalConditionTableModel)tblCondition.getModel();
+                            PrimaryCondition pc = (PrimaryCondition)model.getElementAt(selectedRow);
+                            SecondaryCondition sc = pc.getSecondaryCondition();
+                            if (!sc.get().isEmpty())
+                                this.btnToggleBetweenPrimaryAndSecondaryViews.setEnabled(true);
+                            else
+                                this.btnToggleBetweenPrimaryAndSecondaryViews.setEnabled(false);
+                            this.btnDeleteMedicalCondition.setEnabled(true);
+                            this.btnRenameMedicalCondition.setEnabled(true);
+                        }else {
+                            this.btnToggleBetweenPrimaryAndSecondaryViews.setEnabled(false);
+                            this.btnDeleteMedicalCondition.setEnabled(false);
+                            this.btnRenameMedicalCondition.setEnabled(false);
+                        }
+                        break;
+                    case SECONDARY:
+                        this.btnToggleBetweenPrimaryAndSecondaryViews.setEnabled(true);
+                        if (selectedRow!=-1){
+                            this.btnDeleteMedicalCondition.setEnabled(true);
+                            this.btnRenameMedicalCondition.setEnabled(true);  
+                        }else{
+                            this.btnDeleteMedicalCondition.setEnabled(true);
+                            this.btnRenameMedicalCondition.setEnabled(true); 
+                        }
+                        break;  
+                }
+
+            
         }
     }
     
     public void actionPerformed(ActionEvent e){
+        String ViewError = null;
+        String ErrorTitle = null;
         PrimaryCondition primaryCondition = null;
         ViewController.MedicalConditionViewControllerActionEvent
                 actionCommand = null;
@@ -85,24 +110,44 @@ public class MedicalConditionView extends View
                         .VIEW_CLOSE_NOTIFICATION;
                     doSendActionEvent(actionCommand);
                 break;
-            case REQUEST_CONDITION_CREATE:
+            case REQUEST_CONDITION_CREATE:{
+                setIsErrorMessageReceived(false);
                 switch (getConditionViewMode()){
                     case PRIMARY:
                         primaryCondition = doPrepForRequestPrimaryConditionCreate();
-                        setPrimaryCondition(primaryCondition);
-                        actionCommand = ViewController.MedicalConditionViewControllerActionEvent
-                                .PRIMARY_CONDITION_CREATE_REQUEST;
-                        doSendActionEvent(actionCommand);
+                        if (primaryCondition!=null){
+                            setPrimaryCondition(primaryCondition);
+                            actionCommand = ViewController.MedicalConditionViewControllerActionEvent
+                                    .PRIMARY_CONDITION_CREATE_REQUEST;
+                            doSendActionEvent(actionCommand);
+                        }else{
+                            ViewError = "Medical condition '" 
+                                    + getRejectedConditionName() + "' is not unique";
+                            ErrorTitle = "Primary condition create error";
+                        setIsErrorMessageReceived(true);
+                        }
                         break;
                     case SECONDARY:
                         primaryCondition = doPrepForRequestSecondaryConditionCreate();
-                        setPrimaryCondition(primaryCondition);
-                        actionCommand = ViewController.MedicalConditionViewControllerActionEvent
-                                .SECONDARY_CONDITION_CREATE_REQUEST;
-                        doSendActionEvent(actionCommand);
+                        if (primaryCondition!=null){
+                            setPrimaryCondition(primaryCondition);
+                            actionCommand = ViewController.MedicalConditionViewControllerActionEvent
+                                    .SECONDARY_CONDITION_CREATE_REQUEST;
+                            doSendActionEvent(actionCommand);
+                        }else{
+                            ViewError = "Medical condition '" 
+                                    + getRejectedConditionName() + "' is not unique";
+                            ErrorTitle = "Secondary condition create error";
+                            setIsErrorMessageReceived(true);
+                        }
                         break;
                 }
+                if (getIsErrorMessageReceived()){
+                    JOptionPane.showInternalMessageDialog(this, 
+                            ViewError,ErrorTitle,JOptionPane.WARNING_MESSAGE);
+                }
                 break;
+            }
             case REQUEST_CONDITION_DELETE:
                 setIsErrorMessageReceived(false);
                 switch(getConditionViewMode()){
@@ -127,23 +172,51 @@ public class MedicalConditionView extends View
                                     .getControllerDescription().getError(),
                             "Medical condition delete error",JOptionPane.WARNING_MESSAGE);
                 }
+                setIsErrorMessageReceived(false); //don;'y want this VC derror confusded with View generated errors
                 break;
             case REQUEST_CONDITION_RENAME:
                 switch(getConditionViewMode()){
                     case PRIMARY:
-                        primaryCondition = doPrepForRequestSecondaryConditionDelete();
-                        setPrimaryCondition(primaryCondition);
-                        actionCommand = ViewController.MedicalConditionViewControllerActionEvent
-                                .PRIMARY_CONDITION_RENAME_REQUEST;
-                        doSendActionEvent(actionCommand);
+                        primaryCondition = doPrepForRequestPrimaryConditionRename();
+                        if (primaryCondition!=null){
+                            setPrimaryCondition(primaryCondition);
+                            actionCommand = ViewController.MedicalConditionViewControllerActionEvent
+                                    .PRIMARY_CONDITION_RENAME_REQUEST;
+                            doSendActionEvent(actionCommand);
+                        }else setIsErrorMessageReceived(true);
+                        if (getIsErrorMessageReceived())
+                            if (getSelectedCondition()!=null){
+                                ViewError = "Medical condition '" 
+                                        + getRejectedConditionName() + "' is not unique";
+                                ErrorTitle = "Primary condition rename error";
+                            }else{ 
+                                ViewError = "A medical condition has not been selected for renaming";
+                                ErrorTitle = "Primary condition rename error";
+                            }
                         break;
                     case SECONDARY:
-                        primaryCondition = doPrepForRequestSecondaryConditionDelete();
-                        setPrimaryCondition(primaryCondition);
-                        actionCommand = ViewController.MedicalConditionViewControllerActionEvent
-                                .SECONDARY_CONDITION_RENAME_REQUEST;
-                        doSendActionEvent(actionCommand);
+                        primaryCondition = doPrepForRequestSecondaryConditionRename();
+                        if (primaryCondition!=null){
+                            setPrimaryCondition(primaryCondition);
+                            actionCommand = ViewController.MedicalConditionViewControllerActionEvent
+                                    .SECONDARY_CONDITION_RENAME_REQUEST;
+                            doSendActionEvent(actionCommand);
+                        }else setIsErrorMessageReceived(true);
+                        if (getIsErrorMessageReceived()){
+                            if (getSelectedCondition()!=null){
+                                ViewError = "Medical condition '" 
+                                        + getRejectedConditionName() + "' is not unique";
+                                ErrorTitle = "Secondary condition rename error";
+                            }else{
+                                ViewError = "A medical condition has not been selected for renaming";
+                                ErrorTitle = "Secondary condition rename error";
+                            }
+                        }
                         break;
+                }
+                if (getIsErrorMessageReceived()){
+                    JOptionPane.showInternalMessageDialog(this, 
+                            ViewError,ErrorTitle,JOptionPane.WARNING_MESSAGE);
                 }
                 break;
             case REQUEST_VIEW_MODE_CHANGE:
@@ -153,11 +226,9 @@ public class MedicalConditionView extends View
                         break;
                     case SECONDARY:
                         setConditionViewMode(ConditionViewMode.PRIMARY);
-                        break;
-                               
+                        break;       
                 }
-                break;
-                
+                break;   
         }
     }
 
@@ -169,6 +240,10 @@ public class MedicalConditionView extends View
         switch (propertyName){
             case MEDICAL_CONDITION_VIEW_CONTROLLER_ERROR_RECEIVED:
                 setIsErrorMessageReceived(true);
+                /*JOptionPane.showInternalMessageDialog(this, 
+                        getMyController().getDescriptor()
+                                .getControllerDescription().getError(),
+                        "View controller error", JOptionPane.WARNING_MESSAGE);*/
                 break;
             case PRIMARY_CONDITION_RECEIVED:
                 populateConditionTable();
@@ -199,10 +274,11 @@ public class MedicalConditionView extends View
         btnCloseView.addActionListener(this);
         this.btnDeleteMedicalCondition.addActionListener(this);
         this.btnRenameMedicalCondition.addActionListener(this);
-        
+
         ListSelectionModel lsm = this.tblCondition.getSelectionModel();
         lsm.addListSelectionListener(this);
 
+        /*
         this.tblCondition.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -212,11 +288,9 @@ public class MedicalConditionView extends View
                     tblCondition.clearSelection(); // Deselect the clicked row
                 }else tableValueChangedListenerActivated = false;
             }
-        });
+        });*/
 
-        doSendActionEvent(ViewController
-                .MedicalConditionViewControllerActionEvent
-                .PRIMARY_CONDITION_READ_REQUEST); 
+        setConditionViewMode(ConditionViewMode.PRIMARY);
     }
     
     private boolean isErrorMessageReceived = false;
@@ -237,12 +311,32 @@ public class MedicalConditionView extends View
         switch(conditionViewMode){
             case PRIMARY:
                 setTitle("Medical conditions (primary options)");
+                this.btnToggleBetweenPrimaryAndSecondaryViews.setText(
+                        "<html><center>View</center><center>secondary</center>"
+                                + "<center>conditions</center></html>");
+                this.btnDeleteMedicalCondition.setEnabled(false);
+                this.btnRenameMedicalCondition.setEnabled(false);
+                this.btnRenameMedicalCondition.setEnabled(false);
+                this.btnToggleBetweenPrimaryAndSecondaryViews.setEnabled(false);
                 actionCommand = ViewController.MedicalConditionViewControllerActionEvent
                         .PRIMARY_CONDITION_READ_REQUEST;
                 doSendActionEvent(actionCommand);
                 break;
             case SECONDARY:
+                PrimaryCondition pc = null;
                 setTitle("Medical conditions (secondary options)");
+                Condition condition = getSelectedCondition();
+                if (condition!=null){
+                    pc = (PrimaryCondition)condition;
+                    setPrimaryCondition(pc);
+                }
+                this.btnToggleBetweenPrimaryAndSecondaryViews.setText(
+                        "<html><center>View</center><center>primary</center>"
+                                + "<center>conditions</center></html>");
+                this.btnDeleteMedicalCondition.setEnabled(false);
+                this.btnRenameMedicalCondition.setEnabled(false);
+                this.btnRenameMedicalCondition.setEnabled(false);
+                this.btnToggleBetweenPrimaryAndSecondaryViews.setEnabled(true);
                 actionCommand = ViewController.MedicalConditionViewControllerActionEvent
                         .SECONDARY_CONDITION_READ_REQUEST;
                 doSendActionEvent(actionCommand);
@@ -280,9 +374,10 @@ public class MedicalConditionView extends View
     private Boolean isPrimaryConditionDescriptionUnique(String description){
         boolean isUnique = true;
         for (Condition c : getPrimaryCondition().get()){
-            if (c.getDescription().equalsIgnoreCase(description))
+            if (c.getDescription().equalsIgnoreCase(description)){
                 isUnique = false;
-            break;
+                break;
+            }
         }
         return isUnique;
     }
@@ -290,9 +385,10 @@ public class MedicalConditionView extends View
     private Boolean isSecondaryConditionDescriptionUnique(String description){
         boolean isUnique = true;
         for (Condition c : getPrimaryCondition().getSecondaryCondition().get()){
-            if (c.getDescription().equalsIgnoreCase(description))
+            if (c.getDescription().equalsIgnoreCase(description)){
                 isUnique = false;
-            break;
+                break;
+            }
         }
         return isUnique;
     }
@@ -317,6 +413,14 @@ public class MedicalConditionView extends View
         getMyController().actionPerformed(actionEvent);
     }
     
+    private String conditionName = null;
+    private void setRejectedConditionName(String value){
+        conditionName = value;
+    }
+    private String getRejectedConditionName(){
+        return conditionName;
+    }
+    
     private PrimaryCondition doPrepForRequestPrimaryConditionCreate(){
         PrimaryCondition result = null;
         String reply = null;
@@ -328,8 +432,10 @@ public class MedicalConditionView extends View
                     PrimaryCondition pc = new PrimaryCondition();
                     pc.setDescription(reply);
                     result = pc;
-                }else JOptionPane.showInternalMessageDialog(
-                            this, "Name of medical condition is not unique");  
+                }else {
+                    result = null;
+                    setRejectedConditionName(reply);
+                }  
             }else JOptionPane.showInternalMessageDialog(
                             this, "Name of medical condition cannot be blank"); 
         }else JOptionPane.showInternalMessageDialog(
@@ -345,13 +451,15 @@ public class MedicalConditionView extends View
             reply = reply.trim();
             if (!reply.isEmpty()){
                 if(isSecondaryConditionDescriptionUnique(reply)){
-                    SecondaryCondition sc = new SecondaryCondition();
+                    SecondaryCondition sc = new SecondaryCondition(getPrimaryCondition());
                     sc.setDescription(reply);
                     PrimaryCondition pc = getPrimaryCondition();
                     pc.setSecondaryCondition(sc);
                     result = pc;
-                }else JOptionPane.showInternalMessageDialog(
-                            this, "Name of medical condition is not unique");  
+                }else {
+                    result = null;
+                    setRejectedConditionName(reply);
+                }  
             }else JOptionPane.showInternalMessageDialog(
                             this, "Name of medical condition cannot be blank"); 
         }else JOptionPane.showInternalMessageDialog(
@@ -400,16 +508,25 @@ public class MedicalConditionView extends View
                     if(isPrimaryConditionDescriptionUnique(reply)){
                         pc.setDescription(reply);
                         tblCondition.clearSelection();
-                    }else JOptionPane.showInternalMessageDialog(
-                                this, "Name of medical condition is not unique");  
+                    }else {
+                        pc = null;
+                        setRejectedConditionName(reply);
+                    }
                 }else JOptionPane.showInternalMessageDialog(
                                 this, "Name of medical condition cannot be blank"); 
             }else JOptionPane.showInternalMessageDialog(
                                 this, "Name of medical condition has not been defined"); 
-        }else JOptionPane.showInternalMessageDialog(
-                                this, "Medical condition to be renamed has not been selected");
-        pc = getPrimaryCondition();
+        }else pc = null;
         return pc;
+    }
+    
+    private Condition getSelectedMedicalCondition(){
+        if (this.tblCondition.getSelectedRow()!=-1){
+            int selectedRow = tblCondition.getSelectedRow();
+            MedicalConditionTableModel model = 
+                    (MedicalConditionTableModel)tblCondition.getModel();
+            return model.getElementAt(selectedRow);
+        }else return null;
     }
     
     private PrimaryCondition doPrepForRequestSecondaryConditionRename(){
@@ -428,25 +545,24 @@ public class MedicalConditionView extends View
                 if (!reply.isEmpty()){
                     if(isSecondaryConditionDescriptionUnique(reply)){
                         sc.setDescription(reply);
+                        pc = getPrimaryCondition();
+                        pc.setSecondaryCondition(sc);
                         tblCondition.clearSelection();
-                    }else JOptionPane.showInternalMessageDialog(
-                                this, "Name of medical condition is not unique");  
+                    }else {
+                        pc = null;
+                        setRejectedConditionName(reply);
+                    }  
                 }else JOptionPane.showInternalMessageDialog(
                                 this, "Name of medical condition cannot be blank"); 
             }else JOptionPane.showInternalMessageDialog(
                                 this, "Name of medical condition has not been defined"); 
-        }else JOptionPane.showInternalMessageDialog(
-                                this, "Medical condition to be renamed has not been selected");
-        pc = getPrimaryCondition();
-        pc.setSecondaryCondition(sc);
+        }else pc = null;
+
         return pc;
     }
 
     private void populateConditionTable(){
         ArrayList<Condition> conditions = new ArrayList<>();
-        MedicalConditionTableModel model = 
-                (MedicalConditionTableModel)this.tblCondition.getModel();
-                model.removeAllElements();
         switch(getConditionViewMode()){
             case PRIMARY:
                 conditions = getMyController().getDescriptor()
@@ -457,15 +573,38 @@ public class MedicalConditionView extends View
                 conditions = getMyController().getDescriptor()
                         .getControllerDescription()
                         .getPrimaryCondition().getSecondaryCondition().get();
+                this.btnDeleteMedicalCondition.setEnabled(false);
+                this.btnRenameMedicalCondition.setEnabled(false);
+                this.btnRenameMedicalCondition.setEnabled(false);
                 break;
         }
+        tblCondition = new javax.swing.JTable();
+        tblCondition.setModel(new MedicalConditionTableModel());
+        scrConditionTable.setViewportView(tblCondition);
+        MedicalConditionTableModel model = 
+                (MedicalConditionTableModel)this.tblCondition.getModel();
+        ListSelectionModel lsm = this.tblCondition.getSelectionModel();
+        lsm.addListSelectionListener(this);
         Iterator it = conditions.iterator();
         while(it.hasNext()){
             Condition condition = (Condition)it.next();
             model.addElement(condition);
         }
+        tblCondition.clearSelection();
+        //tblCondition.repaint();
     }
 
+    private Condition getSelectedCondition(){
+        Condition result = null;
+        int selectedRow = 0;
+        selectedRow = this.tblCondition.getSelectedRow();
+        if (selectedRow!=-1){
+            MedicalConditionTableModel model = 
+                    (MedicalConditionTableModel)tblCondition.getModel();
+            result = model.getElementAt(selectedRow);
+        }
+        return result;
+    }
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -499,7 +638,7 @@ public class MedicalConditionView extends View
 
         btnCloseView.setText("<html><center>Close</center><center>view</center></html>");
 
-        btnToggleBetweenPrimaryAndSecondaryViews.setText("<html><center>View</center><center>options for</center><center>condition</center></html>");
+        btnToggleBetweenPrimaryAndSecondaryViews.setText("<html><center>View</center><center>secondary</center><center>conditions</center></html>");
 
         javax.swing.GroupLayout pnlActionsLayout = new javax.swing.GroupLayout(pnlActions);
         pnlActions.setLayout(pnlActionsLayout);

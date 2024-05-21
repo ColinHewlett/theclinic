@@ -13,7 +13,7 @@ import repository.StoreException;
  *
  * @author colin
  */
-public class PatientPrimaryCondition extends Entity implements IEntityStoreActions {
+public class PatientPrimaryCondition extends PatientCondition  {
     
     public PatientPrimaryCondition(){
         this.setIsPatientPrimaryCondition(true);
@@ -26,10 +26,11 @@ public class PatientPrimaryCondition extends Entity implements IEntityStoreActio
     
     public PatientPrimaryCondition(Patient patient, PrimaryCondition primaryCondition){
         this.patient = patient;
-        this.primaryCondition = primaryCondition;
+        this.condition = primaryCondition;
         this.setIsPatientPrimaryCondition(true);
     }
     
+    /*
     private ArrayList<PatientPrimaryCondition> collection = new ArrayList<>();
     public ArrayList<PatientPrimaryCondition> get(){
         return collection;
@@ -37,23 +38,25 @@ public class PatientPrimaryCondition extends Entity implements IEntityStoreActio
     public void set(ArrayList<PatientPrimaryCondition> value){
         collection = value;
     }
+    */
     
+    /*
     private String comment = null;
     public String getComment(){
         return comment;
     }
     public void setComment(String value){
         comment = value;
-    }
-    
+    }*/
+    /*
     private Patient patient = null;
     public Patient getPatient(){
         return patient;
     }
     public void setPatient(Patient value){
         patient = value;
-    }
-    
+    }*/
+    /*
     private PrimaryCondition primaryCondition = null;
     public PrimaryCondition getPrimaryCondition(){
         return primaryCondition;
@@ -61,40 +64,6 @@ public class PatientPrimaryCondition extends Entity implements IEntityStoreActio
     public void setPrimaryCondition(PrimaryCondition value){
         primaryCondition = value;
     }
+    */
     
-    @Override
-    public Point count() throws StoreException{
-        return new Repository().count(this);
-    }
-    
-    @Override
-    public void create() throws StoreException{
-        new Repository().create(this);
-    }
-    
-    @Override
-    public void delete() throws StoreException{
-        new Repository().delete(this);
-    }
-    
-    @Override
-    public void drop() throws StoreException{
-
-    }
-    
-    @Override
-    public Integer insert() throws StoreException{
-        return new Repository().insert(this);
-    }
-    
-    @Override
-    public PatientPrimaryCondition read() throws StoreException{
-        set(new Repository().read(this).get());
-        return this;
-    }
-    
-    @Override
-    public void update() throws StoreException{
-        //new Repository().update(this);
-    }
 }

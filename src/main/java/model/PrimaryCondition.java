@@ -14,7 +14,6 @@ import repository.StoreException;
  * @author colin
  */
 public class PrimaryCondition extends Condition implements IEntityStoreActions {
-    private Integer key = null;
     private SecondaryCondition secondaryCondition = null;
             
     public PrimaryCondition(){
@@ -31,13 +30,6 @@ public class PrimaryCondition extends Condition implements IEntityStoreActions {
         setIsPrimaryCondition(true);
     }
 
-    public Integer getKey(){
-                return key;
-    }
-    public void setKey(Integer value){
-        key = value;
-    }
-    
     public SecondaryCondition getSecondaryCondition(){
                 return secondaryCondition;
     }

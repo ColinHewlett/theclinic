@@ -9,7 +9,7 @@ package model;
  * @author colin
  */
 public class AppointmentTreatmentState extends AppointmentTreatment{
-    
+    /*
     public AppointmentTreatmentState(
             Appointment appointment, Treatment treatment){
         super(appointment,treatment);
@@ -22,4 +22,5 @@ public class AppointmentTreatmentState extends AppointmentTreatment{
     public void setState(Boolean value){
         state = value;
     }
+*/
 }

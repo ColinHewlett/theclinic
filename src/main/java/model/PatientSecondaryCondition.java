@@ -13,9 +13,7 @@ import repository.StoreException;
  *
  * @author colin
  */
-public class PatientSecondaryCondition extends Entity implements IEntityStoreActions{
-    private Patient patient = null;
-    private String comment = null;
+public class PatientSecondaryCondition extends PatientCondition{
     
     public PatientSecondaryCondition(Patient patient){
         this.patient = patient;
@@ -24,10 +22,11 @@ public class PatientSecondaryCondition extends Entity implements IEntityStoreAct
     
     public PatientSecondaryCondition(Patient p, SecondaryCondition sc){
         patient = p;
-        secondaryCondition = sc;
+        condition = sc;
         setIsPatientSecondaryCondition(true);
     }
     
+    /*
     private ArrayList<PatientSecondaryCondition> collection = new ArrayList<>();
     public ArrayList<PatientSecondaryCondition> get(){
         return collection;
@@ -35,7 +34,8 @@ public class PatientSecondaryCondition extends Entity implements IEntityStoreAct
     public void set(ArrayList<PatientSecondaryCondition> value){
         collection = value;
     }
-    
+    */
+    /*
     public void setComment(String value){
         comment = value;
     }
@@ -57,40 +57,6 @@ public class PatientSecondaryCondition extends Entity implements IEntityStoreAct
     public SecondaryCondition getSecondaryCondition(){
         return secondaryCondition;
     }
+    */
     
-    @Override
-    public Point count() throws StoreException{
-        return new Repository().count(this);
-    }
-    
-    @Override
-    public void create() throws StoreException{
-        new Repository().create(this);
-    }
-    
-    @Override
-    public void delete() throws StoreException{
-        new Repository().delete(this);
-    }
-    
-    @Override
-    public void drop() throws StoreException{
-
-    }
-    
-    @Override
-    public Integer insert() throws StoreException{
-        return new Repository().insert(this);
-    }
-    
-    @Override
-    public PatientSecondaryCondition read() throws StoreException{
-        set(new Repository().read(this).get());
-        return this;
-    }
-    
-    @Override
-    public void update() throws StoreException{
-        //new Repository().update(this);
-    }
 }

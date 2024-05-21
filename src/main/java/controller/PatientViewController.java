@@ -13,7 +13,7 @@ import view.views.non_modal_views.DesktopView;
 import view.View;
 import view.views.modal_views.ModalView;
 /*28/03/2024import view.views.modal_views.ModalPatientNotesEditorView;*/
-import view.views.modal_views.ModalPatientMedicalHistory1EditorView;
+//import view.views.modal_views.ModalPatientMedicalHistory1EditorView;
 import repository.StoreException;//01/03/2023
 import static controller.ViewController.displayErrorMessage;
 import java.beans.PropertyChangeSupport;
@@ -76,6 +76,13 @@ public class PatientViewController extends ViewController {
         ViewController.PatientViewControllerActionEvent actionCommand =
                ViewController.PatientViewControllerActionEvent.valueOf(e.getActionCommand());
         switch (actionCommand){
+            case PRINT_PATIENT_MEDICAL_HISTORY_REQUEST:
+                actionEvent = new ActionEvent(
+                        this,ActionEvent.ACTION_PERFORMED,
+                        ViewController.DesktopViewControllerActionEvent
+                                .PRINT_PATIENT_MEDICAL_HISTORY_REQUEST.toString());
+                this.getMyController().actionPerformed(actionEvent);
+                break;
             case VIEW_ACTIVATED_NOTIFICATION:
                 actionEvent = new ActionEvent(
                         this,ActionEvent.ACTION_PERFORMED,
@@ -93,6 +100,9 @@ public class PatientViewController extends ViewController {
             case CLINICAL_NOTE_VIEW_CONTROLLER_REQUEST: //on selection of row in appointment history table
                 doClinicalNoteViewControllerRequest();
                 break;
+            case PATIENT_MEDICAL_HISTORY_VIEW_CONTROLLER_REQUEST:
+                doPatientMedicalHistoryViewControllerRequest();
+                break;
             case SCHEDULE_VIEW_CONTROLLER_REQUEST: //on selection of row in appointment history table
                 doScheduleViewControllerRequest();
                 break;
@@ -104,9 +114,6 @@ public class PatientViewController extends ViewController {
                 break;
             case PATIENT_DELETE_REQUEST:
                 doPatientDeleteRequest();
-                break;
-            case PATIENT_MEDICAL_HISTORY_1_EDITOR_VIEW_REQUEST:
-                doMedicalHistory1EditorViewRequest();
                 break;
             case PATIENT_MEDICATION_EDITOR_VIEW_REQUEST:
                 doMedicationEditorViewRequest();
@@ -224,12 +231,6 @@ public class PatientViewController extends ViewController {
             case PATIENT_GUARDIAN_EDITOR_VIEW:    
                 doPatientEditorViewChange(the_view);
                 break;  
-            case PATIENT_MEDICAL_HISTORY_1_EDITOR_VIEW:
-                doPatientMedicalHistory1EditorViewRequest(e);
-                break;
-            case PATIENT_MEDICAL_HISTORY_2_EDITOR_VIEW:
-                doPatientMedicalHistory2EditorViewRequest(e);
-                break;
             case PATIENT_MEDICATION_EDITOR_VIEW:
                 doPatientMedicationEditorViewRequest(e);
                 break;
@@ -279,6 +280,13 @@ public class PatientViewController extends ViewController {
         ActionEvent actionEvent = new ActionEvent(
             this,ActionEvent.ACTION_PERFORMED,
             ViewController.PatientViewControllerActionEvent.SCHEDULE_VIEW_CONTROLLER_REQUEST.toString());
+        this.getMyController().actionPerformed(actionEvent);
+    }
+    
+    private void doPatientMedicalHistoryViewControllerRequest(){
+        ActionEvent actionEvent = new ActionEvent(
+            this,ActionEvent.ACTION_PERFORMED,
+            ViewController.PatientViewControllerActionEvent.PATIENT_MEDICAL_HISTORY_VIEW_CONTROLLER_REQUEST.toString());
         this.getMyController().actionPerformed(actionEvent);
     }
     
@@ -422,14 +430,11 @@ public class PatientViewController extends ViewController {
                     JOptionPane.WARNING_MESSAGE);
         }    
     }
-    
+    /*
     private void doMedicalHistory1EditorViewRequest(){
-        /**
-         * -- check if this patient has medical history data
-         */ 
-        //27/03/2024 05:43
+
         doOpenPatientMedicalHistory1EditorView();
-        /*
+
         PrimaryCondition pc = null;
         PrimaryCondition storedPrimaryCondition = null; 
         Patient patient = getDescriptor().getControllerDescription().getPatient();
@@ -480,9 +485,9 @@ public class PatientViewController extends ViewController {
                     + "StoreException raised in PatientViewController::doMedicalHistoryRequest()";
             displayErrorMessage(message,"Patient view controller error", JOptionPane.WARNING_MESSAGE);
         }
-        */
+        
     }
-    
+    */
     private void doPatientEditorViewRequest(
             ViewController.PatientViewControllerActionEvent actionCommand){
         switch(actionCommand){
@@ -924,10 +929,10 @@ public class PatientViewController extends ViewController {
     private View getPatientMedicalHistory2View(){
         return patientMedicalHistory2View;
     }
-    
+    /*
     private void doPatientMedicalHistory2EditorViewRequest(ActionEvent e){
         doPatientMedicalHistory2EditorViewRequestNEW(e);
-        /*
+        
         Condition condition = null;
         View view = (View)e.getSource();
         //27/03/2024 05:43
@@ -988,9 +993,9 @@ public class PatientViewController extends ViewController {
                 }
                 break;
         }
-        */
+       
     }
-    
+    */
     private PrimaryCondition makeFatPrimaryCondition()throws StoreException{
         PrimaryCondition fatPC = null;
         Patient patient = getDescriptor().getControllerDescription().getPatient();
@@ -1500,9 +1505,9 @@ public class PatientViewController extends ViewController {
         if (e.getSource() instanceof DesktopViewController){
             doDesktopViewControllerActionRequest(e);
         }
-        else if(e.getSource() instanceof ModalPatientMedicalHistory1EditorView){
-            doSecondaryViewActionRequest(e);
-        }else{
+        /*else if(e.getSource() instanceof ModalPatientMedicalHistory1EditorView){
+            doSecondaryViewActionRequest(e);*/
+        else{
             View the_view = (View)e.getSource();
             switch (the_view.getMyViewType()){
                 case PATIENT_VIEW:
@@ -1516,10 +1521,8 @@ public class PatientViewController extends ViewController {
         
     }
     
+    /*
     private void doOpenPatientMedicalHistory1EditorView(){
-        /**
-         * -- check if this patient has medical history data
-         */ 
         PrimaryCondition pc = null;
         PrimaryCondition storedPrimaryCondition = null; 
         Patient patient = getDescriptor().getControllerDescription().getPatient();
@@ -1565,9 +1568,7 @@ public class PatientViewController extends ViewController {
     }
     
     private void doOpenPatientMedicalHistory2EditorView(){
-        /**
-         * -- fetch selected primary condition's collection of secondary conditions
-         */
+
         getDescriptor().getControllerDescription()
                 .setCondition(getParentPrimaryCondition());
 
@@ -1584,7 +1585,7 @@ public class PatientViewController extends ViewController {
                null
         );
     }
-    
+*/    
     private void doOpenNoteTaker(){
         Condition condition = getDescriptor().getViewDescription().getCondition();
         getDescriptor().getControllerDescription().setCondition(condition);
@@ -1645,6 +1646,7 @@ public class PatientViewController extends ViewController {
                     displayErrorMessage(message,"Patient view controller error", JOptionPane.WARNING_MESSAGE);
                 }
                 break;
+            /*
             case PATIENT_MEDICAL_HISTORY_NOTE_TAKER_REQUEST:
                 doRequestClosePatientMedicalHistory1EditorView(view);
                 
@@ -1658,9 +1660,6 @@ public class PatientViewController extends ViewController {
                 
                 doRequestClosePatientMedicalHistory1EditorView(view);
 
-                /**
-                 * -- fetch selected primary condition's collection of secondary conditions
-                 */
                 pc = (PrimaryCondition)getDescriptor()
                         .getViewDescription().getCondition();
                 getDescriptor().getControllerDescription().setCondition(pc);
@@ -1670,6 +1669,7 @@ public class PatientViewController extends ViewController {
                 doOpenPatientMedicalHistory1EditorView();
 
                 break;
+                */
         } 
     }
     
@@ -1688,13 +1688,12 @@ public class PatientViewController extends ViewController {
     private PrimaryCondition getParentPrimaryCondition(){
         return parentPrimaryCondition;
     }
+    /*
     private void doPatientMedicalHistory2EditorViewRequestNEW(ActionEvent e){
         SecondaryCondition sc = null;
         Condition condition = null;
         View view = (View)e.getSource();
-        
-        /*setParentPrimaryCondition((PrimaryCondition)getDescriptor()
-                .getViewDescription().getCondition());*/
+
         condition = getDescriptor()
                 .getViewDescription().getCondition();
         if (condition.getIsSecondaryCondition()){
@@ -1703,9 +1702,6 @@ public class PatientViewController extends ViewController {
             setParentPrimaryCondition(sc.getPrimaryCondition());
         }
 
-        /**
-         * save reference for access later after receipt of a request from the note taker
-         */
         setPatientMedicalHistory2View(view);
         switch(ViewController.PatientViewControllerActionEvent.valueOf(e.getActionCommand())){
             case PATIENT_MEDICAL_HISTORY_NOTE_TAKER_REQUEST:
@@ -1738,7 +1734,7 @@ public class PatientViewController extends ViewController {
                 break;
         }
     }
-    
+    */
     private void doConvertAppointmentNoteToTreatment(Patient p)throws StoreException{
         ArrayList<Appointment> appointments = p.getAppointmentHistory();
         //doFormatAppointmentTreatmentNote(p.getAppointmentHistory());

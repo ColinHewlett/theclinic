@@ -136,7 +136,7 @@
             </Component>
             <Component class="javax.swing.JButton" name="btnToggleBetweenPrimaryAndSecondaryViews">
               <Properties>
-                <Property name="text" type="java.lang.String" value="&lt;html&gt;&lt;center&gt;View&lt;/center&gt;&lt;center&gt;options for&lt;/center&gt;&lt;center&gt;condition&lt;/center&gt;&lt;/html&gt;"/>
+                <Property name="text" type="java.lang.String" value="&lt;html&gt;&lt;center&gt;View&lt;/center&gt;&lt;center&gt;secondary&lt;/center&gt;&lt;center&gt;conditions&lt;/center&gt;&lt;/html&gt;"/>
               </Properties>
             </Component>
           </SubComponents>

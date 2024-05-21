@@ -10,15 +10,16 @@ import java.util.ArrayList;
  *
  * @author colin
  */
-public class SecondaryConditionWithState {
+public class SecondaryConditionWithState extends ConditionWithState{
     public SecondaryConditionWithState(){
         
     }
     
     public SecondaryConditionWithState(SecondaryCondition secondaryCondition){
-        this.secondaryCondition = secondaryCondition;
+        this.condition = secondaryCondition;
     }
     
+    /*
     private ArrayList<SecondaryConditionWithState> collection = new ArrayList<>();
     public ArrayList<SecondaryConditionWithState> get(){
         return collection;
@@ -34,7 +35,8 @@ public class SecondaryConditionWithState {
     public void setSecondaryCondition(SecondaryCondition value){
         secondaryCondition = value;
     }
-    
+    */
+    /*
     private Boolean state = false;
     public Boolean getState(){
         return state;
@@ -50,4 +52,5 @@ public class SecondaryConditionWithState {
     public void setComment(String value){
         comment = value;
     }
+*/
 }

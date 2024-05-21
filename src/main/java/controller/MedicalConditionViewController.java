@@ -5,10 +5,8 @@
 package controller;
 
 
-import static controller.ViewController.MedicalConditionViewControllerActionEvent.SECONDARY_CONDITION_CREATE_REQUEST;
-import static controller.ViewController.MedicalConditionViewControllerActionEvent.SECONDARY_CONDITION_DELETE_REQUEST;
-import static controller.ViewController.MedicalConditionViewControllerActionEvent.SECONDARY_CONDITION_READ_REQUEST;
-import static controller.ViewController.displayErrorMessage;
+import static controller.ViewController.*;
+import controller.exceptions.TemplateReaderException;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.beans.PropertyChangeEvent;
@@ -47,28 +45,17 @@ public class MedicalConditionViewController extends ViewController{
                         .valueOf(e.getActionCommand());
             switch (actionCommand){
                 case VIEW_CLOSE_NOTIFICATION:
-                ActionEvent actionEvent = new ActionEvent(
-                    this,ActionEvent.ACTION_PERFORMED,
-                    ViewController.DesktopViewControllerActionEvent.
-                            VIEW_CONTROLLER_CLOSE_NOTIFICATION.toString());
-                getMyController().actionPerformed(actionEvent);
-                break;
+                    ActionEvent actionEvent = new ActionEvent(
+                        this,ActionEvent.ACTION_PERFORMED,
+                        ViewController.DesktopViewControllerActionEvent.
+                                VIEW_CONTROLLER_CLOSE_NOTIFICATION.toString());
+                    getMyController().actionPerformed(actionEvent);
+                    break;
                 case PRIMARY_CONDITION_CREATE_REQUEST:
                     try{
                         Integer primaryConditionKey = primaryCondition.insert();
-                        primaryCondition = new PrimaryCondition(primaryConditionKey);
-                        primaryCondition.setScope(Entity.Scope.ALL);
-                        primaryCondition = primaryCondition.read();
-                        getDescriptor().getControllerDescription()
-                                .setPrimaryCondition(primaryCondition);
-                        firePropertyChangeEvent(
-                            ViewController.MedicalConditionViewControllerPropertyChangeEvent.
-                                    PRIMARY_CONDITION_RECEIVED.toString(),
-                            (View)e.getSource(),
-                            this,
-                            null,
-                            null
-                        );
+                        getAllPrimaryConditions(e);
+                        
                     }catch(StoreException ex){
                         String message = ex.getMessage() + "\nHandled in "
                                 + "MedicalConditionViewController::actionPerformed("
@@ -83,19 +70,7 @@ public class MedicalConditionViewController extends ViewController{
                     try{
                         secondaryCondition = primaryCondition.getSecondaryCondition();
                         secondaryCondition.insert();
-                        secondaryCondition.setScope(Entity.Scope.ALL);
-                        secondaryCondition = secondaryCondition.read();
-                        primaryCondition = new PrimaryCondition(secondaryCondition);
-                        getDescriptor().getControllerDescription()
-                                    .setPrimaryCondition(primaryCondition);
-                        firePropertyChangeEvent(
-                            ViewController.MedicalConditionViewControllerPropertyChangeEvent.
-                                    PRIMARY_CONDITION_RECEIVED.toString(),
-                            (View)e.getSource(),
-                            this,
-                            null,
-                            null
-                        );
+                        getAllSecondaryConditionsFor(e,primaryCondition);    
                     }catch (StoreException ex){
                         String message = ex.getMessage() + "\nHandled in "
                                 + "MedicalConditionViewController::actionPerformed("
@@ -107,24 +82,14 @@ public class MedicalConditionViewController extends ViewController{
                     }
                     break;
                 case PRIMARY_CONDITION_DELETE_REQUEST:
-                    //check his treatment is already in use by one or more appinttmentts
-                    ArrayList<Patient> patientWithMedicalCondition = new ArrayList<>();
-                    ArrayList<String> patientConditionDetails = new ArrayList<>();
-                    
-                    PatientPrimaryCondition ppc = new PatientPrimaryCondition(
-                        new Patient(), primaryCondition);
-                        ppc.setScope(Entity.Scope.FOR_PRIMARY_CONDITION);
                     try{
-                        ppc = ppc.read();
-                        /**
-                         * any patients have this condition
-                         */
-                        if (!ppc.get().isEmpty()) {
-                            error = "<html><center>'" + primaryCondition.getDescription() +"' "
-                                + "primary condition is currently selected "
-                                + "by one or more patients</center>"
-                                + "<center>Request to delete aborted</center></html>";
+                        SecondaryCondition sc = new SecondaryCondition(primaryCondition);
+                        sc.setScope(Entity.Scope.FOR_PRIMARY_CONDITION);
+                        sc = sc.read();
+                        if (!sc.get().isEmpty()){
                             isError = true;
+                            error = "Cannot delete '" + primaryCondition.getDescription() 
+                                    + "' because it has associated secondary conditions";
                         }
                     }catch(StoreException ex){
                         String message = ex.getMessage() + "\nHandled in "
@@ -139,19 +104,7 @@ public class MedicalConditionViewController extends ViewController{
                         try{
                             primaryCondition.setScope(Entity.Scope.SINGLE);
                             primaryCondition.delete();
-                            primaryCondition = new PrimaryCondition();
-                            primaryCondition.setScope(Entity.Scope.ALL);
-                            primaryCondition = primaryCondition.read();
-                            getDescriptor().getControllerDescription()
-                                    .setPrimaryCondition(primaryCondition);
-                            firePropertyChangeEvent(
-                                ViewController.MedicalConditionViewControllerPropertyChangeEvent.
-                                        PRIMARY_CONDITION_RECEIVED.toString(),
-                                (View)e.getSource(),
-                                this,
-                                null,
-                                null
-                            );
+                            getAllPrimaryConditions(e);                        
                         }catch(StoreException ex){
                             String message = ex.getMessage() + "\nHandled in "
                                     + "MedicalConditionViewController::actionPerformed("
@@ -165,18 +118,10 @@ public class MedicalConditionViewController extends ViewController{
                     break;
                 case SECONDARY_CONDITION_DELETE_REQUEST:
                     secondaryCondition = primaryCondition.getSecondaryCondition();
-                    PatientSecondaryCondition psc = 
-                            new PatientSecondaryCondition(new Patient(), secondaryCondition);
-                    psc.setScope(Entity.Scope.FOR_SECONDARY_CONDITION);
+                    secondaryCondition.setScope(Entity.Scope.SINGLE);
                     try{
-                        psc = psc.read();
-                        if (!psc.get().isEmpty()){
-                            isError = true;
-                            error = "<html><center>'" + secondaryCondition.getDescription() +"' "
-                                    + "secondary condition is currently selected "
-                                    + "by one or more patients</center>"
-                                    + "<center>Request to delete aborted</center></html>";
-                        }
+                        secondaryCondition.delete();
+                        getAllSecondaryConditionsFor(e, primaryCondition);
                     }catch(StoreException ex){
                         String message = ex.getMessage() + "\nHandled in "
                                 + "MedicalConditionViewController::actionPerformed("
@@ -206,16 +151,23 @@ public class MedicalConditionViewController extends ViewController{
                     primaryCondition.setScope(Entity.Scope.ALL);
                     try{
                         primaryCondition = primaryCondition.read();
-                        getDescriptor().getControllerDescription()
-                                .setPrimaryCondition(primaryCondition);
-                        firePropertyChangeEvent(
-                            ViewController.MedicalConditionViewControllerPropertyChangeEvent.
-                                    PRIMARY_CONDITION_RECEIVED.toString(),
-                            (View)e.getSource(),
-                            this,
-                            null,
-                            null
-                        );
+                        if (primaryCondition.get().isEmpty()){
+                            primaryCondition = extractMedicalHistoryFromTemplate();
+                            for(Condition condition : primaryCondition.get()){
+                                PrimaryCondition pCondition = (PrimaryCondition)condition;
+                                //pCondition.setPatient(patient);
+                                Integer pConditionKey = pCondition.insert();
+                                if (!pCondition.getSecondaryCondition().get().isEmpty()){
+                                    for (Condition c : pCondition.getSecondaryCondition().get()){
+                                        SecondaryCondition sCondition = (SecondaryCondition)c;
+                                        sCondition.setPrimaryCondition(new PrimaryCondition(pConditionKey));
+                                        sCondition.insert();
+                                    }
+                                }
+                            }   
+                            setExtractedPrimaryConditionFromTemplate(primaryCondition);
+                        }
+                        getAllPrimaryConditions(e);
                     }catch(StoreException ex){
                         String message = ex.getMessage() + "\nHandled in "
                                 + "MedicalConditionViewController::actionPerformed("
@@ -224,13 +176,17 @@ public class MedicalConditionViewController extends ViewController{
                                 "Medical condition view controller error", 
                                 JOptionPane.WARNING_MESSAGE);
                         isError = true;
-                    }      
+                    }catch (TemplateReaderException ex){
+                    
+                }   
                     break;
                 case SECONDARY_CONDITION_READ_REQUEST:
                     secondaryCondition = new SecondaryCondition();
-                    secondaryCondition.setScope(Entity.Scope.ALL);
+                    secondaryCondition.setPrimaryCondition(primaryCondition);
+                    secondaryCondition.setScope(Entity.Scope.FOR_PRIMARY_CONDITION);
                     try{
                         secondaryCondition = secondaryCondition.read();
+                        secondaryCondition.setPrimaryCondition(primaryCondition);
                         primaryCondition.setSecondaryCondition(secondaryCondition);
                         getDescriptor().getControllerDescription()
                                 .setPrimaryCondition(primaryCondition);
@@ -255,8 +211,7 @@ public class MedicalConditionViewController extends ViewController{
                 case PRIMARY_CONDITION_RENAME_REQUEST:
                     try{
                         primaryCondition.update();
-                        primaryCondition.setScope(Entity.Scope.ALL);
-                        primaryCondition = primaryCondition.read();
+                        getAllPrimaryConditions(e);
                     }catch(StoreException ex){
                         String message = ex.getMessage() + "\nHandled in "
                                 + "MedicalConditionViewController::actionPerformed("
@@ -266,15 +221,6 @@ public class MedicalConditionViewController extends ViewController{
                                 JOptionPane.WARNING_MESSAGE);
                         isError = true;
                     }
-                    getDescriptor().getControllerDescription().setPrimaryCondition(primaryCondition);
-                    firePropertyChangeEvent(
-                        ViewController.MedicalConditionViewControllerPropertyChangeEvent.
-                                PRIMARY_CONDITION_RECEIVED.toString(),
-                        (View)e.getSource(),
-                        this,
-                        null,
-                        null
-                    );
                     firePropertyChangeEvent(
                         ViewController.DesktopViewControllerPropertyChangeEvent.
                                 MEDICAL_CONDITION_VIEW_CONTROLLER_CHANGE_NOTIFICATION.toString(),
@@ -288,18 +234,12 @@ public class MedicalConditionViewController extends ViewController{
                     try{
                         secondaryCondition = primaryCondition.getSecondaryCondition();
                         secondaryCondition.update();
-                        secondaryCondition.setScope(Entity.Scope.ALL);
-                        secondaryCondition = secondaryCondition.read();
-                        primaryCondition.setSecondaryCondition(secondaryCondition);
-                        getDescriptor().getControllerDescription().setPrimaryCondition(primaryCondition);
-                        firePropertyChangeEvent(
-                            ViewController.MedicalConditionViewControllerPropertyChangeEvent.
-                                    PRIMARY_CONDITION_RECEIVED.toString(),
-                            (View)e.getSource(),
-                            this,
-                            null,
-                            null
-                        );
+                        //secondaryCondition.setScope(Entity.Scope.ALL);
+                        //secondaryCondition = secondaryCondition.read();
+                        getAllSecondaryConditionsFor(e,primaryCondition);
+                        //primaryCondition.setSecondaryCondition(secondaryCondition);
+                        //getDescriptor().getControllerDescription().setPrimaryCondition(primaryCondition);
+                        
                         firePropertyChangeEvent(
                             ViewController.DesktopViewControllerPropertyChangeEvent.
                                     MEDICAL_CONDITION_VIEW_CONTROLLER_CHANGE_NOTIFICATION.toString(),
@@ -319,8 +259,9 @@ public class MedicalConditionViewController extends ViewController{
                     }
                     break;
             }
-            if (!isError){
+            if (isError){
                 if (error!=null){
+                    getDescriptor().getControllerDescription().setError(error);
                     firePropertyChangeEvent(
                         ViewController.MedicalConditionViewControllerPropertyChangeEvent
                                 .MEDICAL_CONDITION_VIEW_CONTROLLER_ERROR_RECEIVED
@@ -340,7 +281,46 @@ public class MedicalConditionViewController extends ViewController{
         
     }
  
+    private void getAllPrimaryConditions(ActionEvent e)throws StoreException{
+        PrimaryCondition primaryCondition = new PrimaryCondition();
+        primaryCondition.setScope(Entity.Scope.ALL);
+        primaryCondition = primaryCondition.read();
+        SecondaryCondition sc = null;
+        PrimaryCondition pc = null;
+        for(Condition c : primaryCondition.get()){
+            pc = (PrimaryCondition)c;
+            sc = new SecondaryCondition(pc);
+            sc.setScope(Entity.Scope.FOR_PRIMARY_CONDITION);
+            sc = sc.read();
+            pc.setSecondaryCondition(sc);
+        }
+        getDescriptor().getControllerDescription()
+                .setPrimaryCondition(primaryCondition);
+        firePropertyChangeEvent(
+            ViewController.MedicalConditionViewControllerPropertyChangeEvent.
+                    PRIMARY_CONDITION_RECEIVED.toString(),
+            (View)e.getSource(),
+            this,
+            null,
+            null
+        );
+        
+    }
     
-    
-
+    private void getAllSecondaryConditionsFor(ActionEvent e,PrimaryCondition pc)throws StoreException{
+        SecondaryCondition sc = new SecondaryCondition(pc);
+        sc.setScope(Entity.Scope.FOR_PRIMARY_CONDITION);
+        sc = sc.read();
+        pc.setSecondaryCondition(sc);
+        getDescriptor().getControllerDescription()
+                .setPrimaryCondition(pc);
+        firePropertyChangeEvent(
+            ViewController.MedicalConditionViewControllerPropertyChangeEvent.
+                    PRIMARY_CONDITION_RECEIVED.toString(),
+            (View)e.getSource(),
+            this,
+            null,
+            null
+        );
+    }
 }

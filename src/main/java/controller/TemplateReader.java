@@ -260,6 +260,8 @@ public class TemplateReader {
                 throw new TemplateReaderException(message,
                         TemplateReaderException.ExceptionType.ELEMENT_NOT_FOUND_IN_TEMPLATE);
             }
+            
+            ArrayList<Condition> conditions = null;
             for(int pIndex = 0; pIndex < pNodes.getLength(); pIndex++){
                 if((pNodes.item(pIndex).getNodeType() == Node.ELEMENT_NODE)){
                     pElement = (Element)pNodes.item(pIndex);
@@ -275,6 +277,7 @@ public class TemplateReader {
                             sc.setDescription(sElement.getAttribute("id"));
                             //adds each secondary object extracted to the collection
                             //of secondary conditions for a given primary condition 
+                            conditions = theSecondaryCondition.get();
                             theSecondaryCondition.get().add(sc);
                         }
                     }
