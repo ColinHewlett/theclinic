@@ -138,7 +138,7 @@
                       <Group type="102" alignment="0" attributes="0">
                           <EmptySpace min="-2" pref="28" max="-2" attributes="0"/>
                           <Component id="btnClearSelection" min="-2" pref="187" max="-2" attributes="0"/>
-                          <EmptySpace min="0" pref="58" max="32767" attributes="0"/>
+                          <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                       </Group>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
@@ -682,44 +682,34 @@
       <Layout>
         <DimensionLayout dim="0">
           <Group type="103" groupAlignment="0" attributes="0">
-              <Group type="102" attributes="0">
+              <Group type="102" alignment="1" attributes="0">
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
-                      <Group type="102" attributes="0">
-                          <Group type="103" groupAlignment="0" attributes="0">
-                              <Component id="rdbRequestPhoneEmailEditorView" alignment="0" min="-2" max="-2" attributes="0"/>
-                              <Component id="rdbRequestModalRecallEditorView" alignment="0" min="-2" max="-2" attributes="0"/>
-                          </Group>
-                          <EmptySpace max="32767" attributes="0"/>
-                          <Group type="103" groupAlignment="0" attributes="0">
-                              <Component id="rdbRequestModalGuardianEditorView" min="-2" max="-2" attributes="0"/>
-                              <Component id="rdbRequestModalMedicalProfilePopup" min="-2" max="-2" attributes="0"/>
-                          </Group>
-                          <EmptySpace min="-2" pref="25" max="-2" attributes="0"/>
-                      </Group>
-                      <Group type="102" alignment="0" attributes="0">
-                          <Component id="rdbRequestAdditionalNotes" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace max="32767" attributes="0"/>
-                      </Group>
+                      <Component id="rdbRequestPhoneEmailEditorView" alignment="0" min="-2" max="-2" attributes="0"/>
+                      <Component id="rdbRequestModalRecallEditorView" alignment="0" min="-2" max="-2" attributes="0"/>
                   </Group>
+                  <EmptySpace pref="47" max="32767" attributes="0"/>
+                  <Group type="103" groupAlignment="0" attributes="0">
+                      <Component id="rdbRequestModalGuardianEditorView" min="-2" max="-2" attributes="0"/>
+                      <Component id="rdbRequestModalMedicalProfilePopup" min="-2" max="-2" attributes="0"/>
+                  </Group>
+                  <EmptySpace min="-2" pref="12" max="-2" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
         <DimensionLayout dim="1">
           <Group type="103" groupAlignment="0" attributes="0">
               <Group type="102" alignment="0" attributes="0">
-                  <EmptySpace max="-2" attributes="0"/>
+                  <EmptySpace min="-2" pref="16" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="3" attributes="0">
                       <Component id="rdbRequestPhoneEmailEditorView" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="rdbRequestModalGuardianEditorView" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
-                  <EmptySpace type="separate" max="-2" attributes="0"/>
+                  <EmptySpace min="-2" pref="32" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="3" attributes="0">
                       <Component id="rdbRequestModalRecallEditorView" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="rdbRequestModalMedicalProfilePopup" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
-                  <EmptySpace type="separate" max="-2" attributes="0"/>
-                  <Component id="rdbRequestAdditionalNotes" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="32767" attributes="0"/>
               </Group>
           </Group>
@@ -757,14 +747,6 @@
               <Color blue="dc" green="dc" red="dc" type="rgb"/>
             </Property>
           </Properties>
-        </Component>
-        <Component class="javax.swing.JRadioButton" name="rdbRequestAdditionalNotes">
-          <Properties>
-            <Property name="text" type="java.lang.String" value="Additional notes"/>
-          </Properties>
-          <AuxValues>
-            <AuxValue name="JavaCodeGenerator_AddingCodePost" type="java.lang.String" value="rdbRequestAdditionalNotes.setBackground(new java.awt.Color(220, 220, 220));"/>
-          </AuxValues>
         </Component>
       </SubComponents>
     </Container>

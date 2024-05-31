@@ -5,7 +5,7 @@
  */
 package controller;
 
-import controller.exceptions.TemplateReaderException;
+import controller.exceptions.*;
 import model.*;
 import view.View;
 import view.views.modal_views.ModalView;
@@ -53,6 +53,26 @@ import org.w3c.dom.Node;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.math.BigInteger;
+import java.util.List;
+import org.apache.poi.xwpf.usermodel.ParagraphAlignment;
+import org.apache.poi.xwpf.usermodel.XWPFParagraph;
+import org.apache.poi.xwpf.usermodel.XWPFRun;
+import org.apache.poi.xwpf.usermodel.XWPFTable;
+import org.apache.poi.xwpf.usermodel.XWPFTableCell;
+import org.apache.poi.xwpf.usermodel.XWPFTableRow;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTHeight;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTR;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTTrPr;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTTblWidth;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTTc;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTTcPr;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.STHeightRule;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.STMerge;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.STTblWidth;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.STVerticalJc;
 
 
 /**
@@ -76,7 +96,6 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
     private DesktopView desktopView;
     private View view = null;
     private ModalView modalView = null;
-    
     private PrimaryCondition extractedPrimaryConditiomFromTemplate = null;
     
     public PrimaryCondition getExtractedPrimaryConditionFromTemplate(){
@@ -191,7 +210,9 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         MEDICAL_CONDITION_VIEW_CONTROLLER_REQUEST,
         NOTIFICATION_VIEW_CONTROLLER_REQUEST,
         PATIENT_MEDICAL_HISTORY_VIEW_CONTROLLER_REQUEST,
-        PRINT_PATIENT_MEDICAL_HISTORY_REQUEST,//basically requires PMH videw controller to achieve this
+        PATIENT_QUESTIONNAIRE_VIEW_CONTROLLER_REQUEST,
+        PRINT_PATIENT_MEDICAL_HISTORY_REQUEST,//basically requires PMH view controller to achieve this
+        PRINT_NEW_PATIENT_DETAILS_REQUEST, //also requires MC view controller to accomplish this
         PATIENT_SELECTION_VIEW_CONTROLLER_REQUEST,
         PATIENT_VIEW_CONTROLLER_REQUEST,
         
@@ -302,6 +323,7 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         PRIMARY_CONDITION_DELETE_REQUEST,
         PRIMARY_CONDITION_READ_REQUEST,
         PRIMARY_CONDITION_RENAME_REQUEST,
+        PRINT_NEW_PATIENT_DETAILS_REQUEST,
         SECONDARY_CONDITION_CREATE_REQUEST,
         SECONDARY_CONDITION_DELETE_REQUEST,
         SECONDARY_CONDITION_READ_REQUEST,
@@ -372,6 +394,21 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         PATIENT_MEDICAL_HISTORY_VIEW_CONTROLLER_CHANGE_NOTIFICATION
     }
     
+    public enum PatientQuestionnaireViewControllerActionEvent{
+        PATIENT_QUESTION_READ_REQUEST,
+        PATIENT_QUESTION_CREATE_REQUEST,
+        PATIENT_QUESTION_DELETE_REQUEST,
+        PATIENT_QUESTION_ANSWER_UPDATE_REQUEST,
+        PATIENT_QUESTION_ANSWER_DELETE_REQUEST,
+        VIEW_CLOSE_NOTIFICATION
+    }
+    
+    public static enum PatientQuestionnaireViewControllerPropertyChangeEvent{
+        QUESTION_WITH_STATE_RECEIVED,
+        PATIENT_QUESTIONNAIRE_VIEW_CONTROLLER_ERROR_RECEIVED,
+        PATIENT_QUESTIONNAIRE_VIEW_CONTROLLER_CHANGE_NOTIFICATION
+    }
+    
     public static enum PatientViewControllerActionEvent{
         //primary view requests (commands)
         
@@ -386,6 +423,7 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         PATIENT_DOCTOR_EDITOR_VIEW_REQUEST,
         PATIENT_GUARDIAN_EDITOR_VIEW_REQUEST,
         PATIENT_MEDICAL_HISTORY_VIEW_CONTROLLER_REQUEST,
+        PATIENT_QUESTIONNAIRE_VIEW_CONTROLLER_REQUEST,
         PATIENT_MEDICAL_HISTORY_1_EDITOR_VIEW_REQUEST,
         PATIENT_MEDICATION_EDITOR_VIEW_REQUEST,
         PATIENT_NOTES_EDITOR_VIEW_REQUEST,
@@ -1416,7 +1454,699 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
             }
         }
     }
-            
     
+    private boolean isForPatient = false;
+    private boolean getIsForPatient(){
+        return isForPatient;
+    }
+    private void setIsForPatient(boolean value){
+        isForPatient = value;
+    }
+    
+    protected void doPrintAppointmentScheduleForDay(LocalDate day){
+        Iterator<Appointment> it = getDescriptor().getControllerDescription().getAppointmentSlotsForDay().iterator();
+        while (it.hasNext()){
+            
+        }
+    }
+      
+    protected void doPrintPatientMedicalHistoryQuestionnaireRequest(boolean isNotForNewPatient)throws StoreException{
+        setPatient(getDescriptor().getControllerDescription().getPatient());
+        setIsForPatient(isNotForNewPatient);
+        List<XWPFTableRow> rowList = null;
+        XWPFDocument document = null;
+        XWPFParagraph paragraph = null;
+        XWPFTableRow row = null;
+        XWPFRun run = null;
+        XWPFTable table;
+        CTTblWidth tableWidth = null;
+        CTR ctr = null;
+        CTTc ctTc = null;
+        XWPFTableCell cell = null;
+        HashMap<PatientDetailsTableName,Integer>tables = null;
+        int tableColumnCount = 6;
+        int tableRowCount = 0;
+        boolean debug = false;
+        InputStream fis = getClass().getResourceAsStream("/PatientMedicalHistory4.docx");
+        try{
+            document = new XWPFDocument(fis);
+            setDocument(document);
+            tables = this.getTablesFromDocument();
+            for(int index = 0; index < tables.size(); index++){
+                table = document.getTableArray(index);
+                tableWidth = table.getCTTbl().addNewTblPr().addNewTblW();
+                tableWidth.setW(BigInteger.valueOf(10300)); // 8000 in Twips (1/20 of a point)
+            }  
+            populate(PatientDetailsTableName.PATIENT_CONTACT_DETAILS);
+            populate(PatientDetailsTableName.PATIENT_QUESTIONNAIRE);
+            populate(PatientDetailsTableName.PATIENT_MEDICAL_HISTORY);
+            
+            
+            FileOutputStream out = new FileOutputStream("PatientMedicalHistory.docx");
+            document.write(out);
+            System.out.println(new File(".").getAbsolutePath());
+            System.out.println("Word document with complex table created successfully!");
+            out.close();
+        }catch (IOException e) {
+            e.printStackTrace();
+        }catch (WordTableBuilderException ex){
+            ex.printStackTrace();
+        }
+    }
+    
+    private enum PatientDetailsTableName{
+        PATIENT_CONTACT_DETAILS,
+        TABLE_HEADER_1,
+        PATIENT_QUESTIONNAIRE,
+        TABLE_HEADER_2,
+        PATIENT_HAVE_YOU_QUESTIONS,
+        TABLE_HEADER_3,
+        PATIENT_YOU_AND_THE_CLINIC_QUESTIONS,
+        PATIENT_MEDICAL_HISTORY}
+        
+    private HashMap<PatientDetailsTableName, Integer> patientDetailsTableMap = null;
+    private HashMap<PatientDetailsTableName, Integer> getPatientDetailsTableNameMap(){
+        return patientDetailsTableMap;
+    }
+    private void setPatientDetailsTableNameMap(HashMap<PatientDetailsTableName, Integer> value){
+        patientDetailsTableMap = value;
+    }
+    
+
+    private XWPFTable getPatientDetailsTableFromName(PatientDetailsTableName pdtn){
+        int tableIndex = getPatientDetailsTableNameMap().get(pdtn);
+        return getDocument().getTableArray(tableIndex); 
+    }
+    
+    private HashMap<PatientDetailsTableName,Integer> getTablesFromDocument()throws WordTableBuilderException{
+        HashMap<PatientDetailsTableName,Integer> map = null;
+        List<XWPFTable> tables = getDocument().getTables();
+        if (tables.size()==5){
+            map = new HashMap<>();
+            map.put(PatientDetailsTableName.PATIENT_CONTACT_DETAILS, 0);
+            map.put(PatientDetailsTableName.TABLE_HEADER_1, 1);
+            map.put(PatientDetailsTableName.PATIENT_QUESTIONNAIRE, 2);
+            map.put(PatientDetailsTableName.TABLE_HEADER_2, 3);
+            map.put(PatientDetailsTableName.PATIENT_MEDICAL_HISTORY, 4);
+            setPatientDetailsTableNameMap(map);
+        }else{
+            String message = "Number of tables located in document = " + tables.size() + "; number expected = 5\n"
+                    + "WordTableBuilderException raised in ViewController.getTablesFromDocument(XWPFDocument document)";
+            throw new WordTableBuilderException(message,
+                    WordTableBuilderException.ExceptionType.INCORRECT_NUMBER_OF_TABLES_FOUND);  
+        }
+        return map;
+    }
+    
+    private ConditionWithState getConditionWithStateFromCondition(Condition condition)throws StoreException{
+        PrimaryConditionWithState pCWS = null;
+        SecondaryConditionWithState sCWS = null;
+        PatientCondition pac = null;
+        PrimaryCondition pc = null;
+        SecondaryCondition sc = null;
+        ConditionWithState result = null;
+        if (condition.getIsPrimaryCondition()){
+            pc = (PrimaryCondition) condition;
+            pac = new PatientPrimaryCondition(
+                    getDescriptor().getControllerDescription().getPatient(),pc );
+            pac.setScope(Entity.Scope.SINGLE);
+            pac = pac.read();
+            if (pac!=null){
+                pCWS = new PrimaryConditionWithState(pc);
+                pCWS.setState(true);
+                pCWS.setComment(pac.getComment());
+                result = pCWS;
+            } 
+        }else if(condition.getIsSecondaryCondition()){
+            sc = (SecondaryCondition) condition;
+            pac = new PatientSecondaryCondition(
+                    getDescriptor().getControllerDescription().getPatient(),sc );
+            pac.setScope(Entity.Scope.SINGLE);
+            pac = pac.read();
+            if (pac!=null){
+                sCWS = new SecondaryConditionWithState(sc);
+                sCWS.setState(true);
+                sCWS.setComment(pac.getComment());
+                result = sCWS;
+            }
+        }
+        return result;
+    }
+    
+    private void setTextInCell(boolean isWithState, XWPFTable table, int row, XWPFTableCell cell, Condition condition)throws StoreException{
+        ConditionWithState CWS = null;
+        if (condition.getIsPrimaryCondition()){
+                runText(cell, condition.getDescription(), SystemDefinition.FONT.DEFAULT_BOLD,ParagraphAlignment.LEFT);
+        }else runText(cell, condition.getDescription(), SystemDefinition.FONT.DEFAULT,ParagraphAlignment.LEFT);
+
+        if (isWithState){
+            /**
+             * if a primary condition
+             * -- fetch patient primary condition from system if it exists
+             * else
+             * -- fetch patient secondary condition from system if it exists
+             * if a patient condition does exist print the state and attached comment (if any)
+             */
+            if (condition.getIsPrimaryCondition()){
+                PrimaryCondition pc = (PrimaryCondition)condition;
+                if(pc.getSecondaryCondition().get().isEmpty()){ //no aecondaries
+                    CWS = getConditionWithStateFromCondition(pc);
+                }
+            }else if(condition.getIsSecondaryCondition()){
+                SecondaryCondition pc = (SecondaryCondition)condition;
+                CWS = getConditionWithStateFromCondition(pc);
+            }
+            if (CWS!=null){
+                cell = table.getRow(row).getCell(2);
+                runText(cell, "P", SystemDefinition.FONT.TICK,ParagraphAlignment.CENTER );// a tick symbol in Wingdings2
+                if (CWS.getComment()!=null){
+                    cell = table.getRow(row).getCell(3);
+                    runText(cell, CWS.getComment(), SystemDefinition.FONT.DYNAMIC,ParagraphAlignment.LEFT );
+                }
+            }
+        }
+    }
+    
+    private void runText(XWPFTableCell cell, String text, SystemDefinition.FONT font,ParagraphAlignment alignment ){
+        XWPFParagraph paragraph = cell.getParagraphs().get(0);
+        XWPFRun run = paragraph.createRun();
+        int cellWidthTwips = 4813;
+        cell.getCTTc().addNewTcPr().addNewNoWrap();
+        switch (font){
+            case DEFAULT_BOLD:
+            case DEFAULT:
+                if (text!=null){
+                    if (!text.trim().isEmpty()){
+                        run.setText(text);
+                        run.setFontFamily(font.fontName());
+                        run.setFontSize(font.fontSize());
+                        run.setBold(font.IsFontBold());
+                    }
+                }
+                break;
+            case DYNAMIC:
+                // Set no word wrap
+                
+                if (text!=null){
+                    if (!text.trim().isEmpty()){
+                        run.setText(text);
+                        run.setFontFamily(font.fontName());
+                        //int cellWidthTwips = getTableCellWidthInTwips(cell);
+                        int maxFontSize = calculateMaxFontSize(text, cellWidthTwips);
+                        run.setFontSize(maxFontSize);
+                    }
+                }
+                break;
+            case TICK:
+                run.setText(text);
+                run.setFontFamily(font.fontName());
+                run.setFontSize(font.fontSize());
+
+                break;
+        }
+        paragraph.setAlignment(alignment);
+        verticallyAlignTextInCell(cell);
+        
+    }
+    
+    /*
+    private void setTextInCell(XWPFTableCell cell, String text){
+        XWPFParagraph paragraph = cell.getParagraphs().get(0);
+        XWPFRun run = paragraph.createRun();
+        run.setText(text);
+        
+
+        // Set the font
+        run.setFontFamily("Arial Narrow");
+        run.setFontSize(10);
+        verticallyAlignTextInCell(cell);
+    }
+    */
+    
+    private void verticallyAlignTextInCell(XWPFTableCell cell){
+        CTTc ctTc = cell.getCTTc();
+        CTTcPr ctTcPr = ctTc.addNewTcPr();
+        ctTcPr.addNewVAlign().setVal(STVerticalJc.CENTER);
+    }
+    
+    private void shadeCellOnEvenRows(XWPFTable table, int row, int column){
+        XWPFTableCell cell = null;
+        
+        if(row % 2 == 0) {
+            cell = table.getRow(row).getCell(column);
+            cell.setColor("F2F2F2");
+        }                
+    }
+    
+    private static void mergeCellsVertically(XWPFTable table, int col, int fromRow, int toRow) {
+        for (int rowIndex = fromRow; rowIndex <= toRow; rowIndex++) {
+            XWPFTableCell cell = table.getRow(rowIndex).getCell(col);
+            if (rowIndex == fromRow) {
+                cell.getCTTc().addNewTcPr().addNewVMerge().setVal(STMerge.RESTART);
+            } else {
+                cell.getCTTc().addNewTcPr().addNewVMerge().setVal(STMerge.CONTINUE);
+            }
+        }
+    }
+
+    private static void mergeCellsHorizontally(XWPFTable table, int row, int fromCol, int toCol) {
+        XWPFTableCell cell = table.getRow(row).getCell(fromCol);
+        cell.getCTTc().addNewTcPr().addNewHMerge().setVal(STMerge.RESTART);
+        for (int colIndex = fromCol + 1; colIndex <= toCol; colIndex++) {
+            cell = table.getRow(row).getCell(colIndex);
+            cell.getCTTc().addNewTcPr().addNewHMerge().setVal(STMerge.CONTINUE);
+        }
+    }
+    
+    private XWPFTable setHeaderRowHeight(XWPFTable table, int row, int pips){
+        XWPFTableCell cell = null;
+        cell = table.getRow(row).getCell(0);
+        // Get the table cell properties
+        CTTc ctTc = cell.getCTTc();
+        CTTcPr ctTcPr = ctTc.addNewTcPr();
+
+        // Set the height of the cell (in twentieths of a point, 1 point = 20 twentieths)
+        CTTblWidth cellHeight = ctTcPr.addNewTcW();
+        cellHeight.setType(STTblWidth.DXA);
+        cellHeight.setW(BigInteger.valueOf(pips)); // Example height (50 points)
+        return table;
+    }
+    
+    private void fetchMedicalConditionsFromStore(){
+        PrimaryCondition primaryCondition = new PrimaryCondition();
+        primaryCondition.setScope(Entity.Scope.ALL);
+        try{
+            primaryCondition = primaryCondition.read();
+            if (primaryCondition.get().isEmpty()){
+                primaryCondition = extractMedicalHistoryFromTemplate();
+                for(Condition condition : primaryCondition.get()){
+                    PrimaryCondition pCondition = (PrimaryCondition)condition;
+                    //pCondition.setPatient(patient);
+                    Integer pConditionKey = pCondition.insert();
+                    if (!pCondition.getSecondaryCondition().get().isEmpty()){
+                        for (Condition c : pCondition.getSecondaryCondition().get()){
+                            SecondaryCondition sCondition = (SecondaryCondition)c;
+                            sCondition.setPrimaryCondition(new PrimaryCondition(pConditionKey));
+                            sCondition.insert();
+                        }
+                    }
+                }   
+                setExtractedPrimaryConditionFromTemplate(primaryCondition);
+            }
+            getFatPrimaryConditions();
+        }catch(StoreException ex){
+            String message = ex.getMessage() ;
+            displayErrorMessage(message, 
+                    "Medical condition view controller error", 
+                    JOptionPane.WARNING_MESSAGE);
+ 
+        }catch (TemplateReaderException ex){
+
+        }   
+    }
+    
+    private void getFatPrimaryConditions()throws StoreException{
+        PrimaryCondition primaryCondition = new PrimaryCondition();
+        primaryCondition.setScope(Entity.Scope.ALL);
+        primaryCondition = primaryCondition.read();
+        SecondaryCondition sc = null;
+        PrimaryCondition pc = null;
+        for(Condition c : primaryCondition.get()){
+            pc = (PrimaryCondition)c;
+            sc = new SecondaryCondition(pc);
+            sc.setScope(Entity.Scope.FOR_PRIMARY_CONDITION);
+            sc = sc.read();
+            pc.setSecondaryCondition(sc);
+        }
+        getDescriptor().getControllerDescription()
+                .setPrimaryCondition(primaryCondition);
+    }
+    
+    private XWPFDocument document = null;
+    private XWPFDocument getDocument(){
+        return document;
+    }
+    private void setDocument(XWPFDocument value){
+        document = value;
+    }
+    
+    private XWPFTable table = null;
+    private XWPFTable getTable(){
+        return table;
+    }
+    private void setTable(XWPFTable value){
+        table = value;
+    }
+    
+    private void populate(PatientDetailsTableName pdtn)throws StoreException{
+        XWPFTable _table = getPatientDetailsTableFromName(pdtn);
+        switch (pdtn){
+            case PATIENT_CONTACT_DETAILS:
+                populatePatientContactDetails(_table);
+                break;
+            case PATIENT_QUESTIONNAIRE:
+                populatePatientQuestionnaireTable(_table);
+                break;
+            case PATIENT_MEDICAL_HISTORY:
+                populatePatientMedicalHistoryTable(_table);
+                break;
+        }
+    }
+
+    private Patient patient = null;
+    private void setPatient(Patient value){
+        patient = value;
+    }
+    private Patient getPatient(){
+        return patient;
+    }
+    
+    private static void appendTextToCell(XWPFTableCell cell, String textToAppend) {
+        // Retrieve the existing paragraphs
+        XWPFParagraph paragraph = cell.getParagraphs().get(0);
+
+        // Append new text to the existing paragraph
+        XWPFRun run = paragraph.createRun();
+        run.setText(textToAppend);
+    }
+    
+    private void populatePatientMedication(XWPFTable table)throws StoreException{
+        int rowCount1 = 0;
+        int rowCount2 = 0;
+        String s = null;
+        XWPFTableCell cell = null;
+        Medication medication = getPatient().getMedicalHistory().getMedication();
+        cell = table.getRow(SystemDefinition.TABLE_2.MEDICATION_FIRST_ROW.row()).getCell(1);
+        runText(cell, SystemDefinition.TICK, SystemDefinition.FONT.TICK,ParagraphAlignment.CENTER);
+        for (Medication _medication : medication.get()){
+            if (rowCount1 < SystemDefinition.TABLE_2.MEDICATION_LAST_ROW.row() - SystemDefinition.TABLE_2.MEDICATION_FIRST_ROW.row() + 1){
+                cell = table.getRow(SystemDefinition.TABLE_2.MEDICATION_FIRST_ROW.row() + rowCount1).getCell(SystemDefinition.TABLE_2.MEDICATION_FIRST_ROW.column());
+                runText(cell, _medication.getDescription(), SystemDefinition.FONT.DEFAULT,ParagraphAlignment.CENTER);
+                rowCount1++;
+            }else if (rowCount1 < (SystemDefinition.TABLE_2.MEDICATION_LAST_ROW.row() - SystemDefinition.TABLE_2.MEDICATION_FIRST_ROW.row() + 1) * 2) {
+                cell = table.getRow(SystemDefinition.TABLE_2.MEDICATION_FIRST_ROW.row() + rowCount2++).getCell(SystemDefinition.TABLE_2.MEDICATION_FIRST_ROW.column()); 
+                s = "; " + _medication.getDescription();
+                runText(cell, s, SystemDefinition.FONT.DEFAULT,ParagraphAlignment.CENTER);
+                rowCount1++;
+            }else break; //quit if more than 10 medications
+        } 
+    }
+
+    private void populatePatientQuestionnaireTable(XWPFTable table)throws StoreException{
+        boolean isMedicationQuestion = false;
+        
+        XWPFTableCell cell = null;
+        XWPFTableRow row = null;
+        PatientQuestion pq = null;
+        
+        
+        if (getIsForPatient()){
+            Medication medication = getPatient().getMedicalHistory().getMedication();
+            QuestionWithState qws = new QuestionWithState();
+            ArrayList<QuestionWithState> collection = new ArrayList<>();
+            Patient patient = getDescriptor().getControllerDescription().getPatient();
+            Question question = new Question();
+            question.setScope(Entity.Scope.ALL);
+            question = question.read();
+            for(Question q : question.get()){
+                qws = new QuestionWithState(q);
+                pq = new PatientQuestion(patient, q);
+                pq.setScope(Entity.Scope.SINGLE);
+                pq = pq.read();
+                if (pq!=null){
+                    qws.setAnswer(pq.getAnswer());
+                    qws.setState(true);
+                }
+                collection.add(qws);      
+            }
+            qws.set(collection);
+            int index = -1;
+            for (QuestionWithState q : qws.get()){
+                index++;
+                if (q.getState()){
+                    switch(index){
+                        case 0:
+                            row = table.getRow(SystemDefinition.TABLE_2._1.row());
+                            break;
+                        case 1:
+                            populatePatientMedication(table);
+                        case 3://case 1 & 2 there to handle patient meds if any
+                            row = table.getRow(SystemDefinition.TABLE_2._4.row());
+                            break;
+                        case 4:
+                            row = table.getRow(SystemDefinition.TABLE_2._5.row());
+                            break;
+                        case 5:
+                            row = table.getRow(SystemDefinition.TABLE_2._6.row());
+                            break;
+                        case 6:
+                            row = table.getRow(SystemDefinition.TABLE_2._7.row());
+                            break;            
+                        case 7:
+                            row = table.getRow(SystemDefinition.TABLE_2._8.row());
+                            break;
+                        case 8:
+                            row = table.getRow(SystemDefinition.TABLE_2._9.row());
+                            break;
+                        case 9:
+                            row = table.getRow(SystemDefinition.TABLE_2._10.row());
+                            break;
+                        case 10:
+                            row = table.getRow(SystemDefinition.TABLE_2._11.row());
+                            break;
+                        case 11:
+                            row = table.getRow(SystemDefinition.TABLE_2._12.row());
+                            break;
+                        case 12:
+                            row = table.getRow(SystemDefinition.TABLE_2._13.row());
+                            break;   
+                    }
+                    if (index!=1 && index!=2){
+                        if (q.getState()){
+                            cell = row.getCell(1);
+                            runText(cell, SystemDefinition.TICK,SystemDefinition.FONT.TICK,ParagraphAlignment.CENTER);
+                            cell = row.getCell(2);
+                            runText(cell, q.getAnswer(),SystemDefinition.FONT.DYNAMIC,ParagraphAlignment.LEFT);
+                        } 
+                    }
+                }
+            }
+        }
+    } 
+
+    private void populatePatientContactDetails(XWPFTable table)throws StoreException{
+        String s = null;
+        XWPFTableCell cell = null;
+        if (getIsForPatient()){
+            Doctor doctor = getPatient().getMedicalHistory().getDoctor();
+            if (doctor!=null){
+                cell = table.getRow(SystemDefinition.TABLE_1.GP.row()).getCell(SystemDefinition.TABLE_1.GP.column());
+                String drDetails = "";
+                s = doctor.getTitle();
+                if (s!=null)
+                    drDetails = doctor.getTitle() + "; ";
+                s = doctor.getLine1();
+                if (s!=null)
+                    drDetails = drDetails + doctor.getLine1() + "; ";
+                s = doctor.getLine2();
+                if (s!=null)
+                    drDetails = drDetails + doctor.getLine2() + "; ";
+                s = doctor.getTown();
+                if (s!=null)
+                    drDetails = drDetails + doctor.getTown() + "; ";
+                s = doctor.getCounty();
+                if (s!=null)
+                    drDetails = drDetails + doctor.getCounty() + "; ";
+                s = doctor.getPostcode();
+                if (s!=null)
+                    drDetails = drDetails + doctor.getPostcode() + ";";
+                if (!drDetails.trim().isEmpty())
+                    runText(cell, drDetails,SystemDefinition.FONT.DEFAULT,ParagraphAlignment.CENTER);
+                s = doctor.getPhone();
+                if (s!=null){
+                    cell = table.getRow(SystemDefinition.TABLE_1.GP_PHONE.row()).getCell(SystemDefinition.TABLE_1.GP_PHONE.column());
+                    runText(cell, doctor.getPhone(),SystemDefinition.FONT.DEFAULT,ParagraphAlignment.CENTER);
+                }
+            }
+            cell = table.getRow(SystemDefinition.TABLE_1.TITLE.row()).getCell(SystemDefinition.TABLE_1.TITLE.column());
+            runText(cell, getPatient().getName().getTitle(),SystemDefinition.FONT.DEFAULT,ParagraphAlignment.CENTER);
+            
+            cell = table.getRow(SystemDefinition.TABLE_1.ADDRESS.row()).getCell(SystemDefinition.TABLE_1.ADDRESS.column());
+            String address = "";
+            s = getPatient().getAddress().getLine1();
+            if (s!=null) address = address + s + "; ";
+            s = getPatient().getAddress().getLine2();
+            if (s!=null) address = address + s + "; ";
+            s = getPatient().getAddress().getTown();
+            if (s!=null) address = address + s + "; ";
+            s = getPatient().getAddress().getCounty();
+            if (s!=null) address = address + s;
+            runText(cell, address,SystemDefinition.FONT.DEFAULT,ParagraphAlignment.CENTER);
+            cell = table.getRow(SystemDefinition.TABLE_1.DOB.row()).getCell(SystemDefinition.TABLE_1.DOB.column());
+            LocalDate d = getPatient().getDOB();
+            if (d!=null){
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+                String formattedDate = getPatient().getDOB().format(formatter);
+                runText(cell, formattedDate,SystemDefinition.FONT.DEFAULT,ParagraphAlignment.CENTER);
+            }
+            cell = table.getRow(SystemDefinition.TABLE_1.EMAIL.row()).getCell(SystemDefinition.TABLE_1.EMAIL.column());
+            s = getPatient().getEmail();
+            if (s!=null) 
+                runText(cell, s,SystemDefinition.FONT.DEFAULT,ParagraphAlignment.CENTER);
+            cell = table.getRow(SystemDefinition.TABLE_1.FORENAMES.row()).getCell(SystemDefinition.TABLE_1.FORENAMES.column());
+            s = getPatient().getName().getForenames();
+            if (s!=null) 
+                runText(cell, s,SystemDefinition.FONT.DEFAULT,ParagraphAlignment.CENTER);
+            cell = table.getRow(SystemDefinition.TABLE_1.GENDER.row()).getCell(SystemDefinition.TABLE_1.GENDER.column());
+            s = getPatient().getGender();
+            if (s!=null)
+                runText(cell, s,SystemDefinition.FONT.DEFAULT,ParagraphAlignment.CENTER);
+            cell = table.getRow(SystemDefinition.TABLE_1.PHONE_1.row()).getCell(SystemDefinition.TABLE_1.PHONE_1.column());
+            s = getPatient().getPhone1();
+            if (s!=null)
+                runText(cell, s,SystemDefinition.FONT.DEFAULT,ParagraphAlignment.CENTER);
+            cell = table.getRow(SystemDefinition.TABLE_1.PHONE_2.row()).getCell(SystemDefinition.TABLE_1.PHONE_2.column());
+            s = getPatient().getPhone2();
+            if (s!=null)
+                runText(cell, s,SystemDefinition.FONT.DEFAULT,ParagraphAlignment.CENTER);
+            cell = table.getRow(SystemDefinition.TABLE_1.POSTCODE.row()).getCell(SystemDefinition.TABLE_1.POSTCODE.column());
+            s = getPatient().getAddress().getPostcode();
+            if (s!=null)
+                runText(cell, s,SystemDefinition.FONT.DEFAULT,ParagraphAlignment.CENTER);
+            cell = table.getRow(SystemDefinition.TABLE_1.SURNAME.row()).getCell(SystemDefinition.TABLE_1.SURNAME.column());
+            s = getPatient().getName().getSurname();
+            if (s!=null)
+                runText(cell, s,SystemDefinition.FONT.DEFAULT,ParagraphAlignment.CENTER);
+            
+        }
+    }
+    
+    private void populatePatientMedicalHistoryTable(XWPFTable table)throws StoreException{
+        setIsForPatient(isForPatient);
+        XWPFTableCell cell = null;
+        fetchMedicalConditionsFromStore();
+        int pcRowCount = 0;
+        PrimaryCondition pc = getDescriptor()
+                .getControllerDescription().getPrimaryCondition();
+        boolean isLastEntryPrimaryCondition = false;
+        boolean isLastEntrySecondaryCondition = false;
+        int rowCount = 0;
+        pc = getDescriptor()
+                .getControllerDescription().getPrimaryCondition();
+        for (Condition c : pc.get()){
+            PrimaryCondition _pc = (PrimaryCondition)c;
+            if (rowCount > 0) {
+                rowCount++;
+                table.createRow();
+               setTableRowHeightInTwips(table.getRow(rowCount), SystemDefinition.EXACT_TABLE_CELL_HEIGHT_IN_TWIPS);
+                pcRowCount = rowCount;
+            }
+            cell = table.getRow(rowCount).getCell(0);
+            setTextInCell(getIsForPatient(), table, rowCount, cell, c);
+            isLastEntryPrimaryCondition = true;
+            if (!_pc.getSecondaryCondition().get().isEmpty()){
+                for(Condition _c : _pc.getSecondaryCondition().get()){
+                    if (isLastEntryPrimaryCondition) {
+                        cell = table.getRow(rowCount).getCell(1);
+                        isLastEntryPrimaryCondition = false;
+                    }else {
+                        table.createRow();
+                        setTableRowHeightInTwips(table.getRow(++rowCount), 380);
+                        cell = table.getRow(rowCount).getCell(1);
+                    }
+                    setTextInCell(getIsForPatient(), table, rowCount, cell, _c);
+                    shadeCellOnEvenRows(table, rowCount, 1);
+                    shadeCellOnEvenRows(table, rowCount, 2);
+                    shadeCellOnEvenRows(table, rowCount, 3);
+                    isLastEntrySecondaryCondition = true;
+                }
+                if (isLastEntrySecondaryCondition){
+                    /*
+                    if (!getIsForPatient()){
+                        table.createRow();
+                        cell = table.getRow(++rowCount).getCell(1);
+                        runText(cell, "Other ...", SystemDefinition.FONT.DEFAULT, ParagraphAlignment.LEFT);
+                    }*/
+                    shadeCellOnEvenRows(table, rowCount, 1);
+                    shadeCellOnEvenRows(table, rowCount, 2);
+                    shadeCellOnEvenRows(table, rowCount, 3);
+                    isLastEntrySecondaryCondition = false;
+                    mergeCellsVertically(table, 0, pcRowCount, rowCount);
+                    verticallyAlignTextInCell(table.getRow(pcRowCount).getCell(0));
+                }
+            }else{
+                mergeCellsHorizontally(table, pcRowCount, 0, 1);
+                shadeCellOnEvenRows(table, pcRowCount, 0);
+                shadeCellOnEvenRows(table, pcRowCount, 2);
+                shadeCellOnEvenRows(table, pcRowCount, 3);
+            }
+        }
+        table.createRow();
+        cell = table.getRow(++rowCount).getCell(0);
+        table.getRow(rowCount).setHeight(500);
+        runText(cell,"Other ...", SystemDefinition.FONT.DEFAULT, ParagraphAlignment.LEFT);
+        shadeCellOnEvenRows(table, rowCount, 0);
+        mergeCellsHorizontally(table,rowCount,0 , 3);
+    }
+    
+    private int getTableCellWidthInTwips(XWPFTableCell cell) {
+        BigInteger bigInteger = null;
+        CTTblWidth cellWidth = cell.getCTTc().getTcPr().getTcW();
+        if (cellWidth != null && cellWidth.getW() != null) {
+            bigInteger = (BigInteger)cellWidth.getW();
+            return bigInteger.intValue();
+        }
+        return -1; // Return -1 if width is not set
+    }
+    
+    /*
+    private void setCellTextFit(XWPFTableCell cell, String text) {
+        // Clear existing paragraphs in the cell
+        cell.removeParagraph(0);
+
+        // Create a new paragraph
+        XWPFParagraph paragraph = cell.addParagraph();
+
+        // Create a new run and set the text
+        XWPFRun run = paragraph.createRun();
+        run.setText(text);
+
+        // Calculate the maximum font size that will fit in the cell
+        //int cellWidthTwips = 3000; // Fixed cell width in twips
+        int cellWidthTwips = getTableCellWidthInTwips(cell);
+        int maxFontSize = calculateMaxFontSize(text, cellWidthTwips);
+
+        // Set the font size
+        run.setFontSize(maxFontSize);
+
+        // Set no word wrap
+        cell.getCTTc().addNewTcPr().addNewNoWrap();
+    }*/
+    
+    private int calculateMaxFontSize(String text, int cellWidthTwips) {
+        int fontSize = 10; // Start with a default font size
+        while (true) {
+            int textWidthTwips = estimateTextWidth(text, fontSize);
+            if (textWidthTwips <= cellWidthTwips || fontSize <= 9) {
+                break;
+            }
+            fontSize--;
+        }
+        return fontSize;
+    }
+    
+    private static int estimateTextWidth(String text, int fontSize) {
+        // Approximate character width in twips for a given font size
+        int charWidthTwips = fontSize * 7;
+        return text.length() * charWidthTwips;
+    }
+    private static void setTableRowHeightInTwips(XWPFTableRow row, int heightTwips) {
+        CTTrPr trPr = row.getCtRow().addNewTrPr();
+        CTHeight ctHeight = trPr.addNewTrHeight();
+        ctHeight.setVal(BigInteger.valueOf(heightTwips));
+        ctHeight.setHRule(STHeightRule.EXACT);
+    }
 }
+
+
 

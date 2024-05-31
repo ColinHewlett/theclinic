@@ -121,6 +121,9 @@ public class View extends JInternalFrame
             case PATIENT_MEDICAL_HISTORY_VIEW:
                 setView(makeView(new PatientMedicalHistoryView(viewer, controller, desktopView)));
                 break;
+            case PATIENT_QUESTIONNAIRE_VIEW:
+                setView(makeView(new PatientQuestionnaireView(viewer, controller, desktopView)));
+                break;
             case APPOINTMENTS_CANCELLED_VIEW:
                 setModalView(makeView(new ModalCancelledAppointmentsView(viewer, controller, desktopView)));
                 break;
@@ -222,6 +225,7 @@ public class View extends JInternalFrame
         PATIENT_RECALL_EDITOR_VIEW,
         PATIENT_PHONE_EMAIL_EDITOR_VIEW,
         PATIENT_GUARDIAN_EDITOR_VIEW,
+        PATIENT_QUESTIONNAIRE_VIEW,
         //PATIENT_NOTES_EDITOR_VIEW,
         PATIENT_RECOVERY_SELECTION_VIEW,
         PATIENT_SELECTION_VIEW,

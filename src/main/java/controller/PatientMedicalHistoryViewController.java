@@ -57,6 +57,7 @@ public class PatientMedicalHistoryViewController extends ViewController{
     
     @Override
     public void actionPerformed(ActionEvent e){
+        ActionEvent actionEvent = null;
         PatientPrimaryCondition ppc = null;
         PatientSecondaryCondition psc = null;
         //PatientSecondaryCondition psc = new PatientSecondaryCondition(pac.getPatient(),new SecondaryCondition());;
@@ -79,15 +80,24 @@ public class PatientMedicalHistoryViewController extends ViewController{
         try{
             switch (actionCommand){
                 case PRINT_PATIENT_MEDICAL_HISTORY_REQUEST:
-                    doPrintPatientMedicalHistoryRequest();
+                    boolean isExisingPatient = true;
+                    doPrintPatientMedicalHistoryQuestionnaireRequest(isExisingPatient);
+                    
                     /**
                      * once print operation complete 
                      * -- drop through to VIEW_CLOSE_NOTIFICATION action command
                      * -- because current instance of VC is 'view-less'
                      * -- this ensures Desktop VC closes down the instance anyway
                      */
+                    actionEvent = new ActionEvent(
+                        this,ActionEvent.ACTION_PERFORMED,
+                        ViewController.DesktopViewControllerActionEvent.
+                                VIEW_CONTROLLER_CLOSE_NOTIFICATION.toString());
+                    getMyController().actionPerformed(actionEvent);
+                    isViewClosed = true;
+                    break;
                 case VIEW_CLOSE_NOTIFICATION:
-                    ActionEvent actionEvent = new ActionEvent(
+                    actionEvent = new ActionEvent(
                         this,ActionEvent.ACTION_PERFORMED,
                         ViewController.DesktopViewControllerActionEvent.
                                 VIEW_CONTROLLER_CLOSE_NOTIFICATION.toString());
@@ -96,15 +106,26 @@ public class PatientMedicalHistoryViewController extends ViewController{
                     break;
                 case PATIENT_CONDITION_COMMENT_UPDATE_REQUEST:
                     if (CWS!=null){
-                        pac = new PatientCondition();
-                        pac.setPatient(patient);
-                        pac.setCondition(CWS.getCondition());
-                        pac.update();
-                        CWS = getConditionWithState(pac);
+                        if (CWS.getCondition().getIsPrimaryCondition())
+                            pac = new PatientPrimaryCondition(patient, 
+                                    (PrimaryCondition)CWS.getCondition());
+                        else if(CWS.getCondition().getIsSecondaryCondition())
+                            pac = new PatientSecondaryCondition(patient, 
+                                    (SecondaryCondition)CWS.getCondition());
+                        else {
+                            isError = true;
+                            error = "Received patient condition not defined correctly/n"
+                                    + "Actiom to update comment for condition aborted";
+                        }
                     }else{
                         isError = true;
                         error = "Patient condition has not been defined;/n"
                                 + "Action to update condition comment aborted";
+                    }
+                    if(!isError){
+                        pac.setComment(CWS.getComment());
+                        pac.update();
+                        conditionWithState = getConditionWithState(pac);
                     }
                     break;
                 case PATIENT_CONDITION_READ_REQUEST:
@@ -217,7 +238,7 @@ public class PatientMedicalHistoryViewController extends ViewController{
             }
         }
     }
-    
+    /*
     private XWPFDocument setMargins(XWPFDocument document, int pips){
         CTSectPr sectPr = document.getDocument().getBody().addNewSectPr();
             
@@ -231,61 +252,8 @@ public class PatientMedicalHistoryViewController extends ViewController{
         //pageMar.setBottom(1440); // 1 inch
         return document;
     }
-    
-    private XWPFTable setHeaderRowHeight(XWPFTable table, int row, int pips){
-        XWPFTableCell cell = null;
-        cell = table.getRow(row).getCell(0);
-        // Get the table cell properties
-        CTTc ctTc = cell.getCTTc();
-        CTTcPr ctTcPr = ctTc.addNewTcPr();
-
-        // Set the height of the cell (in twentieths of a point, 1 point = 20 twentieths)
-        CTTblWidth cellHeight = ctTcPr.addNewTcW();
-        cellHeight.setType(STTblWidth.DXA);
-        cellHeight.setW(BigInteger.valueOf(pips)); // Example height (50 points)
-        return table;
-    }
-    
-    private XWPFDocument setDefaultFontAndSize(XWPFDocument document, String fontFamily, int fontSize) {
-        // Create the fonts settings
-        XWPFStyles styles = document.createStyles();
-        CTHpsMeasure ctSize = null;
-        
-        CTFonts fonts = CTFonts.Factory.newInstance();
-        fonts.setAscii(fontFamily);
-        fonts.setHAnsi(fontFamily);
-        fonts.setCs(fontFamily);
-        fonts.setEastAsia(fontFamily);
-        
-        styles.setDefaultFonts(fonts);
-        
-        try{
-            for (CTFonts font : document.getStyle().getDocDefaults().getRPrDefault().getRPr().getRFontsArray()){
-                System.out.println(font.getAscii());
-                System.out.println(font.getHAnsi());
-                System.out.println(font.getCs());
-                System.out.println(font.getEastAsia());
-            }
-        }catch(XmlException ex){
-            System.out.println(ex.getMessage() + "\n"
-                    + "XmlException");
-        }catch(IOException ex){
-            System.out.println("IOException");
-        }
-            
-
-        BigInteger bint = new BigInteger(Integer.toString(fontSize));
-       // ctSize = bint.multiply(new BigInteger("2"));
-
-        // Apply the font settings to the styles
-        //document.getStyle().getDocDefaults().getRPrDefault().getRPr().setRFonts(fonts);
-        //document.getStyle().getDocDefaults().getRPrDefault().getRPr().setSzArray(0,ctSize /** 2*/);
-        //document.getStyle().getDocDefaults().getRPrDefault().getRPr().setSzCsArray(0,ctSize /** 2*/);
-        
-        //for ()
-        return document;
-    }
-    
+    */
+    /*
     private void setTextInCell(XWPFTableCell cell, String text){
         XWPFParagraph paragraph = cell.getParagraphs().get(0);
         XWPFRun run = paragraph.createRun();
@@ -304,7 +272,8 @@ public class PatientMedicalHistoryViewController extends ViewController{
             cell.setColor("F2F2F2");
         }                ;
     }
-    
+    */
+    /*
     private void doPrintPatientMedicalHistoryRequest(){
         List<XWPFTableRow> rowList = null;
         XWPFDocument document = null;
@@ -391,30 +360,6 @@ public class PatientMedicalHistoryViewController extends ViewController{
             setTextInCell(cell, "Other ...");
             shadeCellOnEvenRows(table, rowCount, 0);
             mergeCellsHorizontally(table,rowCount,0 , 3);
-            //XWPFTableRow newRow = table.createRow();
-            
-        //XWPFDocument document = new XWPFDocument();
-        //document = setMargins(document,576);
-        //document = setDefaultFontAndSize(document, "Ariel", 10);
-        //XWPFTable table = createBasicTableGrid(document,tableColumnCount );
-        //List<XWPFTableRow> rowList = table.getRows();
-        //row = rowList.get(0);
-        //List<XWPFTableCell> cellList =row.getTableCells();
-
-        // Set table width
-            //CTTblWidth tableWidth = table.getCTTbl().addNewTblPr().addNewTblW();
-            //tableWidth.setW(BigInteger.valueOf(10400)); // 8000 in Twips (1/20 of a point)
-        /*
-        row = table.getRow(0);
-        row.setHeight(100);
-        */
-     
-        //set header row height
-
-            
-            //mergeCellsHorizontally(table, 0, 0, 1);
-            //mergeCellsHorizontally(table, 0, 2, 3);
-            //mergeCellsHorizontally(table, 0, 4, 5);
             
             FileOutputStream out = new FileOutputStream("PatientMedicalHistory.docx");
             document.write(out);
@@ -424,75 +369,9 @@ public class PatientMedicalHistoryViewController extends ViewController{
         }catch (IOException e) {
             e.printStackTrace();
         }
-        
-        /*
-        for (XWPFTableRow _row : table.getRows()) {
-            for (XWPFTableCell _cell : _row.getTableCells()) {
-                // Get the cell's CTTc (low-level XML representation)
-                ctTc = _cell.getCTTc();
-                // Add or get the paragraph inside the cell
-                paragraph = _cell.getParagraphArray(0);
-                if (paragraph == null) {
-                    paragraph = _cell.addParagraph();
-                }
-                //run = paragraph.createRun();
-                //ctr = run.getCTR();
-                //run.setFontFamily("Arial");
-                //run.setFontSize(10);
-            }
-        }
-        cell = table.getRow(0).getCell(0);
-        //run.setText("Medical Conditions");
-        ctTc = cell.getCTTc();
-        paragraph = cell.getParagraphArray(0);
-        run = paragraph.createRun();
-        run.setFontFamily("Arial");
-        run.setFontSize(10);
-        run.setText("Medical Condition");
-        //run = paragraph.getRun(ctr);
-        // Set horizontal alignment (center, right, both, left)
-        paragraph.setAlignment(ParagraphAlignment.CENTER); // Horizontal center alignment
-        // Set vertical alignment (top, center, bottom)
-        cell.setVerticalAlignment(XWPFVertAlign.CENTER); // Vertical center alignment
-        
-        cell = table.getRow(0).getCell(4);
-        paragraph = cell.getParagraphArray(0);
-        run = paragraph.createRun();
-        run.setFontFamily("Arial");
-        run.setFontSize(10);
-        run.setText("Comments");
-        ctTc = cell.getCTTc();
-        // Set horizontal alignment (center, right, both, left)
-        paragraph.setAlignment(ParagraphAlignment.CENTER); // Horizontal center alignment
-        // Set vertical alignment (top, center, bottom)
-        cell.setVerticalAlignment(XWPFVertAlign.CENTER); // Vertical center alignment
-        */
-        // Merge cells in the first row for a header
-            
-            //cell = table.getRow(0).getCell(0);
-        
-        /*
-        for (int index = 0; index < 6; index++){
-            cell = table.getRow(0).getCell(index);
-            setCellProperties(cell, "FFFFFF", "0000FF", true);
-        }
-        */
-
-        /*
-        for (int row = 1; row < tableRowCount; row++) {
-            for (int col = 0; col < 6; col++) {
-                XWPFTableCell dataCell = table.getRow(row).getCell(col);
-                dataCell.setText("Row " + row + ", Col " + col);
-                if (row % 2 == 0) {
-                    setCellProperties(dataCell, "F2F2F2", "000000", false); // Gray background for even rows
-                }
-            }
-        }
-        */
-        // Save the document to a file
- 
     }
-    
+    */
+    /*
     private XWPFTable createBasicTableGrid(XWPFDocument document, int tableColumnCount){
         int rowCount = 0;
         fetchMedicalConditionsOnSystem();
@@ -508,7 +387,8 @@ public class PatientMedicalHistoryViewController extends ViewController{
         XWPFTable table = document.createTable(rowCount,tableColumnCount);
         return table;
     }
-    
+    */
+    /*
     private static void setTextProperties(XWPFTableCell cell, String bgColor, String textColor, boolean isBold){
         cell.setColor(bgColor);
 
@@ -536,13 +416,15 @@ public class PatientMedicalHistoryViewController extends ViewController{
         run.setColor(textColor);
         run.setBold(isBold);
     }
-    
+    */
+    /*
     private void verticallyAlignTextInCell(XWPFTableCell cell){
         CTTc ctTc = cell.getCTTc();
         CTTcPr ctTcPr = ctTc.addNewTcPr();
         ctTcPr.addNewVAlign().setVal(STVerticalJc.CENTER);
     }
-    
+    */
+    /*
     // Method to merge cells vertically
     private static void mergeCellsVertically(XWPFTable table, int col, int fromRow, int toRow) {
         for (int rowIndex = fromRow; rowIndex <= toRow; rowIndex++) {
@@ -571,6 +453,7 @@ public class PatientMedicalHistoryViewController extends ViewController{
             cellWidth.setW(BigInteger.valueOf(width));
         }
     }
+    */
     
     private void fetchMedicalConditionsOnSystem(){
         PrimaryCondition primaryCondition = new PrimaryCondition();

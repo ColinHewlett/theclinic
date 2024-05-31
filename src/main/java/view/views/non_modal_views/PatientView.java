@@ -107,6 +107,7 @@ public class PatientView extends View
         REQUEST_NULL_PATIENT,
         REQUEST_PATIENT,
         REQUEST_PATIENT_DELETE,
+        REQUEST_PATIENT_QUESTIONNAIRE,
         REQUEST_PATIENT_RECALLS,
         REQUEST_PATIENT_RECOVER,
         REQUEST_PHONE_EMAIL_EDITOR_VIEW,
@@ -278,17 +279,17 @@ public class PatientView extends View
         rdbGroup.add(rdbRequestModalRecallEditorView);
         rdbGroup.add(rdbRequestModalGuardianEditorView);
         rdbGroup.add(rdbRequestModalMedicalProfilePopup);
-        rdbGroup.add(rdbRequestAdditionalNotes);
+        //rdbGroup.add(rdbRequestAdditionalNotes);
         rdbRequestPhoneEmailEditorView.setActionCommand(Actions.REQUEST_PHONE_EMAIL_EDITOR_VIEW.toString());
         rdbRequestModalRecallEditorView.setActionCommand(Actions.REQUEST_RECALL_EDITOR_VIEW.toString());
         rdbRequestModalGuardianEditorView.setActionCommand(Actions.REQUEST_GUARDIAN_EDITOR_VIEW.toString());
         rdbRequestModalMedicalProfilePopup.setActionCommand(Actions.REQUEST_MEDICAL_HISTORY_POPUP.toString());
-        rdbRequestAdditionalNotes.setActionCommand(Actions.REQUEST_ADDITIONAL_NOTES.toString());
+        //rdbRequestAdditionalNotes.setActionCommand(Actions.REQUEST_ADDITIONAL_NOTES.toString());
         rdbRequestPhoneEmailEditorView.addActionListener(this);
         rdbRequestModalRecallEditorView.addActionListener(this);
         rdbRequestModalGuardianEditorView.addActionListener(this);
         rdbRequestModalMedicalProfilePopup.addActionListener(this);
-        rdbRequestAdditionalNotes.addActionListener(this);
+        //rdbRequestAdditionalNotes.addActionListener(this);
         
         cmbPatientSelector.setActionCommand(Actions.REQUEST_PATIENT.toString());
         cmbPatientSelector.addActionListener(this);
@@ -498,6 +499,9 @@ public class PatientView extends View
             case REQUEST_GUARDIAN_EDITOR_VIEW:
                 doGuardianEditorViewRequest();
                 break;
+            case REQUEST_PATIENT_QUESTIONNAIRE:
+                doPatientQuestionnaireViewControllerRequest();
+                break;
             case REQUEST_MEDICAL_HISTORY:
                 //getMyController().sendNoOpMessage(this);
                 //doMedicalHistoryRequest();
@@ -660,7 +664,7 @@ public class PatientView extends View
         while(itemsIterator.hasNext()){
             String item = (String)itemsIterator.next();
             switch(item){
-                case "History":
+                case "Medical history":
                     menuItem = popup.add(item);
                     menuItem.setActionCommand(
                             Actions.REQUEST_MEDICAL_HISTORY.toString());
@@ -677,12 +681,18 @@ public class PatientView extends View
                     menuItem.setActionCommand(
                             Actions.REQUEST_DOCTOR.toString());
                     menuItem.addActionListener(this);
-                    break;        
+                    break;   
+                case "Questionnaire":
+                    menuItem = popup.add(item);
+                    menuItem.setActionCommand(
+                            Actions.REQUEST_PATIENT_QUESTIONNAIRE.toString());
+                    menuItem.addActionListener(this);
+                    break;
             }
             
         }
         popup.addSeparator();
-        menuItem = popup.add("Print medical history");
+        menuItem = popup.add("Print questionnaire & medical history");
         menuItem.setActionCommand(Actions.REQUEST_PRINT_PATIENT_MEDICAL_HISTORY.toString());
         menuItem.addActionListener(this);
         popup.show(this.rdbRequestModalMedicalProfilePopup, 
@@ -769,6 +779,12 @@ public class PatientView extends View
                 ViewController.PatientViewControllerActionEvent.
                 PATIENT_RECALL_EDITOR_VIEW_REQUEST;
         doActionFor(request);
+    }
+    private void doPatientQuestionnaireViewControllerRequest(){
+        ActionEvent actionEvent = new ActionEvent(
+                this,ActionEvent.ACTION_PERFORMED,
+                ViewController.PatientViewControllerActionEvent.PATIENT_QUESTIONNAIRE_VIEW_CONTROLLER_REQUEST.toString());
+        this.getMyController().actionPerformed(actionEvent);
     }
     private void doPatientMedicalHistoryViewControllerRequest(){
         ActionEvent actionEvent = new ActionEvent(
@@ -1252,7 +1268,6 @@ public class PatientView extends View
         rdbRequestModalRecallEditorView = new javax.swing.JRadioButton();
         rdbRequestModalGuardianEditorView = new javax.swing.JRadioButton();
         rdbRequestModalMedicalProfilePopup = new javax.swing.JRadioButton();
-        rdbRequestAdditionalNotes = new javax.swing.JRadioButton();
         mbaPatientView = new javax.swing.JMenuBar();
         mnuActions = new javax.swing.JMenu();
         mniCreateNewPatient = new javax.swing.JMenuItem();
@@ -1284,7 +1299,7 @@ public class PatientView extends View
                     .addGroup(pnlPatientSelectionLayout.createSequentialGroup()
                         .addGap(28, 28, 28)
                         .addComponent(btnClearSelection, javax.swing.GroupLayout.PREFERRED_SIZE, 187, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 58, Short.MAX_VALUE)))
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         pnlPatientSelectionLayout.setVerticalGroup(
@@ -1594,45 +1609,34 @@ public class PatientView extends View
         rdbRequestModalMedicalProfilePopup.setText("Medical history");
         rdbRequestModalMedicalProfilePopup.setBackground(new java.awt.Color(220, 220, 220));
 
-        rdbRequestAdditionalNotes.setText("Additional notes");
-
         javax.swing.GroupLayout pnlFurtherDetailsLayout = new javax.swing.GroupLayout(pnlFurtherDetails);
         pnlFurtherDetails.setLayout(pnlFurtherDetailsLayout);
         pnlFurtherDetailsLayout.setHorizontalGroup(
             pnlFurtherDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlFurtherDetailsLayout.createSequentialGroup()
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlFurtherDetailsLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(pnlFurtherDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(pnlFurtherDetailsLayout.createSequentialGroup()
-                        .addGroup(pnlFurtherDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(rdbRequestPhoneEmailEditorView)
-                            .addComponent(rdbRequestModalRecallEditorView))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGroup(pnlFurtherDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(rdbRequestModalGuardianEditorView)
-                            .addComponent(rdbRequestModalMedicalProfilePopup))
-                        .addGap(25, 25, 25))
-                    .addGroup(pnlFurtherDetailsLayout.createSequentialGroup()
-                        .addComponent(rdbRequestAdditionalNotes)
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                    .addComponent(rdbRequestPhoneEmailEditorView)
+                    .addComponent(rdbRequestModalRecallEditorView))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 47, Short.MAX_VALUE)
+                .addGroup(pnlFurtherDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(rdbRequestModalGuardianEditorView)
+                    .addComponent(rdbRequestModalMedicalProfilePopup))
+                .addGap(12, 12, 12))
         );
         pnlFurtherDetailsLayout.setVerticalGroup(
             pnlFurtherDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlFurtherDetailsLayout.createSequentialGroup()
-                .addContainerGap()
+                .addGap(16, 16, 16)
                 .addGroup(pnlFurtherDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(rdbRequestPhoneEmailEditorView)
                     .addComponent(rdbRequestModalGuardianEditorView))
-                .addGap(18, 18, 18)
+                .addGap(32, 32, 32)
                 .addGroup(pnlFurtherDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(rdbRequestModalRecallEditorView)
                     .addComponent(rdbRequestModalMedicalProfilePopup))
-                .addGap(18, 18, 18)
-                .addComponent(rdbRequestAdditionalNotes)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
-
-        rdbRequestAdditionalNotes.setBackground(new java.awt.Color(220, 220, 220));
 
         mnuActions.setText("Actions");
 
@@ -1774,7 +1778,6 @@ public class PatientView extends View
     private javax.swing.JPanel pnlOperations;
     private javax.swing.JPanel pnlPatientAddressContent;
     private javax.swing.JPanel pnlPatientSelection;
-    private javax.swing.JRadioButton rdbRequestAdditionalNotes;
     private javax.swing.JRadioButton rdbRequestModalGuardianEditorView;
     private javax.swing.JRadioButton rdbRequestModalMedicalProfilePopup;
     private javax.swing.JRadioButton rdbRequestModalRecallEditorView;

@@ -76,6 +76,9 @@ public class PatientViewController extends ViewController {
         ViewController.PatientViewControllerActionEvent actionCommand =
                ViewController.PatientViewControllerActionEvent.valueOf(e.getActionCommand());
         switch (actionCommand){
+            case PATIENT_QUESTIONNAIRE_VIEW_CONTROLLER_REQUEST:
+                doPatientQuestionnaireViewControllerRequest();
+                break;
             case PRINT_PATIENT_MEDICAL_HISTORY_REQUEST:
                 actionEvent = new ActionEvent(
                         this,ActionEvent.ACTION_PERFORMED,
@@ -287,6 +290,13 @@ public class PatientViewController extends ViewController {
         ActionEvent actionEvent = new ActionEvent(
             this,ActionEvent.ACTION_PERFORMED,
             ViewController.PatientViewControllerActionEvent.PATIENT_MEDICAL_HISTORY_VIEW_CONTROLLER_REQUEST.toString());
+        this.getMyController().actionPerformed(actionEvent);
+    }
+    
+    private void doPatientQuestionnaireViewControllerRequest(){
+        ActionEvent actionEvent = new ActionEvent(
+            this,ActionEvent.ACTION_PERFORMED,
+            ViewController.DesktopViewControllerActionEvent.PATIENT_QUESTIONNAIRE_VIEW_CONTROLLER_REQUEST.toString());
         this.getMyController().actionPerformed(actionEvent);
     }
     

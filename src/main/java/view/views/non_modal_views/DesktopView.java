@@ -47,6 +47,7 @@
  */
 package view.views.non_modal_views;
 
+import com.toedter.calendar.JDateChooser;
 import controller.DesktopViewController;
 import controller.ViewController;
 import controller.Descriptor;
@@ -69,11 +70,19 @@ import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JSeparator;
 import org.apache.commons.io.FilenameUtils;
+import com.github.lgooddatepicker.components.DatePicker;
+import com.github.lgooddatepicker.components.DatePickerSettings;
+import com.github.lgooddatepicker.optionalusertools.DateChangeListener;
+import com.github.lgooddatepicker.zinternaltools.DateChangeEvent;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import javax.swing.JButton;
 
 /**
  *
@@ -81,16 +90,20 @@ import org.apache.commons.io.FilenameUtils;
  */
 public class DesktopView extends javax.swing.JFrame 
         implements ActionListener, 
-                   PropertyChangeListener {
+                   PropertyChangeListener,
+                   DateChangeListener{
 //public class DesktopView extends View implements PropertyChangeListener{
     enum Action{
         REQUEST_CASCADE_VIEWS,
         REQUEST_CLOSE_VIEW,
         REQUEST_APPOINTMENT_VIEW,
-        REQUEST_MEDICAL_CONDITION_LIST_VIEW,
+        REQUEST_MEDICAL_CONDITION_VIEW,
         REQUEST_PATIENT_VIEW,
-        REQUEST_TREATMENT_LIST_VIEW
+        REQUEST_TREATMENT_VIEW,
+        REQUEST_PRINT_PATIENT_DETAILS_VIEW,
+        REQUEST_PRINT_SCHEDULE_VIEW
     };
+
     private JMenu activeMenu = null;
     private int topDynamicFrameListDelimiter;
     private HashMap<JMenuItem, JInternalFrame> menuItemFrameMap = null;
@@ -108,12 +121,16 @@ public class DesktopView extends javax.swing.JFrame
         
         private final String EXIT_VIEW_REQUEST_TITLE = "Exit the Clinic practice management system";
         
-    private final String LIST_MENU_TITLE = "List";
+    private final String SETTINGS_MENU_TITLE = "Settings";
         private final String MEDICAL_CONDITION_REQUEST_TITLE = "Medical history conditions";
         private final String TREATMENTS_REQUEST_TITLE = "Treatments";
-    private final String MIGRATION_MANAGEMENT_MENU_TITLE = "Migration management";
+        private final String CASCADE_VIEWS_REQUEST_TITLE = "Cascade views";
+    
+    private final String PRINTED_FORMS_MENU_TITLE = "Printed forms";
+        private final String PRINT_MEDICAL_CONDITIONS_REQUEST_TITLE = "New patient medical history questionnaire";
+        private final String PRINT_SCHEDULE_REQUEST_TITLE = "Appointment schedule";  
         
-            
+    private final String MIGRATION_MANAGEMENT_MENU_TITLE = "Migration management";
         private final String PMS_DATABASE_PROFILE_TITLE = "Database profile";
             //private final String PMS_DATABASE_URL = "PMS database URL";
             private final String APPOINTMENT_TABLE_RECORD_COUNT_TITLE = "Appointment table ";
@@ -139,9 +156,14 @@ public class DesktopView extends javax.swing.JFrame
         private JMenuItem mniTreatmentViewRequest = null;
         private JMenuItem mniExitViewRequest = null;
         
-    private JMenu mnuSelectList = null; 
+    private JMenu mnuSettings = null; 
         private JMenuItem mniMedicalConditionViewRequest = null;
         private JMenuItem mniTreatmentsViewRequest = null;
+        private JMenuItem mniCascadeViewsRequest = null;
+        
+    private JMenu mnuPrintedForms = null; 
+        private JMenuItem mniPrintMedicalConditionViewRequest = null;
+        private JMenuItem mniPrintScheduleViewRequest = null;    
         
     private JMenu mnuMigrationManagement = null; 
         private JMenu mnuPMSDatabaseProfile = null; 
@@ -185,17 +207,35 @@ public class DesktopView extends javax.swing.JFrame
     private void setIsPMSStoreDefined(Boolean value){
         isPMSStoreDefined = value;
     }
+ 
     
-    private void makeSelectListMenu(){
-        mnuSelectList = new JMenu(LIST_MENU_TITLE);
+    private void makePrintedFormsMenu(){
+        mnuPrintedForms = new JMenu(PRINTED_FORMS_MENU_TITLE);
+        mniPrintMedicalConditionViewRequest = new JMenuItem(PRINT_MEDICAL_CONDITIONS_REQUEST_TITLE);
+        mniPrintScheduleViewRequest = new JMenuItem(PRINT_SCHEDULE_REQUEST_TITLE);
+        mnuPrintedForms.add(mniPrintMedicalConditionViewRequest);
+        mnuPrintedForms.add(mniPrintScheduleViewRequest);
+        mniPrintMedicalConditionViewRequest.setActionCommand(Action.REQUEST_PRINT_PATIENT_DETAILS_VIEW.toString());
+        mniPrintScheduleViewRequest.setActionCommand(Action.REQUEST_PRINT_SCHEDULE_VIEW.toString());
+        mniPrintMedicalConditionViewRequest.addActionListener(this);
+        mniPrintScheduleViewRequest.addActionListener(this);
+    }
+    
+    private void makeSettingsMenu(){
+        mnuSettings = new JMenu(SETTINGS_MENU_TITLE);
         mniMedicalConditionViewRequest = new JMenuItem(MEDICAL_CONDITION_REQUEST_TITLE);
         mniTreatmentsViewRequest = new JMenuItem(TREATMENTS_REQUEST_TITLE);
-        mnuSelectList.add(mniMedicalConditionViewRequest);
-        mnuSelectList.add(mniTreatmentsViewRequest);
-        mniMedicalConditionViewRequest.setActionCommand(Action.REQUEST_MEDICAL_CONDITION_LIST_VIEW.toString());
-        mniTreatmentsViewRequest.setActionCommand(Action.REQUEST_TREATMENT_LIST_VIEW.toString());
+        mniCascadeViewsRequest = new JMenuItem(CASCADE_VIEWS_REQUEST_TITLE);
+        mnuSettings.add(mniMedicalConditionViewRequest);
+        mnuSettings.add(mniTreatmentsViewRequest);
+        mnuSettings.add(new JSeparator());
+        mnuSettings.add(mniCascadeViewsRequest);
+        mniMedicalConditionViewRequest.setActionCommand(Action.REQUEST_MEDICAL_CONDITION_VIEW.toString());
+        mniTreatmentsViewRequest.setActionCommand(Action.REQUEST_TREATMENT_VIEW.toString());
+        mniCascadeViewsRequest.setActionCommand(Action.REQUEST_CASCADE_VIEWS.toString());
         mniMedicalConditionViewRequest.addActionListener(this);
         mniTreatmentsViewRequest.addActionListener(this);
+        mniCascadeViewsRequest.addActionListener(this);
     }
     
     private void makeSelectViewMenu(){
@@ -220,13 +260,6 @@ public class DesktopView extends javax.swing.JFrame
         mniAppointmentViewRequest.addActionListener(this);
         mniPatientViewRequest.addActionListener(this);
         mniExitViewRequest.addActionListener(this);
-        
-        /*
-        mniAppointmentViewRequest.addActionListener((ActionEvent e) -> mniAppointmentViewRequestActionPerformed());
-        mniPatientViewRequest.addActionListener((ActionEvent e) -> mniPatientViewRequestActionPerformed());
-        mniTreatmentViewRequest.addActionListener((ActionEvent e) -> mniTreatmentViewRequestActionPerformed());
-        //mniPatientNotificationViewRequest.addActionListener((ActionEvent e) -> mniNotificationViewRequestActionPerformed());
-        mniExitViewRequest.addActionListener((ActionEvent e) -> mniExitRequestViewActionPerformed());*/
     }
     
     private void makeMigrationManagementMenu(){
@@ -355,16 +388,19 @@ public class DesktopView extends javax.swing.JFrame
             }
             else{
                 makeSelectViewMenu();
-                makeSelectListMenu();
+                makeSettingsMenu();
+                makePrintedFormsMenu();
                 mnbDesktop.add(mnuSelectView);
-                mnbDesktop.add(mnuSelectList);
+                mnbDesktop.add(mnuSettings);
+                mnbDesktop.add(mnuPrintedForms);
             }
         }
         else{
             makeSelectViewMenu();
-            makeSelectListMenu();
+            makeSettingsMenu();
             mnbDesktop.add(mnuSelectView); 
-            mnbDesktop.add(mnuSelectList);
+            mnbDesktop.add(mnuSettings);
+            mnbDesktop.add(mnuPrintedForms);
         }
         setSize(1250,812);
         Dimension test1 = getPreferredSize();
@@ -395,10 +431,39 @@ public class DesktopView extends javax.swing.JFrame
     }
     
     @Override
+        public void dateChanged(DateChangeEvent event) {
+            /**
+             * Update logged at 30/10/2021 08:32
+             * inherited view status (set if any changes have been made to form since its initialisation)
+             * is initialised to true (date changed)
+             */
+            LocalDate date = event.getNewDate();         
+        }
+    
+    @Override
     public void actionPerformed(ActionEvent e){
         ActionEvent actionEvent = null;
         switch (Action.valueOf(e.getActionCommand())){
             case REQUEST_CASCADE_VIEWS:
+                break;
+            case REQUEST_PRINT_PATIENT_DETAILS_VIEW:
+                actionEvent = new ActionEvent(
+                        this,ActionEvent.ACTION_PERFORMED,
+                        ViewController.DesktopViewControllerActionEvent
+                                .PRINT_NEW_PATIENT_DETAILS_REQUEST.toString());
+                this.getMyController().actionPerformed(actionEvent);
+                break;
+            case REQUEST_PRINT_SCHEDULE_VIEW:
+                JDateChooser dateChooser = new JDateChooser();
+                dateChooser.setDateFormatString("dd/MM/yyyy");
+                int option = JOptionPane.showConfirmDialog(
+                this,
+                /*getScheduleDatePicker()*/dateChooser,
+                "Select a date",
+                JOptionPane.OK_CANCEL_OPTION,
+                JOptionPane.PLAIN_MESSAGE
+            );
+                
                 break;
             case REQUEST_CLOSE_VIEW:
                 mniExitRequestViewActionPerformed();
@@ -406,7 +471,7 @@ public class DesktopView extends javax.swing.JFrame
             case REQUEST_APPOINTMENT_VIEW:
                 mniAppointmentViewRequestActionPerformed();
                 break;
-            case REQUEST_MEDICAL_CONDITION_LIST_VIEW:
+            case REQUEST_MEDICAL_CONDITION_VIEW:
                 actionEvent = new ActionEvent(this, 
                     ActionEvent.ACTION_PERFORMED,
                     DesktopViewController.DesktopViewControllerActionEvent
@@ -416,7 +481,7 @@ public class DesktopView extends javax.swing.JFrame
             case REQUEST_PATIENT_VIEW:
                 mniPatientViewRequestActionPerformed();
                 break;
-            case REQUEST_TREATMENT_LIST_VIEW:
+            case REQUEST_TREATMENT_VIEW:
                 actionEvent = new ActionEvent(this, 
                         ActionEvent.ACTION_PERFORMED,
                         DesktopViewController.DesktopViewControllerActionEvent
@@ -480,6 +545,27 @@ public class DesktopView extends javax.swing.JFrame
         doActionEventRequest(ViewController.DesktopViewControllerActionEvent.COUNT_PATIENT_NOTIFICATION_TABLE_REQUEST);
         doActionEventRequest(ViewController.DesktopViewControllerActionEvent.COUNT_SURGERY_DAYS_ASSIGNMENT_TABLE_REQUEST);
         doActionEventRequest(ViewController.DesktopViewControllerActionEvent.COUNT_TREATMENT_TABLE_REQUEST);
+        
+        
+        setScheduleDatePicker(new DatePicker());
+        getScheduleDatePicker().setVisible(true);
+        getScheduleDatePicker().addDateChangeListener(this);
+        ImageIcon icon = new ImageIcon(this.getClass().getResource("/datepickerbutton1.png"));
+        JButton datePickerButton = getScheduleDatePicker().getComponentToggleCalendarButton();
+        datePickerButton.setText("");
+        datePickerButton.setIcon(icon);
+        DatePickerSettings settings = new DatePickerSettings();
+        settings.setFormatForDatesCommonEra(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+        settings.setAllowKeyboardEditing(false);
+        getScheduleDatePicker().setSettings(settings);
+    }
+    
+    DatePicker scheduleDatePicker = null;
+    private void setScheduleDatePicker(DatePicker value){
+        scheduleDatePicker = value;
+    }
+    private DatePicker getScheduleDatePicker(){
+        return scheduleDatePicker;
     }
     
     private JPopupMenu makePopupMenu(){
@@ -735,7 +821,7 @@ public class DesktopView extends javax.swing.JFrame
          * Menu request to close view is routed to the view controller
          */
         
-        ImageIcon icon = new ImageIcon(this.getClass().getResource(clinicLogo));
+        //ImageIcon icon = new ImageIcon(this.getClass().getResource(clinicLogo));
         //new MailMerger();
         //new Emailer("abc");
         ActionEvent actionEvent = new ActionEvent(this, 

@@ -6,44 +6,46 @@ package view.views.view_support_classes.models;
 
 import java.util.ArrayList;
 import javax.swing.table.DefaultTableModel;
-import model.*;
+import model.QuestionWithState;
+
 /**
  *
  * @author colin
  */
-public class MedicalConditionWithStateTableModel extends DefaultTableModel {
+public class PatientQuestionnaireTableModel extends DefaultTableModel {
     
-    private ArrayList<ConditionWithState> conditionWithStates = null;
-    private enum COLUMN{YesNo, Condition};
+    private ArrayList<QuestionWithState> questionWithStates = null;
+    private enum COLUMN{Question, YesNo, PatientReply};
     private final Class[] columnClass = new Class[] {
+        Integer.class,
         Boolean.class,
         String.class};
 
-    public MedicalConditionWithStateTableModel(){
-        conditionWithStates = new ArrayList<>();
+    public PatientQuestionnaireTableModel(){
+        questionWithStates = new ArrayList<>();
         
     }
     
-    public ArrayList<ConditionWithState> getConditionWithStates(){
-        return this.conditionWithStates;
+    public ArrayList<QuestionWithState> getQuestionWithStates(){
+        return this.questionWithStates;
     }
     
-    public void addElement(ConditionWithState c){
-        conditionWithStates.add(c); 
+    public void addElement(QuestionWithState c){
+        questionWithStates.add(c); 
     }
     
     public void removeAllElements(){
-        conditionWithStates.clear();
+        questionWithStates.clear();
     }
     
-    public ConditionWithState getElementAt(int row){
-        return conditionWithStates.get(row);
+    public QuestionWithState getElementAt(int row){
+        return questionWithStates.get(row);
     }
 
     @Override
     public int getRowCount(){
         int result;
-        if (conditionWithStates!=null) result = conditionWithStates.size();
+        if (questionWithStates!=null) result = questionWithStates.size();
         else result = 0;
         return result;
     }
@@ -53,10 +55,10 @@ public class MedicalConditionWithStateTableModel extends DefaultTableModel {
         return COLUMN.values().length;
     }
     
-    public static String conditionsColumnName = null;
+    public static String questionsColumnName = null;
 
-    public String getConditionsColumnName(){
-        return conditionsColumnName;
+    public String getQuestionsColumnName(){
+        return questionsColumnName;
     }
     
     @Override
@@ -67,9 +69,9 @@ public class MedicalConditionWithStateTableModel extends DefaultTableModel {
                 result = column.toString();
                 if (result.equals("YesNo"))
                     result = result + " ?";  
-                else if (result.equals("Condition")){
-                    result = conditionsColumnName;
-                }
+                else if (result.equals("PatientReply")){
+                    result = "Patient reply";
+                }else if(result.equals("Question")) result = "";
                 break;
             }
         }
@@ -93,47 +95,46 @@ public class MedicalConditionWithStateTableModel extends DefaultTableModel {
     
     @Override
     public void setValueAt(Object value, int row, int col) {
-        if (col==0){
-            ConditionWithState conditionWithState = conditionWithStates.get(row);
-            if (conditionWithState.getState()){
-                conditionWithState.setState(Boolean.FALSE);
-            }
-            else{
-                conditionWithState.setState(Boolean.TRUE);
-            }
-            fireTableCellUpdated(row, col);
+        if (col==1){
+            QuestionWithState questionWithState = questionWithStates.get(row);
+                if (!questionWithState.getQuestion().getOrder().equals(2)){
+                    if (questionWithState.getState()){
+                        questionWithState.setState(Boolean.FALSE);
+                    }
+                    else{
+                        questionWithState.setState(Boolean.TRUE);
+                    }
+                }
+                fireTableCellUpdated(row, col);
         }   
     }
 
     @Override
     public Object getValueAt(int row, int columnIndex){
         Object result = null;
-        PrimaryCondition pc = null;
-        ConditionWithState conditionWithState = getConditionWithStates().get(row);
+        QuestionWithState questionWithState = getQuestionWithStates().get(row);
         
         for (COLUMN column: COLUMN.values()){
             if (column.ordinal() == columnIndex){
-                if (conditionWithState == null){
+                if (questionWithState == null){
                     return null;
                 }
                 else{
-                    Boolean state = conditionWithState.getState();
-                    String description = conditionWithState.getCondition().getDescription();
-                    if (conditionWithState.getCondition().getIsPrimaryCondition()){
-                        pc = (PrimaryCondition)conditionWithState.getCondition();
-                        if (!pc.getSecondaryCondition().get().isEmpty())
-                            description = description + " ...";
-                    }
-                    if (conditionWithState.getComment()!=null)
-                        description = description + " (" + conditionWithState.getComment() + ")";
-                    
+                    Boolean state = questionWithState.getState();
+                    //String description = questionWithState.getQuestion().getDescription();
+                    Integer order = questionWithState.getQuestion().getOrder();
+                    String answer = questionWithState.getAnswer();
                     switch (column){
                         case YesNo:
                             result = state;
                             break;
-                        case Condition:
-                            result = description;
+                        case Question:
+                            result = order;
                             break;
+                        case PatientReply:
+                            if (!state) result = "";
+                            else result = answer;
+                            
                     }
                     break;
                 }

@@ -132,6 +132,14 @@ public class Descriptor {
             treatmentWithState = value;
         }
         
+        private QuestionWithState questionWithState = null;
+        public QuestionWithState getQuestionWithState(){
+            return questionWithState; 
+        }
+        public void setQuestionWithState(QuestionWithState value){
+            questionWithState = value;
+        }
+        
         private ConditionWithState conditionWithState = null;
         public ConditionWithState getConditionWithState(){
             return conditionWithState; 
@@ -402,6 +410,14 @@ public class Descriptor {
         }
         public void setConditionWithState(ConditionWithState value){
             conditionWithState = value;
+        }
+        
+        private QuestionWithState questionWithState = null;
+        public QuestionWithState getQuestionWithState(){
+            return questionWithState; 
+        }
+        public void setQuestionWithState(QuestionWithState value){
+            questionWithState = value;
         }
         
         public Doctor getDoctor(){

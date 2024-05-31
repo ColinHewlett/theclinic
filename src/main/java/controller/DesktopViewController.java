@@ -5,6 +5,8 @@
  */
 package controller;
 
+import static controller.ViewController.DesktopViewControllerActionEvent.PATIENT_MEDICAL_HISTORY_VIEW_CONTROLLER_REQUEST;
+import static controller.ViewController.DesktopViewControllerActionEvent.VIEW_CONTROLLER_CLOSE_NOTIFICATION;
 import static controller.ViewController.displayErrorMessage;
 import model.*;
 import controller.exceptions.TemplateReaderException;
@@ -44,7 +46,8 @@ public class DesktopViewController extends ViewController{
     private ArrayList<PatientViewController> patientViewControllers = null;
     private ArrayList<TreatmentViewController> treatmentViewControllers = null;
     private ArrayList<MedicalConditionViewController> medicalConditionViewControllers = null;
-    private ArrayList<PatientMedicalHistoryViewController> patientMedicalHistoryViewControllers = null;
+    private ArrayList<PatientMedicalHistoryViewController> patientMedicalHistoryViewControllers = new ArrayList<>();;
+    private ArrayList<PatientQuestionnaireViewController> patientQuestionnaireViewControllers = new ArrayList<>();
     private ArrayList<ClinicalNoteViewController> clinicalNoteViewControllers = null;
     private ArrayList<DataMigrationProgressViewController> importProgressViewControllers = null;
     private static Boolean isDataMigrationOptionEnabled = null;
@@ -346,6 +349,43 @@ public class DesktopViewController extends ViewController{
         }           
     }
     
+    private void doActionEventForPatientQuestionnaireViewController(ActionEvent e){
+        String message = null;
+        PatientQuestionnaireViewController vc = (PatientQuestionnaireViewController)e.getSource();
+        ViewController.DesktopViewControllerActionEvent actionCommand =
+                    ViewController.DesktopViewControllerActionEvent.valueOf(e.getActionCommand());
+        switch(actionCommand){
+            case VIEW_CONTROLLER_CLOSE_NOTIFICATION:{
+                switch (this.patientQuestionnaireViewControllers.size()){
+                    case 0:
+                        message = "No patient questionnaire view controllers found in "
+                                                    + "DesktopViewController collection.";
+                        break;
+                    case 1:
+                        if (vc.equals(this.patientQuestionnaireViewControllers.get(0))){
+                            this.patientQuestionnaireViewControllers.remove(0);
+                        }
+                        else{
+                            message = "Could not find patient medical history view controller in "
+                                                    + "DesktopViewController collection.";
+                        }
+                        break;
+                    default:
+                        message = "More than one patient questionnaire view controller found in "
+                                                    + "DesktopViewController collection.";
+                        break;
+                }
+                if (message!=null){
+                    displayErrorMessage("Raised in doActionEventForPatientQuestionnaireViewController"
+                            + "(case = " + actionCommand.toString() + ")\n"
+                            + message,
+                            "Desktop view controller error",
+                            JOptionPane.WARNING_MESSAGE);
+                }
+            } 
+        }
+    }
+    
     private void doActionEventForPatientMedicalHistoryViewController(ActionEvent e){
         String message = null;
         PatientMedicalHistoryViewController vc = (PatientMedicalHistoryViewController)e.getSource();
@@ -427,10 +467,12 @@ public class DesktopViewController extends ViewController{
             case PATIENT_MEDICAL_HISTORY_VIEW_CONTROLLER_REQUEST:
                 doRequestForPatientMedicalHistoryViewController(e);
                 break;
+            case PATIENT_QUESTIONNAIRE_VIEW_CONTROLLER_REQUEST:
+                doRequestForPatientQuestionnaireViewController(e);
+                break;
             case PRINT_PATIENT_MEDICAL_HISTORY_REQUEST:
                 doRequestToPrintPatientMedicalHistory(e);
                 break;
-            
             case SCHEDULE_VIEW_CONTROLLER_REQUEST:
                 /**
                  * VC receives a request for a new AppointmentVC from a PatientVC
@@ -583,6 +625,9 @@ public class DesktopViewController extends ViewController{
             actionCommand =
                     ViewController.DesktopViewControllerActionEvent.valueOf(e.getActionCommand());
             switch (actionCommand){
+                case PRINT_NEW_PATIENT_DETAILS_REQUEST:
+                    doPrintNewPatientDetailsRequest(e);
+                    break;
                 case IMPORT_LIST_FILES:
                     /**
                      * read the list files to populate the following tables
@@ -1052,6 +1097,50 @@ public class DesktopViewController extends ViewController{
         }
     }
     
+    private void doRequestForPatientQuestionnaireViewController(ActionEvent e){
+        boolean isPQVCForSamePatientActive = false;
+        PatientQuestionnaireViewController activeVCForSamePatient = null;
+        PatientQuestionnaireViewController pqhvc = null;
+        PatientViewController pvc = (PatientViewController)e.getSource();
+        Patient patient = pvc.getDescriptor().getControllerDescription().getPatient();
+        if (patient!=null){
+            if (patient.getIsKeyDefined()){
+                if (!patient.getKey().equals(SystemDefinition.UNBOOKABLE_APPOINTMENT_SLOT)){
+                    for (PatientQuestionnaireViewController vc : patientQuestionnaireViewControllers){
+                        if (vc.getDescriptor().getControllerDescription().getPatient().equals(patient)){
+                            isPQVCForSamePatientActive = true;
+                            activeVCForSamePatient = vc;
+                            break;
+                        }
+                    }
+                    if (!isPQVCForSamePatientActive){
+                        patientQuestionnaireViewControllers.add(
+                            new PatientQuestionnaireViewController(
+                            this,
+                            getDesktopView()));
+                        pqhvc = patientQuestionnaireViewControllers.get(
+                            patientQuestionnaireViewControllers.size()-1);
+                        pqhvc.getDescriptor().getControllerDescription().setPatient(patient);
+                        setView(new View().make(View.Viewer.PATIENT_QUESTIONNAIRE_VIEW,
+                                pqhvc, 
+                                getDesktopView()));
+                        /*
+                        ActionEvent actionEvent = new ActionEvent(
+                                this,ActionEvent.ACTION_PERFORMED,
+                                DesktopViewController.DesktopViewControllerActionEvent.INITIALISE_VIEW.toString());
+                         mcvc.actionPerformed(actionEvent);*/
+
+                        if (getDesktopViewMode().equals(DesktopViewMode.CLINIC_LOGO)){
+                                doSetupDesktopViewMode();
+                        }
+                    }else {
+                        activeVCForSamePatient.getView().toFront();
+                    }//do nothing because only one medical condition VC allowed
+                }
+            }
+        }
+    }
+    
     private void doRequestForPatientMedicalHistoryViewController(ActionEvent e){
         boolean isPMVCForSamePatientActive = false;
         PatientMedicalHistoryViewController activeVCForSamePatient = null;
@@ -1096,6 +1185,30 @@ public class DesktopViewController extends ViewController{
         }
     }
     
+    private void doPrintNewPatientDetailsRequest(ActionEvent e){
+        MedicalConditionViewController mcvc = null;
+        medicalConditionViewControllers.add(
+                new MedicalConditionViewController(
+                        this,getDesktopView()));
+        mcvc = medicalConditionViewControllers
+                .get(medicalConditionViewControllers.size()-1);
+        ActionEvent actionEvent = new ActionEvent(
+                this,ActionEvent.ACTION_PERFORMED,
+                DesktopViewController.MedicalConditionViewControllerActionEvent
+                        .PRINT_NEW_PATIENT_DETAILS_REQUEST.toString());
+        mcvc.actionPerformed(actionEvent);
+        /**
+         * now close the view controller down after its done its job
+         */
+        if (!this.medicalConditionViewControllers.remove(mcvc)){
+            String message = "Problem arose on attempt to remove a "
+                    + "(viewless) medical condition view controller";
+            displayErrorMessage(
+                    message,"DesktopViewController error",
+                    JOptionPane.WARNING_MESSAGE);
+        }
+    }
+    
     private void doRequestForMedicalConditionViewController(ActionEvent e){
         MedicalConditionViewController mcvc = null;
         if (medicalConditionViewControllers.isEmpty()){
@@ -1107,11 +1220,12 @@ public class DesktopViewController extends ViewController{
             setView(new View().make(View.Viewer.MEDICAL_CONDITION_VIEW,
                         mcvc, 
                         getDesktopView()));
-
+            /*
             ActionEvent actionEvent = new ActionEvent(
                     this,ActionEvent.ACTION_PERFORMED,
                     DesktopViewController.DesktopViewControllerActionEvent.INITIALISE_VIEW.toString());
              mcvc.actionPerformed(actionEvent);
+            */
 
             if (getDesktopViewMode().equals(DesktopViewMode.CLINIC_LOGO)){
                     doSetupDesktopViewMode();
@@ -1803,6 +1917,9 @@ public class DesktopViewController extends ViewController{
                     break;
                 case "PatientMedicalHistoryViewController":
                     doActionEventForPatientMedicalHistoryViewController(e);
+                    break;
+                case "PatientQuestionnaireViewController":
+                    doActionEventForPatientQuestionnaireViewController(e);
                     break;
                 case "TreatmentViewController":
                     doActionEventForTreatmentViewController(e);

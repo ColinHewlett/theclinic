@@ -4,6 +4,7 @@
  */
 package model;
 
+import java.awt.Point;
 import repository.Repository;
 import repository.StoreException;
 import java.util.HashMap;
@@ -32,6 +33,97 @@ public class SystemDefinition {
     private static String pmsStoreAccessURL = null;
     private static String pmsStorePostgresSQL = null;
     private static String pmsStoreType = null;
+    
+    public static int QUESTIONNAIRE_REPLY_MAX_LENGTH = 130;
+    public static String TICK ="P";
+    public static int EXACT_TABLE_CELL_HEIGHT_IN_TWIPS = 400;
+
+    public enum FONT{
+        DYNAMIC(new ID("Arial Narrow", 10, false)),
+        DEFAULT(new ID("Arial Narrow", 10, false)),
+        DEFAULT_BOLD(new ID("Arial Narrow", 10, true)),
+        TICK(new ID("WingDings 2", 10, true));
+        
+        private ID value;
+        FONT(ID value){
+            this.value = value;
+        }
+        
+        public String fontName(){
+            return value.Name();
+        }
+        
+        public Integer fontSize(){
+            return value.Size();
+        }
+        
+        public boolean IsFontBold(){
+            return value.IsBold();
+        } 
+    }
+    
+    public enum TABLE_1{
+        TITLE(new Point(1,0)),
+        FORENAMES(new Point(1,1)),
+        SURNAME(new Point(1,2)),
+        GENDER(new Point(1,3)),
+        PHONE_1(new Point(3,0)),
+        PHONE_2(new Point(3,1)),
+        EMAIL(new Point(3,2)),
+        DOB(new Point(5,0)),
+        ADDRESS(new Point(5,1)),
+        POSTCODE(new Point(5,2)),
+        GP(new Point(7,0)),
+        GP_PHONE(new Point(7,1));
+        
+        private final Point value;
+
+        TABLE_1(Point value) {
+            this.value = value;
+        }
+
+        public int row() {
+            return value.x;
+        }
+        
+        public int column() {
+            return value.y;
+        }       
+    }
+    
+    public enum TABLE_2{
+        _1(new Point(1,2)),
+        MEDICATION_FIRST_ROW(new Point(2,2)), //first row of medication
+        MEDICATION_LAST_ROW(new Point(6,2)), //2nd row of medication
+        _3(new Point(7,2)),
+        //blank row for header
+        _4(new Point(9,2)),
+        _5(new Point(10,2)),
+        _6(new Point(11,2)),
+        _7(new Point(12,2)),
+        _8(new Point(13,2)),
+        _9(new Point(14,2)),
+        _10(new Point(15,2)),
+        //blank row for header
+        _11(new Point(17,2)),
+        _12(new Point(18,2)),
+        _13(new Point(19,2));
+        
+        
+        TABLE_2(Point value) {
+            this.value = value;
+        }
+
+        private final Point value;
+        
+        public int row() {
+            return value.x;
+        }
+        
+        public int column() {
+            return value.y;
+        }
+    }
     
     public static String getPMSStoreType(){
         return pmsStoreType;

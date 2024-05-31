@@ -43,7 +43,6 @@ public class ModalPatientMedicationEditorView extends ModalView
     public ModalPatientMedicationEditorView(View.Viewer myViewType, 
             ViewController myController,
             DesktopView desktopView) {//ViewMode arg
-        setTitle("Patient medical history primary view");
         setMyController(myController);
         setMyViewType(myViewType);
         setDesktopView(desktopView); 
@@ -57,7 +56,7 @@ public class ModalPatientMedicationEditorView extends ModalView
         Medication medication = (Medication)getMyController()
                 .getDescriptor().getControllerDescription().getMedication();
         setViewMode(ViewMode.CREATE);
-        setTitle(patient.toString() + ": prescribed medication");
+        setTitle(patient.toString() + " medication");
         
         this.btnAddUpdateMedication.setActionCommand(Action.REQUEST_MEDICATION_ADDITION_OR_UPDATE.toString());
         this.btnRemoveMedication.setActionCommand(Action.REQUEST_MEDICATION_REMOVAL.toString());

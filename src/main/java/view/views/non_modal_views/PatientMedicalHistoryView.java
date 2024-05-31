@@ -119,9 +119,11 @@ public class PatientMedicalHistoryView extends View
             case REQUEST_UPDATE_PATIENT_CONDITION_COMMENT:
                 cws = getSelectedCondition();     
                 if (cws!=null){
-                    setConditionWithState(cws);
-                    doSendActionEvent(ViewController.PatientMedicalHistoryViewControllerActionEvent
-                            .PATIENT_CONDITION_COMMENT_UPDATE_REQUEST);
+                    if (doRequestConditionCommentUpdateEditor(cws)!=null){
+                        setConditionWithState(cws);
+                        doSendActionEvent(ViewController.PatientMedicalHistoryViewControllerActionEvent
+                                .PATIENT_CONDITION_COMMENT_UPDATE_REQUEST);
+                    }
                 }else{
                     isError = true;
                     error = "Patient condition has not been defined;/n"
@@ -205,10 +207,20 @@ public class PatientMedicalHistoryView extends View
                         (MedicalConditionWithStateTableModel)tblCondition.getModel();
                 ConditionWithState cws = 
                         (ConditionWithState) model.getElementAt(selectedRow);
+                if (cws.getComment()==null) txaComment.setText("");
+                else txaComment.setText(cws.getComment());
+                if (cws.getState()){
+                    if (cws.getComment()==null)
+                        this.btnDeleteCommentFromCondition.setEnabled(false);
+                    else this.btnDeleteCommentFromCondition.setEnabled(false);
+                    this.btnEditCommentForCondition.setEnabled(true);
+                }else{
+                    this.btnDeleteCommentFromCondition.setEnabled(false);
+                    this.btnEditCommentForCondition.setEnabled(false);
+                    this.btnEditCommentForCondition.setEnabled(false);
+                }
                 switch(getConditionViewMode()){
                     case PRIMARY:
-                        this.btnDeleteCommentFromCondition.setEnabled(true);
-                        this.btnEditCommentForCondition.setEnabled(true);
                         pc = (PrimaryCondition)cws.getCondition();
                         if (!pc.getSecondaryCondition().get().isEmpty()){
                             setPrimaryCondition(pc);
@@ -220,8 +232,7 @@ public class PatientMedicalHistoryView extends View
                         }
                         break;
                     case SECONDARY:
-                        this.btnDeleteCommentFromCondition.setEnabled(true);
-                        this.btnEditCommentForCondition.setEnabled(true);
+                        
                         this.btnToggleConditionView.setEnabled(true);
                         setToggleMode(ToggleMode.SECONDARY);
                         break;
@@ -231,19 +242,21 @@ public class PatientMedicalHistoryView extends View
     }
     
     private ConditionWithState doRequestConditionCommentUpdateEditor(ConditionWithState cws){
+        ConditionWithState result = null;
         String comment = "";
         comment = JOptionPane.showInternalInputDialog(
-                    this,"Enter new comment for '" + cws.getComment() + "'");
+                    this,"Enter new comment for '" + cws.getCondition().getDescription() + "'. After 50 characters printed line will get progressively shorter to fit in available space");
             if (comment!=null){
                 comment = comment.trim();
                 if (!comment.isEmpty()){
                     cws.setComment(comment);
+                    result = cws;
                     tblCondition.clearSelection();  
                 }else JOptionPane.showInternalMessageDialog(
                                 this, "Updated of medical condition comment cannot be blank"); 
             }else JOptionPane.showInternalMessageDialog(
                                 this, "Medical condition comment has not been defined");
-        return cws;
+        return result;
     }
     
     private void setConditionWithState(ConditionWithState cws){
@@ -347,7 +360,7 @@ public class PatientMedicalHistoryView extends View
                 setToggleMode(ToggleMode.PRIMARY);
                 SecondaryCondition sc = (SecondaryCondition)conditions.get(0).getCondition();
                 MedicalConditionWithStateTableModel.conditionsColumnName = 
-                        sc.getPrimaryCondition().getDescription() + " condition";
+                        sc.getPrimaryCondition().getDescription() + " conditions";
                 break;
         }
         tblCondition.setModel(new MedicalConditionWithStateTableModel());
@@ -469,6 +482,7 @@ public class PatientMedicalHistoryView extends View
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jScrollPane1 = new javax.swing.JScrollPane();
         scrConditionTable = new javax.swing.JScrollPane();
         tblCondition = new javax.swing.JTable();
         pnlActions = new javax.swing.JPanel();
@@ -478,6 +492,8 @@ public class PatientMedicalHistoryView extends View
         btnToggleConditionView = new javax.swing.JButton();
         jPanel2 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        txaComment = new javax.swing.JTextArea();
 
         scrConditionTable.setViewportView(tblCondition);
         ViewController.setJTableColumnProperties(
@@ -549,7 +565,14 @@ public class PatientMedicalHistoryView extends View
 
         btnEditCommentForCondition.getAccessibleContext().setAccessibleDescription("");
 
-        jLabel1.setText("Notes on condition: ");
+        jPanel2.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+
+        jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        jLabel1.setText("<html><center>Notes</center><center>on</center><center>condition</center></html>");
+
+        txaComment.setColumns(20);
+        txaComment.setRows(5);
+        jScrollPane2.setViewportView(txaComment);
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -557,15 +580,19 @@ public class PatientMedicalHistoryView extends View
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jLabel1)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jScrollPane2))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jLabel1)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel2Layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGap(8, 8, 8))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -590,8 +617,8 @@ public class PatientMedicalHistoryView extends View
                     .addComponent(pnlActions, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(scrConditionTable, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap())
         );
 
         pack();
@@ -617,8 +644,11 @@ public class PatientMedicalHistoryView extends View
     private javax.swing.JButton btnToggleConditionView;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JPanel jPanel2;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JPanel pnlActions;
     private javax.swing.JScrollPane scrConditionTable;
     private javax.swing.JTable tblCondition;
+    private javax.swing.JTextArea txaComment;
     // End of variables declaration//GEN-END:variables
 }

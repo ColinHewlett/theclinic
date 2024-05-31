@@ -23,8 +23,8 @@ public interface IStoreActions {
     public Point count(ClinicalNote clinicNote)throws StoreException;
     public Point count(Treatment treatment)throws StoreException;
     public Point count(AppointmentTreatment appointmentTreatment)throws StoreException;
-    //public Point count(PatientPrimaryCondition patientPrimaryCondition)throws StoreException;
-    //public Point count(PatientSecondaryCondition patientSecondaryCondition)throws StoreException;
+    public Point count(Question treatment)throws StoreException;
+    public Point count(PatientQuestion appointmentQuestion)throws StoreException;
     public Point count(PatientCondition patientCondition)throws StoreException;
     
     public void create(Appointment a) throws StoreException;
@@ -39,8 +39,8 @@ public interface IStoreActions {
     public void create(SecondaryCondition sc)throws StoreException;
     public void create(Treatment treatment)throws StoreException;
     public void create(AppointmentTreatment appointmentTreatment)throws StoreException;
-    //public void create(PatientPrimaryCondition patientPrimaryCondition)throws StoreException;
-    //public void create(PatientSecondaryCondition patientSecondaryCondition)throws StoreException;
+    public void create(Question treatment)throws StoreException;
+    public void create(PatientQuestion appointmentQuestion)throws StoreException;
     public void create(PatientCondition patientCondition)throws StoreException;
     
     public void delete(Appointment a, Integer key) throws StoreException;
@@ -54,8 +54,8 @@ public interface IStoreActions {
     public void delete(ClinicalNote clinicNote)throws StoreException;
     public void delete(Treatment treatment)throws StoreException;
     public void delete(AppointmentTreatment appointmentTreatment)throws StoreException;
-    //public void delete(PatientPrimaryCondition patientPrimaryCondition)throws StoreException;
-    //public void delete(PatientSecondaryCondition patientSecondaryCondition)throws StoreException;
+    public void delete(Question treatment)throws StoreException;
+    public void delete(PatientQuestion appointmentQuestion)throws StoreException;
     public void delete(PatientCondition patientCondition)throws StoreException;
     
     public List<String[]> importEntityFromCSV(Entity entity) throws StoreException;
@@ -72,8 +72,8 @@ public interface IStoreActions {
     public Integer insert(ClinicalNote clinicNote)throws StoreException;
     public Integer insert(Treatment treatment)throws StoreException;
     public Integer insert(AppointmentTreatment appointmentTreatment)throws StoreException;
-    //public Integer insert(PatientPrimaryCondition patientPrimaryCondition)throws StoreException;
-    //public Integer insert(PatientSecondaryCondition patientSecondaryCondition)throws StoreException;
+    public Integer insert(Question treatment)throws StoreException;
+    public Integer insert(PatientQuestion appointmentQuestion)throws StoreException;
     public Integer insert(PatientCondition patientCondition)throws StoreException;
     
     //public void populate(SurgeryDaysAssignment data)throws StoreException;
@@ -90,6 +90,8 @@ public interface IStoreActions {
     public ClinicalNote read(ClinicalNote clinicNote)throws StoreException;
     public Treatment read(Treatment treatment)throws StoreException;
     public AppointmentTreatment read(AppointmentTreatment appointmentTreatment)throws StoreException;
+    public Question read(Question treatment)throws StoreException;
+    public PatientQuestion read(PatientQuestion appointmentQuestion)throws StoreException;
     //public PatientPrimaryCondition read(PatientPrimaryCondition patientPrimaryCondition)throws StoreException;
     //public PatientSecondaryCondition read(PatientSecondaryCondition patientSecondaryCondition)throws StoreException;
     PatientCondition read(PatientCondition patientCondition)throws StoreException;
@@ -110,5 +112,7 @@ public interface IStoreActions {
     public void update(ClinicalNote clinicNote)throws StoreException;
     public void update(Treatment treatment)throws StoreException;
     public void update(AppointmentTreatment appointmentTreatment)throws StoreException;
+    public void update(Question treatment)throws StoreException;
+    public void update(PatientQuestion appointmentQuestion)throws StoreException;
     public void update(PatientCondition patientCondition) throws StoreException;
 }
