@@ -40,14 +40,14 @@ import javax.mail.internet.MimeMessage;
 import java.util.Properties;
 import java.io.FileInputStream;
 import java.io.IOException;
-import org.apache.poi.xwpf.extractor.XWPFWordExtractor;
-import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.math.BigInteger;
 import java.time.Duration;
 import java.util.List;
+import org.apache.poi.xwpf.extractor.XWPFWordExtractor;
+import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.ParagraphAlignment;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.apache.poi.xwpf.usermodel.XWPFRun;
@@ -64,6 +64,18 @@ import org.openxmlformats.schemas.wordprocessingml.x2006.main.STHeightRule;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.STMerge;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.STTblWidth;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.STVerticalJc;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.font.PDType1Font;
+import javax.print.*;
+import javax.print.attribute.HashPrintRequestAttributeSet;
+import javax.print.attribute.PrintRequestAttributeSet;
+import javax.print.attribute.standard.MediaSizeName;
+import java.awt.print.PrinterException;
+import java.io.*;
+import org.apache.commons.compress.utils.FileNameUtils;
 
 
 /**
@@ -1477,6 +1489,9 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
             
             FileOutputStream out = new FileOutputStream("AppointmentScheduleForDay.docx");
             document.write(out);
+            String path = new File(".").getAbsolutePath();
+            path = path.substring(0,path.length() - 2) + "\\AppointmentScheduleForDay.docx";
+            printDocument(document,path);
             System.out.println(new File(".").getAbsolutePath());
             System.out.println("Word document with complex table created successfully!");
             out.close();
@@ -2412,6 +2427,90 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         if (appointment.getPatient()==null) return false;
         if(!appointment.getPatient().getIsKeyDefined())return false;
         return true;
+    }
+    
+    private void printDocument(XWPFDocument document, String path){
+        //get path name for pdf conversion of Word document
+        
+        int folder;
+        String filename = "";
+        String pdfFilePath = "";
+        String docxFilePath = path;
+        
+        pdfFilePath = docxFilePath.substring(0,docxFilePath.length() - 5);
+        pdfFilePath = pdfFilePath + ".pdf";
+        
+         try {
+            // Load the Word document
+            //InputStream docxInputStream = new FileInputStream(docxFilePath);
+            //XWPFDocument docxDocument = new XWPFDocument(docxInputStream);
+            
+            //XWPFDocument document = new XWPFDocument(new FileInputStream(docxFilePath));
+
+            // Convert the Word document to PDF
+            convertToPDF(document, pdfFilePath);
+
+            // Print the PDF document
+            printPDF(pdfFilePath);
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.err.println("Failed to load the Word document: " + e.getMessage());
+        }
+    }
+    
+    private static void convertToPDF(XWPFDocument document, String pdfFilePath) throws IOException {
+        PDDocument pdfDocument = new PDDocument();
+
+        // Create a new page in the PDF document
+        PDPage page = new PDPage();
+        pdfDocument.addPage(page);
+
+        PDPageContentStream contentStream = new PDPageContentStream(pdfDocument, page);
+
+        // Write the content of the Word document to the PDF
+        contentStream.beginText();
+        contentStream.setFont(PDType1Font.HELVETICA, 12);
+        contentStream.setLeading(14.5f);
+        contentStream.newLineAtOffset(25, 750);
+
+        document.getParagraphs().forEach(paragraph -> {
+            try {
+                contentStream.showText(paragraph.getText());
+                contentStream.newLine();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+
+        contentStream.endText();
+        contentStream.close();
+
+        // Save the PDF document
+        pdfDocument.save(pdfFilePath);
+        pdfDocument.close();
+    }
+    
+    private static void printPDF(String pdfFilePath) {
+        try (InputStream inputStream = new FileInputStream(pdfFilePath)) {
+            Doc pdfDoc = new SimpleDoc(inputStream, DocFlavor.INPUT_STREAM.PDF, null);
+
+            PrintRequestAttributeSet printRequestAttributes = new HashPrintRequestAttributeSet();
+            printRequestAttributes.add(MediaSizeName.ISO_A4);
+
+            PrintService[] printServices = PrintServiceLookup.lookupPrintServices(DocFlavor.INPUT_STREAM.PDF, printRequestAttributes);
+
+            PrintService printService = ServiceUI.printDialog(null, 200, 200, printServices, null, null, printRequestAttributes);
+            if (printService != null) {
+                DocPrintJob printJob = printService.createPrintJob();
+                printJob.print(pdfDoc, printRequestAttributes);
+                System.out.println("Document sent to printer successfully.");
+            } else {
+                System.out.println("Print job canceled.");
+            }
+        } catch (IOException | PrintException e) {
+            e.printStackTrace();
+            System.err.println("Failed to print the document: " + e.getMessage());
+        }
     }
 }
 

@@ -186,6 +186,7 @@ public class ScheduleView extends View implements ActionListener{
             case REQUEST_UNBOOKABLE_SLOT:
                 break;
             case REQUEST_PRINT_SCHEDULE:
+                getMyController().getDescriptor().getViewDescription().setScheduleDay(dayDatePicker.getDate());
                 ActionEvent actionEvent = new ActionEvent(ScheduleView.this, 
                         ActionEvent.ACTION_PERFORMED,
                         ViewController.ScheduleViewControllerActionEvent.PRINT_SCHEDULE_REQUEST.toString());

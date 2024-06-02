@@ -576,6 +576,8 @@ public class ScheduleViewController extends ViewController{
                ViewController.ScheduleViewControllerActionEvent.valueOf(e.getActionCommand());
         switch (actionCommand){
             case PRINT_SCHEDULE_REQUEST:
+                getDescriptor().getControllerDescription().setScheduleDay(
+                        getDescriptor().getViewDescription().getScheduleDay());
                 doPrintAppointmentScheduleForDay(
                         getDescriptor().getControllerDescription().getScheduleDay());
                 break;
