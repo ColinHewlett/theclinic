@@ -51,6 +51,7 @@ import com.toedter.calendar.JDateChooser;
 import controller.DesktopViewController;
 import controller.ViewController;
 import controller.Descriptor;
+import model.non_entity.DatePickerInDialog;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -101,7 +102,7 @@ public class DesktopView extends javax.swing.JFrame
         REQUEST_PATIENT_VIEW,
         REQUEST_TREATMENT_VIEW,
         REQUEST_PRINT_PATIENT_DETAILS_VIEW,
-        REQUEST_PRINT_SCHEDULE_VIEW
+        REQUEST_PRINT_SCHEDULE
     };
 
     private JMenu activeMenu = null;
@@ -216,7 +217,7 @@ public class DesktopView extends javax.swing.JFrame
         mnuPrintedForms.add(mniPrintMedicalConditionViewRequest);
         mnuPrintedForms.add(mniPrintScheduleViewRequest);
         mniPrintMedicalConditionViewRequest.setActionCommand(Action.REQUEST_PRINT_PATIENT_DETAILS_VIEW.toString());
-        mniPrintScheduleViewRequest.setActionCommand(Action.REQUEST_PRINT_SCHEDULE_VIEW.toString());
+        mniPrintScheduleViewRequest.setActionCommand(Action.REQUEST_PRINT_SCHEDULE.toString());
         mniPrintMedicalConditionViewRequest.addActionListener(this);
         mniPrintScheduleViewRequest.addActionListener(this);
     }
@@ -326,7 +327,7 @@ public class DesktopView extends javax.swing.JFrame
         mnuPMSDatabaseProfile.add(mniTreatmentTableRecordCount);
     }
   
-    private ActionListener controller = null;
+    private ViewController controller = null;
     private WindowAdapter windowAdapter = null;  
     private final boolean closeIsEnabled = true;
 
@@ -354,7 +355,7 @@ public class DesktopView extends javax.swing.JFrame
                     ActionEvent actionEvent = new ActionEvent(DesktopView.this, 
                             ActionEvent.ACTION_PERFORMED,
                             DesktopViewController.DesktopViewControllerActionEvent.VIEW_CLOSE_REQUEST.toString());
-                    DesktopView.this.getController().actionPerformed(actionEvent);
+                    DesktopView.this.getMyController().actionPerformed(actionEvent);
                 }
             }
         };
@@ -372,8 +373,8 @@ public class DesktopView extends javax.swing.JFrame
      * @param isDataMigrationEnabled
      * @param ed 
      */
-    public DesktopView(ActionListener controller, Boolean isDataMigrationEnabled, Descriptor ed) { 
-        this.controller = controller;
+    public DesktopView(ViewController controller, Boolean isDataMigrationEnabled, Descriptor ed) { 
+        setMyController(controller);
         this.entityDescriptor = ed;
         initComponents();
         /**
@@ -453,17 +454,19 @@ public class DesktopView extends javax.swing.JFrame
                                 .PRINT_NEW_PATIENT_DETAILS_REQUEST.toString());
                 this.getMyController().actionPerformed(actionEvent);
                 break;
-            case REQUEST_PRINT_SCHEDULE_VIEW:
-                JDateChooser dateChooser = new JDateChooser();
-                dateChooser.setDateFormatString("dd/MM/yyyy");
-                int option = JOptionPane.showConfirmDialog(
-                this,
-                /*getScheduleDatePicker()*/dateChooser,
-                "Select a date",
-                JOptionPane.OK_CANCEL_OPTION,
-                JOptionPane.PLAIN_MESSAGE
-            );
-                
+            case REQUEST_PRINT_SCHEDULE:
+                DatePickerInDialog datePickerInDialog = new DatePickerInDialog(this);
+                datePickerInDialog.showDatePickerDialog();
+                LocalDate day = datePickerInDialog.getSelectedDate();
+                if (day!=null) {
+                    DesktopViewController myController = (DesktopViewController)getMyController();
+                    myController.getDescriptor().getControllerDescription().setScheduleDay(day);
+                    actionEvent = new ActionEvent(
+                            this,ActionEvent.ACTION_PERFORMED,
+                            ViewController.DesktopViewControllerActionEvent
+                                    .PRINT_SCHEDULE_REQUEST.toString());
+                    this.getMyController().actionPerformed(actionEvent);
+                }
                 break;
             case REQUEST_CLOSE_VIEW:
                 mniExitRequestViewActionPerformed();
@@ -476,7 +479,7 @@ public class DesktopView extends javax.swing.JFrame
                     ActionEvent.ACTION_PERFORMED,
                     DesktopViewController.DesktopViewControllerActionEvent
                             .MEDICAL_CONDITION_VIEW_CONTROLLER_REQUEST.toString());
-                    this.getController().actionPerformed(actionEvent);
+                    this.getMyController().actionPerformed(actionEvent);
                 break;
             case REQUEST_PATIENT_VIEW:
                 mniPatientViewRequestActionPerformed();
@@ -486,7 +489,7 @@ public class DesktopView extends javax.swing.JFrame
                         ActionEvent.ACTION_PERFORMED,
                         DesktopViewController.DesktopViewControllerActionEvent
                                 .TREATMENT_VIEW_CONTROLLER_REQUEST.toString());
-                this.getController().actionPerformed(actionEvent);
+                this.getMyController().actionPerformed(actionEvent);
                 break;
         }
     }
@@ -509,9 +512,11 @@ public class DesktopView extends javax.swing.JFrame
         }
     }
     
+    /*
     public ActionListener getMyController(){
         return this.controller;
     }
+    */
     
     public void doSetClinicLogoViewMode(){
         //resizing X_DesktopView frame forces a frame.repaint()
@@ -583,7 +588,7 @@ public class DesktopView extends javax.swing.JFrame
         ActionEvent actionEvent = new ActionEvent(this, 
                 ActionEvent.ACTION_PERFORMED,
                 action.toString());
-        this.getController().actionPerformed(actionEvent);
+        this.getMyController().actionPerformed(actionEvent);
     }
     
     @Override
@@ -678,11 +683,15 @@ public class DesktopView extends javax.swing.JFrame
     private void setContentPaneForInternalFrame(){
         setContentPane(desktop);
     }
-    
+    /*
     public ActionListener getController(){
         return controller;
     }
-    public void setController(DesktopViewController value){
+    */
+    public ViewController getMyController(){
+        return controller;
+    }
+    public void setMyController(ViewController value){
         controller = value;
     }
     /**
@@ -727,7 +736,7 @@ public class DesktopView extends javax.swing.JFrame
                 DesktopViewController.DesktopViewControllerActionEvent.SCHEDULE_VIEW_CONTROLLER_REQUEST.toString());
         String s;
         s = actionEvent.getSource().getClass().getSimpleName();
-        this.getController().actionPerformed(actionEvent);
+        this.getMyController().actionPerformed(actionEvent);
     }
   /*
     private void mniAppointmentCSVSelectionRequestActionPerformed(){
@@ -749,14 +758,14 @@ public class DesktopView extends javax.swing.JFrame
                 ActionEvent.ACTION_PERFORMED,
                 DesktopViewController.DesktopViewControllerActionEvent.PATIENT_VIEW_CONTROLLER_REQUEST.toString());
                 //DesktopViewController.DesktopViewControllerActionEvent.TEST_PATIENT_VIEW_CONTROLLER_REQUEST.toString());
-                this.getController().actionPerformed(actionEvent);
+                this.getMyController().actionPerformed(actionEvent);
     }
     
     private void mniTreatmentViewRequestActionPerformed() {    
         ActionEvent actionEvent = new ActionEvent(this, 
                 ActionEvent.ACTION_PERFORMED,
                 DesktopViewController.DesktopViewControllerActionEvent.TREATMENT_VIEW_CONTROLLER_REQUEST.toString());
-        this.getController().actionPerformed(actionEvent);
+        this.getMyController().actionPerformed(actionEvent);
         
     }
     
@@ -764,7 +773,7 @@ public class DesktopView extends javax.swing.JFrame
         ActionEvent actionEvent = new ActionEvent(this, 
                 ActionEvent.ACTION_PERFORMED,
                 DesktopViewController.DesktopViewControllerActionEvent.NOTIFICATION_VIEW_CONTROLLER_REQUEST.toString());
-        this.getController().actionPerformed(actionEvent);
+        this.getMyController().actionPerformed(actionEvent);
     }
    /* 
     private void mniRenamePMSStoreRequestActionPerformed(){
@@ -827,21 +836,21 @@ public class DesktopView extends javax.swing.JFrame
         ActionEvent actionEvent = new ActionEvent(this, 
                 ActionEvent.ACTION_PERFORMED,
                 DesktopViewController.DesktopViewControllerActionEvent.VIEW_CLOSE_REQUEST.toString());
-        DesktopView.this.getController().actionPerformed(actionEvent);
+        DesktopView.this.getMyController().actionPerformed(actionEvent);
     }
 
     private void mniDeleteDataFromPMSDatabaseRequestActionPerformed(){
         ActionEvent actionEvent = new ActionEvent(this, 
                 ActionEvent.ACTION_PERFORMED,
                 DesktopViewController.DesktopViewControllerActionEvent.DELETE_DATA_FROM_PMS_DATABASE_REQUEST.toString());
-        DesktopView.this.getController().actionPerformed(actionEvent);
+        DesktopView.this.getMyController().actionPerformed(actionEvent);
     }
     
     private void mniImportMigratedDataRequestActionPerformed(){
         ActionEvent actionEvent = new ActionEvent(this, 
                 ActionEvent.ACTION_PERFORMED,
                 DesktopViewController.DesktopViewControllerActionEvent.MIGRATE_DATA_FROM_SOURCE_VIEW_REQUEST.toString());
-        DesktopView.this.getController().actionPerformed(actionEvent);
+        DesktopView.this.getMyController().actionPerformed(actionEvent);
     }
     
     private void doCountAppointmentTableReceived(){
@@ -940,38 +949,38 @@ public class DesktopView extends javax.swing.JFrame
         ActionEvent actionEvent = new ActionEvent(this, 
                 ActionEvent.ACTION_PERFORMED,
                 DesktopViewController.DesktopViewControllerActionEvent.GET_APPOINTMENT_CSV_PATH_REQUEST.toString());
-        this.getController().actionPerformed(actionEvent);
+        this.getMyController().actionPerformed(actionEvent);
         
         actionEvent = new ActionEvent(this, 
                 ActionEvent.ACTION_PERFORMED,
                 DesktopViewController.DesktopViewControllerActionEvent.GET_PATIENT_CSV_PATH_REQUEST.toString());
-        this.getController().actionPerformed(actionEvent);
+        this.getMyController().actionPerformed(actionEvent);
         
         actionEvent = new ActionEvent(this, 
                 ActionEvent.ACTION_PERFORMED,
                 DesktopViewController.DesktopViewControllerActionEvent.GET_PMS_STORE_PATH_REQUEST.toString());
-        this.getController().actionPerformed(actionEvent);
+        this.getMyController().actionPerformed(actionEvent);
         
         if (getIsPMSStoreDefined()){
             actionEvent = new ActionEvent(this, 
                 ActionEvent.ACTION_PERFORMED,
                 DesktopViewController.DesktopViewControllerActionEvent.COUNT_APPOINTMENT_TABLE_REQUEST.toString());
-            this.getController().actionPerformed(actionEvent);
+            this.getMyController().actionPerformed(actionEvent);
 
             actionEvent = new ActionEvent(this, 
                     ActionEvent.ACTION_PERFORMED,
                     DesktopViewController.DesktopViewControllerActionEvent.COUNT_PATIENT_TABLE_REQUEST.toString());
-            this.getController().actionPerformed(actionEvent);
+            this.getMyController().actionPerformed(actionEvent);
 
             actionEvent = new ActionEvent(this, 
                     ActionEvent.ACTION_PERFORMED,
                     DesktopViewController.DesktopViewControllerActionEvent.COUNT_PATIENT_NOTIFICATION_TABLE_REQUEST.toString());
-            this.getController().actionPerformed(actionEvent);
+            this.getMyController().actionPerformed(actionEvent);
 
             actionEvent = new ActionEvent(this, 
                     ActionEvent.ACTION_PERFORMED,
                     DesktopViewController.DesktopViewControllerActionEvent.COUNT_SURGERY_DAYS_ASSIGNMENT_TABLE_REQUEST.toString());
-            this.getController().actionPerformed(actionEvent);
+            this.getMyController().actionPerformed(actionEvent);
         }else{
             this.mniAppointmentTableRecordCount.setText(
                     this.APPOINTMENT_TABLE_RECORD_COUNT_TITLE

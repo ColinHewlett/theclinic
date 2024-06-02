@@ -4,6 +4,7 @@
  */
 package repository;
 
+import model.non_entity.SystemDefinition;
 import static controller.ViewController.displayErrorMessage;
 import model.*;
 import com.healthmarketscience.jackcess.Database;

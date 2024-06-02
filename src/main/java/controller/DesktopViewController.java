@@ -11,7 +11,7 @@ import static controller.ViewController.displayErrorMessage;
 import model.*;
 import controller.exceptions.TemplateReaderException;
 import repository.Repository;
-import model.SystemDefinition;
+import model.non_entity.SystemDefinition;
 import org.apache.commons.io.FilenameUtils;
 import repository.StoreException;//01/03/2023
 import view.views.non_modal_views.DesktopView;
@@ -625,6 +625,10 @@ public class DesktopViewController extends ViewController{
             actionCommand =
                     ViewController.DesktopViewControllerActionEvent.valueOf(e.getActionCommand());
             switch (actionCommand){
+                case PRINT_SCHEDULE_REQUEST:
+                    doPrintAppointmentScheduleForDay(
+                            getDescriptor().getControllerDescription().getScheduleDay());
+                    break;
                 case PRINT_NEW_PATIENT_DETAILS_REQUEST:
                     doPrintNewPatientDetailsRequest(e);
                     break;

@@ -33,7 +33,7 @@ import javax.swing.event.TableModelEvent;
 import javax.swing.JTable;
 import model.QuestionWithState;
 import model.Patient;
-import model.SystemDefinition;
+import model.non_entity.SystemDefinition;
 
 /**
  *

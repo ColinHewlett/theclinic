@@ -6,7 +6,7 @@
 package controller;
 
 //import static controller.ViewController.ScheduleViewControllerActionEvent.APPOINTMENT_EDITOR_TREATMENT_VIEW_REQUEST;
-import model.SystemDefinition;
+import model.non_entity.SystemDefinition;
 import static controller.ViewController.displayErrorMessage;
 import model.Entity.Scope;
 import model.Appointment;
@@ -575,6 +575,10 @@ public class ScheduleViewController extends ViewController{
         ViewController.ScheduleViewControllerActionEvent actionCommand =
                ViewController.ScheduleViewControllerActionEvent.valueOf(e.getActionCommand());
         switch (actionCommand){
+            case PRINT_SCHEDULE_REQUEST:
+                doPrintAppointmentScheduleForDay(
+                        getDescriptor().getControllerDescription().getScheduleDay());
+                break;
             case APPOINTMENT_REMINDED_STATUS_UPDATE_REQUEST:
                 Appointment appointment = 
                         getDescriptor().getViewDescription().getAppointment();

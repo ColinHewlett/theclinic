@@ -90,18 +90,7 @@ public class AppointmentsScheduleTableModel extends DefaultTableModel{
     public Class<?> getColumnClass(int columnIndex){
         return columnClass[columnIndex];
     }
-    
-    /**
-     * 
-     * @param value the update the user made to the "Contact?" column content
-     * -- the method determines the value of the cell before the update (true or false)
-     * -- this is got by reading the source of this value that was read from persistent store
-     * -- depending the value read from persistent store the cell value in the table is toggled
-     * -- lastly an event is fired to inform listeners of the update; thus fireTableCellUpdated(row, col);
-     * @param row defines the row which includes the cell
-     * @param col defines the column which includes the cell
-     */
-    
+
     @Override
     public void setValueAt(Object value, int row, int col) {
         if (col==5){

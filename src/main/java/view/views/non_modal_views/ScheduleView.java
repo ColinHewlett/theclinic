@@ -5,7 +5,7 @@
  */
 package view.views.non_modal_views;
 
-import model.SystemDefinition;
+import model.non_entity.SystemDefinition;
 import view.views.view_support_classes.renderers.AppointmentsTableDurationRenderer;
 import view.views.view_support_classes.renderers.AppointmentsTableLocalDateTimeRenderer;
 import view.views.view_support_classes.renderers.AppointmentsTablePatientRenderer;
@@ -186,6 +186,10 @@ public class ScheduleView extends View implements ActionListener{
             case REQUEST_UNBOOKABLE_SLOT:
                 break;
             case REQUEST_PRINT_SCHEDULE:
+                ActionEvent actionEvent = new ActionEvent(ScheduleView.this, 
+                        ActionEvent.ACTION_PERFORMED,
+                        ViewController.ScheduleViewControllerActionEvent.PRINT_SCHEDULE_REQUEST.toString());
+                getMyController().actionPerformed(actionEvent);
                 break;
             case REQUEST_CLOSE_VIEW:
                 break;
@@ -824,11 +828,16 @@ public class ScheduleView extends View implements ActionListener{
         mnuOptions.add(jSeparator2);
 
         mniPrintSchedule.setText("Print schedule selection");
+        mniPrintSchedule.setActionCommand(Action.REQUEST_PRINT_SCHEDULE.toString());
+        mniPrintSchedule.addActionListener(this);
+        /*
         mniPrintSchedule.addActionListener(new java.awt.event.ActionListener() {
+            
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 mniPrintScheduleActionPerformed(evt);
             }
         });
+        */
         mnuOptions.add(mniPrintSchedule);
         mnuOptions.add(jSeparator3);
 
@@ -1237,82 +1246,7 @@ public class ScheduleView extends View implements ActionListener{
     
     private void mniPrintScheduleActionPerformed(java.awt.event.ActionEvent evt) { 
         getMyController().sendNoOpMessage(this);
-        /*
-        int PATIENT_WIDTH = 36;
-        int FROM_WIDTH = 8;
-        int TO_WIDTH = 8;
-        int NOTES_WIDTH = 20;
-        int patientColumn = 0;
-        int fromColumn = 1;
-        int toColumn = 2;
-        int durationColumn = 3;
-        int notesColumn = 4;
-        String patient;
-        String from;
-        String to;
-        String duration;
-        String contact;
-        String stringToPrint;
-        if (this.tblAppointments!=null){
-            TableModel model = tblAppointments.getModel();
-            stringToPrint = getMyController().getDescriptor().getControllerDescription().getScheduleDay().
-                    format(DateTimeFormatter.ofPattern("dd/MM/yy"));
-            stringToPrint = stringToPrint + " Appointment Schedule" +"\n\n";
-            stringToPrint = stringToPrint + String.format(centreString(PATIENT_WIDTH,"Patient") +
-                    centreString(FROM_WIDTH,"From") 
-                    + centreString(TO_WIDTH, "To")
-                    + centreString(NOTES_WIDTH, "Notes"));
-            stringToPrint = stringToPrint +"\n";
- 
-            for (int row = 0; row < tblAppointments.getRowCount(); row++) {
-                from = ((LocalTime)model.getValueAt(row, fromColumn)).format(DateTimeFormatter.ofPattern("HH:mm"));
-                to = ((LocalTime)model.getValueAt(row, toColumn)).format(DateTimeFormatter.ofPattern("HH:mm"));
-                Patient p = (Patient)model.getValueAt(row, patientColumn);
-                //String notes = (String)model.getValueAt(row, notesColumn);
-               
-                //if (model.getValueAt(row, patientColumn)==null) {
-                if (p==null){
-                    patient = "AVAILABLE SLOT";
-                    stringToPrint = stringToPrint + String.format(
-                        centreString(PATIENT_WIDTH, patient) +
-                        centreString(FROM_WIDTH, from) +
-                        centreString(TO_WIDTH, to) +
-                        leftAlignString(NOTES_WIDTH, ""));
-                }else if(p.toString().equals(SystemDefinition.APPOINTMENT_UNBOOKABILITY_MARKER)){
-                    patient = "<< U N B O O K A B L E  S L O T >>";
-                    stringToPrint = stringToPrint + String.format(
-                        centreString(PATIENT_WIDTH, patient) +
-                        centreString(FROM_WIDTH, from) +
-                        centreString(TO_WIDTH, to) +
-                        leftAlignString(NOTES_WIDTH, ""));   
-                }else {
-                    patient = model.getValueAt(row,patientColumn).toString();
-                    stringToPrint = stringToPrint + String.format(
-                        leftAlignString(PATIENT_WIDTH, patient) +
-                        centreString(FROM_WIDTH, from) +
-                        centreString(TO_WIDTH, to) +
-                        leftAlignString(NOTES_WIDTH, "");
-                }
-                stringToPrint = stringToPrint + "\n";
-            }
-            
-            PrinterJob job = PrinterJob.getPrinterJob();
-            job.setPrintable(new OutputPrinter(stringToPrint));
-            boolean doPrint = job.printDialog();
-            if (doPrint)
-            { 
-                try 
-                {
-                    job.print();
-                }
-                catch (PrinterException ex)
-                {
-                    int test = 0;
-                    // Print job did not complete.
-                }
-            }
-        }
-        */
+
     }
 
     /*

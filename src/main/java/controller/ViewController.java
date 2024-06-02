@@ -18,7 +18,6 @@ import java.awt.event.ActionListener;
 import java.awt.Frame;
 import java.awt.Insets;
 import java.awt.Point;
-import java.io.File;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
@@ -28,14 +27,13 @@ import java.time.LocalTime;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.ArrayList;
 import java.util.Iterator;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.table.TableColumn;
 /*28/03/2024import model.PatientNote;*/
-import model.SystemDefinition;
+import model.non_entity.SystemDefinition;
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
@@ -44,18 +42,11 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import org.apache.poi.xwpf.extractor.XWPFWordExtractor;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.ParserConfigurationException;
-import org.w3c.dom.Document;
-import org.w3c.dom.NodeList;
-import org.w3c.dom.Node;
-import org.w3c.dom.Element;
-import org.xml.sax.SAXException;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.math.BigInteger;
+import java.time.Duration;
 import java.util.List;
 import org.apache.poi.xwpf.usermodel.ParagraphAlignment;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
@@ -213,6 +204,7 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         PATIENT_QUESTIONNAIRE_VIEW_CONTROLLER_REQUEST,
         PRINT_PATIENT_MEDICAL_HISTORY_REQUEST,//basically requires PMH view controller to achieve this
         PRINT_NEW_PATIENT_DETAILS_REQUEST, //also requires MC view controller to accomplish this
+        PRINT_SCHEDULE_REQUEST,// Desktop VC accesses methods in ViewControllet to get job done, so no requirement for a scheduile VC
         PATIENT_SELECTION_VIEW_CONTROLLER_REQUEST,
         PATIENT_VIEW_CONTROLLER_REQUEST,
         
@@ -498,6 +490,7 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         SURGERY_DAYS_EDITOR_VIEW_REQUEST,
         EMPTY_SLOT_SCAN_CONFIGURATION_VIEW_REQUEST,
         UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_VIEW_REQUEST,
+        PRINT_SCHEDULE_REQUEST,
         //view action requests
         APPOINTMENT_CANCEL_REQUEST,
         APPOINTMENT_FOR_DAY_REQUEST,
@@ -1464,10 +1457,33 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
     }
     
     protected void doPrintAppointmentScheduleForDay(LocalDate day){
-        Iterator<Appointment> it = getDescriptor().getControllerDescription().getAppointmentSlotsForDay().iterator();
-        while (it.hasNext()){
+        doAppointmentForDayRequestForPrintScheduleRequest(day);
+        XWPFDocument document = null;
+        XWPFTable table = null;
+        CTTblWidth tableWidth = null;
+        
+        InputStream fis = getClass().getResourceAsStream("/Appointment schedule.docx");
+        try{
+            document = new XWPFDocument(fis);
+            setDocument(document);
+            List<XWPFTable> tables = getDocument().getTables();
+            for(int index = 0; index < tables.size(); index++){
+                table = document.getTableArray(index);
+                tableWidth = table.getCTTbl().addNewTblPr().addNewTblW();
+                tableWidth.setW(BigInteger.valueOf(10300)); // 8000 in Twips (1/20 of a point)
+            }
+            populateAppointmentScheduleHeaderTable(document.getTableArray(0), day);
+            populateAppointmentScheduleTable(document.getTableArray(1));
             
+            FileOutputStream out = new FileOutputStream("AppointmentScheduleForDay.docx");
+            document.write(out);
+            System.out.println(new File(".").getAbsolutePath());
+            System.out.println("Word document with complex table created successfully!");
+            out.close();
+        }catch (IOException e) {
+            e.printStackTrace();
         }
+            
     }
       
     protected void doPrintPatientMedicalHistoryQuestionnaireRequest(boolean isNotForNewPatient)throws StoreException{
@@ -1496,7 +1512,8 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
                 table = document.getTableArray(index);
                 tableWidth = table.getCTTbl().addNewTblPr().addNewTblW();
                 tableWidth.setW(BigInteger.valueOf(10300)); // 8000 in Twips (1/20 of a point)
-            }  
+            } 
+            
             populate(PatientDetailsTableName.PATIENT_CONTACT_DETAILS);
             populate(PatientDetailsTableName.PATIENT_QUESTIONNAIRE);
             populate(PatientDetailsTableName.PATIENT_MEDICAL_HISTORY);
@@ -1593,6 +1610,30 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         return result;
     }
     
+    private void setTextInCell(XWPFTableCell cell,String text,SystemDefinition.ScheduleTable entity){
+        if(entity!=null){ //switches between 'header' table and 'schedule' table
+            switch(entity){
+                case PATIENT:
+                    if (text.contains("UNBOOKABLE")) runText(cell, text, SystemDefinition.FONT.DEFAULT_RED, ParagraphAlignment.CENTER);
+                    else if(text.contains("AVAILABLE SLOT")) runText(cell, text, SystemDefinition.FONT.DEFAULT_BLUE, ParagraphAlignment.CENTER);
+                    else runText(cell, text, SystemDefinition.FONT.DEFAULT, ParagraphAlignment.LEFT);
+                    break;
+                case FROM:
+                    runText(cell, text, SystemDefinition.FONT.DEFAULT, ParagraphAlignment.CENTER);
+                    break;
+                case TO:
+                    runText(cell, text, SystemDefinition.FONT.DEFAULT, ParagraphAlignment.CENTER);
+                    break;
+                case TREATMENT:
+                    runText(cell, text, SystemDefinition.FONT.DYNAMIC, ParagraphAlignment.LEFT);
+                    break;
+                case CONFIRMED:
+                    runText(cell, text, SystemDefinition.FONT.TICK, ParagraphAlignment.CENTER);
+                    break;
+            }
+        }else runText(cell, text, SystemDefinition.FONT.SCHEDULE_HEADER, ParagraphAlignment.CENTER);
+    }
+    
     private void setTextInCell(boolean isWithState, XWPFTable table, int row, XWPFTableCell cell, Condition condition)throws StoreException{
         ConditionWithState CWS = null;
         if (condition.getIsPrimaryCondition()){
@@ -1633,6 +1674,18 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         int cellWidthTwips = 4813;
         cell.getCTTc().addNewTcPr().addNewNoWrap();
         switch (font){
+            case SCHEDULE_HEADER:
+                if (text!=null){
+                    if (!text.trim().isEmpty()){
+                        run.setText(text);
+                        run.setFontFamily(font.fontName());
+                        run.setFontSize(font.fontSize());
+
+                    }
+                }
+                break;
+            case DEFAULT_RED:
+            case DEFAULT_BLUE:
             case DEFAULT_BOLD:
             case DEFAULT:
                 if (text!=null){
@@ -1641,12 +1694,12 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
                         run.setFontFamily(font.fontName());
                         run.setFontSize(font.fontSize());
                         run.setBold(font.IsFontBold());
+                        run.setColor(font.fontColor());
                     }
                 }
                 break;
             case DYNAMIC:
                 // Set no word wrap
-                
                 if (text!=null){
                     if (!text.trim().isEmpty()){
                         run.setText(text);
@@ -1658,12 +1711,17 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
                 }
                 break;
             case TICK:
-                run.setText(text);
-                run.setFontFamily(font.fontName());
-                run.setFontSize(font.fontSize());
+                if (text!=null){
+                    if (!text.trim().isEmpty()){
+                        run.setText(text);
+                        run.setFontFamily(font.fontName());
+                        run.setFontSize(font.fontSize());
+                    }
+                }
 
                 break;
         }
+
         paragraph.setAlignment(alignment);
         verticallyAlignTextInCell(cell);
         
@@ -2021,6 +2079,59 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         }
     }
     
+    private void populateAppointmentScheduleHeaderTable(XWPFTable table, LocalDate day){
+        String _day = day.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+        String header = "Appointment schedule (" + _day + ")";
+        XWPFTableCell cell = table.getRow(0).getCell(0);
+        setTextInCell(cell, header, null);
+    }
+    
+    private void populateAppointmentScheduleTable(XWPFTable table){
+        XWPFTableCell cell = null;
+        int row = 0;
+        String patient = "";
+        String from = "";
+        String to = "";
+        String treatment = "";
+        String confirmed = "";
+        
+        Iterator<Appointment> it = getDescriptor().getControllerDescription().getAppointmentSlotsForDay().iterator();
+        while (it.hasNext()){
+            row++;
+            Appointment appointment = (Appointment)it.next();
+
+            if (appointment.getPatient()==null) patient = "<AVAILABLE SLOT>";
+            else if (appointment.getPatient().toString()
+                    .equals(SystemDefinition.APPOINTMENT_UNBOOKABILITY_MARKER))
+                patient = "<UNBOOKABLE_SLOT>";
+            else patient = appointment.getPatient().toString();
+
+
+            from = appointment.getStart().toLocalTime().format(DateTimeFormatter.ofPattern("HH:mm"));
+
+            Long duration = appointment.getDuration().toMinutes();
+            to = appointment.getStart().toLocalTime().plusMinutes(duration)
+                    .format(DateTimeFormatter.ofPattern("HH:mm"));
+
+            treatment = appointment.getNotes();
+            
+            if (row > 1) table.createRow();//this because we already start with one blank row pluis the column headers
+            setTableRowHeightInTwips(table.getRow(row), SystemDefinition.SCHEDULE_TABLE_CELL_HEIGHT);
+            cell = table.getRow(row).getCell(SystemDefinition.ScheduleTable.PATIENT.column());
+            setTextInCell(cell,patient,SystemDefinition.ScheduleTable.PATIENT);
+            cell = table.getRow(row).getCell(SystemDefinition.ScheduleTable.FROM.column());
+            setTextInCell(cell,from,SystemDefinition.ScheduleTable.FROM);
+            cell = table.getRow(row).getCell(SystemDefinition.ScheduleTable.TO.column());
+            setTextInCell(cell,to,SystemDefinition.ScheduleTable.TO);
+            cell = table.getRow(row).getCell(SystemDefinition.ScheduleTable.TREATMENT.column());
+            setTextInCell(cell,treatment,SystemDefinition.ScheduleTable.TREATMENT);
+            cell = table.getRow(row).getCell(SystemDefinition.ScheduleTable.CONFIRMED.column());
+            if (appointment.getHasPatientBeenContacted())confirmed = SystemDefinition.TICK;
+            else confirmed = null;
+            setTextInCell(cell,confirmed,SystemDefinition.ScheduleTable.CONFIRMED);
+        }
+    }
+    
     private void populatePatientMedicalHistoryTable(XWPFTable table)throws StoreException{
         setIsForPatient(isForPatient);
         XWPFTableCell cell = null;
@@ -2145,6 +2256,162 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         CTHeight ctHeight = trPr.addNewTrHeight();
         ctHeight.setVal(BigInteger.valueOf(heightTwips));
         ctHeight.setHRule(STHeightRule.EXACT);
+    }
+    
+    protected void doAppointmentForDayRequestForPrintScheduleRequest(LocalDate day){
+        Appointment appointment = new Appointment();
+        appointment.setStart(day.atStartOfDay());
+        appointment.setScope(Entity.Scope.FOR_DAY);
+        try{
+            appointment.read();
+            if (!appointment.get().isEmpty()){
+                if (appointment.get().get(0).getStart().
+                        isBefore(day.atTime(ViewController.FIRST_APPOINTMENT_SLOT))){
+                    getDescriptor().getControllerDescription().
+                            setAppointmentEarlyStart(appointment.get().get(0).getStart());
+                }else getDescriptor().getControllerDescription().
+                            setAppointmentEarlyStart(null);
+            }
+            if (!appointment.get().isEmpty()){
+                if (appointment.get().get(appointment.get().size()-1).getStart().
+                        isAfter(day.atTime(ViewController.LAST_APPOINTMENT_SLOT))){
+                    getDescriptor().getControllerDescription().
+                            setAppointmentLateStart(appointment.get().
+                                    get(appointment.get().size()-1).getStart());
+                }else getDescriptor().getControllerDescription().
+                            setAppointmentLateStart(null);
+            }
+            /**
+             * generate appointment note from treatments selected
+             */
+            doFormatAppointmentTreatmentNote(appointment.get());
+
+            getDescriptor().getControllerDescription().setAppointments(appointment.get());
+            getDescriptor().getControllerDescription().setScheduleDay(day);
+            //doAppointeeReminderCount(appointment.get());
+            //getUpdatedAppointmentSlotsForDay(appointment);// = getUpdatedAppointmentSlotsForDay(appointment) contents
+            ArrayList<Appointment> appointmentSlotsForDay =
+                getAppointmentsForSelectedDayIncludingEmptySlotsForPrintScheduleRequest(appointment.get(),appointment.getStart().toLocalDate());
+            getDescriptor().getControllerDescription().setAppointmentSlotsForDay(appointmentSlotsForDay); 
+        }
+        catch (StoreException ex){
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+            String message = ex.getMessage() 
+                    + "\nRaised in doAppointmentForDayRequest(" + day.format(formatter) + ")";
+            displayErrorMessage(message,"AppointmentViewController error",JOptionPane.WARNING_MESSAGE);
+        }
+    }
+    
+    private ArrayList<Appointment> getAppointmentsForSelectedDayIncludingEmptySlotsForPrintScheduleRequest(
+            ArrayList<Appointment> appointments, LocalDate day) {
+        LocalDateTime nextEmptySlotStartTime = null;
+        
+        /* code to handle an early appointment */
+        if (!appointments.isEmpty()){
+            if (appointments.get(0).getStart().toLocalTime().
+                    isBefore(ViewController.FIRST_APPOINTMENT_SLOT)){
+                nextEmptySlotStartTime = appointments.get(0).getStart();
+            }else {
+                nextEmptySlotStartTime = LocalDateTime.of(day, 
+                                        ViewController.FIRST_APPOINTMENT_SLOT);
+            }
+        }else{
+           nextEmptySlotStartTime = LocalDateTime.of(day, 
+                                        ViewController.FIRST_APPOINTMENT_SLOT); 
+        }
+
+
+        ArrayList<Appointment> apptsForDayIncludingEmptySlots = new ArrayList<>();      
+        Iterator<Appointment> it = appointments.iterator();
+        /**
+         * check for no appointments on this day if no appointment create a
+         * single empty slot for whole day
+         */
+        if (appointments.isEmpty()) {
+            apptsForDayIncludingEmptySlots.add(createEmptyAppointmentSlotForPrintScheduleRequest(
+                                                nextEmptySlotStartTime));
+        } 
+        /**
+         * At least one appointment scheduled, calculate empty slot intervals
+         * interleaved appropriately (time ordered) with scheduled
+         * appointment(s)
+         */
+        else { 
+            while (it.hasNext()) {
+                Appointment appointment = it.next();
+                Duration durationToNextSlot = Duration.between(
+                        nextEmptySlotStartTime,appointment.getStart() );
+                /**
+                 * check if no time exists between next scheduled appointment
+                 * If so update nextEmptySlotStartTime to immediately follow
+                 * the current scheduled appointment
+                 */
+                if (durationToNextSlot.isZero()) {
+                    nextEmptySlotStartTime = 
+                            appointment.getStart().plusMinutes(appointment.getDuration().toMinutes());
+                    apptsForDayIncludingEmptySlots.add(appointment);
+                } 
+                /**
+                 * If time exists between nextEmptySlotTime and the current 
+                 * appointment,
+                 * -- create an empty appointment slot to fill the gap
+                 * -- re-initialise nextEmptySlotTime to immediately follow the
+                 *    the current appointment
+                 */
+                else {
+                    Appointment emptySlot = createEmptyAppointmentSlotForPrintScheduleRequest(nextEmptySlotStartTime,
+                            Duration.between(nextEmptySlotStartTime, appointment.getStart()).abs());
+                    apptsForDayIncludingEmptySlots.add(emptySlot);
+                    apptsForDayIncludingEmptySlots.add(appointment);
+                    nextEmptySlotStartTime =
+                            appointment.getStart().plusMinutes(appointment.getDuration().toMinutes());
+                }
+            }
+        }
+        Appointment lastAppointment = 
+                apptsForDayIncludingEmptySlots.get(apptsForDayIncludingEmptySlots.size()-1);
+        //06/08/2022 08:49
+        if (getIsBookedStatusForPrintScheduleRequest(lastAppointment)){
+            //15/07/2023 enables an appointment to run over LAST_APPOINTMENT_SLOT time
+ 
+            Duration durationToDayEnd = 
+                    Duration.between(nextEmptySlotStartTime.toLocalTime(), ViewController.LAST_APPOINTMENT_SLOT);
+            if (!durationToDayEnd.isNegative()){
+                if (!durationToDayEnd.isZero()) {
+                    Appointment emptySlot = createEmptyAppointmentSlotForPrintScheduleRequest(nextEmptySlotStartTime);
+                    apptsForDayIncludingEmptySlots.add(emptySlot);
+                }
+            }
+            
+        }
+        return apptsForDayIncludingEmptySlots;
+    }
+    
+    private Appointment createEmptyAppointmentSlotForPrintScheduleRequest(LocalDateTime start){
+        Appointment appointment = new Appointment();
+        appointment.setPatient(null);
+        appointment.setStart(start);
+        appointment.setDuration(Duration.between(start.toLocalTime(), 
+                                                ViewController.LAST_APPOINTMENT_SLOT));
+         //06/08/2022 08:49                                       
+        //appointment.setStatus(Appointment.Status.UNBOOKED);
+        return appointment;
+    }
+    
+    private Appointment createEmptyAppointmentSlotForPrintScheduleRequest(LocalDateTime start, Duration duration){
+        Appointment appointment = new Appointment();
+        appointment.setPatient(null);
+        appointment.setStart(start);
+        appointment.setDuration(duration);
+        //appointment.setStatus(Appointment.Status.UNBOOKED);
+        //appointment.setEnd(appointment.getStart().plusMinutes(duration.toMinutes()));
+        return appointment;
+    }
+    
+    private Boolean getIsBookedStatusForPrintScheduleRequest(Appointment appointment){
+        if (appointment.getPatient()==null) return false;
+        if(!appointment.getPatient().getIsKeyDefined())return false;
+        return true;
     }
 }
 

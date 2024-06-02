@@ -6,7 +6,7 @@
 package view.views.view_support_classes.renderers;
 
 import model.Patient;
-import model.SystemDefinition;
+import model.non_entity.SystemDefinition;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;

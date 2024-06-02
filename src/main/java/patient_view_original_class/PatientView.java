@@ -6,7 +6,7 @@
 package patient_view_original_class;
 
 import view.views.non_modal_views.DesktopView;
-import model.SystemDefinition;
+import model.non_entity.SystemDefinition;
 import view.views.modal_views.dialogs.Dialog;
 import controller.exceptions.TemplateReaderException;
 import controller.TemplateReader;

@@ -5,6 +5,7 @@
  */
 package model;
 //<editor-fold defaultstate="collapsed" desc="Imports">
+import model.non_entity.SystemDefinition;
 import repository.Repository;
 import repository.StoreException;//01/03/2023
 import java.awt.Point;

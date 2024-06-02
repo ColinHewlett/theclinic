@@ -4,7 +4,7 @@
  */
 package patient_view_original_class;
 
-import model.SystemDefinition;
+import model.non_entity.SystemDefinition;
 import java.awt.Component;
 import java.awt.Font;
 import javax.swing.JLabel;
