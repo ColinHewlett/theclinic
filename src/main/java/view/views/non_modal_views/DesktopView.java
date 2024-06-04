@@ -148,6 +148,7 @@ public class DesktopView extends javax.swing.JFrame
             private final String PATIENT_CSV_SELECTION_REQUEST_TITLE = "Select patient CSV file to use";
         
         private final String IMPORT_DATA_REQUEST_TITLE = "Import data from CSV files to PMS database";  
+        private final String IMPORT_TEMPLATED_DATA_REQUEST_TITLE = "Import templated data from SystemDefintion.xml";  
         private final String DELETE_DATA_FROM_PMS_DATABASE_REQUEST_TITLE = "Delete all data from PMS database";
         
     private JMenu mnuSelectView = null; 
@@ -183,6 +184,7 @@ public class DesktopView extends javax.swing.JFrame
             private JMenuItem mniPatientCSVSelectionRequest = null;
         
         private JMenuItem mniImportMigratedDataRequest = null;
+        private JMenuItem mniImportTemplatedDataRequest = null;
         private JMenuItem mniDeleteDataFromPMSDatabaseRequest = null;
         
     private int getTopDynamicFrameListDelimiter(){
@@ -272,6 +274,7 @@ public class DesktopView extends javax.swing.JFrame
         makeCSVSourceFilesPopupMenu();
         
         mniImportMigratedDataRequest = new JMenuItem(IMPORT_DATA_REQUEST_TITLE); 
+        mniImportTemplatedDataRequest = new JMenuItem(IMPORT_TEMPLATED_DATA_REQUEST_TITLE);
         mniDeleteDataFromPMSDatabaseRequest = new JMenuItem(DELETE_DATA_FROM_PMS_DATABASE_REQUEST_TITLE);
         mniExitViewRequest = new JMenuItem(EXIT_VIEW_REQUEST_TITLE);
         
@@ -279,6 +282,7 @@ public class DesktopView extends javax.swing.JFrame
         mnuMigrationManagement.add(mnuCSVSourceFiles);
         mnuMigrationManagement.add(new JSeparator());
         mnuMigrationManagement.add(mniImportMigratedDataRequest);
+        mnuMigrationManagement.add(mniImportTemplatedDataRequest);
         mnuMigrationManagement.add(mniDeleteDataFromPMSDatabaseRequest);
         mnuMigrationManagement.add(new JSeparator());
         setTopDynamicFrameListDelimiter(mnuMigrationManagement.getItemCount()-1);
@@ -286,6 +290,8 @@ public class DesktopView extends javax.swing.JFrame
         
         mniImportMigratedDataRequest.addActionListener(
                 (ActionEvent e) -> mniImportMigratedDataRequestActionPerformed());
+        mniImportTemplatedDataRequest.addActionListener(
+                (ActionEvent e) -> mniImportTemplatedDataRequestActionPerformed());
         mniDeleteDataFromPMSDatabaseRequest.addActionListener(
                 (ActionEvent e) -> mniDeleteDataFromPMSDatabaseRequestActionPerformed());
         mniExitViewRequest.addActionListener(
@@ -843,6 +849,13 @@ public class DesktopView extends javax.swing.JFrame
         ActionEvent actionEvent = new ActionEvent(this, 
                 ActionEvent.ACTION_PERFORMED,
                 DesktopViewController.DesktopViewControllerActionEvent.DELETE_DATA_FROM_PMS_DATABASE_REQUEST.toString());
+        DesktopView.this.getMyController().actionPerformed(actionEvent);
+    }
+    
+    private void mniImportTemplatedDataRequestActionPerformed(){
+        ActionEvent actionEvent = new ActionEvent(this, 
+                ActionEvent.ACTION_PERFORMED,
+                DesktopViewController.DesktopViewControllerActionEvent.MIGRATE_DATA_FROM_SYSTEM_DEFINITION_TEMPLATE.toString());
         DesktopView.this.getMyController().actionPerformed(actionEvent);
     }
     

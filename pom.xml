@@ -76,6 +76,21 @@
         
 <!-- Thanks for using https://jar-download.com -->
 
+        <!-- https://mvnrepository.com/artifact/org.docx4j/docx4j-core -->
+        <dependency>
+            <groupId>org.docx4j</groupId>
+            <artifactId>docx4j-core</artifactId>
+            <version>11.4.11</version>
+        </dependency>
+        <!-- Docx4j Export FO for PDF conversion -->
+        <!-- https://mvnrepository.com/artifact/org.docx4j/docx4j-export-fo -->
+        <dependency>
+            <groupId>org.docx4j</groupId>
+            <artifactId>docx4j-export-fo</artifactId>
+            <version>8.3.3</version>
+        </dependency>
+
+
         <!-- Apache PDFBox for creating PDF files -->
         <dependency>
             <groupId>org.apache.pdfbox</groupId>

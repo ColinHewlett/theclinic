@@ -66,7 +66,7 @@ import org.openxmlformats.schemas.wordprocessingml.x2006.main.STTblWidth;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.STVerticalJc;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.printing.PDFPageable;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import javax.print.*;
@@ -76,6 +76,14 @@ import javax.print.attribute.standard.MediaSizeName;
 import java.awt.print.PrinterException;
 import java.io.*;
 import org.apache.commons.compress.utils.FileNameUtils;
+import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
+import org.docx4j.Docx4J;
+
+import java.awt.print.PrinterException;
+import java.awt.print.PrinterJob;
+import javax.print.attribute.HashPrintRequestAttributeSet;
+import javax.print.attribute.PrintRequestAttributeSet;
+import javax.print.attribute.standard.MediaSizeName;
 
 
 /**
@@ -113,9 +121,19 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
                         new File(SystemDefinition.getPMSSystemDefinition()));
         TemplateReader.setEntityTag("entity");
         TemplateReader.setEntityId("Patient");
-        TemplateReader.setSectionId("History");
+        TemplateReader.setSectionId("Medical history");
         PrimaryCondition pc = TemplateReader.extract(new PrimaryCondition());
         return pc;
+    }
+    
+    protected Question extractQuestionnaireFromTemplate()throws TemplateReaderException{
+        TemplateReader.setTemplateFile(
+                        new File(SystemDefinition.getPMSSystemDefinition()));
+        TemplateReader.setEntityTag("entity");
+        TemplateReader.setEntityId("Patient");
+        TemplateReader.setSectionId("Questionnaire");
+        Question question = TemplateReader.extract(new Question());
+        return question;
     }
     
     protected Treatment extractTreatmentFromTemplate()throws TemplateReaderException{
@@ -255,6 +273,7 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         MIGRATE_SECONDARY_CONDITION_DATA,
         MIGRATE_SECONDARY_CONDITION_DATA_COMPLETED,
         MIGRATE_TREATMENT_DATA,
+        MIGRATE_DATA_FROM_SYSTEM_DEFINITION_TEMPLATE,
         MIGRATE_TREATMENT_DATA_COMPLETED,
         MODAL_VIEWER_ACTIVATED_NOTIFICATION,
         MODAL_VIEWER_CLOSED_NOTIFICATION,
@@ -1489,9 +1508,10 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
             
             FileOutputStream out = new FileOutputStream("AppointmentScheduleForDay.docx");
             document.write(out);
+            document.close();
             String path = new File(".").getAbsolutePath();
             path = path.substring(0,path.length() - 2) + "\\AppointmentScheduleForDay.docx";
-            printDocument(document,path);
+            printDocument(path);
             System.out.println(new File(".").getAbsolutePath());
             System.out.println("Word document with complex table created successfully!");
             out.close();
@@ -2429,7 +2449,7 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         return true;
     }
     
-    private void printDocument(XWPFDocument document, String path){
+    private void printDocument(String path){
         //get path name for pdf conversion of Word document
         
         int folder;
@@ -2441,75 +2461,66 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         pdfFilePath = pdfFilePath + ".pdf";
         
          try {
-            // Load the Word document
-            //InputStream docxInputStream = new FileInputStream(docxFilePath);
-            //XWPFDocument docxDocument = new XWPFDocument(docxInputStream);
-            
-            //XWPFDocument document = new XWPFDocument(new FileInputStream(docxFilePath));
+            // Load the DOCX document using Docx4j
+            WordprocessingMLPackage wordMLPackage = WordprocessingMLPackage.load(new File(docxFilePath));
 
-            // Convert the Word document to PDF
-            convertToPDF(document, pdfFilePath);
+            // Convert DOCX to PDF
+            File pdfFile = new File(pdfFilePath);
+            convertDocxToPdf(wordMLPackage, pdfFile);
 
-            // Print the PDF document
-            printPDF(pdfFilePath);
-        } catch (IOException e) {
+            // Print the PDF file
+            printPDF(pdfFile);
+
+            System.out.println("Document printed successfully.");
+        } catch (Exception e) {
             e.printStackTrace();
-            System.err.println("Failed to load the Word document: " + e.getMessage());
+            System.err.println("Failed to print the document: " + e.getMessage());
         }
     }
     
-    private static void convertToPDF(XWPFDocument document, String pdfFilePath) throws IOException {
-        PDDocument pdfDocument = new PDDocument();
-
-        // Create a new page in the PDF document
-        PDPage page = new PDPage();
-        pdfDocument.addPage(page);
-
-        PDPageContentStream contentStream = new PDPageContentStream(pdfDocument, page);
-
-        // Write the content of the Word document to the PDF
-        contentStream.beginText();
-        contentStream.setFont(PDType1Font.HELVETICA, 12);
-        contentStream.setLeading(14.5f);
-        contentStream.newLineAtOffset(25, 750);
-
-        document.getParagraphs().forEach(paragraph -> {
-            try {
-                contentStream.showText(paragraph.getText());
-                contentStream.newLine();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        });
-
-        contentStream.endText();
-        contentStream.close();
-
-        // Save the PDF document
-        pdfDocument.save(pdfFilePath);
-        pdfDocument.close();
+    private static void convertDocxToPdf(WordprocessingMLPackage wordMLPackage, File pdfFile) throws Exception {
+        OutputStream os = new FileOutputStream(pdfFile);
+        Docx4J.toPDF(wordMLPackage, os);
+        os.close();
     }
     
-    private static void printPDF(String pdfFilePath) {
-        try (InputStream inputStream = new FileInputStream(pdfFilePath)) {
-            Doc pdfDoc = new SimpleDoc(inputStream, DocFlavor.INPUT_STREAM.PDF, null);
+    private static void printPDF(File pdfFile) {
+        PDDocument document = null;
 
-            PrintRequestAttributeSet printRequestAttributes = new HashPrintRequestAttributeSet();
-            printRequestAttributes.add(MediaSizeName.ISO_A4);
+        try {
+            document = PDDocument.load(pdfFile);
 
-            PrintService[] printServices = PrintServiceLookup.lookupPrintServices(DocFlavor.INPUT_STREAM.PDF, printRequestAttributes);
+            // Create a PrinterJob
+            PrinterJob job = PrinterJob.getPrinterJob();
 
-            PrintService printService = ServiceUI.printDialog(null, 200, 200, printServices, null, null, printRequestAttributes);
-            if (printService != null) {
-                DocPrintJob printJob = printService.createPrintJob();
-                printJob.print(pdfDoc, printRequestAttributes);
-                System.out.println("Document sent to printer successfully.");
+            // Set the document to be printed
+            job.setPageable(new PDFPageable(document));
+
+            // Create print dialog attributes
+            PrintRequestAttributeSet attr = new HashPrintRequestAttributeSet();
+            attr.add(MediaSizeName.ISO_A4);
+
+            // Show the print dialog
+            if (job.printDialog(attr)) {
+                // Print the document
+                job.print(attr);
             } else {
-                System.out.println("Print job canceled.");
+                System.out.println("Print job cancelled by the user.");
             }
-        } catch (IOException | PrintException e) {
+
+        } catch (IOException e) {
             e.printStackTrace();
-            System.err.println("Failed to print the document: " + e.getMessage());
+        } catch (PrinterException e) {
+            e.printStackTrace();
+        } finally {
+            // Close the document
+            if (document != null) {
+                try {
+                    document.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 }

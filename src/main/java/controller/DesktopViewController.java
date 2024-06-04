@@ -487,6 +487,33 @@ public class DesktopViewController extends ViewController{
                 break;
         }
     }
+    
+    private void doMigrateDataFromSystemDefintionTemplate(){
+        //PRIMARY CONDITION import
+        try{
+            PrimaryCondition pc = 
+                    extractMedicalHistoryFromTemplate();
+            setExtractedPrimaryConditionFromTemplate(pc);
+            
+            for(Condition condition : pc.get()){
+                PrimaryCondition pCondition = (PrimaryCondition)condition;
+                pCondition.insert();
+            }
+            
+        }catch (TemplateReaderException ex){
+            displayErrorMessage(ex.getMessage() + "\nTemplateReaderException handled"
+                    + " in case MIGRATE_PRIMARY_CONDITION_DATA inside "
+                    + "doExportProgressViewControllerAction()",
+                    "Desktop View Controller error",
+                    JOptionPane.WARNING_MESSAGE);
+        }catch (StoreException ex){
+            displayErrorMessage(ex.getMessage() + "\nStoreException handled"
+                    + " in case MIGRATE_PATIENT_MEDICAL_HISTORY inside "
+                    + "doExportProgressViewControllerAction()",
+                    "Desktop View Controller error",
+                    JOptionPane.WARNING_MESSAGE);
+        }
+    }
  
     private void doActionEventForImportProgressViewController(ActionEvent e){
         DesktopViewControllerActionEvent actionCommand =
@@ -605,6 +632,70 @@ public class DesktopViewController extends ViewController{
                 break;
         }
     }
+    
+    private void doMigrateTreatmentDataFromSystemDefintionTemplate(){
+        try{
+            Treatment treatment = 
+                    extractTreatmentFromTemplate();
+            for(Treatment t : treatment.get()){
+                t.insert();
+            }
+        }catch (TemplateReaderException ex){
+            displayErrorMessage(ex.getMessage() + "\nTemplateReaderException handled in "
+                    + "doExportProgressViewControllerAction()",
+                    "Desktop View Controller error",
+                    JOptionPane.WARNING_MESSAGE);
+        }catch (StoreException ex){
+            displayErrorMessage(ex.getMessage() + "\nStoreException handled in "
+                    + "doExportProgressViewControllerAction()",
+                    "Desktop View Controller error",
+                    JOptionPane.WARNING_MESSAGE);
+        }
+    }
+    
+    private void doMigrateMedicalConditionDataFromSystemDefintionTemplate(){
+        try{
+            PrimaryCondition primaryCondition = extractMedicalHistoryFromTemplate();
+            for(Condition condition : primaryCondition.get()){
+                PrimaryCondition pCondition = (PrimaryCondition)condition;
+                Integer pConditionKey = pCondition.insert();
+                if (!pCondition.getSecondaryCondition().get().isEmpty()){
+                    for (Condition c : pCondition.getSecondaryCondition().get()){
+                        SecondaryCondition sCondition = (SecondaryCondition)c;
+                        sCondition.setPrimaryCondition(new PrimaryCondition(pConditionKey));
+                        sCondition.insert();
+                    }
+                }
+            }   
+        }catch (StoreException ex){
+            displayErrorMessage(ex.getMessage() + "\nStoreException handled"
+                    + " in case doMigrateMedicalConditionDataFromSystemDefintionTemplate()",
+                    "Desktop View Controller error",
+                    JOptionPane.WARNING_MESSAGE);
+        }catch(TemplateReaderException ex){
+            displayErrorMessage(ex.getMessage() + "\nTemplateReaderException handled"
+                    + " in doMigrateMedicalConditionDataFromSystemDefintionTemplate()",
+                    "Desktop view controller error", JOptionPane.WARNING_MESSAGE);
+        }
+    }
+    
+    private void doMigrateQuestionnaireFromSystemDefintionTemplate(){
+        try{
+            Question question = extractQuestionnaireFromTemplate();
+            for(Question q : question.get()){
+                q.insert();
+            }
+        }catch (StoreException ex){
+            displayErrorMessage(ex.getMessage() + "\nStoreException handled"
+                    + " in case doMigrateQuestionnaireFromSystemDefintionTemplate()",
+                    "Desktop View Controller error",
+                    JOptionPane.WARNING_MESSAGE);
+        }catch(TemplateReaderException ex){
+            displayErrorMessage(ex.getMessage() + "\nTemplateReaderException handled"
+                    + " in doMigrateQuestionnaireFromSystemDefintionTemplate()",
+                    "Desktop view controller error", JOptionPane.WARNING_MESSAGE);
+        }
+    }
    
     /**
      * 
@@ -625,6 +716,11 @@ public class DesktopViewController extends ViewController{
             actionCommand =
                     ViewController.DesktopViewControllerActionEvent.valueOf(e.getActionCommand());
             switch (actionCommand){
+                case MIGRATE_DATA_FROM_SYSTEM_DEFINITION_TEMPLATE:
+                    doMigrateTreatmentDataFromSystemDefintionTemplate();
+                    doMigrateMedicalConditionDataFromSystemDefintionTemplate();
+                    doMigrateQuestionnaireFromSystemDefintionTemplate();
+                    break;
                 case PRINT_SCHEDULE_REQUEST:
                     doPrintAppointmentScheduleForDay(
                             getDescriptor().getControllerDescription().getScheduleDay());
@@ -1824,6 +1920,26 @@ public class DesktopViewController extends ViewController{
         }
         
         try{
+            PatientSecondaryCondition patientSecondaryCondition = 
+                    new PatientSecondaryCondition(new Patient());
+            patientSecondaryCondition.setScope(Entity.Scope.ALL);
+            patientSecondaryCondition.delete();
+        }catch (StoreException ex){
+            displayErrorMessage(ex.getMessage(),
+                    "Desktop view controller",JOptionPane.WARNING_MESSAGE);
+        }
+        
+        try{
+            PatientPrimaryCondition patientPrimaryCondition = 
+                    new PatientPrimaryCondition(new Patient());
+            patientPrimaryCondition.setScope(Entity.Scope.ALL);
+            patientPrimaryCondition.delete();
+        }catch (StoreException ex){
+            displayErrorMessage(ex.getMessage(),
+                    "Desktop view controller",JOptionPane.WARNING_MESSAGE);
+        }
+        
+        try{
             SecondaryCondition secondaryCondition = new SecondaryCondition();
             secondaryCondition.setScope(Entity.Scope.ALL);
             secondaryCondition.delete();
@@ -1869,9 +1985,18 @@ public class DesktopViewController extends ViewController{
         }*/
         
         try{
-            Treatment treatment = new Treatment();
-            treatment.setScope(Entity.Scope.ALL);
-            treatment.delete();
+            PatientQuestion patientQuestion = new PatientQuestion();
+            patientQuestion.setScope(Entity.Scope.ALL);
+            patientQuestion.delete();
+        }catch (StoreException ex){
+            displayErrorMessage(ex.getMessage(),
+                    "Desktop view controller",JOptionPane.WARNING_MESSAGE);
+        }
+        
+        try{
+            Question question = new Question();
+            question.setScope(Entity.Scope.ALL);
+            question.delete();
         }catch (StoreException ex){
             displayErrorMessage(ex.getMessage(),
                     "Desktop view controller",JOptionPane.WARNING_MESSAGE);

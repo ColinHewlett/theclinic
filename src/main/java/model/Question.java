@@ -21,7 +21,9 @@ public class Question extends Entity implements IEntityStoreActions {
         YOU_AND_THE_CLINIC;
     }
     
-    public Question(){}
+    public Question(){
+        this.setIsQuestion(true);
+    }
     
     public Question(Integer key){
         this.setIsQuestion(true);
@@ -44,6 +46,14 @@ public class Question extends Entity implements IEntityStoreActions {
         return key;
     }
     
+    private Category category = null;
+    public Category getCategory(){
+        return category;
+    }
+    public void setCategory(String value){
+        category = Category.valueOf(value);
+    }
+    
     private String description = null;
     public void setDescription(String value){
         description = value;
@@ -59,15 +69,7 @@ public class Question extends Entity implements IEntityStoreActions {
     public Integer getOrder(){
         return order;
     }
-    
-    private Question.Category category = null;
-    public void setCategory(Question.Category value){
-        category = value;
-    }
-    public Question.Category getCategory(){
-        return category;
-    }
-    
+ 
     @Override
     public Point count()throws StoreException{
         return new Repository().count(this);

@@ -212,6 +212,73 @@ public class TemplateReader {
             return map;
         }
         
+        public static Question extract(Question theQuestion)throws TemplateReaderException{
+            Question.Category  category = null;
+            Question question;
+            boolean isElementFound = false;
+            Element eSection = null;
+            Element categoryElement;
+            Element questionElement;
+
+            Element element = getSelectedRootFromTemplate();
+            NodeList sectionNodes = element.getElementsByTagName("section");
+            if (sectionNodes.getLength() == 0){
+                String message = "Template element tagged 'section' not found in "
+                        + "TemplateReader::extract(Question) method";
+                throw new TemplateReaderException(message,
+                        TemplateReaderException.ExceptionType.ELEMENT_NOT_FOUND_IN_TEMPLATE);
+            }
+            
+            for(int pIndex = 0; pIndex < sectionNodes.getLength(); pIndex++){
+                if((sectionNodes.item(pIndex).getNodeType() == Node.ELEMENT_NODE)){
+                    eSection = (Element)sectionNodes.item(pIndex);
+                    if (eSection.getAttribute("id").equals(getSectionId())){
+                        isElementFound = true;
+                        break;
+                    }
+                }
+            }
+            if (!isElementFound){
+                String message = "Unable to locate sectionId = '" + getSectionId() 
+                        + "' in TemplateReader::extract(Question)";
+                throw new TemplateReaderException(message, 
+                        TemplateReaderException.ExceptionType.ELEMENT_NOT_FOUND_IN_TEMPLATE);
+            }
+            
+            NodeList categoryNodes = eSection.getElementsByTagName("category");
+            if (categoryNodes.getLength() == 0){
+                String message = "Template element tagged 'category' not found in "
+                        +  "TemplateReader::extract(Question) method";
+                throw new TemplateReaderException(message,
+                        TemplateReaderException.ExceptionType.ELEMENT_NOT_FOUND_IN_TEMPLATE);
+            }
+            
+            ArrayList<Question> questions = new ArrayList<>();
+            for(int pIndex = 0; pIndex < categoryNodes.getLength(); pIndex++){
+                if((categoryNodes.item(pIndex).getNodeType() == Node.ELEMENT_NODE)){
+                    categoryElement = (Element)categoryNodes.item(pIndex);
+                    
+                    category = Question.Category.valueOf(categoryElement.getAttribute("id"));
+
+                    NodeList questionNodes = categoryElement.getElementsByTagName("question");
+                    for(int sIndex = 0; sIndex < questionNodes.getLength(); sIndex++){
+                        if((questionNodes.item(sIndex).getNodeType() == Node.ELEMENT_NODE)){
+                            questionElement = (Element)questionNodes.item(sIndex);
+                            question = new Question();
+                            question.setDescription(questionElement.getAttribute("id"));
+                            question.setOrder(Integer.valueOf(questionElement.getAttribute("order")));
+                            question.setCategory(categoryElement.getAttribute("id"));
+                            //adds each secondary object extracted to the collection
+                            //of secondary conditions for a given primary condition 
+                            questions.add(question);
+                        }
+                    }
+                }
+            }
+            theQuestion.set(questions);
+            return theQuestion;
+        }
+        
         /**
          * 
          * @param thePrimaryCondition 

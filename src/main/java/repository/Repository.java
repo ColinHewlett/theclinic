@@ -1172,10 +1172,10 @@ public class Repository implements IStoreActions {
                 try{
                     PreparedStatement preparedStatement = getPMSStoreConnection().prepareStatement(sql);
                     preparedStatement.setLong(1,question.getKey());
-                    //preparedStatement.setString(2,question.getCategory().toString());
-                    preparedStatement.setString(2,question.getDescription());
-                    preparedStatement.setBoolean(3,question.getIsDeleted());
-                    preparedStatement.setInt(4,question.getOrder());
+                    preparedStatement.setString(2,question.getCategory().toString());
+                    preparedStatement.setString(3,question.getDescription());
+                    preparedStatement.setBoolean(4,question.getIsDeleted());
+                    preparedStatement.setInt(5,question.getOrder());
                     preparedStatement.executeUpdate();
                 }catch(SQLException ex){
                     throw new StoreException("SQLException message -> " + ex.getMessage() + "\n"
@@ -2131,10 +2131,12 @@ public class Repository implements IStoreActions {
                     if (!rs.wasNull()){
                         rs.next();
                         Integer pid = rs.getInt("pid");
+                        String category = rs.getString("category");
                         String description = rs.getString("description");
                         Boolean isDeleted = rs.getBoolean("isDeleted");
                         Integer order = rs.getInt("sortorder");
                         question = new Question(pid);
+                        question.setCategory(category);
                         question.setDescription(description);
                         question.setIsDeleted(isDeleted);
                         question.setOrder(order);
@@ -2144,10 +2146,12 @@ public class Repository implements IStoreActions {
                     if (!rs.wasNull()){
                         while (rs.next()){
                             Integer pid = rs.getInt("pid");
+                            String category = rs.getString("category");
                             String description = rs.getString("description");
                             Boolean isDeleted = rs.getBoolean("isDeleted");
                             Integer order = rs.getInt("sortorder");
                             question = new Question(pid);
+                            question.setCategory(category);
                             question.setDescription(description);
                             question.setIsDeleted(isDeleted);
                             question.setOrder(order);
@@ -3614,11 +3618,11 @@ public class Repository implements IStoreActions {
                     question = (Question)entity;
                 try{
                     PreparedStatement preparedStatement = getPMSStoreConnection().prepareStatement(sql);
-                    //preparedStatement.setString(1, question.getCategory().toString());
-                    preparedStatement.setString(1, question.getDescription());
-                    preparedStatement.setBoolean(2, question.getIsDeleted());
-                    preparedStatement.setLong(3, question.getOrder());
-                    preparedStatement.setInt(4, question.getKey());
+                    preparedStatement.setString(1, question.getCategory().toString());
+                    preparedStatement.setString(2, question.getDescription());
+                    preparedStatement.setBoolean(3, question.getIsDeleted());
+                    preparedStatement.setLong(4, question.getOrder());
+                    preparedStatement.setInt(5, question.getKey());
                     preparedStatement.executeUpdate();   
                 }catch(SQLException ex){
                     throw new StoreException("SQLException message -> " + ex.getMessage() + "\n"
@@ -4487,6 +4491,7 @@ public class Repository implements IStoreActions {
             case CREATE_QUESTION_TABLE:
                 sql = "CREATE TABLE Question ("
                         + "pid LONG PRIMARY KEY, "
+                        + "category CHAR(20), "
                         + "description CHAR(255), "
                         + "sortorder LONG, "
                         + "isDeleted YesNo;";
@@ -4504,8 +4509,8 @@ public class Repository implements IStoreActions {
                 break;
             case INSERT_QUESTION:
                 sql = "INSERT INTO Question "
-                        + "(pid, description, , isDeleted, sortorder) "
-                        + "VALUES(?,?, ?, ?);";
+                        + "(pid, category, description, isDeleted, sortorder) "
+                        + "VALUES(?,?,?,?,?);";
                 doInsertQuestion(sql, entity);
                 break; 
             case READ_QUESTION:
@@ -4529,7 +4534,8 @@ public class Repository implements IStoreActions {
                 break;
             case UPDATE_QUESTION:
                 sql = "UPDATE Question "
-                        + "SET description = ?, "
+                        + "SET category ?, "
+                        + "description = ?, "
                         + "isDeleted = ?, "
                         + "sortorder = ?, "
                         + "WHERE pid = ?;";
