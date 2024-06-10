@@ -85,6 +85,7 @@ public class Entity implements IStoreClient{
                         FOR_APPOINTMENT,        //clinic note or treatment for appointment
                         FOR_TREATMENT,          //appointment for treatment
                         FOR_QUESTION,
+                        FOR_CATEGORY,           //questions in this category
                         FOR_DAY,                //appointments for this day
                         FOR_PATIENT,            //appointments/notes for this patient
                         FOR_PRIMARY_CONDITION,  //secondary condition(s) for this primary condition

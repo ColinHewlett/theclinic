@@ -167,6 +167,7 @@ public class Repository implements IStoreActions {
                                 INSERT_QUESTION,
                                 READ_QUESTION,
                                 READ_QUESTION_FOR_PATIENT,
+                                READ_QUESTION_FOR_CATEGORY,
                                 READ_ALL_QUESTION,
                                 READ_QUESTION_NEXT_HIGHEST_KEY,
                                 UPDATE_QUESTION,
@@ -2626,6 +2627,8 @@ public class Repository implements IStoreActions {
         }
     }
     
+    
+    
     private Entity doReadQuestionWithKey(String sql, Entity entity)throws StoreException{
         Question question = null;
         if (entity != null) {
@@ -2640,6 +2643,32 @@ public class Repository implements IStoreActions {
                 } catch (SQLException ex) {
                     throw new StoreException("SQLException message -> " + ex.getMessage() + "\n"
                             + "StoreException message -> exception raised in Repository::doReadQuestionWithKey()",
+                            StoreException.ExceptionType.SQL_EXCEPTION);
+                }
+            } else {
+                String msg = "StoreException -> unexpected entity type encountered in Repository::doReadPatientNoteWithKey()";
+                throw new StoreException(msg, StoreException.ExceptionType.UNEXPECTED_DATA_TYPE_ENCOUNTERED);
+            }
+        } else {
+            String msg = "StoreException -> patient note undefined in doReadPatientNoteWithKey()";
+            throw new StoreException(msg, StoreException.ExceptionType.NULL_KEY_EXCEPTION);
+        }
+    }
+    
+    private Entity doReadQuestionForCategory(String sql, Entity entity)throws StoreException{
+        Question question = null;
+        if (entity != null) {
+            if (entity.getIsQuestion()) {
+                question = (Question) entity;
+                try {
+                    PreparedStatement preparedStatement = getPMSStoreConnection().prepareStatement(sql);
+                    preparedStatement.setString(1, question.getCategory().toString());
+                    ResultSet rs = preparedStatement.executeQuery();
+                    question.setScope(Entity.Scope.FOR_CATEGORY);
+                    return get(question, rs);
+                } catch (SQLException ex) {
+                    throw new StoreException("SQLException message -> " + ex.getMessage() + "\n"
+                            + "StoreException message -> exception raised in Repository::doReadQuestionForCategory()",
                             StoreException.ExceptionType.SQL_EXCEPTION);
                 }
             } else {
@@ -4520,6 +4549,13 @@ public class Repository implements IStoreActions {
                         + "AND isDeleted = false; ";                       
                 result = doReadQuestionWithKey(sql, entity);
                 break;
+            case READ_QUESTION_FOR_CATEGORY:
+                sql = "SELECT * "
+                        + "FROM Question "
+                        + "WHERE category = ? "
+                        + "AND isDeleted = false; ";                       
+                result = doReadQuestionForCategory(sql, entity);
+                break; 
             case READ_ALL_QUESTION:
                 sql = "SELECT * "
                         + "FROM Question "
@@ -6150,8 +6186,7 @@ public class Repository implements IStoreActions {
                             StoreException.ExceptionType.STORE_EXCEPTION);
             }
         }else{
-            String error = "Scope of patientQuestion delete operation undefined (" 
-                    + patientQuestion.getScope().toString() + ")\n" 
+            String error = "Scope of patientQuestion delete operation undefined \n" 
                     + "Raised in Repository.delete(PatientQuestion)";
             throw new StoreException(error, 
                     StoreException.ExceptionType.STORE_EXCEPTION);
@@ -6567,6 +6602,10 @@ public class Repository implements IStoreActions {
                 }
                 break;
             }
+            case FOR_CATEGORY:
+                entity = (Entity)runSQL(Repository.EntitySQL.QUESTION,
+                            Repository.PMSSQL.READ_QUESTION_FOR_CATEGORY, question);
+                break;
             case ALL:
                 entity = (Entity)runSQL(Repository.EntitySQL.QUESTION,
                             Repository.PMSSQL.READ_ALL_QUESTION, question);

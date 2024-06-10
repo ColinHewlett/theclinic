@@ -29,6 +29,7 @@ public class SystemDefinition {
     private static String pmsSystemDefinition = null;
     private static String pmsNotesTemplateMode = null;
     private static String pmsOperationMode = null;
+    private static String pmsPrintFolder = null;
     private static String pmsSMTPBody = null;
     private static String pmsSMTPServer = null;
     private static String pmsSMTPUser = null;
@@ -36,15 +37,34 @@ public class SystemDefinition {
     private static String pmsStorePostgresSQL = null;
     private static String pmsStoreType = null;
     
-    public static int QUESTIONNAIRE_REPLY_MAX_LENGTH = 130;
+    public static boolean DEBUG = true;
+    public static int QUESTIONNAIRE_REPLY_MAX_LENGTH = 255;
     public static String TICK ="P";
     public static int EXACT_TABLE_CELL_HEIGHT_IN_TWIPS = 400;
     public static int SCHEDULE_TABLE_CELL_HEIGHT = 600;
+    public static int QUESTIONNAIRE_TABLE_DOUBLE_HEIGHT = 500;
+    public static int QUESTIONNAIRE_TABLE_SINGLE_HEIGHT = 300;
+    public static int QUESTIONNAIRE_TABLE_MEDICATION_ROW_COUNT = 5;
 
+    public enum QuestionnaireTableMetric {
+        CELL_1(5100),
+        CELL_2(550),
+        TABLE(10300);
+        
+        private int width;
+        QuestionnaireTableMetric(int value){
+            width = value;
+        }
+        
+        public int width(){
+            return width;
+        }
+    }
     public enum FONT{
         SCHEDULE_HEADER(new ID("FUTURA Light", 14, false, "000000")),
         DYNAMIC(new ID("Arial Narrow", 10, false, "000000")),
         DEFAULT(new ID("Arial Narrow", 10, false, "000000")),
+        DEFAULT_HEADER(new ID("Ariel Narrow", 11, true, "000000")),
         DEFAULT_BOLD(new ID("Arial Narrow", 10, true, "000000")),
         DEFAULT_BLUE(new ID("Arial Narrow", 10, true, "0000FF")),
         DEFAULT_RED(new ID("Arial Narrow", 10, true, "FF0000")),
@@ -136,6 +156,7 @@ public class SystemDefinition {
     }
     
     public enum ScheduleTable{
+        HEADER(0),
         PATIENT(0),
         FROM(1),
         TO(2),
@@ -153,6 +174,25 @@ public class SystemDefinition {
         }
     }
     
+    public enum QuestionnaireTable{
+        CATEGORY(0),      //selects font properties for sub heading (col 0 option)
+        //NUMBERED(0),    //selects auto-numbering of questions (col 0 option)
+        //OTHER(0),       //neither of the above with default font setting (col 0 option)
+        QUESTION(0),    //question column
+        TICK(1),        //tick box column
+        ANSWER(2);      //answer column
+        
+        QuestionnaireTable(int value) {
+            this.value = value;
+        }
+
+        private final int value;
+        
+        public int column() {
+            return value;
+        }
+    }
+      
     public static String getPMSStoreType(){
         return pmsStoreType;
     }
@@ -173,6 +213,9 @@ public class SystemDefinition {
     }
     public static String getPMSOperationMode(){
         return pmsOperationMode;
+    }
+    public static String getPMSPrintFolder(){
+        return pmsPrintFolder;
     }
     public static String getPMSNotesTemplateMode(){
         return pmsNotesTemplateMode;
@@ -218,15 +261,14 @@ public class SystemDefinition {
                 case "PMS_MASTER_DOCUMENT":
                     pmsMasterDocument = entry.getValue();
                     break;
-                case "PMS_SYSTEM_DEFINITION":
-                    pmsSystemDefinition = entry.getValue();
-                    break;
                 case "PMS_NOTES_TEMPLATE_MODE":
                     pmsNotesTemplateMode = entry.getValue();
                     break;
                 case "PMS_OPERATION_MODE":
                     pmsOperationMode = entry.getValue();
                     break;
+                case "PMS_PRINT_FOLDER":
+                    pmsPrintFolder = entry.getValue();
                 case "PMS_SMTP_BODY":
                     pmsSMTPBody = entry.getValue();
                     break;
@@ -244,7 +286,10 @@ public class SystemDefinition {
                     break;
                 case "PMS_STORE_TYPE":
                     pmsStoreType = entry.getValue();
-                    break;   
+                    break;
+                case "PMS_SYSTEM_DEFINITION":
+                    pmsSystemDefinition = entry.getValue();
+                    break;
             }
         }
     }

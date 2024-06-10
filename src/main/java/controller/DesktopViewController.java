@@ -655,6 +655,13 @@ public class DesktopViewController extends ViewController{
     
     private void doMigrateMedicalConditionDataFromSystemDefintionTemplate(){
         try{
+            /*
+            PrimaryCondition pc = new PrimaryCondition();
+            SecondaryCondition sc = new SecondaryCondition();
+            pc.setScope(Entity.Scope.ALL);
+            sc.setScope(Entity.Scope.ALL);
+            pc.delete();
+            sc.delete();*/
             PrimaryCondition primaryCondition = extractMedicalHistoryFromTemplate();
             for(Condition condition : primaryCondition.get()){
                 PrimaryCondition pCondition = (PrimaryCondition)condition;

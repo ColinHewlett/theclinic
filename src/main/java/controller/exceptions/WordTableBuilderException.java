@@ -24,6 +24,7 @@ public class WordTableBuilderException extends Exception {
     private ExceptionType  exceptionType = null;
     
     public static enum ExceptionType {
-                INCORRECT_NUMBER_OF_TABLES_FOUND
+        INCORRECT_NUMBER_OF_CELLS_FOUND,
+        INCORRECT_NUMBER_OF_TABLES_FOUND;
     }
 }

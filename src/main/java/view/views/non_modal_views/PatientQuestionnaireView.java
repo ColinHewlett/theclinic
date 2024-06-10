@@ -14,6 +14,7 @@ import static controller.ViewController.PatientQuestionnaireViewControllerAction
 import static controller.ViewController.PatientQuestionnaireViewControllerPropertyChangeEvent.PATIENT_QUESTIONNAIRE_VIEW_CONTROLLER_CHANGE_NOTIFICATION;
 import static controller.ViewController.PatientQuestionnaireViewControllerPropertyChangeEvent.PATIENT_QUESTIONNAIRE_VIEW_CONTROLLER_ERROR_RECEIVED;
 import static controller.ViewController.PatientQuestionnaireViewControllerPropertyChangeEvent.QUESTION_WITH_STATE_RECEIVED;
+import model.*;
 import view.View;
 import view.views.view_support_classes.models.PatientQuestionnaireTableModel;
 import java.awt.event.ActionListener;
@@ -105,8 +106,8 @@ public class PatientQuestionnaireView extends View
                 doSendActionEvent(ViewController.PatientQuestionnaireViewControllerActionEvent
                         .PATIENT_QUESTION_DELETE_REQUEST);
         }else{
-            String message = "Patient meds are defined using 'Medical history' radio button\n"
-                    + "on the Patient view";
+            String message = "Patient meds can only be defined using the 'Medical history' radio button\n"
+                    + "on the Patient view, and then selecting the 'Medication' option";
             JOptionPane.showInternalMessageDialog(this, message, "View information",JOptionPane.INFORMATION_MESSAGE);
         }
         
@@ -124,10 +125,10 @@ public class PatientQuestionnaireView extends View
                 QuestionWithState qws = 
                         (QuestionWithState) model.getElementAt(selectedRow);
                 txaSelectedQuestion.setText(qws.getQuestion().getDescription());
-                if (qws.getState()){
+                if (qws.getState() && (!qws.getQuestion().getOrder().equals(2))){
                     this.btnDeletePatientReply.setEnabled(true);
                     this.btnEditPatientReply.setEnabled(true);
-                }else{
+                }else{ 
                     this.btnDeletePatientReply.setEnabled(false);
                     this.btnEditPatientReply.setEnabled(false);
                 }
@@ -217,6 +218,7 @@ public class PatientQuestionnaireView extends View
         doSendActionEvent(ViewController
                 .PatientQuestionnaireViewControllerActionEvent
                 .PATIENT_QUESTION_READ_REQUEST);
+        
     }
     
     private PatientQuestionnaireTableModel initialiseTable(){
@@ -389,6 +391,7 @@ public class PatientQuestionnaireView extends View
         txaSelectedQuestion.setRows(5);
         txaSelectedQuestion.setWrapStyleWord(true);
         jScrollPane1.setViewportView(txaSelectedQuestion);
+        txaSelectedQuestion.setEditable(false);
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);

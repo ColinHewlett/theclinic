@@ -421,10 +421,12 @@ public class PatientViewController extends ViewController {
                     getDescriptor().getControllerDescription().getPatient());
             medication.setScope(Scope.FOR_PATIENT);
             medication = medication.read();
+            ArrayList<Medication> beforePatientMedicationEdit = medication.get();
             getDescriptor().getControllerDescription().setMedication(medication);
             setModalView((ModalView)new View().make(View.Viewer.PATIENT_MEDICATION_EDITOR_VIEW,
                     this, 
                     this.getDesktopView()).getModalView());
+            Medication afterPatientMedicationEdit = getDescriptor().getControllerDescription().getMedication();
             firePropertyChangeEvent(
                 ViewController.PatientViewControllerPropertyChangeEvent.
                     PATIENT_EDITOR_VIEW_CLOSED.toString(),
@@ -432,7 +434,7 @@ public class PatientViewController extends ViewController {
                 this,
                 null,
                 null
-            );           
+            ); 
         }catch(StoreException ex){
             String message = ex.getMessage() + "\n"
                     + "Handled in PatientViewController::doMedicationjEditorViewRequest()";
@@ -440,64 +442,123 @@ public class PatientViewController extends ViewController {
                     JOptionPane.WARNING_MESSAGE);
         }    
     }
-    /*
-    private void doMedicalHistory1EditorViewRequest(){
-
-        doOpenPatientMedicalHistory1EditorView();
-
-        PrimaryCondition pc = null;
-        PrimaryCondition storedPrimaryCondition = null; 
+    
+    private void createPatientMedicationQuestionnaireStatus(){
+        boolean isQFound = false;
+        Question question = null;
+        Medication m = getDescriptor().getControllerDescription().getMedication();
+        try{
+            Question q = new Question();
+            q.setScope(Entity.Scope.ALL);
+            q = q.read();
+            for (Question _q : q.get()){
+                if (_q.getOrder().equals(2)){
+                    isQFound = true;
+                    question = _q;
+                    break;
+                }
+            }
+            if(isQFound){
+                PatientQuestion pq = 
+                        new PatientQuestion(getDescriptor().getControllerDescription().getPatient(),question );
+                pq.setAnswer(m.getDescription());
+                pq.insert();
+               
+            }else{
+                message = "Whoops! could not locate patient medication question in store ...?!\n"
+                        + "Message sent from createPatientMedicationQuestionnaireStatus() method";
+                displayErrorMessage(message, "Patient view controller error",
+                        JOptionPane.WARNING_MESSAGE);
+            }
+        }catch (StoreException ex){
+            message = ex.getMessage() +"\n"
+                    + "StoreExceptopn handled in "
+                    + "createPatientMedicationQuestionnaireStatus() method"; 
+            displayErrorMessage(message,"Patient view controller error", 
+                    JOptionPane.WARNING_MESSAGE);
+        }
+    }
+    
+    private void deletePatientMedicationQuestionnaireStatus(){
+        boolean isQFound = false;
+        Question question = null;
         Patient patient = getDescriptor().getControllerDescription().getPatient();
         try{
-            if (patient!=null){
-                pc = new PrimaryCondition(patient);
-                pc.setScope(Scope.FOR_PATIENT);
-                pc = pc.read();
-                if (pc.get().isEmpty()){// patient needs default medical history from template file
-                    pc = createPrimaryConditionsFromTemplate(patient);    
+            Question q = new Question();
+            q.setScope(Entity.Scope.ALL);
+            q = q.read();
+            for (Question _q : q.get()){
+                if (_q.getOrder().equals(2)){
+                    isQFound = true;
+                    question = _q;
+                    break;
                 }
-                
-                for (Condition primaryCondition : pc.get()){
-                    PrimaryCondition pCondition = (PrimaryCondition)primaryCondition;
-                    SecondaryCondition sCondition = new SecondaryCondition(pCondition);
-                    sCondition.setScope(Scope.FOR_PRIMARY_CONDITION);
-                    sCondition = sCondition.read();
-                    pCondition.setSecondaryCondition(sCondition);
-                } 
             }
-
-            getDescriptor().getControllerDescription().setCondition(pc);
-            setModalView((ModalView)new View().make(View.Viewer.PATIENT_MEDICAL_HISTORY_1_EDITOR_VIEW,
-                    this, 
-                    this.getDesktopView()).getModalView());
-            firePropertyChangeEvent(
-                    ViewController.PatientViewControllerPropertyChangeEvent.
-                        PATIENT_EDITOR_VIEW_CLOSED.toString(),
-                    getView(),
-                    this,
-                    null,
-                    null
-            );
-            firePropertyChangeEvent(
-                    ViewController.PatientViewControllerPropertyChangeEvent.
-                        MAKE_VIEW_VISIBLE.toString(),
-                    getView(),
-                    this,
-                    null,
-                    null
-            );
-        }catch(TemplateReaderException ex){
-            String message = ex.getMessage() + "\n"
-                    + "TemplateErrorMessage raised in PatientViewController::doMedicalHistoryRequest()";
-            displayErrorMessage(message,"Patient view controller error", JOptionPane.WARNING_MESSAGE);
-        }catch(StoreException ex){
-            String message = ex.getMessage() + "\n"
-                    + "StoreException raised in PatientViewController::doMedicalHistoryRequest()";
-            displayErrorMessage(message,"Patient view controller error", JOptionPane.WARNING_MESSAGE);
+            if(isQFound){
+                PatientQuestion pq = 
+                        new PatientQuestion(patient,question);
+                pq.setScope(Entity.Scope.SINGLE);
+                pq.delete();
+            }else{
+                message = "Whoops! could not locate patient medication question in store ...?!\n"
+                        + "Message sent from deletePatientMedicationQuestionnaireStatus() method";
+                displayErrorMessage(message, "Patient view controller error",
+                        JOptionPane.WARNING_MESSAGE);
+            }
+        }catch (StoreException ex){
+            message = ex.getMessage() +"\n"
+                    + "StoreExceptopn handled in "
+                    + "createPatientMedicationQuestionnaireStatus() method"; 
+            displayErrorMessage(message,"Patient view controller error", 
+                    JOptionPane.WARNING_MESSAGE);
         }
-        
     }
-    */
+    
+    private void syncPatientMedicationWithPatientQuestionnaireResponse(){
+        boolean isQFound = false;
+        Question question = null;
+        Medication m = getDescriptor().getControllerDescription().getMedication();
+        Patient patient = getDescriptor().getControllerDescription().getPatient();
+        try{
+            Question q = new Question();
+            q.setScope(Entity.Scope.ALL);
+            q = q.read();
+            for (Question _q : q.get()){
+                if (_q.getOrder().equals(2)){
+                    isQFound = true;
+                    question = _q;
+                    break;
+                }
+            }
+            if(isQFound){
+                String meds = "";
+                for (Medication _m : m.get()){
+                    meds = meds + _m.getDescription() + "; ";  
+                }
+                meds = meds.trim();
+                meds = meds.substring(0, meds.length()- 1); //skip trailing ';'
+                
+                PatientQuestion pq = 
+                        new PatientQuestion(patient,question);
+                pq.setScope(Entity.Scope.SINGLE);
+                pq = pq.read();
+                pq.setAnswer(meds);
+                pq.update();
+            }else{
+                message = "Whoops! could not locate patient medication question in store ...?!\n"
+                        + "Message sent from deletePatientMedicationQuestionnaireStatus() method";
+                displayErrorMessage(message, "Patient view controller error",
+                        JOptionPane.WARNING_MESSAGE);
+            }
+        }catch (StoreException ex){
+            message = ex.getMessage() +"\n"
+                    + "StoreExceptopn handled in "
+                    + "syncPatientMedicationWithPatientQuestionnaireResponse() method"; 
+            displayErrorMessage(message,"Patient view controller error", 
+                    JOptionPane.WARNING_MESSAGE);
+        }
+    }
+    
     private void doPatientEditorViewRequest(
             ViewController.PatientViewControllerActionEvent actionCommand){
         switch(actionCommand){
@@ -1148,8 +1209,38 @@ public class PatientViewController extends ViewController {
         }
     }
     
+    private ArrayList<Medication> beforePatientMedicationEdit = null;
+    private ArrayList<Medication> getBeforePatientMedicationEdit(){
+        return beforePatientMedicationEdit;
+    }
+    private void setBeforePatientMedicationEdit(ArrayList<Medication> value){
+        beforePatientMedicationEdit = value;
+    }
+    
+    private Medication afterPatientMedicationEdit = null;
+    private Medication getAfterPatientMedicationEdit(){
+        return afterPatientMedicationEdit;
+    }
+    private void setAfterPatientMedicationEdit(Medication value){
+        afterPatientMedicationEdit = value;
+    }
+    
+    private void mopUpAction(){
+        /**
+         * the following mop up operation necessary
+         * -- to keep patient medication state view consistent with patient medication question status in store
+         */
+        if ((beforePatientMedicationEdit.isEmpty()) && (!afterPatientMedicationEdit.get().isEmpty()))
+            createPatientMedicationQuestionnaireStatus();
+        else if ((!beforePatientMedicationEdit.isEmpty()) && (afterPatientMedicationEdit.get().isEmpty()))
+            deletePatientMedicationQuestionnaireStatus();
+        else if(!afterPatientMedicationEdit.get().isEmpty()) syncPatientMedicationWithPatientQuestionnaireResponse(); 
+    }
+    
     private void doPatientMedicationEditorViewRequest(ActionEvent e){
         Medication medication = getDescriptor().getViewDescription().getMedication();
+        setBeforePatientMedicationEdit(getDescriptor()
+                .getControllerDescription().getMedication().get());
         try{
             switch(ViewController
                     .PatientViewControllerActionEvent.valueOf(e.getActionCommand())){ 
@@ -1170,6 +1261,8 @@ public class PatientViewController extends ViewController {
                             medication = medication.read();
                             getDescriptor().getControllerDescription()
                                     .setMedication(medication);
+                            setAfterPatientMedicationEdit(medication);
+                            mopUpAction();
                             firePropertyChangeEvent(
                             ViewController.PatientViewControllerPropertyChangeEvent.
                                 CLOSE_VIEW_REQUEST_RECEIVED.toString(),
@@ -1188,6 +1281,8 @@ public class PatientViewController extends ViewController {
                     medication.setScope(Scope.FOR_PATIENT);
                     medication = medication.read();
                     getDescriptor().getControllerDescription().setMedication(medication);
+                    setAfterPatientMedicationEdit(medication);
+                    mopUpAction();
                     firePropertyChangeEvent(
                             ViewController.PatientViewControllerPropertyChangeEvent.
                                 CLOSE_VIEW_REQUEST_RECEIVED.toString(),
@@ -1210,6 +1305,8 @@ public class PatientViewController extends ViewController {
                             medication.update();
                             medication.setScope(Scope.FOR_PATIENT);
                             medication = medication.read();
+                            setAfterPatientMedicationEdit(medication);
+                            mopUpAction();
                         }
                     }
                     getDescriptor().getControllerDescription().setMedication(medication);
