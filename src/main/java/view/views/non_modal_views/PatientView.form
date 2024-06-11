@@ -98,7 +98,10 @@
           <Group type="102" alignment="0" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Component id="pnlOperations" pref="505" max="32767" attributes="0"/>
+                  <Group type="102" attributes="0">
+                      <Component id="pnlOperations" min="-2" pref="529" max="-2" attributes="0"/>
+                      <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                  </Group>
                   <Group type="102" attributes="0">
                       <Group type="103" groupAlignment="0" max="-2" attributes="0">
                           <Component id="pnlPatientSelection" max="32767" attributes="0"/>
@@ -109,7 +112,7 @@
                           <Component id="pnlAddress" max="32767" attributes="0"/>
                           <Component id="pnlFurtherDetails" max="32767" attributes="0"/>
                       </Group>
-                      <EmptySpace max="-2" attributes="0"/>
+                      <EmptySpace min="-2" pref="12" max="-2" attributes="0"/>
                       <Component id="pnlAppointmentHistory" max="32767" attributes="0"/>
                   </Group>
               </Group>
@@ -363,7 +366,7 @@
         <DimensionLayout dim="0">
           <Group type="103" groupAlignment="0" attributes="0">
               <Group type="102" alignment="1" attributes="0">
-                  <EmptySpace min="-2" pref="12" max="-2" attributes="0"/>
+                  <EmptySpace min="-2" pref="10" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="1" attributes="0">
                       <Component id="btnCloseView" alignment="1" min="-2" pref="106" max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="1" max="-2" attributes="0">
@@ -382,15 +385,15 @@
               <Group type="102" alignment="0" attributes="0">
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="btnCreateRecoverPatient" min="-2" pref="82" max="-2" attributes="0"/>
-                  <EmptySpace min="-2" pref="6" max="-2" attributes="0"/>
+                  <EmptySpace min="-2" pref="17" max="-2" attributes="0"/>
                   <Component id="btnUpdateRecoverPatient" min="-2" pref="82" max="-2" attributes="0"/>
-                  <EmptySpace min="-2" pref="6" max="-2" attributes="0"/>
+                  <EmptySpace min="-2" pref="17" max="-2" attributes="0"/>
                   <Component id="btnFetchClinicalNotes" min="-2" pref="82" max="-2" attributes="0"/>
-                  <EmptySpace min="-2" pref="5" max="-2" attributes="0"/>
+                  <EmptySpace min="-2" pref="17" max="-2" attributes="0"/>
                   <Component id="btnFetchScheduleForSelectedAppointment" min="-2" pref="83" max="-2" attributes="0"/>
-                  <EmptySpace min="-2" pref="6" max="-2" attributes="0"/>
+                  <EmptySpace min="-2" pref="17" max="-2" attributes="0"/>
                   <Component id="btnCloseView" min="-2" pref="84" max="-2" attributes="0"/>
-                  <EmptySpace min="-2" pref="20" max="-2" attributes="0"/>
+                  <EmptySpace pref="19" max="32767" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -501,7 +504,7 @@
               <Group type="102" alignment="0" attributes="0">
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="pnlPatientAddressContent" max="32767" attributes="0"/>
-                  <EmptySpace min="-2" pref="10" max="-2" attributes="0"/>
+                  <EmptySpace min="-2" pref="19" max="-2" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -514,35 +517,29 @@
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" alignment="0" attributes="0">
                       <Group type="103" groupAlignment="0" attributes="0">
-                          <Group type="102" alignment="1" attributes="0">
+                          <Component id="lblAddressLine1" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Component id="lblAddressLine2" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Group type="103" groupAlignment="0" attributes="0">
+                              <Component id="lblAddressPostcode" alignment="1" min="-2" max="-2" attributes="0"/>
                               <Component id="lblAddressTown" min="-2" max="-2" attributes="0"/>
-                              <EmptySpace min="-2" pref="30" max="-2" attributes="0"/>
-                          </Group>
-                          <Group type="102" attributes="0">
-                              <Group type="103" groupAlignment="0" attributes="0">
-                                  <Component id="lblAddressLine1" alignment="0" min="-2" max="-2" attributes="0"/>
-                                  <Component id="lblAddressLine2" alignment="0" min="-2" max="-2" attributes="0"/>
-                              </Group>
-                              <EmptySpace min="-2" pref="10" max="-2" attributes="0"/>
-                          </Group>
-                          <Group type="102" alignment="1" attributes="0">
-                              <Component id="lblAddressPostcode" min="-2" max="-2" attributes="0"/>
-                              <EmptySpace type="unrelated" max="-2" attributes="0"/>
                           </Group>
                       </Group>
+                      <EmptySpace type="unrelated" max="32767" attributes="0"/>
                       <Group type="103" groupAlignment="0" attributes="0">
-                          <Component id="txtNameLine2" alignment="0" max="32767" attributes="0"/>
                           <Group type="102" alignment="0" attributes="0">
-                              <Group type="103" groupAlignment="1" max="-2" attributes="0">
-                                  <Component id="txtAddressPostcode" alignment="0" pref="102" max="32767" attributes="0"/>
-                                  <Component id="txtAddressTown" alignment="0" max="32767" attributes="0"/>
+                              <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                                  <Component id="txtAddressPostcode" pref="102" max="32767" attributes="0"/>
+                                  <Component id="txtAddressTown" max="32767" attributes="0"/>
                               </Group>
                               <EmptySpace type="separate" max="-2" attributes="0"/>
                               <Component id="lblAddressCounty" min="-2" max="-2" attributes="0"/>
                               <EmptySpace max="-2" attributes="0"/>
                               <Component id="txtAddressCounty" min="-2" pref="81" max="-2" attributes="0"/>
                           </Group>
-                          <Component id="txtAddressLine1" max="32767" attributes="0"/>
+                          <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                              <Component id="txtNameLine2" alignment="1" pref="281" max="32767" attributes="0"/>
+                              <Component id="txtAddressLine1" alignment="1" max="32767" attributes="0"/>
+                          </Group>
                       </Group>
                   </Group>
               </Group>
@@ -561,11 +558,13 @@
                       </Group>
                       <EmptySpace min="-2" pref="10" max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" attributes="0">
-                          <Component id="txtAddressTown" alignment="0" min="-2" pref="22" max="-2" attributes="0"/>
+                          <Group type="103" alignment="0" groupAlignment="3" attributes="0">
+                              <Component id="txtAddressTown" alignment="3" min="-2" pref="22" max="-2" attributes="0"/>
+                              <Component id="lblAddressTown" alignment="3" min="-2" max="-2" attributes="0"/>
+                          </Group>
                           <Group type="103" groupAlignment="3" attributes="0">
                               <Component id="lblAddressCounty" alignment="3" min="-2" max="-2" attributes="0"/>
                               <Component id="txtAddressCounty" alignment="3" min="-2" max="-2" attributes="0"/>
-                              <Component id="lblAddressTown" alignment="3" min="-2" max="-2" attributes="0"/>
                           </Group>
                       </Group>
                       <EmptySpace min="-2" pref="9" max="-2" attributes="0"/>
@@ -599,11 +598,6 @@
                 <Property name="text" type="java.lang.String" value="County"/>
               </Properties>
             </Component>
-            <Component class="javax.swing.JLabel" name="lblAddressTown">
-              <Properties>
-                <Property name="text" type="java.lang.String" value="Town"/>
-              </Properties>
-            </Component>
             <Component class="javax.swing.JLabel" name="lblAddressPostcode">
               <Properties>
                 <Property name="text" type="java.lang.String" value="Postcode"/>
@@ -617,6 +611,12 @@
             <Component class="javax.swing.JTextField" name="txtAddressCounty">
             </Component>
             <Component class="javax.swing.JTextField" name="txtAddressPostcode">
+            </Component>
+            <Component class="javax.swing.JLabel" name="lblAddressTown">
+              <Properties>
+                <Property name="horizontalAlignment" type="int" value="2"/>
+                <Property name="text" type="java.lang.String" value="Town"/>
+              </Properties>
             </Component>
           </SubComponents>
         </Container>
@@ -645,8 +645,8 @@
           <Group type="103" groupAlignment="0" attributes="0">
               <Group type="102" alignment="0" attributes="0">
                   <EmptySpace max="-2" attributes="0"/>
-                  <Component id="scrAppointmentHistory" min="-2" pref="100" max="-2" attributes="0"/>
-                  <EmptySpace min="-2" pref="13" max="-2" attributes="0"/>
+                  <Component id="scrAppointmentHistory" min="-2" pref="144" max="-2" attributes="0"/>
+                  <EmptySpace max="32767" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -719,33 +719,21 @@
         <Component class="javax.swing.JRadioButton" name="rdbRequestPhoneEmailEditorView">
           <Properties>
             <Property name="text" type="java.lang.String" value="Phone/email"/>
-            <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-              <Color blue="dc" green="dc" red="dc" type="rgb"/>
-            </Property>
           </Properties>
         </Component>
         <Component class="javax.swing.JRadioButton" name="rdbRequestModalRecallEditorView">
           <Properties>
             <Property name="text" type="java.lang.String" value="Recall data"/>
-            <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-              <Color blue="dc" green="dc" red="dc" type="rgb"/>
-            </Property>
           </Properties>
         </Component>
         <Component class="javax.swing.JRadioButton" name="rdbRequestModalGuardianEditorView">
           <Properties>
             <Property name="text" type="java.lang.String" value="Guardian (if patient)"/>
-            <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-              <Color blue="dc" green="dc" red="dc" type="rgb"/>
-            </Property>
           </Properties>
         </Component>
         <Component class="javax.swing.JRadioButton" name="rdbRequestModalMedicalProfilePopup">
           <Properties>
             <Property name="text" type="java.lang.String" value="Medical history"/>
-            <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-              <Color blue="dc" green="dc" red="dc" type="rgb"/>
-            </Property>
           </Properties>
         </Component>
       </SubComponents>

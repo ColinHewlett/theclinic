@@ -70,7 +70,7 @@ public class PatientView extends View
     private final String panelPatientActionsCaption = "Actions";
     private final String panelPatientAddressCaption = "Address";
     private final String panelPatientDetailsCaption = "Name & particulars";
-    private final String panelPatientFurtherDetailsCaption = "Further patient information";
+    private final String panelPatientFurtherDetailsCaption = "Additional patient information";
     private final String panelPatientRecoveryTitle = "Select patient to recover";
     private final String panelPatientSelectionCaption = "Select patient";
     
@@ -166,7 +166,7 @@ public class PatientView extends View
             case APPOINTMENT_HISTORY:
                 panel = pnlAppointmentHistory;
                 caption = panelPatientAppointmentHistoryCaption;
-                isPanelBackgroundDefault = false;
+                isPanelBackgroundDefault = true;
                 break;
             case PATIENT_ADDRESS:
                 panel = pnlAddress;
@@ -181,12 +181,12 @@ public class PatientView extends View
             case PATIENT_EXTRA_DETAILS:
                 panel = pnlFurtherDetails;
                 caption = panelPatientFurtherDetailsCaption;
-                isPanelBackgroundDefault = false;
+                isPanelBackgroundDefault = true;
                 break;
             case PATIENT_SELECTION:
                 panel = pnlPatientSelection;
                 caption = panelPatientSelectionCaption;
-                isPanelBackgroundDefault = false;
+                isPanelBackgroundDefault = true;
                 break;        
         }
         panel.setBorder(
@@ -1255,11 +1255,11 @@ public class PatientView extends View
         txtNameLine2 = new javax.swing.JTextField();
         lblAddressLine2 = new javax.swing.JLabel();
         lblAddressCounty = new javax.swing.JLabel();
-        lblAddressTown = new javax.swing.JLabel();
         lblAddressPostcode = new javax.swing.JLabel();
         txtAddressTown = new javax.swing.JTextField();
         txtAddressCounty = new javax.swing.JTextField();
         txtAddressPostcode = new javax.swing.JTextField();
+        lblAddressTown = new javax.swing.JLabel();
         pnlAppointmentHistory = new javax.swing.JPanel();
         scrAppointmentHistory = new javax.swing.JScrollPane();
         tblAppointmentHistory = new javax.swing.JTable();
@@ -1451,7 +1451,7 @@ public class PatientView extends View
         pnlOperationsLayout.setHorizontalGroup(
             pnlOperationsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlOperationsLayout.createSequentialGroup()
-                .addGap(12, 12, 12)
+                .addGap(10, 10, 10)
                 .addGroup(pnlOperationsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(btnCloseView, javax.swing.GroupLayout.PREFERRED_SIZE, 106, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(pnlOperationsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
@@ -1466,15 +1466,15 @@ public class PatientView extends View
             .addGroup(pnlOperationsLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(btnCreateRecoverPatient, javax.swing.GroupLayout.PREFERRED_SIZE, 82, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(6, 6, 6)
+                .addGap(17, 17, 17)
                 .addComponent(btnUpdateRecoverPatient, javax.swing.GroupLayout.PREFERRED_SIZE, 82, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(6, 6, 6)
+                .addGap(17, 17, 17)
                 .addComponent(btnFetchClinicalNotes, javax.swing.GroupLayout.PREFERRED_SIZE, 82, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(5, 5, 5)
+                .addGap(17, 17, 17)
                 .addComponent(btnFetchScheduleForSelectedAppointment, javax.swing.GroupLayout.PREFERRED_SIZE, 83, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(6, 6, 6)
+                .addGap(17, 17, 17)
                 .addComponent(btnCloseView, javax.swing.GroupLayout.PREFERRED_SIZE, 84, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(20, 20, 20))
+                .addContainerGap(19, Short.MAX_VALUE))
         );
 
         pnlAddress.setBorder(javax.swing.BorderFactory.createTitledBorder("Address"));
@@ -1487,8 +1487,6 @@ public class PatientView extends View
 
         lblAddressCounty.setText("County");
 
-        lblAddressTown.setText("Town");
-
         lblAddressPostcode.setText("Postcode");
 
         txtAddressTown.addActionListener(new java.awt.event.ActionListener() {
@@ -1497,34 +1495,33 @@ public class PatientView extends View
             }
         });
 
+        lblAddressTown.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        lblAddressTown.setText("Town");
+
         javax.swing.GroupLayout pnlPatientAddressContentLayout = new javax.swing.GroupLayout(pnlPatientAddressContent);
         pnlPatientAddressContent.setLayout(pnlPatientAddressContentLayout);
         pnlPatientAddressContentLayout.setHorizontalGroup(
             pnlPatientAddressContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlPatientAddressContentLayout.createSequentialGroup()
                 .addGroup(pnlPatientAddressContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlPatientAddressContentLayout.createSequentialGroup()
-                        .addComponent(lblAddressTown)
-                        .addGap(30, 30, 30))
-                    .addGroup(pnlPatientAddressContentLayout.createSequentialGroup()
-                        .addGroup(pnlPatientAddressContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(lblAddressLine1)
-                            .addComponent(lblAddressLine2))
-                        .addGap(10, 10, 10))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlPatientAddressContentLayout.createSequentialGroup()
-                        .addComponent(lblAddressPostcode)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)))
+                    .addComponent(lblAddressLine1)
+                    .addComponent(lblAddressLine2)
+                    .addGroup(pnlPatientAddressContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(lblAddressPostcode, javax.swing.GroupLayout.Alignment.TRAILING)
+                        .addComponent(lblAddressTown)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(pnlPatientAddressContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtNameLine2)
                     .addGroup(pnlPatientAddressContentLayout.createSequentialGroup()
-                        .addGroup(pnlPatientAddressContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                            .addComponent(txtAddressPostcode, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 102, Short.MAX_VALUE)
-                            .addComponent(txtAddressTown, javax.swing.GroupLayout.Alignment.LEADING))
+                        .addGroup(pnlPatientAddressContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(txtAddressPostcode, javax.swing.GroupLayout.DEFAULT_SIZE, 102, Short.MAX_VALUE)
+                            .addComponent(txtAddressTown))
                         .addGap(18, 18, 18)
                         .addComponent(lblAddressCounty)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(txtAddressCounty, javax.swing.GroupLayout.PREFERRED_SIZE, 81, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(txtAddressLine1)))
+                    .addGroup(pnlPatientAddressContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                        .addComponent(txtNameLine2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 281, Short.MAX_VALUE)
+                        .addComponent(txtAddressLine1, javax.swing.GroupLayout.Alignment.TRAILING))))
         );
         pnlPatientAddressContentLayout.setVerticalGroup(
             pnlPatientAddressContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1538,11 +1535,12 @@ public class PatientView extends View
                     .addComponent(lblAddressLine2))
                 .addGap(10, 10, 10)
                 .addGroup(pnlPatientAddressContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtAddressTown, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(pnlPatientAddressContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(txtAddressTown, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(lblAddressTown))
                     .addGroup(pnlPatientAddressContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(lblAddressCounty)
-                        .addComponent(txtAddressCounty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(lblAddressTown)))
+                        .addComponent(txtAddressCounty, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addGap(9, 9, 9)
                 .addGroup(pnlPatientAddressContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(txtAddressPostcode, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -1563,7 +1561,7 @@ public class PatientView extends View
             .addGroup(pnlAddressLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(pnlPatientAddressContent, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGap(10, 10, 10))
+                .addGap(19, 19, 19))
         );
 
         pnlAppointmentHistory.setBorder(javax.swing.BorderFactory.createTitledBorder("Appointment history"));
@@ -1591,23 +1589,19 @@ public class PatientView extends View
             pnlAppointmentHistoryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlAppointmentHistoryLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(scrAppointmentHistory, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(13, 13, 13))
+                .addComponent(scrAppointmentHistory, javax.swing.GroupLayout.PREFERRED_SIZE, 144, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pnlFurtherDetails.setBorder(javax.swing.BorderFactory.createTitledBorder("Further details"));
 
         rdbRequestPhoneEmailEditorView.setText("Phone/email");
-        rdbRequestPhoneEmailEditorView.setBackground(new java.awt.Color(220, 220, 220));
 
         rdbRequestModalRecallEditorView.setText("Recall data");
-        rdbRequestModalRecallEditorView.setBackground(new java.awt.Color(220, 220, 220));
 
         rdbRequestModalGuardianEditorView.setText("Guardian (if patient)");
-        rdbRequestModalGuardianEditorView.setBackground(new java.awt.Color(220, 220, 220));
 
         rdbRequestModalMedicalProfilePopup.setText("Medical history");
-        rdbRequestModalMedicalProfilePopup.setBackground(new java.awt.Color(220, 220, 220));
 
         javax.swing.GroupLayout pnlFurtherDetailsLayout = new javax.swing.GroupLayout(pnlFurtherDetails);
         pnlFurtherDetails.setLayout(pnlFurtherDetailsLayout);
@@ -1690,7 +1684,9 @@ public class PatientView extends View
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(pnlOperations, javax.swing.GroupLayout.DEFAULT_SIZE, 505, Short.MAX_VALUE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(pnlOperations, javax.swing.GroupLayout.PREFERRED_SIZE, 529, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 0, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(pnlPatientSelection, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -1699,7 +1695,7 @@ public class PatientView extends View
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(pnlAddress, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(pnlFurtherDetails, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGap(12, 12, 12)
                         .addComponent(pnlAppointmentHistory, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addContainerGap())
         );

@@ -69,9 +69,8 @@ public class PatientQuestionnaireTableModel extends DefaultTableModel {
                 result = column.toString();
                 if (result.equals("YesNo"))
                     result = result + " ?";  
-                else if (result.equals("PatientReply")){
+                else if (result.equals("PatientReply"))
                     result = "Patient reply";
-                }else if(result.equals("Question")) result = "";
                 break;
             }
         }
