@@ -4,6 +4,15 @@
  */
 package controller;
 
+import model.entity.SecondaryCondition;
+import model.entity.PrimaryCondition;
+import model.entity.Condition;
+import model.entity.PatientPrimaryCondition;
+import model.entity.PatientCondition;
+import model.entity.Patient;
+import model.entity.Entity;
+import model.entity.PatientSecondaryCondition;
+import model.non_entity.ConditionWithState;
 import static controller.ViewController.displayErrorMessage;
 import controller.exceptions.TemplateReaderException;
 import view.views.non_modal_views.DesktopView;

@@ -4,6 +4,7 @@
  */
 package view.views.view_support_classes.models;
 
+import model.entity.Condition;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.LocalTime;

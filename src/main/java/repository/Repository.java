@@ -4,6 +4,24 @@
  */
 package repository;
 
+import model.entity.SecondaryCondition;
+import model.entity.PrimaryCondition;
+import model.entity.Condition;
+import model.entity.Treatment;
+import model.entity.SurgeryDaysAssignment;
+import model.entity.Question;
+import model.entity.PatientQuestion;
+import model.entity.PatientPrimaryCondition;
+import model.entity.PatientCondition;
+import model.entity.Patient;
+import model.entity.Notification;
+import model.entity.Medication;
+import model.entity.Entity;
+import model.entity.Doctor;
+import model.entity.ClinicalNote;
+import model.entity.AppointmentTreatment;
+import model.entity.Appointment;
+import model.entity.PatientSecondaryCondition;
 import model.non_entity.SystemDefinition;
 import static controller.ViewController.displayErrorMessage;
 import model.*;
@@ -29,13 +47,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import javax.swing.JOptionPane;
-import static model.Entity.Scope.ALL;
-import static model.Entity.Scope.FOR_APPOINTMENT;
-import static model.Entity.Scope.FOR_PATIENT;
-import static model.Entity.Scope.FOR_PRIMARY_CONDITION;
-import static model.Entity.Scope.FOR_QUESTION;
-import static model.Entity.Scope.FOR_TREATMENT;
-import static model.Entity.Scope.SINGLE;
+import static model.entity.Entity.Scope.ALL;
+import static model.entity.Entity.Scope.FOR_APPOINTMENT;
+import static model.entity.Entity.Scope.FOR_PATIENT;
+import static model.entity.Entity.Scope.FOR_PRIMARY_CONDITION;
+import static model.entity.Entity.Scope.FOR_QUESTION;
+import static model.entity.Entity.Scope.FOR_TREATMENT;
+import static model.entity.Entity.Scope.SINGLE;
 
 /**
  *

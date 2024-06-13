@@ -5,6 +5,7 @@
 
 package view.views.modal_views;
 
+import model.entity.Patient;
 import view.views.view_support_classes.renderers.SelectStartTimeLocalDateTimeRenderer;
 import view.views.non_modal_views.DesktopView;
 import controller.Descriptor;

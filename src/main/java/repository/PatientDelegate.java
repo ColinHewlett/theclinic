@@ -6,7 +6,7 @@
 package repository;
 
 
-import model.Patient;
+import model.entity.Patient;
 
 /**
  *

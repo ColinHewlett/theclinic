@@ -6,9 +6,20 @@
 package controller;
 
 //import controller.DesktopViewController.DesktopViewControllerActionEvent;
+import model.entity.SecondaryCondition;
+import model.entity.PrimaryCondition;
+import model.entity.Condition;
+import model.non_entity.TreatmentWithState;
+import model.entity.Question;
+import model.entity.PatientQuestion;
+import model.entity.Patient;
+import model.entity.Medication;
+import model.entity.Entity;
+import model.entity.Doctor;
+import model.entity.Appointment;
 import controller.exceptions.TemplateReaderException;
 import model.*;
-import model.Entity.Scope;
+import model.entity.Entity.Scope;
 import view.views.non_modal_views.DesktopView;
 import view.View;
 import view.views.modal_views.ModalView;

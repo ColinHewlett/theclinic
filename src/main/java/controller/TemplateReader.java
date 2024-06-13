@@ -4,6 +4,13 @@
  */
 package controller;
 
+import model.entity.SecondaryCondition;
+import model.entity.PrimaryCondition;
+import model.entity.Condition;
+import model.entity.Treatment;
+import model.entity.Question;
+import model.entity.Patient;
+import model.entity.Appointment;
 import controller.exceptions.TemplateReaderException;
 import java.io.File;
 import java.io.IOException;

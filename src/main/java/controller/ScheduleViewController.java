@@ -8,10 +8,10 @@ package controller;
 //import static controller.ViewController.ScheduleViewControllerActionEvent.APPOINTMENT_EDITOR_TREATMENT_VIEW_REQUEST;
 import model.non_entity.SystemDefinition;
 import static controller.ViewController.displayErrorMessage;
-import model.Entity.Scope;
-import model.Appointment;
-import model.Patient;
-import model.SurgeryDaysAssignment;
+import model.entity.Entity.Scope;
+import model.entity.Appointment;
+import model.entity.Patient;
+import model.entity.SurgeryDaysAssignment;
 import repository.StoreException;//01/03/2023
 import view.views.non_modal_views.DesktopView;
 import view.View;
@@ -34,10 +34,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Optional;
 import javax.swing.JOptionPane;
-import model.AppointmentTreatment;
-import model.Entity;
-import model.Treatment;
-import model.TreatmentWithState;
+import model.entity.AppointmentTreatment;
+import model.entity.Entity;
+import model.entity.Treatment;
+import model.non_entity.TreatmentWithState;
 
 /**
  *

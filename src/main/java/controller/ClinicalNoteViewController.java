@@ -4,6 +4,9 @@
  */
 package controller;
 
+import model.entity.Entity;
+import model.entity.ClinicalNote;
+import model.entity.Appointment;
 import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeEvent;
 import view.views.non_modal_views.DesktopView;

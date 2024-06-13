@@ -5,6 +5,11 @@
 package controller;
 
 
+import model.entity.SecondaryCondition;
+import model.entity.PrimaryCondition;
+import model.entity.Condition;
+import model.entity.Patient;
+import model.entity.Entity;
 import static controller.ViewController.*;
 import controller.exceptions.TemplateReaderException;
 import java.awt.event.ActionEvent;

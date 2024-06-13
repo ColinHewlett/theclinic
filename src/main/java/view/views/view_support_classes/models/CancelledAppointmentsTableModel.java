@@ -4,8 +4,8 @@
  */
 package view.views.view_support_classes.models;
 
-import model.Appointment;
-import model.Patient;
+import model.entity.Appointment;
+import model.entity.Patient;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.LocalTime;

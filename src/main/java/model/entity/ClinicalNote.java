@@ -2,10 +2,12 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package model;
+package model.entity;
 
+import model.entity.Appointment;
 import java.awt.Point;
 import java.util.ArrayList;
+import model.IEntityStoreActions;
 import repository.Repository;
 import repository.StoreException;
 
@@ -13,26 +15,27 @@ import repository.StoreException;
  *
  * @author colin
  */
-public class Treatment extends Entity implements IEntityStoreActions{
-    public Treatment(){
-        this.setIsTreatment(true);
+public class ClinicalNote extends Entity implements IEntityStoreActions{
+
+    public ClinicalNote(){
+        this.setIsClinicNote(true);
     }
     
-    public Treatment(Integer key){
-        this.setIsTreatment(true);
-        this.key = key;
+    public ClinicalNote(Integer value){
+        this.setIsClinicNote(true);
+        this.key = value;
     }
     
-    public Treatment(Appointment value){
-        this.setIsTreatment(true);
-        this.appointment = value;
+    public ClinicalNote(Appointment appointment){
+        this.setIsClinicNote(true);
+        this.key = appointment.getKey();
     }
     
-    private ArrayList<Treatment> collection = new ArrayList<>();
-    public ArrayList<Treatment> get(){
+    private ArrayList<ClinicalNote> collection = null;
+    public ArrayList<ClinicalNote> get(){
         return collection;
     }
-    public void set(ArrayList<Treatment> value){
+    public void set(ArrayList<ClinicalNote> value){
         collection = value;
     }
     
@@ -44,32 +47,14 @@ public class Treatment extends Entity implements IEntityStoreActions{
         key = value;
     }
     
-    private Appointment appointment = null;
-    public Appointment getAppointment(){
-        return appointment;
+    private String notes = null;
+    public String getNotes(){
+        return notes;
     }
-    public void setAppointment(Appointment value){
-        appointment = value;
+    public void setNotes(String value){
+        notes = value;
     }
-    
-    private String description = null;
-    public String getDescription(){
-        return description;
-    }
-    public void setDescription(String value){
-        description = value;
-    }
-    
-    
-    
-    private boolean state = false;
-    public boolean getSttate(){
-        return state;
-    }
-    public void setSttate(boolean value){
-        state = value;
-    }
-    
+
     @Override
     public Point count()throws StoreException{
         return new Repository().count(this);
@@ -99,7 +84,7 @@ public class Treatment extends Entity implements IEntityStoreActions{
     }
     
     @Override
-    public Treatment read()throws StoreException{
+    public ClinicalNote read()throws StoreException{
         /**
          * if scope = FOR_PATIENT
          * -- patientKey property must have been initialised with the patient key value
@@ -111,5 +96,6 @@ public class Treatment extends Entity implements IEntityStoreActions{
     public void update()throws StoreException{
         new Repository().update(this);
     }
+    
     
 }

@@ -5,7 +5,7 @@
  */
 package repository;
 
-import model.Appointment;
+import model.entity.Appointment;
 
 /**
  *

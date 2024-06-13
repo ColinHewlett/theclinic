@@ -4,6 +4,13 @@
  */
 package view.views.non_modal_views;
 
+import model.entity.SecondaryCondition;
+import model.entity.PrimaryCondition;
+import model.entity.PatientCondition;
+import model.entity.Patient;
+import model.non_entity.SecondaryConditionWithState;
+import model.non_entity.PrimaryConditionWithState;
+import model.non_entity.ConditionWithState;
 import controller.ViewController;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;

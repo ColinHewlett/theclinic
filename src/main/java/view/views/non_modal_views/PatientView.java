@@ -11,9 +11,9 @@ import view.views.view_support_classes.renderers.AppointmentsTableDurationRender
 import controller.Descriptor;
 import controller.ViewController;
 import view.View;
-import model.Patient;
-import model.Appointment;
-import model.Entity;
+import model.entity.Patient;
+import model.entity.Appointment;
+import model.entity.Entity;
 import com.github.lgooddatepicker.components.DatePickerSettings;
 import com.github.lgooddatepicker.optionalusertools.DateChangeListener;
 import com.github.lgooddatepicker.zinternaltools.DateChangeEvent;
@@ -50,7 +50,7 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.JTextField;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.TableColumnModel;
-import model.TreatmentWithState;
+import model.non_entity.TreatmentWithState;
 import view.views.view_support_classes.renderers.ScheduleTableCellRenderer;
 /*28/03/2024import model.PatientNote;*/
 /*28/03/2024import view.views.view_support_classes.renderers.AppointmentsTablePatientNoteRenderer;*/

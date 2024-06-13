@@ -5,6 +5,23 @@
  */
 package controller;
 
+import model.entity.SecondaryCondition;
+import model.entity.PrimaryCondition;
+import model.entity.Condition;
+import model.entity.Treatment;
+import model.entity.SurgeryDaysAssignment;
+import model.entity.Question;
+import model.entity.PatientQuestion;
+import model.entity.PatientPrimaryCondition;
+import model.entity.Patient;
+import model.entity.Notification;
+import model.entity.Medication;
+import model.entity.Entity;
+import model.entity.Doctor;
+import model.entity.ClinicalNote;
+import model.entity.AppointmentTreatment;
+import model.entity.Appointment;
+import model.entity.PatientSecondaryCondition;
 import static controller.ViewController.DesktopViewControllerActionEvent.PATIENT_MEDICAL_HISTORY_VIEW_CONTROLLER_REQUEST;
 import static controller.ViewController.DesktopViewControllerActionEvent.VIEW_CONTROLLER_CLOSE_NOTIFICATION;
 import static controller.ViewController.displayErrorMessage;

@@ -11,7 +11,7 @@ import view.views.non_modal_views.DesktopView;
 import controller.Descriptor;
 import controller.ViewController;
 import view.View;
-import model.Patient;
+import model.entity.Patient;
 /*28/03/2024import model.PatientNote;*/
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;

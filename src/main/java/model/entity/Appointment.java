@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package model;
+package model.entity;
 
 
 //<editor-fold defaultstate="collapsed" desc="Imports">
@@ -19,6 +19,7 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import model.IEntityStoreActions;
 //</editor-fold>
 
 /**

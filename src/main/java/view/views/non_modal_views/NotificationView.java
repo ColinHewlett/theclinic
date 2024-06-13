@@ -11,7 +11,7 @@ import view.View;
 //import view.views.appontment_schedule_view.AppointmentsTableLocalDateTimeRenderer;
 import controller.Descriptor;
 import controller.ViewController;
-import model.Notification;
+import model.entity.Notification;
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
@@ -39,7 +39,7 @@ import javax.swing.event.InternalFrameEvent;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.TableCellRenderer;
-import model.Patient;
+import model.entity.Patient;
 
 /**
  *

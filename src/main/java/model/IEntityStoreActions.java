@@ -5,6 +5,7 @@
  */
 package model;
 
+import model.entity.Entity;
 import repository.StoreException;//01/03/2023
 import java.awt.Point;
 

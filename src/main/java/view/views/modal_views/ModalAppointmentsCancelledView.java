@@ -9,8 +9,8 @@ import view.views.view_support_classes.renderers.AppointmentsTableDurationRender
 import view.views.view_support_classes.renderers.AppointmentsTableLocalDateRenderer;
 import view.views.view_support_classes.renderers.AppointmentsTablePatientRenderer;
 import controller.ViewController;
-import model.Appointment;
-import model.Patient;
+import model.entity.Appointment;
+import model.entity.Patient;
 import view.views.view_support_classes.renderers.TableHeaderCellBorderRenderer;
 import view.views.view_support_classes.models.CancelledAppointmentsTableModel;
 import view.View;

@@ -5,7 +5,7 @@
  */
 package view.views.view_support_classes.renderers;
 import view.views.non_modal_views.NotificationView;
-import model.Notification;
+import model.entity.Notification;
 import view.views.view_support_classes.models.NotificationView4ColumnTableModel;
 import java.awt.Color;
 import java.awt.Component;

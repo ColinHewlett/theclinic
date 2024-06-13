@@ -4,6 +4,8 @@
  */
 package view.views.view_support_classes.models;
 
+import model.entity.PrimaryCondition;
+import model.non_entity.ConditionWithState;
 import java.util.ArrayList;
 import javax.swing.table.DefaultTableModel;
 import model.*;

@@ -38,7 +38,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumnModel;
-import model.Patient;
+import model.entity.Patient;
 /*28/03/2024import model.PatientNote;*/
 import view.View;
 /*28/03/2024import view.views.modal_views.ModalPatientNotesEditorView;*/

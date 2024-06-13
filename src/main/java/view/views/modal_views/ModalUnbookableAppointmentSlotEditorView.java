@@ -6,7 +6,7 @@ package view.views.modal_views;
 
 import controller.Descriptor;
 import controller.ViewController;
-import model.Appointment;
+import model.entity.Appointment;
 /*28/03/2024import model.PatientNote;*/
 import view.views.non_modal_views.DesktopView;
 import java.awt.event.ActionEvent;

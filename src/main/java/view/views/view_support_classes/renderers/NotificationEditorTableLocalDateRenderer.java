@@ -14,7 +14,7 @@ import java.time.format.DateTimeFormatter;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
-import model.Notification;
+import model.entity.Notification;
 import view.views.modal_views.ModalNotificationEditorView;
 import view.views.non_modal_views.NotificationView;
 import view.views.view_support_classes.models.PatientNotificationView2ColumnTableModel;

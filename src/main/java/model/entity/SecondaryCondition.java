@@ -2,10 +2,13 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package model;
+package model.entity;
 
+import model.entity.PrimaryCondition;
+import model.entity.Condition;
 import java.awt.Point;
 import java.util.ArrayList;
+import model.IEntityStoreActions;
 import repository.Repository;
 import repository.StoreException;
 
@@ -13,60 +16,60 @@ import repository.StoreException;
  *
  * @author colin
  */
-public class PrimaryCondition extends Condition implements IEntityStoreActions {
-    private SecondaryCondition secondaryCondition = null;
-            
-    public PrimaryCondition(){
-        setIsPrimaryCondition(true);
+public class SecondaryCondition extends Condition implements IEntityStoreActions {
+    private PrimaryCondition primaryCondition = null;
+
+    public SecondaryCondition(){
+        setIsSecondaryCondition(true);
     }
     
-    public PrimaryCondition(SecondaryCondition sc){
-        secondaryCondition = sc;
-        setIsPrimaryCondition(true);
-    }
-    
-    public PrimaryCondition(Integer key){
+    public SecondaryCondition(Integer key){
         this.key = key;
-        setIsPrimaryCondition(true);
+        setIsSecondaryCondition(true);
     }
 
-    public SecondaryCondition getSecondaryCondition(){
-                return secondaryCondition;
-    }
-    public void setSecondaryCondition(SecondaryCondition value){
-        secondaryCondition = value;
+    public SecondaryCondition(PrimaryCondition pc){
+        primaryCondition = pc;
+        setIsSecondaryCondition(true);
     }
 
-    @Override 
+    public PrimaryCondition getPrimaryCondition(){
+        return primaryCondition;
+    }
+    public void setPrimaryCondition(PrimaryCondition value){
+        primaryCondition = value;
+    }
+
+    @Override
     public Point count()throws StoreException{
         return new Repository().count(this);
     }
-    
+
     @Override 
     public void create()throws StoreException{
         new Repository().create(this);
     }
-        
+
     @Override 
     public void delete()throws StoreException{
         new Repository().delete(this);
     }
-    
+
     @Override 
     public void drop()throws StoreException{
 
     }
-    
+
     @Override 
     public Integer insert()throws StoreException{
         return new Repository().insert(this);
     }
-    
+
     @Override 
-    public PrimaryCondition read()throws StoreException{
+    public SecondaryCondition read()throws StoreException{
         return new Repository().read(this);
     }
-    
+
     @Override 
     public void update()throws StoreException{
         new Repository().update(this);

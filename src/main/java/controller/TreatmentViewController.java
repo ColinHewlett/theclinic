@@ -6,13 +6,13 @@ package controller;
 
 import static controller.ViewController.displayErrorMessage;
 import controller.exceptions.TemplateReaderException;
-import model.Treatment;
+import model.entity.Treatment;
 import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeEvent;
 import javax.swing.JOptionPane;
-import model.Appointment;
-import model.AppointmentTreatment;
-import model.Entity;
+import model.entity.Appointment;
+import model.entity.AppointmentTreatment;
+import model.entity.Entity;
 /*28/03/2024import model.PatientNote;*/
 import repository.StoreException;
 import view.View;

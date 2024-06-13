@@ -10,7 +10,7 @@ import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyVetoException;
 import javax.swing.JOptionPane;
-import model.Patient;
+import model.entity.Patient;
 import view.View;
 import view.views.non_modal_views.DesktopView;
 

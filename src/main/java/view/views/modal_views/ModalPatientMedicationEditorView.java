@@ -4,6 +4,9 @@
  */
 package view.views.modal_views;
 
+import model.entity.Patient;
+import model.entity.Medication;
+import model.entity.Entity;
 import model.*;
 import controller.ViewController;
 import view.views.view_support_classes.models.MedicationTableModel;

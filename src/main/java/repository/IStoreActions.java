@@ -5,6 +5,21 @@
  */
 package repository;
 
+import model.entity.SecondaryCondition;
+import model.entity.PrimaryCondition;
+import model.entity.Treatment;
+import model.entity.SurgeryDaysAssignment;
+import model.entity.Question;
+import model.entity.PatientQuestion;
+import model.entity.PatientCondition;
+import model.entity.Patient;
+import model.entity.Notification;
+import model.entity.Medication;
+import model.entity.Entity;
+import model.entity.Doctor;
+import model.entity.ClinicalNote;
+import model.entity.AppointmentTreatment;
+import model.entity.Appointment;
 import model.*;
 import java.awt.Point;
 import java.util.List;

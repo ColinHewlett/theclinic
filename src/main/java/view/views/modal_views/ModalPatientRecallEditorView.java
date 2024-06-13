@@ -9,7 +9,7 @@ import com.github.lgooddatepicker.optionalusertools.DateChangeListener;
 import com.github.lgooddatepicker.zinternaltools.DateChangeEvent;
 import controller.ViewController;
 import java.awt.event.ActionEvent;
-import model.Patient;
+import model.entity.Patient;
 import java.beans.PropertyVetoException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;

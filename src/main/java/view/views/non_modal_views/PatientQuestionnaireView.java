@@ -32,8 +32,8 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.JTable;
-import model.QuestionWithState;
-import model.Patient;
+import model.non_entity.QuestionWithState;
+import model.entity.Patient;
 import model.non_entity.SystemDefinition;
 
 /**

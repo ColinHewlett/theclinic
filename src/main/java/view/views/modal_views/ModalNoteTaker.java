@@ -4,6 +4,10 @@
  */
 package view.views.modal_views;
 
+import model.entity.SecondaryCondition;
+import model.entity.PrimaryCondition;
+import model.entity.Condition;
+import model.entity.Patient;
 import controller.ViewController;
 import view.View;
 import view.views.non_modal_views.DesktopView;

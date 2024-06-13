@@ -4,6 +4,9 @@
  */
 package patient_view_original_class;
 
+import model.entity.Patient;
+import model.entity.Entity;
+import model.entity.Appointment;
 import model.*;
 //<editor-fold defaultstate="collapsed" desc="Imports">
 

@@ -20,7 +20,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
-import model.Treatment;
+import model.entity.Treatment;
 import view.View;
 import view.views.view_support_classes.models.TreatmentTableModel;
 

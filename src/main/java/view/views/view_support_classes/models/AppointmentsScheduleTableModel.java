@@ -5,8 +5,8 @@
  */
 package view.views.view_support_classes.models;
 
-import model.Appointment;
-import model.Patient;
+import model.entity.Appointment;
+import model.entity.Patient;
 /*28/03/2024import model.PatientNote;*/
 import java.time.Duration;
 import java.time.LocalDateTime;

@@ -5,8 +5,8 @@
  */
 package controller;
 
-import model.Notification;
-import model.Entity.Scope;
+import model.entity.Notification;
+import model.entity.Entity.Scope;
 import java.beans.PropertyVetoException;
 /**
  * ThePatient is used temporarily to start a refactored and restructured Patient process
@@ -14,7 +14,7 @@ import java.beans.PropertyVetoException;
  * -- this removes the need for a separate Patients class
  * -- thus EntityDescriptor.thePatient is also being updated to an ArrayList<ThePatient>
  */
-import model.Patient;
+import model.entity.Patient;
 
 import repository.StoreException;//01/03/2023
 import view.views.non_modal_views.DesktopView;

@@ -6,7 +6,7 @@ package view.views.modal_views;
 
 import controller.Descriptor;
 import controller.ViewController;
-import model.Patient;
+import model.entity.Patient;
 import view.View;
 import view.views.non_modal_views.DesktopView;
 import java.awt.AWTEvent;

@@ -5,6 +5,26 @@
  */
 package controller;
 
+import model.entity.SecondaryCondition;
+import model.entity.PrimaryCondition;
+import model.entity.Condition;
+import model.non_entity.TreatmentWithState;
+import model.entity.Treatment;
+import model.entity.Question;
+import model.entity.PatientQuestion;
+import model.entity.PatientPrimaryCondition;
+import model.entity.PatientCondition;
+import model.entity.Patient;
+import model.entity.Medication;
+import model.entity.Entity;
+import model.entity.Doctor;
+import model.entity.AppointmentTreatment;
+import model.entity.Appointment;
+import model.non_entity.SecondaryConditionWithState;
+import model.non_entity.QuestionWithState;
+import model.entity.PatientSecondaryCondition;
+import model.non_entity.PrimaryConditionWithState;
+import model.non_entity.ConditionWithState;
 import controller.exceptions.*;
 import model.*;
 import model.non_entity.TableRow;
@@ -99,9 +119,9 @@ import java.awt.print.PrinterJob;
 import javax.print.attribute.HashPrintRequestAttributeSet;
 import javax.print.attribute.PrintRequestAttributeSet;
 import javax.print.attribute.standard.MediaSizeName;
-import static model.Question.Category.ARE_YOU;
-import static model.Question.Category.HAVE_YOU;
-import static model.Question.Category.YOU_AND_THE_CLINIC;
+import static model.entity.Question.Category.ARE_YOU;
+import static model.entity.Question.Category.HAVE_YOU;
+import static model.entity.Question.Category.YOU_AND_THE_CLINIC;
 import static model.non_entity.SystemDefinition.FONT.DYNAMIC;
 import static model.non_entity.SystemDefinition.FONT.TICK;
 

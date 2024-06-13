@@ -5,7 +5,7 @@
  */
 package repository;
 
-import model.Notification;
+import model.entity.Notification;
 //import colinhewlettsolutions.clinicpmswithmaven.model.Patient;
 /**
  *

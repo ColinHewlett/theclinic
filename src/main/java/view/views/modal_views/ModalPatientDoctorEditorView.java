@@ -13,8 +13,8 @@ import java.beans.PropertyVetoException;
 import javax.swing.SwingUtilities;
 import javax.swing.JOptionPane;
 import javax.swing.SwingConstants;
-import model.Doctor;
-import model.Patient;
+import model.entity.Doctor;
+import model.entity.Patient;
 import view.View;
 import view.views.non_modal_views.DesktopView;
 

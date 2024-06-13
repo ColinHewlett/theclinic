@@ -3,15 +3,17 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package model;
+package model.entity;
 
 //<editor-fold defaultstate="collapsed" desc="Imports">
+import model.entity.Entity;
 import repository.Repository;
 import repository.StoreException;//01/03/2023
 import java.awt.Point;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Iterator;
+import model.IEntityStoreActions;
 //</editor-fold>
 /**
  *

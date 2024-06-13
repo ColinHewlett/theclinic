@@ -5,7 +5,7 @@
  */
 package view.views.view_support_classes.models;
 
-import model.Appointment;
+import model.entity.Appointment;
 import controller.Descriptor;
 import java.time.LocalDateTime;
 import java.util.ArrayList;

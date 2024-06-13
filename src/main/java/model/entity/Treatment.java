@@ -2,10 +2,13 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package model;
+package model.entity;
 
+import model.entity.Entity;
+import model.entity.Appointment;
 import java.awt.Point;
 import java.util.ArrayList;
+import model.IEntityStoreActions;
 import repository.Repository;
 import repository.StoreException;
 
@@ -13,63 +16,63 @@ import repository.StoreException;
  *
  * @author colin
  */
-public class Question extends Entity implements IEntityStoreActions {
-
-    public enum Category{
-        ARE_YOU,
-        HAVE_YOU,
-        YOU_AND_THE_CLINIC;
+public class Treatment extends Entity implements IEntityStoreActions{
+    public Treatment(){
+        this.setIsTreatment(true);
     }
     
-    public Question(){
-        this.setIsQuestion(true);
-    }
-    
-    public Question(Integer key){
-        this.setIsQuestion(true);
+    public Treatment(Integer key){
+        this.setIsTreatment(true);
         this.key = key;
     }
     
-    private ArrayList<Question> collection = new ArrayList<>();
-    public ArrayList<Question> get(){
+    public Treatment(Appointment value){
+        this.setIsTreatment(true);
+        this.appointment = value;
+    }
+    
+    private ArrayList<Treatment> collection = new ArrayList<>();
+    public ArrayList<Treatment> get(){
         return collection;
     }
-    public void set(ArrayList<Question> value){
+    public void set(ArrayList<Treatment> value){
         collection = value;
     }
     
     private Integer key = null;
-    public void setKey(Integer value){
-        key = value;
-    }
     public Integer getKey(){
         return key;
     }
-    
-    private Category category = null;
-    public Category getCategory(){
-        return category;
+    public void setKey(Integer value){
+        key = value;
     }
-    public void setCategory(String value){
-        category = Category.valueOf(value);
+    
+    private Appointment appointment = null;
+    public Appointment getAppointment(){
+        return appointment;
+    }
+    public void setAppointment(Appointment value){
+        appointment = value;
     }
     
     private String description = null;
-    public void setDescription(String value){
-        description = value;
-    }
     public String getDescription(){
         return description;
     }
+    public void setDescription(String value){
+        description = value;
+    }
     
-    private Integer order = null;
-    public void setOrder(Integer value){
-        order = value;
+    
+    
+    private boolean state = false;
+    public boolean getSttate(){
+        return state;
     }
-    public Integer getOrder(){
-        return order;
+    public void setSttate(boolean value){
+        state = value;
     }
- 
+    
     @Override
     public Point count()throws StoreException{
         return new Repository().count(this);
@@ -99,7 +102,7 @@ public class Question extends Entity implements IEntityStoreActions {
     }
     
     @Override
-    public Question read()throws StoreException{
+    public Treatment read()throws StoreException{
         /**
          * if scope = FOR_PATIENT
          * -- patientKey property must have been initialised with the patient key value
@@ -111,4 +114,5 @@ public class Question extends Entity implements IEntityStoreActions {
     public void update()throws StoreException{
         new Repository().update(this);
     }
+    
 }

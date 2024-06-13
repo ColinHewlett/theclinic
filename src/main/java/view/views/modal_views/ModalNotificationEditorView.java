@@ -9,8 +9,8 @@ import view.views.view_support_classes.models.PatientNotificationView2ColumnTabl
 import view.views.view_support_classes.renderers.NotificationEditorTableLocalDateRenderer;
 import view.views.view_support_classes.renderers.NotificationTableKeyColorsAndLocalDateRenderer;
 import controller.ViewController;
-import model.Patient;
-import model.Notification;
+import model.entity.Patient;
+import model.entity.Notification;
 import view.views.view_support_classes.renderers.TableHeaderCellBorderRenderer;
 import view.View;
 import view.views.non_modal_views.DesktopView;
@@ -223,7 +223,7 @@ public class ModalNotificationEditorView extends ModalView {
         jList1 = new javax.swing.JList<>();
         jSpinner1 = new javax.swing.JSpinner();
         pnlPatientSelection = new javax.swing.JPanel();
-        cmbSelectPatient = new javax.swing.JComboBox<model.Patient>();
+        cmbSelectPatient = new javax.swing.JComboBox<model.entity.Patient>();
         pnlNotificationDetails = new javax.swing.JPanel();
         jLabel2 = new javax.swing.JLabel();
         dpNotificationDate = new com.github.lgooddatepicker.components.DatePicker();
@@ -254,7 +254,7 @@ public class ModalNotificationEditorView extends ModalView {
 
         pnlPatientSelection.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Select patient", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 1, 11))); // NOI18N
 
-        cmbSelectPatient.setModel(new javax.swing.DefaultComboBoxModel<model.Patient>());
+        cmbSelectPatient.setModel(new javax.swing.DefaultComboBoxModel<model.entity.Patient>());
         cmbSelectPatient.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cmbSelectPatientActionPerformed(evt);
@@ -559,7 +559,7 @@ public class ModalNotificationEditorView extends ModalView {
     private javax.swing.JButton btnCloseView;
     private javax.swing.JButton btnCreateUpdatePatientNotification;
     private javax.swing.ButtonGroup buttonGroup1;
-    private javax.swing.JComboBox<model.Patient> cmbSelectPatient;
+    private javax.swing.JComboBox<model.entity.Patient> cmbSelectPatient;
     private com.github.lgooddatepicker.components.DatePicker dpNotificationDate;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;

@@ -8,6 +8,9 @@ package view.views.modal_views.dialogs;
  *
  * @author colin
  */
+import model.entity.SecondaryCondition;
+import model.entity.PrimaryCondition;
+import model.entity.Patient;
 import controller.ViewController;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;

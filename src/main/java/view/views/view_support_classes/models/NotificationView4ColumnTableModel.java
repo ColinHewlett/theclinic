@@ -6,8 +6,8 @@
 package view.views.view_support_classes.models;
 
 //import view.views.schedule_contact_details_view.*;
-import model.Patient;
-import model.Notification;
+import model.entity.Patient;
+import model.entity.Notification;
 import controller.Descriptor;
 import java.time.format.DateTimeFormatter;
 import java.time.LocalDate;

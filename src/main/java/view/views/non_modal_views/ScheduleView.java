@@ -12,8 +12,8 @@ import view.views.view_support_classes.renderers.AppointmentsTablePatientRendere
 import view.views.view_support_classes.renderers.ScheduleTableCellRenderer;
 /*28/03/2024import view.views.view_support_classes.renderers.AppointmentsTablePatientNoteRenderer;*/
 import view.views.view_support_classes.models.AppointmentsScheduleTableModel;
-import model.Appointment;
-import model.Patient;
+import model.entity.Appointment;
+import model.entity.Patient;
 /*28/03/2024import model.PatientNote;*/
 import controller.ViewController;
 import view.views.view_support_classes.AppointmentDateVetoPolicy;
@@ -77,7 +77,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
-import model.SurgeryDaysAssignment;
+import model.entity.SurgeryDaysAssignment;
 
 
 /**

@@ -5,7 +5,7 @@
  */
 package view.views.view_support_classes.models;
 
-import model.Appointment;
+import model.entity.Appointment;
 import java.time.DayOfWeek;
 import java.time.Duration;
 import java.time.LocalDate;

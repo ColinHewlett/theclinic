@@ -3,6 +3,8 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JInternalFrame.java to edit this template
  */
 package view.views.non_modal_views;
+import model.entity.ClinicalNote;
+import model.entity.Appointment;
 import controller.ViewController;
 import model.*;
 import view.View;

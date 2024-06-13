@@ -4,6 +4,10 @@
  */
 package view.views.non_modal_views;
 
+import model.entity.SecondaryCondition;
+import model.entity.PrimaryCondition;
+import model.entity.Condition;
+import model.entity.Treatment;
 import controller.ViewController;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;

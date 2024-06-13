@@ -4,6 +4,11 @@
  */
 package controller;
 
+import model.entity.Question;
+import model.entity.PatientQuestion;
+import model.entity.Patient;
+import model.entity.Entity;
+import model.non_entity.QuestionWithState;
 import static controller.ViewController.displayErrorMessage;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;

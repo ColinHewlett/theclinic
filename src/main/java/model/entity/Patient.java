@@ -3,8 +3,13 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package model;
+package model.entity;
 //<editor-fold defaultstate="collapsed" desc="Imports">
+import model.entity.Notification;
+import model.entity.Medication;
+import model.entity.Entity;
+import model.entity.Doctor;
+import model.entity.Appointment;
 import model.non_entity.SystemDefinition;
 import repository.Repository;
 import repository.StoreException;//01/03/2023
@@ -14,6 +19,7 @@ import java.time.Period;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import model.IEntityStoreActions;
 import repository.IStoreActions;
 //</editor-fold>
 

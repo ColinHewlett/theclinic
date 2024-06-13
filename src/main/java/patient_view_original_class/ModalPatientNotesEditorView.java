@@ -8,7 +8,7 @@ import controller.Descriptor;
 import controller.ViewController;
 /*28/03/2024import model.PatientNote;*/
 import view.views.modal_views.ModalView;
-import model.Patient;
+import model.entity.Patient;
 import java.awt.Color;
 import java.awt.Rectangle;
 import java.beans.PropertyChangeListener;

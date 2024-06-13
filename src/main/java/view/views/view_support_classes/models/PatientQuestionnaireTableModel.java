@@ -6,7 +6,7 @@ package view.views.view_support_classes.models;
 
 import java.util.ArrayList;
 import javax.swing.table.DefaultTableModel;
-import model.QuestionWithState;
+import model.non_entity.QuestionWithState;
 
 /**
  *

@@ -6,7 +6,7 @@
 package view.views.view_support_classes.renderers;
 
 import controller.Descriptor;
-import model.Appointment;
+import model.entity.Appointment;
 import java.awt.Component;
 import java.time.Duration;
 import java.time.format.DateTimeFormatter;

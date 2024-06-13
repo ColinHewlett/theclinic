@@ -4,7 +4,7 @@
  */
 package view.views.modal_views;
 
-import model.Patient;
+import model.entity.Patient;
 import controller.ViewController;
 import java.awt.event.ActionEvent;
 import view.views.non_modal_views.PatientView;

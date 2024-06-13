@@ -5,8 +5,8 @@
 package view.views.modal_views;
 
 import controller.ViewController;
-import model.Treatment;
-import model.Appointment;
+import model.entity.Treatment;
+import model.entity.Appointment;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -24,7 +24,7 @@ import java.beans.PropertyChangeListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.JOptionPane;
-import model.TreatmentWithState;
+import model.non_entity.TreatmentWithState;
 import view.View;
 import view.views.non_modal_views.DesktopView;
 import view.views.view_support_classes.models.MedicalHistoryTableModel;
