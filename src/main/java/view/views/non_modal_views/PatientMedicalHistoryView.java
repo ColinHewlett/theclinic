@@ -21,6 +21,8 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
+import javax.swing.JPanel;
+import javax.swing.border.TitledBorder;
 import model.*;
 import view.View;
 import view.views.view_support_classes.models.MedicalConditionWithStateTableModel;
@@ -34,14 +36,60 @@ public class PatientMedicalHistoryView extends View
                    TableModelListener, 
                    ListSelectionListener,
                    PropertyChangeListener{
+    private final String PANEL_VIEWER_TITLE = "Patient comments on condition";
+    private final String CANCEL_COMMENT_MODE_TITLE = 
+            "<html><center>Cancel</center><center>upload</center><center>comment</center></html>";;
+    private final String EDIT_COMMENT_MODE_TITLE = 
+            "<html><center>Edit</center><center>patient</center><center>comment</center></html>";
     enum ToggleMode{PRIMARY,SECONDARY,OTHER}
     enum ConditionViewMode{PRIMARY, SECONDARY};
+    enum PatientCommentMode{CANCEL, EDIT};
+    enum CommentEditMode{ON,OFF}
     enum Action{
         REQUEST_CLOSE_VIEW,
         REQUEST_DELETE_PATIENT_CONDITION_COMMENT, 
         REQUEST_TOGGLE_CONDITION_VIEW,
-        REQUEST_UPDATE_PATIENT_CONDITION_COMMENT,
+        REQUEST_CANCEL_EDIT_PATIENT_CONDITION_COMMENT,
+        REQUEST_UPLOAD_PATIENT_CONDITION_COMMENT
         };
+    
+    private CommentEditMode commentEditMode = null;
+    private void setCommentEditMode(CommentEditMode value){
+        commentEditMode = value;
+        if (value.equals(CommentEditMode.ON)) {
+            this.btnUploadPatientComment.setEnabled(true);
+            this.btnCancelEditPatientComment.setText(CANCEL_COMMENT_MODE_TITLE);
+            this.txaComment.setEditable(true);
+            setCachedComment(txaComment.getText());
+        }else{
+            this.btnUploadPatientComment.setEnabled(false);
+            this.btnCancelEditPatientComment.setText(this.EDIT_COMMENT_MODE_TITLE);
+            this.txaComment.setEditable(false);
+        }    
+    }
+    private CommentEditMode getCommentEditMode(){
+        return commentEditMode;
+    }
+    
+    private void setTitledBorderFor(JPanel panel, String heading, String condition){
+        String title = null;
+        TitledBorder tb = (TitledBorder)panel.getBorder();
+        if (heading != null){
+            title = "Patient comment on " + heading + " (" + condition + ")";
+            //title = title + "       (click 'Edit patient comment' button to edit comment)";
+            tb.setTitle(title);
+        }
+        else tb.setTitle(this.PANEL_VIEWER_TITLE);
+        panel.repaint();
+    }
+    
+    private String cachedComment = "";
+    private void setCachedComment(String value){
+        cachedComment = value;
+    }
+    private String getCachedComment(){
+        return cachedComment;
+    }
     
     /**
      * 
@@ -67,14 +115,21 @@ public class PatientMedicalHistoryView extends View
         pnlActions.setBackground(new Color(220,220,220));
         setTitle(getPatient().toString() + " medical history");
         
+        TitledBorder tb = (TitledBorder)this.pnlPatientCommentViewer.getBorder();
+        tb.setTitleFont(getBorderTitleFont());
+        tb.setTitleColor(getBorderTitleColor());
+        tb.setTitle(this.PANEL_VIEWER_TITLE);
+        
         this.btnCloseView.setActionCommand(Action.REQUEST_CLOSE_VIEW.toString());
         this.btnDeleteCommentFromCondition.setActionCommand(Action.REQUEST_DELETE_PATIENT_CONDITION_COMMENT.toString());
-        this.btnEditCommentForCondition.setActionCommand(Action.REQUEST_UPDATE_PATIENT_CONDITION_COMMENT.toString());
+        this.btnCancelEditPatientComment.setActionCommand(Action.REQUEST_CANCEL_EDIT_PATIENT_CONDITION_COMMENT.toString());
         this.btnToggleConditionView.setActionCommand(Action.REQUEST_TOGGLE_CONDITION_VIEW.toString());
+        this.btnUploadPatientComment.setActionCommand(Action.REQUEST_UPLOAD_PATIENT_CONDITION_COMMENT.toString());
         this.btnCloseView.addActionListener(this);
         this.btnDeleteCommentFromCondition.addActionListener(this);
-        this.btnEditCommentForCondition.addActionListener(this);
+        this.btnCancelEditPatientComment.addActionListener(this);
         this.btnToggleConditionView.addActionListener(this);
+        this.btnUploadPatientComment.addActionListener(this);
         
         ListSelectionModel lsm = this.tblCondition.getSelectionModel();
         lsm.addListSelectionListener(this);
@@ -83,6 +138,7 @@ public class PatientMedicalHistoryView extends View
         cws.setCondition(new PrimaryCondition());
         setConditionWithState(cws);
         setConditionViewMode(ConditionViewMode.PRIMARY);
+        setCommentEditMode(CommentEditMode.OFF);
     }
     
     @Override
@@ -117,18 +173,18 @@ public class PatientMedicalHistoryView extends View
                 }
                 break;
             
-            case REQUEST_UPDATE_PATIENT_CONDITION_COMMENT:
+            case REQUEST_CANCEL_EDIT_PATIENT_CONDITION_COMMENT:
                 cws = getSelectedCondition();     
                 if (cws!=null){
-                    if (doRequestConditionCommentUpdateEditor(cws)!=null){
-                        setConditionWithState(cws);
-                        doSendActionEvent(ViewController.PatientMedicalHistoryViewControllerActionEvent
-                                .PATIENT_CONDITION_COMMENT_UPDATE_REQUEST);
+                    switch(getCommentEditMode()){
+                        case ON:
+                            setCommentEditMode(CommentEditMode.OFF);
+                            txaComment.setText(getCachedComment());
+                            break;
+                        case OFF:
+                            setCommentEditMode(CommentEditMode.ON);
+                            break;
                     }
-                }else{
-                    isError = true;
-                    error = "Patient condition has not been defined;/n"
-                                + "Action to update condition comment aborted";
                 }
                 break;
                 
@@ -139,11 +195,23 @@ public class PatientMedicalHistoryView extends View
                     setConditionWithState(cws);
                     doSendActionEvent(ViewController.PatientMedicalHistoryViewControllerActionEvent
                             .PATIENT_CONDITION_COMMENT_UPDATE_REQUEST);
+                    this.txaComment.setText("");
                 }
                 else{
                     isError = true;
                     error = "Patient condition has not been defined;/n"
                                 + "Action to delete condition comment aborted";
+                }
+                break;
+                
+            case REQUEST_UPLOAD_PATIENT_CONDITION_COMMENT:
+                cws = getSelectedCondition();
+                if (cws!=null){
+                    cws.setComment(txaComment.getText());
+                    setConditionWithState(cws);
+                    doSendActionEvent(ViewController.PatientMedicalHistoryViewControllerActionEvent
+                            .PATIENT_CONDITION_COMMENT_UPDATE_REQUEST);
+                    setCommentEditMode(CommentEditMode.OFF);
                 }
                 break;
         }
@@ -199,6 +267,7 @@ public class PatientMedicalHistoryView extends View
     
     @Override
     public void valueChanged(ListSelectionEvent e){
+        String heading = null;
         PrimaryCondition pc = null;
         if (!e.getValueIsAdjusting()) {   // Ensure the event is not fired multiple times
             int selectedRow = tblCondition.getSelectedRow();
@@ -208,17 +277,39 @@ public class PatientMedicalHistoryView extends View
                         (MedicalConditionWithStateTableModel)tblCondition.getModel();
                 ConditionWithState cws = 
                         (ConditionWithState) model.getElementAt(selectedRow);
-                if (cws.getComment()==null) txaComment.setText("");
-                else txaComment.setText(cws.getComment());
+                heading = model.getConditionsColumnName();
+                if (heading.charAt(heading.length()-1)=='s')
+                    heading = heading.substring(0, heading.length()-1);
+                
                 if (cws.getState()){
-                    if (cws.getComment()==null)
-                        this.btnDeleteCommentFromCondition.setEnabled(false);
-                    else this.btnDeleteCommentFromCondition.setEnabled(false);
-                    this.btnEditCommentForCondition.setEnabled(true);
+                    if (cws.getComment()==null) txaComment.setText("");
+                        else txaComment.setText(cws.getComment());
+                    if (cws.getComment()!=null){
+                        if (!cws.getComment().trim().isEmpty())
+                            this.btnDeleteCommentFromCondition.setEnabled(true);
+                    }else this.btnDeleteCommentFromCondition.setEnabled(false);
+                    switch(getConditionViewMode()){
+                        case PRIMARY://fetch secondariews linked to this primary (if any)
+                            SecondaryCondition sc = ((PrimaryCondition)cws.getCondition()).getSecondaryCondition();
+                            if (sc.get().isEmpty()){
+                                this.btnCancelEditPatientComment.setEnabled(true);
+                                setTitledBorderFor(pnlPatientCommentViewer,heading, cws.getCondition().getDescription());
+                            }else{
+                                this.btnCancelEditPatientComment.setEnabled(false);
+                                setTitledBorderFor(pnlPatientCommentViewer, null, null);
+                            }
+                            break;
+                        case SECONDARY:
+                            this.btnCancelEditPatientComment.setEnabled(true);
+                            setTitledBorderFor(pnlPatientCommentViewer,heading, cws.getCondition().getDescription());
+                            break;
+                    }   
                 }else{
+                    txaComment.setText("");
+                    setTitledBorderFor(pnlPatientCommentViewer,null,null);
                     this.btnDeleteCommentFromCondition.setEnabled(false);
-                    this.btnEditCommentForCondition.setEnabled(false);
-                    this.btnEditCommentForCondition.setEnabled(false);
+                    this.btnCancelEditPatientComment.setEnabled(false);
+                    this.btnCancelEditPatientComment.setEnabled(false);
                 }
                 switch(getConditionViewMode()){
                     case PRIMARY:
@@ -235,7 +326,7 @@ public class PatientMedicalHistoryView extends View
                     case SECONDARY:
                         
                         this.btnToggleConditionView.setEnabled(true);
-                        setToggleMode(ToggleMode.SECONDARY);
+                        setToggleMode(ToggleMode.PRIMARY);
                         break;
                 }
             }
@@ -306,7 +397,7 @@ public class PatientMedicalHistoryView extends View
                 setConditionWithState(cws);
                 //setTitle("Medical conditions (primary options)");
                 setToggleMode(ToggleMode.SECONDARY);
-                this.btnEditCommentForCondition.setEnabled(false);
+                this.btnCancelEditPatientComment.setEnabled(false);
                 this.btnDeleteCommentFromCondition.setEnabled(false);
                 this.btnToggleConditionView.setEnabled(false);
                 break;
@@ -320,7 +411,7 @@ public class PatientMedicalHistoryView extends View
                     setConditionWithState(conditionWithState);
                     setToggleMode(ToggleMode.PRIMARY);
                     this.btnDeleteCommentFromCondition.setEnabled(false);
-                    this.btnEditCommentForCondition.setEnabled(false);
+                    this.btnCancelEditPatientComment.setEnabled(false);
                     this.btnToggleConditionView.setEnabled(true);
 
                 }else{
@@ -349,14 +440,14 @@ public class PatientMedicalHistoryView extends View
         switch(getConditionViewMode()){
             case PRIMARY:
                 this.btnDeleteCommentFromCondition.setEnabled(false);
-                this.btnEditCommentForCondition.setEnabled(false);
+                this.btnCancelEditPatientComment.setEnabled(false);
                 this.btnToggleConditionView.setEnabled(false);
                 setToggleMode(ToggleMode.SECONDARY);
                 MedicalConditionWithStateTableModel.conditionsColumnName = "Condition";
                 break;
             case SECONDARY:
                 this.btnDeleteCommentFromCondition.setEnabled(false);
-                this.btnEditCommentForCondition.setEnabled(false);
+                this.btnCancelEditPatientComment.setEnabled(false);
                 this.btnToggleConditionView.setEnabled(true);
                 setToggleMode(ToggleMode.PRIMARY);
                 SecondaryCondition sc = (SecondaryCondition)conditions.get(0).getCondition();
@@ -489,14 +580,14 @@ public class PatientMedicalHistoryView extends View
         scrConditionTable = new javax.swing.JScrollPane();
         tblCondition = new javax.swing.JTable();
         pnlActions = new javax.swing.JPanel();
-        btnEditCommentForCondition = new javax.swing.JButton();
+        btnCancelEditPatientComment = new javax.swing.JButton();
         btnDeleteCommentFromCondition = new javax.swing.JButton();
         btnCloseView = new javax.swing.JButton();
         btnToggleConditionView = new javax.swing.JButton();
         pnlPatientCommentViewer = new javax.swing.JPanel();
         jScrollPane2 = new javax.swing.JScrollPane();
         txaComment = new javax.swing.JTextArea();
-        jButton1 = new javax.swing.JButton();
+        btnUploadPatientComment = new javax.swing.JButton();
 
         scrConditionTable.setViewportView(tblCondition);
         ViewController.setJTableColumnProperties(
@@ -504,13 +595,13 @@ public class PatientMedicalHistoryView extends View
 
         pnlActions.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
-        btnEditCommentForCondition.setText("<html><center>Update</center><center>condition</center><center>notes</center></html>");
-        btnEditCommentForCondition.setMaximumSize(new java.awt.Dimension(87, 25));
-        btnEditCommentForCondition.setMinimumSize(new java.awt.Dimension(87, 25));
-        btnEditCommentForCondition.setPreferredSize(new java.awt.Dimension(87, 25));
-        btnEditCommentForCondition.addActionListener(new java.awt.event.ActionListener() {
+        btnCancelEditPatientComment.setText("<html><center>Edit</center><center>patient</center><center>Comment</center></html>");
+        btnCancelEditPatientComment.setMaximumSize(new java.awt.Dimension(87, 25));
+        btnCancelEditPatientComment.setMinimumSize(new java.awt.Dimension(87, 25));
+        btnCancelEditPatientComment.setPreferredSize(new java.awt.Dimension(87, 25));
+        btnCancelEditPatientComment.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnEditCommentForConditionActionPerformed(evt);
+                btnCancelEditPatientCommentActionPerformed(evt);
             }
         });
 
@@ -546,7 +637,7 @@ public class PatientMedicalHistoryView extends View
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlActionsLayout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(pnlActionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(btnEditCommentForCondition, javax.swing.GroupLayout.DEFAULT_SIZE, 97, Short.MAX_VALUE)
+                    .addComponent(btnCancelEditPatientComment, javax.swing.GroupLayout.DEFAULT_SIZE, 97, Short.MAX_VALUE)
                     .addGroup(pnlActionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                         .addComponent(btnDeleteCommentFromCondition, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 97, Short.MAX_VALUE)
                         .addComponent(btnCloseView, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -557,7 +648,7 @@ public class PatientMedicalHistoryView extends View
             pnlActionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlActionsLayout.createSequentialGroup()
                 .addGap(11, 11, 11)
-                .addComponent(btnEditCommentForCondition, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(btnCancelEditPatientComment, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(11, 11, 11)
                 .addComponent(btnDeleteCommentFromCondition, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -567,7 +658,7 @@ public class PatientMedicalHistoryView extends View
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        btnEditCommentForCondition.getAccessibleContext().setAccessibleDescription("");
+        btnCancelEditPatientComment.getAccessibleContext().setAccessibleDescription("");
 
         pnlPatientCommentViewer.setBorder(javax.swing.BorderFactory.createTitledBorder("Patient comment on condition"));
 
@@ -578,9 +669,9 @@ public class PatientMedicalHistoryView extends View
         txaComment.setLineWrap(true);
         txaComment.setWrapStyleWord(true);
 
-        jButton1.setText("<html><center>Upload</center><center>patient</center><center>comment</center></html");
-        jButton1.setMinimumSize(new java.awt.Dimension(87, 55));
-        jButton1.setPreferredSize(new java.awt.Dimension(87, 55));
+        btnUploadPatientComment.setText("<html><center>Upload</center><center>patient</center><center>comment</center></html");
+        btnUploadPatientComment.setMinimumSize(new java.awt.Dimension(87, 55));
+        btnUploadPatientComment.setPreferredSize(new java.awt.Dimension(87, 55));
 
         javax.swing.GroupLayout pnlPatientCommentViewerLayout = new javax.swing.GroupLayout(pnlPatientCommentViewer);
         pnlPatientCommentViewer.setLayout(pnlPatientCommentViewerLayout);
@@ -590,7 +681,7 @@ public class PatientMedicalHistoryView extends View
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 353, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
-                .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 87, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(btnUploadPatientComment, javax.swing.GroupLayout.PREFERRED_SIZE, 87, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(10, 10, 10))
         );
         pnlPatientCommentViewerLayout.setVerticalGroup(
@@ -598,7 +689,7 @@ public class PatientMedicalHistoryView extends View
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlPatientCommentViewerLayout.createSequentialGroup()
                 .addContainerGap(18, Short.MAX_VALUE)
                 .addGroup(pnlPatientCommentViewerLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnUploadPatientComment, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap())
         );
@@ -634,9 +725,9 @@ public class PatientMedicalHistoryView extends View
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void btnEditCommentForConditionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEditCommentForConditionActionPerformed
+    private void btnCancelEditPatientCommentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelEditPatientCommentActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_btnEditCommentForConditionActionPerformed
+    }//GEN-LAST:event_btnCancelEditPatientCommentActionPerformed
 
     private void btnCloseViewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCloseViewActionPerformed
         // TODO add your handling code here:
@@ -648,11 +739,11 @@ public class PatientMedicalHistoryView extends View
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnCancelEditPatientComment;
     private javax.swing.JButton btnCloseView;
     private javax.swing.JButton btnDeleteCommentFromCondition;
-    private javax.swing.JButton btnEditCommentForCondition;
     private javax.swing.JButton btnToggleConditionView;
-    private javax.swing.JButton jButton1;
+    private javax.swing.JButton btnUploadPatientComment;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JPanel pnlActions;
