@@ -4,13 +4,15 @@
  */
 package model.entity;
 
+import java.awt.Point;
 import model.entity.Entity;
 import java.util.ArrayList;
+import repository.StoreException;
 /**
  *
  * @author colin
  */
-public class Condition extends Entity {
+public abstract class Condition extends Entity {
     Integer key = null;
     private String description = null;
     private ArrayList<Condition> collection = new ArrayList<>();
@@ -32,5 +34,5 @@ public class Condition extends Entity {
     }
     public void setKey(Integer value){
         key = value;
-    }
+    } 
 }

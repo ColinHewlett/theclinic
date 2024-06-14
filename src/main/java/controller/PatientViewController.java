@@ -1875,9 +1875,11 @@ public class PatientViewController extends ViewController {
             }
             note = a.getNotes();
             if (note!=null){
-                if (note.substring(note.length()-1).equals("/")){
-                    note = note.substring(0, note.length() - 2);
-                    a.setNotes(note);
+                if(!note.trim().isEmpty()){
+                    if (note.substring(note.length()-1).equals("/")){
+                        note = note.substring(0, note.length() - 2);
+                        a.setNotes(note);
+                    }
                 }
             } 
         }

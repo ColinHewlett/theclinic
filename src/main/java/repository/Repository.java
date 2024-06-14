@@ -797,7 +797,7 @@ public class Repository implements IStoreActions {
             }
             Entity entity = new Entity();
             entity.setValue(key);
-            return entity;
+            return entity; 
         } catch (SQLException ex) {
             throw new StoreException("SQLException message -> " + ex.getMessage() + "\n"
                     + "StoreException message -> exception raised in Repository::runSQL(AppointmentSQL..) during execution of an READ_HIGHEST_KEY statement",
@@ -4043,7 +4043,7 @@ public class Repository implements IStoreActions {
     }
 
     private Entity doPMSSQLforAppointment(Repository.PMSSQL q, Entity entity)throws StoreException{
-        Entity result = new Entity(); 
+        Entity result = null; 
         String sql = null;
         switch (q){
             case CANCEL_APPOINTMENT:

@@ -9,6 +9,8 @@ import repository.StoreException;//01/03/2023
 import java.awt.Point;
 import java.util.ArrayList;
 import model.IStoreClient;
+import model.IEntityStoreActions;
+import repository.Repository;
 
 /**
  *

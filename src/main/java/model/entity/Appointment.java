@@ -314,18 +314,8 @@ public class Appointment extends Entity implements IEntityStoreActions{
     @Override
     public Integer insert() throws StoreException{
         Integer pid = null;
-        /**
-         * 29/03/2024  code logic update
-         */
         this.setKey(new Repository().insert(
                     this, getPatient().getKey(), null));
-        /*
-        if (getPatientNote()==null)
-            this.setKey(new Repository().insert(
-                    this, getPatient().getKey(), null));
-        else this.setKey(new Repository().insert(
-                this, getPatient().getKey(), getPatientNote().getKey()));
-        */
         return pid;
     }
     
