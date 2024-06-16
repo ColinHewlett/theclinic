@@ -198,6 +198,15 @@ public class Appointment extends Entity implements IEntityStoreActions{
         this.notes = notes;
     }
     
+    
+    private Invoice invoice = null;
+    public Invoice getInvoice() {
+        return invoice;
+    }
+    public void setInvoice(Invoice value) {
+        this.invoice = value;
+    }
+    
     /**
      * 
      * @return 

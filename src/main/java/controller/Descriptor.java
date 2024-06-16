@@ -15,7 +15,7 @@ import model.entity.Patient;
 import model.entity.Notification;
 import model.entity.Medication;
 import model.entity.Doctor;
-import model.entity.ClinicalNote;
+import model.entity.ClinicNote;
 import model.entity.Appointment;
 import model.non_entity.QuestionWithState;
 import model.non_entity.ConditionWithState;
@@ -162,11 +162,11 @@ public class Descriptor {
             conditionWithState = value;
         }
         
-        private ClinicalNote clinicalNote = null;
-        public ClinicalNote getClinicalNote(){
+        private ClinicNote clinicalNote = null;
+        public ClinicNote getClinicalNote(){
             return clinicalNote; 
         }
-        public void setClinicalNote(ClinicalNote value){
+        public void setClinicalNote(ClinicNote value){
             clinicalNote = value;
         }
         
@@ -487,11 +487,11 @@ public class Descriptor {
             treatment = value;
         }
         
-        private ClinicalNote clinicalNote = null;
-        public ClinicalNote getClinicalNote(){
+        private ClinicNote clinicalNote = null;
+        public ClinicNote getClinicalNote(){
             return clinicalNote; 
         }
-        public void setClinicalNote(ClinicalNote value){
+        public void setClinicalNote(ClinicNote value){
             clinicalNote = value;
         }
         

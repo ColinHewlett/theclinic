@@ -3,7 +3,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JInternalFrame.java to edit this template
  */
 package view.views.non_modal_views;
-import model.entity.ClinicalNote;
+import model.entity.ClinicNote;
 import model.entity.Appointment;
 import controller.ViewController;
 import model.*;
@@ -146,7 +146,7 @@ public class ClinicalNoteView extends View
         String message = null;
         String note = null;
         Appointment appointment = null;
-        ClinicalNote clinicalNote = null;
+        ClinicNote clinicalNote = null;
         actionCommand = null;
         switch (Action.valueOf(e.getActionCommand())){
             case REQUEST_CLOSE_VIEW:
@@ -159,7 +159,7 @@ public class ClinicalNoteView extends View
             case REQUEST_CREATE_NOTE:{
                 appointment = getMyController().getDescriptor().
                         getControllerDescription().getAppointment();
-                clinicalNote = new ClinicalNote(appointment);
+                clinicalNote = new ClinicNote(appointment);
                 note = txaNotepad.getText().trim();
                 if (note.isEmpty()){
                     message = "Notepad is empty, nothing to save";  
@@ -266,8 +266,8 @@ public class ClinicalNoteView extends View
         return appointment;
     }
     
-    private ClinicalNote clinicalNote = null;
-    private void setClinicalNote(ClinicalNote value){
+    private ClinicNote clinicalNote = null;
+    private void setClinicalNote(ClinicNote value){
         clinicalNote = value;
         if (clinicalNote==null) {
             setViewMode(ViewController.ViewMode.CREATE);
@@ -279,7 +279,7 @@ public class ClinicalNoteView extends View
         }
         
     }
-    private ClinicalNote getClinicalNote(){
+    private ClinicNote getClinicalNote(){
         return clinicalNote;
     }
     

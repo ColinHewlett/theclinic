@@ -5,7 +5,7 @@
 package controller;
 
 import model.entity.Entity;
-import model.entity.ClinicalNote;
+import model.entity.ClinicNote;
 import model.entity.Appointment;
 import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeEvent;
@@ -32,7 +32,7 @@ public class ClinicalNoteViewController extends ViewController{
         String error = null;
         String message = null;
         Appointment appointment = null;
-        ClinicalNote clinicalNote = null;
+        ClinicNote clinicalNote = null;
         
         ViewController.ClinicalNoteViewControllerActionEvent actionCommand =
                 ViewController.ClinicalNoteViewControllerActionEvent
@@ -126,7 +126,7 @@ public class ClinicalNoteViewController extends ViewController{
     private void doClinicalNoteForAppoinmentRequest(ActionEvent e)throws StoreException{
         Appointment appointment = 
                 getDescriptor().getControllerDescription().getAppointment();
-        ClinicalNote clinicalNote = new ClinicalNote(appointment);
+        ClinicNote clinicalNote = new ClinicNote(appointment);
         clinicalNote.setScope(Entity.Scope.FOR_APPOINTMENT);
         clinicalNote = clinicalNote.read();
         if (clinicalNote.get().isEmpty())

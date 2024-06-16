@@ -18,7 +18,7 @@ import model.entity.Notification;
 import model.entity.Medication;
 import model.entity.Entity;
 import model.entity.Doctor;
-import model.entity.ClinicalNote;
+import model.entity.ClinicNote;
 import model.entity.AppointmentTreatment;
 import model.entity.Appointment;
 import model.entity.PatientSecondaryCondition;
@@ -1739,7 +1739,7 @@ public class DesktopViewController extends ViewController{
     private Point doRequestCountForClinicNoteTable(){
         Point result = null;
         //07/08/2022
-        ClinicalNote clinicNote = new ClinicalNote();
+        ClinicNote clinicNote = new ClinicNote();
         clinicNote.setScope(Entity.Scope.ALL);
         try{
             result = clinicNote.count();
@@ -1899,7 +1899,7 @@ public class DesktopViewController extends ViewController{
         }
         
         try{
-            ClinicalNote cn = new ClinicalNote();
+            ClinicNote cn = new ClinicNote();
             cn.setScope(Entity.Scope.ALL); 
             cn.delete();
         }catch(StoreException ex){
