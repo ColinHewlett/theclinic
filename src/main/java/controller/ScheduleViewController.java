@@ -6,6 +6,7 @@
 package controller;
 
 //import static controller.ViewController.ScheduleViewControllerActionEvent.APPOINTMENT_EDITOR_TREATMENT_VIEW_REQUEST;
+import static controller.ViewController.ScheduleViewControllerActionEvent.SCHEDULE_EDITOR_UPDATE_APPOINTMENT_REQUEST;
 import model.non_entity.SystemDefinition;
 import static controller.ViewController.displayErrorMessage;
 import model.entity.Entity.Scope;
@@ -231,8 +232,7 @@ public class ScheduleViewController extends ViewController{
             getDescriptor().getControllerDescription().setViewMode(ViewMode.CREATE);
             if (getDescriptor().getControllerDescription().
                     getAppointment().getPatient()==null){
-                setModalView((ModalView)new View().make(
-                    View.Viewer.APPOINTMENT_EDITOR_VIEW,
+                setModalView((ModalView)new View().make(View.Viewer.SCHEDULE_EDITOR_VIEW,
                     this, 
                     this.getDesktopView()).getModalView());
                 /**
@@ -328,6 +328,25 @@ public class ScheduleViewController extends ViewController{
         this.getMyController().actionPerformed(actionEvent);
     }
     
+    private void doAppointmentEmergencyViewRequest(){
+        /* get a list of all patients on the system */
+        Patient patient = new Patient();
+        patient.setScope(Scope.ALL);
+        try{
+            patient.read();
+            getDescriptor().getControllerDescription().setPatients(patient.get());
+            Appointment appointment = getDescriptor().getViewDescription().getAppointment();
+            getDescriptor().getControllerDescription().setAppointment(appointment);
+            getDescriptor().getControllerDescription().setViewMode(ViewMode.EMERGENCY);
+            setModalView((ModalView)new View().make(View.Viewer.SCHEDULE_EDITOR_VIEW,
+                this, 
+                this.getDesktopView()).getModalView());
+        }catch (StoreException ex){
+            String message = ex.getMessage();
+            displayErrorMessage(message,"AppointmentViewController error",JOptionPane.WARNING_MESSAGE);
+        }
+    }
+    
     private void doAppointmentUpdateViewRequest(){
         /**
          * on receipt of APPOINTMENT_UPDATE_VIEW_REQUEST
@@ -351,8 +370,7 @@ public class ScheduleViewController extends ViewController{
                 getDescriptor().getControllerDescription().setAppointment(appointment);
                 getDescriptor().getControllerDescription().setPatients(patient.get());
                 getDescriptor().getControllerDescription().setViewMode(ViewMode.UPDATE);
-                setModalView((ModalView)new View().make(
-                    View.Viewer.APPOINTMENT_EDITOR_VIEW,
+                setModalView((ModalView)new View().make(View.Viewer.SCHEDULE_EDITOR_VIEW,
                     this, 
                     this.getDesktopView()).getModalView());
                 /**
@@ -392,7 +410,9 @@ public class ScheduleViewController extends ViewController{
     private void doAppointmentForDayRequest(LocalDate day){
         Appointment appointment = new Appointment();
         appointment.setStart(day.atStartOfDay());
-        appointment.setScope(Scope.FOR_DAY);
+        
+        appointment.setScope(Entity.Scope.FOR_DAY_AND_NON_EMERGENCY_APPOINTMENTS);
+        //appointment.setScope(Scope.FOR_DAY);
         try{
             appointment.read();
             if (!appointment.get().isEmpty()){
@@ -673,6 +693,9 @@ public class ScheduleViewController extends ViewController{
             case APPOINTMENT_EDITOR_TREATMENT_VIEW_REQUEST:
                 doOpenTreatmentView();
                 break;
+            case SCHEDULE_EDITOR_EMERGENCY_APPOINTMENT_REQUEST:
+                doAppointmentEmergencyViewRequest();
+                break;
             case APPOINTMENT_UPDATE_VIEW_REQUEST:
                 getDescriptor().getControllerDescription().
                     setViewMode(ViewController.ViewMode.UPDATE);
@@ -726,7 +749,7 @@ public class ScheduleViewController extends ViewController{
     /**
      * redirects ActionEvents sent from secondary views that have been launched by the primary view
  -- secondary views are identified by the ActionEvent::Source property, defined in the View::ViewGype enum ; thus
- ---- APPOINTMENT_EDITOR_VIEW
+ ---- SCHEDULE_EDITOR_VIEW
  ---- APPOINTMENT_EMPTY_SLOT_SCAN_CONFIGURATION_VIEW
  ---- NON_SURGERY_DAY_EDITOR_VIEW
  ---- SURGERY_DAY_EDITOR_VIEW
@@ -746,8 +769,8 @@ public class ScheduleViewController extends ViewController{
                 doUnbookableAppointmentSlotEditorAction(e);
                 //resetEmptySlotScannerSettings();
                 break;
-            case APPOINTMENT_EDITOR_VIEW:
-                doAppointmentCreatorEditorViewAction(e);
+            case SCHEDULE_EDITOR_VIEW:
+                doScheduleEditorViewAction(e);
                 //resetEmptySlotScannerSettings();
                 break;
             case APPOINTMENT_EMPTY_SLOT_SCAN_CONFIGURATION_VIEW:
@@ -973,6 +996,9 @@ getDescriptor().getViewDescription().getScheduleDay());
         }catch (StoreException ex){
             String message = ex.getMessage();
             displayErrorMessage(message,"AppointmentViewController error on attempt to create a new appointment",JOptionPane.WARNING_MESSAGE);
+        }catch (NullPointerException ex){
+            String message = ex.getMessage();
+            message = message + "\n";
         }
         return result;
     }
@@ -990,9 +1016,9 @@ getDescriptor().getViewDescription().getScheduleDay());
         return result;
     }
 
-    private void sendErrorToAppointmentCreatorEditorView(){
+    private void sendErrorToScheduleEditorView(){
         /**
-         * fire event over to APPOINTMENT_CREATOR_EDITOR_VIEW
+         * fire event over to SCHEDULE_EDITOR_VIEW
          */
         
         firePropertyChangeEvent(
@@ -1159,7 +1185,7 @@ getDescriptor().getViewDescription().getScheduleDay());
             );
         }
         else {
-            sendErrorToAppointmentCreatorEditorView();
+            sendErrorToScheduleEditorView();
             //02/12/2022
             /**
              * update forces a refresh of the appt schedule for the day to its original state prior to the erroneous create/update attempt
@@ -1371,7 +1397,7 @@ getDescriptor().getViewDescription().getScheduleDay());
         }
     }
 
-    private void doAppointmentCreatorEditorViewAction(ActionEvent e){
+    private void doScheduleEditorViewAction(ActionEvent e){
         Appointment result;
         Appointment changedSlotRequest = 
                 //?getDescriptorFromView().getControllerDescription().getAppointment();
@@ -1408,7 +1434,7 @@ getDescriptor().getViewDescription().getScheduleDay());
                 doOpenTreatmentView();
                 doReopenModelAppointmentEditorView();
                 break;
-            case APPOINTMENT_EDITOR_CREATE_REQUEST:
+            case SCHEDULE_EDITOR_CREATE_APPOINTMENT_REQUEST:
                 setScheduleReport(new ScheduleReport());
                 result = doAppointmentCreateRequest(e, changedSlotRequest);
                 if (result!=null){
@@ -1433,7 +1459,7 @@ getDescriptor().getViewDescription().getScheduleDay());
                     );
                 }
                 else {
-                    sendErrorToAppointmentCreatorEditorView();
+                    sendErrorToScheduleEditorView();
                     //02/12/2022
                     /**
                      * update forces a refresh of the appt schedule for the day to its original state prior to the erroneous create/update attempt
@@ -1443,7 +1469,7 @@ getDescriptor().getViewDescription().getScheduleDay());
                     doAppointmentForDayRequest(day);
                 }
                 break;
-            case APPOINTMENT_EDITOR_UPDATE_REQUEST:
+            case SCHEDULE_EDITOR_UPDATE_APPOINTMENT_REQUEST:
                 day = 
                         //?getDescriptorFromView().getViewDescription().getAppointment().
                         getDescriptor().getViewDescription().getAppointment().
@@ -1471,11 +1497,67 @@ getDescriptor().getViewDescription().getScheduleDay());
                 }
                 else {
                     //2/12/2022
-                    sendErrorToAppointmentCreatorEditorView();
+                    sendErrorToScheduleEditorView();
                     doAppointmentForDayRequest(day); 
                 }
                 break;
-            
+            case SCHEDULE_EDITOR_EMERGENCY_APPOINTMENT_REQUEST:
+                //check this requewsted for a patient not already a patient today
+                boolean isEmergencyPatientAlreadyBookedForAppointmentToday = false;
+                Patient patient = changedSlotRequest.getPatient();
+                for (Appointment appointment : getDescriptor().getControllerDescription().getAppointments()){
+                    if(appointment.getPatient().equals(patient)){
+                        isEmergencyPatientAlreadyBookedForAppointmentToday = true;
+                        break;
+                    }
+                }
+                if(!isEmergencyPatientAlreadyBookedForAppointmentToday){
+                    
+                    day = getDescriptor().getViewDescription().getAppointment().
+                                getStart().toLocalDate();
+                    result = doAppointmentUpdateRequest(e, changedSlotRequest);
+                    if (result!=null) {
+                        try{
+                            getModalView().setClosed(true);
+                        }
+                        catch (PropertyVetoException ex){
+                        }
+                        //mergeScheduleSlotsIfPossible(day); not necessary because this is only entry for patient
+                        doAppointmentForDayRequest(day);
+                        getDescriptor().getControllerDescription().setPatient(result.getPatient());
+
+
+                        firePropertyChangeEvent(
+                                ViewController.DesktopViewControllerPropertyChangeEvent.
+                                        SCHEDULE_VIEW_CONTROLLER_CHANGE_NOTIFICATION.toString(),
+                                (DesktopViewController)getMyController(),
+                                this,
+                                null,
+                                getDescriptor()
+                        );
+                    }else{
+                        changedSlotRequest.setIsEmergency(true);
+                        try{
+                            changedSlotRequest.update();
+                            getModalView().setClosed(true);
+                        }catch(StoreException ex){
+                            String message = ex.getMessage() + "\n"
+                                    + "StoreException handled in doScheduleEditorViewAction("
+                                    + actionCommand.toString() + ")";
+                            displayErrorMessage(message,
+                                    "Schedule view controller error",JOptionPane.WARNING_MESSAGE);
+                        }catch (PropertyVetoException ex){
+                        
+                        }
+
+                    }
+                }else {//emergency patient already on the schedule
+                    String error = "Emergency patient selection invalid because this patient already booked on schedule";
+                    getDescriptor().getControllerDescription().setError(error);
+                    sendErrorToScheduleEditorView();
+                    doAppointmentForDayRequest(day);
+                }
+                break;
         } 
     }
     
@@ -1502,8 +1584,7 @@ getDescriptor().getViewDescription().getScheduleDay());
     }
     */
     private void doReopenModelAppointmentEditorView(){
-        setModalView((ModalView)new View().make(
-                    View.Viewer.APPOINTMENT_EDITOR_VIEW,
+        setModalView((ModalView)new View().make(View.Viewer.SCHEDULE_EDITOR_VIEW,
                     this, 
                     this.getDesktopView()).getModalView());
         ActionEvent actionEvent = new ActionEvent(

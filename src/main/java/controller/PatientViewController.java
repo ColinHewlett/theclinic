@@ -17,26 +17,19 @@ import model.entity.Medication;
 import model.entity.Entity;
 import model.entity.Doctor;
 import model.entity.Appointment;
-import controller.exceptions.TemplateReaderException;
-import model.*;
 import model.entity.Entity.Scope;
 import view.views.non_modal_views.DesktopView;
 import view.View;
 import view.views.modal_views.ModalView;
-/*28/03/2024import view.views.modal_views.ModalPatientNotesEditorView;*/
-//import view.views.modal_views.ModalPatientMedicalHistory1EditorView;
 import repository.StoreException;//01/03/2023
 import static controller.ViewController.displayErrorMessage;
 import java.beans.PropertyChangeSupport;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.beans.PropertyVetoException;
-import java.io.File;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.LocalDateTime;
 import java.time.Period;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -87,6 +80,9 @@ public class PatientViewController extends ViewController {
         ViewController.PatientViewControllerActionEvent actionCommand =
                ViewController.PatientViewControllerActionEvent.valueOf(e.getActionCommand());
         switch (actionCommand){
+            case PATIENT_INVOICE_VIEW_CONTROLLER_REQUEST:
+                doPatientInvoiceViewControllerRequest();
+                break;
             case PATIENT_QUESTIONNAIRE_VIEW_CONTROLLER_REQUEST:
                 doPatientQuestionnaireViewControllerRequest();
                 break;
@@ -301,6 +297,13 @@ public class PatientViewController extends ViewController {
         ActionEvent actionEvent = new ActionEvent(
             this,ActionEvent.ACTION_PERFORMED,
             ViewController.PatientViewControllerActionEvent.PATIENT_MEDICAL_HISTORY_VIEW_CONTROLLER_REQUEST.toString());
+        this.getMyController().actionPerformed(actionEvent);
+    }
+    
+    private void doPatientInvoiceViewControllerRequest(){
+        ActionEvent actionEvent = new ActionEvent(
+            this,ActionEvent.ACTION_PERFORMED,
+            ViewController.DesktopViewControllerActionEvent.PATIENT_INVOICE_VIEW_CONTROLLER_REQUEST.toString());
         this.getMyController().actionPerformed(actionEvent);
     }
     

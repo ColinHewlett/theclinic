@@ -87,8 +87,8 @@ import model.entity.SurgeryDaysAssignment;
 public class ScheduleView extends View implements ActionListener{
     private enum COLUMN{From,Duration,Patient,Notes};
     enum Action{
-        REQUEST_CREATE_APPOINTMENT,
-        REQUEST_UPDATE_APPOINTMENT,
+        REQUEST_CREATE_UPDATE_APPOINTMENT,
+        REQUEST_EMERGENCY_APPOINTMENT,
         REQUEST_CANCEL_APPOINTMENT,
         REQUEST_CLINICAL_NOTE,
         REQUEST_UNBOOKABLE_SLOT,
@@ -174,16 +174,29 @@ public class ScheduleView extends View implements ActionListener{
         ViewController.ScheduleViewControllerActionEvent
                 actionCommand = null;
         switch (Action.valueOf(e.getActionCommand())){
-            case REQUEST_CREATE_APPOINTMENT:
+            case REQUEST_CREATE_UPDATE_APPOINTMENT:
+                switch(getAppointmentMode()){
+                    case CREATE:
+                        btnCreateAppointmentActionPerformed(e);
+                        break;
+                    case UPDATE:
+                        btnUpdateAppointmentActionPerformed(e);
+                        break;
+                    case NONE:
+                        break;
+                }
                 break;
-            case REQUEST_UPDATE_APPOINTMENT:
+            case REQUEST_EMERGENCY_APPOINTMENT:
+                this.btnEmergencyAppointmentActionPerformed();
                 break;
             case REQUEST_CANCEL_APPOINTMENT:
+                btnCancelSelectedAppointmentActionPerformed(e);
                 break;
             case REQUEST_CLINICAL_NOTE:
                 doClinicNoteRequest();
                 break;
             case REQUEST_UNBOOKABLE_SLOT:
+                btnMarkSlotUnbookableActionPerformed(e);
                 break;
             case REQUEST_PRINT_SCHEDULE:
                 getMyController().getDescriptor().getViewDescription().setScheduleDay(dayDatePicker.getDate());
@@ -193,6 +206,7 @@ public class ScheduleView extends View implements ActionListener{
                 getMyController().actionPerformed(actionEvent);
                 break;
             case REQUEST_CLOSE_VIEW:
+                btnCloseViewActionPerformed(e);
                 break;
         }
     }
@@ -307,12 +321,12 @@ public class ScheduleView extends View implements ActionListener{
                 .setActionCommand(Action.REQUEST_CLINICAL_NOTE.toString());
         this.btnClinicalNotesForSelectedAppointment.addActionListener(this);
         
-        btnCreateAppointment.setEnabled(true);
+        btnCreateUpdateAppointment.setEnabled(true);
         btnMarkSlotUnbookable.setEnabled(true);
         btnCancelSelectedAppointment.setEnabled(false);
         btnClinicalNotesForSelectedAppointment.setEnabled(false);
         btnSelectTreatmentRequest.setEnabled(false);
-        btnUpdateSelectedAppointment.setEnabled(false);
+        btnEmergencyAppointment.setEnabled(false);
         setUnbookableSlotMode(UnbookableSlotMode.MARK);
         
         dayDatePicker.addDateChangeListener(new DayDatePickerChangeListener());
@@ -473,7 +487,7 @@ public class ScheduleView extends View implements ActionListener{
 
                 ListSelectionModel lsm = (ListSelectionModel)e.getSource();
                 if (!lsm.isSelectionEmpty()) {
-                    btnUpdateSelectedAppointment.setEnabled(false);
+                    btnEmergencyAppointment.setEnabled(false);
                     btnCancelSelectedAppointment.setEnabled(false);
                     btnClinicalNotesForSelectedAppointment.setEnabled(false);  
                     btnSelectTreatmentRequest.setEnabled(false);
@@ -506,41 +520,44 @@ public class ScheduleView extends View implements ActionListener{
                         Patient patient = (Patient)tblAppointments.getModel().getValueAt(selectedRow, 0);
                         doScheduleTitleRefresh(patient);
                         if (patient==null){
-                            btnCreateAppointment.setEnabled(true);
+                            setAppointmentMode(AppointmentMode.CREATE);
+                            //btnCreateUpdateAppointment.setEnabled(true);
                             btnMarkSlotUnbookable.setEnabled(true);
                             btnCancelSelectedAppointment.setEnabled(false);
                             btnClinicalNotesForSelectedAppointment.setEnabled(false);
                             btnSelectTreatmentRequest.setEnabled(false);
-                            btnUpdateSelectedAppointment.setEnabled(false);
+                            btnEmergencyAppointment.setEnabled(false);
                         }else if (patient.toString().equals(
                                 SystemDefinition.APPOINTMENT_UNBOOKABILITY_MARKER)){
-                            btnCreateAppointment.setEnabled(false);
+                            setAppointmentMode(AppointmentMode.NONE);
+                            //btnCreateUpdateAppointment.setEnabled(false);
                             btnMarkSlotUnbookable.setEnabled(true);
                             setUnbookableSlotMode(UnbookableSlotMode.CANCEL);
                             btnCancelSelectedAppointment.setEnabled(false);
                             btnClinicalNotesForSelectedAppointment.setEnabled(false);
                             btnSelectTreatmentRequest.setEnabled(false);
-                            btnUpdateSelectedAppointment.setEnabled(false);
+                            btnEmergencyAppointment.setEnabled(true);
                         }else{
                             setUnbookableSlotMode(UnbookableSlotMode.MARK);
-                            btnCreateAppointment.setEnabled(false);
+                            setAppointmentMode(AppointmentMode.UPDATE);
+                            //btnCreateUpdateAppointment.setEnabled(false);
                             btnMarkSlotUnbookable.setEnabled(false);
                             btnCancelSelectedAppointment.setEnabled(true);
                             btnClinicalNotesForSelectedAppointment.setEnabled(true);
                             btnSelectTreatmentRequest.setEnabled(true);
-                            btnUpdateSelectedAppointment.setEnabled(true);
+                            btnEmergencyAppointment.setEnabled(true);
                         }
                     }
                     else {
                         getMyController().getDescriptor()
                                 .getViewDescription().setAppointment(null);
                         doScheduleTitleRefresh(null);
-                        btnCreateAppointment.setEnabled(true);
+                        btnCreateUpdateAppointment.setEnabled(true);
                         btnMarkSlotUnbookable.setEnabled(true);
                         btnCancelSelectedAppointment.setEnabled(false);
                         btnClinicalNotesForSelectedAppointment.setEnabled(false);
                         btnSelectTreatmentRequest.setEnabled(false);
-                        btnUpdateSelectedAppointment.setEnabled(false);
+                        btnEmergencyAppointment.setEnabled(false);
                     }
                 }
             }
@@ -652,8 +669,8 @@ public class ScheduleView extends View implements ActionListener{
         dayDatePicker = new com.github.lgooddatepicker.components.DatePicker();
         
         pnlScheduleOperations = new javax.swing.JPanel();
-        btnCreateAppointment = new javax.swing.JButton();
-        btnUpdateSelectedAppointment = new javax.swing.JButton();
+        btnCreateUpdateAppointment = new javax.swing.JButton();
+        btnEmergencyAppointment = new javax.swing.JButton();
         btnClinicalNotesForSelectedAppointment = new javax.swing.JButton();
         btnCancelSelectedAppointment = new javax.swing.JButton();
         btnMarkSlotUnbookable = new javax.swing.JButton();
@@ -756,40 +773,56 @@ public class ScheduleView extends View implements ActionListener{
                 getBorderTitleColor()));// NOI18N
         pnlScheduleOperations.setBackground(new Color(220,220,220));
 
-        btnCreateAppointment.setText("<html><center>Create</center><center>appointment</center></html>");
-        btnCreateAppointment.setToolTipText("");
-        btnCreateAppointment.addActionListener(new java.awt.event.ActionListener() {
+        btnCreateUpdateAppointment.setText("<html><center>Create</center><center>appointment</center></html>");
+        btnCreateUpdateAppointment.setToolTipText("");
+        btnCreateUpdateAppointment.setActionCommand(Action.REQUEST_CREATE_UPDATE_APPOINTMENT.toString());
+        btnCreateUpdateAppointment.addActionListener(this);
+        
+        /*
+        btnCreateUpdateAppointment.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnCreateAppointmentActionPerformed(evt);
             }
         });
-
-        btnUpdateSelectedAppointment.setText("<html><center>Update</center><center>appointment</center></html>");
-        btnUpdateSelectedAppointment.setToolTipText("update selected appointment");
-        btnUpdateSelectedAppointment.addActionListener(new java.awt.event.ActionListener() {
+        */
+        btnEmergencyAppointment.setText("<html><center>Emergency</center><center>appointment</center></html>");
+        //btnUpdateSelectedAppointment.setToolTipText("update selected appointment");
+        
+        btnEmergencyAppointment.setActionCommand(Action.REQUEST_EMERGENCY_APPOINTMENT.toString());
+        btnEmergencyAppointment.addActionListener(this);
+        /*
+        btnEmergencyAppointment.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnUpdateAppointmentActionPerformed(evt);
             }
         });
-
+        */
         btnCancelSelectedAppointment.setText("<html><center>Cancel</center><center>appointment</center></html>");
         btnCancelSelectedAppointment.setToolTipText("cancel selected appointment");
+        btnCancelSelectedAppointment.setActionCommand(Action.REQUEST_CANCEL_APPOINTMENT.toString());
+        btnCancelSelectedAppointment.addActionListener(this);
+        /*
         btnCancelSelectedAppointment.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnCancelSelectedAppointmentActionPerformed(evt);
             }
         });
+        */
         
         btnClinicalNotesForSelectedAppointment.setText(
                 "<html><center>Clinical</center><center>notes</center></html>");
 
         btnMarkSlotUnbookable.setText("<html><center>Mark slot</center><center>unbookable</center></html>");
         btnMarkSlotUnbookable.setToolTipText("make a slot unbookable");
+        btnMarkSlotUnbookable.setActionCommand(Action.REQUEST_UNBOOKABLE_SLOT.toString());
+        btnMarkSlotUnbookable.addActionListener(this);
+        
+        /*
         btnMarkSlotUnbookable.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnMarkSlotUnbookableActionPerformed(evt);
             }
-        });
+        });*/
         
         btnSelectTreatmentRequest.setText("<html><center>Select</center><center>treatment</center></html>");
         btnSelectTreatmentRequest.addActionListener(new java.awt.event.ActionListener() {
@@ -799,12 +832,16 @@ public class ScheduleView extends View implements ActionListener{
         });
 
         btnCloseView.setText("Close view");
+        btnCloseView.setActionCommand(Action.REQUEST_CLOSE_VIEW.toString());
+        btnCloseView.addActionListener(this);
+        
+        /*
         btnCloseView.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnCloseViewActionPerformed(evt);
             }
         });
-
+        */
         mnuOptions.setText("Actions");
 
         mniViewCancelledAppointments.setText("View cancelled appointments");
@@ -968,10 +1005,10 @@ public class ScheduleView extends View implements ActionListener{
             .addGroup(pnlScheduleOperationsLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(pnlScheduleOperationsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(btnUpdateSelectedAppointment, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(btnEmergencyAppointment, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(btnCancelSelectedAppointment, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(btnMarkSlotUnbookable, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(btnCreateAppointment, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(btnCreateUpdateAppointment, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(btnCloseView, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(btnClinicalNotesForSelectedAppointment, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(btnSelectTreatmentRequest, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -981,9 +1018,9 @@ public class ScheduleView extends View implements ActionListener{
         pnlScheduleOperationsLayout.setVerticalGroup(pnlScheduleOperationsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlScheduleOperationsLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(btnCreateAppointment, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(btnCreateUpdateAppointment, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
                 /*.addGap(18,18,18)*/.addGap(5,5,5)
-                .addComponent(btnUpdateSelectedAppointment, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(btnEmergencyAppointment, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
                 /*.addGap(18,18,18)*/.addGap(5,5,5)
                  .addComponent(btnCancelSelectedAppointment, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
                 /*.addGap(18,18,18)*/.addGap(5,5,5)
@@ -1059,9 +1096,22 @@ public class ScheduleView extends View implements ActionListener{
                 ActionEvent.ACTION_PERFORMED,
                 ViewController.ScheduleViewControllerActionEvent.APPOINTMENT_CREATE_VIEW_REQUEST.toString());
         this.getMyController().actionPerformed(actionEvent);
-    }                                                    
+    }  
+    
+    private void btnEmergencyAppointmentActionPerformed(){
+        //shouldn't need any pre-checks on what/is not selected
+        int row = this.tblAppointments.getSelectedRow();
+        if (row != -1){
+            getMyController().getDescriptor().getViewDescription().setAppointment(tableModel.getElementAt(row));
+            ActionEvent actionEvent = new ActionEvent(this, 
+                    ActionEvent.ACTION_PERFORMED,
+                    ViewController.ScheduleViewControllerActionEvent.
+                            SCHEDULE_EDITOR_EMERGENCY_APPOINTMENT_REQUEST.toString());
+            this.getMyController().actionPerformed(actionEvent);
+        }
+    }
 
-    private void btnUpdateAppointmentActionPerformed(java.awt.event.ActionEvent evt) {                                                     
+    private void btnUpdateAppointmentActionPerformed(java.awt.event.ActionEvent evt) {
         int row = this.tblAppointments.getSelectedRow();
         if (row == -1){
             JOptionPane.showMessageDialog(this, "An appointment has not been selected for update");
@@ -1375,8 +1425,8 @@ public class ScheduleView extends View implements ActionListener{
         btnPreviousPracticeDay = new javax.swing.JButton();
         dayDatePicker = new com.github.lgooddatepicker.components.DatePicker();
         pnlScheduleOperations = new javax.swing.JPanel();
-        btnCreateAppointment = new javax.swing.JButton();
-        btnUpdateSelectedAppointment = new javax.swing.JButton();
+        btnCreateUpdateAppointment = new javax.swing.JButton();
+        btnEmergencyAppointment = new javax.swing.JButton();
         btnCancelSelectedAppointment = new javax.swing.JButton();
         btnMarkSlotUnbookable = new javax.swing.JButton();
         btnPrintDayScheduleRequest = new javax.swing.JButton();
@@ -1517,7 +1567,7 @@ public class ScheduleView extends View implements ActionListener{
             pnlAppointmentDaySelectionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlAppointmentDaySelectionLayout.createSequentialGroup()
                 .addGap(15, 15, 15)
-                .addComponent(pnlAppointmentDaySelector, javax.swing.GroupLayout.PREFERRED_SIZE, 259, Short.MAX_VALUE)
+                .addComponent(pnlAppointmentDaySelector, javax.swing.GroupLayout.DEFAULT_SIZE, 259, Short.MAX_VALUE)
                 .addGap(20, 20, 20))
             .addGroup(pnlAppointmentDaySelectionLayout.createSequentialGroup()
                 .addGap(33, 33, 33)
@@ -1536,19 +1586,14 @@ public class ScheduleView extends View implements ActionListener{
 
         pnlScheduleOperations.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Appointment schedule operations", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Segoe UI", 1, 12))); // NOI18N
 
-        btnCreateAppointment.setText("Create");
-        btnCreateAppointment.setToolTipText("create new appointment");
-        btnCreateAppointment.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnCreateAppointmentActionPerformed(evt);
-            }
-        });
+        btnCreateUpdateAppointment.setText("Create");
+        btnCreateUpdateAppointment.setToolTipText("create new appointment");
 
-        btnUpdateSelectedAppointment.setText("Update");
-        btnUpdateSelectedAppointment.setToolTipText("update selected appointment");
-        btnUpdateSelectedAppointment.addActionListener(new java.awt.event.ActionListener() {
+        btnEmergencyAppointment.setText("Update");
+        btnEmergencyAppointment.setToolTipText("update selected appointment");
+        btnEmergencyAppointment.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnUpdateSelectedAppointmentActionPerformed(evt);
+                btnEmergencyAppointmentActionPerformed(evt);
             }
         });
 
@@ -1574,9 +1619,9 @@ public class ScheduleView extends View implements ActionListener{
             pnlScheduleOperationsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlScheduleOperationsLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(btnCreateAppointment, javax.swing.GroupLayout.PREFERRED_SIZE, 97, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(btnCreateUpdateAppointment, javax.swing.GroupLayout.PREFERRED_SIZE, 97, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
-                .addComponent(btnUpdateSelectedAppointment, javax.swing.GroupLayout.PREFERRED_SIZE, 97, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(btnEmergencyAppointment, javax.swing.GroupLayout.PREFERRED_SIZE, 97, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(btnCancelSelectedAppointment)
                 .addGap(87, 87, 87)
@@ -1588,8 +1633,8 @@ public class ScheduleView extends View implements ActionListener{
             .addGroup(pnlScheduleOperationsLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(pnlScheduleOperationsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(btnCreateAppointment)
-                    .addComponent(btnUpdateSelectedAppointment)
+                    .addComponent(btnCreateUpdateAppointment)
+                    .addComponent(btnEmergencyAppointment)
                     .addComponent(btnCancelSelectedAppointment)
                     .addComponent(btnMarkSlotUnbookable))
                 .addContainerGap(20, Short.MAX_VALUE))
@@ -1706,24 +1751,7 @@ public class ScheduleView extends View implements ActionListener{
      * @param evt 
      */
     /*
-    private void btnCreateAppointmentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCreateAppointmentActionPerformed
-        int row = this.tblAppointments.getSelectedRow();
-        if (row == -1) {
-            getMyController().getDescriptor().getViewDescription().
-                    setViewMode(ViewController.ViewMode.SLOT_UNSELECTED);
-        }else{
-            getMyController().getDescriptor().getViewDescription().
-                    setViewMode(ViewController.ViewMode.SLOT_SELECTED);
-            getMyController().getDescriptor().getViewDescription().
-                    setAppointment(tableModel.getElementAt(row));
-        }
-        ActionEvent actionEvent = new ActionEvent(this,
-                ActionEvent.ACTION_PERFORMED,
-                ViewController.ScheduleViewControllerActionEvent.APPOINTMENT_CREATE_VIEW_REQUEST.toString());
-        this.getMyController().actionPerformed(actionEvent);
-    }//GEN-LAST:event_btnCreateAppointmentActionPerformed
-
-    private void btnUpdateSelectedAppointmentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateSelectedAppointmentActionPerformed
+    private void btnEmergencyAppointmentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEmergencyAppointmentActionPerformed
         int row = this.tblAppointments.getSelectedRow();
         if (row == -1){
             JOptionPane.showMessageDialog(this, "An appointment has not been selected for update");
@@ -1753,7 +1781,7 @@ public class ScheduleView extends View implements ActionListener{
                             APPOINTMENT_UPDATE_VIEW_REQUEST.toString());
             this.getMyController().actionPerformed(actionEvent);
         }
-    }//GEN-LAST:event_btnUpdateSelectedAppointmentActionPerformed
+    }//GEN-LAST:event_btnEmergencyAppointmentActionPerformed
 
     private void btnCloseViewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCloseViewActionPerformed
 
@@ -1981,14 +2009,14 @@ public class ScheduleView extends View implements ActionListener{
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnCancelSelectedAppointment;
     private javax.swing.JButton btnCloseView;
-    private javax.swing.JButton btnCreateAppointment;
+    private javax.swing.JButton btnCreateUpdateAppointment;
+    private javax.swing.JButton btnEmergencyAppointment;
     private javax.swing.JButton btnMarkSlotUnbookable;
     private javax.swing.JButton btnNextPracticeDay;
     private javax.swing.JButton btnNowDay;
     private javax.swing.JButton btnPreviousPracticeDay;
     private javax.swing.JButton btnPrintDayScheduleRequest;
     private javax.swing.JButton btnSlotAvailabilityScannerRequest;
-    private javax.swing.JButton btnUpdateSelectedAppointment;
     private javax.swing.ButtonGroup buttonGroup1;
     private com.github.lgooddatepicker.components.DatePicker dayDatePicker;
     private javax.swing.JMenuBar jMenuBar1;
@@ -2016,14 +2044,14 @@ public class ScheduleView extends View implements ActionListener{
     private javax.swing.JButton btnClinicalNotesForSelectedAppointment;
     private javax.swing.JButton btnCancelSelectedAppointment;
     private javax.swing.JButton btnCloseView;
-    private javax.swing.JButton btnCreateAppointment;
+    private javax.swing.JButton btnCreateUpdateAppointment;
     private javax.swing.JButton btnMarkSlotUnbookable;
     private javax.swing.JButton btnNextPracticeDay;
     private javax.swing.JButton btnNowDay;
     private javax.swing.JButton btnPreviousPracticeDay;
     private javax.swing.JButton btnSelectTreatmentRequest;
     private javax.swing.JButton btnSlotAvailabilityScannerRequest;
-    private javax.swing.JButton btnUpdateSelectedAppointment;
+    private javax.swing.JButton btnEmergencyAppointment;
     private javax.swing.ButtonGroup buttonGroup1;
     private com.github.lgooddatepicker.components.DatePicker dayDatePicker;
     private javax.swing.JMenuBar jMenuBar1;
@@ -2112,6 +2140,17 @@ public class ScheduleView extends View implements ActionListener{
         pnlAppointmentScheduleForDay.repaint();
     }
     
+    private ArrayList<Appointment> makeEmergencyAppointmentsFirst(ArrayList<Appointment> schedule){
+        ArrayList<Appointment> modifiedList = new ArrayList<>();
+        for (Appointment a : schedule){
+            if (a.getIsEmergency()) modifiedList.add(a);
+        }
+        for (Appointment a : schedule){
+            if (!a.getIsEmergency()) modifiedList.add(a);
+        }
+        return modifiedList;
+    }
+    
     private void ConfigureScheduleTable(){
         if (tableModel == null) {
             tableModel = new AppointmentsScheduleTableModel();
@@ -2140,7 +2179,10 @@ public class ScheduleView extends View implements ActionListener{
             this.tblAppointments.setModel(tableModel);
         }
         tableModel.removeAllElements();
-        Iterator<Appointment> it = getMyController().getDescriptor().getControllerDescription().getAppointmentSlotsForDay().iterator();
+        ArrayList<Appointment> schedule = makeEmergencyAppointmentsFirst(
+                getMyController().getDescriptor()
+                        .getControllerDescription().getAppointmentSlotsForDay());
+        Iterator<Appointment> it = schedule.iterator();
         while (it.hasNext()){
             tableModel.addElement(it.next());
         }
@@ -2316,6 +2358,44 @@ public class ScheduleView extends View implements ActionListener{
             }
             return null;
         }
+    }
+    
+    enum AppointmentMode{
+            CREATE("<html><center>Create</center><center>appointment</center></html>"),
+            UPDATE("<html><center>Update</center><center>appointment</center></html>"),
+            NONE("<html><center>Create</center><center>appointment</center></html>");
+    
+            private String value;
+            AppointmentMode(String title){
+                this.value = title;
+            }
+            
+            String title(){
+                return value;
+            }
+    };
+   
+    private AppointmentMode appointmentMode = null;
+    private void setAppointmentMode(AppointmentMode value){
+        appointmentMode = value;
+        btnCreateUpdateAppointment.setText(appointmentMode.title());
+        switch(appointmentMode){
+            case CREATE:
+                btnCreateUpdateAppointment.setEnabled(true);
+                btnCreateUpdateAppointment.setEnabled(true);
+                break;
+            case UPDATE:
+                btnCreateUpdateAppointment.setEnabled(true);
+                btnCreateUpdateAppointment.setEnabled(true);
+                break;
+            case NONE:
+                btnCreateUpdateAppointment.setEnabled(false);
+                btnCreateUpdateAppointment.setEnabled(false);
+                break;
+        }
+    }
+    private AppointmentMode getAppointmentMode(){
+        return appointmentMode;
     }
   }
 

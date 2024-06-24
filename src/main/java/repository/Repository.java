@@ -500,23 +500,15 @@ public class Repository implements IStoreActions {
         appointment.setHasPatientBeenContacted(rs.getBoolean("hasPatientBeenContacted"));
         appointment.setIsDeleted(rs.getBoolean("isDeleted"));
         appointment.setIsCancelled(rs.getBoolean("isCancelled"));
+        appointment.setIsEmergency(rs.getBoolean("isEmergency"));
         int invoiceKey = rs.getInt("invoiceKey");
-        appointment.setInvoice(new Invoice(invoiceKey));
-        
-        //09/06/2023 fix 
-        //patientDelegate = new PatientDelegate();
+        if (invoiceKey==0)appointment.setInvoice(new Invoice(invoiceKey));
+
         int patientKey = rs.getInt("PatientKey");
         patientDelegate = new PatientDelegate(patientKey);
         patientDelegate.setPatientKey(patientKey); 
         appointment.setPatient(patientDelegate);
-        
-        /*28/03/2024
-        int patientNoteKey = rs.getInt("patientNoteKey");
-        patientNoteDelegate = new PatientNoteDelegate();
-        patientNoteDelegate.setKey(patientNoteKey);
-        appointment.setPatientNote(patientNoteDelegate);
-        */
-        
+
         delegate = new AppointmentDelegate(appointment);
         delegate.setAppointmentKey(key);
         return delegate;
@@ -750,7 +742,8 @@ public class Repository implements IStoreActions {
             AppointmentDelegate delegate = (AppointmentDelegate)entity;
             try {
                 PreparedStatement preparedStatement = getPMSStoreConnection().prepareStatement(sql);
-                preparedStatement.setInt(1, delegate.getInvoice().getKey());
+                if (delegate.getInvoice()==null) preparedStatement.setInt(1, 1066);
+                else preparedStatement.setInt(1, delegate.getInvoice().getKey());
                 preparedStatement.setInt(2, 
                         ((PatientDelegate)delegate.getPatient()).getPatientKey());
                 preparedStatement.setTimestamp(3, Timestamp.valueOf(delegate.getStart()));
@@ -1044,10 +1037,11 @@ public class Repository implements IStoreActions {
                     preparedStatement.setLong(4, delegate.getDuration().toMinutes());
                     /*28/03/2024preparedStatement.setString(4, delegate.getNotes());*/
                     preparedStatement.setString(5, delegate.getNotes());
-                    preparedStatement.setBoolean(6, delegate.getHasPatientBeenContacted());
+                    preparedStatement.setBoolean(6, delegate.getIsEmergency());
+                    preparedStatement.setBoolean(7, delegate.getHasPatientBeenContacted());
                     /*28/03/2024preparedStatement.setLong(6, 
                             ((repository.PatientNoteDelegate)delegate.getPatientNote()).getKey());*/
-                    preparedStatement.setLong(7, delegate.getAppointmentKey());
+                    preparedStatement.setLong(8, delegate.getAppointmentKey());
                     preparedStatement.executeUpdate();
                 }catch (SQLException ex){
                     throw new StoreException("SQLException message -> " + ex.getMessage() + "\n"
@@ -4540,6 +4534,7 @@ public class Repository implements IStoreActions {
                         + "notes char(255), "
                         + "isDeleted YesNo, "
                         + "hasPatientBeenContacted YesNo, "
+                        + "isEmergency YesNo, "
                         + "isCancelled YesNo);";
                         break;
                     case "POSTGRES":
@@ -4674,9 +4669,8 @@ public class Repository implements IStoreActions {
                         + "Start = ?, "
                         + "Duration = ?, "
                         + "Notes = ?, "
-                        /*28/03/2024+ "Notes = ?, "*/
+                        + "isEmergency = ?, "
                         + "hasPatientBeenContacted = ? "
-                        /*28/03/2024+ "patientNoteKey = ? "*/
                         + "WHERE pid = ? ;";
                 doUpdateAppointment(sql, entity);
                 break;

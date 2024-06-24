@@ -10,8 +10,8 @@ import view.views.view_support_classes.renderers.SelectStartTimeLocalDateTimeRen
 import view.views.non_modal_views.DesktopView;
 import controller.Descriptor;
 import controller.ViewController;
+import static controller.ViewController.ViewMode.EMERGENCY;
 import view.View;
-import model.*;
 /*28/03/2024import model.PatientNote;*/
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -45,13 +45,14 @@ public class ModalScheduleEditorView extends ModalView implements ActionListener
     private final String LAST_APPOINTMENT_START_TIME = "Last appointment start time";
     private final String EXIT_VIEW = "Close view";
     private final String CLOSE_CAPTION = "<html><center>Close</center><center>view</center></html>";
-    private final String CREATE_CAPTION = "<html><center>Create</center><center>appointment</center></html>";
+    private final String CREATE_CAPTION = "<html>Create appointment</html>";
+    private final String EMERGENCY_CAPTION = "<html>Create emergency appointment</html>";
     private final String UPDATE_CAPTION = "Update start & duration times";
     private final String TREATMENT_CAPTION = "<html><center>Select</center><center>treatment</center></html>";
     private final String PANEL_START_DURATION_CAPTION = "Start & duration";
     private final String PANEL_SCHEDULE_DETAILS_CAPTION = "Schedule details";
     private JMenuBar mbrView = null;
-    private JMenu mnuSelectSettings = null; 
+    private JMenu mnuScheduleEditorMenu = null; 
     private JMenuItem mniFirstAppointmentStartTime = null;
     private JMenuItem mniLastAppointmentStartTime = null;
     private JMenuItem mniExitView = null;
@@ -80,19 +81,29 @@ public class ModalScheduleEditorView extends ModalView implements ActionListener
         //initComponents();
     }
     
-    private void makeSelectSettingsMenu(){
-        this.mnuSelectSettings = new JMenu(SETTINGS);
-        this.mniFirstAppointmentStartTime = new JMenuItem(FIRST_APPOINTMENT_START_TIME);
-        this.mniLastAppointmentStartTime = new JMenuItem(LAST_APPOINTMENT_START_TIME);
+    private void makeSettingsAndCloseViewMenu(){
+        switch(getViewMode()){
+            case CREATE:
+            case UPDATE:
+                this.mnuScheduleEditorMenu = new JMenu("Settings & close view");
+                this.mniFirstAppointmentStartTime = new JMenuItem(FIRST_APPOINTMENT_START_TIME);
+                this.mniLastAppointmentStartTime = new JMenuItem(LAST_APPOINTMENT_START_TIME);
+                mniFirstAppointmentStartTime.setActionCommand(Action.REQUEST_FIRST_APPOINTMENT_START_TIME_UPDATE.toString());
+                mniLastAppointmentStartTime.setActionCommand(Action.REQUEST_LAST_APPOINTMENT_START_TIME_UPDATE.toString());
+                mniFirstAppointmentStartTime.addActionListener(this);
+                mniLastAppointmentStartTime.addActionListener(this);
+                mnuScheduleEditorMenu.add(mniFirstAppointmentStartTime);
+                mnuScheduleEditorMenu.add(mniLastAppointmentStartTime);
+                mnuScheduleEditorMenu.addSeparator();
+                break;
+            case EMERGENCY:
+                this.mnuScheduleEditorMenu = new JMenu("Close view");
+                break;
+        }
         mniExitView = new JMenuItem(EXIT_VIEW);
-        mnuSelectSettings.add(mniFirstAppointmentStartTime);
-        mnuSelectSettings.add(mniLastAppointmentStartTime);
-        mnuSelectSettings.add(new JSeparator());
-        mnuSelectSettings.add(mniExitView);
-   
-        mniFirstAppointmentStartTime.addActionListener((ActionEvent e) -> mniFirstAppointmentStartTimeActionPerformed());
-        mniLastAppointmentStartTime.addActionListener((ActionEvent e) -> mniLastAppointmentStartTimeActionPerformed());
-        mniExitView.addActionListener((ActionEvent e) -> mniExitViewActionPerformed());
+        mniExitView.setActionCommand(Action.REQUEST_CLOSE_VIEW.toString());
+        mniExitView.addActionListener(this);
+        mnuScheduleEditorMenu.add(mniExitView);
     }
     
     private boolean isNumeric(String s){
@@ -152,14 +163,17 @@ public class ModalScheduleEditorView extends ModalView implements ActionListener
     }
     
     enum Action{
-            REQUEST_CREATE_UPDATE_APPOINTMENT,
+            REQUEST_CREATE_UPDATE_EMERGENCY_APPOINTMENT,
+            REQUEST_FIRST_APPOINTMENT_START_TIME_UPDATE,
+            REQUEST_LAST_APPOINTMENT_START_TIME_UPDATE,
             REQUEST_TREATMENT_SELECTION,
             REQUEST_CLOSE_VIEW};
+    
     @Override 
     public void actionPerformed(ActionEvent e){
         switch(Action.valueOf(e.getActionCommand())){
-            case REQUEST_CREATE_UPDATE_APPOINTMENT:
-                if (doCreateUpdateAppointmentRequest()){
+            case REQUEST_CREATE_UPDATE_EMERGENCY_APPOINTMENT:
+                if (isOKToSendAppointmentRequest()){
                     switch(getViewMode()){
                         case CREATE:
                             doCreateAppointmentRequest();
@@ -167,17 +181,22 @@ public class ModalScheduleEditorView extends ModalView implements ActionListener
                         case UPDATE:
                             doUpdateAppointmentRequest();
                             break;
+                        case EMERGENCY:
+                            doEmergencyAppointmentRequest();
+                            break;
                     }
                 }
                 break;
-            case REQUEST_TREATMENT_SELECTION:
-                doTreatmentSelectionRequest();
+            case REQUEST_FIRST_APPOINTMENT_START_TIME_UPDATE:
+                mniFirstAppointmentStartTimeActionPerformed();
+                break;
+            case REQUEST_LAST_APPOINTMENT_START_TIME_UPDATE:
+                mniLastAppointmentStartTimeActionPerformed();
                 break;
             case REQUEST_CLOSE_VIEW:
                 int reply = JOptionPane.showInternalConfirmDialog(this, 
-                        "<html><center>Any outstanding appointment start and duration "
-                                + "changes will not be saved</center>"
-                                + "<center>Close view anyway?</center></html>",
+                        "Outstanding appointment changes will not be saved.\n"
+                                + "Close view anyway?",
                         "Confirm view closure", JOptionPane.YES_NO_OPTION);
                 if (reply == JOptionPane.YES_OPTION)
                     doCloseViewRequest();
@@ -185,7 +204,7 @@ public class ModalScheduleEditorView extends ModalView implements ActionListener
         }
     }
     
-    private boolean doCreateUpdateAppointmentRequest(){
+    private boolean isOKToSendAppointmentRequest(){
         //int OKToSaveAppointment = JOptionPane.YES_OPTION;
         //evt = null;
         boolean OKToSaveAppointment = false;
@@ -206,7 +225,10 @@ public class ModalScheduleEditorView extends ModalView implements ActionListener
                         "Defined duration for appointment must be longer than zero minutes",
                         "View error", JOptionPane.WARNING_MESSAGE);
             }
-            else OKToSaveAppointment = true;
+            else {
+                
+                OKToSaveAppointment = true;
+            }
         }  
         else{
             JOptionPane.showInternalMessageDialog(this, 
@@ -218,32 +240,40 @@ public class ModalScheduleEditorView extends ModalView implements ActionListener
     
     private ActionEvent actionEvent = null;
     private void doCreateAppointmentRequest(){
-        if (doCreateUpdateAppointmentRequest()){
+        if (isOKToSendAppointmentRequest()){
             actionEvent = new ActionEvent(
                     this, ActionEvent.ACTION_PERFORMED,
                     ViewController.ScheduleViewControllerActionEvent.
-                            APPOINTMENT_EDITOR_CREATE_REQUEST.toString());
+                            SCHEDULE_EDITOR_CREATE_APPOINTMENT_REQUEST.toString());
             getMyController().actionPerformed(actionEvent);
         }
     }
     
     private void doUpdateAppointmentRequest(){
-        if (doCreateUpdateAppointmentRequest()){
-            actionEvent = new ActionEvent(
-                    this, ActionEvent.ACTION_PERFORMED,
-                    ViewController.ScheduleViewControllerActionEvent.
-                            APPOINTMENT_EDITOR_UPDATE_REQUEST.toString());
-            getMyController().actionPerformed(actionEvent);
-        }
+        actionEvent = new ActionEvent(
+                this, ActionEvent.ACTION_PERFORMED,
+                ViewController.ScheduleViewControllerActionEvent.
+                        SCHEDULE_EDITOR_UPDATE_APPOINTMENT_REQUEST.toString());
+        getMyController().actionPerformed(actionEvent);
     }
     
+    private void doEmergencyAppointmentRequest(){
+        actionEvent = new ActionEvent(
+                this, ActionEvent.ACTION_PERFORMED,
+                ViewController.ScheduleViewControllerActionEvent.
+                        SCHEDULE_EDITOR_EMERGENCY_APPOINTMENT_REQUEST.toString());
+        getMyController().actionPerformed(actionEvent);
+    }
+    
+    /*
     private void doTreatmentSelectionRequest(){
         actionEvent = new ActionEvent(
                 this, ActionEvent.ACTION_PERFORMED,
                 ViewController.ScheduleViewControllerActionEvent.
                         APPOINTMENT_EDITOR_TREATMENT_VIEW_REQUEST.toString());
         getMyController().actionPerformed(actionEvent);
-    }
+    }*/
+
     
     private void doCloseViewRequest(){
         try{
@@ -305,27 +335,21 @@ public class ModalScheduleEditorView extends ModalView implements ActionListener
     public void initialiseView(){
         initComponents();
         this.setClosable(true);
-        //initialiseViewMode();
-        
         this.setVisible(true);
         this.setSize(this.getWidth(), 400);
-        makeSelectSettingsMenu();
-        mbrView = new JMenuBar();
-        mbrView.add(this.mnuSelectSettings);
-        setJMenuBar(mbrView);
         
         setViewMode(getMyController().getDescriptor()
                 .getControllerDescription().getViewMode());
-        //this.btnCloseView.setText(this.CLOSE_CAPTION);
         
-        //this.btnSelectTreatment.setActionCommand(Action.REQUEST_TREATMENT_SELECTION.toString());
-        //this.btnCloseView.setActionCommand(Action.REQUEST_CLOSE_VIEW.toString());
-        this.btnSaveChanges.setActionCommand(Action.REQUEST_CREATE_UPDATE_APPOINTMENT.toString());
-        //this.btnSelectTreatment.setActionCommand(Action.REQUEST_TREATMENT_SELECTION.toString());
-        //this.btnCloseView.removeActionListener(this);
-        //this.btnCloseView.addActionListener(this);
+        makeSettingsAndCloseViewMenu();
+        mbrView = new JMenuBar();
+        mbrView.add(this.mnuScheduleEditorMenu);
+        setJMenuBar(mbrView);
+        
+        
+
+        this.btnSaveChanges.setActionCommand(Action.REQUEST_CREATE_UPDATE_EMERGENCY_APPOINTMENT.toString());
         this.btnSaveChanges.addActionListener(this);
-        //this.btnSelectTreatment.addActionListener(this);
                 
         setBorderTitles(BorderTitles.SCHEDULE_DETAILS);        
         setBorderTitles(BorderTitles.START_DURATION); 
@@ -334,15 +358,6 @@ public class ModalScheduleEditorView extends ModalView implements ActionListener
         this.cmbSelectStartTime.setMaximumRowCount(20);
         this.cmbSelectStartTime.setRenderer(new SelectStartTimeLocalDateTimeRenderer());
         populateSelectStartTime(day);
-        
-        
-        /**
-         * 10/02/24
-         */
-        setViewMode(
-                getMyController()
-                        .getDescriptor()
-                        .getControllerDescription().getViewMode());
         
         populatePatientSelector(this.cmbSelectPatient);
         this.cmbSelectPatient.setEditable(false);
@@ -356,11 +371,7 @@ public class ModalScheduleEditorView extends ModalView implements ActionListener
         
         this.cmbSelectPatient.setSelectedItem(getMyController().getDescriptor()
             .getControllerDescription().getAppointment().getPatient());       
-
-        /*28/03/2024PatientNote patientNote = getMyController().getDescriptor().
-            getControllerDescription().getAppointment().getPatientNote();*/
-
-        this.setTitle("Apppointment editor for " + day.format(ddMMyyyyFormat));
+        
         
         this.setLayer(JLayeredPane.MODAL_LAYER);
     }
@@ -440,11 +451,7 @@ public class ModalScheduleEditorView extends ModalView implements ActionListener
             selector.setSelectedIndex(-1);
         }
     }
-    
-    private ViewController.ViewMode getViewMode(){
-        return viewMode;
-    }
-    
+
     enum BorderTitles{
         SCHEDULE_DETAILS,
         START_DURATION
@@ -479,18 +486,27 @@ public class ModalScheduleEditorView extends ModalView implements ActionListener
     }
     
     private void setViewMode(ViewController.ViewMode value){
+        LocalDate day = getMyController().getDescriptor()
+                .getViewDescription().getScheduleDay();
         viewMode = value;
         switch(viewMode){
             case CREATE:
                 this.btnSaveChanges.setText(CREATE_CAPTION);
-                //this.btnSelectTreatment.setEnabled(false);
+                this.setTitle("Create new apppointment editor for " + day.format(ddMMyyyyFormat));
                 break;
             case UPDATE:
                 this.btnSaveChanges.setText(UPDATE_CAPTION);
-               //this.btnSelectTreatment.setEnabled(true);
+                this.setTitle("Update apppointment editor for " + day.format(ddMMyyyyFormat));
+                break;
+            case EMERGENCY:
+                this.btnSaveChanges.setText(EMERGENCY_CAPTION);
+                this.setTitle("Emergency apppointment editor for " + day.format(ddMMyyyyFormat));
                 break;
         }
         
+    }
+    private ViewController.ViewMode getViewMode(){
+        return viewMode;
     }
     
     
@@ -576,14 +592,14 @@ public class ModalScheduleEditorView extends ModalView implements ActionListener
             .addGroup(pnlScheduleDetailsLayout.createSequentialGroup()
                 .addGap(12, 12, 12)
                 .addComponent(pnlStartAndDuration, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGap(12, 12, 12))
+                .addGap(18, 18, 18))
         );
         pnlScheduleDetailsLayout.setVerticalGroup(
             pnlScheduleDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlScheduleDetailsLayout.createSequentialGroup()
-                .addContainerGap()
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlScheduleDetailsLayout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(pnlStartAndDuration, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
         );
 
         jLabel1.setText("Patient");
@@ -599,7 +615,7 @@ public class ModalScheduleEditorView extends ModalView implements ActionListener
                         .addComponent(pnlScheduleDetails, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addGap(12, 12, 12))
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGap(0, 30, Short.MAX_VALUE)
+                        .addGap(0, 82, Short.MAX_VALUE)
                         .addComponent(jLabel1)
                         .addGap(18, 18, 18)
                         .addComponent(cmbSelectPatient, javax.swing.GroupLayout.PREFERRED_SIZE, 181, javax.swing.GroupLayout.PREFERRED_SIZE)

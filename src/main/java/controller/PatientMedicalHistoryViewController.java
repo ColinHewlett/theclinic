@@ -17,37 +17,11 @@ import static controller.ViewController.displayErrorMessage;
 import controller.exceptions.TemplateReaderException;
 import view.views.non_modal_views.DesktopView;
 import java.awt.event.ActionEvent;
-import java.awt.Color;
 import java.beans.PropertyChangeEvent;
-import java.math.BigInteger;
-import java.util.List;
 import javax.swing.JOptionPane;
-import model.*;
 import repository.StoreException;
 import view.View;
-import org.apache.poi.xwpf.usermodel.*;
-import org.apache.poi.xwpf.usermodel.XWPFTableCell.XWPFVertAlign;
-import org.apache.xmlbeans.XmlObject;
-import org.apache.xmlbeans.XmlException;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.STMerge;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTHpsMeasure;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTTblWidth;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTTbl;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTTc;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTTcPr;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTR;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.STJc;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.STVerticalJc;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTSectPr;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTPageMar;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTStyles;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTStyle;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTFonts;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.STTblWidth;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.File;
-import java.io.InputStream;
+
 /**
  *
  * @author colin
@@ -60,6 +34,7 @@ public class PatientMedicalHistoryViewController extends ViewController{
         setDesktopView(desktopView);  
     }
     
+    @Override
     public void propertyChange(PropertyChangeEvent e){
         
     }
@@ -247,222 +222,6 @@ public class PatientMedicalHistoryViewController extends ViewController{
             }
         }
     }
-    /*
-    private XWPFDocument setMargins(XWPFDocument document, int pips){
-        CTSectPr sectPr = document.getDocument().getBody().addNewSectPr();
-            
-        // Create a new page margin
-        CTPageMar pageMar = sectPr.addNewPgMar();
-
-        // Set the margins (values are in twentieths of a point, so 1440 = 1 inch)
-        pageMar.setLeft(576);   // 1 inch
-        pageMar.setRight(576);  // 1 inch
-        //pageMar.setTop(1440);    // 1 inch
-        //pageMar.setBottom(1440); // 1 inch
-        return document;
-    }
-    */
-    /*
-    private void setTextInCell(XWPFTableCell cell, String text){
-        XWPFParagraph paragraph = cell.getParagraphs().get(0);
-        XWPFRun run = paragraph.createRun();
-        run.setText(text);
-
-        // Set the font
-        run.setFontFamily("Arial");
-        run.setFontSize(10);
-        verticallyAlignTextInCell(cell);
-    }
-
-    private void shadeCellOnEvenRows(XWPFTable table, int row, int column){
-        XWPFTableCell cell = null;
-        if(row % 2 == 0) {
-            cell = table.getRow(row).getCell(column);
-            cell.setColor("F2F2F2");
-        }                ;
-    }
-    */
-    /*
-    private void doPrintPatientMedicalHistoryRequest(){
-        List<XWPFTableRow> rowList = null;
-        XWPFDocument document = null;
-        XWPFParagraph paragraph = null;
-        XWPFTableRow row = null;
-        XWPFRun run = null;
-        XWPFTable table;
-        CTTblWidth tableWidth = null;
-        CTR ctr = null;
-        CTTc ctTc = null;
-        XWPFTableCell cell = null;
-        int tableColumnCount = 6;
-        int tableRowCount = 0;
-        boolean debug = false;
-        InputStream fis = getClass().getResourceAsStream("/PatientMedicalHistory.docx");
-        try{
-            document = new XWPFDocument(fis);
-            table = document.getTableArray(0);
-            tableWidth = table.getCTTbl().addNewTblPr().addNewTblW();
-            tableWidth.setW(BigInteger.valueOf(10600)); // 8000 in Twips (1/20 of a point)
-            table = document.getTableArray(1);
-            tableWidth = table.getCTTbl().addNewTblPr().addNewTblW();
-            tableWidth.setW(BigInteger.valueOf(10600));
-            table = document.getTableArray(2);
-            tableWidth = table.getCTTbl().addNewTblPr().addNewTblW();
-            tableWidth.setW(BigInteger.valueOf(10600));
-            
-            int pcRowCount = 0;
-            fetchMedicalConditionsOnSystem();
-            PrimaryCondition pc = getDescriptor()
-                    .getControllerDescription().getPrimaryCondition();
-            boolean isLastEntryPrimaryCondition = false;
-            boolean isLastEntrySecondaryCondition = false;
-            int rowCount = 0;
-            pc = getDescriptor()
-                    .getControllerDescription().getPrimaryCondition();
-            for (Condition c : pc.get()){
-                PrimaryCondition _pc = (PrimaryCondition)c;
-                if (rowCount > 0) {
-                    rowCount++;
-                    table.createRow();
-                    pcRowCount = rowCount;
-                }
-                cell = table.getRow(rowCount).getCell(0);
-                setTextInCell(cell,c.getDescription());
-                //cell.setText(c.getDescription());
-                isLastEntryPrimaryCondition = true;
-                if (!_pc.getSecondaryCondition().get().isEmpty()){
-                    for(Condition _c : _pc.getSecondaryCondition().get()){
-                        if (isLastEntryPrimaryCondition) {
-                            cell = table.getRow(rowCount).getCell(1);
-                            isLastEntryPrimaryCondition = false;
-                        }else {
-                            table.createRow();
-                            cell = table.getRow(++rowCount).getCell(1);
-                        }
-                        setTextInCell(cell, _c.getDescription());
-                        shadeCellOnEvenRows(table, rowCount, 1);
-                        shadeCellOnEvenRows(table, rowCount, 2);
-                        shadeCellOnEvenRows(table, rowCount, 3);
-                        isLastEntrySecondaryCondition = true;
-                    }
-                    if (isLastEntrySecondaryCondition){
-                        table.createRow();
-                        cell = table.getRow(++rowCount).getCell(1);
-                        setTextInCell(cell, "Other ...");
-                        shadeCellOnEvenRows(table, rowCount, 1);
-                        shadeCellOnEvenRows(table, rowCount, 2);
-                        shadeCellOnEvenRows(table, rowCount, 3);
-                        isLastEntrySecondaryCondition = false;
-                        mergeCellsVertically(table, 0, pcRowCount, rowCount);
-                        verticallyAlignTextInCell(table.getRow(pcRowCount).getCell(0));
-                    }
-                }else{
-                    mergeCellsHorizontally(table, pcRowCount, 0, 1);
-                    shadeCellOnEvenRows(table, pcRowCount, 0);
-                    shadeCellOnEvenRows(table, pcRowCount, 2);
-                    shadeCellOnEvenRows(table, pcRowCount, 3);
-                }
-            }
-            table.createRow();
-            cell = table.getRow(++rowCount).getCell(0);
-            table.getRow(rowCount).setHeight(500);
-            setTextInCell(cell, "Other ...");
-            shadeCellOnEvenRows(table, rowCount, 0);
-            mergeCellsHorizontally(table,rowCount,0 , 3);
-            
-            FileOutputStream out = new FileOutputStream("PatientMedicalHistory.docx");
-            document.write(out);
-            System.out.println(new File(".").getAbsolutePath());
-            System.out.println("Word document with complex table created successfully!");
-            out.close();
-        }catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-    */
-    /*
-    private XWPFTable createBasicTableGrid(XWPFDocument document, int tableColumnCount){
-        int rowCount = 0;
-        fetchMedicalConditionsOnSystem();
-        PrimaryCondition pc = getDescriptor()
-                .getControllerDescription().getPrimaryCondition();
-        for (Condition c : pc.get()){
-            PrimaryCondition _pc = (PrimaryCondition)c;
-            if (!_pc.getSecondaryCondition().get().isEmpty())
-                rowCount = rowCount +  _pc.getSecondaryCondition().get().size();
-            else rowCount++; 
-        }
-        rowCount++;//includes the header row in the count
-        XWPFTable table = document.createTable(rowCount,tableColumnCount);
-        return table;
-    }
-    */
-    /*
-    private static void setTextProperties(XWPFTableCell cell, String bgColor, String textColor, boolean isBold){
-        cell.setColor(bgColor);
-
-        // Set text properties
-        XWPFParagraph paragraph = cell.getParagraphs().get(0);
-        XWPFRun run = paragraph.createRun();
-        run.setFontFamily("Arial");
-        run.setFontSize(10);
-        run.setColor(textColor);
-        run.setBold(isBold);
-    }
-    
-    private static void setCellProperties(XWPFTableCell cell, String bgColor, String textColor, boolean isBold) {
-        // Set background color
-        cell.setColor(bgColor);
-
-        // Set text properties
-        XWPFParagraph paragraph = cell.getParagraphs().get(0);
-        if (paragraph == null){
-            paragraph = cell.addParagraph();
-        }
-        XWPFRun run = paragraph.createRun();
-        run.setFontFamily("Arial");
-        run.setFontSize(10);
-        run.setColor(textColor);
-        run.setBold(isBold);
-    }
-    */
-    /*
-    private void verticallyAlignTextInCell(XWPFTableCell cell){
-        CTTc ctTc = cell.getCTTc();
-        CTTcPr ctTcPr = ctTc.addNewTcPr();
-        ctTcPr.addNewVAlign().setVal(STVerticalJc.CENTER);
-    }
-    */
-    /*
-    // Method to merge cells vertically
-    private static void mergeCellsVertically(XWPFTable table, int col, int fromRow, int toRow) {
-        for (int rowIndex = fromRow; rowIndex <= toRow; rowIndex++) {
-            XWPFTableCell cell = table.getRow(rowIndex).getCell(col);
-            if (rowIndex == fromRow) {
-                cell.getCTTc().addNewTcPr().addNewVMerge().setVal(STMerge.RESTART);
-            } else {
-                cell.getCTTc().addNewTcPr().addNewVMerge().setVal(STMerge.CONTINUE);
-            }
-        }
-    }
-
-    private static void mergeCellsHorizontally(XWPFTable table, int row, int fromCol, int toCol) {
-        XWPFTableCell cell = table.getRow(row).getCell(fromCol);
-        cell.getCTTc().addNewTcPr().addNewHMerge().setVal(STMerge.RESTART);
-        for (int colIndex = fromCol + 1; colIndex <= toCol; colIndex++) {
-            cell = table.getRow(row).getCell(colIndex);
-            cell.getCTTc().addNewTcPr().addNewHMerge().setVal(STMerge.CONTINUE);
-        }
-    }
-
-    private static void setColumnWidth(XWPFTable table, int colIndex, int width) {
-        for (XWPFTableRow row : table.getRows()) {
-            XWPFTableCell cell = row.getCell(colIndex);
-            CTTblWidth cellWidth = cell.getCTTc().addNewTcPr().addNewTcW();
-            cellWidth.setW(BigInteger.valueOf(width));
-        }
-    }
-    */
     
     private void fetchMedicalConditionsOnSystem(){
         PrimaryCondition primaryCondition = new PrimaryCondition();

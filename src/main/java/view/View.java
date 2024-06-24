@@ -109,6 +109,9 @@ public class View extends JInternalFrame
             case NOTES_VIEW:
                 setView(makeView(new NotesView(viewer, controller, desktopView)));
                 break;*/
+            case PATIENT_INVOICE_VIEW:
+                setView(makeView(new PatientInvoiceView(viewer, controller,desktopView)));
+                break;
             case TREATMENT_VIEW:
                 setView(makeView(new TreatmentView(viewer, controller, desktopView)));
                 break;
@@ -127,7 +130,7 @@ public class View extends JInternalFrame
             case APPOINTMENTS_CANCELLED_VIEW:
                 setModalView(makeView(new ModalCancelledAppointmentsView(viewer, controller, desktopView)));
                 break;
-            case APPOINTMENT_EDITOR_VIEW:
+            case SCHEDULE_EDITOR_VIEW:
                 setModalView(makeView(new ModalScheduleEditorView(viewer, controller, desktopView)));
                 break;
             case APPOINTMENT_EMPTY_SLOT_SCAN_CONFIGURATION_VIEW:
@@ -153,13 +156,7 @@ public class View extends JInternalFrame
                 break;
             case PATIENT_MEDICATION_EDITOR_VIEW:
                 setModalView(makeView(new ModalPatientMedicationEditorView(viewer, controller,desktopView)));
-                break;
-            /*case PATIENT_MEDICAL_HISTORY_1_EDITOR_VIEW:
-                setModalView(makeView(new ModalPatientMedicalHistory1EditorView(viewer, controller,desktopView)));
-                break;*/
-            /*case PATIENT_MEDICAL_HISTORY_2_EDITOR_VIEW:
-                setModalView(makeView(new ModalPatientMedicalHistory2EditorView(viewer, controller,desktopView)));
-                break; */  
+                break; 
             case PATIENT_RECALL_EDITOR_VIEW:
                 setModalView(makeView(new ModalPatientRecallEditorView(viewer, controller,desktopView)));
                 break;
@@ -205,7 +202,7 @@ public class View extends JInternalFrame
 
     public static enum Viewer { 
         APPOINTMENT_CREATOR_VIEW,
-        APPOINTMENT_EDITOR_VIEW,
+        SCHEDULE_EDITOR_VIEW,
         APPOINTMENT_TREATMENT_VIEW,
         APPOINTMENT_EMPTY_SLOT_SCAN_CONFIGURATION_VIEW,
         APPOINTMENTS_CANCELLED_VIEW,
@@ -217,8 +214,7 @@ public class View extends JInternalFrame
         NON_SURGERY_DAY_EDITOR_VIEW,
         TREATMENT_VIEW,
         NOTE_TAKER,
-        //PATIENT_MEDICAL_HISTORY_1_EDITOR_VIEW,
-        //PATIENT_MEDICAL_HISTORY_2_EDITOR_VIEW,
+        PATIENT_INVOICE_VIEW,
         PATIENT_MEDICAL_HISTORY_VIEW,
         PATIENT_MEDICATION_EDITOR_VIEW,
         PATIENT_DOCTOR_EDITOR_VIEW,

@@ -5,12 +5,14 @@
 package view.views.non_modal_views;
 
 import model.non_entity.SystemDefinition;
-import view.views.view_support_classes.models.Appointments3ColumnTableModel;
+import view.views.view_support_classes.models.PatientAppointmentHistoryTableModel;
+import view.views.view_support_classes.renderers.PatientAppointmentHistoryTableInvoiceRenderer;
 import view.views.view_support_classes.renderers.AppointmentsTableLocalDateTimeRenderer;
 import view.views.view_support_classes.renderers.AppointmentsTableDurationRenderer;
 import controller.Descriptor;
 import controller.ViewController;
 import view.View;
+import model.entity.Invoice;
 import model.entity.Patient;
 import model.entity.Appointment;
 import model.entity.Entity;
@@ -50,7 +52,9 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.JTextField;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.TableColumnModel;
-import model.non_entity.TreatmentWithState;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
+
 import view.views.view_support_classes.renderers.ScheduleTableCellRenderer;
 /*28/03/2024import model.PatientNote;*/
 /*28/03/2024import view.views.view_support_classes.renderers.AppointmentsTablePatientNoteRenderer;*/
@@ -59,7 +63,8 @@ import view.views.view_support_classes.renderers.ScheduleTableCellRenderer;
  * @author colin
  */
 public class PatientView extends View 
-        implements ActionListener, ListSelectionListener{
+        implements ActionListener, 
+                   ListSelectionListener{
     private JTextField txtAddressLine2 = null;
     private javax.swing.ButtonGroup rdbGroup = null;
     //private JTable tblAppointmentHistory = null;
@@ -104,6 +109,7 @@ public class PatientView extends View
         REQUEST_MEDICAL_HISTORY_POPUP,
         REQUEST_MEDICAL_HISTORY,
         REQUEST_MEDICATION,
+        REQUEST_NEW_INVOICE,
         REQUEST_NULL_PATIENT,
         REQUEST_PATIENT,
         REQUEST_PATIENT_DELETE,
@@ -114,6 +120,7 @@ public class PatientView extends View
         REQUEST_PRINT_PATIENT_MEDICAL_HISTORY,
         REQUEST_RECALL_EDITOR_VIEW,
         REQUEST_SCHEDULE_VIEW_CONTROLLER,
+        REQUEST_SELECT_INVOICE,
         REQUEST_UNTITLED_NAME,
         REQUEST_UPDATE_RECOVER_PATIENT
     }
@@ -249,8 +256,8 @@ public class PatientView extends View
                 this.btnFetchClinicalNotes.setEnabled(true);
                 this.btnFetchScheduleForSelectedAppointment.setEnabled(true);
                 int selectedRow = this.tblAppointmentHistory.getSelectedRow();
-                Appointments3ColumnTableModel model = 
-                        (Appointments3ColumnTableModel)tblAppointmentHistory.getModel();
+                PatientAppointmentHistoryTableModel model = 
+                        (PatientAppointmentHistoryTableModel)tblAppointmentHistory.getModel();
                 Appointment appointment = model.getElementAt(selectedRow);
                 getMyController().getDescriptor().getViewDescription()
                         .setAppointment(appointment);
@@ -296,9 +303,10 @@ public class PatientView extends View
         
         
         addInternalFrameListeners();
+        PatientAppointmentHistoryTableModel model = 
+                (PatientAppointmentHistoryTableModel)this.tblAppointmentHistory.getModel();
+        //model.addTableModelListener(this);
 
-        
-       
         setBorderTitles(BorderTitles.ACTIONS);
         setBorderTitles(BorderTitles.APPOINTMENT_HISTORY);
         setBorderTitles(BorderTitles.PATIENT_ADDRESS);
@@ -376,16 +384,20 @@ public class PatientView extends View
     
     MouseAdapter mouseListener = new MouseAdapter() {
         public void mouseClicked(MouseEvent me) {
+            Invoice invoice = null;
             if (me.getClickCount() == 2) {     // to detect doble click events
+                /*
                 if (tblAppointmentHistory.getRowCount() > 0){ //ensures there are rows in the table
                     int row = tblAppointmentHistory.getSelectedRow();
-                    LocalDate day = ((LocalDateTime)tblAppointmentHistory.getValueAt(row,0)).toLocalDate();
-                    getMyController().getDescriptor().getViewDescription().setScheduleDay(day);
+                    PatientAppointmentHistoryTableModel model = 
+                            (PatientAppointmentHistoryTableModel)tblAppointmentHistory.getModel();
+                    Appointment appointment = (Appointment)model.getElementAt(row);
+                    getMyController().getDescriptor().getViewDescription().setAppointment(appointment);
                     ActionEvent actionEvent = new ActionEvent(
                             PatientView.this,ActionEvent.ACTION_PERFORMED,
-                            ViewController.PatientViewControllerActionEvent.SCHEDULE_VIEW_CONTROLLER_REQUEST.toString());
+                            ViewController.PatientViewControllerActionEvent.PATIENT_INVOICE_VIEW_CONTROLLER_REQUEST.toString());
                     getMyController().actionPerformed(actionEvent);
-                }
+                }*/
             }
         }
     };
@@ -639,15 +651,7 @@ public class PatientView extends View
                 PATIENT_GUARDIAN_EDITOR_VIEW_REQUEST;
         doActionFor(request);
     }
-    
-    /*
-    private void doMedicalHistoryRequest(){
-        ViewController.PatientViewControllerActionEvent request = 
-                ViewController.PatientViewControllerActionEvent.
-                PATIENT_MEDICAL_HISTORY_1_EDITOR_VIEW_REQUEST;
-        doActionFor(request);
-    }
-*/
+
     private void doMedicalHistoryPopupRequest(){
         JMenuItem menuItem = null;
         JPopupMenu popup = new JPopupMenu("Select option");
@@ -804,7 +808,7 @@ public class PatientView extends View
         }
         else{
             int row = this.tblAppointmentHistory.getSelectedRow();
-            LocalDate day = ((LocalDateTime)this.tblAppointmentHistory.getValueAt(row,0)).toLocalDate();
+            LocalDate day = ((LocalDateTime)this.tblAppointmentHistory.getValueAt(row,1)).toLocalDate();
             getMyController().getDescriptor().getViewDescription().setScheduleDay(day);
             ActionEvent actionEvent = new ActionEvent(
                     this,ActionEvent.ACTION_PERFORMED,
@@ -924,8 +928,8 @@ public class PatientView extends View
          */
         if (appointments == null) appointments = new ArrayList<>();
         
-        Appointments3ColumnTableModel tableModel = 
-                (Appointments3ColumnTableModel)tblAppointmentHistory.getModel(); 
+        PatientAppointmentHistoryTableModel tableModel = 
+                (PatientAppointmentHistoryTableModel)tblAppointmentHistory.getModel(); 
         tableModel.removeAllElements();
         
         try{
@@ -937,13 +941,20 @@ public class PatientView extends View
                     tableModel.addElement(it.next());
                 }
             }
+            /*ViewController.setJTableColumnProperties(tblAppointmentHistory, 
+                scrAppointmentHistory.getPreferredSize().width, 
+                5,10,10,75);*/
+            /*ViewController.setJTableColumnProperties(tblAppointmentHistory, 
+                scrAppointmentHistory.getPreferredSize().width, 
+                10,10,80);*/
+            this.tblAppointmentHistory.setDefaultRenderer(Invoice.class, new PatientAppointmentHistoryTableInvoiceRenderer());
             this.tblAppointmentHistory.setDefaultRenderer(Duration.class, new AppointmentsTableDurationRenderer());
-            this.tblAppointmentHistory.setDefaultRenderer(LocalDateTime.class, new AppointmentsTableLocalDateTimeRenderer());;
+            this.tblAppointmentHistory.setDefaultRenderer(LocalDateTime.class, new AppointmentsTableLocalDateTimeRenderer());
             /*28/03/2024this.tblAppointmentHistory.setDefaultRenderer(PatientNote.class, new AppointmentsTablePatientNoteRenderer());*/
             //this.tblAppointmentHistory.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
             
             TableColumnModel columnModel = this.tblAppointmentHistory.getColumnModel();
-            columnModel.getColumn(2).setCellRenderer(new ScheduleTableCellRenderer());
+            columnModel.getColumn(3).setCellRenderer(new ScheduleTableCellRenderer());
             
             //this.tblAppointmentHistory.setPreferredScrollableViewportSize(tblAppointmentHistory.getPreferredSize());
             TitledBorder titledBorder =
@@ -1566,13 +1577,12 @@ public class PatientView extends View
 
         pnlAppointmentHistory.setBorder(javax.swing.BorderFactory.createTitledBorder("Appointment history"));
 
-        tblAppointmentHistory.setModel(new Appointments3ColumnTableModel());
+        tblAppointmentHistory.setModel(new view.views.view_support_classes.models.PatientAppointmentHistoryTableModel());
         scrAppointmentHistory.setViewportView(tblAppointmentHistory);
+        tblAppointmentHistory.addMouseListener(mouseListener);
         ViewController.setJTableColumnProperties(tblAppointmentHistory,
             scrAppointmentHistory.getPreferredSize().width,
-            10,10,80);
-        tblAppointmentHistory.addMouseListener(mouseListener);
-
+            7,10,10,73);
         ListSelectionModel lsm = tblAppointmentHistory.getSelectionModel();
         lsm.addListSelectionListener(this);
 

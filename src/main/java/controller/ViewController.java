@@ -270,6 +270,7 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         CLINICAL_NOTE_VIEW_CONTROLLER_REQUEST,
         MEDICAL_CONDITION_VIEW_CONTROLLER_REQUEST,
         NOTIFICATION_VIEW_CONTROLLER_REQUEST,
+        PATIENT_INVOICE_VIEW_CONTROLLER_REQUEST,
         PATIENT_MEDICAL_HISTORY_VIEW_CONTROLLER_REQUEST,
         PATIENT_QUESTIONNAIRE_VIEW_CONTROLLER_REQUEST,
         PRINT_PATIENT_MEDICAL_HISTORY_REQUEST,//basically requires PMH view controller to achieve this
@@ -485,6 +486,7 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         
         PATIENT_DOCTOR_EDITOR_VIEW_REQUEST,
         PATIENT_GUARDIAN_EDITOR_VIEW_REQUEST,
+        PATIENT_INVOICE_VIEW_CONTROLLER_REQUEST,
         PATIENT_MEDICAL_HISTORY_VIEW_CONTROLLER_REQUEST,
         PATIENT_QUESTIONNAIRE_VIEW_CONTROLLER_REQUEST,
         PATIENT_MEDICAL_HISTORY_1_EDITOR_VIEW_REQUEST,
@@ -555,6 +557,7 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         APPOINTMENT_REMINDED_STATUS_UPDATE_REQUEST,
         APPOINTMENTS_CANCELLED_VIEW_REQUEST,
         APPOINTMENT_CREATE_VIEW_REQUEST,
+        SCHEDULE_EDITOR_EMERGENCY_APPOINTMENT_REQUEST,
         APPOINTMENT_UPDATE_VIEW_REQUEST,
         CLINICAL_NOTE_VIEW_CONTROLLER_REQUEST,
         NON_SURGERY_DAY_SCHEDULE_VIEW_REQUEST,
@@ -573,9 +576,9 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
          * SECONDARY VIEW ACTION EVENTS
          */
         APPOINTMENT_UNCANCEL_REQUEST,
-        APPOINTMENT_EDITOR_CREATE_REQUEST,
+        SCHEDULE_EDITOR_CREATE_APPOINTMENT_REQUEST,
         APPOINTMENTS_FOR_NON_SURGERY_DAY_REQUEST,
-        APPOINTMENT_EDITOR_UPDATE_REQUEST,
+        SCHEDULE_EDITOR_UPDATE_APPOINTMENT_REQUEST,
         APPOINTMENT_EDITOR_TREATMENT_VIEW_REQUEST,
         APPOINTMENT_TREATMENT_UPDATE_REQUEST, 
         APPOINTMENT_TREATMENT_COMMENT_UPDATE_REQUEST,
@@ -628,6 +631,7 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         Create,
         UPDATE,
         Update,
+        EMERGENCY,
         SLOT_SELECTED,
         SLOT_UNSELECTED,
         SCHEDULE_REFERENCED_FROM_PATIENT_VIEW,
@@ -675,8 +679,16 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
 
         for (int i = 0; i < table.getColumnModel().getColumnCount(); i++) {
             TableColumn column = table.getColumnModel().getColumn(i);
-            column.setPreferredWidth((int)
+            double test = tablePreferredWidth * (percentages[i] / total);
+            if (i>0)
+                column.setPreferredWidth((int)
                     (tablePreferredWidth * (percentages[i] / total)));
+            else{
+                column.setMinWidth((int)
+                        (tablePreferredWidth * (percentages[i] / total)));
+                column.setMaxWidth((int)
+                        (tablePreferredWidth * (percentages[i] / total)));
+            }
             column.setHeaderRenderer(new TableHeaderCellBorderRenderer(Color.LIGHT_GRAY));
         }
     }
@@ -1510,9 +1522,11 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
                 note = a.getNotes();
 
                 if (note!=null){
-                    if (note.substring(note.length()-1).equals("/")){
-                        note = note.substring(0, note.length() - 2);
-                        a.setNotes(note);
+                    if(!note.trim().isEmpty()){
+                        if (note.substring(note.length()-1).equals("/")){
+                            note = note.substring(0, note.length() - 2);
+                            a.setNotes(note);
+                        }
                     }
                 }
             }

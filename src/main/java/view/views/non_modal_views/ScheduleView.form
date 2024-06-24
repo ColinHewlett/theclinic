@@ -390,9 +390,9 @@
           <Group type="103" groupAlignment="0" attributes="0">
               <Group type="102" alignment="0" attributes="0">
                   <EmptySpace max="-2" attributes="0"/>
-                  <Component id="btnCreateAppointment" min="-2" pref="97" max="-2" attributes="0"/>
+                  <Component id="btnCreateUpdateAppointment" min="-2" pref="97" max="-2" attributes="0"/>
                   <EmptySpace type="separate" max="-2" attributes="0"/>
-                  <Component id="btnUpdateSelectedAppointment" min="-2" pref="97" max="-2" attributes="0"/>
+                  <Component id="btnEmergencyAppointment" min="-2" pref="97" max="-2" attributes="0"/>
                   <EmptySpace type="separate" max="-2" attributes="0"/>
                   <Component id="btnCancelSelectedAppointment" min="-2" max="-2" attributes="0"/>
                   <EmptySpace min="-2" pref="87" max="-2" attributes="0"/>
@@ -406,8 +406,8 @@
               <Group type="102" alignment="0" attributes="0">
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="3" attributes="0">
-                      <Component id="btnCreateAppointment" alignment="3" min="-2" max="-2" attributes="0"/>
-                      <Component id="btnUpdateSelectedAppointment" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="btnCreateUpdateAppointment" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="btnEmergencyAppointment" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="btnCancelSelectedAppointment" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="btnMarkSlotUnbookable" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
@@ -417,30 +417,27 @@
         </DimensionLayout>
       </Layout>
       <SubComponents>
-        <Component class="javax.swing.JButton" name="btnCreateAppointment">
+        <Component class="javax.swing.JButton" name="btnCreateUpdateAppointment">
           <Properties>
             <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
               <Connection code="&quot;Create&quot;" type="code"/>
             </Property>
           </Properties>
-          <Events>
-            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnCreateAppointmentActionPerformed"/>
-          </Events>
           <AuxValues>
-            <AuxValue name="JavaCodeGenerator_InitCodePost" type="java.lang.String" value="btnCreateAppointment.setToolTipText(&quot;create new appointment&quot;);"/>
+            <AuxValue name="JavaCodeGenerator_InitCodePost" type="java.lang.String" value="btnCreateUpdateAppointment.setToolTipText(&quot;create new appointment&quot;);"/>
           </AuxValues>
         </Component>
-        <Component class="javax.swing.JButton" name="btnUpdateSelectedAppointment">
+        <Component class="javax.swing.JButton" name="btnEmergencyAppointment">
           <Properties>
             <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
               <Connection code="&quot;Update&quot;" type="code"/>
             </Property>
           </Properties>
           <Events>
-            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnUpdateSelectedAppointmentActionPerformed"/>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnEmergencyAppointmentActionPerformed"/>
           </Events>
           <AuxValues>
-            <AuxValue name="JavaCodeGenerator_InitCodePost" type="java.lang.String" value="btnUpdateSelectedAppointment.setToolTipText(&quot;update selected appointment&quot;);"/>
+            <AuxValue name="JavaCodeGenerator_InitCodePost" type="java.lang.String" value="btnEmergencyAppointment.setToolTipText(&quot;update selected appointment&quot;);"/>
           </AuxValues>
         </Component>
         <Component class="javax.swing.JButton" name="btnCancelSelectedAppointment">

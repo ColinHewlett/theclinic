@@ -5,21 +5,8 @@
  */
 package controller;
 
-import model.entity.PrimaryCondition;
-import model.entity.Condition;
-import model.non_entity.TreatmentWithState;
-import model.entity.Treatment;
-import model.entity.SurgeryDaysAssignment;
-import model.entity.PatientCondition;
-import model.entity.Patient;
-import model.entity.Notification;
-import model.entity.Medication;
-import model.entity.Doctor;
-import model.entity.ClinicNote;
-import model.entity.Appointment;
-import model.non_entity.QuestionWithState;
-import model.non_entity.ConditionWithState;
-import model.*;
+import model.entity.*;
+import model.non_entity.*;
 import java.awt.Point;
 import java.util.ArrayList;
 import java.time.Duration;
@@ -129,6 +116,14 @@ public class Descriptor {
         }
         public void setPatientCondition(PatientCondition value){
             patientCondition = value;
+        }
+        
+        private Invoice invoice = null;
+        public Invoice getInvoice(){
+            return invoice; 
+        }
+        public void setInvoice(Invoice value){
+            invoice = value;
         }
         
         public Doctor getDoctor(){
@@ -455,6 +450,15 @@ public class Descriptor {
         }
         public void setPrimaryCondition(PrimaryCondition value){
             primaryCondition = value;
+        }
+        
+        
+        private Invoice invoice = null;
+        public Invoice getInvoice(){
+            return invoice; 
+        }
+        public void setInvoice(Invoice value){
+            invoice = value;
         }
         
         public Medication getMedication(){

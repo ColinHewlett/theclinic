@@ -45,8 +45,9 @@ public class ModalAppointmentEditorView extends ModalView implements ActionListe
     private final String LAST_APPOINTMENT_START_TIME = "Last appointment start time";
     private final String EXIT_VIEW = "Close view";
     private final String CLOSE_CAPTION = "<html><center>Close</center><center>view</center></html>";
-    private final String CREATE_CAPTION = "<html><center>Create</center><center>appointment</center></html>";
+    private final String CREATE_CAPTION = "<html>Create appointment </html>";
     private final String UPDATE_CAPTION = "Update start & duration times";
+    private final String EMERGENCY_CAPTION = "<html>Create emergency appointment </html>";
     private final String TREATMENT_CAPTION = "<html><center>Select</center><center>treatment</center></html>";
     private final String PANEL_START_DURATION_CAPTION = "Start & duration";
     private final String PANEL_SCHEDULE_DETAILS_CAPTION = "Schedule details";
@@ -152,13 +153,13 @@ public class ModalAppointmentEditorView extends ModalView implements ActionListe
     }
     
     enum Action{
-            REQUEST_CREATE_UPDATE_APPOINTMENT,
+            REQUEST_CREATE_UPDATE_EMERGENCY_APPOINTMENT,
             REQUEST_TREATMENT_SELECTION,
             REQUEST_CLOSE_VIEW};
     @Override 
     public void actionPerformed(ActionEvent e){
         switch(Action.valueOf(e.getActionCommand())){
-            case REQUEST_CREATE_UPDATE_APPOINTMENT:
+            case REQUEST_CREATE_UPDATE_EMERGENCY_APPOINTMENT:
                 if (doCreateUpdateAppointmentRequest()){
                     switch(getViewMode()){
                         case CREATE:
@@ -222,7 +223,7 @@ public class ModalAppointmentEditorView extends ModalView implements ActionListe
             actionEvent = new ActionEvent(
                     this, ActionEvent.ACTION_PERFORMED,
                     ViewController.ScheduleViewControllerActionEvent.
-                            APPOINTMENT_EDITOR_CREATE_REQUEST.toString());
+                            SCHEDULE_EDITOR_CREATE_APPOINTMENT_REQUEST.toString());
             getMyController().actionPerformed(actionEvent);
         }
     }
@@ -232,7 +233,7 @@ public class ModalAppointmentEditorView extends ModalView implements ActionListe
             actionEvent = new ActionEvent(
                     this, ActionEvent.ACTION_PERFORMED,
                     ViewController.ScheduleViewControllerActionEvent.
-                            APPOINTMENT_EDITOR_UPDATE_REQUEST.toString());
+                            SCHEDULE_EDITOR_UPDATE_APPOINTMENT_REQUEST.toString());
             getMyController().actionPerformed(actionEvent);
         }
     }
@@ -316,16 +317,8 @@ public class ModalAppointmentEditorView extends ModalView implements ActionListe
         
         setViewMode(getMyController().getDescriptor()
                 .getControllerDescription().getViewMode());
-        //this.btnCloseView.setText(this.CLOSE_CAPTION);
-        
-        //this.btnSelectTreatment.setActionCommand(Action.REQUEST_TREATMENT_SELECTION.toString());
-        //this.btnCloseView.setActionCommand(Action.REQUEST_CLOSE_VIEW.toString());
-        this.btnSaveChanges.setActionCommand(Action.REQUEST_CREATE_UPDATE_APPOINTMENT.toString());
-        //this.btnSelectTreatment.setActionCommand(Action.REQUEST_TREATMENT_SELECTION.toString());
-        //this.btnCloseView.removeActionListener(this);
-        //this.btnCloseView.addActionListener(this);
+        this.btnSaveChanges.setActionCommand(Action.REQUEST_CREATE_UPDATE_EMERGENCY_APPOINTMENT.toString());
         this.btnSaveChanges.addActionListener(this);
-        //this.btnSelectTreatment.addActionListener(this);
                 
         setBorderTitles(BorderTitles.SCHEDULE_DETAILS);        
         setBorderTitles(BorderTitles.START_DURATION); 
@@ -488,6 +481,9 @@ public class ModalAppointmentEditorView extends ModalView implements ActionListe
             case UPDATE:
                 this.btnSaveChanges.setText(UPDATE_CAPTION);
                //this.btnSelectTreatment.setEnabled(true);
+                break;
+            case EMERGENCY:
+                this.btnSaveChanges.setText(EMERGENCY_CAPTION);
                 break;
         }
         

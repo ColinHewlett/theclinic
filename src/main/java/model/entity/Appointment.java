@@ -207,6 +207,14 @@ public class Appointment extends Entity implements IEntityStoreActions{
         this.invoice = value;
     }
     
+    private boolean isEmergency = false;
+    public boolean getIsEmergency() {
+        return isEmergency;
+    }
+    public void setIsEmergency(boolean value) {
+        this.isEmergency = value;
+    }
+    
     /**
      * 
      * @return 

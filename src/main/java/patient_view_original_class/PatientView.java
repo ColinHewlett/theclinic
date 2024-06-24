@@ -6,11 +6,12 @@
 package patient_view_original_class;
 
 import view.views.non_modal_views.DesktopView;
+import model.entity.*;
 import model.non_entity.SystemDefinition;
 import view.views.modal_views.dialogs.Dialog;
 import controller.exceptions.TemplateReaderException;
 import controller.TemplateReader;
-import view.views.view_support_classes.models.Appointments3ColumnTableModel;
+import view.views.view_support_classes.models.PatientAppointmentHistoryTableModel;
 import view.views.view_support_classes.renderers.AppointmentsTableLocalDateTimeRenderer;
 import view.views.view_support_classes.renderers.AppointmentsTableDurationRenderer;
 import view.views.view_support_classes.components.FatCheckBox;
@@ -654,45 +655,19 @@ public class PatientView extends View implements ActionListener{
             setViewStatus(true);
         }
     };
-    /*
-    private void setAppointmentHistoryTableListener(){
-        this.tblAppointmentHistory.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        ListSelectionModel lsm = this.tblAppointmentHistory.getSelectionModel();
-        
-        lsm.addListSelectionListener(new ListSelectionListener() {
-            @Override
-            public void valueChanged(ListSelectionEvent e) {
-                if (!e.getValueIsAdjusting()) {   // Ensure the event is not fired multiple times
-                    int selectedRow = tblAppointmentHistory.getSelectedRow();
-                    if (selectedRow!=-1){
-                        tableValueChangedListenerActivated = true;
-                        //Patient patient = (Patient)tblAppointments.getModel().getValueAt(selectedRow, 0);
-                        //doScheduleTitleRefresh(patient);
-                    }
-                    //else doScheduleTitleRefresh(null);  
-                }
-            }
-        });    
-    }
-    */
-    /**
-     * 07/11/2021 11:07 dev. log update
-     * Implements appointment double click event which displays appointment schedule day
-     * for row in appointment history table that's been double clicked
-     * Mouse listener added in the initialisation code for the JTable component 
-     * in "initComponents")
-     */
-    //private boolean tableValueChangedListenerActivated = true;
+
     MouseAdapter mouseListener = new MouseAdapter() {
         public void mouseClicked(MouseEvent me) {
             if (me.getClickCount() == 2) {     // to detect doble click events
                 if (tblAppointmentHistory.getRowCount() > 0){ //ensures there are rows in the table
                     int row = tblAppointmentHistory.getSelectedRow();
-                    LocalDate day = ((LocalDateTime)tblAppointmentHistory.getValueAt(row,0)).toLocalDate();
-                    getMyController().getDescriptor().getViewDescription().setScheduleDay(day);
+                    PatientAppointmentHistoryTableModel model = 
+                            (PatientAppointmentHistoryTableModel)tblAppointmentHistory.getModel();
+                    Appointment appointment = model.getElementAt(row);
+                    getMyController().getDescriptor().getViewDescription().setAppointment(appointment);
                     ActionEvent actionEvent = new ActionEvent(
                             PatientView.this,ActionEvent.ACTION_PERFORMED,
-                            ViewController.PatientViewControllerActionEvent.SCHEDULE_VIEW_CONTROLLER_REQUEST.toString());
+                            ViewController.PatientViewControllerActionEvent.PATIENT_INVOICE_VIEW_CONTROLLER_REQUEST.toString());
                     getMyController().actionPerformed(actionEvent);
                 }
             }
@@ -1129,8 +1104,8 @@ public class PatientView extends View implements ActionListener{
     
     private void populateAppointmentsHistoryTable(Patient patient){
         int appointments = 0;
-        Appointments3ColumnTableModel tableModel = 
-                (Appointments3ColumnTableModel)tblAppointmentHistory.getModel(); 
+        PatientAppointmentHistoryTableModel tableModel = 
+                (PatientAppointmentHistoryTableModel)tblAppointmentHistory.getModel(); 
         tableModel.removeAllElements();
         try{
             if (patient.getIsKeyDefined()){//if patient data in view has just been cleared  
@@ -1610,7 +1585,7 @@ public class PatientView extends View implements ActionListener{
 
         tblAppointmentHistory = new javax.swing.JTable();
         tblAppointmentHistory.addMouseListener(mouseListener);
-        tblAppointmentHistory.setModel(new Appointments3ColumnTableModel());
+        tblAppointmentHistory.setModel(new PatientAppointmentHistoryTableModel());
         //tblAppointmentHistory.setPreferredSize(new Dimension(getAppointmentHistoryTableWidth(),110));
 
         try{

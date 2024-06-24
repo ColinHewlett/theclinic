@@ -5,27 +5,10 @@
  */
 package controller;
 
-import model.entity.SecondaryCondition;
-import model.entity.PrimaryCondition;
-import model.entity.Condition;
-import model.entity.Treatment;
-import model.entity.SurgeryDaysAssignment;
-import model.entity.Question;
-import model.entity.PatientQuestion;
-import model.entity.PatientPrimaryCondition;
-import model.entity.Patient;
-import model.entity.Notification;
-import model.entity.Medication;
-import model.entity.Entity;
-import model.entity.Doctor;
-import model.entity.ClinicNote;
-import model.entity.AppointmentTreatment;
-import model.entity.Appointment;
-import model.entity.PatientSecondaryCondition;
 import static controller.ViewController.DesktopViewControllerActionEvent.PATIENT_MEDICAL_HISTORY_VIEW_CONTROLLER_REQUEST;
 import static controller.ViewController.DesktopViewControllerActionEvent.VIEW_CONTROLLER_CLOSE_NOTIFICATION;
 import static controller.ViewController.displayErrorMessage;
-import model.*;
+import model.entity.*;
 import controller.exceptions.TemplateReaderException;
 import repository.Repository;
 import model.non_entity.SystemDefinition;
@@ -62,6 +45,7 @@ public class DesktopViewController extends ViewController{
     private ArrayList<NotificationViewController> notificationViewControllers = null;
     private ArrayList<PatientViewController> patientViewControllers = null;
     private ArrayList<TreatmentViewController> treatmentViewControllers = null;
+    private ArrayList<PatientInvoiceViewController> patientInvoiceViewControllers = null;
     private ArrayList<MedicalConditionViewController> medicalConditionViewControllers = null;
     private ArrayList<PatientMedicalHistoryViewController> patientMedicalHistoryViewControllers = new ArrayList<>();;
     private ArrayList<PatientQuestionnaireViewController> patientQuestionnaireViewControllers = new ArrayList<>();
@@ -480,6 +464,9 @@ public class DesktopViewController extends ViewController{
                 break;
             case CLINICAL_NOTE_VIEW_CONTROLLER_REQUEST:
                 doRequestForClinicalNoteViewController(e);
+                break;
+            case PATIENT_INVOICE_VIEW_CONTROLLER_REQUEST:
+                doRequestForPatientInvoiceViewController(e);
                 break;
             case PATIENT_MEDICAL_HISTORY_VIEW_CONTROLLER_REQUEST:
                 doRequestForPatientMedicalHistoryViewController(e);
@@ -1262,6 +1249,40 @@ public class DesktopViewController extends ViewController{
                     }//do nothing because only one medical condition VC allowed
                 }
             }
+        }
+    }
+    
+    private void doRequestForPatientInvoiceViewController(ActionEvent e){
+        boolean isPIVCForSamePatientActive = false;
+        PatientInvoiceViewController activeVCForSamePatient = null;
+        PatientInvoiceViewController pivc = null;
+        PatientViewController pvc = (PatientViewController)e.getSource();
+        Patient patient = pvc.getDescriptor().getControllerDescription().getPatient();
+        Appointment appointment = pvc.getDescriptor().getControllerDescription().getAppointment();
+        for (PatientInvoiceViewController vc : patientInvoiceViewControllers){
+            if (vc.getDescriptor().getControllerDescription().getPatient().equals(patient)){
+                isPIVCForSamePatientActive = true;
+                activeVCForSamePatient = vc;
+                break;
+            }
+        }
+        if (!isPIVCForSamePatientActive){
+            patientInvoiceViewControllers.add(
+                new PatientInvoiceViewController(
+                this,
+                getDesktopView()));
+            pivc = patientInvoiceViewControllers.get(
+                patientInvoiceViewControllers.size()-1);
+            pivc.getDescriptor().getControllerDescription().setPatient(patient);
+            pivc.getDescriptor().getControllerDescription().setAppointment(appointment);
+            setView(new View().make(View.Viewer.PATIENT_INVOICE_VIEW,
+                pivc, 
+                getDesktopView()));         
+            if (getDesktopViewMode().equals(DesktopViewMode.CLINIC_LOGO)){
+                    doSetupDesktopViewMode();
+            }else {
+                activeVCForSamePatient.getView().toFront();
+            }//do nothing because only one medical condition VC allowed
         }
     }
     

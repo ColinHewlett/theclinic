@@ -6,6 +6,7 @@
 package view.views.view_support_classes.models;
 
 import model.entity.Appointment;
+import model.entity.Invoice;
 /*28/03/2024import model.PatientNote;*/
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -19,10 +20,11 @@ import javax.swing.table.AbstractTableModel;
  * update to remove statically defined data structure
  * -- replaces extension  from DefaultTableModel to AbstractTableModel
  */
-public class Appointments3ColumnTableModel extends AbstractTableModel{
+public class PatientAppointmentHistoryTableModel extends AbstractTableModel{
     public ArrayList<Appointment> appointments = new ArrayList<>();
-    private enum COLUMN{From,Duration,Treatment};
+    private enum COLUMN{Inv,From,Duration,Treatment};
     private final Class[] columnClass = new Class[] {
+        Invoice.class,
         LocalDateTime.class, 
         Duration.class,
         /*28/03/2024PatientNote*/String.class};
@@ -58,7 +60,8 @@ public class Appointments3ColumnTableModel extends AbstractTableModel{
         String result = null;
         for (COLUMN column: COLUMN.values()){
             if (column.ordinal() == columnIndex){
-                result = column.toString();
+                if(columnIndex == 0)result = ("Inv");
+                else result = column.toString();
                 break;
             }
         }
@@ -80,6 +83,9 @@ public class Appointments3ColumnTableModel extends AbstractTableModel{
                 }
                 else{
                     switch (column){
+                        case Inv:
+                            result = appointment.getInvoice();
+                            break;
                         case Duration:
                             result = appointment.getDuration();
                             break;
@@ -97,4 +103,5 @@ public class Appointments3ColumnTableModel extends AbstractTableModel{
         }
         return result;
     }
+
 }
