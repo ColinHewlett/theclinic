@@ -98,7 +98,7 @@ public class Entity implements IStoreClient{
                         FOR_PATIENT,            //appointments/notes for this patient
                         FOR_PRIMARY_CONDITION,  //secondary condition(s) for this primary condition
                         FOR_SECONDARY_CONDITION,
-                        FOR_DAY_AND_NON_EMERGENCY_APPOINTMENTS,
+                        FOR_DAY_AND_NON_EMERGENCY_APPOINTMENT,
                         FOR_DAY_AND_EMERGENCY_APPOINTMENT,
                         DELETED_FOR_PATIENT,    //deleted appointments for this patient (when a deleted patient is being recovered)         
                         DELETED,                //deleted patients

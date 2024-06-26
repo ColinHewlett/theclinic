@@ -6,6 +6,7 @@
 package controller;
 
 //import static controller.ViewController.ScheduleViewControllerActionEvent.APPOINTMENT_EDITOR_TREATMENT_VIEW_REQUEST;
+import static controller.ViewController.ScheduleViewControllerActionEvent.APPOINTMENT_EDITOR_TREATMENT_VIEW_REQUEST;
 import static controller.ViewController.ScheduleViewControllerActionEvent.SCHEDULE_EDITOR_UPDATE_APPOINTMENT_REQUEST;
 import model.non_entity.SystemDefinition;
 import static controller.ViewController.displayErrorMessage;
@@ -411,7 +412,7 @@ public class ScheduleViewController extends ViewController{
         Appointment appointment = new Appointment();
         appointment.setStart(day.atStartOfDay());
         
-        appointment.setScope(Entity.Scope.FOR_DAY_AND_NON_EMERGENCY_APPOINTMENTS);
+        appointment.setScope(Entity.Scope.FOR_DAY_AND_NON_EMERGENCY_APPOINTMENT);
         //appointment.setScope(Scope.FOR_DAY);
         try{
             appointment.read();
@@ -469,6 +470,29 @@ public class ScheduleViewController extends ViewController{
             getDescriptor().getControllerDescription().setScheduleDay(day);
             doAppointeeReminderCount(appointment.get());
             getUpdatedAppointmentSlotsForDay(appointment);
+            
+            /**
+             * 25/06/2024 07:42 update
+             * -- separately determines if any emergency appointments on this day
+             * -- yes; recreate the schedule list with the emergency appointment(s) at the top
+             */
+
+            appointment.setScope(Scope.FOR_DAY_AND_EMERGENCY_APPOINTMENT);
+            appointment.setStart(day.atTime(ViewController.FIRST_APPOINTMENT_SLOT));
+            appointment = appointment.read();
+            if (!appointment.get().isEmpty()){
+                ArrayList<Appointment> scheduleListForTheDay = new ArrayList<>();
+                for (Appointment a : appointment.get()){
+                    scheduleListForTheDay.add(a);
+                }
+                for(Appointment a : getDescriptor()
+                        .getControllerDescription().getAppointmentSlotsForDay()){
+                    scheduleListForTheDay.add(a);
+                }
+                getDescriptor().getControllerDescription()
+                        .setAppointmentSlotsForDay(scheduleListForTheDay);
+            }
+            
             firePropertyChangeEvent(
                     ViewController.ScheduleViewControllerPropertyChangeEvent.
                             APPOINTMENTS_FOR_DAY_RECEIVED.toString(),
@@ -1397,11 +1421,16 @@ getDescriptor().getViewDescription().getScheduleDay());
         }
     }
 
+    /**
+     * 26/06/2024 05:32 update 
+     * @param e 
+     */
     private void doScheduleEditorViewAction(ActionEvent e){
         Appointment result;
         Appointment changedSlotRequest = 
-                //?getDescriptorFromView().getControllerDescription().getAppointment();
-                getDescriptor().getControllerDescription().getAppointment();
+                getDescriptor().getViewDescription().getAppointment();
+        /*Appointment changedSlotRequest = 
+                getDescriptor().getControllerDescription().getAppointment();*/
                 
         LocalDate day = changedSlotRequest.getStart().toLocalDate();
         ViewController.ScheduleViewControllerActionEvent actionCommand =
@@ -1410,30 +1439,8 @@ getDescriptor().getViewDescription().getScheduleDay());
             case APPOINTMENTS_FOR_DAY_REQUEST:
                 doAppointmentForDayRequest(getDescriptor()
                         .getControllerDescription().getScheduleDay());       
-                /*
-                firePropertyChangeEvent(
-                       ViewController.ScheduleViewControllerPropertyChangeEvent.
-                               APPOINTMENTS_FOR_DAY_RECEIVED.toString(),
-                       (View)e.getSource(),
-                       this,//event sender
-                       null,
-                       getDescriptor()//event related data        
-               ); */
                 break;
-            case APPOINTMENT_EDITOR_TREATMENT_VIEW_REQUEST:
-                /**
-                 * -- check ModalAppointmentEditorView viewmode == CREATE
-                 * -- send message to ModalAppointmentEditorView to close view
-                 * ---- assumes current ControllerDescription will re-launch view ok
-                 * -- launch ModalTreatmetView
-                 * -- when that closes relaunch ModalAppointmentEditorView
-                 */
-                
-                View view = (View)e.getSource();
-                doRequestCloseModalAppointmentEditorView(view);
-                doOpenTreatmentView();
-                doReopenModelAppointmentEditorView();
-                break;
+            
             case SCHEDULE_EDITOR_CREATE_APPOINTMENT_REQUEST:
                 setScheduleReport(new ScheduleReport());
                 result = doAppointmentCreateRequest(e, changedSlotRequest);
@@ -1515,8 +1522,8 @@ getDescriptor().getViewDescription().getScheduleDay());
                     
                     day = getDescriptor().getViewDescription().getAppointment().
                                 getStart().toLocalDate();
-                    result = doAppointmentUpdateRequest(e, changedSlotRequest);
-                    if (result!=null) {
+                    result = doAppointmentCreateRequest(e, changedSlotRequest);
+                    if (result!=null) {//note: unlikely outcome since emergency appointment and should clash
                         try{
                             getModalView().setClosed(true);
                         }
@@ -1538,7 +1545,7 @@ getDescriptor().getViewDescription().getScheduleDay());
                     }else{
                         changedSlotRequest.setIsEmergency(true);
                         try{
-                            changedSlotRequest.update();
+                            changedSlotRequest.insert();
                             getModalView().setClosed(true);
                         }catch(StoreException ex){
                             String message = ex.getMessage() + "\n"
@@ -1557,6 +1564,20 @@ getDescriptor().getViewDescription().getScheduleDay());
                     sendErrorToScheduleEditorView();
                     doAppointmentForDayRequest(day);
                 }
+                break;
+                case APPOINTMENT_EDITOR_TREATMENT_VIEW_REQUEST:
+                /**
+                 * -- check ModalAppointmentEditorView viewmode == CREATE
+                 * -- send message to ModalAppointmentEditorView to close view
+                 * ---- assumes current ControllerDescription will re-launch view ok
+                 * -- launch ModalTreatmetView
+                 * -- when that closes relaunch ModalAppointmentEditorView
+                 */
+                
+                View view = (View)e.getSource();
+                doRequestCloseModalAppointmentEditorView(view);
+                doOpenTreatmentView();
+                doReopenModelAppointmentEditorView();
                 break;
         } 
     }

@@ -8,6 +8,7 @@ package model.entity;
 
 //<editor-fold defaultstate="collapsed" desc="Imports">
 
+import controller.ViewController;
 import model.non_entity.SystemDefinition;
 import repository.Repository;
 import repository.StoreException;//01/03/2023
@@ -481,6 +482,9 @@ public class Appointment extends Entity implements IEntityStoreActions{
                 /*28/03/2024set(new Repository().read(this, key).get());*/
                 set(((Appointment)new Repository().read(this, key)).get());
                 result = this;
+                break;
+            case FOR_DAY_AND_EMERGENCY_APPOINTMENT:
+                result = new Repository().read(this, key);
                 break;
             default:
                 try{

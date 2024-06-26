@@ -6,6 +6,7 @@
 package view.views.modal_views;
 
 import model.entity.Patient;
+import model.entity.Appointment;
 import view.views.view_support_classes.renderers.SelectStartTimeLocalDateTimeRenderer;
 import view.views.non_modal_views.DesktopView;
 import controller.Descriptor;
@@ -376,15 +377,38 @@ public class ModalScheduleEditorView extends ModalView implements ActionListener
         this.setLayer(JLayeredPane.MODAL_LAYER);
     }
     
+    private void setAppointment(){
+        Appointment appointment = null;
+        switch (getViewMode()){
+            case CREATE:
+            case EMERGENCY:
+                appointment = new Appointment();
+                appointment.setPatient((Patient)this.cmbSelectPatient.getSelectedItem());
+                break;
+            case UPDATE:
+                appointment = getMyController().getDescriptor().
+                            getControllerDescription().getAppointment();
+                break;
+        }
+        appointment.setStart((LocalDateTime)this.cmbSelectStartTime.getSelectedItem());
+        appointment.setDuration(getDurationFromView());
+        getMyController().getDescriptor().getViewDescription()
+                .setAppointment(appointment);
+    }
+    
     /**
      * the method process
      * -- collects data about appointment (start, duration, notes)
      * -- collects data about appointee (the patient)
+     * 
      */
     private void initialiseEntityDescriptorFromView(){
+        /**
+         * 26/06/2024 05:32 update
+         */
+        setAppointment();
+        /* setAppointment() replaces initialiseEntityDescriptorFromView() contents
         //get the appointment with  which the view was initialised (in particular the appointment key)
-        /*28/03/2024PatientNote patientNote = getMyController().getDescriptor().
-                            getControllerDescription().getAppointment().getPatientNote();*/
         getMyController().getDescriptor().getViewDescription().setAppointment(
                     getMyController().getDescriptor().
                             getControllerDescription().getAppointment());
@@ -397,9 +421,7 @@ public class ModalScheduleEditorView extends ModalView implements ActionListener
         getMyController().getDescriptor().getViewDescription().getAppointment().
                 setStart((LocalDateTime)this.cmbSelectStartTime.getSelectedItem());
         getMyController().getDescriptor().getViewDescription().getAppointment().
-                setDuration(getDurationFromView());
-        /*getMyController().getDescriptor().getViewDescription().getAppointment().
-                setNotes(this.txaNotepad.getText());*/
+                setDuration(getDurationFromView());*/
     }
     private Duration getDurationFromView(){
         return Duration.ofMinutes(

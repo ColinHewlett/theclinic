@@ -40,7 +40,7 @@ public class AppointmentsTablePatientRenderer  extends JLabel implements TableCe
         boolean hasFocus, int row, int column)
     {
         
-        Patient patient = (Patient)value;
+        Patient patient = (PatientDelegate)value;
         if (patient == null) {
             super.setText("AVAILABLE SLOT");
             super.setHorizontalAlignment(JLabel.CENTER);

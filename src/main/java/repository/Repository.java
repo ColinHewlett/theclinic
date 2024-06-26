@@ -89,6 +89,8 @@ public class Repository implements IStoreActions {
                                 READ_APPOINTMENTS,
                                 READ_CANCELLED_APPOINTMENTS,
                                 READ_APPOINTMENTS_FOR_DAY,
+                                READ_APPOINTMENTS_FOR_DAY_AND_EMERGENCY_APPOINTMENT,
+                                READ_APPOINTMENTS_FOR_DAY_AND_NON_EMERGENCY_APPOINTMENT,
                                 READ_APPOINTMENTS_FOR_PATIENT,
                                 READ_APPOINTMENTS_FOR_INVOICE,
                                 READ_APPOINTMENTS_FROM_DAY,
@@ -742,14 +744,15 @@ public class Repository implements IStoreActions {
             AppointmentDelegate delegate = (AppointmentDelegate)entity;
             try {
                 PreparedStatement preparedStatement = getPMSStoreConnection().prepareStatement(sql);
-                if (delegate.getInvoice()==null) preparedStatement.setInt(1, 1066);
-                else preparedStatement.setInt(1, delegate.getInvoice().getKey());
-                preparedStatement.setInt(2, 
+                preparedStatement.setBoolean(1,delegate.getIsEmergency());
+                if (delegate.getInvoice()==null) preparedStatement.setInt(2, 1066);
+                else preparedStatement.setInt(2, delegate.getInvoice().getKey());
+                preparedStatement.setInt(3, 
                         ((PatientDelegate)delegate.getPatient()).getPatientKey());
-                preparedStatement.setTimestamp(3, Timestamp.valueOf(delegate.getStart()));
-                preparedStatement.setLong(4, delegate.getDuration().toMinutes());
-                preparedStatement.setString(5, delegate.getNotes());
-                preparedStatement.setLong(6, delegate.getAppointmentKey());
+                preparedStatement.setTimestamp(4, Timestamp.valueOf(delegate.getStart()));
+                preparedStatement.setLong(5, delegate.getDuration().toMinutes());
+                preparedStatement.setString(6, delegate.getNotes());
+                preparedStatement.setLong(7, delegate.getAppointmentKey());
                 /*Integer patientNoteKey =
                         ((PatientNoteDelegate)delegate.getPatientNote()).getKey();
                 if (patientNoteKey == null)
@@ -4557,8 +4560,8 @@ public class Repository implements IStoreActions {
             case INSERT_APPOINTMENT:
                 sql = "INSERT INTO Appointment "
                         /*+ "(PatientKey, Start, Duration, Notes,pid, patientNoteKey, invoiceKey) "*/
-                        + "(InvoiceKey, PatientKey, Start, Duration, notes, pid) "
-                        + "VALUES (?,?,?,?,?,?);";
+                        + "(isEmergency, InvoiceKey, PatientKey, Start, Duration, notes, pid) "
+                        + "VALUES (?,?,?,?,?,?,?);";
                 doInsertAppointment(sql, entity);
                 break;
             case RECOVER_APPOINTMENT:
@@ -4601,6 +4604,7 @@ public class Repository implements IStoreActions {
                 result = doReadAppointmentsForPatient(sql, entity);
                 break;
             case READ_APPOINTMENTS_FOR_DAY:
+            case READ_APPOINTMENTS_FOR_DAY_AND_NON_EMERGENCY_APPOINTMENT:
                 switch (repositoryName){
                     case "ACCESS":
                         sql = "select *"
@@ -4609,7 +4613,8 @@ public class Repository implements IStoreActions {
                         + "AND  DatePart(\"m\",a.start) = ? "
                         + "AND  DatePart(\"d\",a.start) = ? "
                         + "AND isDeleted = false "
-                        + "AND isCancelled = false "        
+                        + "AND isCancelled = false " 
+                        + "AND isEmergency = false "
                         + "ORDER BY a.start ASC;";
                         break;
                     case "POSTGRES":
@@ -4620,10 +4625,37 @@ public class Repository implements IStoreActions {
                         + "AND  EXTRACT(day from a.start) = ? "
                         + "AND isDeleted = false "
                         + "AND isCancelled = false "
+                        + "AND isEmergency = false "
                         + "ORDER BY a.start ASC;";
                         break;
                 }
-                
+                result = doReadAppointmentsForDay(sql, entity);
+                break;
+            case READ_APPOINTMENTS_FOR_DAY_AND_EMERGENCY_APPOINTMENT:
+                switch (repositoryName){
+                    case "ACCESS":
+                        sql = "select *"
+                        + "from appointment as a "
+                        + "where DatePart(\"yyyy\",a.start) = ? "
+                        + "AND  DatePart(\"m\",a.start) = ? "
+                        + "AND  DatePart(\"d\",a.start) = ? "
+                        + "AND isDeleted = false "
+                        + "AND isCancelled = false " 
+                        + "AND isEmergency = true "
+                        + "ORDER BY a.start ASC;";
+                        break;
+                    case "POSTGRES":
+                        sql = "select *"
+                        + "from appointment as a "
+                        + "where EXTRACT(year from a.start) = ? "
+                        + "AND  EXTRACT(month from a.start) = ? "
+                        + "AND  EXTRACT(day from a.start) = ? "
+                        + "AND isDeleted = false "
+                        + "AND isCancelled = false "
+                        + "AND isEmergency = true "
+                        + "ORDER BY a.start ASC;";
+                        break;
+                }
                 result = doReadAppointmentsForDay(sql, entity);
                 break;
             case READ_APPOINTMENTS_FROM_DAY:
@@ -4633,6 +4665,7 @@ public class Repository implements IStoreActions {
                         + "WHERE a.Start >= ? "
                         + "AND isDeleted = false "
                         + "AND isCancelled = false "
+                        + "AND isEmergency = false "
                         + "ORDER BY a.Start ASC;";
                 result = doReadAppointmentsFromDay(sql, entity);
                 break;
@@ -8308,7 +8341,12 @@ public class Repository implements IStoreActions {
                 sqlStatement = Repository.PMSSQL.READ_APPOINTMENTS;
                 break;
             case FOR_DAY:
+            case FOR_DAY_AND_NON_EMERGENCY_APPOINTMENT:
                 sqlStatement = Repository.PMSSQL.READ_APPOINTMENTS_FOR_DAY;
+                isAppointmentsForDay = true;
+                break;
+            case FOR_DAY_AND_EMERGENCY_APPOINTMENT:
+                sqlStatement = Repository.PMSSQL.READ_APPOINTMENTS_FOR_DAY_AND_EMERGENCY_APPOINTMENT;
                 isAppointmentsForDay = true;
                 break;
             case DELETED_FOR_PATIENT:
