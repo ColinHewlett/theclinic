@@ -5,6 +5,7 @@
 package view.views.non_modal_views;
 
 import model.non_entity.SystemDefinition;
+import model.non_entity.SystemDefinition.PatientViewActionCaption;
 import view.views.view_support_classes.models.PatientAppointmentHistoryTableModel;
 import view.views.view_support_classes.renderers.PatientAppointmentHistoryTableInvoiceRenderer;
 import view.views.view_support_classes.renderers.AppointmentsTableLocalDateTimeRenderer;
@@ -80,13 +81,13 @@ public class PatientView extends View
     private final String panelPatientSelectionCaption = "Select patient";
     
     
-    private final String patientFetchScheduleCaption = "<html><center>Schedule</center><center>for selected</center><center>appointment</center></html>";
+    //private final String patientFetchScheduleCaption = "<html><center>Schedule</center><center>for selected</center><center>appointment</center></html>";
     private final String patientClearSelectionCaption = "Clear selection";
-    private final String patientCloseViewCaption = "Close view";
-    private final String patientClinicalNotesCaption = "<html><center>Clinical</center><center>notes for</center><center>patient</center></html>";
-    private final String patientCreateCaption = "<html><center>Create</center><center>new</center><center>patient</center></html>";
-    private final String patientRecoveryCaption = "<html><center>Recover patient</center></html>";
-    private final String patientUpdateCaption = "<html><center>Update</center><center>selected</center><center>patient</center></html>";
+    //private final String patientCloseViewCaption = "Close view";
+    //private final String patientClinicalNotesCaption = "<html><center>Clinical</center><center>notes for</center><center>patient</center></html>";
+    //private final String patientCreateCaption = "<html><center>Create</center><center>new</center><center>patient</center></html>";
+    //private final String patientRecoveryCaption = "<html><center>Recover patient</center></html>";
+    //private final String patientUpdateCaption = "<html><center>Update</center><center>selected</center><center>patient</center></html>";
     
     
   
@@ -215,19 +216,19 @@ public class PatientView extends View
             case PATIENT_RECOVERY:
                 titledBorder.setTitle(panelPatientRecoveryTitle);
                 titledBorder.setTitleColor(Color.RED);
-                btnCreateRecoverPatient.setText(patientRecoveryCaption);
+                btnCreateRecoverPatient.setText(PatientViewActionCaption.CREATE_RECOVER_PATIENT._2());
                 btnCreateRecoverPatient.setForeground(Color.RED);
                 btnUpdateRecoverPatient.setEnabled(true);
-                btnUpdateRecoverPatient.setText(cancelPatientRecoveryCaption);
+                btnUpdateRecoverPatient.setText(PatientViewActionCaption.UPDATE_RECOVER_PATIENT._2());
                 btnUpdateRecoverPatient.setForeground(Color.RED);
                 
                 break;
             case PATIENT_SELECTION:
                 titledBorder.setTitle(panelPatientSelectionCaption);
                 titledBorder.setTitleColor(getBorderTitleColor());
-                btnCreateRecoverPatient.setText(patientCreateCaption);
+                btnCreateRecoverPatient.setText(PatientViewActionCaption.CREATE_RECOVER_PATIENT._1());
                 btnCreateRecoverPatient.setForeground(Color.BLACK);
-                btnUpdateRecoverPatient.setText(patientUpdateCaption);
+                btnUpdateRecoverPatient.setText(PatientViewActionCaption.UPDATE_RECOVER_PATIENT._1());
                 btnUpdateRecoverPatient.setForeground(Color.BLACK);
                 break;
         }
@@ -314,11 +315,11 @@ public class PatientView extends View
         setBorderTitles(BorderTitles.PATIENT_EXTRA_DETAILS);
         setBorderTitles(BorderTitles.PATIENT_SELECTION);
         this.btnClearSelection.setText(this.patientClearSelectionCaption);
-        this.btnCloseView.setText(this.patientCloseViewCaption);
-        this.btnCreateRecoverPatient.setText(this.patientCreateCaption);
-        this.btnFetchClinicalNotes.setText(this.patientClinicalNotesCaption);
-        this.btnFetchScheduleForSelectedAppointment.setText(this.patientFetchScheduleCaption);
-        this.btnUpdateRecoverPatient.setText(this.patientUpdateCaption);
+        this.btnCloseView.setText(PatientViewActionCaption.CLOSE_VIEW._1());
+        this.btnCreateRecoverPatient.setText(PatientViewActionCaption.CREATE_RECOVER_PATIENT._1());
+        this.btnFetchClinicalNotes.setText(PatientViewActionCaption.PATIENT_CLINICAL_NOTES._1());
+        this.btnFetchScheduleForSelectedAppointment.setText(PatientViewActionCaption.SCHEDULE_FOR_APPOINTMENT._1());
+        this.btnUpdateRecoverPatient.setText(PatientViewActionCaption.UPDATE_RECOVER_PATIENT._1());
         btnClearSelection.setActionCommand(Actions.REQUEST_NULL_PATIENT.toString());
         btnCloseView.setActionCommand(Actions.REQUEST_CLOSE_VIEW.toString());
         btnCreateRecoverPatient.setActionCommand(Actions.REQUEST_CREATE_RECOVER_PATIENT.toString());
@@ -938,7 +939,10 @@ public class PatientView extends View
                 appointmentHistoryCount = appointments.size();
                 Iterator<Appointment> it = appointments.iterator();
                 while (it.hasNext()){   
-                    tableModel.addElement(it.next());
+                    Appointment appointment = it.next();
+                    if (appointment.getIsEmergency())
+                        appointment.setNotes(SystemDefinition.EMERGENCY_APPOINTMENT);
+                    tableModel.addElement(appointment);
                 }
             }
             /*ViewController.setJTableColumnProperties(tblAppointmentHistory, 
