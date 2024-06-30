@@ -100,7 +100,7 @@ public class Appointment extends Entity implements IEntityStoreActions{
     }
     
     public boolean getIsUnbookableSlot(){
-        return getPatient().getKey() == SystemDefinition.UNBOOKABLE_APPOINTMENT_SLOT;
+        return getPatient().getKey().equals(SystemDefinition.UNBOOKABLE_SCHEDULE_SLOT_APPOINTMENT_KEY);
     }
     
     
@@ -484,7 +484,20 @@ public class Appointment extends Entity implements IEntityStoreActions{
                 result = this;
                 break;
             case FOR_DAY_AND_EMERGENCY_APPOINTMENT:
-                result = new Repository().read(this, key);
+                set(((Appointment)new Repository().read(this, key)).get());
+                appointments = this.get();
+                    for(Appointment a : this.get()){
+                        if (a.getPatient().getIsKeyDefined()){
+                            patient = new Patient(a.getPatient().getKey());
+                            patient.setScope(Scope.SINGLE);
+                            a.setPatient(patient.read()); 
+                        }else{
+                        String message = "A key has not been defined for the appointee object in the read Appointment, "
+                                + "raised in Appointment::Read(default read)";
+                        throw new StoreException(message, StoreException.ExceptionType.NULL_KEY_EXCEPTION);
+                        }
+                    }
+                result = this;
                 break;
             default:
                 try{

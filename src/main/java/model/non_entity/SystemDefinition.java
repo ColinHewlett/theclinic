@@ -18,8 +18,9 @@ import java.util.Map;
  */
 public class SystemDefinition {
     public static String test = null;
-    public static String APPOINTMENT_UNBOOKABILITY_MARKER = "UNBOOKABLE";
-    public static Integer UNBOOKABLE_APPOINTMENT_SLOT = 1;
+    //public static String BOOKABLE_SCHEDULE_SLOT_MARKER = "AVAILABLE SLOT";
+    //public static String UNBOOKABLE_SCHEDULE_SLOT_MARKER = "UNBOOKABLE SLOT";
+    public static Integer UNBOOKABLE_SCHEDULE_SLOT_APPOINTMENT_KEY = 1;
     private static HashMap<String,String> systemDefinitions = null;
     private static String pmsDebug = null;
     private static String pmsImportAppointmentData = null;
@@ -45,6 +46,87 @@ public class SystemDefinition {
     public static int QUESTIONNAIRE_TABLE_DOUBLE_HEIGHT = 500;
     public static int QUESTIONNAIRE_TABLE_SINGLE_HEIGHT = 300;
     public static int QUESTIONNAIRE_TABLE_MEDICATION_ROW_COUNT = 5;
+    //public static String EMERGENCY_APPOINTMENT = "Emergency appointment";
+    
+    public enum PatientViewActionCaption{
+        CREATE_RECOVER_PATIENT("<html><center>Create</center><center>new</center><center>patient</center></html>",
+                               "<html><center>Update</center><center>selected</center><center>patient</center></html>"),
+        UPDATE_RECOVER_PATIENT("<html><center>Update</center><center>selected</center><center>patient</center></html>",
+                               "<html><center>Cancel</center><center>patient</center><center>recovery</center>"),
+        PATIENT_CLINICAL_NOTES("<html><center>Clinical</center><center>notes for</center><center>patient</center></html"),
+        SCHEDULE_FOR_APPOINTMENT("<html><center>Show</center><center>schedule for</center><center>selection</center></html>"),
+        CLEAR_SELECTION("Clear selection"),
+        CLOSE_VIEW("<html><center>Close</center<center>view</center></html>",null);
+        
+        private String _1;
+        private String _2;
+        
+        PatientViewActionCaption(String value1){
+            _1 = value1;
+        }
+        
+        PatientViewActionCaption(String value1, String value2){
+            _1 = value1;
+            _2 = value2;
+        }
+        
+        public String _1(){
+            return _1;
+        }
+        
+        public String _2(){
+            return _2;
+        }
+    }
+    
+    public enum ScheduleViewActionCaption{
+        CREATE_UPDATE_APPOINTMENT("<html><center>Create</center<center>appointment</center></html>",
+                                  "<html><center>Update</center<center>appointment</center></html>"),
+        MAKE_DELETE_EMERGENCY_APPOINTMENT("<html><center>Make</center><center>emergency</center><center>appointment</center></html>",
+                                          "<html><center>Delete</center><center>emergency</center><center>appointment</center></html>"),
+        MARK_CANCEL_UNBOOKABLE_SLOT("<html><center>Make slot</center<center>unbookable</center></html>",
+                                    "<html><center>Cancel</center<center>unbookable</center><center>slot</center></html>"),
+        CANCEL_APPOINTMENT("<html><center>Cancel</center<center>appointment</center></html>"),
+        CLINICAL_NOTES("<html><center>Clinical</center<center>notes</center></html>"),
+        SELECT_TREATMENT("<html><center>Select</center<center>treatment</center></html>"),
+        CLOSE_VIEW("<html><center>Close</center<center>view</center></html>");
+        
+        
+        private String first;
+        private String second;
+        
+        ScheduleViewActionCaption(String value1){
+            first = value1;
+        }
+        
+        ScheduleViewActionCaption(String value1, String value2){
+            first = value1;
+            second = value2;
+        }
+        
+        public String _1(){
+            return first;
+        }
+        
+        public String _2(){
+            return second;
+        }
+    }
+    public enum ScheduleSlotType{
+        BOOKED_SCHEDULE_SLOT(null),
+        BOOKABLE_SCHEDULE_SLOT("AVAILABLE SLOT"),
+        UNBOOKABLE_SCHEDULE_SLOT("UNBOOKABLE SLOT"),
+        EMERGENCY_SCHEDULE_SLOT("Emergency appointment");
+        
+        private String mark;
+        ScheduleSlotType(String value){
+            mark = value;
+        }
+        
+        public String mark(){
+            return mark;
+        }
+    }
 
     public enum QuestionnaireTableMetric {
         CELL_1(5100),

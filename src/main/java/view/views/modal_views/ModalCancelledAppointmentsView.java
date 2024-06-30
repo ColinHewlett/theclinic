@@ -24,7 +24,7 @@ import view.views.non_modal_views.DesktopView;
 import view.views.view_support_classes.models.CancelledAppointmentsTableModel;
 import view.views.view_support_classes.renderers.AppointmentsTableDurationRenderer;
 import view.views.view_support_classes.renderers.AppointmentsTableLocalDateRenderer;
-import view.views.view_support_classes.renderers.AppointmentsTablePatientRenderer;
+import view.views.view_support_classes.renderers.CancelledAppointmentsTablePatientRenderer;
 import view.views.view_support_classes.renderers.TableHeaderCellBorderRenderer;
 
 /**
@@ -317,12 +317,7 @@ public class ModalCancelledAppointmentsView extends ModalView {
 
         pack();
     }// </editor-fold> 
-    
-    
-    
-    
-    
-    
+
     private void populateCancelledAppointmentsTable(){
         if (tblCancelledAppointments.getModel() == null)
             tblCancelledAppointments.setModel(new CancelledAppointmentsTableModel());
@@ -338,7 +333,7 @@ public class ModalCancelledAppointmentsView extends ModalView {
         
        
         this.tblCancelledAppointments.setDefaultRenderer(LocalDateTime.class, new AppointmentsTableLocalDateRenderer());
-        this.tblCancelledAppointments.setDefaultRenderer(Patient.class, new AppointmentsTablePatientRenderer());
+        this.tblCancelledAppointments.setDefaultRenderer(Patient.class, new CancelledAppointmentsTablePatientRenderer());
         this.tblCancelledAppointments.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
         TableColumnModel columnModel = tblCancelledAppointments.getColumnModel();
  

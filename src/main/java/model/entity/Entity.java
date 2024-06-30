@@ -89,6 +89,7 @@ public class Entity implements IStoreClient{
     public enum Scope { ALL,
                         APPOINTEE_REMINDERS,    //all entities
                         CANCELLED,              //cancelled appointments
+                        EMERGENCY,              //on an appointment deletion to make deletion permanent
                         FOR_APPOINTMENT,        //clinic note or treatment for appointment
                         FOR_TREATMENT,          //appointment for treatment
                         FOR_QUESTION,

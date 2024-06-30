@@ -80,6 +80,7 @@ public class Repository implements IStoreActions {
                                 COUNT_APPOINTMENTS_FOR_PATIENT,
                                 COUNT_APPOINTMENTS_FROM_DAY,
                                 CREATE_APPOINTMENT_TABLE,
+                                DELETE_EMERGENCY_APPOINTMENT,
                                 DELETE_APPOINTMENT, // was commented out
                                 DELETE_APPOINTMENTS_FOR_PATIENT,
                                 DELETE_APPOINTMENTS,
@@ -491,7 +492,7 @@ public class Repository implements IStoreActions {
     private Appointment getAppointmentDetailsFromRs(ResultSet rs)throws SQLException{
         Appointment appointment = new Appointment();
         AppointmentDelegate delegate = null;
-        PatientDelegate patientDelegate = null;
+        Patient patient = null;
         /*PatientNoteDelegate patientNoteDelegate = null;*/
         
         int key = rs.getInt("pid");
@@ -507,9 +508,9 @@ public class Repository implements IStoreActions {
         if (invoiceKey==0)appointment.setInvoice(new Invoice(invoiceKey));
 
         int patientKey = rs.getInt("PatientKey");
-        patientDelegate = new PatientDelegate(patientKey);
-        patientDelegate.setPatientKey(patientKey); 
-        appointment.setPatient(patientDelegate);
+        patient = new Patient(patientKey);
+        patient.setKey(patientKey); 
+        appointment.setPatient(patient);
 
         delegate = new AppointmentDelegate(appointment);
         delegate.setAppointmentKey(key);
@@ -615,20 +616,20 @@ public class Repository implements IStoreActions {
         String sql;
         PreparedStatement preparedStatement = null;
         if (entity.getIsPatient()){
-            PatientDelegate patient = (PatientDelegate)entity;
+            Patient patient = (Patient)entity;
             try{
                 getPMSStoreConnection().setAutoCommit(false);
                 sql = "UPDATE Patient SET isDeleted = false WHERE pid = ?;";
                 preparedStatement = getPMSStoreConnection().prepareStatement(sql); 
-                preparedStatement.setLong(1, patient.getPatientKey());
+                preparedStatement.setLong(1, patient.getKey());
                 preparedStatement.executeUpdate();
                 sql = "UPDATE Appointment SET isDeleted = false where patientKey = ?;";
                 preparedStatement = getPMSStoreConnection().prepareStatement(sql); 
-                preparedStatement.setLong(1, patient.getPatientKey());
+                preparedStatement.setLong(1, patient.getKey());
                 preparedStatement.executeUpdate();
                 sql = "UPDATE PatientNotification SET IsDeleted = false WHERE patientToNotify = ?;";
                 preparedStatement = getPMSStoreConnection().prepareStatement(sql); 
-                preparedStatement.setLong(1, patient.getPatientKey());
+                preparedStatement.setLong(1, patient.getKey());
                 preparedStatement.executeUpdate();
                 getPMSStoreConnection().commit();
             }catch(SQLException ex){
@@ -654,25 +655,19 @@ public class Repository implements IStoreActions {
     private void doDeletePatient(Entity entity)throws StoreException{ 
         String sql;
         if (entity.getIsPatient()){
-            PatientDelegate patient = (PatientDelegate)entity;
+            Patient patient = (Patient)entity;
             try{
                 getPMSStoreConnection().setAutoCommit(false);
                 sql = "UPDATE Appointment SET isDeleted = true where patientKey = ?;";
                 PreparedStatement preparedStatement = getPMSStoreConnection().prepareStatement(sql); 
-                preparedStatement.setLong(1, patient.getPatientKey());
+                preparedStatement.setLong(1, patient.getKey());
                 preparedStatement.executeUpdate();
                 sql = "UPDATE PatientNotification SET IsDeleted = true WHERE patientToNotify = ?;";
                 preparedStatement = getPMSStoreConnection().prepareStatement(sql); 
-                preparedStatement.setLong(1, patient.getPatientKey());
-                /*
-                sql = "UPDATE PatientNote SET IsDeleted = true WHERE patientKey = ?;";
-                preparedStatement = getPMSStoreConnection().prepareStatement(sql); 
-                preparedStatement.setLong(1, patient.getPatientKey());
-                preparedStatement.executeUpdate();
-                */
+                preparedStatement.setLong(1, patient.getKey());
                 sql = "UPDATE Patient SET isDeleted = true WHERE pid = ?;";
                 preparedStatement = getPMSStoreConnection().prepareStatement(sql); 
-                preparedStatement.setLong(1, patient.getPatientKey());
+                preparedStatement.setLong(1, patient.getKey());
                 preparedStatement.executeUpdate();
                 getPMSStoreConnection().commit();
             }
@@ -700,6 +695,28 @@ public class Repository implements IStoreActions {
                     + "StoreException raised in Repository::doDelete(" + sql + ")",
                     StoreException.ExceptionType.SQL_EXCEPTION);
         }
+    }
+    
+    private void doDeleteEmergencyAppointment(String sql, Entity entity) throws StoreException{
+        if (entity.getIsAppointment()){
+            AppointmentDelegate delegate = (AppointmentDelegate)entity;
+            try{
+                PreparedStatement preparedStatement = getPMSStoreConnection().prepareStatement(sql);
+                preparedStatement.setInt(1, ((AppointmentDelegate)delegate).getAppointmentKey());
+                preparedStatement.execute();
+            }catch(SQLException ex){
+                String message = ex.getMessage() + "\n";
+                throw new StoreException(message 
+                        + "StoreException raised in Repository::doDeleteEmergencyAppointment()",
+                        StoreException.ExceptionType.SQL_EXCEPTION);
+            }
+        }else{
+            String message = "Entity not an Appointment as expected\n"
+                    + "StoreException raised in Repository::doDeleteEmergencyAppointment()";
+            throw new StoreException(message, StoreException.ExceptionType.UNEXPECTED_DATA_TYPE_ENCOUNTERED);
+        }
+                
+                    
     }
     
     private void doDeleteCancelChildEntity(String sql, Entity entity)throws StoreException{
@@ -748,16 +765,11 @@ public class Repository implements IStoreActions {
                 if (delegate.getInvoice()==null) preparedStatement.setInt(2, 1066);
                 else preparedStatement.setInt(2, delegate.getInvoice().getKey());
                 preparedStatement.setInt(3, 
-                        ((PatientDelegate)delegate.getPatient()).getPatientKey());
+                        ((Patient)delegate.getPatient()).getKey());
                 preparedStatement.setTimestamp(4, Timestamp.valueOf(delegate.getStart()));
                 preparedStatement.setLong(5, delegate.getDuration().toMinutes());
                 preparedStatement.setString(6, delegate.getNotes());
                 preparedStatement.setLong(7, delegate.getAppointmentKey());
-                /*Integer patientNoteKey =
-                        ((PatientNoteDelegate)delegate.getPatientNote()).getKey();
-                if (patientNoteKey == null)
-                    preparedStatement.setNull(6, java.sql.Types.INTEGER);
-                else preparedStatement.setLong(6, patientNoteKey);*/
                 preparedStatement.executeUpdate();
                    
             } catch (SQLException ex) {
@@ -969,7 +981,7 @@ public class Repository implements IStoreActions {
                 try{
                     PreparedStatement preparedStatement = getPMSStoreConnection().prepareStatement(sql);
                     preparedStatement.setInt(1, 
-                            ((PatientDelegate)appointment.getPatient()).getPatientKey());
+                            ((Patient)appointment.getPatient()).getKey());
                     ResultSet rs = preparedStatement.executeQuery();
                     result = get(appointment, rs);
                 }catch (SQLException ex){
@@ -1031,7 +1043,7 @@ public class Repository implements IStoreActions {
                     PreparedStatement preparedStatement = getPMSStoreConnection().prepareStatement(sql);
                     if (delegate.getPatient() != null) {
                         preparedStatement.setInt(1, 
-                                ((repository.PatientDelegate)delegate.getPatient()).getPatientKey());
+                                ((Patient)delegate.getPatient()).getKey());
                     }
                     if (delegate.getInvoice()==null)
                         preparedStatement.setNull(2, java.sql.Types.INTEGER);
@@ -1143,23 +1155,17 @@ public class Repository implements IStoreActions {
         patient.setDOB(dob);
         patient.getRecall().setDentalFrequency(rs.getInt("recallFrequency"));
         LocalDate recallDate = rs.getObject("recallDate", LocalDate.class);
-        /*
-        -- if (recallDate.getYear() == 1899) {
-            recallDate = null;
-        }
-        */
         patient.getRecall().setDentalDate(recallDate);
         patient.setIsGuardianAPatient(rs.getBoolean("isGuardianAPatient"));
         if (patient.getIsGuardianAPatient()) {
             int guardianKey = rs.getInt("guardianKey");
             if (guardianKey > 0) {
-                PatientDelegate gDelegate = new PatientDelegate(guardianKey);
-                patient.setGuardian(gDelegate);
+                Patient guardian = new Patient(guardianKey);
+                patient.setGuardian(guardian);
             }
         }
-        PatientDelegate delegate = new PatientDelegate(patient);
-        delegate.setPatientKey(rs.getInt("pid"));
-        return delegate;
+        patient.setKey(rs.getInt("pid"));
+        return patient;
     }
     
     private void doInsertSecondaryCondition(String sql, Entity entity)throws StoreException{
@@ -1518,49 +1524,48 @@ public class Repository implements IStoreActions {
     }
     
     private void doInsertPatient(String sql, Entity entity)throws StoreException{
-        PatientDelegate delegate;
+        Patient patient = null;
         if (entity != null) {
             if (entity.getIsPatient()) {
                 //thePatient = (Patient)entity;
-                delegate = (PatientDelegate)entity;
+                patient = (Patient)entity;
                 try {
                     PreparedStatement preparedStatement = getPMSStoreConnection().prepareStatement(sql);
-                    preparedStatement.setString(1, delegate.getName().getTitle());
-                    preparedStatement.setString(2, delegate.getName().getForenames());
-                    preparedStatement.setString(3, delegate.getName().getSurname());
-                    preparedStatement.setString(4, delegate.getAddress().getLine1());
-                    preparedStatement.setString(5, delegate.getAddress().getLine2());
-                    preparedStatement.setString(6, delegate.getAddress().getTown());
-                    preparedStatement.setString(7, delegate.getAddress().getCounty());
-                    preparedStatement.setString(8, delegate.getAddress().getPostcode());
-                    preparedStatement.setString(9, delegate.getPhone1());
-                    preparedStatement.setString(10, delegate.getPhone2());
-                    preparedStatement.setString(11, delegate.getGender());
-                    if (delegate.getDOB() != null) {
-                        preparedStatement.setDate(12, java.sql.Date.valueOf(delegate.getDOB()));
+                    preparedStatement.setString(1, patient.getName().getTitle());
+                    preparedStatement.setString(2, patient.getName().getForenames());
+                    preparedStatement.setString(3, patient.getName().getSurname());
+                    preparedStatement.setString(4, patient.getAddress().getLine1());
+                    preparedStatement.setString(5, patient.getAddress().getLine2());
+                    preparedStatement.setString(6, patient.getAddress().getTown());
+                    preparedStatement.setString(7, patient.getAddress().getCounty());
+                    preparedStatement.setString(8, patient.getAddress().getPostcode());
+                    preparedStatement.setString(9, patient.getPhone1());
+                    preparedStatement.setString(10, patient.getPhone2());
+                    preparedStatement.setString(11, patient.getGender());
+                    if (patient.getDOB() != null) {
+                        preparedStatement.setDate(12, java.sql.Date.valueOf(patient.getDOB()));
                     } else {
                         //preparedStatement.setDate(12, java.sql.Date.valueOf(LocalDate.of(1899, 1, 1)));
                         preparedStatement.setNull(12, java.sql.Types.DATE);
                     }
-                    preparedStatement.setBoolean(13, delegate.getIsGuardianAPatient());
-                    if (delegate.getRecall().getDentalFrequency()==null)
+                    preparedStatement.setBoolean(13, patient.getIsGuardianAPatient());
+                    if (patient.getRecall().getDentalFrequency()==null)
                         preparedStatement.setInt(14, 0);
                     else
-                        preparedStatement.setInt(14, delegate.getRecall().getDentalFrequency()); 
-                    if (delegate.getRecall().getDentalDate() != null) {
-                        preparedStatement.setDate(15, java.sql.Date.valueOf(delegate.getRecall().getDentalDate()));
+                        preparedStatement.setInt(14, patient.getRecall().getDentalFrequency()); 
+                    if (patient.getRecall().getDentalDate() != null) {
+                        preparedStatement.setDate(15, java.sql.Date.valueOf(patient.getRecall().getDentalDate()));
                     } else {
                         //preparedStatement.setDate(15, java.sql.Date.valueOf(LocalDate.of(1899, 1, 1)));
                         preparedStatement.setNull(15, java.sql.Types.DATE);
                     }
-                    preparedStatement.setString(16, delegate.getNotes());
-                    //Integer key = delegate.getPatientKey();
-                    preparedStatement.setLong(17, delegate.getPatientKey());
-                    if (((PatientDelegate)delegate.getGuardian()).getPatientKey() > 0){
-                        preparedStatement.setLong(18,((PatientDelegate)delegate.getGuardian()).getPatientKey());
+                    preparedStatement.setString(16, patient.getNotes());
+                    preparedStatement.setLong(17, patient.getKey());
+                    if (((Patient)patient.getGuardian()).getKey() > 0){
+                        preparedStatement.setLong(18,((Patient)patient.getGuardian()).getKey());
                     }
                     else preparedStatement.setNull(18, java.sql.Types.INTEGER);
-                    preparedStatement.setString(19, delegate.getEmail());
+                    preparedStatement.setString(19, patient.getEmail());
                     
                     preparedStatement.executeUpdate();
                 } catch (SQLException ex) {
@@ -1701,15 +1706,15 @@ public class Repository implements IStoreActions {
     }
     
     private Entity doReadPatientWithKey(String sql, Entity entity)throws StoreException{
-        PatientDelegate delegate;
+        Patient patient;
         Entity result = null;
         if (entity != null){
             if (entity.getIsPatient()){
-                delegate  = (PatientDelegate)entity;
+                patient  = (Patient)entity;
                 
                 try {
                     PreparedStatement preparedStatement = getPMSStoreConnection().prepareStatement(sql);
-                    preparedStatement.setLong(1, delegate.getPatientKey());
+                    preparedStatement.setLong(1, patient.getKey());
                     ResultSet rs = preparedStatement.executeQuery();
                     result = get((Patient)entity, rs);
                 } catch (SQLException ex) {
@@ -1765,43 +1770,43 @@ public class Repository implements IStoreActions {
     private void doUpdatePatient(String sql, Entity entity)throws StoreException{
         if (entity != null){
             if (entity.getIsPatient()){
-                PatientDelegate delegate = (PatientDelegate)entity;
+                Patient patient = (Patient)entity;
                 try {
                     PreparedStatement preparedStatement = getPMSStoreConnection().prepareStatement(sql);
-                    preparedStatement.setString(1, delegate.getName().getTitle());
-                    preparedStatement.setString(2, delegate.getName().getForenames());
-                    preparedStatement.setString(3, delegate.getName().getSurname());
-                    preparedStatement.setString(4, delegate.getAddress().getLine1());
-                    preparedStatement.setString(5, delegate.getAddress().getLine2());
-                    preparedStatement.setString(6, delegate.getAddress().getTown());
-                    preparedStatement.setString(7, delegate.getAddress().getCounty());
-                    preparedStatement.setString(8, delegate.getAddress().getPostcode());
-                    preparedStatement.setString(9, delegate.getPhone1());
-                    preparedStatement.setString(10, delegate.getPhone2());
-                    preparedStatement.setString(11, delegate.getGender());
-                    if (delegate.getDOB() != null) {
-                        preparedStatement.setDate(12, java.sql.Date.valueOf(delegate.getDOB()));
+                    preparedStatement.setString(1, patient.getName().getTitle());
+                    preparedStatement.setString(2, patient.getName().getForenames());
+                    preparedStatement.setString(3, patient.getName().getSurname());
+                    preparedStatement.setString(4, patient.getAddress().getLine1());
+                    preparedStatement.setString(5, patient.getAddress().getLine2());
+                    preparedStatement.setString(6, patient.getAddress().getTown());
+                    preparedStatement.setString(7, patient.getAddress().getCounty());
+                    preparedStatement.setString(8, patient.getAddress().getPostcode());
+                    preparedStatement.setString(9, patient.getPhone1());
+                    preparedStatement.setString(10, patient.getPhone2());
+                    preparedStatement.setString(11, patient.getGender());
+                    if (patient.getDOB() != null) {
+                        preparedStatement.setDate(12, java.sql.Date.valueOf(patient.getDOB()));
                     } else {
                         //preparedStatement.setDate(12, java.sql.Date.valueOf(LocalDate.of(1899, 1, 1)));
                         preparedStatement.setNull(12, java.sql.Types.DATE);
                     }
-                    preparedStatement.setBoolean(13, delegate.getIsGuardianAPatient());
-                    preparedStatement.setInt(14, delegate.getRecall().getDentalFrequency());
-                    if (delegate.getRecall().getDentalDate() != null) {
-                        preparedStatement.setDate(15, java.sql.Date.valueOf(delegate.getRecall().getDentalDate()));
+                    preparedStatement.setBoolean(13, patient.getIsGuardianAPatient());
+                    preparedStatement.setInt(14, patient.getRecall().getDentalFrequency());
+                    if (patient.getRecall().getDentalDate() != null) {
+                        preparedStatement.setDate(15, java.sql.Date.valueOf(patient.getRecall().getDentalDate()));
                     } else {
                         //preparedStatement.setDate(15, java.sql.Date.valueOf(LocalDate.of(1899, 1, 1)));
                         preparedStatement.setNull(15, java.sql.Types.DATE);
                     }
-                    preparedStatement.setString(16, delegate.getNotes());
-                    if (delegate.getIsGuardianAPatient()) {
-                        preparedStatement.setLong(17, ((PatientDelegate)delegate.getGuardian()).getPatientKey());
+                    preparedStatement.setString(16, patient.getNotes());
+                    if (patient.getIsGuardianAPatient()) {
+                        preparedStatement.setLong(17, ((Patient)patient.getGuardian()).getKey());
                     } else {
                         //preparedStatement.setNull(17, 0);
                         preparedStatement.setNull(17, Types.INTEGER);
                     }
-                    preparedStatement.setString(18, delegate.getEmail());
-                    preparedStatement.setLong(19, delegate.getPatientKey());
+                    preparedStatement.setString(18, patient.getEmail());
+                    preparedStatement.setLong(19, patient.getKey());
                     preparedStatement.executeUpdate();
                 } catch (SQLException ex) {
                     throw new StoreException("SQLException message -> " + ex.getMessage() + "\n"
@@ -1834,7 +1839,7 @@ public class Repository implements IStoreActions {
         ArrayList<Notification> collection = new ArrayList<>();
         NotificationDelegate delegate = new NotificationDelegate(patientNotification);
         delegate.set(null);
-        PatientDelegate pDelegate = new PatientDelegate(0);
+        Patient patient = new Patient(0);
         try{
             switch (patientNotification.getScope()){
                 case SINGLE:
@@ -1848,8 +1853,8 @@ public class Repository implements IStoreActions {
                         Boolean isDeleted = rs.getBoolean("isDeleted");
                         Boolean isCancelled = rs.getBoolean("isCancelled");
                         delegate.setKey(pid);
-                        pDelegate.setPatientKey(patientKey);
-                        delegate.setPatient(pDelegate);
+                        patient.setKey(patientKey);
+                        delegate.setPatient(patient);
                         delegate.setNotificationDate(notificationDate);
                         delegate.setNotificationText(notificationText);
                         delegate.setIsActioned(isActioned);
@@ -1868,9 +1873,9 @@ public class Repository implements IStoreActions {
                            Boolean isActioned = rs.getBoolean("isActioned");
                            delegate = new NotificationDelegate();
                            delegate.setKey(pid);
-                           pDelegate = new PatientDelegate(patientKey);
+                           patient = new Patient(patientKey);
                            //pDelegate.setPatientKey(patientKey);
-                           delegate.setPatient(pDelegate);
+                           delegate.setPatient(patient);
                            delegate.setNotificationDate(notificationDate);
                            delegate.setNotificationText(notificationText);
                            delegate.setIsActioned(isActioned);
@@ -2630,14 +2635,14 @@ public class Repository implements IStoreActions {
     private Entity doReadPatientNotificationsForPatient(String sql, Entity entity)throws StoreException{
         //07/08/2022
         Notification notification = null;
-        PatientDelegate delegate;
+        Patient patient;
         if (entity != null) {
             if (entity.getIsPatientNotification()) {
                 notification = (Notification)entity;
                 try {
                     PreparedStatement preparedStatement = getPMSStoreConnection().prepareStatement(sql);
-                    delegate = (PatientDelegate)notification.getPatient();
-                    preparedStatement.setLong(1, delegate.getPatientKey());
+                    patient = (Patient)notification.getPatient();
+                    preparedStatement.setLong(1, patient.getKey());
                     ResultSet rs = preparedStatement.executeQuery();
                     return get(notification, rs);
                 } catch (SQLException ex) {
@@ -3369,7 +3374,7 @@ public class Repository implements IStoreActions {
                 delegate = (NotificationDelegate) entity;
                 try {
                     PreparedStatement preparedStatement = getPMSStoreConnection().prepareStatement(sql);
-                    preparedStatement.setLong(1, ((PatientDelegate)delegate.getPatient()).getPatientKey());
+                    preparedStatement.setLong(1, ((Patient)delegate.getPatient()).getKey());
                     preparedStatement.setDate(2, java.sql.Date.valueOf(delegate.getNotificationDate()));
                     preparedStatement.setString(3, delegate.getNotificationText());
                     preparedStatement.setBoolean(4, delegate.getIsActioned());
@@ -4113,15 +4118,15 @@ public class Repository implements IStoreActions {
     }
     
     private void doUpdatePatientNotification(String sql, Entity entity) throws StoreException{
-        PatientDelegate pDelegate;
+        Patient patient;
         NotificationDelegate  delegate;
         if (entity != null) {
             if (entity.getIsPatientNotification()) {
                 delegate = (NotificationDelegate) entity;
-                pDelegate = (PatientDelegate)delegate.getPatient();
+                patient = (Patient)delegate.getPatient();
                 try {
                     PreparedStatement preparedStatement = getPMSStoreConnection().prepareStatement(sql);
-                    preparedStatement.setLong(1, pDelegate.getPatientKey());
+                    preparedStatement.setLong(1, patient.getKey());
                     preparedStatement.setDate(2, java.sql.Date.valueOf(delegate.getNotificationDate()));
                     preparedStatement.setString(3, delegate.getNotificationText());
                     preparedStatement.setBoolean(4, delegate.getIsActioned());
@@ -4545,7 +4550,11 @@ public class Repository implements IStoreActions {
                 }
                 doCreateAppointmentTable(sql);
                 break;
-            
+            case DELETE_EMERGENCY_APPOINTMENT:
+                sql = "DELETE FROM Appointment "
+                        + "WHERE pid = ?;";
+                doDeleteEmergencyAppointment(sql, entity);
+                break;
             case DELETE_APPOINTMENT: //was commented out
                 sql = "UPDATE Appointment "
                         + "SET isDeleted = true "
@@ -6129,11 +6138,11 @@ public class Repository implements IStoreActions {
     public Integer insert(Appointment appointment,Integer appointeeKey, Integer patientNoteKey) throws StoreException {
         Integer result = null;
         AppointmentDelegate delegate = new AppointmentDelegate(appointment);
-        PatientDelegate pDelegate = new PatientDelegate(delegate.getPatient());
+        Patient patient = delegate.getPatient();
         /*28/03/2024PatientNoteDelegate noteDelegate = new PatientNoteDelegate();*/
         
-        pDelegate.setPatientKey(appointeeKey);
-        delegate.setPatient(pDelegate);
+        patient.setKey(appointeeKey);
+        delegate.setPatient(patient);
         /*28/03/2024noteDelegate.setKey(patientNoteKey);
         delegate.setPatientNote(noteDelegate);*/
         Entity entity;
@@ -6153,22 +6162,6 @@ public class Repository implements IStoreActions {
         }
         return result;
     }
-    
-    /*28/03/2024public Integer insert(PatientNote patientNote)throws StoreException{
-        
-        PatientNoteDelegate delegate = null;
-        IStoreClient client = null;
-        Entity entity = null; 
-        client = runSQL(Repository.EntitySQL.PATIENT_NOTE,
-                    Repository.PMSSQL.READ_PATIENT_NOTE_NEXT_HIGHEST_KEY,patientNote);
-        entity = (Entity)client;
-        delegate = new PatientNoteDelegate(patientNote);
-        delegate.setKey(entity.getValue().x + 1);
-        runSQL(Repository.EntitySQL.PATIENT_NOTE,Repository.PMSSQL.INSERT_PATIENT_NOTE, delegate);
-        return delegate.getKey();
-        
-        
-    }*/
 
     @Override
     /**
@@ -6186,7 +6179,7 @@ public class Repository implements IStoreActions {
     public Integer insert(Notification pn, Integer patientKey)throws StoreException{
         Entity key = null;
         NotificationDelegate delegate = null;
-        PatientDelegate pDelegate = null;
+        Patient patient = null;
         Entity entity;
         IStoreClient client;
         client = runSQL(Repository.EntitySQL.PATIENT_NOTIFICATION,
@@ -6194,17 +6187,15 @@ public class Repository implements IStoreActions {
         entity = (Entity)client;
         delegate = new NotificationDelegate(pn);
         delegate.setKey(entity.getValue().x + 1);
-        pDelegate = new PatientDelegate(delegate.getPatient());
-        pDelegate.setPatientKey(patientKey);
-        delegate.setPatient(pDelegate);
+        patient = delegate.getPatient();
+        patient.setKey(patientKey);
+        delegate.setPatient(patient);
         //30/07/2022 09:26
         runSQL(Repository.EntitySQL.PATIENT_NOTIFICATION,
                 Repository.PMSSQL.INSERT_NOTIFICATION, delegate);
         return delegate.getKey();
     }
-    
-    
-    
+
     @Override
     public Integer insert(Doctor doctor)throws StoreException{
         Entity key = null;
@@ -6476,36 +6467,34 @@ public class Repository implements IStoreActions {
         Entity entity;
         IStoreClient client;
         Integer result = null;
-        PatientDelegate delegate;
-        PatientDelegate gDelegate;
-        delegate = new PatientDelegate(patient);
+        Patient guardian = null;
         if (patientKey==null){
-            if (delegate.getIsGuardianAPatient()){
+            if (patient.getIsGuardianAPatient()){
                 if (guardianKey==null){
                     throw new StoreException("StoreException raised in AccessRepository.insert(Patient...) because expected a non null guardian key value.",
                     StoreException.ExceptionType.UNEXPECTED_NULL_GUARDIAN_KEY);
                 }
                 else{
-                    gDelegate = new PatientDelegate(delegate.getGuardian());
-                    gDelegate.setPatientKey(guardianKey);
+                    guardian = patient.getGuardian();
+                    guardian.setKey(guardianKey);
                 }
             }
             else{
-                gDelegate = new PatientDelegate(0);
+                //gDelegate = new Patient(0);
                 //gDelegate.setPatientKey(0);
             }
             client = runSQL(Repository.EntitySQL.PATIENT,Repository.PMSSQL.READ_PATIENT_NEXT_HIGHEST_KEY, new Patient());
             entity = (Entity)client;
             if (entity.getValue()!=null)
-                delegate.setPatientKey(entity.getValue().x + 1);
+                patient.setKey(entity.getValue().x + 1);
         }else{
-            delegate.setPatientKey(patientKey);
-            gDelegate = new PatientDelegate(0);
+            patient.setKey(patientKey);
+            //gDelegate = new Patient(0);
             //gDelegate.setPatientKey(0);
         }
-        delegate.setGuardian(gDelegate);           
-        runSQL(Repository.EntitySQL.PATIENT,Repository.PMSSQL.INSERT_PATIENT, delegate);
-        result =  delegate.getPatientKey();
+        if (guardian!=null) patient.setGuardian(guardian);           
+        runSQL(Repository.EntitySQL.PATIENT,Repository.PMSSQL.INSERT_PATIENT, patient);
+        result =  patient.getKey();
         return result;
     }
    
@@ -6529,9 +6518,7 @@ public class Repository implements IStoreActions {
     public void recover(Patient patient, Integer patientKey)throws StoreException{
        switch(patient.getScope()){
             case DELETED:
-               PatientDelegate delegate = new PatientDelegate(patient);
-               delegate.setPatientKey(patientKey);
-               runSQL(Repository.EntitySQL.PATIENT,Repository.PMSSQL.RECOVER_PATIENT, delegate);
+               runSQL(Repository.EntitySQL.PATIENT,Repository.PMSSQL.RECOVER_PATIENT, patient);
                break;
             default:
                 String error = "Scope of recovery not defined as DELETED; "
@@ -6580,9 +6567,7 @@ public class Repository implements IStoreActions {
     public void delete(Patient patient, Integer patientKey)throws StoreException{
         switch(patient.getScope()){
             case SINGLE:
-                PatientDelegate delegate = new PatientDelegate(patient);
-                delegate.setPatientKey(patientKey);
-                runSQL(Repository.EntitySQL.PATIENT,Repository.PMSSQL.DELETE_PATIENT, delegate);
+                runSQL(Repository.EntitySQL.PATIENT,Repository.PMSSQL.DELETE_PATIENT, patient);
                 break;
             case ALL: //migration data function only
                 runSQL(Repository.EntitySQL.PATIENT,Repository.PMSSQL.DELETE_ALL_PATIENT, null);
@@ -7019,7 +7004,11 @@ public class Repository implements IStoreActions {
                 runSQL(Repository.EntitySQL.APPOINTMENT, 
                         Repository.PMSSQL.DELETE_APPOINTMENT, appointment);
                 break;
-            
+            case EMERGENCY:
+                delegate.setAppointmentKey(key);
+                runSQL(Repository.EntitySQL.APPOINTMENT, 
+                        Repository.PMSSQL.DELETE_EMERGENCY_APPOINTMENT, appointment);
+                break;
             case ALL:
                 runSQL(Repository.EntitySQL.APPOINTMENT, 
                         Repository.PMSSQL.DELETE_APPOINTMENTS, null);
@@ -7864,17 +7853,11 @@ public class Repository implements IStoreActions {
                             patientNotification);
                 break;
             case FOR_PATIENT:
-                PatientDelegate patientDelegate = new PatientDelegate(patientNotification.getPatient());
-                patientDelegate.setPatientKey(key);
-                patientNotification.setPatient(patientDelegate);
                 entity = (Entity)runSQL(Repository.EntitySQL.PATIENT_NOTIFICATION,
                             Repository.PMSSQL.READ_NOTIFICATIONS_FOR_PATIENT, 
                             patientNotification);
                 break;
             case DELETED_FOR_PATIENT:
-                patientDelegate = new PatientDelegate(patientNotification.getPatient());
-                patientDelegate.setPatientKey(key);
-                patientNotification.setPatient(patientDelegate);
                 entity = (Entity)runSQL(Repository.EntitySQL.PATIENT_NOTIFICATION,
                             Repository.PMSSQL.READ_DELETED_NOTIFICATIONS_FOR_PATIENT, 
                             patientNotification);
@@ -8158,9 +8141,6 @@ public class Repository implements IStoreActions {
                     sqlStatement = Repository.PMSSQL.COUNT_APPOINTMENTS_FOR_DAY;
                     break;
                 case FOR_PATIENT:
-                    PatientDelegate delegate = new PatientDelegate(appointeeKey);
-                    //delegate.setPatientKey(appointeeKey);
-                    appointment.setPatient(delegate);
                     sqlStatement = Repository.PMSSQL.COUNT_APPOINTMENTS_FOR_PATIENT;
                     break;
                 case FROM_DAY:
@@ -8325,7 +8305,7 @@ public class Repository implements IStoreActions {
     public Appointment read(Appointment appointment, Integer key)throws StoreException{
         boolean isAppointmentsForDay = false;
         AppointmentDelegate appointmentDelegate = null;
-        PatientDelegate patientDelegate = null;
+        Patient patient = null;
         Entity result = null;
         Repository.PMSSQL sqlStatement = null;
         switch(appointment.getScope()){
@@ -8350,13 +8330,13 @@ public class Repository implements IStoreActions {
                 isAppointmentsForDay = true;
                 break;
             case DELETED_FOR_PATIENT:
-                patientDelegate = new PatientDelegate(key);
-                appointment.setPatient(patientDelegate);
+                patient = new Patient(key);
+                appointment.setPatient(patient);
                 sqlStatement = Repository.PMSSQL.READ_DELETED_APPOINTMENTS_FOR_PATIENT;
                 break;
             case FOR_PATIENT:
-                patientDelegate = new PatientDelegate(key);
-                appointment.setPatient(patientDelegate);
+                patient = new Patient(key);
+                appointment.setPatient(patient);
                 sqlStatement = Repository.PMSSQL.READ_APPOINTMENTS_FOR_PATIENT;
                 break;
             case FROM_DAY:
@@ -8372,8 +8352,7 @@ public class Repository implements IStoreActions {
             Iterator<Appointment> it = ((Appointment)result).get().iterator();
             while (it.hasNext()){
                 Appointment a = it.next();
-                //Integer theKey = ((PatientDelegate)a.getPatient()).getPatientKey();
-                Patient patient = new Patient(((PatientDelegate)a.getPatient()).getPatientKey());
+                patient = new Patient(((Patient)a.getPatient()).getKey());
                 patient.setScope(Entity.Scope.SINGLE);
                 //01/03/2023
                 //a.setPatient(patient.read());
@@ -8385,14 +8364,10 @@ public class Repository implements IStoreActions {
     @Override
     public Patient read(Patient patient, Integer key) throws StoreException { 
         if (patient != null) {
-            PatientDelegate gDelegate = null;
-            PatientDelegate delegate = null;
             Entity entity = null;
             switch (patient.getScope()){
                 case SINGLE:
-                    delegate = new PatientDelegate(patient);
-                    delegate.setPatientKey(key);
-                    entity = (Entity)runSQL(Repository.EntitySQL.PATIENT,Repository.PMSSQL.READ_PATIENT, delegate);
+                    entity = (Entity)runSQL(Repository.EntitySQL.PATIENT,Repository.PMSSQL.READ_PATIENT, patient);
                     if (entity == null) {
                         throw new StoreException(
                                 "Could not locate requested patient in "
@@ -8401,9 +8376,7 @@ public class Repository implements IStoreActions {
                     }
                     return (Patient)entity;
                 case DELETED:
-                    delegate = new PatientDelegate(patient);
-                    delegate.setPatientKey(key);
-                    entity = (Entity)runSQL(Repository.EntitySQL.PATIENT,Repository.PMSSQL.READ_DELETED_PATIENTS, delegate);
+                    entity = (Entity)runSQL(Repository.EntitySQL.PATIENT,Repository.PMSSQL.READ_DELETED_PATIENTS, patient);
                     if (entity == null) {
                         throw new StoreException(
                                 "Could not locate requested deleted patient in "
@@ -8447,12 +8420,12 @@ public class Repository implements IStoreActions {
      */
     public void update(Appointment appointment, Integer key, Integer appointeeKey /*,28/03/2024Integer patientNoteKey*/) throws StoreException {
         AppointmentDelegate delegate = new AppointmentDelegate(appointment);
-        PatientDelegate pDelegate = new PatientDelegate(delegate.getPatient());
+        //Patient pDelegate = new Patient(delegate.getPatient());
         /*28/03/2024PatientNoteDelegate noteDelegate = new PatientNoteDelegate();
         noteDelegate.setKey(patientNoteKey);*/
         delegate.setAppointmentKey(key);
-        pDelegate.setPatientKey(appointeeKey);
-        delegate.setPatient(pDelegate);
+        //pDelegate.setPatientKey(appointeeKey);
+        //delegate.setPatient(pDelegate);
         /*28/03/2024delegate.setPatientNote(noteDelegate);*/
         runSQL(Repository.EntitySQL.APPOINTMENT, Repository.PMSSQL.UPDATE_APPOINTMENT, delegate);
 
@@ -8484,9 +8457,9 @@ public class Repository implements IStoreActions {
     @Override
     public void update(Notification pn, Integer key, Integer patientKey)throws StoreException{
         NotificationDelegate delegate = new NotificationDelegate(pn);
-        PatientDelegate pDelegate = new PatientDelegate(patientKey);
+        Patient pDelegate = new Patient(patientKey);
         delegate.setKey(key);
-        delegate.setPatient(pDelegate);
+        //delegate.setPatient(pDelegate);
         runSQL(Repository.EntitySQL.PATIENT_NOTIFICATION, Repository.PMSSQL.UPDATE_NOTIFICATION,pn);
         
     }
@@ -8582,11 +8555,11 @@ public class Repository implements IStoreActions {
     
     @Override
     public void update(Patient patient, Integer key, Integer guardianKey) throws StoreException {
-        PatientDelegate delegate = new PatientDelegate(patient);
-        delegate.setPatientKey(key);
+        Patient delegate = patient;
+        //delegate.setPatientKey(key);
         if (delegate.getIsGuardianAPatient()){
-            PatientDelegate gDelegate = new PatientDelegate(delegate.getGuardian());
-            gDelegate.setPatientKey(guardianKey);
+            Patient gDelegate = delegate.getGuardian();
+            //gDelegate.setPatientKey(guardianKey);
             delegate.setGuardian(gDelegate);
         }
         runSQL(Repository.EntitySQL.PATIENT, Repository.PMSSQL.UPDATE_PATIENT, delegate);

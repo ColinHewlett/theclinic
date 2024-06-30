@@ -54,7 +54,7 @@ public class Patient extends Entity implements IEntityStoreActions {
         return key;
     }
     
-    protected void setKey(Integer key){
+    public void setKey(Integer key){
         this.key = key;
         if (key != null){
             if (key!=0)
@@ -615,7 +615,7 @@ public class Patient extends Entity implements IEntityStoreActions {
     public String toString(){
         String cappedName = null;
         if (getKey() == 1){
-            return SystemDefinition.APPOINTMENT_UNBOOKABILITY_MARKER;
+            return SystemDefinition.ScheduleSlotType.UNBOOKABLE_SCHEDULE_SLOT.mark();
         }
         if (!getName().getSurname().isEmpty()){
             //if (getData().getSurname().strip().contains("-")) 

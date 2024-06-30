@@ -1113,7 +1113,10 @@ public class PatientView extends View implements ActionListener{
                 appointments = patient.getAppointmentHistory().size();
                 Iterator<Appointment> it = patient.getAppointmentHistory().iterator();
                 while (it.hasNext()){
-                    tableModel.addElement(it.next());
+                    Appointment appointment = (Appointment)it.next();
+                    if (appointment.getIsEmergency())
+                        appointment.setNotes(SystemDefinition.ScheduleSlotType.EMERGENCY_SCHEDULE_SLOT.toString());
+                    tableModel.addElement(appointment);
                 }
             }
             this.tblAppointmentHistory.setDefaultRenderer(Duration.class, new AppointmentsTableDurationRenderer());

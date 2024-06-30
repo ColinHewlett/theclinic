@@ -262,7 +262,7 @@ public class ModalScheduleEditorView extends ModalView implements ActionListener
         actionEvent = new ActionEvent(
                 this, ActionEvent.ACTION_PERFORMED,
                 ViewController.ScheduleViewControllerActionEvent.
-                        SCHEDULE_EDITOR_EMERGENCY_APPOINTMENT_REQUEST.toString());
+                        SCHEDULE_EDITOR_MAKE_EMERGENCY_APPOINTMENT_REQUEST.toString());
         getMyController().actionPerformed(actionEvent);
     }
     

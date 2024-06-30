@@ -557,7 +557,8 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         APPOINTMENT_REMINDED_STATUS_UPDATE_REQUEST,
         APPOINTMENTS_CANCELLED_VIEW_REQUEST,
         APPOINTMENT_CREATE_VIEW_REQUEST,
-        SCHEDULE_EDITOR_EMERGENCY_APPOINTMENT_REQUEST,
+        SCHEDULE_EDITOR_DELETE_EMERGENCY_APPOINTMENT_REQUEST,
+        SCHEDULE_EDITOR_MAKE_EMERGENCY_APPOINTMENT_REQUEST,
         APPOINTMENT_UPDATE_VIEW_REQUEST,
         CLINICAL_NOTE_VIEW_CONTROLLER_REQUEST,
         NON_SURGERY_DAY_SCHEDULE_VIEW_REQUEST,
@@ -1503,8 +1504,7 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
     protected void doFormatAppointmentTreatmentNote(ArrayList<Appointment> appointments)throws StoreException{
         for (Appointment a : appointments){
             if ((a.getPatient()!=null) ||
-                    (!a.getPatient().toString().equals(
-                            SystemDefinition.APPOINTMENT_UNBOOKABILITY_MARKER))){
+                    (!a.getPatient().toString().equals(SystemDefinition.ScheduleSlotType.UNBOOKABLE_SCHEDULE_SLOT.mark()))){
                 TreatmentWithState treatmentWithState = getTreatmentsWithState(a);
                 String note = new String();
                 for(TreatmentWithState tws : treatmentWithState.get()){
@@ -2485,7 +2485,7 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
 
             if (appointment.getPatient()==null) patient = "<AVAILABLE SLOT>";
             else if (appointment.getPatient().toString()
-                    .equals(SystemDefinition.APPOINTMENT_UNBOOKABILITY_MARKER))
+                    .equals(SystemDefinition.ScheduleSlotType.UNBOOKABLE_SCHEDULE_SLOT.mark()))
                 patient = "<UNBOOKABLE_SLOT>";
             else patient = appointment.getPatient().toString();
 

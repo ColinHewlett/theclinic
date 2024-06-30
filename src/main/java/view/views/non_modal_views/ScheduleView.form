@@ -392,11 +392,11 @@
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="btnCreateUpdateAppointment" min="-2" pref="97" max="-2" attributes="0"/>
                   <EmptySpace type="separate" max="-2" attributes="0"/>
-                  <Component id="btnEmergencyAppointment" min="-2" pref="97" max="-2" attributes="0"/>
+                  <Component id="btnMakeDeleteEmergencyAppointment" min="-2" pref="97" max="-2" attributes="0"/>
                   <EmptySpace type="separate" max="-2" attributes="0"/>
                   <Component id="btnCancelSelectedAppointment" min="-2" max="-2" attributes="0"/>
                   <EmptySpace min="-2" pref="87" max="-2" attributes="0"/>
-                  <Component id="btnMarkSlotUnbookable" max="32767" attributes="0"/>
+                  <Component id="btnMarkCancelSlotUnbookable" max="32767" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
               </Group>
           </Group>
@@ -407,9 +407,9 @@
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="3" attributes="0">
                       <Component id="btnCreateUpdateAppointment" alignment="3" min="-2" max="-2" attributes="0"/>
-                      <Component id="btnEmergencyAppointment" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="btnMakeDeleteEmergencyAppointment" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="btnCancelSelectedAppointment" alignment="3" min="-2" max="-2" attributes="0"/>
-                      <Component id="btnMarkSlotUnbookable" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="btnMarkCancelSlotUnbookable" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace pref="20" max="32767" attributes="0"/>
               </Group>
@@ -427,17 +427,17 @@
             <AuxValue name="JavaCodeGenerator_InitCodePost" type="java.lang.String" value="btnCreateUpdateAppointment.setToolTipText(&quot;create new appointment&quot;);"/>
           </AuxValues>
         </Component>
-        <Component class="javax.swing.JButton" name="btnEmergencyAppointment">
+        <Component class="javax.swing.JButton" name="btnMakeDeleteEmergencyAppointment">
           <Properties>
             <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
               <Connection code="&quot;Update&quot;" type="code"/>
             </Property>
           </Properties>
           <Events>
-            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnEmergencyAppointmentActionPerformed"/>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnMakeDeleteEmergencyAppointmentActionPerformed"/>
           </Events>
           <AuxValues>
-            <AuxValue name="JavaCodeGenerator_InitCodePost" type="java.lang.String" value="btnEmergencyAppointment.setToolTipText(&quot;update selected appointment&quot;);"/>
+            <AuxValue name="JavaCodeGenerator_InitCodePost" type="java.lang.String" value="btnMakeDeleteEmergencyAppointment.setToolTipText(&quot;update selected appointment&quot;);"/>
           </AuxValues>
         </Component>
         <Component class="javax.swing.JButton" name="btnCancelSelectedAppointment">
@@ -451,15 +451,15 @@
             <AuxValue name="JavaCodeGenerator_InitCodePost" type="java.lang.String" value="btnCancelSelectedAppointment.setToolTipText(&quot;cancel selected appointment&quot;);"/>
           </AuxValues>
         </Component>
-        <Component class="javax.swing.JButton" name="btnMarkSlotUnbookable">
+        <Component class="javax.swing.JButton" name="btnMarkCancelSlotUnbookable">
           <Properties>
             <Property name="text" type="java.lang.String" value="Mark  slot as unbookable"/>
           </Properties>
           <Events>
-            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnMarkSlotUnbookableActionPerformed"/>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnMarkCancelSlotUnbookableActionPerformed"/>
           </Events>
           <AuxValues>
-            <AuxValue name="JavaCodeGenerator_InitCodePost" type="java.lang.String" value="btnMarkSlotUnbookable.setToolTipText(&quot;make a slot unbookable&quot;);"/>
+            <AuxValue name="JavaCodeGenerator_InitCodePost" type="java.lang.String" value="btnMarkCancelSlotUnbookable.setToolTipText(&quot;make a slot unbookable&quot;);"/>
           </AuxValues>
         </Component>
       </SubComponents>

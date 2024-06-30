@@ -6,12 +6,14 @@
 package view.views.non_modal_views;
 
 import model.non_entity.SystemDefinition;
+import model.non_entity.SystemDefinition.ScheduleSlotType;
+import model.non_entity.SystemDefinition.ScheduleViewActionCaption;
 import view.views.view_support_classes.renderers.AppointmentsTableDurationRenderer;
 import view.views.view_support_classes.renderers.AppointmentsTableLocalDateTimeRenderer;
 import view.views.view_support_classes.renderers.AppointmentsTablePatientRenderer;
 import view.views.view_support_classes.renderers.ScheduleTableCellRenderer;
 /*28/03/2024import view.views.view_support_classes.renderers.AppointmentsTablePatientNoteRenderer;*/
-import view.views.view_support_classes.models.AppointmentsScheduleTableModel;
+import view.views.view_support_classes.models.AppointmentScheduleTableModel;
 import model.entity.Appointment;
 import model.entity.Patient;
 /*28/03/2024import model.PatientNote;*/
@@ -19,14 +21,12 @@ import controller.ViewController;
 import view.views.view_support_classes.AppointmentDateVetoPolicy;
 import view.views.view_support_classes.renderers.TableHeaderCellBorderRenderer;
 import view.views.view_support_classes.models.EmptySlotAvailability2ColumnTableModel;
-import controller.Descriptor;
 import view.View;
 import com.github.lgooddatepicker.components.DatePickerSettings;
 import com.github.lgooddatepicker.optionalusertools.DateChangeListener;
 import com.github.lgooddatepicker.optionalusertools.DateHighlightPolicy;
 import com.github.lgooddatepicker.zinternaltools.DateChangeEvent;
 import com.github.lgooddatepicker.zinternaltools.HighlightInformation;
-import static controller.ViewController.ScheduleViewControllerActionEvent.APPOINTMENT_CANCEL_REQUEST;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontMetrics;
@@ -36,8 +36,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.Point;
-import java.awt.print.PrinterJob;
 import java.awt.print.PageFormat;
 import java.awt.print.Printable;
 import static java.awt.print.Printable.NO_SUCH_PAGE;
@@ -53,21 +51,17 @@ import java.time.DayOfWeek;
 import java.time.format.DateTimeFormatter;
 import java.time.LocalTime;
 import java.util.HashMap;
-import javax.swing.JDesktopPane;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
 import javax.swing.JOptionPane;
 import javax.swing.JButton; 
 import javax.swing.JTable;
-import javax.swing.table.TableModel;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.Month;
 import java.util.ArrayList;
 import java.util.Iterator;
 import javax.swing.ImageIcon;
-
 import javax.swing.border.TitledBorder;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumnModel;
@@ -77,14 +71,18 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
-import model.entity.SurgeryDaysAssignment;
+import static model.non_entity.SystemDefinition.ScheduleSlotType.BOOKABLE_SCHEDULE_SLOT;
+import static model.non_entity.SystemDefinition.ScheduleSlotType.BOOKED_SCHEDULE_SLOT;
+import static model.non_entity.SystemDefinition.ScheduleSlotType.EMERGENCY_SCHEDULE_SLOT;
+import static model.non_entity.SystemDefinition.ScheduleSlotType.UNBOOKABLE_SCHEDULE_SLOT;
+
 
 
 /**
  *
  * @author colin
  */
-public class ScheduleView extends View implements ActionListener{
+public class ScheduleView extends View implements ActionListener, ListSelectionListener{
     private enum COLUMN{From,Duration,Patient,Notes};
     enum Action{
         REQUEST_CREATE_UPDATE_APPOINTMENT,
@@ -95,8 +93,8 @@ public class ScheduleView extends View implements ActionListener{
         REQUEST_PRINT_SCHEDULE,
         REQUEST_CLOSE_VIEW
     }
-    enum UnbookableSlotMode{MARK,CANCEL};
-    private AppointmentsScheduleTableModel tableModel = null;
+    
+    private AppointmentScheduleTableModel tableModel = null;
     private InternalFrameAdapter internalFrameAdapter = null;
     private DatePickerSettings settings = null;
     private ArrayList<Appointment> appointments = null;
@@ -108,23 +106,51 @@ public class ScheduleView extends View implements ActionListener{
     private int wGapBetweenAppointmentDaySelectionAndAvailabilitySlotsPanels = 40;
     private int mAppointmentDayScheduleWidth = 742;
     private int wAppointmentDayScheduleWidth = 752;
-    
-    private String markUnbookableSlotTitle = "<html><center>Mark slot</center><center>unbookable</center></html>";
-    private String cancelUnbookableSlotTitle = "<html><center>Cancel</center><center>unbookable</center><center>slot</center></html>";
+
+    enum UnbookableSlotMode{MARK,CANCEL,NONE};
     private UnbookableSlotMode unbookableSlotMode = null;
     private void setUnbookableSlotMode(UnbookableSlotMode value){
         unbookableSlotMode = value;
         switch (unbookableSlotMode){
             case MARK:
-                this.btnMarkSlotUnbookable.setText(markUnbookableSlotTitle);
+                btnMarkCancelSlotUnbookable.setText(ScheduleViewActionCaption.MARK_CANCEL_UNBOOKABLE_SLOT._1());
+                btnMarkCancelSlotUnbookable.setEnabled(true);
                 break;
             case CANCEL:
-                this.btnMarkSlotUnbookable.setText(cancelUnbookableSlotTitle);
+                btnMarkCancelSlotUnbookable.setText(ScheduleViewActionCaption.MARK_CANCEL_UNBOOKABLE_SLOT._2());
+                btnMarkCancelSlotUnbookable.setEnabled(true);
                 break;
+            case NONE:
+                btnMarkCancelSlotUnbookable.setEnabled(false);
+                break;
+                
         }
     }
     private UnbookableSlotMode getUnbookableSlotMode(){
         return unbookableSlotMode;
+    }
+    
+    enum EmergencySlotMode{MAKE,DELETE,NONE};
+    private EmergencySlotMode emergencySlotMode = null;
+    private void setEmergencySlotMode(EmergencySlotMode value){
+        emergencySlotMode = value;
+        switch (emergencySlotMode){
+            case MAKE:
+                btnMakeDeleteEmergencyAppointment.setText(ScheduleViewActionCaption.MAKE_DELETE_EMERGENCY_APPOINTMENT._1());
+                btnMakeDeleteEmergencyAppointment.setEnabled(true);
+                break;
+            case DELETE:
+                btnMakeDeleteEmergencyAppointment.setText(ScheduleViewActionCaption.MAKE_DELETE_EMERGENCY_APPOINTMENT._2());
+                btnMakeDeleteEmergencyAppointment.setEnabled(true);
+                break;
+            case NONE:
+                btnMakeDeleteEmergencyAppointment.setEnabled(false);
+                break;
+                
+        }
+    }
+    private EmergencySlotMode getEmergencySlotMode(){
+        return emergencySlotMode;
     }
     
     private int getAppointmentDayScheduleTableWidth(){
@@ -170,6 +196,70 @@ public class ScheduleView extends View implements ActionListener{
     }
     
     @Override
+    public void valueChanged(ListSelectionEvent e) {
+        if (!e.getValueIsAdjusting()) {   // Ensure the event is not fired multiple times
+            int selectedRow = tblAppointments.getSelectedRow();
+            if (selectedRow!=-1){
+                AppointmentScheduleTableModel model = 
+                        (AppointmentScheduleTableModel)tblAppointments.getModel();
+                Appointment appointment = model.getElementAt(selectedRow);
+                setScheduleSlotType(appointment);
+                getMyController().getDescriptor()
+                        .getViewDescription().setAppointment(appointment);
+                tableValueChangedListenerActivated = true;
+                Patient patient = (Patient)tblAppointments.getModel().getValueAt(selectedRow, 0);
+                doScheduleTitleRefresh(patient);
+                switch(getScheduleSlotType()){
+                    case BOOKABLE_SCHEDULE_SLOT:
+                        setAppointmentMode(AppointmentMode.CREATE);
+                        setUnbookableSlotMode(UnbookableSlotMode.MARK);
+                        setEmergencySlotMode(EmergencySlotMode.NONE);
+                        btnCancelSelectedAppointment.setEnabled(false);
+                        btnClinicalNotesForSelectedAppointment.setEnabled(false);
+                        btnSelectTreatmentRequest.setEnabled(false);
+                        break;
+                    case UNBOOKABLE_SCHEDULE_SLOT:
+                        setAppointmentMode(AppointmentMode.NONE);
+                        setUnbookableSlotMode(UnbookableSlotMode.CANCEL);
+                        setEmergencySlotMode(EmergencySlotMode.NONE);
+                        btnCancelSelectedAppointment.setEnabled(false);
+                        btnClinicalNotesForSelectedAppointment.setEnabled(false);
+                        btnSelectTreatmentRequest.setEnabled(false);
+                        break;
+                    case EMERGENCY_SCHEDULE_SLOT:
+                        setAppointmentMode(AppointmentMode.NONE);
+                        setEmergencySlotMode(EmergencySlotMode.DELETE);
+                        setUnbookableSlotMode(UnbookableSlotMode.NONE);
+                        btnCancelSelectedAppointment.setEnabled(false);
+                        btnClinicalNotesForSelectedAppointment.setEnabled(true);
+                        btnSelectTreatmentRequest.setEnabled(false);
+                        break;
+                    case BOOKED_SCHEDULE_SLOT:
+                        setAppointmentMode(AppointmentMode.UPDATE);
+                        setEmergencySlotMode(EmergencySlotMode.MAKE);
+                        setUnbookableSlotMode(UnbookableSlotMode.NONE);
+                        btnCancelSelectedAppointment.setEnabled(true);
+                        btnClinicalNotesForSelectedAppointment.setEnabled(true);
+                        btnSelectTreatmentRequest.setEnabled(true);
+                        break;
+                }
+            }
+            else {
+                getMyController().getDescriptor()
+                        .getViewDescription().setAppointment(null);
+                doScheduleTitleRefresh(null);
+                
+                btnCreateUpdateAppointment.setEnabled(false);
+                btnMarkCancelSlotUnbookable.setEnabled(false);
+                btnCancelSelectedAppointment.setEnabled(false);
+                btnClinicalNotesForSelectedAppointment.setEnabled(false);
+                btnSelectTreatmentRequest.setEnabled(false);
+                btnMakeDeleteEmergencyAppointment.setEnabled(false);
+            }
+        }
+    }
+    
+    @Override
     public void actionPerformed(ActionEvent e){
         ViewController.ScheduleViewControllerActionEvent
                 actionCommand = null;
@@ -187,7 +277,14 @@ public class ScheduleView extends View implements ActionListener{
                 }
                 break;
             case REQUEST_EMERGENCY_APPOINTMENT:
-                this.btnEmergencyAppointmentActionPerformed();
+                switch(getScheduleSlotType()){
+                    case EMERGENCY_SCHEDULE_SLOT:
+                        deleteEmergencyAppointment();
+                        break;
+                    case BOOKED_SCHEDULE_SLOT:
+                        makeEmergencyAppointment();
+                        break;
+                }
                 break;
             case REQUEST_CANCEL_APPOINTMENT:
                 btnCancelSelectedAppointmentActionPerformed(e);
@@ -321,13 +418,21 @@ public class ScheduleView extends View implements ActionListener{
                 .setActionCommand(Action.REQUEST_CLINICAL_NOTE.toString());
         this.btnClinicalNotesForSelectedAppointment.addActionListener(this);
         
-        btnCreateUpdateAppointment.setEnabled(true);
-        btnMarkSlotUnbookable.setEnabled(true);
+        btnCreateUpdateAppointment.setEnabled(false);
+        btnMakeDeleteEmergencyAppointment.setEnabled(false);
+        btnMarkCancelSlotUnbookable.setEnabled(false);
         btnCancelSelectedAppointment.setEnabled(false);
         btnClinicalNotesForSelectedAppointment.setEnabled(false);
         btnSelectTreatmentRequest.setEnabled(false);
-        btnEmergencyAppointment.setEnabled(false);
-        setUnbookableSlotMode(UnbookableSlotMode.MARK);
+        btnMakeDeleteEmergencyAppointment.setEnabled(false);
+        btnCloseView.setEnabled(true);
+        
+        btnCreateUpdateAppointment.setText(ScheduleViewActionCaption.CREATE_UPDATE_APPOINTMENT._1());
+        btnMakeDeleteEmergencyAppointment.setText(ScheduleViewActionCaption.MAKE_DELETE_EMERGENCY_APPOINTMENT._1());
+        btnMarkCancelSlotUnbookable.setText(ScheduleViewActionCaption.MARK_CANCEL_UNBOOKABLE_SLOT._1());
+        btnCancelSelectedAppointment.setText(ScheduleViewActionCaption.CANCEL_APPOINTMENT._1());
+        btnClinicalNotesForSelectedAppointment.setText(ScheduleViewActionCaption.CLINICAL_NOTES._1());
+        btnSelectTreatmentRequest.setText(ScheduleViewActionCaption.SELECT_TREATMENT._1());       
         
         dayDatePicker.addDateChangeListener(new DayDatePickerChangeListener());
         this.mniCloseView.addActionListener((ActionEvent e) -> mniCloseViewActionPerformed(e));
@@ -475,94 +580,27 @@ public class ScheduleView extends View implements ActionListener{
             }
         });
     }
+
+    private ScheduleSlotType scheduleSlotType = null;
+    private void setScheduleSlotType(Appointment appointment){
+        if (appointment.getPatient()==null) 
+            scheduleSlotType = ScheduleSlotType.BOOKABLE_SCHEDULE_SLOT;
+        else if(appointment.getPatient().toString().equals(ScheduleSlotType.UNBOOKABLE_SCHEDULE_SLOT.mark()))
+            scheduleSlotType = ScheduleSlotType.UNBOOKABLE_SCHEDULE_SLOT;
+        else if(appointment.getIsEmergency())
+            scheduleSlotType = ScheduleSlotType.EMERGENCY_SCHEDULE_SLOT;
+        else scheduleSlotType = ScheduleSlotType.BOOKED_SCHEDULE_SLOT;
+    }
+    private ScheduleSlotType getScheduleSlotType(){
+        return scheduleSlotType;
+    }
     
-    /*
-    private void setAppointmentsTableListener(){
-        this.tblAppointments.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        ListSelectionModel lsm = this.tblAppointments.getSelectionModel();
-        lsm.addListSelectionListener(new ListSelectionListener() {
-            public void valueChanged(ListSelectionEvent e) {
-                //Ignore extra messages.
-                if (e.getValueIsAdjusting()) return;
-
-                ListSelectionModel lsm = (ListSelectionModel)e.getSource();
-                if (!lsm.isSelectionEmpty()) {
-                    btnEmergencyAppointment.setEnabled(false);
-                    btnCancelSelectedAppointment.setEnabled(false);
-                    btnClinicalNotesForSelectedAppointment.setEnabled(false);  
-                    btnSelectTreatmentRequest.setEnabled(false);
-                }else{
-                    
-                }
-            }
-        });
-    }*/
-
     private boolean tableValueChangedListenerActivated = false;
 
     private void setAppointmentTableListener(){
         this.tblAppointments.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         ListSelectionModel lsm = this.tblAppointments.getSelectionModel();
-        
-        lsm.addListSelectionListener(new ListSelectionListener() {
-            
-            @Override
-            public void valueChanged(ListSelectionEvent e) {
-                if (!e.getValueIsAdjusting()) {   // Ensure the event is not fired multiple times
-                    int selectedRow = tblAppointments.getSelectedRow();
-                    if (selectedRow!=-1){
-                        AppointmentsScheduleTableModel model = 
-                                (AppointmentsScheduleTableModel)tblAppointments.getModel();
-                        Appointment appointment = model.getElementAt(selectedRow);
-                        getMyController().getDescriptor()
-                                .getViewDescription().setAppointment(appointment);
-                        tableValueChangedListenerActivated = true;
-                        Patient patient = (Patient)tblAppointments.getModel().getValueAt(selectedRow, 0);
-                        doScheduleTitleRefresh(patient);
-                        if (patient==null){
-                            setAppointmentMode(AppointmentMode.CREATE);
-                            //btnCreateUpdateAppointment.setEnabled(true);
-                            btnMarkSlotUnbookable.setEnabled(true);
-                            btnCancelSelectedAppointment.setEnabled(false);
-                            btnClinicalNotesForSelectedAppointment.setEnabled(false);
-                            btnSelectTreatmentRequest.setEnabled(false);
-                            btnEmergencyAppointment.setEnabled(false);
-                        }else if (patient.toString().equals(
-                                SystemDefinition.APPOINTMENT_UNBOOKABILITY_MARKER)){
-                            setAppointmentMode(AppointmentMode.NONE);
-                            //btnCreateUpdateAppointment.setEnabled(false);
-                            btnMarkSlotUnbookable.setEnabled(true);
-                            setUnbookableSlotMode(UnbookableSlotMode.CANCEL);
-                            btnCancelSelectedAppointment.setEnabled(false);
-                            btnClinicalNotesForSelectedAppointment.setEnabled(false);
-                            btnSelectTreatmentRequest.setEnabled(false);
-                            btnEmergencyAppointment.setEnabled(true);
-                        }else{
-                            setUnbookableSlotMode(UnbookableSlotMode.MARK);
-                            setAppointmentMode(AppointmentMode.UPDATE);
-                            //btnCreateUpdateAppointment.setEnabled(false);
-                            btnMarkSlotUnbookable.setEnabled(false);
-                            btnCancelSelectedAppointment.setEnabled(true);
-                            btnClinicalNotesForSelectedAppointment.setEnabled(true);
-                            btnSelectTreatmentRequest.setEnabled(true);
-                            btnEmergencyAppointment.setEnabled(true);
-                        }
-                    }
-                    else {
-                        getMyController().getDescriptor()
-                                .getViewDescription().setAppointment(null);
-                        doScheduleTitleRefresh(null);
-                        btnCreateUpdateAppointment.setEnabled(true);
-                        btnMarkSlotUnbookable.setEnabled(true);
-                        btnCancelSelectedAppointment.setEnabled(false);
-                        btnClinicalNotesForSelectedAppointment.setEnabled(false);
-                        btnSelectTreatmentRequest.setEnabled(false);
-                        btnEmergencyAppointment.setEnabled(false);
-                    }
-                }
-            }
-        });
-
+        lsm.addListSelectionListener(this);
         tblAppointments.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -670,10 +708,10 @@ public class ScheduleView extends View implements ActionListener{
         
         pnlScheduleOperations = new javax.swing.JPanel();
         btnCreateUpdateAppointment = new javax.swing.JButton();
-        btnEmergencyAppointment = new javax.swing.JButton();
+        btnMakeDeleteEmergencyAppointment = new javax.swing.JButton();
         btnClinicalNotesForSelectedAppointment = new javax.swing.JButton();
         btnCancelSelectedAppointment = new javax.swing.JButton();
-        btnMarkSlotUnbookable = new javax.swing.JButton();
+        btnMarkCancelSlotUnbookable = new javax.swing.JButton();
         btnSelectTreatmentRequest = new javax.swing.JButton("Select treatment");
         btnCloseView = new javax.swing.JButton("Close view");
         jMenuBar1 = new javax.swing.JMenuBar();
@@ -785,13 +823,13 @@ public class ScheduleView extends View implements ActionListener{
             }
         });
         */
-        btnEmergencyAppointment.setText("<html><center>Emergency</center><center>appointment</center></html>");
+        btnMakeDeleteEmergencyAppointment.setText("<html><center>Emergency</center><center>appointment</center></html>");
         //btnUpdateSelectedAppointment.setToolTipText("update selected appointment");
         
-        btnEmergencyAppointment.setActionCommand(Action.REQUEST_EMERGENCY_APPOINTMENT.toString());
-        btnEmergencyAppointment.addActionListener(this);
+        btnMakeDeleteEmergencyAppointment.setActionCommand(Action.REQUEST_EMERGENCY_APPOINTMENT.toString());
+        btnMakeDeleteEmergencyAppointment.addActionListener(this);
         /*
-        btnEmergencyAppointment.addActionListener(new java.awt.event.ActionListener() {
+        btnMakeDeleteEmergencyAppointment.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnUpdateAppointmentActionPerformed(evt);
             }
@@ -812,13 +850,13 @@ public class ScheduleView extends View implements ActionListener{
         btnClinicalNotesForSelectedAppointment.setText(
                 "<html><center>Clinical</center><center>notes</center></html>");
 
-        btnMarkSlotUnbookable.setText("<html><center>Mark slot</center><center>unbookable</center></html>");
-        btnMarkSlotUnbookable.setToolTipText("make a slot unbookable");
-        btnMarkSlotUnbookable.setActionCommand(Action.REQUEST_UNBOOKABLE_SLOT.toString());
-        btnMarkSlotUnbookable.addActionListener(this);
+        btnMarkCancelSlotUnbookable.setText("<html><center>Mark slot</center><center>unbookable</center></html>");
+        btnMarkCancelSlotUnbookable.setToolTipText("make a slot unbookable");
+        btnMarkCancelSlotUnbookable.setActionCommand(Action.REQUEST_UNBOOKABLE_SLOT.toString());
+        btnMarkCancelSlotUnbookable.addActionListener(this);
         
         /*
-        btnMarkSlotUnbookable.addActionListener(new java.awt.event.ActionListener() {
+        btnMarkCancelSlotUnbookable.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnMarkSlotUnbookableActionPerformed(evt);
             }
@@ -1005,9 +1043,9 @@ public class ScheduleView extends View implements ActionListener{
             .addGroup(pnlScheduleOperationsLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(pnlScheduleOperationsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(btnEmergencyAppointment, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(btnMakeDeleteEmergencyAppointment, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(btnCancelSelectedAppointment, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(btnMarkSlotUnbookable, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(btnMarkCancelSlotUnbookable, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(btnCreateUpdateAppointment, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(btnCloseView, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(btnClinicalNotesForSelectedAppointment, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -1020,11 +1058,11 @@ public class ScheduleView extends View implements ActionListener{
                 .addContainerGap()
                 .addComponent(btnCreateUpdateAppointment, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
                 /*.addGap(18,18,18)*/.addGap(5,5,5)
-                .addComponent(btnEmergencyAppointment, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(btnMakeDeleteEmergencyAppointment, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
                 /*.addGap(18,18,18)*/.addGap(5,5,5)
                  .addComponent(btnCancelSelectedAppointment, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
                 /*.addGap(18,18,18)*/.addGap(5,5,5)
-                .addComponent(btnMarkSlotUnbookable, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(btnMarkCancelSlotUnbookable, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
                 /*.addGap(18,18,18)*/.addGap(5,5,5)
                 .addComponent(btnClinicalNotesForSelectedAppointment, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)   
                 /*.addGap(18,18,18)*/.addGap(5,5,5)
@@ -1098,6 +1136,40 @@ public class ScheduleView extends View implements ActionListener{
         this.getMyController().actionPerformed(actionEvent);
     }  
     
+    private void makeEmergencyAppointment(){
+        int row = this.tblAppointments.getSelectedRow();
+        if (row != -1){
+            getMyController().getDescriptor().getViewDescription().setAppointment(tableModel.getElementAt(row));
+            ActionEvent actionEvent = new ActionEvent(this, 
+                    ActionEvent.ACTION_PERFORMED,
+                    ViewController.ScheduleViewControllerActionEvent.
+                            SCHEDULE_EDITOR_MAKE_EMERGENCY_APPOINTMENT_REQUEST.toString());
+            this.getMyController().actionPerformed(actionEvent);
+        }
+        else{
+            JOptionPane.showInternalMessageDialog(this,
+                    "An appointment slot has not been selected;\n make emergency appointment action aborted", 
+                    "View error", JOptionPane.WARNING_MESSAGE);
+        }
+    }
+    
+    private void deleteEmergencyAppointment(){
+        int row = this.tblAppointments.getSelectedRow();
+        if (row != -1){
+            getMyController().getDescriptor().getViewDescription().setAppointment(tableModel.getElementAt(row));
+            ActionEvent actionEvent = new ActionEvent(this, 
+                    ActionEvent.ACTION_PERFORMED,
+                    ViewController.ScheduleViewControllerActionEvent.
+                            SCHEDULE_EDITOR_DELETE_EMERGENCY_APPOINTMENT_REQUEST.toString());
+            this.getMyController().actionPerformed(actionEvent);
+        }
+        else{
+            JOptionPane.showInternalMessageDialog(this,
+                    "An appointment slot has not been selected;\n delete emergency appointment action aborted",  
+                    "View error", JOptionPane.WARNING_MESSAGE);
+        }
+    }
+    
     private void btnEmergencyAppointmentActionPerformed(){
         //shouldn't need any pre-checks on what/is not selected
         int row = this.tblAppointments.getSelectedRow();
@@ -1106,7 +1178,7 @@ public class ScheduleView extends View implements ActionListener{
             ActionEvent actionEvent = new ActionEvent(this, 
                     ActionEvent.ACTION_PERFORMED,
                     ViewController.ScheduleViewControllerActionEvent.
-                            SCHEDULE_EDITOR_EMERGENCY_APPOINTMENT_REQUEST.toString());
+                            SCHEDULE_EDITOR_MAKE_EMERGENCY_APPOINTMENT_REQUEST.toString());
             this.getMyController().actionPerformed(actionEvent);
         }
     }
@@ -1116,13 +1188,14 @@ public class ScheduleView extends View implements ActionListener{
         if (row == -1){
             JOptionPane.showMessageDialog(this, "An appointment has not been selected for update");
         }
-        else if(((AppointmentsScheduleTableModel)this.tblAppointments.getModel()).getElementAt(row).getPatient()==null){
+        else if(((AppointmentScheduleTableModel)this.tblAppointments.getModel()).getElementAt(row).getPatient()==null){
             JOptionPane.showMessageDialog(this, "An appointment has not been selected for update");
         }
-        else if (!((AppointmentsScheduleTableModel)this.tblAppointments.getModel()).getElementAt(row).getPatient().getIsKeyDefined()){
+        else if (!((AppointmentScheduleTableModel)this.tblAppointments.getModel()).getElementAt(row).getPatient().getIsKeyDefined()){
             JOptionPane.showMessageDialog(this, "An appointment has not been selected for update");
         }
-        else if (SystemDefinition.APPOINTMENT_UNBOOKABILITY_MARKER.equals(((AppointmentsScheduleTableModel)this.tblAppointments.getModel()).
+        else if (SystemDefinition.ScheduleSlotType.UNBOOKABLE_SCHEDULE_SLOT.mark()
+                .equals(((AppointmentScheduleTableModel)this.tblAppointments.getModel()).
                             getElementAt(row).getPatient().toString())){
             getMyController().getDescriptor().getViewDescription().
                     setViewMode(ViewController.ViewMode.UPDATE);
@@ -1193,7 +1266,7 @@ public class ScheduleView extends View implements ActionListener{
         }
         //30/07/2022 09:26
         if (!isError){
-            if ((((AppointmentsScheduleTableModel)this.tblAppointments.getModel()).getElementAt(row).getPatient()==null)){
+            if ((((AppointmentScheduleTableModel)this.tblAppointments.getModel()).getElementAt(row).getPatient()==null)){
                 JOptionPane.showMessageDialog(this, "An appointment has not been selected for cancellation");
             }   
         }
@@ -1208,7 +1281,7 @@ public class ScheduleView extends View implements ActionListener{
 
         String message;
         if (getMyController().getDescriptor().getViewDescription().getAppointment().getPatient().toString().
-                equals(SystemDefinition.APPOINTMENT_UNBOOKABILITY_MARKER)){
+                equals(SystemDefinition.ScheduleSlotType.UNBOOKABLE_SCHEDULE_SLOT.mark())){
             message = "Are you sure you want to cancel the unbookable appointment slot";
         }
         else {
@@ -1281,7 +1354,7 @@ public class ScheduleView extends View implements ActionListener{
         if (row != -1){
             getMyController().getDescriptor().getViewDescription().
                     setViewMode(ViewController.ViewMode.SLOT_SELECTED);
-            appointment = ((AppointmentsScheduleTableModel)this.tblAppointments.getModel()).getElementAt(row);
+            appointment = ((AppointmentScheduleTableModel)this.tblAppointments.getModel()).getElementAt(row);
             getMyController().getDescriptor().getViewDescription().setAppointment(appointment); 
         }
         else {
@@ -1364,7 +1437,7 @@ public class ScheduleView extends View implements ActionListener{
                         centreString(FROM_WIDTH, from) +
                         centreString(TO_WIDTH, to) +
                         leftAlignString(NOTES_WIDTH, ""));
-                }else if(p.toString().equals(SystemDefinition.APPOINTMENT_UNBOOKABILITY_MARKER)){
+                }else if(p.toString().equals(SystemDefinition.UNBOOKABLE_SCHEDULE_SLOT_MARKER)){
                     patient = "<< U N B O O K A B L E  S L O T >>";
                     stringToPrint = stringToPrint + String.format(
                         centreString(PATIENT_WIDTH, patient) +
@@ -1426,9 +1499,9 @@ public class ScheduleView extends View implements ActionListener{
         dayDatePicker = new com.github.lgooddatepicker.components.DatePicker();
         pnlScheduleOperations = new javax.swing.JPanel();
         btnCreateUpdateAppointment = new javax.swing.JButton();
-        btnEmergencyAppointment = new javax.swing.JButton();
+        btnMakeDeleteEmergencyAppointment = new javax.swing.JButton();
         btnCancelSelectedAppointment = new javax.swing.JButton();
-        btnMarkSlotUnbookable = new javax.swing.JButton();
+        btnMarkCancelSlotUnbookable = new javax.swing.JButton();
         btnPrintDayScheduleRequest = new javax.swing.JButton();
         btnCloseView = new javax.swing.JButton();
         jMenuBar1 = new javax.swing.JMenuBar();
@@ -1589,11 +1662,11 @@ public class ScheduleView extends View implements ActionListener{
         btnCreateUpdateAppointment.setText("Create");
         btnCreateUpdateAppointment.setToolTipText("create new appointment");
 
-        btnEmergencyAppointment.setText("Update");
-        btnEmergencyAppointment.setToolTipText("update selected appointment");
-        btnEmergencyAppointment.addActionListener(new java.awt.event.ActionListener() {
+        btnMakeDeleteEmergencyAppointment.setText("Update");
+        btnMakeDeleteEmergencyAppointment.setToolTipText("update selected appointment");
+        btnMakeDeleteEmergencyAppointment.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnEmergencyAppointmentActionPerformed(evt);
+                btnMakeDeleteEmergencyAppointmentActionPerformed(evt);
             }
         });
 
@@ -1605,11 +1678,11 @@ public class ScheduleView extends View implements ActionListener{
             }
         });
 
-        btnMarkSlotUnbookable.setText("Mark  slot as unbookable");
-        btnMarkSlotUnbookable.setToolTipText("make a slot unbookable");
-        btnMarkSlotUnbookable.addActionListener(new java.awt.event.ActionListener() {
+        btnMarkCancelSlotUnbookable.setText("Mark  slot as unbookable");
+        btnMarkCancelSlotUnbookable.setToolTipText("make a slot unbookable");
+        btnMarkCancelSlotUnbookable.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnMarkSlotUnbookableActionPerformed(evt);
+                btnMarkCancelSlotUnbookableActionPerformed(evt);
             }
         });
 
@@ -1621,11 +1694,11 @@ public class ScheduleView extends View implements ActionListener{
                 .addContainerGap()
                 .addComponent(btnCreateUpdateAppointment, javax.swing.GroupLayout.PREFERRED_SIZE, 97, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
-                .addComponent(btnEmergencyAppointment, javax.swing.GroupLayout.PREFERRED_SIZE, 97, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(btnMakeDeleteEmergencyAppointment, javax.swing.GroupLayout.PREFERRED_SIZE, 97, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(btnCancelSelectedAppointment)
                 .addGap(87, 87, 87)
-                .addComponent(btnMarkSlotUnbookable, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(btnMarkCancelSlotUnbookable, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
         );
         pnlScheduleOperationsLayout.setVerticalGroup(
@@ -1634,9 +1707,9 @@ public class ScheduleView extends View implements ActionListener{
                 .addContainerGap()
                 .addGroup(pnlScheduleOperationsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnCreateUpdateAppointment)
-                    .addComponent(btnEmergencyAppointment)
+                    .addComponent(btnMakeDeleteEmergencyAppointment)
                     .addComponent(btnCancelSelectedAppointment)
-                    .addComponent(btnMarkSlotUnbookable))
+                    .addComponent(btnMarkCancelSlotUnbookable))
                 .addContainerGap(20, Short.MAX_VALUE))
         );
 
@@ -1751,18 +1824,18 @@ public class ScheduleView extends View implements ActionListener{
      * @param evt 
      */
     /*
-    private void btnEmergencyAppointmentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEmergencyAppointmentActionPerformed
+    private void btnMakeDeleteEmergencyAppointmentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnMakeDeleteEmergencyAppointmentActionPerformed
         int row = this.tblAppointments.getSelectedRow();
         if (row == -1){
             JOptionPane.showMessageDialog(this, "An appointment has not been selected for update");
         }
-        else if(((AppointmentsScheduleTableModel)this.tblAppointments.getModel()).getElementAt(row).getPatient()==null){
+        else if(((AppointmentScheduleTableModel)this.tblAppointments.getModel()).getElementAt(row).getPatient()==null){
             JOptionPane.showMessageDialog(this, "An appointment has not been selected for update");
         }
-        else if (!((AppointmentsScheduleTableModel)this.tblAppointments.getModel()).getElementAt(row).getPatient().getIsKeyDefined()){
+        else if (!((AppointmentScheduleTableModel)this.tblAppointments.getModel()).getElementAt(row).getPatient().getIsKeyDefined()){
             JOptionPane.showMessageDialog(this, "An appointment has not been selected for update");
         }
-        else if (SystemDefinition.APPOINTMENT_UNBOOKABILITY_MARKER.equals(((AppointmentsScheduleTableModel)this.tblAppointments.getModel()).
+        else if (SystemDefinition.UNBOOKABLE_SCHEDULE_SLOT_MARKER.equals(((AppointmentScheduleTableModel)this.tblAppointments.getModel()).
                             getElementAt(row).getPatient().toString())){
             getMyController().getDescriptor().getViewDescription().
                     setViewMode(ViewController.ViewMode.UPDATE);
@@ -1781,7 +1854,7 @@ public class ScheduleView extends View implements ActionListener{
                             APPOINTMENT_UPDATE_VIEW_REQUEST.toString());
             this.getMyController().actionPerformed(actionEvent);
         }
-    }//GEN-LAST:event_btnEmergencyAppointmentActionPerformed
+    }//GEN-LAST:event_btnMakeDeleteEmergencyAppointmentActionPerformed
 
     private void btnCloseViewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCloseViewActionPerformed
 
@@ -1833,7 +1906,7 @@ public class ScheduleView extends View implements ActionListener{
         }
         //30/07/2022 09:26
         if (!isError){
-            if ((((AppointmentsScheduleTableModel)this.tblAppointments.getModel()).getElementAt(row).getPatient()==null)){
+            if ((((AppointmentScheduleTableModel)this.tblAppointments.getModel()).getElementAt(row).getPatient()==null)){
                 JOptionPane.showMessageDialog(this, "An appointment has not been selected for cancellation");
             }   
         }
@@ -1848,7 +1921,7 @@ public class ScheduleView extends View implements ActionListener{
 
         String message;
         if (getMyController().getDescriptor().getViewDescription().getAppointment().getPatient().toString().
-                equals(SystemDefinition.APPOINTMENT_UNBOOKABILITY_MARKER)){
+                equals(SystemDefinition.UNBOOKABLE_SCHEDULE_SLOT_MARKER)){
             message = "Are you sure you want to cancel the unbookable appointment slot";
         }
         else {
@@ -1896,13 +1969,13 @@ public class ScheduleView extends View implements ActionListener{
                 this.getMyController().actionPerformed(actionEvent);
     }//GEN-LAST:event_mniViewCancelledAppointmentsActionPerformed
 
-    private void btnMarkSlotUnbookableActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnMarkSlotUnbookableActionPerformed
+    private void btnMarkCancelSlotUnbookableActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnMarkCancelSlotUnbookableActionPerformed
         Appointment appointment = null;
         int row = this.tblAppointments.getSelectedRow();
         if (row != -1){
             getMyController().getDescriptor().getViewDescription().
                     setViewMode(ViewController.ViewMode.SLOT_SELECTED);
-            appointment = ((AppointmentsScheduleTableModel)this.tblAppointments.getModel()).getElementAt(row);
+            appointment = ((AppointmentScheduleTableModel)this.tblAppointments.getModel()).getElementAt(row);
             getMyController().getDescriptor().getViewDescription().setAppointment(appointment); 
         }
         else {
@@ -1914,7 +1987,7 @@ public class ScheduleView extends View implements ActionListener{
                 ActionEvent.ACTION_PERFORMED,
                 ViewController.ScheduleViewControllerActionEvent.UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_VIEW_REQUEST.toString());
         this.getMyController().actionPerformed(actionEvent);
-    }//GEN-LAST:event_btnMarkSlotUnbookableActionPerformed
+    }//GEN-LAST:event_btnMarkCancelSlotUnbookableActionPerformed
 
     private void mniPrintScheduleSelectionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mniPrintScheduleSelectionActionPerformed
         // TODO add your handling code here:
@@ -1969,7 +2042,7 @@ public class ScheduleView extends View implements ActionListener{
                         centreString(FROM_WIDTH, from) +
                         centreString(TO_WIDTH, to) +
                         leftAlignString(NOTES_WIDTH, notes));
-                }else if(p.toString().equals(SystemDefinition.APPOINTMENT_UNBOOKABILITY_MARKER)){
+                }else if(p.toString().equals(SystemDefinition.UNBOOKABLE_SCHEDULE_SLOT_MARKER)){
                     patient = "<< U N B O O K A B L E  S L O T >>";
                     stringToPrint = stringToPrint + String.format(
                         centreString(PATIENT_WIDTH, patient) +
@@ -2010,8 +2083,8 @@ public class ScheduleView extends View implements ActionListener{
     private javax.swing.JButton btnCancelSelectedAppointment;
     private javax.swing.JButton btnCloseView;
     private javax.swing.JButton btnCreateUpdateAppointment;
-    private javax.swing.JButton btnEmergencyAppointment;
-    private javax.swing.JButton btnMarkSlotUnbookable;
+    private javax.swing.JButton btnMakeDeleteEmergencyAppointment;
+    private javax.swing.JButton btnMarkCancelSlotUnbookable;
     private javax.swing.JButton btnNextPracticeDay;
     private javax.swing.JButton btnNowDay;
     private javax.swing.JButton btnPreviousPracticeDay;
@@ -2045,13 +2118,13 @@ public class ScheduleView extends View implements ActionListener{
     private javax.swing.JButton btnCancelSelectedAppointment;
     private javax.swing.JButton btnCloseView;
     private javax.swing.JButton btnCreateUpdateAppointment;
-    private javax.swing.JButton btnMarkSlotUnbookable;
+    private javax.swing.JButton btnMarkCancelSlotUnbookable;
     private javax.swing.JButton btnNextPracticeDay;
     private javax.swing.JButton btnNowDay;
     private javax.swing.JButton btnPreviousPracticeDay;
     private javax.swing.JButton btnSelectTreatmentRequest;
     private javax.swing.JButton btnSlotAvailabilityScannerRequest;
-    private javax.swing.JButton btnEmergencyAppointment;
+    private javax.swing.JButton btnMakeDeleteEmergencyAppointment;
     private javax.swing.ButtonGroup buttonGroup1;
     private com.github.lgooddatepicker.components.DatePicker dayDatePicker;
     private javax.swing.JMenuBar jMenuBar1;
@@ -2123,8 +2196,8 @@ public class ScheduleView extends View implements ActionListener{
         String tableTitle = "Appointment schedule for " 
                 + dayDatePicker.getDate().format(appointmentScheduleFormat);
         if (appointee!=null){
-            if (!appointee.toString().equals(SystemDefinition.APPOINTMENT_UNBOOKABILITY_MARKER)){
-                    //SystemDefinitions.UNBOOKABLE_APPOINTMENT_SLOT.toString())){
+            if (!appointee.toString().equals(SystemDefinition.ScheduleSlotType.UNBOOKABLE_SCHEDULE_SLOT.mark())){
+                    //SystemDefinitions.UNBOOKABLE_SCHEDULE_SLOT_APPOINTMENT_KEY.toString())){
                 tableTitle = tableTitle + "          <"
                     + appointee.getName().getForenames() +  " " 
                     + appointee.getName().getSurname() + "'s contact "
@@ -2153,15 +2226,15 @@ public class ScheduleView extends View implements ActionListener{
     
     private void ConfigureScheduleTable(){
         if (tableModel == null) {
-            tableModel = new AppointmentsScheduleTableModel();
+            tableModel = new AppointmentScheduleTableModel();
             tableModel.addTableModelListener(new TableModelListener(){
                 Appointment appointment = null;
                 @Override
                 public void tableChanged(TableModelEvent e) {
                     int row = e.getFirstRow();
                     int column = e.getColumn();
-                    AppointmentsScheduleTableModel model =  
-                            (AppointmentsScheduleTableModel)e.getSource();
+                    AppointmentScheduleTableModel model =  
+                            (AppointmentScheduleTableModel)e.getSource();
                     Boolean value = (Boolean)model.getValueAt(row, column);
                     appointment = model.getElementAt(row);
                     appointment.setHasPatientBeenContacted(value);
@@ -2190,6 +2263,7 @@ public class ScheduleView extends View implements ActionListener{
         this.tblAppointments.setDefaultRenderer(Duration.class, new AppointmentsTableDurationRenderer());
         this.tblAppointments.setDefaultRenderer(LocalDateTime.class, new AppointmentsTableLocalDateTimeRenderer());
         this.tblAppointments.setDefaultRenderer(Patient.class, new AppointmentsTablePatientRenderer());
+        //this.tblAppointments.setDefaultRenderer(Object.class, new ScheduleTableRenderer());
         /*28/03/2024this.tblAppointments.setDefaultRenderer(PatientNote.class, new AppointmentsTablePatientNoteRenderer());*/
         //this.tblAppointments.setModel(tableModel);
         //this.tblAppointments.setRowSelectionAllowed(false);
@@ -2378,18 +2452,19 @@ public class ScheduleView extends View implements ActionListener{
     private AppointmentMode appointmentMode = null;
     private void setAppointmentMode(AppointmentMode value){
         appointmentMode = value;
-        btnCreateUpdateAppointment.setText(appointmentMode.title());
+        
         switch(appointmentMode){
             case CREATE:
-                btnCreateUpdateAppointment.setEnabled(true);
+                btnCreateUpdateAppointment.setText(
+                        SystemDefinition.ScheduleViewActionCaption.CREATE_UPDATE_APPOINTMENT._1());
                 btnCreateUpdateAppointment.setEnabled(true);
                 break;
             case UPDATE:
-                btnCreateUpdateAppointment.setEnabled(true);
+                btnCreateUpdateAppointment.setText(
+                        SystemDefinition.ScheduleViewActionCaption.CREATE_UPDATE_APPOINTMENT._2());
                 btnCreateUpdateAppointment.setEnabled(true);
                 break;
             case NONE:
-                btnCreateUpdateAppointment.setEnabled(false);
                 btnCreateUpdateAppointment.setEnabled(false);
                 break;
         }

@@ -446,7 +446,9 @@
         </Component>
         <Component class="javax.swing.JButton" name="btnFetchScheduleForSelectedAppointment">
           <Properties>
-            <Property name="text" type="java.lang.String" value="&lt;html&gt;&lt;center&gt;Schedule&lt;/center&gt;&lt;center&gt;for selected&lt;/center&gt;&lt;center&gt;appointment&lt;/center&gt;&lt;/html&gt;"/>
+            <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+              <Connection code="PatientViewActionCaption.SCHEDULE_FOR_APPOINTMENT._1()" type="code"/>
+            </Property>
             <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
               <Dimension value="[2147483647, 82]"/>
             </Property>

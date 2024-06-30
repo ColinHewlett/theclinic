@@ -26,8 +26,8 @@ import javax.swing.table.DefaultTableModel;
  * -- replaces -> public static ArrayList<Descriptor.Appointment> appointments = null;
  -- with -> public ArrayList<Descriptor.Appointment> appointments = new ArrayList<>();
  */
-//public class AppointmentsScheduleTableModel extends AbstractTableModel{
-public class AppointmentsScheduleTableModel extends DefaultTableModel{
+//public class AppointmentScheduleTableModel extends AbstractTableModel{
+public class AppointmentScheduleTableModel extends DefaultTableModel{
     //public ArrayList<Appointment> appointments = new ArrayList<>();
     private ArrayList<Appointment> appointments = null;
     private enum COLUMN{Patient, From,To,Duration,Treatment,Reminded};
@@ -39,7 +39,7 @@ public class AppointmentsScheduleTableModel extends DefaultTableModel{
         /*28/03/2024PatientNote*/String.class,
         Boolean.class};
 
-    public AppointmentsScheduleTableModel(){
+    public AppointmentScheduleTableModel(){
         appointments = new ArrayList<>();
         
     }

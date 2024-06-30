@@ -6,7 +6,9 @@
 package view.views.view_support_classes.renderers;
 
 import model.entity.Patient;
-import model.non_entity.SystemDefinition;
+import model.entity.Appointment;
+import model.non_entity.SystemDefinition.ScheduleSlotType;
+import view.views.view_support_classes.models.AppointmentScheduleTableModel;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
@@ -20,55 +22,71 @@ import javax.swing.table.TableCellRenderer;
  */
 public class AppointmentsTablePatientRenderer  extends JLabel implements TableCellRenderer{
     private boolean isUnbookable = false;
+    private Appointment appointment = null;
+    
     public AppointmentsTablePatientRenderer()
     {
         Font f = super.getFont();
         // bold
         this.setFont(f.deriveFont(f.getStyle() | ~Font.PLAIN));
     }
-    
-    private boolean getIsUnbookable(){
-        return isUnbookable;
+    private ScheduleSlotType slotMarker = null;
+    private ScheduleSlotType getSlotMarker(){
+        return slotMarker;
     }
-    
-    private void setIsUnbookable(boolean value){
-        isUnbookable = value;
+    private void setSlotMarker(ScheduleSlotType value){
+        slotMarker = value;
     }
     
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
         boolean hasFocus, int row, int column)
     {
+        AppointmentScheduleTableModel model = (AppointmentScheduleTableModel)table.getModel();
+        appointment = model.getElementAt(row);
+        Patient patient = (Patient)value;
         
-        Patient patient = (PatientDelegate)value;
-        if (patient == null) {
-            super.setText("AVAILABLE SLOT");
+        if (appointment.getIsEmergency()){ 
+            super.setText(patient.toString());
+            super.setHorizontalAlignment(JLabel.LEFT);
+            setSlotMarker(ScheduleSlotType.EMERGENCY_SCHEDULE_SLOT);
+        }else if (patient == null) {
+            super.setText(ScheduleSlotType.BOOKABLE_SCHEDULE_SLOT.mark());
             super.setHorizontalAlignment(JLabel.CENTER);
-            setIsUnbookable(false);
-
+            setSlotMarker(ScheduleSlotType.BOOKABLE_SCHEDULE_SLOT);
         }
-        else if (patient.toString().equals(SystemDefinition.APPOINTMENT_UNBOOKABILITY_MARKER)){
-            super.setText("<< U N B O O K A B L E  S L O T >>");
-            super.setForeground(Color.RED);
+        else if (patient.toString().equals(ScheduleSlotType.UNBOOKABLE_SCHEDULE_SLOT.mark())){
+            super.setText(ScheduleSlotType.UNBOOKABLE_SCHEDULE_SLOT.mark());
             super.setHorizontalAlignment(JLabel.CENTER);
-            setIsUnbookable(true);
+            setSlotMarker(ScheduleSlotType.UNBOOKABLE_SCHEDULE_SLOT);
         }
         else {
             super.setText(patient.toString());
             super.setHorizontalAlignment(JLabel.LEFT);
-            super.setForeground(Color.BLACK);
-            setIsUnbookable(false);
-            
+            setSlotMarker(ScheduleSlotType.BOOKED_SCHEDULE_SLOT); 
         }
-        
+
         if (isSelected) {
             setBackground(table.getSelectionBackground());
             setForeground(table.getSelectionForeground());
-        } else {
-            setBackground(table.getBackground());
-            if (getIsUnbookable()) setForeground(Color.RED);
-            else setForeground(table.getForeground());
+        }else {
+            switch(getSlotMarker()){
+                case UNBOOKABLE_SCHEDULE_SLOT:
+                case BOOKABLE_SCHEDULE_SLOT:
+                    setBackground(table.getBackground());
+                    setForeground(Color.BLUE);
+                    break;
+                case BOOKED_SCHEDULE_SLOT:
+                    setBackground(table.getBackground());
+                    setForeground(table.getForeground());
+                    break;
+                case EMERGENCY_SCHEDULE_SLOT:
+                    setBackground(table.getBackground());
+                    setForeground(Color.RED);
+                    break;
+            }
         }
+       
         setOpaque(true);
         return this;
     }

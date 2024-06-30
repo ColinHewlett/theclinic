@@ -265,8 +265,6 @@ public class PatientView extends View
             }else{
                 this.btnFetchClinicalNotes.setEnabled(false);
                 this.btnFetchScheduleForSelectedAppointment.setEnabled(false);
-                //int selectedRow = lsm.getMinSelectionIndex();
-                //doEmptySlotAvailabilityTableRowSelection(selectedRow);
             }
     }
     
@@ -314,12 +312,7 @@ public class PatientView extends View
         setBorderTitles(BorderTitles.PATIENT_DETAILS);
         setBorderTitles(BorderTitles.PATIENT_EXTRA_DETAILS);
         setBorderTitles(BorderTitles.PATIENT_SELECTION);
-        this.btnClearSelection.setText(this.patientClearSelectionCaption);
-        this.btnCloseView.setText(PatientViewActionCaption.CLOSE_VIEW._1());
-        this.btnCreateRecoverPatient.setText(PatientViewActionCaption.CREATE_RECOVER_PATIENT._1());
-        this.btnFetchClinicalNotes.setText(PatientViewActionCaption.PATIENT_CLINICAL_NOTES._1());
-        this.btnFetchScheduleForSelectedAppointment.setText(PatientViewActionCaption.SCHEDULE_FOR_APPOINTMENT._1());
-        this.btnUpdateRecoverPatient.setText(PatientViewActionCaption.UPDATE_RECOVER_PATIENT._1());
+        this.btnClearSelection.setText(PatientViewActionCaption.CLEAR_SELECTION._1());
         btnClearSelection.setActionCommand(Actions.REQUEST_NULL_PATIENT.toString());
         btnCloseView.setActionCommand(Actions.REQUEST_CLOSE_VIEW.toString());
         btnCreateRecoverPatient.setActionCommand(Actions.REQUEST_CREATE_RECOVER_PATIENT.toString());
@@ -941,7 +934,7 @@ public class PatientView extends View
                 while (it.hasNext()){   
                     Appointment appointment = it.next();
                     if (appointment.getIsEmergency())
-                        appointment.setNotes(SystemDefinition.EMERGENCY_APPOINTMENT);
+                        appointment.setNotes(SystemDefinition.ScheduleSlotType.EMERGENCY_SCHEDULE_SLOT.mark());
                     tableModel.addElement(appointment);
                 }
             }
@@ -1441,7 +1434,7 @@ public class PatientView extends View
             }
         });
 
-        btnFetchScheduleForSelectedAppointment.setText("<html><center>Schedule</center><center>for selected</center><center>appointment</center></html>");
+        btnFetchScheduleForSelectedAppointment.setText(PatientViewActionCaption.SCHEDULE_FOR_APPOINTMENT._1());
         btnFetchScheduleForSelectedAppointment.setMaximumSize(new java.awt.Dimension(2147483647, 82));
         btnFetchScheduleForSelectedAppointment.setMinimumSize(new java.awt.Dimension(99, 82));
         btnFetchScheduleForSelectedAppointment.setPreferredSize(new java.awt.Dimension(99, 82));
@@ -1718,19 +1711,7 @@ public class PatientView extends View
     }// </editor-fold>//GEN-END:initComponents
 /*
     private void btnFetchScheduleForSelectedAppointmentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnFetchScheduleForSelectedAppointmentActionPerformed
-        // TODO add your handling code here:
-        if (this.tblAppointmentHistory.getSelectedRow()==-1){
-            JOptionPane.showMessageDialog(this, "An appointment has not been selected");
-        }
-        else{
-            int row = this.tblAppointmentHistory.getSelectedRow();
-            LocalDate day = ((LocalDateTime)this.tblAppointmentHistory.getValueAt(row,0)).toLocalDate();
-            getMyController().getDescriptor().getViewDescription().setScheduleDay(day);
-            ActionEvent actionEvent = new ActionEvent(
-                this,ActionEvent.ACTION_PERFORMED,
-                ViewController.PatientViewControllerActionEvent.SCHEDULE_VIEW_CONTROLLER_REQUEST.toString());
-            this.getMyController().actionPerformed(actionEvent);
-        }
+
     }//GEN-LAST:event_btnFetchScheduleForSelectedAppointmentActionPerformed
 */
     private void txtAddressTownActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtAddressTownActionPerformed

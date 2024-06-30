@@ -1181,7 +1181,7 @@ public class DesktopViewController extends ViewController{
         Patient patient = pvc.getDescriptor().getControllerDescription().getPatient();
         if (patient!=null){
             if (patient.getIsKeyDefined()){
-                if (!patient.getKey().equals(SystemDefinition.UNBOOKABLE_APPOINTMENT_SLOT)){
+                if (!patient.getKey().equals(SystemDefinition.UNBOOKABLE_SCHEDULE_SLOT_APPOINTMENT_KEY)){
                     for (PatientMedicalHistoryViewController vc : patientMedicalHistoryViewControllers){
                         if (vc.getDescriptor().getControllerDescription().getPatient().equals(patient)){
                             isPMVCForSamePatientActive = true;
@@ -1216,7 +1216,7 @@ public class DesktopViewController extends ViewController{
         Patient patient = pvc.getDescriptor().getControllerDescription().getPatient();
         if (patient!=null){
             if (patient.getIsKeyDefined()){
-                if (!patient.getKey().equals(SystemDefinition.UNBOOKABLE_APPOINTMENT_SLOT)){
+                if (!patient.getKey().equals(SystemDefinition.UNBOOKABLE_SCHEDULE_SLOT_APPOINTMENT_KEY)){
                     for (PatientQuestionnaireViewController vc : patientQuestionnaireViewControllers){
                         if (vc.getDescriptor().getControllerDescription().getPatient().equals(patient)){
                             isPQVCForSamePatientActive = true;
@@ -1294,7 +1294,7 @@ public class DesktopViewController extends ViewController{
         Patient patient = pvc.getDescriptor().getControllerDescription().getPatient();
         if (patient!=null){
             if (patient.getIsKeyDefined()){
-                if (!patient.getKey().equals(SystemDefinition.UNBOOKABLE_APPOINTMENT_SLOT)){
+                if (!patient.getKey().equals(SystemDefinition.UNBOOKABLE_SCHEDULE_SLOT_APPOINTMENT_KEY)){
                     for (PatientMedicalHistoryViewController vc : patientMedicalHistoryViewControllers){
                         if (vc.getDescriptor().getControllerDescription().getPatient().equals(patient)){
                             isPMVCForSamePatientActive = true;

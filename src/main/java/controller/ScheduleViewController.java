@@ -145,7 +145,7 @@ public class ScheduleViewController extends ViewController{
                 Patient patient = appointment.getPatient();
                 getDescriptor().getControllerDescription().setPatient(patient);
                 LocalDate day = appointment.getStart().toLocalDate();
-                if (patient.toString().equals(SystemDefinition.APPOINTMENT_UNBOOKABILITY_MARKER)) {
+                if (patient.toString().equals(SystemDefinition.ScheduleSlotType.UNBOOKABLE_SCHEDULE_SLOT.mark())) {
                     appointment.setScope(Scope.SINGLE);
                     appointment.delete();
                 }
@@ -247,7 +247,7 @@ public class ScheduleViewController extends ViewController{
                 this.getMyController().actionPerformed(actionEvent);
             }else{
                 if (getDescriptor().getControllerDescription().
-                    getAppointment().getPatient().toString().equals(SystemDefinition.APPOINTMENT_UNBOOKABILITY_MARKER)) 
+                    getAppointment().getPatient().toString().equals(SystemDefinition.ScheduleSlotType.UNBOOKABLE_SCHEDULE_SLOT.mark())) 
                     displayErrorMessage("Cannot create an appointment in an unbookable slot", 
                         "Schedule view controller error",JOptionPane.WARNING_MESSAGE);
                 else displayErrorMessage("Cannot create an appointment in the selected slot "
@@ -329,7 +329,33 @@ public class ScheduleViewController extends ViewController{
         this.getMyController().actionPerformed(actionEvent);
     }
     
-    private void doAppointmentEmergencyViewRequest(){
+    private void doDeleteEmergencyAppointmentRequest(){
+        Appointment appointment = getDescriptor().getViewDescription().getAppointment();
+        if (appointment.getIsEmergency()){
+            appointment.setScope(Scope.EMERGENCY);
+            try{
+                appointment.delete();
+                doAppointmentForDayRequest(appointment.getStart().toLocalDate());
+                //getDescriptor().getControllerDescription().setPatient(result.getPatient());
+
+                firePropertyChangeEvent(
+                        ViewController.DesktopViewControllerPropertyChangeEvent.
+                                SCHEDULE_VIEW_CONTROLLER_CHANGE_NOTIFICATION.toString(),
+                        (DesktopViewController)getMyController(),
+                        this,
+                        null,
+                        getDescriptor()
+                );
+            }catch (StoreException ex){
+                String message = ex.getMessage() +"\n"
+                        + "StoreException handled in doDeleteEmergencyAppointment()";
+                displayErrorMessage(message,
+                        "Schedule view controller error", JOptionPane.WARNING_MESSAGE);
+            }
+        }
+    }
+    
+    private void doMakeEmergencyAppointmentViewRequest(){
         /* get a list of all patients on the system */
         Patient patient = new Patient();
         patient.setScope(Scope.ALL);
@@ -441,7 +467,7 @@ public class ScheduleViewController extends ViewController{
             for (Appointment a : appointment.get()){
                 if ((a.getPatient()!=null) ||
                         (!a.getPatient().toString().equals(
-                                SystemDefinition.APPOINTMENT_UNBOOKABILITY_MARKER))){
+                                SystemDefinition.UNBOOKABLE_SCHEDULE_SLOT_MARKER))){
                     TreatmentWithState treatmentWithState = getTreatmentsWithState(a);
                     String note = new String();
                     for(TreatmentWithState tws : treatmentWithState.get()){
@@ -483,6 +509,7 @@ public class ScheduleViewController extends ViewController{
             if (!appointment.get().isEmpty()){
                 ArrayList<Appointment> scheduleListForTheDay = new ArrayList<>();
                 for (Appointment a : appointment.get()){
+                    a.setNotes(SystemDefinition.ScheduleSlotType.EMERGENCY_SCHEDULE_SLOT.mark());
                     scheduleListForTheDay.add(a);
                 }
                 for(Appointment a : getDescriptor()
@@ -669,11 +696,25 @@ public class ScheduleViewController extends ViewController{
                  this.getMyController().actionPerformed(actionEvent);
                  break;
             case APPOINTMENT_CANCEL_REQUEST:
-                doAppointmentCancelRequest();
+                appointment = getDescriptor().getViewDescription().getAppointment();
+                if(!appointment.getIsEmergency()){
+                    doAppointmentCancelRequest();
                 
-                mergeScheduleSlotsIfPossible(getScheduleDay());
+                    mergeScheduleSlotsIfPossible(getScheduleDay());
+                    
+                }else{
+                    appointment.setScope(Scope.EMERGENCY);
+                    
+                    try{
+                        appointment.delete();
+                    }catch (StoreException ex){
+                        String message = ex.getMessage() + "\n"
+                                + "StoreException handled in "
+                                + "ScheduleViewController::doPrimaryViewActionPerformed"
+                                + "(" + actionCommand.toString() + ")";
+                    }
+                }
                 doAppointmentForDayRequest(getScheduleDay());
-                
                 firePropertyChangeEvent(
                         ViewController.ScheduleViewControllerPropertyChangeEvent.
                                 APPOINTMENTS_FOR_DAY_RECEIVED.toString(),
@@ -717,8 +758,11 @@ public class ScheduleViewController extends ViewController{
             case APPOINTMENT_EDITOR_TREATMENT_VIEW_REQUEST:
                 doOpenTreatmentView();
                 break;
-            case SCHEDULE_EDITOR_EMERGENCY_APPOINTMENT_REQUEST:
-                doAppointmentEmergencyViewRequest();
+            case SCHEDULE_EDITOR_MAKE_EMERGENCY_APPOINTMENT_REQUEST:
+                doMakeEmergencyAppointmentViewRequest();
+                break;
+            case SCHEDULE_EDITOR_DELETE_EMERGENCY_APPOINTMENT_REQUEST:
+                doDeleteEmergencyAppointmentRequest();
                 break;
             case APPOINTMENT_UPDATE_VIEW_REQUEST:
                 getDescriptor().getControllerDescription().
@@ -1508,7 +1552,7 @@ getDescriptor().getViewDescription().getScheduleDay());
                     doAppointmentForDayRequest(day); 
                 }
                 break;
-            case SCHEDULE_EDITOR_EMERGENCY_APPOINTMENT_REQUEST:
+            case SCHEDULE_EDITOR_MAKE_EMERGENCY_APPOINTMENT_REQUEST:
                 //check this requewsted for a patient not already a patient today
                 boolean isEmergencyPatientAlreadyBookedForAppointmentToday = false;
                 Patient patient = changedSlotRequest.getPatient();
@@ -1546,6 +1590,15 @@ getDescriptor().getViewDescription().getScheduleDay());
                         changedSlotRequest.setIsEmergency(true);
                         try{
                             changedSlotRequest.insert();
+                            doAppointmentForDayRequest(day);
+                            firePropertyChangeEvent(
+                                ViewController.DesktopViewControllerPropertyChangeEvent.
+                                        SCHEDULE_VIEW_CONTROLLER_CHANGE_NOTIFICATION.toString(),
+                                (DesktopViewController)getMyController(),
+                                this,
+                                null,
+                                getDescriptor()
+                            );
                             getModalView().setClosed(true);
                         }catch(StoreException ex){
                             String message = ex.getMessage() + "\n"
