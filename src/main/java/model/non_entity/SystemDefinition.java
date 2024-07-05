@@ -56,7 +56,7 @@ public class SystemDefinition {
         PATIENT_CLINICAL_NOTES("<html><center>Clinical</center><center>notes for</center><center>patient</center></html"),
         SCHEDULE_FOR_APPOINTMENT("<html><center>Show</center><center>schedule for</center><center>selection</center></html>"),
         CLEAR_SELECTION("Clear selection"),
-        CLOSE_VIEW("<html><center>Close</center<center>view</center></html>",null);
+        CLOSE_VIEW("<html><center>Close</center<center>view</center></html>");
         
         private String _1;
         private String _2;
