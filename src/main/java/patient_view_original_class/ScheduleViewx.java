@@ -83,7 +83,7 @@ import static model.non_entity.SystemDefinition.ScheduleSlotType.UNBOOKABLE_SCHE
  *
  * @author colin
  */
-public class ScheduleView extends View 
+public class ScheduleViewx extends View 
         implements ActionListener, ListSelectionListener{
     private enum COLUMN{From,Duration,Patient,Notes};
     enum Action{
@@ -289,7 +289,7 @@ public class ScheduleView extends View
                 break;
             case REQUEST_PRINT_SCHEDULE:
                 getMyController().getDescriptor().getViewDescription().setScheduleDay(dayDatePicker.getDate());
-                ActionEvent actionEvent = new ActionEvent(ScheduleView.this, 
+                ActionEvent actionEvent = new ActionEvent(ScheduleViewx.this, 
                         ActionEvent.ACTION_PERFORMED,
                         ViewController.ScheduleViewControllerActionEvent.PRINT_SCHEDULE_REQUEST.toString());
                 getMyController().actionPerformed(actionEvent);
@@ -493,7 +493,7 @@ public class ScheduleView extends View
      * -- to be added to the DesktopView object
      * -- and be centred in the desktopView
      */
-    public ScheduleView(
+    public ScheduleViewx(
             View.Viewer myViewType, 
             ViewController controller, 
             view.views.non_modal_views.DesktopView desktopView) {
@@ -604,15 +604,15 @@ public class ScheduleView extends View
         
     }
     private void refreshAppointmentTableWithCurrentlySelectedDate(){
-        ActionEvent actionEvent = new ActionEvent(ScheduleView.this, 
+        ActionEvent actionEvent = new ActionEvent(ScheduleViewx.this, 
                 ActionEvent.ACTION_PERFORMED,
                 ViewController.ScheduleViewControllerActionEvent.APPOINTMENTS_FOR_DAY_REQUEST.toString());
-        ScheduleView.this.getMyController().actionPerformed(actionEvent);
+        ScheduleViewx.this.getMyController().actionPerformed(actionEvent);
         SwingUtilities.invokeLater(new Runnable() 
         {
           public void run()
           {
-            ScheduleView.this.setTitle(ScheduleView.this.getMyController().getDescriptor().getViewDescription().getScheduleDay().format(DateTimeFormatter.ofPattern("dd/MM/yy")) + " Appointment schedule");
+            ScheduleViewx.this.setTitle(ScheduleViewx.this.getMyController().getDescriptor().getViewDescription().getScheduleDay().format(DateTimeFormatter.ofPattern("dd/MM/yy")) + " Appointment schedule");
             setIsViewInitialised(true);       
           }
         });
@@ -659,7 +659,7 @@ public class ScheduleView extends View
             @Override  
             public void internalFrameClosing(InternalFrameEvent e) {
                 ActionEvent actionEvent = new ActionEvent(
-                        ScheduleView.this,ActionEvent.ACTION_PERFORMED,
+                        ScheduleViewx.this,ActionEvent.ACTION_PERFORMED,
                         ViewController.ScheduleViewControllerActionEvent.
                                 VIEW_CLOSE_NOTIFICATION.toString());
                 getMyController().actionPerformed(actionEvent);
@@ -668,7 +668,7 @@ public class ScheduleView extends View
             @Override
             public void internalFrameActivated(InternalFrameEvent e){
                 ActionEvent actionEvent = new ActionEvent(
-                        ScheduleView.this,ActionEvent.ACTION_PERFORMED,
+                        ScheduleViewx.this,ActionEvent.ACTION_PERFORMED,
                         ViewController.ScheduleViewControllerActionEvent.
                                 VIEW_ACTIVATED_NOTIFICATION.toString());
                 getMyController().actionPerformed(actionEvent);
@@ -1630,7 +1630,7 @@ public class ScheduleView extends View
             pnlAppointmentDaySelectionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlAppointmentDaySelectionLayout.createSequentialGroup()
                 .addGap(15, 15, 15)
-                .addComponent(pnlAppointmentDaySelector, javax.swing.GroupLayout.DEFAULT_SIZE, 259, Short.MAX_VALUE)
+                .addComponent(pnlAppointmentDaySelector, javax.swing.GroupLayout.PREFERRED_SIZE, 259, Short.MAX_VALUE)
                 .addGap(20, 20, 20))
             .addGroup(pnlAppointmentDaySelectionLayout.createSequentialGroup()
                 .addGap(33, 33, 33)
@@ -2140,18 +2140,18 @@ public class ScheduleView extends View
         @Override
         public void dateChanged(DateChangeEvent event) {
             //LocalDate date = event.getNewDate();
-            getMyController().getDescriptor().getViewDescription().setScheduleDay(ScheduleView.this.dayDatePicker.getDate());
+            getMyController().getDescriptor().getViewDescription().setScheduleDay(ScheduleViewx.this.dayDatePicker.getDate());
             tblAppointments.clearSelection();
-            ActionEvent actionEvent = new ActionEvent(ScheduleView.this, 
+            ActionEvent actionEvent = new ActionEvent(ScheduleViewx.this, 
                     ActionEvent.ACTION_PERFORMED,
                     ViewController.ScheduleViewControllerActionEvent.APPOINTMENTS_FOR_DAY_REQUEST.toString());
-            ScheduleView.this.getMyController().actionPerformed(actionEvent);
+            ScheduleViewx.this.getMyController().actionPerformed(actionEvent);
             //getMyController().actionPerformed(actionEvent);
             SwingUtilities.invokeLater(new Runnable() 
             {
               public void run()
               {
-                ScheduleView.this.setTitle(ScheduleView.this.dayDatePicker.getDate().format(DateTimeFormatter.ofPattern("dd/MM/yy")) + " schedule");
+                ScheduleViewx.this.setTitle(ScheduleViewx.this.dayDatePicker.getDate().format(DateTimeFormatter.ofPattern("dd/MM/yy")) + " schedule");
               }
             });
         }
@@ -2232,7 +2232,7 @@ public class ScheduleView extends View
                     tblAppointments.clearSelection();
                     
                     ActionEvent actionEvent = new ActionEvent(
-                        ScheduleView.this,ActionEvent.ACTION_PERFORMED,
+                        ScheduleViewx.this,ActionEvent.ACTION_PERFORMED,
                         ViewController.ScheduleViewControllerActionEvent.
                                 APPOINTMENT_REMINDED_STATUS_UPDATE_REQUEST.toString());
                     getMyController().actionPerformed(actionEvent);

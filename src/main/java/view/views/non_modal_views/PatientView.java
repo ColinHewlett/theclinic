@@ -938,17 +938,9 @@ public class PatientView extends View
                     tableModel.addElement(appointment);
                 }
             }
-            /*ViewController.setJTableColumnProperties(tblAppointmentHistory, 
-                scrAppointmentHistory.getPreferredSize().width, 
-                5,10,10,75);*/
-            /*ViewController.setJTableColumnProperties(tblAppointmentHistory, 
-                scrAppointmentHistory.getPreferredSize().width, 
-                10,10,80);*/
             this.tblAppointmentHistory.setDefaultRenderer(Invoice.class, new PatientAppointmentHistoryTableInvoiceRenderer());
             this.tblAppointmentHistory.setDefaultRenderer(Duration.class, new AppointmentsTableDurationRenderer());
             this.tblAppointmentHistory.setDefaultRenderer(LocalDateTime.class, new AppointmentsTableLocalDateTimeRenderer());
-            /*28/03/2024this.tblAppointmentHistory.setDefaultRenderer(PatientNote.class, new AppointmentsTablePatientNoteRenderer());*/
-            //this.tblAppointmentHistory.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
             
             TableColumnModel columnModel = this.tblAppointmentHistory.getColumnModel();
             columnModel.getColumn(3).setCellRenderer(new ScheduleTableCellRenderer());
