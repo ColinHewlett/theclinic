@@ -8,7 +8,7 @@ package view.views.view_support_classes.renderers;
 import model.entity.Patient;
 import model.entity.Appointment;
 import model.non_entity.SystemDefinition.ScheduleSlotType;
-import view.views.view_support_classes.models.ScheduleTableModel;
+import view.views.view_support_classes.models.ScheduleListTableModel;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
@@ -42,7 +42,7 @@ public class AppointmentsTablePatientRenderer  extends JLabel implements TableCe
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
         boolean hasFocus, int row, int column)
     {
-        ScheduleTableModel model = (ScheduleTableModel)table.getModel();
+        ScheduleListTableModel model = (ScheduleListTableModel)table.getModel();
         appointment = model.getElementAt(row);
         Patient patient = (Patient)value;
         

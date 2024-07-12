@@ -17,7 +17,7 @@ import model.entity.Patient;
  *
  * @author colin
  */
-public class ScheduleTableModel extends DefaultTableModel{
+public class ScheduleListTableModel extends DefaultTableModel{
     private ArrayList<Appointment> appointments = null;
     private enum COLUMN{Confirmed, Patient, From,To,Duration,Treatment};
     private final Class[] columnClass = new Class[] {
@@ -29,7 +29,7 @@ public class ScheduleTableModel extends DefaultTableModel{
         String.class,
         };
 
-    public ScheduleTableModel(){
+    public ScheduleListTableModel(){
         appointments = new ArrayList<>();
         
     }
