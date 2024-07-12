@@ -36,19 +36,19 @@ public class Slot {
         isFirst = value;
     }
     
-    private Boolean isIsAvailable = null;
-    public Boolean getIsIsAvailable(){
-        return isIsAvailable;
+    private Boolean isAvailable = null;
+    public Boolean getIsAvailable(){
+        return isAvailable;
     }
     public void setIsAvailable(Boolean value){
-        isIsAvailable = value;
+        isAvailable = value;
     }
-    
-    private Boolean isIsUnbookable = null;
-    public Boolean getIsIsUnbookable(){
-        return isIsUnbookable;
+
+    private Boolean isBooked = null;
+    public Boolean getIsBooked(){
+        return isBooked;
     }
-    public void setIsUnbookable(Boolean value){
-        isIsUnbookable = value;
+    public void setIsBooked(Boolean value){
+        isBooked = value;
     }
 }

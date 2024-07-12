@@ -17,7 +17,7 @@ import model.entity.Patient;
  * @author colin
  */
 public class ScheduleDiaryTableModel extends DefaultTableModel{
-    private ArrayList<Slot> appointments = null;
+    private ArrayList<Slot> slots = null;
     private enum COLUMN{Slot, Patient,Treatment};
     private final Class[] columnClass = new Class[] {
         LocalDateTime.class,
@@ -25,8 +25,105 @@ public class ScheduleDiaryTableModel extends DefaultTableModel{
         String.class,
         };
 
-    public ScheduleDiaryTableModel(){
-        appointments = new ArrayList<>();  
+    /**
+     * need to know the current patient (if any)
+     */
+    private Patient patient = null;
+    private Patient getCurrentPatient(){
+        return patient;
+    }
+    private void setCurrentPatient(Patient value){
+        patient = value;
     }
     
+    public ScheduleDiaryTableModel(){
+        slots = new ArrayList<>();  
+    }
+    
+    public ArrayList<Slot> getSlots(){
+        return this.slots;
+    }
+    
+    public void addElement(Slot slot){
+        slots.add(slot);
+    }
+    
+    public void removeAllElements(){
+        slots.clear();
+        //this.fireTableDataChanged();
+    }
+    
+    public Slot getElementAt(int row){
+        return slots.get(row);
+    }
+
+    @Override
+    public int getRowCount(){
+        int result;
+        if (slots!=null) result = slots.size();
+        else result = 0;
+        return result;
+    }
+
+    @Override
+    public int getColumnCount(){
+        return COLUMN.values().length;
+    }
+    @Override
+    public String getColumnName(int columnIndex){
+        String result = null;
+        for (COLUMN column: COLUMN.values()){
+            if (column.ordinal() == columnIndex){
+                result = column.toString();
+                break;
+            }
+        }
+        return result;
+    }
+    @Override
+    public Class<?> getColumnClass(int columnIndex){
+        return columnClass[columnIndex];
+    }
+    
+    @Override
+    public Object getValueAt(int row, int columnIndex){
+        Object result = null;
+        Slot slot = getSlots().get(row);
+        for (COLUMN column: COLUMN.values()){
+            if (column.ordinal() == columnIndex){
+                if (slot == null){
+                    return null;
+                }
+                else{
+                    //LocalDateTime start = appointment.getData().getStart();
+                    //long minutes = appointment.getData().getDuration().toMinutes();
+                    //Duration duration = appointment.getData().getDuration();
+                    LocalDateTime start = slot.getStart();
+                    Appointment appointment = slot.getAppointment();
+                    Patient patient = null;
+                    String treatment = "";
+                    
+                    switch (column){
+                        case Slot:
+                            result = slot.getStart().toLocalTime();
+                            break;
+                        case Patient:
+                            if(!slot.getIsAvailable()){ 
+                                if (!getCurrentPatient().equals(slot.getAppointment().getPatient()))//is this a new patient?
+                                    patient = slot.getAppointment().getPatient();
+                            }
+                            break;
+                        case Treatment:
+                            if(!slot.getIsAvailable()){ 
+                                if (!getCurrentPatient().equals(slot.getAppointment().getPatient()))//is this a new patient?
+                                    treatment = slot.getAppointment().getNotes();
+                            }
+                            break;
+                    }
+
+                }
+            }
+        }
+        return result;
+    }
 }
