@@ -83,7 +83,7 @@ public class ScheduleListTableModel extends DefaultTableModel{
 
     @Override
     public void setValueAt(Object value, int row, int col) {
-        if (col==5){
+        if (col==0){
             Appointment appointment = appointments.get(row);
             //checkslot is booked out to a patient
             if (appointment.getPatient()!=null){

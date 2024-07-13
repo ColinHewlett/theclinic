@@ -599,8 +599,7 @@ public class ScheduleView extends View
                     "Schedule view controller error", JOptionPane.WARNING_MESSAGE);
         }
         setEmptySlotAvailabilityTableListener();
-        setAppointmentTableListener();
-        
+
         this.btnClinicalNotesForSelectedAppointment
                 .setActionCommand(Action.REQUEST_CLINICAL_NOTE_VIEW.toString());
         this.btnClinicalNotesForSelectedAppointment.addActionListener(this);
@@ -1139,14 +1138,17 @@ public class ScheduleView extends View
                 ViewController.ScheduleViewControllerActionEvent.
                         VIEW_CHANGED_NOTIFICATION.toString());
         this.getMyController().actionPerformed(actionEvent);
-        
+        tblAppointments.repaint();
         this.pnlScheduleForDay.repaint();
     }
     
+    private JTable tblAppointments = null;
     private void configureScheduleListView(){
-        ScheduleListTableModel model = new ScheduleListTableModel();
-        this.tblAppointments.setModel(model);
+        tblAppointments = new JTable(new ScheduleListTableModel());
+        scrAppointmentsForDayTable.setViewportView(tblAppointments);
+        ScheduleListTableModel model = (ScheduleListTableModel)tblAppointments.getModel();
         model.addTableModelListener(this);
+        setAppointmentTableListener();
         
         this.tblAppointments.setDefaultRenderer(Duration.class, new AppointmentsTableDurationRenderer());
         this.tblAppointments.setDefaultRenderer(LocalDateTime.class, new AppointmentsTableLocalDateTimeRenderer());
@@ -1154,6 +1156,7 @@ public class ScheduleView extends View
         JTableHeader tableHeader = this.tblAppointments.getTableHeader();
         tableHeader.setBackground(new Color(220,220,220));
         tableHeader.setOpaque(true); 
+        ViewController.setJTableColumnProperties(tblAppointments, scrAppointmentsForDayTable.getPreferredSize().width, 10,20,5,5,15,45);
         //populateScheduleListView();
     }
     
@@ -1279,7 +1282,6 @@ public class ScheduleView extends View
         btnSearchAvailableSlotsRequest = new javax.swing.JButton();
         pnlScheduleForDay = new javax.swing.JPanel();
         scrAppointmentsForDayTable = new javax.swing.JScrollPane();
-        tblAppointments = new javax.swing.JTable();
         pnlScheduleViewSelection = new javax.swing.JPanel();
         rdbList = new javax.swing.JRadioButton();
         rdbDiary = new javax.swing.JRadioButton();
@@ -1466,19 +1468,6 @@ public class ScheduleView extends View
         scrAppointmentsForDayTable.setMaximumSize(new java.awt.Dimension(835, 333));
         scrAppointmentsForDayTable.setPreferredSize(new java.awt.Dimension(835, 333));
 
-        tblAppointments.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null}
-            },
-            new String [] {
-                "Title 1", "Title 2", "Title 3", "Title 4"
-            }
-        ));
-        scrAppointmentsForDayTable.setViewportView(tblAppointments);
-
         javax.swing.GroupLayout pnlScheduleForDayLayout = new javax.swing.GroupLayout(pnlScheduleForDay);
         pnlScheduleForDay.setLayout(pnlScheduleForDayLayout);
         pnlScheduleForDayLayout.setHorizontalGroup(
@@ -1639,7 +1628,6 @@ public class ScheduleView extends View
     private javax.swing.ButtonGroup scheduleViewer;
     private javax.swing.JScrollPane scrAppointmentsForDayTable;
     private javax.swing.JScrollPane scrPanelSlotAvailability;
-    private javax.swing.JTable tblAppointments;
     private javax.swing.JTable tblSlotAvailability;
     // End of variables declaration//GEN-END:variables
 }
