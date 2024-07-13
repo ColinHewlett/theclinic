@@ -96,7 +96,7 @@ public class ScheduleView extends View
                                      DateHighlightPolicy,
                                      TableModelListener{
     
-    private ScheduleListTableModel tableModel = null;
+    //private ScheduleListTableModel tableModel = null;
     private InternalFrameAdapter internalFrameAdapter = null;
     private DatePickerSettings settings = null;
     private ArrayList<Appointment> appointments = null;
@@ -232,6 +232,14 @@ public class ScheduleView extends View
     }
     private ScheduleSlotType getScheduleSlotType(){
         return scheduleSlotType;
+    }
+    
+    private ScheduleListTableModel scheduleListTableModel = null;
+    private void setScheduleListTableModel(ScheduleListTableModel value){
+        scheduleListTableModel = value;
+    }
+    private ScheduleListTableModel getScheduleListTableModel(){
+        return scheduleListTableModel;
     }
     
     /**
@@ -739,7 +747,8 @@ public class ScheduleView extends View
     
     
     
-    private void doCreateAppointmentAction() {                                                     
+    private void doCreateAppointmentAction() {  
+        ScheduleListTableModel model = (ScheduleListTableModel)tblAppointments.getModel();
         int row = this.tblAppointments.getSelectedRow();
         if (row == -1) {
             getMyController().getDescriptor().getViewDescription().
@@ -748,7 +757,7 @@ public class ScheduleView extends View
             getMyController().getDescriptor().getViewDescription().
                     setViewMode(ViewController.ViewMode.SLOT_SELECTED);
             getMyController().getDescriptor().getViewDescription().
-                    setAppointment(tableModel.getElementAt(row));
+                    setAppointment(model.getElementAt(row));
         }
         ActionEvent actionEvent = new ActionEvent(this,
                 ActionEvent.ACTION_PERFORMED,
@@ -757,9 +766,10 @@ public class ScheduleView extends View
     }  
     
     private void makeEmergencyAppointment(){
+        ScheduleListTableModel model = (ScheduleListTableModel)tblAppointments.getModel();
         int row = this.tblAppointments.getSelectedRow();
         if (row != -1){
-            getMyController().getDescriptor().getViewDescription().setAppointment(tableModel.getElementAt(row));
+            getMyController().getDescriptor().getViewDescription().setAppointment(model.getElementAt(row));
             ActionEvent actionEvent = new ActionEvent(this, 
                     ActionEvent.ACTION_PERFORMED,
                     ViewController.ScheduleViewControllerActionEvent.
@@ -774,9 +784,10 @@ public class ScheduleView extends View
     }
     
     private void deleteEmergencyAppointment(){
+        ScheduleListTableModel model = (ScheduleListTableModel)tblAppointments.getModel();
         int row = this.tblAppointments.getSelectedRow();
         if (row != -1){
-            getMyController().getDescriptor().getViewDescription().setAppointment(tableModel.getElementAt(row));
+            getMyController().getDescriptor().getViewDescription().setAppointment(model.getElementAt(row));
             ActionEvent actionEvent = new ActionEvent(this, 
                     ActionEvent.ACTION_PERFORMED,
                     ViewController.ScheduleViewControllerActionEvent.
@@ -791,6 +802,7 @@ public class ScheduleView extends View
     }
     
     private void doUpdateAppointmentAction() {
+        ScheduleListTableModel model = (ScheduleListTableModel)tblAppointments.getModel();
         int row = this.tblAppointments.getSelectedRow();
         if (row == -1){
             JOptionPane.showMessageDialog(this, "An appointment has not been selected for update");
@@ -806,7 +818,7 @@ public class ScheduleView extends View
                             getElementAt(row).getPatient().toString())){
             getMyController().getDescriptor().getViewDescription().
                     setViewMode(ViewController.ViewMode.UPDATE);
-            getMyController().getDescriptor().getViewDescription().setAppointment(tableModel.getElementAt(row));
+            getMyController().getDescriptor().getViewDescription().setAppointment(model.getElementAt(row));
             ActionEvent actionEvent = new ActionEvent(this, 
                     ActionEvent.ACTION_PERFORMED,
                     ViewController.ScheduleViewControllerActionEvent.
@@ -814,7 +826,7 @@ public class ScheduleView extends View
             this.getMyController().actionPerformed(actionEvent);
         }
         else{
-            getMyController().getDescriptor().getViewDescription().setAppointment(tableModel.getElementAt(row));
+            getMyController().getDescriptor().getViewDescription().setAppointment(model.getElementAt(row));
             ActionEvent actionEvent = new ActionEvent(this, 
                     ActionEvent.ACTION_PERFORMED,
                     ViewController.ScheduleViewControllerActionEvent.
@@ -876,6 +888,7 @@ public class ScheduleView extends View
     
     private void doCancelSelectedAppointmentAction() {                                                             
         //DateTimeFormatter format24Hour = DateTimeFormatter.ofPattern("HH:mm");
+        ScheduleListTableModel model = (ScheduleListTableModel)tblAppointments.getModel();
         boolean isError = false;
         String name = null;
         LocalDateTime start = null;
@@ -894,7 +907,7 @@ public class ScheduleView extends View
             }   
         }
         int OKToCancelAppointment;
-        getMyController().getDescriptor().getViewDescription().setAppointment(tableModel.getElementAt(row));
+        getMyController().getDescriptor().getViewDescription().setAppointment(model.getElementAt(row));
         start = getMyController().getDescriptor().getViewDescription().getAppointment().getStart();
         from = start.toLocalTime();
         //20/07/2022 08:16 update
