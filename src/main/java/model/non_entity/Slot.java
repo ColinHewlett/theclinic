@@ -6,12 +6,40 @@ package model.non_entity;
 
 import model.entity.Appointment;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.ArrayList;
 
 /**
  *
  * @author colin
  */
 public class Slot {
+
+    public Slot(Appointment a){
+        appointment = a;
+    }
+    
+    private ArrayList<Slot> collection = null;
+    public ArrayList<Slot> get(){
+        return collection;
+    }
+    public void set(){
+        collection = new ArrayList<Slot>();
+        Slot slot = new Slot(getAppointment());
+        slot.setStart(getAppointment().getStart());
+        int minutes = (int)getAppointment().getDuration().toMinutes();
+        int intervals = minutes/5;
+        collection.add(slot);
+        if (intervals > 1){
+           for(int interval = 1; interval < intervals; interval++){
+               LocalDateTime start = slot.getStart().plusMinutes(interval*5);
+               Slot theSlot = new Slot(slot.getAppointment());
+               theSlot.setStart(start);
+               collection.add(theSlot);
+           }
+        }    
+    }
+    
     private Appointment appointment = null;
     public Appointment getAppointment(){
         return appointment;
@@ -24,7 +52,7 @@ public class Slot {
     public LocalDateTime getStart(){
         return localDateTime;
     }
-    public void setApppointment(LocalDateTime value){
+    public void setStart(LocalDateTime value){
         localDateTime = value;
     }
     

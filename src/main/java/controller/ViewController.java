@@ -9,6 +9,7 @@ import model.entity.SecondaryCondition;
 import model.entity.PrimaryCondition;
 import model.entity.Condition;
 import model.non_entity.TreatmentWithState;
+import model.non_entity.Slot;
 import model.entity.Treatment;
 import model.entity.Question;
 import model.entity.PatientQuestion;
@@ -2478,7 +2479,7 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         String treatment = "";
         String confirmed = "";
         
-        Iterator<Appointment> it = getDescriptor().getControllerDescription().getAppointmentSlotsForDay().iterator();
+        Iterator<Appointment> it = getDescriptor().getControllerDescription().getAppointmentSlotsForDayInListFormat().iterator();
         while (it.hasNext()){
             row++;
             Appointment appointment = (Appointment)it.next();
@@ -2675,7 +2676,7 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
             //getUpdatedAppointmentSlotsForDay(appointment);// = getUpdatedAppointmentSlotsForDay(appointment) contents
             ArrayList<Appointment> appointmentSlotsForDay =
                 getAppointmentsForSelectedDayIncludingEmptySlotsForPrintScheduleRequest(appointment.get(),appointment.getStart().toLocalDate());
-            getDescriptor().getControllerDescription().setAppointmentSlotsForDay(appointmentSlotsForDay); 
+            getDescriptor().getControllerDescription().setAppointmentSlotsForDayInListFormat(appointmentSlotsForDay); 
         }
         catch (StoreException ex){
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
@@ -2882,6 +2883,18 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
             return ((BigInteger)cellWidth.getW()).intValue();
         }
         return -1; // Indicate that the width is not set
+    }
+    
+    
+    protected ArrayList<Slot> convertScheduleListToDiaryFormat(ArrayList<Appointment> scheduleList){
+        ArrayList<Slot> slots = new ArrayList<>();
+        for(Appointment appointment : scheduleList){
+            Slot slot = new Slot(appointment);
+            slot.setStart(appointment.getStart());
+            slot.set();
+            slots.add(slot);
+        }
+        return slots;
     }
 }
 

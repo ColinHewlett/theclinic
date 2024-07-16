@@ -19,9 +19,9 @@ public class AppointmentsTableDurationRenderer extends JLabel implements TableCe
     
     public AppointmentsTableDurationRenderer()
     {
-        Font f = super.getFont();
+        //Font f = super.getFont();
         // bold
-        this.setFont(f.deriveFont(f.getStyle() | ~Font.PLAIN));
+        //this.setFont(f.deriveFont(f.getStyle() | ~Font.PLAIN));
     }
     
     @Override
@@ -29,6 +29,7 @@ public class AppointmentsTableDurationRenderer extends JLabel implements TableCe
         boolean hasFocus, int row, int column){
         if (value!=null){
             super.setText(renderDuration((Duration)value));
+            super.setFont(super.getFont().deriveFont(Font.PLAIN));
         }
         else super.setText("");
         

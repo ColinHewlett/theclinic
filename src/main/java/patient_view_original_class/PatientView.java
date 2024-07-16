@@ -12,7 +12,7 @@ import view.views.modal_views.dialogs.Dialog;
 import controller.exceptions.TemplateReaderException;
 import controller.TemplateReader;
 import view.views.view_support_classes.models.PatientAppointmentHistoryTableModel;
-import view.views.view_support_classes.renderers.AppointmentsTableLocalDateTimeRenderer;
+import view.views.view_support_classes.renderers.AppointmentsListTableLocalDateTimeRenderer;
 import view.views.view_support_classes.renderers.AppointmentsTableDurationRenderer;
 import view.views.view_support_classes.components.FatCheckBox;
 import controller.Descriptor;
@@ -1120,7 +1120,7 @@ public class PatientView extends View implements ActionListener{
                 }
             }
             this.tblAppointmentHistory.setDefaultRenderer(Duration.class, new AppointmentsTableDurationRenderer());
-            this.tblAppointmentHistory.setDefaultRenderer(LocalDateTime.class, new AppointmentsTableLocalDateTimeRenderer());;
+            this.tblAppointmentHistory.setDefaultRenderer(LocalDateTime.class, new AppointmentsListTableLocalDateTimeRenderer());;
             this.tblAppointmentHistory.setDefaultRenderer(PatientNote.class, new AppointmentsTablePatientNoteRenderer());
             //this.tblAppointmentHistory.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
             

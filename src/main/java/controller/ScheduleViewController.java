@@ -9,6 +9,7 @@ package controller;
 import static controller.ViewController.ScheduleViewControllerActionEvent.APPOINTMENT_EDITOR_TREATMENT_VIEW_REQUEST;
 import static controller.ViewController.ScheduleViewControllerActionEvent.SCHEDULE_EDITOR_UPDATE_APPOINTMENT_REQUEST;
 import model.non_entity.SystemDefinition;
+import model.non_entity.Slot;
 import static controller.ViewController.displayErrorMessage;
 import model.entity.Entity.Scope;
 import model.entity.Appointment;
@@ -513,21 +514,14 @@ public class ScheduleViewController extends ViewController{
                     scheduleListForTheDay.add(a);
                 }
                 for(Appointment a : getDescriptor()
-                        .getControllerDescription().getAppointmentSlotsForDay()){
+                        .getControllerDescription().getAppointmentSlotsForDayInListFormat()){
                     scheduleListForTheDay.add(a);
                 }
                 getDescriptor().getControllerDescription()
-                        .setAppointmentSlotsForDay(scheduleListForTheDay);
+                        .setAppointmentSlotsForDayInListFormat(scheduleListForTheDay);
             }
             
-            firePropertyChangeEvent(
-                    ViewController.ScheduleViewControllerPropertyChangeEvent.
-                            APPOINTMENTS_FOR_DAY_RECEIVED.toString(),
-                    getView(),
-                    this,
-                    null,
-                    null
-            );
+            doSendViewNewSchedule();
             resetEmptySlotScannerSettings();
         }
         catch (StoreException ex){
@@ -715,14 +709,7 @@ public class ScheduleViewController extends ViewController{
                     }
                 }
                 doAppointmentForDayRequest(getScheduleDay());
-                firePropertyChangeEvent(
-                        ViewController.ScheduleViewControllerPropertyChangeEvent.
-                                APPOINTMENTS_FOR_DAY_RECEIVED.toString(),
-                        getView(),//event target/listener
-                        this,//event sender
-                        null,
-                        getDescriptor()//event related data        
-                );
+                doSendViewNewSchedule();
                 
                 if (getDescriptor().getControllerDescription().getEmptySlotFromDay()!=null){
                     firePropertyChangeEvent(
@@ -1183,14 +1170,8 @@ getDescriptor().getViewDescription().getScheduleDay());
                             mergeScheduleSlotsIfPossible(getScheduleDay());
                             doAppointmentForDayRequest(getScheduleDay());
                             
-                            firePropertyChangeEvent(
-                                   ViewController.ScheduleViewControllerPropertyChangeEvent.
-                                           APPOINTMENTS_FOR_DAY_RECEIVED.toString(),
-                                   this.getView(),//event target/listener
-                                   this,//event sender
-                                   null,
-                                   getDescriptor()//event related data        
-                           );   
+                            doSendViewNewSchedule();
+                               
                         }
                         getDescriptor().getControllerDescription().setAppointment(theUncancelledAppointment);
                         firePropertyChangeEvent(
@@ -2167,7 +2148,7 @@ getDescriptor().getViewDescription().getScheduleDay());
     private void getUpdatedAppointmentSlotsForDay(Appointment appointment)throws StoreException{
         ArrayList<Appointment> appointmentSlotsForDay =
                 getAppointmentsForSelectedDayIncludingEmptySlots(appointment.get(),appointment.getStart().toLocalDate());
-        getDescriptor().getControllerDescription().setAppointmentSlotsForDay(appointmentSlotsForDay); 
+        getDescriptor().getControllerDescription().setAppointmentSlotsForDayInListFormat(appointmentSlotsForDay); 
     }
     
     private Boolean getIsBookedStatus(Appointment appointment){
@@ -2243,5 +2224,20 @@ getDescriptor().getViewDescription().getScheduleDay());
     
     private View getSecondaryView(){
         return secondaryView;
+    }
+    
+    private void doSendViewNewSchedule(){
+        ArrayList<Slot> slots = 
+                convertScheduleListToDiaryFormat(
+                        getDescriptor().getControllerDescription().getAppointmentSlotsForDayInListFormat());
+        getDescriptor().getControllerDescription().setAppointmentSlotsForDayInDiaryFormat(slots);
+        firePropertyChangeEvent(
+                ViewController.ScheduleViewControllerPropertyChangeEvent.
+                        APPOINTMENTS_FOR_DAY_RECEIVED.toString(),
+                getView(),
+                this,
+                null,
+                null
+        );
     }
 }

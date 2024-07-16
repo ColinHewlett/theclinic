@@ -8,7 +8,7 @@ import model.non_entity.SystemDefinition;
 import model.non_entity.SystemDefinition.PatientViewActionCaption;
 import view.views.view_support_classes.models.PatientAppointmentHistoryTableModel;
 import view.views.view_support_classes.renderers.PatientAppointmentHistoryTableInvoiceRenderer;
-import view.views.view_support_classes.renderers.AppointmentsTableLocalDateTimeRenderer;
+import view.views.view_support_classes.renderers.AppointmentsListTableLocalDateTimeRenderer;
 import view.views.view_support_classes.renderers.AppointmentsTableDurationRenderer;
 import controller.Descriptor;
 import controller.ViewController;
@@ -940,7 +940,7 @@ public class PatientView extends View
             }
             this.tblAppointmentHistory.setDefaultRenderer(Invoice.class, new PatientAppointmentHistoryTableInvoiceRenderer());
             this.tblAppointmentHistory.setDefaultRenderer(Duration.class, new AppointmentsTableDurationRenderer());
-            this.tblAppointmentHistory.setDefaultRenderer(LocalDateTime.class, new AppointmentsTableLocalDateTimeRenderer());
+            this.tblAppointmentHistory.setDefaultRenderer(LocalDateTime.class, new AppointmentsListTableLocalDateTimeRenderer());
             
             TableColumnModel columnModel = this.tblAppointmentHistory.getColumnModel();
             columnModel.getColumn(3).setCellRenderer(new ScheduleTableCellRenderer());

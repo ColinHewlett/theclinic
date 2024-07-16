@@ -88,7 +88,7 @@ public class Descriptor {
         private LocalDate emptySlotFromDay = null;
         private LocalDate appointmentScheduleDay = null;
         private ArrayList<Appointment> appointmentSlots = null;
-        private ArrayList<Appointment> appointmentSlotsForTheDay = null;
+        private ArrayList<Appointment> appointmentSlotsForTheDayInListFormat = null;
         private ArrayList<Appointment> appointmentCancellations = null;
         private ArrayList<Appointment> appointments = null;
         private HashMap<DayOfWeek,Boolean> surgeryDaysAssignment = null;
@@ -215,23 +215,6 @@ public class Descriptor {
         public void setViewMode(ViewController.ViewMode value){
             viewMode = value;
         }
-        /*28/03/2024
-        public PatientNote getPatientNote(){
-            return patientNote;
-        }
-        
-        public void setPatientNotes(PatientNote value){
-            patientNote = value;
-        }*/
-        
-        /*28/03/2024
-        public ArrayList<PatientNote> getPatientNotes(){
-            return patientNotes;
-        }
-        
-        public void setPatientNotes(ArrayList<PatientNote> value){
-            patientNotes = value;
-        }*/
         
         public ArrayList<Appointment> getAppointmentCancellations(){
             return appointmentCancellations;
@@ -341,12 +324,19 @@ public class Descriptor {
             error = message;
         }
         
-        public ArrayList<Appointment> getAppointmentSlotsForDay(){
-            return appointmentSlotsForTheDay;
+        public ArrayList<Appointment> getAppointmentSlotsForDayInListFormat(){
+            return appointmentSlotsForTheDayInListFormat;
         }
-
-        public void setAppointmentSlotsForDay(ArrayList<Appointment> appointments){
-            appointmentSlotsForTheDay = appointments;
+        public void setAppointmentSlotsForDayInListFormat(ArrayList<Appointment> appointments){
+            appointmentSlotsForTheDayInListFormat = appointments;
+        }
+        
+        private ArrayList<Slot> appointmentSlotsForTheDayInDiaryFormat = null;
+        public ArrayList<Slot> getAppointmentSlotsForDayInDiaryFormat(){
+            return appointmentSlotsForTheDayInDiaryFormat;
+        }
+        public void setAppointmentSlotsForDayInDiaryFormat(ArrayList<Slot> slots){
+            appointmentSlotsForTheDayInDiaryFormat = slots;
         }
 
         public ArrayList<Appointment> getAppointmentSlots(){

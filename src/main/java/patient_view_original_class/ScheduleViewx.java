@@ -9,8 +9,8 @@ import model.non_entity.SystemDefinition;
 import model.non_entity.SystemDefinition.ScheduleSlotType;
 import model.non_entity.SystemDefinition.ScheduleViewActionCaption;
 import view.views.view_support_classes.renderers.AppointmentsTableDurationRenderer;
-import view.views.view_support_classes.renderers.AppointmentsTableLocalDateTimeRenderer;
-import view.views.view_support_classes.renderers.AppointmentsTablePatientRenderer;
+import view.views.view_support_classes.renderers.AppointmentsListTableLocalDateTimeRenderer;
+import view.views.view_support_classes.renderers.AppointmentsListTablePatientRenderer;
 import view.views.view_support_classes.renderers.ScheduleTableCellRenderer;
 /*28/03/2024import view.views.view_support_classes.renderers.AppointmentsTablePatientNoteRenderer;*/
 import view.views.view_support_classes.models.AppointmentScheduleTableModel;
@@ -2244,15 +2244,15 @@ public class ScheduleViewx extends View
         tableModel.removeAllElements();
         ArrayList<Appointment> schedule = makeEmergencyAppointmentsFirst(
                 getMyController().getDescriptor()
-                        .getControllerDescription().getAppointmentSlotsForDay());
+                        .getControllerDescription().getAppointmentSlotsForDayInListFormat());
         Iterator<Appointment> it = schedule.iterator();
         while (it.hasNext()){
             tableModel.addElement(it.next());
         }
        
         this.tblAppointments.setDefaultRenderer(Duration.class, new AppointmentsTableDurationRenderer());
-        this.tblAppointments.setDefaultRenderer(LocalDateTime.class, new AppointmentsTableLocalDateTimeRenderer());
-        this.tblAppointments.setDefaultRenderer(Patient.class, new AppointmentsTablePatientRenderer());
+        this.tblAppointments.setDefaultRenderer(LocalDateTime.class, new AppointmentsListTableLocalDateTimeRenderer());
+        this.tblAppointments.setDefaultRenderer(Patient.class, new AppointmentsListTablePatientRenderer());
         //this.tblAppointments.setDefaultRenderer(Object.class, new ScheduleTableRenderer());
         /*28/03/2024this.tblAppointments.setDefaultRenderer(PatientNote.class, new AppointmentsTablePatientNoteRenderer());*/
         //this.tblAppointments.setModel(tableModel);

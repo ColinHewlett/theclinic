@@ -9,6 +9,7 @@ import model.entity.Patient;
 import model.entity.Appointment;
 import model.non_entity.SystemDefinition.ScheduleSlotType;
 import view.views.view_support_classes.models.ScheduleListTableModel;
+import view.views.view_support_classes.models.ScheduleDiaryTableModel;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
@@ -20,15 +21,16 @@ import javax.swing.table.TableCellRenderer;
  *
  * @author colin
  */
-public class AppointmentsTablePatientRenderer  extends JLabel implements TableCellRenderer{
+public class AppointmentsListTablePatientRenderer  extends JLabel implements TableCellRenderer{
     private boolean isUnbookable = false;
     private Appointment appointment = null;
+    ScheduleListTableModel listModel = null;
     
-    public AppointmentsTablePatientRenderer()
+    public AppointmentsListTablePatientRenderer()
     {
-        Font f = super.getFont();
+        //Font f = super.getFont();
         // bold
-        this.setFont(f.deriveFont(f.getStyle() | ~Font.PLAIN));
+        //this.setFont(f.deriveFont(f.getStyle() | ~Font.PLAIN));
     }
     private ScheduleSlotType slotMarker = null;
     private ScheduleSlotType getSlotMarker(){
@@ -42,12 +44,14 @@ public class AppointmentsTablePatientRenderer  extends JLabel implements TableCe
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
         boolean hasFocus, int row, int column)
     {
+        
         ScheduleListTableModel model = (ScheduleListTableModel)table.getModel();
         appointment = model.getElementAt(row);
         Patient patient = (Patient)value;
         
         if (appointment.getIsEmergency()){ 
             super.setText(patient.toString());
+            //super.setFont(super.getFont().deriveFont(Font.PLAIN));
             super.setHorizontalAlignment(JLabel.LEFT);
             setSlotMarker(ScheduleSlotType.EMERGENCY_SCHEDULE_SLOT);
         }else if (patient == null) {

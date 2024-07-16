@@ -39,6 +39,8 @@ public class SystemDefinition {
     private static String pmsStorePostgresSQL = null;
     private static String pmsStoreType = null;
     
+    public static Color BOOKED_SLOT_HEADER_COLOR = new Color(245,213,184);
+    public static Color BOOKED_SLOT_BLOCK_COLOR = new Color(245,193,144);
     public static Color TITLED_BORDER_COLOR = new Color(0,0,153);
     public static Font TITLED_BORDER_FONT = new Font("Segoe UI", 1, 12);
     public static boolean DEBUG = true;
@@ -83,19 +85,21 @@ public class SystemDefinition {
     }
 
     public enum ScheduleViewActionCaption{
+        CANCEL_APPOINTMENT("<html><center>Cancel</center<center>appointment</center></html>"),
+        CLINICAL_NOTES("<html><center>Clinical</center<center>notes</center></html>"),
+        CLOSE_VIEW("<html><center>Close</center<center>view</center></html>"),
         CREATE_UPDATE_APPOINTMENT("<html><center>Create</center<center>appointment</center></html>",
                                   "<html><center>Update</center<center>appointment</center></html>"),
         MAKE_DELETE_EMERGENCY_APPOINTMENT("<html><center>Make</center><center>emergency</center><center>appointment</center></html>",
                                           "<html><center>Delete</center><center>emergency</center><center>appointment</center></html>"),
         MARK_CANCEL_UNBOOKABLE_SLOT("<html><center>Make slot</center<center>unbookable</center></html>",
                                     "<html><center>Cancel</center<center>unbookable</center><center>slot</center></html>"),
-        CANCEL_APPOINTMENT("<html><center>Cancel</center<center>appointment</center></html>"),
-        CLINICAL_NOTES("<html><center>Clinical</center<center>notes</center></html>"),
+        NEXT_DAY(">>"),
+        PREVIOUS_DAY("<<"),
         SEARCH_AVAILABLE_SLOTS("<html><center>Search</center><center>for</center><center>empty</center><center>schedule</center><center>slots</center</html>"),
         SELECT_TREATMENT("<html><center>Select</center<center>treatment</center></html>"),
-        CLOSE_VIEW("<html><center>Close</center<center>view</center></html>");
-        
-        
+        TODAY("Today");
+
         private String first;
         private String second;
         
