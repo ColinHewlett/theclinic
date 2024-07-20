@@ -595,7 +595,10 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         SURGERY_DAYS_EDIT_REQUEST,
         UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_CREATE_REQUEST,
         UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_UPDATE_REQUEST,
-        TREATMENT_CREATE_REQUEST
+        TREATMENT_CREATE_REQUEST,
+        //following issued when view in diary format
+        CREATE_APPOINTMENT_REQUEST,
+        UPDATE_APPOINTMENT_REQUEST
     }
     
     public static enum ScheduleViewControllerPropertyChangeEvent{

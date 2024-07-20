@@ -635,11 +635,38 @@ public class ScheduleViewController extends ViewController{
      * ---- raised when primary view requests to scan ahead for available appointment slots
      * @param e, ActionEvent received 
      */
-    private void doPrimaryViewActionRequest(ActionEvent e){
-        //getDescriptor().setViewDescription(getView().getViewDescriptor().getViewDescription());
+    private void doPrimaryViewActionRequest(ActionEvent e){ 
+        Appointment result = null;
+        Appointment changedSlotRequest = 
+                getDescriptor().getViewDescription().getAppointment();
+        
         ViewController.ScheduleViewControllerActionEvent actionCommand =
                ViewController.ScheduleViewControllerActionEvent.valueOf(e.getActionCommand());
         switch (actionCommand){
+            case CREATE_APPOINTMENT_REQUEST:
+                LocalDate day = changedSlotRequest.getStart().toLocalDate();
+                setScheduleReport(new ScheduleReport());
+                result = doAppointmentCreateRequest(e, getDescriptor().getViewDescription().getAppointment());
+                if (result!=null){
+                    mergeScheduleSlotsIfPossible(day);
+                    doAppointmentForDayRequest(day);
+                    getDescriptor().getControllerDescription().setPatient(result.getPatient());
+                    firePropertyChangeEvent(
+                            ViewController.DesktopViewControllerPropertyChangeEvent.
+                                    SCHEDULE_VIEW_CONTROLLER_CHANGE_NOTIFICATION.toString(),
+                            (DesktopViewController)getMyController(),
+                            this,
+                            null,
+                            getDescriptor()
+                    );
+                }
+                else {
+                    sendErrorToScheduleEditorView();
+                    doAppointmentForDayRequest(day);
+                }
+                break;
+            case UPDATE_APPOINTMENT_REQUEST:
+                break;
             case PRINT_SCHEDULE_REQUEST:
                 getDescriptor().getControllerDescription().setScheduleDay(
                         getDescriptor().getViewDescription().getScheduleDay());
@@ -2227,17 +2254,27 @@ getDescriptor().getViewDescription().getScheduleDay());
     }
     
     private void doSendViewNewSchedule(){
-        ArrayList<Slot> slots = 
-                convertScheduleListToDiaryFormat(
-                        getDescriptor().getControllerDescription().getAppointmentSlotsForDayInListFormat());
-        getDescriptor().getControllerDescription().setAppointmentSlotsForDayInDiaryFormat(slots);
-        firePropertyChangeEvent(
-                ViewController.ScheduleViewControllerPropertyChangeEvent.
-                        APPOINTMENTS_FOR_DAY_RECEIVED.toString(),
-                getView(),
-                this,
-                null,
-                null
-        );
+        try{
+            ArrayList<Slot> slots = 
+                    convertScheduleListToDiaryFormat(
+                            getDescriptor().getControllerDescription().getAppointmentSlotsForDayInListFormat());
+            getDescriptor().getControllerDescription().setAppointmentSlotsForDayInDiaryFormat(slots);
+            Patient patient = new Patient();
+            patient.setScope(Scope.ALL);
+            patient.read();
+            getDescriptor().getControllerDescription().setPatients(patient.get());
+            firePropertyChangeEvent(
+                    ViewController.ScheduleViewControllerPropertyChangeEvent.
+                            APPOINTMENTS_FOR_DAY_RECEIVED.toString(),
+                    getView(),
+                    this,
+                    null,
+                    null
+            );
+        }catch(StoreException ex){
+            String message = ex.getMessage() + "\n"
+                    + "StoreException raised in doSendViewNewSchedule()";
+            displayErrorMessage(message,"Schedule view controller", JOptionPane.WARNING_MESSAGE);
+        }
     }
 }

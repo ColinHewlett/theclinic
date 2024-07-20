@@ -5,6 +5,7 @@
 package model.non_entity;
 
 import model.entity.Appointment;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -56,27 +57,45 @@ public class Slot {
         localDateTime = value;
     }
     
-    private Boolean isFirst = null;
-    public Boolean getIsFirst(){
-        return isFirst;
-    }
-    public void setIsFirst(Boolean value){
-        isFirst = value;
-    }
-    
-    private Boolean isAvailable = null;
-    public Boolean getIsAvailable(){
-        return isAvailable;
-    }
-    public void setIsAvailable(Boolean value){
-        isAvailable = value;
+    public Boolean getIsFirstSlotOfAppointment(){
+        Boolean result = null;
+        if (getAppointment()!=null) result = (getStart().equals(getAppointment().getStart()));
+        else result = null;
+        return result;
     }
 
-    private Boolean isBooked = null;
-    public Boolean getIsBooked(){
-        return isBooked;
+    public Boolean getIsLastSlotOfAppointment(){
+        Boolean result = false;
+        int duration = 0;
+        LocalDateTime start = null;
+        if(getAppointment()!=null){
+            duration = (int)getAppointment().getDuration().toMinutes();
+            start = getAppointment().getStart();
+            start.plusMinutes(duration-5);
+            result = getStart().equals(start);
+        } else result = null;  
+        return result;
     }
-    public void setIsBooked(Boolean value){
-        isBooked = value;
+    
+    public Boolean getIsSingleSlotAppointment(){
+        Boolean result = null;
+        if (getAppointment()!=null){
+            result = getAppointment().getDuration().toMinutes() == 5;
+        }
+        return result;
+    }
+    
+    public Boolean getIsBookable(){
+        Boolean result = null;
+        if (getAppointment()==null) result = true;
+        else result = false;
+        return result;
+    }
+
+    public Boolean getIsBooked(){
+        Boolean result = null;
+        if (getAppointment()!=null) result = true;
+        else result = false;
+        return result;
     }
 }
