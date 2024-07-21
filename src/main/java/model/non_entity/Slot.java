@@ -59,7 +59,7 @@ public class Slot {
     
     public Boolean getIsFirstSlotOfAppointment(){
         Boolean result = null;
-        if (getAppointment()!=null) result = (getStart().equals(getAppointment().getStart()));
+        if (getAppointment().getPatient()!=null) result = (getStart().equals(getAppointment().getStart()));
         else result = null;
         return result;
     }
@@ -68,11 +68,12 @@ public class Slot {
         Boolean result = false;
         int duration = 0;
         LocalDateTime start = null;
-        if(getAppointment()!=null){
+        LocalDateTime end = null;
+        if(getAppointment().getPatient()!=null){
             duration = (int)getAppointment().getDuration().toMinutes();
             start = getAppointment().getStart();
-            start.plusMinutes(duration-5);
-            result = getStart().equals(start);
+            end = start.plusMinutes(duration-5);
+            result = getStart().equals(end);
         } else result = null;  
         return result;
     }
@@ -87,14 +88,14 @@ public class Slot {
     
     public Boolean getIsBookable(){
         Boolean result = null;
-        if (getAppointment()==null) result = true;
+        if (getAppointment().getPatient()==null) result = true;
         else result = false;
         return result;
     }
 
     public Boolean getIsBooked(){
         Boolean result = null;
-        if (getAppointment()!=null) result = true;
+        if (getAppointment().getPatient()!=null) result = true;
         else result = false;
         return result;
     }
