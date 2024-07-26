@@ -131,7 +131,7 @@
                       <Component id="btnClinicalNotesForSelectedAppointment" alignment="0" max="32767" attributes="0"/>
                       <Component id="btnMarkCancelSlotUnbookable" alignment="0" max="32767" attributes="0"/>
                       <Component id="btnCancelSelectedAppointment" alignment="0" max="32767" attributes="0"/>
-                      <Component id="btnMakeDeleteEmergencyAppointment" alignment="0" max="32767" attributes="0"/>
+                      <Component id="btnMakeDeleteEmergencyAppointmentUndoSelection" alignment="0" max="32767" attributes="0"/>
                       <Component id="btnCreateUpdateAppointment" alignment="0" max="32767" attributes="0"/>
                   </Group>
                   <EmptySpace max="32767" attributes="0"/>
@@ -144,7 +144,7 @@
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="btnCreateUpdateAppointment" min="-2" pref="71" max="-2" attributes="0"/>
                   <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                  <Component id="btnMakeDeleteEmergencyAppointment" min="-2" pref="71" max="-2" attributes="0"/>
+                  <Component id="btnMakeDeleteEmergencyAppointmentUndoSelection" min="-2" pref="71" max="-2" attributes="0"/>
                   <EmptySpace type="unrelated" max="-2" attributes="0"/>
                   <Component id="btnCancelSelectedAppointment" min="-2" pref="71" max="-2" attributes="0"/>
                   <EmptySpace min="-2" pref="12" max="-2" attributes="0"/>
@@ -168,10 +168,10 @@
             </Property>
           </Properties>
         </Component>
-        <Component class="javax.swing.JButton" name="btnMakeDeleteEmergencyAppointment">
+        <Component class="javax.swing.JButton" name="btnMakeDeleteEmergencyAppointmentUndoSelection">
           <Properties>
             <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code="ScheduleViewActionCaption.MAKE_DELETE_EMERGENCY_APPOINTMENT._1()" type="code"/>
+              <Connection code="ScheduleViewActionCaption.MAKE_DELETE_EMERGENCY_APPOINTMENT_UNDO._1()" type="code"/>
             </Property>
           </Properties>
         </Component>
