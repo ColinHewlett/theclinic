@@ -72,6 +72,7 @@ import java.util.HashMap;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
 import javax.swing.JOptionPane;
+import javax.swing.JColorChooser;
 import javax.swing.JButton; 
 import javax.swing.JTable;
 import java.time.Duration;
@@ -119,6 +120,7 @@ public class ScheduleView extends View
         REQUEST_CANCELLED_APPOINTMENT_VIEW,
         REQUEST_CLINICAL_NOTE_VIEW,
         REQUEST_CLOSE_VIEW,
+        REQUEST_COLOUR_PICKER,
         REQUEST_CREATE_UPDATE_APPOINTMENT,
         REQUEST_MAKE_DELETE_EMERGENCY_APPOINTMENT_UNDO_SELECTION,
         REQUEST_MARK_CANCEL_UNBOOKABLE_SLOT,
@@ -210,6 +212,7 @@ public class ScheduleView extends View
             else result = ScheduleDiaryAction.NONE;
 
             if (getIsSingleSlotAppointmentFound()){
+                setAppointmentMode(AppointmentMode.UPDATE);
                 switch(result){
                     case SHIFT_APPOINTMENT_DOWN:
                         result = ScheduleDiaryAction.EXTEND_SHIFT_APPOINTMENT_DOWN;
@@ -750,6 +753,9 @@ public class ScheduleView extends View
                 break;
             case REQUEST_CLOSE_VIEW:
                 doCloseViewAction();
+                break;
+            case REQUEST_COLOUR_PICKER:
+                doColourPickerRequest();
                 break;
             case REQUEST_CREATE_UPDATE_APPOINTMENT:
                 switch(getAppointmentMode()){
@@ -1340,10 +1346,6 @@ public class ScheduleView extends View
                     "Schedule view controller error", JOptionPane.WARNING_MESSAGE);
         }
         setEmptySlotAvailabilityTableListener();
-
-        this.btnClinicalNotesForSelectedAppointment
-                .setActionCommand(Action.REQUEST_CLINICAL_NOTE_VIEW.toString());
-        this.btnClinicalNotesForSelectedAppointment.addActionListener(this);
         
         btnCreateUpdateAppointment.setEnabled(false);
         btnMakeDeleteEmergencyAppointmentUndoSelection.setEnabled(false);
@@ -1410,6 +1412,8 @@ public class ScheduleView extends View
         this.mniSurgeryDaysEditor.setActionCommand(Action.REQUEST_SURGERY_DAY_EDITOR.toString());
         this.mniSurgeryDaysEditor.addActionListener(this);
         this.mniViewCancelledAppointments.setActionCommand(Action.REQUEST_CANCELLED_APPOINTMENT_VIEW.toString());
+        this.mniColorPicker.setActionCommand(Action.REQUEST_COLOUR_PICKER.toString());
+        this.mniColorPicker.addActionListener(this);
         dayDatePicker.addDateChangeListener(this);
         
         pnlSlotAvailability.setBorder(javax.swing.BorderFactory.createTitledBorder(
@@ -1884,6 +1888,14 @@ public class ScheduleView extends View
                 ActionEvent.ACTION_PERFORMED,
                 ViewController.ScheduleViewControllerActionEvent.UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_VIEW_REQUEST.toString());
         this.getMyController().actionPerformed(actionEvent);
+    }
+    
+    private void doColourPickerRequest(){
+        Color initialColor = Color.RED;
+        Color selectedColor = JColorChooser.showDialog(this, "Select a Color", initialColor);
+        //if (selectedColor != null) {
+            //button.setBackground(selectedColor);
+        //}
     }
     
     private void doClinicNoteRequest(){
@@ -2500,6 +2512,8 @@ public class ScheduleView extends View
         mniSelectNonSurgeryDay = new javax.swing.JMenuItem();
         jSeparator2 = new javax.swing.JPopupMenu.Separator();
         mniPrintScheduleSelection = new javax.swing.JMenuItem();
+        jSeparator4 = new javax.swing.JPopupMenu.Separator();
+        mniColorPicker = new javax.swing.JMenuItem();
         jSeparator3 = new javax.swing.JPopupMenu.Separator();
         mniCloseView = new javax.swing.JMenuItem();
 
@@ -2734,6 +2748,10 @@ public class ScheduleView extends View
 
         mniPrintScheduleSelection.setText("Print schedule");
         mnuOptions.add(mniPrintScheduleSelection);
+        mnuOptions.add(jSeparator4);
+
+        mniColorPicker.setText("Colour picker");
+        mnuOptions.add(mniColorPicker);
         mnuOptions.add(jSeparator3);
 
         mniCloseView.setText("Close view");
@@ -2818,7 +2836,9 @@ public class ScheduleView extends View
     private javax.swing.JPopupMenu.Separator jSeparator1;
     private javax.swing.JPopupMenu.Separator jSeparator2;
     private javax.swing.JPopupMenu.Separator jSeparator3;
+    private javax.swing.JPopupMenu.Separator jSeparator4;
     private javax.swing.JMenuItem mniCloseView;
+    private javax.swing.JMenuItem mniColorPicker;
     private javax.swing.JMenuItem mniPrintScheduleSelection;
     private javax.swing.JMenuItem mniSelectNonSurgeryDay;
     private javax.swing.JMenuItem mniSurgeryDaysEditor;

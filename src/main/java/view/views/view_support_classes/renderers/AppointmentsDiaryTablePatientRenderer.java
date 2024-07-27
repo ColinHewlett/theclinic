@@ -85,7 +85,7 @@ public class AppointmentsDiaryTablePatientRenderer extends JLabel implements Tab
                 case UNBOOKABLE_SCHEDULE_SLOT:
                     break;
                 case BOOKABLE_SCHEDULE_SLOT:
-                    setBackground(table.getBackground());
+                    setBackground(SystemDefinition.BOOKABLE_SLOT_COLOR);
                     setForeground(table.getForeground());
                     break;
                 case BOOKED_SCHEDULE_SLOT:

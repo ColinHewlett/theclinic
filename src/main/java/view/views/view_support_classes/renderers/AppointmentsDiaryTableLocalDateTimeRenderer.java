@@ -98,7 +98,7 @@ public class AppointmentsDiaryTableLocalDateTimeRenderer extends JLabel implemen
                     setForeground(Color.RED);
                     break;
                 case BOOKABLE_SCHEDULE_SLOT:
-                    setBackground(table.getBackground());
+                    setBackground(SystemDefinition.BOOKABLE_SLOT_COLOR);
                     setForeground(table.getForeground());
                     break;
 

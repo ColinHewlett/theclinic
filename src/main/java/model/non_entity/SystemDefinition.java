@@ -39,8 +39,10 @@ public class SystemDefinition {
     private static String pmsStorePostgresSQL = null;
     private static String pmsStoreType = null;
     
-    public static Color BOOKED_SLOT_HEADER_COLOR = new Color(245,213,184);
-    public static Color BOOKED_SLOT_BLOCK_COLOR = new Color(245,193,144);
+    public static Color BOOKABLE_SLOT_COLOR = new Color(240,240,240);
+    public static Color BOOKED_SLOT_HEADER_COLOR = new Color(245,247,208);
+    public static Color BOOKED_SLOT_BLOCK_COLOR = new Color(245,227,167);
+    
     public static Color TITLED_BORDER_COLOR = new Color(0,0,153);
     public static Font TITLED_BORDER_FONT = new Font("Segoe UI", 1, 12);
     public static boolean DEBUG = true;
@@ -90,8 +92,9 @@ public class SystemDefinition {
         CLOSE_VIEW("<html><center>Close</center<center>view</center></html>"),
         CREATE_UPDATE_APPOINTMENT("<html><center>Create</center<center>appointment</center></html>",
                                   "<html><center>Update</center<center>appointment</center></html>"),
-        MAKE_DELETE_EMERGENCY_APPOINTMENT("<html><center>Make</center><center>emergency</center><center>appointment</center></html>",
-                                          "<html><center>Delete</center><center>emergency</center><center>appointment</center></html>"),
+        MAKE_DELETE_EMERGENCY_APPOINTMENT_UNDO("<html><center>Make</center><center>emergency</center><center>appointment</center></html>",
+                                          "<html><center>Delete</center><center>emergency</center><center>appointment</center></html>",
+                                          "<html><center>Undo</center><center>current</center><center>selection</center></html>"),
         MARK_CANCEL_UNBOOKABLE_SLOT("<html><center>Make slot</center<center>unbookable</center></html>",
                                     "<html><center>Cancel</center<center>unbookable</center><center>slot</center></html>"),
         NEXT_DAY(">>"),
@@ -100,8 +103,9 @@ public class SystemDefinition {
         SELECT_TREATMENT("<html><center>Select</center<center>treatment</center></html>"),
         TODAY("Today");
 
-        private String first;
-        private String second;
+        private String first = "";
+        private String second = "";
+        private String third = "";
         
         ScheduleViewActionCaption(String value1){
             first = value1;
@@ -112,12 +116,22 @@ public class SystemDefinition {
             second = value2;
         }
         
+        ScheduleViewActionCaption(String value1, String value2, String value3){
+            first = value1;
+            second = value2;
+            third = value3;
+        }
+        
         public String _1(){
             return first;
         }
         
         public String _2(){
             return second;
+        }
+        
+        public String _3(){
+            return third;
         }
     }
     public enum ScheduleSlotType{

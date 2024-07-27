@@ -35,6 +35,13 @@
                 <Property name="text" type="java.lang.String" value="Print schedule"/>
               </Properties>
             </MenuItem>
+            <MenuItem class="javax.swing.JPopupMenu$Separator" name="jSeparator4">
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="mniColorPicker">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Colour picker"/>
+              </Properties>
+            </MenuItem>
             <MenuItem class="javax.swing.JPopupMenu$Separator" name="jSeparator3">
             </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="mniCloseView">

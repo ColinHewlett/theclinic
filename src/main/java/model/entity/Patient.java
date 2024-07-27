@@ -251,6 +251,10 @@ public class Patient extends Entity implements IEntityStoreActions {
             this.setIsPatient(true);
     } 
     
+    public boolean getIsPatientMarkedUnbookable(){
+        return getKey().equals(1);
+    }
+    
     /** 
      * @return collection of patients in persistent store less patient with a key = 1
      */

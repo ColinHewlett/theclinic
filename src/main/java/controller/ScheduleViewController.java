@@ -666,6 +666,27 @@ public class ScheduleViewController extends ViewController{
                 }
                 break;
             case UPDATE_APPOINTMENT_REQUEST:
+                day = changedSlotRequest.getStart().toLocalDate();
+                setScheduleReport(new ScheduleReport());
+                result = doAppointmentUpdateRequest(e,changedSlotRequest);
+                if(result!=null){
+                    mergeScheduleSlotsIfPossible(day);
+                    doAppointmentForDayRequest(day);
+                    getDescriptor().getControllerDescription().setPatient(result.getPatient());
+                    firePropertyChangeEvent(
+                            ViewController.DesktopViewControllerPropertyChangeEvent.
+                                    SCHEDULE_VIEW_CONTROLLER_CHANGE_NOTIFICATION.toString(),
+                            (DesktopViewController)getMyController(),
+                            this,
+                            null,
+                            getDescriptor()
+                    );
+                    
+                }
+                else {
+                    sendErrorToScheduleEditorView();
+                    doAppointmentForDayRequest(day);
+                }
                 break;
             case PRINT_SCHEDULE_REQUEST:
                 getDescriptor().getControllerDescription().setScheduleDay(

@@ -138,11 +138,11 @@ public class ScheduleViewx extends View
         emergencySlotMode = value;
         switch (emergencySlotMode){
             case MAKE:
-                btnMakeDeleteEmergencyAppointment.setText(ScheduleViewActionCaption.MAKE_DELETE_EMERGENCY_APPOINTMENT._1());
+                //btnMakeDeleteEmergencyAppointment.setText(ScheduleViewActionCaption.MAKE_DELETE_EMERGENCY_APPOINTMENT._1());
                 btnMakeDeleteEmergencyAppointment.setEnabled(true);
                 break;
             case DELETE:
-                btnMakeDeleteEmergencyAppointment.setText(ScheduleViewActionCaption.MAKE_DELETE_EMERGENCY_APPOINTMENT._2());
+                //btnMakeDeleteEmergencyAppointment.setText(ScheduleViewActionCaption.MAKE_DELETE_EMERGENCY_APPOINTMENT._2());
                 btnMakeDeleteEmergencyAppointment.setEnabled(true);
                 break;
             case NONE:
@@ -420,7 +420,7 @@ public class ScheduleViewx extends View
         btnCloseView.setEnabled(true);
         
         btnCreateUpdateAppointment.setText(ScheduleViewActionCaption.CREATE_UPDATE_APPOINTMENT._1());
-        btnMakeDeleteEmergencyAppointment.setText(ScheduleViewActionCaption.MAKE_DELETE_EMERGENCY_APPOINTMENT._1());
+        //btnMakeDeleteEmergencyAppointment.setText(ScheduleViewActionCaption.MAKE_DELETE_EMERGENCY_APPOINTMENT._1());
         btnMarkCancelSlotUnbookable.setText(ScheduleViewActionCaption.MARK_CANCEL_UNBOOKABLE_SLOT._1());
         btnCancelSelectedAppointment.setText(ScheduleViewActionCaption.CANCEL_APPOINTMENT._1());
         btnClinicalNotesForSelectedAppointment.setText(ScheduleViewActionCaption.CLINICAL_NOTES._1());
