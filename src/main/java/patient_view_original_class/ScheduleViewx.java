@@ -490,8 +490,8 @@ public class ScheduleViewx extends View
      * @param controller; ViewController object responsible for this View
      * -- enables access to the Descriptor settings created by the controller 
      * @param desktopView; DesktopView reference enabling this view 
-     * -- to be added to the DesktopView object
-     * -- and be centred in the desktopView
+ -- to be added to the DesktopView object
+ -- and be centred in the desktopView
      */
     public ScheduleViewx(
             View.Viewer myViewType, 

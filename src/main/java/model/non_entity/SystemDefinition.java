@@ -53,6 +53,8 @@ public class SystemDefinition {
     public static int QUESTIONNAIRE_TABLE_DOUBLE_HEIGHT = 500;
     public static int QUESTIONNAIRE_TABLE_SINGLE_HEIGHT = 300;
     public static int QUESTIONNAIRE_TABLE_MEDICATION_ROW_COUNT = 5;
+    public static String PATIENT_SCHEDULE_FILENAME = "AppointmentSchedule.docx";
+    public static String PATIENT_QUESTIONNAIRE_MEDICAL_HISTORY_FILENAME = "PatientMedicalHistory.docx";
     //public static String EMERGENCY_APPOINTMENT = "Emergency appointment";
     
     public enum PatientViewActionCaption{

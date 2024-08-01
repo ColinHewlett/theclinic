@@ -15,6 +15,7 @@ import java.awt.ActiveEvent;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.Desktop;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.MenuComponent;
@@ -27,6 +28,8 @@ import java.awt.event.MouseMotionAdapter;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyVetoException;
+import java.io.File;
+import java.io.IOException;
 import javax.swing.JCheckBox;
 import javax.swing.JInternalFrame;
 import javax.swing.JLayeredPane;
@@ -394,5 +397,23 @@ public class View extends JInternalFrame
     @Override
     public void propertyChange(PropertyChangeEvent ex){
         
+    }
+    
+    public void doOpenDocumentForPrinting(String filepath){
+        File file = new File(filepath);
+        
+        if (!Desktop.isDesktopSupported()) {
+            System.out.println("Desktop API is not supported on this system.");
+            return;
+        }
+
+        // Get the Desktop instance
+        Desktop desktop = Desktop.getDesktop();
+        try {
+            // Open the document with the default application
+            desktop.open(file);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

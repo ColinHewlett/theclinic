@@ -21,6 +21,7 @@ import com.github.lgooddatepicker.components.DatePickerSettings;
 import com.github.lgooddatepicker.optionalusertools.DateChangeListener;
 import com.github.lgooddatepicker.zinternaltools.DateChangeEvent;
 import controller.TemplateReader;
+import java.awt.Desktop;
 import java.awt.Color;
 import java.awt.event.*;
 import java.beans.PropertyChangeEvent;
@@ -55,6 +56,8 @@ import javax.swing.border.TitledBorder;
 import javax.swing.table.TableColumnModel;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
+import java.io.File;
+import java.io.IOException;
 
 import view.views.view_support_classes.renderers.ScheduleTableCellRenderer;
 /*28/03/2024import model.PatientNote;*/
@@ -486,6 +489,8 @@ public class PatientView extends View
             case REQUEST_PRINT_PATIENT_MEDICAL_HISTORY:
                 doActionFor(ViewController.PatientViewControllerActionEvent
                         .PRINT_PATIENT_MEDICAL_HISTORY_REQUEST);
+                doOpenDocumentForPrinting(SystemDefinition.getPMSPrintFolder() 
+                        + SystemDefinition.PATIENT_QUESTIONNAIRE_MEDICAL_HISTORY_FILENAME);
                 break;
             case REQUEST_PATIENT_RECALLS:
                 getMyController().sendNoOpMessage(this);
@@ -1205,6 +1210,25 @@ public class PatientView extends View
     private int getAge(LocalDate dob){
         return Period.between(dob, LocalDate.now()).getYears();
     }
+    
+    /*
+    private void doOpenDocumentForPrinting(String filepath){
+        File file = new File(filepath);
+        
+        if (!Desktop.isDesktopSupported()) {
+            System.out.println("Desktop API is not supported on this system.");
+            return;
+        }
+
+        // Get the Desktop instance
+        Desktop desktop = Desktop.getDesktop();
+        try {
+            // Open the document with the default application
+            desktop.open(file);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }*/
 
     /**
      * This method is called from within the constructor to initialize the form.

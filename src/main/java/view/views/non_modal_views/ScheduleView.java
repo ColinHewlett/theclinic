@@ -4,6 +4,10 @@
  */
 package view.views.non_modal_views;
 
+import com.bric.colorpicker.ColorPicker;
+import com.bric.colorpicker.listeners.ColorListener;
+import com.bric.colorpicker.models.ColorModel;
+import com.bric.colorpicker.ColorPickerDialog;
 import model.non_entity.SystemDefinition;
 import model.non_entity.Slot;
 import model.non_entity.SystemDefinition.ScheduleSlotType;
@@ -105,7 +109,8 @@ public class ScheduleView extends View
                                      MouseListener,
                                      DateChangeListener,
                                      DateHighlightPolicy,
-                                     TableModelListener{
+                                     TableModelListener,
+                                     ColorListener{
     
     //private ScheduleListTableModel tableModel = null;
     private InternalFrameAdapter internalFrameAdapter = null;
@@ -755,7 +760,7 @@ public class ScheduleView extends View
                 doCloseViewAction();
                 break;
             case REQUEST_COLOUR_PICKER:
-                doColourPickerRequest();
+                doColourPickerRequest2();
                 break;
             case REQUEST_CREATE_UPDATE_APPOINTMENT:
                 switch(getAppointmentMode()){
@@ -916,6 +921,8 @@ public class ScheduleView extends View
                         ActionEvent.ACTION_PERFORMED,
                         ViewController.ScheduleViewControllerActionEvent.PRINT_SCHEDULE_REQUEST.toString());
                 getMyController().actionPerformed(actionEvent);
+                doOpenDocumentForPrinting(SystemDefinition.getPMSPrintFolder() 
+                        + SystemDefinition.PATIENT_SCHEDULE_FILENAME);
                 break;
             case REQUEST_SCHEDULE_DIARY_VIEW:
                 setScheduleViewMode(ScheduleViewMode.DIARY);
@@ -1096,6 +1103,11 @@ public class ScheduleView extends View
             ViewController.ScheduleViewControllerActionEvent.
                     APPOINTMENT_REMINDED_STATUS_UPDATE_REQUEST.toString());
         getMyController().actionPerformed(actionEvent);
+    }
+    
+    @Override
+    public void colorChanged(ColorModel colorModel){
+
     }
     
     private boolean tableValueChangedListenerActivated = false;
@@ -1896,6 +1908,11 @@ public class ScheduleView extends View
         //if (selectedColor != null) {
             //button.setBackground(selectedColor);
         //}
+    }
+    
+    private void doColourPickerRequest2(){
+        Color initialColor = Color.WHITE;
+        Color selectedColor = ColorPickerDialog.showDialog(null, initialColor, true);
     }
     
     private void doClinicNoteRequest(){

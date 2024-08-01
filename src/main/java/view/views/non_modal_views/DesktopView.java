@@ -81,9 +81,13 @@ import com.github.lgooddatepicker.components.DatePicker;
 import com.github.lgooddatepicker.components.DatePickerSettings;
 import com.github.lgooddatepicker.optionalusertools.DateChangeListener;
 import com.github.lgooddatepicker.zinternaltools.DateChangeEvent;
+import java.awt.Desktop;
+import java.io.File;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import javax.swing.JButton;
+import model.non_entity.SystemDefinition;
 
 /**
  *
@@ -101,7 +105,7 @@ public class DesktopView extends javax.swing.JFrame
         REQUEST_MEDICAL_CONDITION_VIEW,
         REQUEST_PATIENT_VIEW,
         REQUEST_TREATMENT_VIEW,
-        REQUEST_PRINT_PATIENT_DETAILS_VIEW,
+        REQUEST_PRINT_NEW_PATIENT_DETAILS_VIEW,
         REQUEST_PRINT_SCHEDULE
     };
 
@@ -123,12 +127,14 @@ public class DesktopView extends javax.swing.JFrame
         private final String EXIT_VIEW_REQUEST_TITLE = "Exit the Clinic practice management system";
         
     private final String SETTINGS_MENU_TITLE = "Settings";
+        private final String PRINT_BLANK_MEDICAL_HISTORY_REQUEST_TITLE = "Blank new patient medical history questionnaire";
         private final String MEDICAL_CONDITION_REQUEST_TITLE = "Medical history conditions";
         private final String TREATMENTS_REQUEST_TITLE = "Treatments";
+        private final String COLOUR_PICKER_OPTIONS_TITLE = "Colour picker options";
         private final String CASCADE_VIEWS_REQUEST_TITLE = "Cascade views";
     
     private final String PRINTED_FORMS_MENU_TITLE = "Printed forms";
-        private final String PRINT_MEDICAL_CONDITIONS_REQUEST_TITLE = "New patient medical history questionnaire";
+        
         private final String PRINT_SCHEDULE_REQUEST_TITLE = "Appointment schedule";  
         
     private final String MIGRATION_MANAGEMENT_MENU_TITLE = "Migration management";
@@ -159,12 +165,14 @@ public class DesktopView extends javax.swing.JFrame
         private JMenuItem mniExitViewRequest = null;
         
     private JMenu mnuSettings = null; 
+    private JMenuItem mniPrintBlankMedicalHistoryRequest = null;
         private JMenuItem mniMedicalConditionViewRequest = null;
         private JMenuItem mniTreatmentsViewRequest = null;
+        private JMenuItem mniColorPickerOptionsViewRequest = null;
         private JMenuItem mniCascadeViewsRequest = null;
         
     private JMenu mnuPrintedForms = null; 
-        private JMenuItem mniPrintMedicalConditionViewRequest = null;
+        
         private JMenuItem mniPrintScheduleViewRequest = null;    
         
     private JMenu mnuMigrationManagement = null; 
@@ -211,31 +219,38 @@ public class DesktopView extends javax.swing.JFrame
         isPMSStoreDefined = value;
     }
  
-    
+    /*
     private void makePrintedFormsMenu(){
         mnuPrintedForms = new JMenu(PRINTED_FORMS_MENU_TITLE);
-        mniPrintMedicalConditionViewRequest = new JMenuItem(PRINT_MEDICAL_CONDITIONS_REQUEST_TITLE);
+        mniPrintBlankMedicalHistoryRequest = new JMenuItem(PRINT_BLANK_MEDICAL_HISTORY_REQUEST_TITLE);
         mniPrintScheduleViewRequest = new JMenuItem(PRINT_SCHEDULE_REQUEST_TITLE);
-        mnuPrintedForms.add(mniPrintMedicalConditionViewRequest);
+        mnuPrintedForms.add(mniPrintBlankMedicalHistoryRequest);
         mnuPrintedForms.add(mniPrintScheduleViewRequest);
-        mniPrintMedicalConditionViewRequest.setActionCommand(Action.REQUEST_PRINT_PATIENT_DETAILS_VIEW.toString());
+        mniPrintBlankMedicalHistoryRequest.setActionCommand(Action.REQUEST_PRINT_NEW_PATIENT_DETAILS_VIEW.toString());
         mniPrintScheduleViewRequest.setActionCommand(Action.REQUEST_PRINT_SCHEDULE.toString());
-        mniPrintMedicalConditionViewRequest.addActionListener(this);
+        mniPrintBlankMedicalHistoryRequest.addActionListener(this);
         mniPrintScheduleViewRequest.addActionListener(this);
-    }
+    }*/
     
     private void makeSettingsMenu(){
         mnuSettings = new JMenu(SETTINGS_MENU_TITLE);
+        mniPrintBlankMedicalHistoryRequest = new JMenuItem(PRINT_BLANK_MEDICAL_HISTORY_REQUEST_TITLE);
         mniMedicalConditionViewRequest = new JMenuItem(MEDICAL_CONDITION_REQUEST_TITLE);
         mniTreatmentsViewRequest = new JMenuItem(TREATMENTS_REQUEST_TITLE);
+        mniColorPickerOptionsViewRequest = new JMenuItem(COLOUR_PICKER_OPTIONS_TITLE);
         mniCascadeViewsRequest = new JMenuItem(CASCADE_VIEWS_REQUEST_TITLE);
+        mnuSettings.add(mniPrintBlankMedicalHistoryRequest);
         mnuSettings.add(mniMedicalConditionViewRequest);
         mnuSettings.add(mniTreatmentsViewRequest);
         mnuSettings.add(new JSeparator());
+        mnuSettings.add(mniColorPickerOptionsViewRequest);
+        mnuSettings.add(new JSeparator());
         mnuSettings.add(mniCascadeViewsRequest);
+        mniPrintBlankMedicalHistoryRequest.setActionCommand(Action.REQUEST_PRINT_NEW_PATIENT_DETAILS_VIEW.toString());
         mniMedicalConditionViewRequest.setActionCommand(Action.REQUEST_MEDICAL_CONDITION_VIEW.toString());
         mniTreatmentsViewRequest.setActionCommand(Action.REQUEST_TREATMENT_VIEW.toString());
         mniCascadeViewsRequest.setActionCommand(Action.REQUEST_CASCADE_VIEWS.toString());
+        mniPrintBlankMedicalHistoryRequest.addActionListener(this);
         mniMedicalConditionViewRequest.addActionListener(this);
         mniTreatmentsViewRequest.addActionListener(this);
         mniCascadeViewsRequest.addActionListener(this);
@@ -396,10 +411,10 @@ public class DesktopView extends javax.swing.JFrame
             else{
                 makeSelectViewMenu();
                 makeSettingsMenu();
-                makePrintedFormsMenu();
+                //makePrintedFormsMenu();
                 mnbDesktop.add(mnuSelectView);
                 mnbDesktop.add(mnuSettings);
-                mnbDesktop.add(mnuPrintedForms);
+                //mnbDesktop.add(mnuPrintedForms);
             }
         }
         else{
@@ -407,7 +422,7 @@ public class DesktopView extends javax.swing.JFrame
             makeSettingsMenu();
             mnbDesktop.add(mnuSelectView); 
             mnbDesktop.add(mnuSettings);
-            mnbDesktop.add(mnuPrintedForms);
+            //mnbDesktop.add(mnuPrintedForms);
         }
         setSize(1250,812);
         Dimension test1 = getPreferredSize();
@@ -453,12 +468,15 @@ public class DesktopView extends javax.swing.JFrame
         switch (Action.valueOf(e.getActionCommand())){
             case REQUEST_CASCADE_VIEWS:
                 break;
-            case REQUEST_PRINT_PATIENT_DETAILS_VIEW:
+            case REQUEST_PRINT_NEW_PATIENT_DETAILS_VIEW:
                 actionEvent = new ActionEvent(
                         this,ActionEvent.ACTION_PERFORMED,
                         ViewController.DesktopViewControllerActionEvent
                                 .PRINT_NEW_PATIENT_DETAILS_REQUEST.toString());
                 this.getMyController().actionPerformed(actionEvent);
+                doOpenDocumentForPrinting(SystemDefinition.getPMSPrintFolder() 
+                        + SystemDefinition.PATIENT_QUESTIONNAIRE_MEDICAL_HISTORY_FILENAME);
+                
                 break;
             case REQUEST_PRINT_SCHEDULE:
                 DatePickerInDialog datePickerInDialog = new DatePickerInDialog(this);
@@ -1203,6 +1221,24 @@ public class DesktopView extends javax.swing.JFrame
     
     public void addInternalFrameListeners(){
         
+    }
+    
+    public void doOpenDocumentForPrinting(String filepath){
+        File file = new File(filepath);
+        
+        if (!Desktop.isDesktopSupported()) {
+            System.out.println("Desktop API is not supported on this system.");
+            return;
+        }
+
+        // Get the Desktop instance
+        Desktop desktop = Desktop.getDesktop();
+        try {
+            // Open the document with the default application
+            desktop.open(file);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
 
