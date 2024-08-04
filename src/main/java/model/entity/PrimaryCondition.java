@@ -28,7 +28,7 @@ public class PrimaryCondition extends Condition implements IEntityStoreActions {
     }
     
     public PrimaryCondition(Integer key){
-        this.key = key;
+        setKey(key);
         setIsPrimaryCondition(true);
     }
 
