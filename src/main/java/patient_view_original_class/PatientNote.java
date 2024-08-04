@@ -44,7 +44,7 @@ public class PatientNote extends Entity implements IEntityStoreActions{
     
     
     public PatientNote(Integer key){
-        this.key = key;
+        setKey(key);
         super.setIsPatientNote(true);
     }
     
@@ -69,14 +69,6 @@ public class PatientNote extends Entity implements IEntityStoreActions{
     
     public PatientNote(){
         super.setIsPatientNote(true);
-    }
-    
-    private Integer key = null;
-    protected void setKey(Integer value){
-        this.key = value;
-    }
-    protected Integer getKey(){
-        return key;
     }
     
     private LocalDateTime datestamp = null;

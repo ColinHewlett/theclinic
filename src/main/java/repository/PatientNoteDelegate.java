@@ -25,14 +25,5 @@ public class PatientNoteDelegate extends PatientNote{
         super.setScope(pn.getScope());
         super.setLastUpdated(pn.getLastUpdated());
     }
-    
-    @Override
-    protected void setKey(Integer key){
-        super.setKey(key);
-    }
-    
-    @Override
-    protected Integer getKey(){
-        return super.getKey();
-    }
+
 }

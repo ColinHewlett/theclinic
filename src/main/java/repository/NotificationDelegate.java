@@ -29,11 +29,4 @@ public class NotificationDelegate extends Notification {
         super.setScope(pn.getScope());
     }
     
-    protected void setKey(Integer key){
-        super.setKey(key);
-    }
-    
-    protected Integer getKey(){
-        return super.getKey();
-    }
 }

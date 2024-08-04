@@ -53,13 +53,7 @@ public class PatientCondition extends Entity implements IEntityStoreActions{
     public void setComment(String value){
         comment = value;
     }
-     public Integer getKey(){
-                return key;
-    }
-    public void setKey(Integer value){
-        key = value;
-    }
-    
+
     @Override
     public Point count() throws StoreException{
         return new Repository().count(this);

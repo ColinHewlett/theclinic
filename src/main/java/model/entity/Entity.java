@@ -7,10 +7,7 @@ package model.entity;
 
 import repository.StoreException;//01/03/2023
 import java.awt.Point;
-import java.util.ArrayList;
 import model.IStoreClient;
-import model.IEntityStoreActions;
-import repository.Repository;
 
 /**
  *
@@ -39,6 +36,7 @@ public class Entity implements IStoreClient{
     private Boolean isQuestion = false;
     private Boolean isInvoice = false;
     private Boolean isTreatmentCost = false;
+    private Boolean isUser = false;
     private Scope scope = null;
     private Point value = null;
     protected Boolean isDeleted = false;
@@ -81,6 +79,7 @@ public class Entity implements IStoreClient{
         setIsQuestion(false);
         setIsInvoice(false);
         setIsTreatmentCost(false);
+        setIsUser(false);
     }
     
     /**
@@ -139,6 +138,27 @@ public class Entity implements IStoreClient{
     public void setScope(Scope value){
         scope = value;
     }
+    
+    private Integer key = null;
+    public Integer getKey(){
+        return key;
+    }
+    public void setKey(Integer value){
+        this.key = value;
+        if (key!=null)
+            if (key!=0) setIsKeyDefined(true);
+            else setIsKeyDefined(false);
+        else setIsKeyDefined(false); 
+    }
+    
+    private Boolean isKeyDefined = false;
+    public Boolean getIsKeyDefined(){
+        return isKeyDefined;
+    }
+    public void setIsKeyDefined(Boolean value){
+        isKeyDefined = value;
+    }
+
     
     public Boolean getIsAppointment(){
         return isAppointment;
@@ -223,6 +243,15 @@ public class Entity implements IStoreClient{
     
     public Boolean getIsTreatmentCost(){
         return isTreatmentCost;
+    }
+    
+    public Boolean getIsUser(){
+        return isUser;
+    }
+    
+    protected void setIsUser(Boolean value){
+        if (value) resetAll();
+        isUser= value;
     }
     
     protected void setIsTreatmentCost(Boolean value){

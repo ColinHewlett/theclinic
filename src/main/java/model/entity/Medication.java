@@ -37,15 +37,7 @@ public class Medication extends Entity implements IEntityStoreActions{
         this.patient = patient;
         setIsMedication(true);
     }
-    
-    public Integer getKey() {
-        return key;
-    }
 
-    public void setKey(Integer key) {
-        this.key = key;
-    }
-    
     public Integer getPatientKey() {
         return key;
     }

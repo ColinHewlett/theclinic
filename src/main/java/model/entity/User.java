@@ -4,8 +4,6 @@
  */
 package model.entity;
 
-import model.entity.Entity;
-import model.entity.Appointment;
 import java.awt.Point;
 import java.util.ArrayList;
 import model.IEntityStoreActions;
@@ -16,53 +14,44 @@ import repository.StoreException;
  *
  * @author colin
  */
-public class Treatment extends Entity implements IEntityStoreActions{
-    public Treatment(){
-        this.setIsTreatment(true);
+public class User extends Entity implements IEntityStoreActions{
+   
+    public User(Integer value){
+        setKey(value);
     }
     
-    public Treatment(Integer key){
-        this.setIsTreatment(true);
-        setKey(key);
-    }
+    public User(){}
     
-    public Treatment(Appointment value){
-        this.setIsTreatment(true);
-        this.appointment = value;
-    }
-    
-    private ArrayList<Treatment> collection = new ArrayList<>();
-    public ArrayList<Treatment> get(){
+    private ArrayList<User> collection = new ArrayList<>();
+    public ArrayList<User> get(){
         return collection;
     }
-    public void set(ArrayList<Treatment> value){
+    public void set(ArrayList<User> value){
         collection = value;
     }
     
-    private Appointment appointment = null;
-    public Appointment getAppointment(){
-        return appointment;
+    private byte[] password = null;
+    public void setPassword(byte[] value){
+        password = value;
     }
-    public void setAppointment(Appointment value){
-        appointment = value;
-    }
-    
-    private String description = null;
-    public String getDescription(){
-        return description;
-    }
-    public void setDescription(String value){
-        description = value;
+    public byte[] getPassword(){
+        return password;
     }
     
-    
-    
-    private boolean state = false;
-    public boolean getSttate(){
-        return state;
+    private byte[] salt = null;
+    public void setSalt(byte[] value){
+        salt = value;
     }
-    public void setSttate(boolean value){
-        state = value;
+    public byte[] getSalt(){
+        return salt;
+    }
+    
+    private String username = null;
+    public void setUsername(String value){
+        username = value;
+    }
+    public String getUsername(){
+        return username;
     }
     
     @Override
@@ -94,15 +83,11 @@ public class Treatment extends Entity implements IEntityStoreActions{
     }
     
     @Override
-    public Treatment read()throws StoreException{
-        /**
-         * if scope = FOR_PATIENT
-         * -- patientKey property must have been initialised with the patient key value
-         */
+    public User read()throws StoreException{
         return new Repository().read(this);
     }
-    
-    @Override
+
+    @Override 
     public void update()throws StoreException{
         new Repository().update(this);
     }

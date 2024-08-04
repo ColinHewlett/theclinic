@@ -4,12 +4,6 @@
  */
 package model.entity;
 
-import model.entity.PatientCondition;
-import model.entity.Patient;
-import java.awt.Point;
-import java.util.ArrayList;
-import repository.Repository;
-import repository.StoreException;
 
 /**
  *

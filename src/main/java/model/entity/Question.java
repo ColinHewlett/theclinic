@@ -29,7 +29,7 @@ public class Question extends Entity implements IEntityStoreActions {
     
     public Question(Integer key){
         this.setIsQuestion(true);
-        this.key = key;
+        setKey(key);
     }
     
     private ArrayList<Question> collection = new ArrayList<>();
@@ -38,14 +38,6 @@ public class Question extends Entity implements IEntityStoreActions {
     }
     public void set(ArrayList<Question> value){
         collection = value;
-    }
-    
-    private Integer key = null;
-    public void setKey(Integer value){
-        key = value;
-    }
-    public Integer getKey(){
-        return key;
     }
     
     private Category category = null;

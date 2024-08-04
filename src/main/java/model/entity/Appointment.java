@@ -41,25 +41,7 @@ public class Appointment extends Entity implements IEntityStoreActions{
     private ArrayList<Appointment> collection = null;
     private static final DateTimeFormatter ddMMyyyyFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
-    /**
-     * 
-     * @return 
-     */
-    public Integer getKey() {
-        return key;
-    }
-    
-    /**
-     * 
-     * @param key 
-     */
-    protected void setKey(Integer key) {
-        this.key = key;
-        if (key!=null)
-            if (key!=0) setIsKeyDefined(true);
-            else setIsKeyDefined(false);
-        else setIsKeyDefined(false);  
-    }
+
 //</editor-fold>   
 
 //<editor-fold defaultstate="collapsed" desc="Public interface">
@@ -244,21 +226,7 @@ public class Appointment extends Entity implements IEntityStoreActions{
         return result;
     }
     */
-    /**
-     * 
-     * @return 
-     */
-    public Boolean getIsKeyDefined(){
-        return isKeyDefined;
-    }
     
-    /**
-     * 
-     * @param value 
-     */
-    public void setIsKeyDefined(Boolean value){
-        isKeyDefined = value;
-    }
 
     /**
      * 

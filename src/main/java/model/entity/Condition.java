@@ -29,10 +29,5 @@ public abstract class Condition extends Entity {
     public void setDescription(String value){
         description = value;
     }
-     public Integer getKey(){
-                return key;
-    }
-    public void setKey(Integer value){
-        key = value;
-    } 
+
 }

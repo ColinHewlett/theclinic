@@ -49,20 +49,6 @@ public class Patient extends Entity implements IEntityStoreActions {
     
     private static final DateTimeFormatter ddMMyyyyFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy");
     
-    
-    public Integer getKey(){
-        return key;
-    }
-    
-    public void setKey(Integer key){
-        this.key = key;
-        if (key != null){
-            if (key!=0)
-                setIsKeyDefined(true);
-            else
-                setIsKeyDefined(false);
-        }        
-    }
 //</editor-fold>
     
  //<editor-fold defaultstate="collapsed" desc="Public interface">
@@ -291,14 +277,6 @@ public class Patient extends Entity implements IEntityStoreActions {
     }
     public void setDOB(LocalDate dob) {
         this.dob = dob;
-    }
-    
-    public Boolean getIsKeyDefined(){
-        return isPatientKeyDefined;
-    }
-    
-    private void setIsKeyDefined(Boolean value){
-        isPatientKeyDefined = value;
     }
     
     public String getNotes(){

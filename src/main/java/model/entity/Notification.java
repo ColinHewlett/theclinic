@@ -29,13 +29,6 @@ public class Notification extends Entity implements IEntityStoreActions {
     private Boolean isActioned = false;
     private ArrayList<Notification> collection = new ArrayList<>();
 
-    protected Integer getKey(){
-        return key;
-    }
-    
-    protected void setKey(int value){
-        key = value;
-    }
 //</editor-fold>
     
 //<editor-fold defaultstate="collapsed" desc="Public interface">

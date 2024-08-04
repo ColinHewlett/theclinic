@@ -42,14 +42,7 @@ public class Invoice extends Entity implements IEntityStoreActions{
     public void set(ArrayList<Invoice> collection){
         this.collection = collection;
     }
-    
-    public Integer getKey() {
-        return key;
-    }
-    public void setKey(Integer key) {
-        this.key = key;
-    }
-    
+
     public String getDescription() {
         return description;
     }

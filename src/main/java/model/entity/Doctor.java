@@ -50,14 +50,6 @@ public class Doctor extends Entity implements IEntityStoreActions{
         this.collection = value;
     }
     
-    public Integer getKey() {
-        return key;
-    }
-
-    public void setKey(Integer value) {
-        this.key = value;
-    }
-    
     public Integer getPatientKey() {
         return patientKey;
     }

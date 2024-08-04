@@ -17,6 +17,7 @@ import repository.StoreException;//01/03/2023
 import view.views.non_modal_views.DesktopView;
 import java.awt.event.ActionEvent;
 import java.awt.Point;
+import java.awt.BorderLayout;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeSupport;
 import java.beans.PropertyChangeListener;
@@ -26,6 +27,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.HashMap;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
 import javax.swing.JOptionPane;
 import javax.swing.SwingWorker;
 import javax.swing.UIManager;
@@ -58,51 +61,56 @@ public class DesktopViewController extends ViewController{
     private int recordCount = 0;
     
     
-    private DesktopViewController(){
-               setDescriptor(new Descriptor());
-        /**
-         * Constructor for DesktopView takes two arguments
-         * -- object reference to view controller (this)
-         * -- Boolean signifying whether view enables data migration functions
-         */
-        DesktopView desktopView = new DesktopView(this, isDataMigrationOptionEnabled, getDescriptor() );
-        desktopView.setLocationRelativeTo(null);
-        setDesktopView(desktopView);
+    protected DesktopViewController(){
         
+        //LoginApp dialog = new LoginApp(new javax.swing.JFrame(), true);
+        //if (dialog.isSucceeded()){
         
-        //view.setContentPane(view);
-        pcSupport = new PropertyChangeSupport(this);
-        //appointmentScheduleViewControllersMap = new HashMap<>();
-        scheduleViewControllers = new ArrayList<>();
-        patientViewControllers = new ArrayList<>();
-        importProgressViewControllers = new ArrayList<>();
-        notificationViewControllers = new ArrayList<>();
-        treatmentViewControllers = new ArrayList<>();
-        clinicalNoteViewControllers = new ArrayList<>();
-        medicalConditionViewControllers = new ArrayList<>();
-        patientMedicalHistoryViewControllers = new ArrayList<>();
-        boolean isPMSStoreDefined;
-        try{
-            new Repository();
+            setDescriptor(new Descriptor());
+            /**
+             * Constructor for DesktopView takes two arguments
+             * -- object reference to view controller (this)
+             * -- Boolean signifying whether view enables data migration functions
+             */     
+            DesktopView desktopView = new DesktopView(this, isDataMigrationOptionEnabled, getDescriptor() );
+            desktopView.setLocationRelativeTo(null);
+            setDesktopView(desktopView);
 
-            if (isDataMigrationOptionEnabled) {
-                notifyMigrationActionCompleted();
-                getDesktopView().initialiseView();
+
+            //view.setContentPane(view);
+            pcSupport = new PropertyChangeSupport(this);
+            //appointmentScheduleViewControllersMap = new HashMap<>();
+            scheduleViewControllers = new ArrayList<>();
+            patientViewControllers = new ArrayList<>();
+            importProgressViewControllers = new ArrayList<>();
+            notificationViewControllers = new ArrayList<>();
+            treatmentViewControllers = new ArrayList<>();
+            clinicalNoteViewControllers = new ArrayList<>();
+            medicalConditionViewControllers = new ArrayList<>();
+            patientMedicalHistoryViewControllers = new ArrayList<>();
+            boolean isPMSStoreDefined;
+            try{
+                new Repository();
+
+                if (isDataMigrationOptionEnabled) {
+                    notifyMigrationActionCompleted();
+                    getDesktopView().initialiseView();
+                }
+                else{
+                    if ((SystemDefinition.getPMSOperationMode()).equals("undefined")){
+                        displayErrorMessage("A PMS store has not been defined; ClinicPMS will abort\n"
+                                + "Re-enter application in data migration mode by specifying DATA_MIGRATION_ENABLED on the command line",
+                                "Desktop View Controller error", JOptionPane.WARNING_MESSAGE);
+                        System.exit(0);
+                    } 
+                }
+            }catch (StoreException ex){
+                displayErrorMessage(ex.getMessage() + "\n"
+                        + "Raised in Desktop view controller constructor",
+                        "Desktop view controller error",
+                        JOptionPane.WARNING_MESSAGE);
             }
-            else{
-                if ((SystemDefinition.getPMSOperationMode()).equals("undefined")){
-                    displayErrorMessage("A PMS store has not been defined; ClinicPMS will abort\n"
-                            + "Re-enter application in data migration mode by specifying DATA_MIGRATION_ENABLED on the command line",
-                            "Desktop View Controller error", JOptionPane.WARNING_MESSAGE);
-                    System.exit(0);
-                } 
-            }
-        }catch (StoreException ex){
-            displayErrorMessage(ex.getMessage() + "\n"
-                    + "Raised in Desktop view controller constructor",
-                    "Desktop view controller error",
-                    JOptionPane.WARNING_MESSAGE);
-        }
+       // }else System.exit(0);
     }
     
     private void doActionEventForClinicalNoteViewController(ActionEvent e){
@@ -2112,8 +2120,10 @@ public class DesktopViewController extends ViewController{
      * @param args the command line arguments
      */
     public static void main(String[] args) {   
+    //public static void newMain() { 
         boolean isExceptionRaised = false;
         isDataMigrationOptionEnabled = false;
+        
         try{
             //System.out.println(args.length);
             String xmlFileName = System.getenv("PMS_SYSTEM_DEFINITION");
@@ -2156,7 +2166,9 @@ public class DesktopViewController extends ViewController{
                     JOptionPane.WARNING_MESSAGE);
             isExceptionRaised = true;
         }
+        
         if (!isExceptionRaised){
+            
             javax.swing.SwingUtilities.invokeLater(new Runnable() {
                 @Override
                 public void run() {
@@ -2164,6 +2176,7 @@ public class DesktopViewController extends ViewController{
                 }
             });  
         }else System.exit(0);
+        
     }
     
     private void importDataFromListFiles(){

@@ -28,12 +28,12 @@ public interface IStoreActions {
     public Point count(PatientCondition patientCondition)throws StoreException;
     public Point count(Invoice invoice)throws StoreException;
     public Point count(TreatmentCost treatmentCost)throws StoreException;
+    public Point count(User _user)throws StoreException;
     
     public void create(Appointment a) throws StoreException;
     public void create(Notification pn) throws StoreException;
     public void create(Patient p )throws StoreException;
     public void create(SurgeryDaysAssignment s)throws StoreException;
-    /*28/03/2024public void create(PatientNote p)throws StoreException;*/
     public void create(Doctor doctor)throws StoreException;
     public void create(Medication medication)throws StoreException;
     public void create(ClinicNote clinicNote)throws StoreException;
@@ -46,11 +46,11 @@ public interface IStoreActions {
     public void create(PatientCondition patientCondition)throws StoreException;
     public void create(Invoice invoice)throws StoreException;
     public void create(TreatmentCost treatmentCost)throws StoreException;
+    public void create(User _user)throws StoreException;
     
     public void delete(Appointment a, Integer key) throws StoreException;
     public void delete(Patient p, Integer patientKey) throws StoreException;
     public void delete(Notification pn, Integer key)throws StoreException;
-    /*28/03/2024public void delete(PatientNote p, LocalDateTime datestamp, Integer patientKey)throws StoreException;*/
     public void delete(PrimaryCondition pc)throws StoreException;
     public void delete(SecondaryCondition sc)throws StoreException;
     public void delete(Doctor doctor)throws StoreException;
@@ -63,6 +63,7 @@ public interface IStoreActions {
     public void delete(PatientCondition patientCondition)throws StoreException;
     public void delete(Invoice invoice)throws StoreException;
     public void delete(TreatmentCost treatmentCost)throws StoreException;
+    public void delete(User _user)throws StoreException;
     
     public List<String[]> importEntityFromCSV(Entity entity) throws StoreException;
     
@@ -70,7 +71,6 @@ public interface IStoreActions {
     public Integer insert(Patient p, Integer patientKey, Integer guardianKey) throws StoreException;
     public Integer insert(Notification pn, Integer patientKey) throws StoreException;
     public Integer insert(SurgeryDaysAssignment p) throws StoreException;
-    /*28/03/2024public Integer insert(PatientNote pn) throws StoreException;*/
     public Integer insert(Doctor doctor)throws StoreException;
     public Integer insert(Medication medication)throws StoreException;
     public Integer insert(PrimaryCondition pc)throws StoreException;
@@ -83,13 +83,11 @@ public interface IStoreActions {
     public Integer insert(PatientCondition patientCondition)throws StoreException;
     public Integer insert(Invoice invoice)throws StoreException;
     public Integer insert(TreatmentCost treatmentCost)throws StoreException;
-    
-    //public void populate(SurgeryDaysAssignment data)throws StoreException;
+    public Integer insert(User _user)throws StoreException;
     
     public Appointment read(Appointment a, Integer key)throws StoreException ;
     public Patient read(Patient p, Integer key) throws StoreException;
     public Notification read(Notification value, Integer key)throws StoreException;
-    /*28/03/2024public PatientNote read(PatientNote pn, Integer key)throws StoreException;*/
     public SurgeryDaysAssignment read(SurgeryDaysAssignment value) throws StoreException;
     public Doctor read(Doctor doctor)throws StoreException;
     public Medication read(Medication medication)throws StoreException;
@@ -100,12 +98,10 @@ public interface IStoreActions {
     public AppointmentTreatment read(AppointmentTreatment appointmentTreatment)throws StoreException;
     public Question read(Question treatment)throws StoreException;
     public PatientQuestion read(PatientQuestion appointmentQuestion)throws StoreException;
-    //public PatientPrimaryCondition read(PatientPrimaryCondition patientPrimaryCondition)throws StoreException;
-    //public PatientSecondaryCondition read(PatientSecondaryCondition patientSecondaryCondition)throws StoreException;
     public PatientCondition read(PatientCondition patientCondition)throws StoreException;
     public Invoice read(Invoice invoice)throws StoreException;
     public TreatmentCost read(TreatmentCost treatmentCost)throws StoreException;
-    
+    public User read(User _user)throws StoreException;
     
     public void recover(Appointment a, Integer key) throws StoreException;
     public void recover(Patient p, Integer key) throws StoreException;
@@ -115,7 +111,6 @@ public interface IStoreActions {
     public void update(SurgeryDaysAssignment value) throws StoreException;
     public void update(Patient p, Integer key, Integer guardianKey) throws StoreException;
     public void update(Notification pn, Integer key, Integer patientKey)throws StoreException;
-    /*28/03/2024public void update(PatientNote pn, Integer patientNoteKey)throws StoreException;*/
     public void update(Doctor doctor)throws StoreException;
     public void update(Medication medication)throws StoreException;
     public void update(PrimaryCondition pc)throws StoreException;
@@ -128,4 +123,5 @@ public interface IStoreActions {
     public void update(PatientCondition patientCondition) throws StoreException;
     public void update(Invoice invoice)throws StoreException;
     public void update(TreatmentCost treatmentCost)throws StoreException;
+    public void update(User _user)throws StoreException;
 }

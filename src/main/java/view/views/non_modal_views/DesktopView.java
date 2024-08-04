@@ -99,7 +99,9 @@ public class DesktopView extends javax.swing.JFrame
                    DateChangeListener{
 //public class DesktopView extends View implements PropertyChangeListener{
     enum Action{
+        REQUEST_ADD_NEW_USER,
         REQUEST_CASCADE_VIEWS,
+        REQUEST_CHANGE_USER_PASSWORD,
         REQUEST_CLOSE_VIEW,
         REQUEST_APPOINTMENT_VIEW,
         REQUEST_MEDICAL_CONDITION_VIEW,
@@ -127,9 +129,11 @@ public class DesktopView extends javax.swing.JFrame
         private final String EXIT_VIEW_REQUEST_TITLE = "Exit the Clinic practice management system";
         
     private final String SETTINGS_MENU_TITLE = "Settings";
-        private final String PRINT_BLANK_MEDICAL_HISTORY_REQUEST_TITLE = "Blank new patient medical history questionnaire";
-        private final String MEDICAL_CONDITION_REQUEST_TITLE = "Medical history conditions";
-        private final String TREATMENTS_REQUEST_TITLE = "Treatments";
+        private final String ADD_NEW_USER_TITLE = "Add new user";
+        private final String CHANGE_USER_PASSWORD_TITLE = "Change user password";
+        private final String PRINT_BLANK_MEDICAL_HISTORY_REQUEST_TITLE = "Print new patient medical history questionnaire";
+        private final String MEDICAL_CONDITION_REQUEST_TITLE = "Medical history conditions editor";
+        private final String TREATMENTS_REQUEST_TITLE = "Treatments editor";
         private final String COLOUR_PICKER_OPTIONS_TITLE = "Colour picker options";
         private final String CASCADE_VIEWS_REQUEST_TITLE = "Cascade views";
     
@@ -165,7 +169,9 @@ public class DesktopView extends javax.swing.JFrame
         private JMenuItem mniExitViewRequest = null;
         
     private JMenu mnuSettings = null; 
-    private JMenuItem mniPrintBlankMedicalHistoryRequest = null;
+        private JMenuItem mniAddNewUserRequest = null;
+        private JMenuItem mniChangeUserPasswordRequest = null;
+        private JMenuItem mniPrintBlankMedicalHistoryRequest = null;
         private JMenuItem mniMedicalConditionViewRequest = null;
         private JMenuItem mniTreatmentsViewRequest = null;
         private JMenuItem mniColorPickerOptionsViewRequest = null;
@@ -234,14 +240,20 @@ public class DesktopView extends javax.swing.JFrame
     
     private void makeSettingsMenu(){
         mnuSettings = new JMenu(SETTINGS_MENU_TITLE);
+        mniAddNewUserRequest = new JMenuItem(ADD_NEW_USER_TITLE);
+        mniChangeUserPasswordRequest = new JMenuItem(CHANGE_USER_PASSWORD_TITLE);
         mniPrintBlankMedicalHistoryRequest = new JMenuItem(PRINT_BLANK_MEDICAL_HISTORY_REQUEST_TITLE);
         mniMedicalConditionViewRequest = new JMenuItem(MEDICAL_CONDITION_REQUEST_TITLE);
         mniTreatmentsViewRequest = new JMenuItem(TREATMENTS_REQUEST_TITLE);
         mniColorPickerOptionsViewRequest = new JMenuItem(COLOUR_PICKER_OPTIONS_TITLE);
         mniCascadeViewsRequest = new JMenuItem(CASCADE_VIEWS_REQUEST_TITLE);
         mnuSettings.add(mniPrintBlankMedicalHistoryRequest);
+        mnuSettings.add(new JSeparator());
         mnuSettings.add(mniMedicalConditionViewRequest);
         mnuSettings.add(mniTreatmentsViewRequest);
+        mnuSettings.add(new JSeparator());
+        mnuSettings.add(mniAddNewUserRequest);
+        mnuSettings.add(mniChangeUserPasswordRequest);
         mnuSettings.add(new JSeparator());
         mnuSettings.add(mniColorPickerOptionsViewRequest);
         mnuSettings.add(new JSeparator());
@@ -250,6 +262,10 @@ public class DesktopView extends javax.swing.JFrame
         mniMedicalConditionViewRequest.setActionCommand(Action.REQUEST_MEDICAL_CONDITION_VIEW.toString());
         mniTreatmentsViewRequest.setActionCommand(Action.REQUEST_TREATMENT_VIEW.toString());
         mniCascadeViewsRequest.setActionCommand(Action.REQUEST_CASCADE_VIEWS.toString());
+        mniAddNewUserRequest.setActionCommand(Action.REQUEST_ADD_NEW_USER.toString());
+        mniChangeUserPasswordRequest.setActionCommand(Action.REQUEST_CHANGE_USER_PASSWORD.toString());
+        mniAddNewUserRequest.addActionListener(this);
+        mniChangeUserPasswordRequest.addActionListener(this);
         mniPrintBlankMedicalHistoryRequest.addActionListener(this);
         mniMedicalConditionViewRequest.addActionListener(this);
         mniTreatmentsViewRequest.addActionListener(this);
@@ -466,6 +482,10 @@ public class DesktopView extends javax.swing.JFrame
     public void actionPerformed(ActionEvent e){
         ActionEvent actionEvent = null;
         switch (Action.valueOf(e.getActionCommand())){
+            case REQUEST_ADD_NEW_USER:
+                break;
+            case REQUEST_CHANGE_USER_PASSWORD:
+                break;
             case REQUEST_CASCADE_VIEWS:
                 break;
             case REQUEST_PRINT_NEW_PATIENT_DETAILS_VIEW:
@@ -475,8 +495,7 @@ public class DesktopView extends javax.swing.JFrame
                                 .PRINT_NEW_PATIENT_DETAILS_REQUEST.toString());
                 this.getMyController().actionPerformed(actionEvent);
                 doOpenDocumentForPrinting(SystemDefinition.getPMSPrintFolder() 
-                        + SystemDefinition.PATIENT_QUESTIONNAIRE_MEDICAL_HISTORY_FILENAME);
-                
+                        + SystemDefinition.PATIENT_QUESTIONNAIRE_MEDICAL_HISTORY_FILENAME); 
                 break;
             case REQUEST_PRINT_SCHEDULE:
                 DatePickerInDialog datePickerInDialog = new DatePickerInDialog(this);

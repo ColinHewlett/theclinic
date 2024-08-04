@@ -42,14 +42,7 @@ public class TreatmentCost extends Entity implements IEntityStoreActions{
     public void set(ArrayList<TreatmentCost> collection){
         this.collection = collection;
     }
-    
-    public Integer getKey() {
-        return key;
-    }
-    public void setKey(Integer key) {
-        this.key = key;
-    }
-    
+
     public String getDescription() {
         return description;
     }

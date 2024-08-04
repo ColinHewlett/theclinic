@@ -23,12 +23,12 @@ public class ClinicNote extends Entity implements IEntityStoreActions{
     
     public ClinicNote(Integer value){
         this.setIsClinicNote(true);
-        this.key = value;
+        setKey(value);
     }
     
     public ClinicNote(Appointment appointment){
         this.setIsClinicNote(true);
-        this.key = appointment.getKey();
+        setKey(appointment.getKey());
     }
     
     private ArrayList<ClinicNote> collection = null;
@@ -37,14 +37,6 @@ public class ClinicNote extends Entity implements IEntityStoreActions{
     }
     public void set(ArrayList<ClinicNote> value){
         collection = value;
-    }
-    
-    private Integer key = null;
-    public Integer getKey(){
-        return key;
-    }
-    public void setKey(Integer value){
-        key = value;
     }
     
     private String notes = null;
