@@ -519,6 +519,7 @@ public class Repository implements IStoreActions {
         /*PatientNoteDelegate patientNoteDelegate = null;*/
         
         int key = rs.getInt("pid");
+        appointment.setKey(key);
         appointment.setStart(rs.getObject("Start", LocalDateTime.class));
         appointment.setDuration(Duration.ofMinutes(rs.getLong("Duration")));
         /*28/03/2024appointment.setNotes(rs.getString("Notes"));*/
@@ -535,9 +536,9 @@ public class Repository implements IStoreActions {
         patient.setKey(patientKey); 
         appointment.setPatient(patient);
 
-        delegate = new AppointmentDelegate(appointment);
-        delegate.setAppointmentKey(key);
-        return delegate;
+        //delegate = new AppointmentDelegate(appointment);
+        //delegate.setAppointmentKey(key);
+        return appointment;
     }
     
     private String getName(Entity entity){

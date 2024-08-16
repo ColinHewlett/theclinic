@@ -15,7 +15,7 @@ import repository.StoreException;
  * @author colin
  */
 public class Invoice extends Entity implements IEntityStoreActions{
-    private Integer key = null;
+    //private Integer key = null;
     private Patient patient = null;
     private String description = null;
     private double amount = 0.00;
@@ -27,7 +27,7 @@ public class Invoice extends Entity implements IEntityStoreActions{
     }
     
     public Invoice(Integer key){
-        this.key = key;
+        setKey(key);
         setIsInvoice(true);
     }
     

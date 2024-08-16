@@ -30,8 +30,6 @@ import model.IEntityStoreActions;
 public class Appointment extends Entity implements IEntityStoreActions{
     
 //<editor-fold defaultstate="collapsed" desc="Private and protected state">
-    private Boolean isKeyDefined = false;
-    private Integer key = null;
     private LocalDateTime start = null;
     private Duration duration  = null;
     private String notes = null;
@@ -55,7 +53,7 @@ public class Appointment extends Entity implements IEntityStoreActions{
      * @param key 
      */
     public Appointment( int key) {
-        this.key = key;
+        super.setKey(key);
         super.setIsAppointment(true);
     }
     public ArrayList<Appointment> get(){
@@ -270,7 +268,7 @@ public class Appointment extends Entity implements IEntityStoreActions{
         Integer pid = null; 
         switch (getScope()){
             case FOR_PATIENT:
-                key = getPatient().getKey();      
+                setKey(getPatient().getKey());      
             
         }
         
@@ -347,8 +345,8 @@ public class Appointment extends Entity implements IEntityStoreActions{
         switch (getScope()){
             case FOR_PATIENT:
                 try{
-                    key = getPatient().getKey();
-                    set(((Appointment)new Repository().read(this, key)).get());
+                    
+                    set(((Appointment)new Repository().read(this, getPatient().getKey())).get());
                     
                     /*28/03/2024set(new Repository().read(this, key).get());*/
                     
@@ -374,9 +372,10 @@ public class Appointment extends Entity implements IEntityStoreActions{
                 break;
             case DELETED_FOR_PATIENT:
                 try{
-                    key = getPatient().getKey();
+                    
+                    //key = getPatient().getKey();
                     /*28/03/2024 update*/
-                    set(((Appointment)new Repository().read(this, key)).get());
+                    set(((Appointment)new Repository().read(this, getPatient().getKey())).get());
                     
                     for(Appointment a : this.get()){
                         if (a.getPatient().getIsKeyDefined()){
@@ -431,7 +430,7 @@ public class Appointment extends Entity implements IEntityStoreActions{
                 break;
             case CANCELLED:
                 /*28/03/2024set(new Repository().read(this, key).get());*/
-                set(((Appointment)new Repository().read(this, key)).get());
+                set(((Appointment)new Repository().read(this, getKey())).get());
                 appointments = this.get();
                 for(Appointment a : this.get()){
                     if (a.getPatient().getIsKeyDefined()){
@@ -448,11 +447,11 @@ public class Appointment extends Entity implements IEntityStoreActions{
                 break;
             case ALL:
                 /*28/03/2024set(new Repository().read(this, key).get());*/
-                set(((Appointment)new Repository().read(this, key)).get());
+                set(((Appointment)new Repository().read(this, getKey())).get());
                 result = this;
                 break;
             case FOR_DAY_AND_EMERGENCY_APPOINTMENT:
-                set(((Appointment)new Repository().read(this, key)).get());
+                set(((Appointment)new Repository().read(this, getKey())).get());
                 appointments = this.get();
                     for(Appointment a : this.get()){
                         if (a.getPatient().getIsKeyDefined()){
@@ -470,7 +469,7 @@ public class Appointment extends Entity implements IEntityStoreActions{
             default:
                 try{
                     /*28/03/2024set(new Repository().read(this, key).get());*/
-                    set(((Appointment)new Repository().read(this, key)).get());
+                    set(((Appointment)new Repository().read(this, getKey())).get());
                     appointments = this.get();
                     for(Appointment a : this.get()){
                         if (a.getPatient().getIsKeyDefined()){
