@@ -14,6 +14,7 @@ import java.util.List;
  * @author colin
  */
 public interface IStoreActions {  
+    public int test = 0;
     public Point count(Appointment appointment, Integer appointeeKey)throws StoreException;
     public Point count(Patient patient)throws StoreException;
     public Point count(Notification patientNotification)throws StoreException;
@@ -101,7 +102,7 @@ public interface IStoreActions {
     public PatientCondition read(PatientCondition patientCondition)throws StoreException;
     public Invoice read(Invoice invoice)throws StoreException;
     public TreatmentCost read(TreatmentCost treatmentCost)throws StoreException;
-    public User read(User _user)throws StoreException;
+    public User read(User _user)throws StoreException, LoginException;
     
     public void recover(Appointment a, Integer key) throws StoreException;
     public void recover(Patient p, Integer key) throws StoreException;
