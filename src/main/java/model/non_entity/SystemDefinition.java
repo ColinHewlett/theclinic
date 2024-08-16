@@ -5,6 +5,7 @@
 package model.non_entity;
 
 import model.non_entity.ID;
+import model.entity.User;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Point;
@@ -56,6 +57,20 @@ public class SystemDefinition {
     public static String PATIENT_SCHEDULE_FILENAME = "AppointmentSchedule.docx";
     public static String PATIENT_QUESTIONNAIRE_MEDICAL_HISTORY_FILENAME = "PatientMedicalHistory.docx";
     //public static String EMERGENCY_APPOINTMENT = "Emergency appointment";
+    public static String userP;
+    public static String userS;
+    
+    public enum LoginAction {
+        REQUEST_CLOSE_LAUNCH_APP,
+        REQUEST_LOGIN,
+        REQUEST_ADD_NEW_CREDENTIAL,
+        REQUEST_UPDATE_CREDENTIAL
+    };
+    
+    public enum LoginViewMode{
+        LOGIN,
+        NEW_USER_OR_PASSWORD
+    }
     
     public enum PatientViewActionCaption{
         CREATE_RECOVER_PATIENT("<html><center>Create</center><center>new</center><center>patient</center></html>",
@@ -406,5 +421,13 @@ public class SystemDefinition {
 
     public SystemDefinition(HashMap<String,String> map){
         systemDefinitions = map;
+    }
+    
+    private static User activeUser = null;
+    public static void setActiveUser(User value){
+        activeUser = value;
+    }
+    public static User getActiveUser(){
+        return activeUser;
     }
 }

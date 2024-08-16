@@ -14,6 +14,7 @@ import model.IStoreClient;
  * @author colin
  */
 public class Entity implements IStoreClient{
+    private int test = 0;
     private String systemDefinitionProperty = null;
     private Boolean isAppointment = false;
     private Boolean isAppointmentDate = false;
@@ -105,6 +106,9 @@ public class Entity implements IStoreClient{
                         FROM_DAY,               //appointmens from this day
                         SINGLE,                 // this entity only
                         UNACTIONED,             //unactioned patient notifications
+                        WITH_NAME,              //for duplicated username check (ADD_NEW_CREDENTIAL)
+                                                //to check if specified username exists (LOGIN_REQUEST)
+                        WITH_CREDENTIAL         //when both username and password need to be correct (LOGIN_REQUEST)
                         }
     
     public static void createPMSDatabase()throws StoreException{

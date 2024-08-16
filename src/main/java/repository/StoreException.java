@@ -44,7 +44,7 @@ public class StoreException extends Exception{
                                  PMS_DATABASE_UNDEFINED,
                                  PMS_DATABASE_INCORRECTLY_DEFINED,
                                  PMS_DATABASE_EXISTS,
-                                 
+                                 SECURITY_EXCEPTION,
                                  UNEXPECTED_NULL_GUARDIAN_KEY,
                                  UNDEFINED_DATABASE}
     
@@ -52,6 +52,11 @@ public class StoreException extends Exception{
         super(s);
         exceptionType = e;
     }
+    
+    public StoreException(String s){
+        super(s);
+    }
+    
     public void setErrorType(ExceptionType exceptionType){
         this.exceptionType = exceptionType;
     }

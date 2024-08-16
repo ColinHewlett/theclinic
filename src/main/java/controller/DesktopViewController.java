@@ -9,6 +9,7 @@ import static controller.ViewController.DesktopViewControllerActionEvent.PATIENT
 import static controller.ViewController.DesktopViewControllerActionEvent.VIEW_CONTROLLER_CLOSE_NOTIFICATION;
 import static controller.ViewController.displayErrorMessage;
 import model.entity.*;
+import model.non_entity.Credential;
 import controller.exceptions.TemplateReaderException;
 import repository.Repository;
 import model.non_entity.SystemDefinition;
@@ -39,6 +40,7 @@ import view.View;
  * @author colin
  */
 public class DesktopViewController extends ViewController{
+    private int test = 0;
     private boolean isFirstActionEventReceivedFromAppointmentScheduleViewController = true;
     private DesktopViewMode desktopViewMode;
     private boolean isDesktopPendingClosure = false;
@@ -62,10 +64,13 @@ public class DesktopViewController extends ViewController{
     
     
     protected DesktopViewController(){
+        LoginViewController lvc = new LoginViewController(this);
+        ActionEvent actionEvent = new ActionEvent(
+            this,ActionEvent.ACTION_PERFORMED,
+            DesktopViewController.DesktopViewControllerActionEvent.INITIALISE_VIEW.toString());
+        lvc.actionPerformed(actionEvent);
         
-        //LoginApp dialog = new LoginApp(new javax.swing.JFrame(), true);
-        //if (dialog.isSucceeded()){
-        
+        if (checkCredential(lvc.getDescriptor().getControllerDescription().getLoginCredential())){
             setDescriptor(new Descriptor());
             /**
              * Constructor for DesktopView takes two arguments
@@ -110,7 +115,11 @@ public class DesktopViewController extends ViewController{
                         "Desktop view controller error",
                         JOptionPane.WARNING_MESSAGE);
             }
-       // }else System.exit(0);
+        }else System.exit(0);
+    }
+    
+    private boolean checkCredential(Credential credential){
+        return credential.getIsPasswordValid() && credential.getIsUsernameValid();
     }
     
     private void doActionEventForClinicalNoteViewController(ActionEvent e){

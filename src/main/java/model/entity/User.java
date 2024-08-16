@@ -9,18 +9,23 @@ import java.util.ArrayList;
 import model.IEntityStoreActions;
 import repository.Repository;
 import repository.StoreException;
+import repository.LoginException;
+
 
 /**
  *
  * @author colin
  */
 public class User extends Entity implements IEntityStoreActions{
-   
+    private int test = 0;
     public User(Integer value){
+        setIsUser(true);
         setKey(value);
     }
     
-    public User(){}
+    public User(){
+        setIsUser(true);
+    }
     
     private ArrayList<User> collection = new ArrayList<>();
     public ArrayList<User> get(){
@@ -30,11 +35,11 @@ public class User extends Entity implements IEntityStoreActions{
         collection = value;
     }
     
-    private byte[] password = null;
-    public void setPassword(byte[] value){
+    private String password = null;
+    public void setPassword(String value){
         password = value;
     }
-    public byte[] getPassword(){
+    public String getPassword(){
         return password;
     }
     
@@ -72,6 +77,11 @@ public class User extends Entity implements IEntityStoreActions{
     @Override
     public void drop()throws StoreException{
         
+    }
+    
+    private byte[] hashPasswordBytes = null;
+    private void setHashPasswordBytes(byte[] value){
+        hashPasswordBytes = value;
     }
     
     @Override

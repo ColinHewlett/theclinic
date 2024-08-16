@@ -231,6 +231,14 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         return pc;
     }
     
+    public enum LoginMode{
+        ADD_NEW_CREDENTIAL,         //add new user/password credentials
+        LOGIN,  //login using existing credentials
+        UPDATE_CREDENTIAL           //update active user's password
+    };
+    
+    
+    
     public enum ViewControllers {
         ScheduleViewController,
         DesktopViewController,
@@ -382,6 +390,22 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         PREPARE_FOR_RECEIPT_OF_SECONDARY_CONDITION_MIGRATION_PROGRESS,
         PREPARE_FOR_RECEIPT_OF_TREATMENT_MIGRATION_PROGRESS
         }
+    
+    public static enum LoginViewControllerActionEvent{
+        ADD_NEW_CREDENTIAL_REQUEST,                     //request to create a new user and password
+        LOGIN_REQUEST,                                  //request to accept/reject entered credential
+        NEW_PASSWORD_REQUEST                       //request a new password for the current user 
+    }
+    
+    public static enum LoginViewControllerPropertyChangeEvent{
+        CORRECT_LOGIN_CREDENTIAL_RECEIVED,
+        CORRECT_NEW_CREDENTIAL_RECEIVED,
+        PASSWORD_CHANGE_RECEIVED,
+        INCORRECT_USERNAME_RECEIVED,
+        INCORRECT_PASSWORD_RECEIVED,
+        DUPLICATE_USERNAME_RECEIVED,
+        INCORRECT_PASSWORD_VALIDATION_RECEIVED
+    };
     
     public static enum MedicalConditionViewControllerActionEvent{
         PRIMARY_CONDITION_CREATE_REQUEST,

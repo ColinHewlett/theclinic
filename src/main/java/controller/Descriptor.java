@@ -7,6 +7,8 @@ package controller;
 
 import model.entity.*;
 import model.non_entity.*;
+import model.non_entity.SystemDefinition.LoginViewMode;
+import view.views.dialogs.LoginDialog;
 import java.awt.Point;
 import java.util.ArrayList;
 import java.time.Duration;
@@ -14,6 +16,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.DayOfWeek;
 import java.util.HashMap;
+
 
 /**
  *
@@ -126,6 +129,22 @@ public class Descriptor {
             invoice = value;
         }
         
+        private Credential newUserCredential = null;
+        public Credential getNewUserCredential(){
+            return newUserCredential; 
+        }
+        public void setNewUserCredential(Credential value){
+            newUserCredential = value;
+        }
+        
+        private Credential loginCredential = null;
+        public Credential getLoginCredential(){
+            return loginCredential; 
+        }
+        public void setLoginCredential(Credential value){
+            loginCredential = value;
+        }
+        
         public Doctor getDoctor(){
             return doctor; 
         }
@@ -179,6 +198,14 @@ public class Descriptor {
         }
         public void setTreatment(Treatment value){
             treatment = value;
+        }
+        
+        private LoginViewMode loginViewMode = null;
+        public LoginViewMode getLoginViewMode(){
+            return loginViewMode; 
+        }
+        public void setLoginViewMode(LoginViewMode value){
+            loginViewMode = value;
         }
         
         public Medication getMedication(){
@@ -319,7 +346,6 @@ public class Descriptor {
         public String getError(){
             return error;
         }
-
         protected void setError(String message){
             error = message;
         }
@@ -426,6 +452,30 @@ public class Descriptor {
             doctor = value;
         }
         
+        private Credential newUserCredential = null;
+        public Credential getNewUserCredential(){
+            return newUserCredential; 
+        }
+        public void setNewUserCredential(Credential value){
+            newUserCredential = value;
+        }
+        
+        private Credential loginCredential = null;
+        public Credential getLoginCredential(){
+            return loginCredential; 
+        }
+        public void setLoginCredential(Credential value){
+            loginCredential = value;
+        }
+        
+        private LoginViewMode loginViewMode = null;
+        public LoginViewMode getLoginViewMode(){
+            return loginViewMode; 
+        }
+        public void setLoginViewMode(LoginViewMode value){
+            loginViewMode = value;
+        }
+        
         private PatientCondition patientCondition = null;
         public PatientCondition getPatientCondition(){
             return patientCondition; 
@@ -441,14 +491,21 @@ public class Descriptor {
         public void setPrimaryCondition(PrimaryCondition value){
             primaryCondition = value;
         }
-        
-        
+
         private Invoice invoice = null;
         public Invoice getInvoice(){
             return invoice; 
         }
         public void setInvoice(Invoice value){
             invoice = value;
+        }
+        
+        private LoginDialog loginDialog = null;
+        public LoginDialog getLoginDialog(){
+            return loginDialog; 
+        }
+        public void setLoginDialog(LoginDialog value){
+            loginDialog = value;
         }
         
         public Medication getMedication(){
@@ -574,6 +631,14 @@ public class Descriptor {
         
         public void setDuration(Duration value){
             duration = value;
+        }
+        
+        private String error = "";
+        public String getError(){
+            return error;
+        }
+        public void setError(String message){
+            error = message;
         }
     }
     

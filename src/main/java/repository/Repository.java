@@ -38,12 +38,19 @@ import static model.entity.Entity.Scope.FOR_PRIMARY_CONDITION;
 import static model.entity.Entity.Scope.FOR_QUESTION;
 import static model.entity.Entity.Scope.FOR_TREATMENT;
 import static model.entity.Entity.Scope.SINGLE;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
+import java.security.MessageDigest;
+import java.security.SecureRandom;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
 
 /**
  *
  * @author colin
  */
 public class Repository implements IStoreActions {
+    private int test = 0;
     private static String url = null;
     private static String user = null;
     private static String password = null;
@@ -162,6 +169,7 @@ public class Repository implements IStoreActions {
                                 DELETE_USER,
                                 INSERT_USER,
                                 READ_USER,
+                                READ_USER_WITH_NAME,
                                 READ_ALL_USER,
                                 READ_USER_NEXT_HIGHEST_KEY,
                                 UPDATE_USER,
@@ -444,6 +452,10 @@ public class Repository implements IStoreActions {
                 case TREATMENT_COST:
                     result = doPMSSQLforTreatmentCost(pmsSQL, (Entity)client);
                     break;
+                case USER:
+                    result = doPMSSQLforUser(pmsSQL, (Entity)client);
+                    break;
+                    
             }
             return result;
         }catch (SQLException ex){
@@ -1267,8 +1279,8 @@ public class Repository implements IStoreActions {
                 try (PreparedStatement preparedStatement = getPMSStoreConnection().prepareStatement(sql);){
                     preparedStatement.setLong(1,_user.getKey());
                     preparedStatement.setString(2,_user.getUsername());
-                    preparedStatement.setBytes(3,_user.getPassword());
-                    preparedStatement.setBytes(4,_user.getSalt());
+                    preparedStatement.setString(3,SystemDefinition.userP);
+                    preparedStatement.setString(4,SystemDefinition.userS);
                     preparedStatement.setBoolean(5,_user.getIsDeleted());
                     preparedStatement.executeUpdate();
                 }catch(SQLException ex){
@@ -2232,21 +2244,30 @@ public class Repository implements IStoreActions {
         ArrayList<User> collection = new ArrayList<>();
         try{
             switch(theUser.getScope()){
-                case SINGLE:
-                    if(!rs.wasNull()){
-                        rs.next();
-                        result = getNextUserFrom(rs); 
+                case WITH_NAME:
+                    if(rs.next()){
+                        rs.isBeforeFirst();
+                        User _user = new User(rs.getInt("pid"));
+                        _user.setUsername(rs.getString("username"));
+                        _user.setIsDeleted(rs.getBoolean("isDeleted")); 
+                        result = _user;
                     }
                     break;
-                default:
-                    if (!rs.wasNull()){
-                        while (rs.next()){
-                            collection.add(getNextUserFrom(rs));
-                        }
-                        result = new User(1);
-                        result.set(collection);
+                case WITH_CREDENTIAL:{
+                    if(rs.next()){
+                        User _user = new User(rs.getInt("pid"));
+                        _user.setUsername(rs.getString("username"));
+                        SystemDefinition.userP = rs.getString("password");
+                        SystemDefinition.userS = rs.getString("salt");
+                        _user.setIsDeleted(rs.getBoolean("isDeleted"));
+                        /**
+                         * following required else unhashed password lost
+                         */
+                        _user.setPassword(theUser.getPassword());
+                        result = _user;
                     }
                     break;
+                }
             }
         }catch (SQLException ex) {
             throw new StoreException("SQLException message -> " + ex.getMessage() + "\n"
@@ -2254,20 +2275,6 @@ public class Repository implements IStoreActions {
                     StoreException.ExceptionType.SQL_EXCEPTION);
         }
         return result;
-    }
-    
-    private User getNextUserFrom(ResultSet rs)throws SQLException{
-        String username = rs.getString("username");
-        Integer pid = rs.getInt("pid");
-        byte[] password = rs.getBytes("password");
-        byte[] salt = rs.getBytes("salt");
-        boolean isDeleted = rs.getBoolean("isDeleted");
-        User _user = new User(pid);
-        _user.setUsername(rs.getString("username"));
-        _user.setPassword(rs.getBytes("password"));
-        _user.setSalt(rs.getBytes("salt"));
-        _user.setIsDeleted(rs.getBoolean("isDeleted"));
-        return _user;
     }
     
     private Treatment get(Treatment treatment, ResultSet rs)throws StoreException{
@@ -2757,6 +2764,23 @@ public class Repository implements IStoreActions {
         }
     }
     */
+    
+    private Entity doReadUser(String sql, Entity entity)throws StoreException{
+        if (entity != null){
+            try(PreparedStatement preparedStatement = getPMSStoreConnection().prepareStatement(sql);){
+                    preparedStatement.setString(1, ((User)entity).getUsername());
+                    ResultSet rs = preparedStatement.executeQuery();
+                    return getDataRead(entity, rs);
+            }catch(SQLException ex){
+                throw new StoreException("SQLException message -> " + ex.getMessage() + "\n"
+                            + "StoreException message -> exception raised in Repository::doReadUserWithName()" ,
+                            StoreException.ExceptionType.SQL_EXCEPTION);
+            }
+        }else {
+            String msg = "StoreException -> patient note undefined in doReadSingle( '" + getEntityType(entity) + "' )";
+            throw new StoreException(msg, StoreException.ExceptionType.NULL_KEY_EXCEPTION);
+        }
+    }
     
     private Entity doReadSingle(String sql, Entity entity)throws StoreException{
         if (entity != null){
@@ -3451,11 +3475,10 @@ public class Repository implements IStoreActions {
                 _user = (User)entity;
             }
             try(PreparedStatement preparedStatement = getPMSStoreConnection().prepareStatement(sql);){
-                preparedStatement.setString(1, _user.getUsername());
-                preparedStatement.setBytes(2, _user.getPassword());
-                preparedStatement.setBytes(3, _user.getSalt());
-                preparedStatement.setBoolean(4, _user.getIsDeleted());
-                preparedStatement.setLong(5, _user.getKey());
+                
+                preparedStatement.setString(1, SystemDefinition.userP);
+                preparedStatement.setString(2, SystemDefinition.userS);
+                preparedStatement.setString(3, _user.getUsername());
                 preparedStatement.executeUpdate();   
             }catch(SQLException ex){
                 throw new StoreException("SQLException message -> " + ex.getMessage() + "\n"
@@ -4559,12 +4582,12 @@ public class Repository implements IStoreActions {
                 sql = "CREATE TABLE User ("
                         + "pid LONG PRIMARY KEY, "
                         + "username CHAR(30), "
-                        + "password OLE OBJECT"
-                        + "salt OLE OBJECT"
+                        + "password LONG TEXT"
+                        + "salt LONG TEXT"
                         + "isDeleted YesNo);";
                 doCreateTable(sql);
                 break; 
-            case DELETE_ALL_TREATMENT:
+            case DELETE_ALL_USER:
                 sql = "DELETE FROM User;";
                 doDelete(sql);
                 break;
@@ -4574,18 +4597,27 @@ public class Repository implements IStoreActions {
                         + "WHERE pid = ?;";
                 doDeleteSingle(sql,entity);
                 break;
-            case INSERT_TREATMENT:
+            case INSERT_USER:
                 sql = "INSERT INTO User "
                         + "(pid, username, password, salt, isDeleted) "
                         + "VALUES(?,?,?,?,?);";
                 doInsertUser(sql, entity);
                 break; 
+            /*
             case READ_USER:
                 sql = "SELECT * "
                         + "FROM User "
                         + "WHERE pid = ? "
                         + "AND isDeleted = false; ";                       
                 result = doReadSingle(sql, entity);
+                break;
+                */
+            case READ_USER:
+                sql = "SELECT * "
+                        + "FROM User "
+                        + "WHERE username = ? "
+                        + "AND isDeleted = false; ";                       
+                result = doReadUser(sql, entity);
                 break;
             case READ_ALL_USER:
                 sql = "SELECT * "
@@ -4601,11 +4633,9 @@ public class Repository implements IStoreActions {
                 break;
             case UPDATE_USER:
                 sql = "UPDATE User "
-                        + "SET username = ?, "
-                        + "password = ?, "
-                        + "salt = ?, "
-                        + "isDeleted = ? "
-                        + "WHERE pid = ?;";
+                        + "SET password = ?, "
+                        + "salt = ? "
+                        + "WHERE username = ?;";
                 doUpdateUser(sql, entity);
         }
         return result;
@@ -5827,17 +5857,62 @@ public class Repository implements IStoreActions {
     
     @Override
     public Integer insert(User _user)throws StoreException{
-        Entity key = null;
+        boolean test = false;
+        int count = 0;
         Entity entity;
         IStoreClient client;
-        client = runSQL(Repository.EntityType.USER,
-                    Repository.PMSSQL.READ_DOCTOR_NEXT_HIGHEST_KEY,_user);
-        entity = (Entity)client;
-        _user.setKey(entity.getValue().x + 1);
+        SystemDefinition.userS = controller.PasswordUtils.generateSalt();
+        controller.PasswordUtils.setSalt(SystemDefinition.userS);
+        try{
+            SystemDefinition.userP = controller.PasswordUtils.hashPassword(_user.getPassword(), SystemDefinition.userS);
+            controller.PasswordUtils.setHashedPassword(SystemDefinition.userP);
+            
+            test = controller.PasswordUtils.isSaltCorrect(SystemDefinition.userS);
+            test = controller.PasswordUtils.isHashedPasswordCorrect(SystemDefinition.userP);
+            test = controller.PasswordUtils.isPasswordCorrect(_user.getPassword(),SystemDefinition.userP, SystemDefinition.userS);
+            count = SystemDefinition.userS.length();
+            count = SystemDefinition.userP.length();
+            //SystemDefinition.userP = controller.PasswordUtilsx.hashPassword(_user.getPassword(), SystemDefinition.userS);
+            client = runSQL(Repository.EntityType.USER,
+                        Repository.PMSSQL.READ_USER_NEXT_HIGHEST_KEY,_user);
+            entity = (Entity)client;
+            if (entity == null) _user.setKey(1);
+            else _user.setKey(entity.getValue().x + 1);
 
-        runSQL(Repository.EntityType.USER,
+            runSQL(Repository.EntityType.USER,
                 Repository.PMSSQL.INSERT_USER, _user);
-        
+            
+            _user.setScope(Entity.Scope.WITH_CREDENTIAL);
+            entity = (Entity)runSQL(Repository.EntityType.USER, 
+                            Repository.PMSSQL.READ_USER, _user);
+            
+            count = controller.PasswordUtils.getSalt().length();
+            count = controller.PasswordUtils.getHashedPassword().length();
+            count = SystemDefinition.userS.length();
+            count = SystemDefinition.userP.length();
+            test = controller.PasswordUtils.isSaltCorrect(SystemDefinition.userS);
+            test = controller.PasswordUtils.isHashedPasswordCorrect(SystemDefinition.userP);
+            test = controller.PasswordUtils.isPasswordCorrect(_user.getPassword(), SystemDefinition.userP, SystemDefinition.userS);
+            
+            if (entity!=null){
+                if(!controller.PasswordUtils.isPasswordCorrect(_user.getPassword(),SystemDefinition.userP, SystemDefinition.userS)){
+                    //if(!MessageDigest.isEqual(hashPassword, SystemDefinition.userP)){
+                    LoginException loginException = new LoginException("security breach");
+                    loginException.setLoginErrorType(LoginException.LoginExceptionType.MATCHING_PASSWORD_NOT_FOUND);
+                    throw loginException;
+                }
+            }
+            
+            
+        }catch(NoSuchAlgorithmException ex){
+            String message = ex.getMessage() + "\n"
+                    + "NoSuchAlgorithmException raised in Repository::insert(User)";
+            displayErrorMessage(message,"Repository error", JOptionPane.WARNING_MESSAGE);
+        }catch(InvalidKeySpecException ex){
+            String message = ex.getMessage() + "\n"
+                    + "InvalidKeySpecException raised in Repository::insert(User)";
+            displayErrorMessage(message,"Repository error", JOptionPane.WARNING_MESSAGE);
+        }
         return _user.getKey();
     }
     
@@ -7311,47 +7386,53 @@ public class Repository implements IStoreActions {
     public User read(User _user)throws StoreException{
         User result = null;
         Entity entity = null;
+        byte[] salt = null;
+        byte[] hashedPassword = null;
+        int count = 0;
 
         switch(_user.getScope()){
-            case SINGLE:{
-                try{
+            case WITH_NAME:
                     entity = (Entity)runSQL(Repository.EntityType.USER, 
                             Repository.PMSSQL.READ_USER, _user);
-                }catch(StoreException ex){
-                    String message = "";
-                    throw new StoreException(
-                        message + "StoreException raised -> null value returned from persistent store "
-                            + "in method Repository::read(User)" 
-                                + _user.getScope().toString() + "])\n",
-                        StoreException.ExceptionType.UNEXPECTED_DATA_TYPE_ENCOUNTERED);
+                break;
+            case WITH_CREDENTIAL:{
+                //SystemDefinition.userS = controller.PasswordUtilsx.generateSaltBytes();
+                //controller.PasswordUtilsx.setSalt(salt);
+                try{
+                    //SystemDefinition.userP = controller.PasswordUtilsx.hashPassword("jeff", SystemDefinition.userS);
+                    //boolean test = controller.PasswordUtilsx.isPasswordCorrect("jeff",SystemDefinition.userP);
+                    //if (test) count = 1;
+                
+                
+                    entity = (Entity)runSQL(Repository.EntityType.USER, 
+                            Repository.PMSSQL.READ_USER, _user);
+                    if (entity!=null){
+                        //byte[] hashPassword = controller.PasswordUtilsx.hashPassword(_user.getPassword(), SystemDefinition.userS);
+                        if(!controller.PasswordUtils.isPasswordCorrect(_user.getPassword(),SystemDefinition.userP, SystemDefinition.userS)){
+                            //if(!MessageDigest.isEqual(hashPassword, SystemDefinition.userP)){
+                            LoginException loginException = new LoginException("security breach");
+                            loginException.setLoginErrorType(LoginException.LoginExceptionType.MATCHING_PASSWORD_NOT_FOUND);
+                            throw loginException;
+                        }
+                    }
+                }catch(NoSuchAlgorithmException ex){
+                    String message = ex.getMessage() + "\n"
+                            + "Raised in Repository::read(User) using case 'WITH_NAME'";
+                    displayErrorMessage(message,"Repository error",JOptionPane.WARNING_MESSAGE);
+                }catch(InvalidKeySpecException ex){
+                    String message = ex.getMessage() + "\n"
+                            + "Raised in Repository::read(User) using case 'WITH_NAME'";
+                    displayErrorMessage(message,"Repository error",JOptionPane.WARNING_MESSAGE);
                 }
                 break;
-            }       
-            case ALL:
-                entity = (Entity)runSQL(Repository.EntityType.USER,
-                            Repository.PMSSQL.READ_ALL_USER, _user);
-                break;
+            }
         }
-        if (entity!=null){
+        if(entity!=null){
             if (entity.getIsUser()){
                 result = (User)entity;
-                return result;
-            }else{
-                String message = "";
-                throw new StoreException(
-
-                    message + "StoreException raised -> unexpected entity type returned from persistent store "
-                        + "in method Repository::read(User)\n",
-                    StoreException.ExceptionType.UNEXPECTED_DATA_TYPE_ENCOUNTERED); 
             }
-        }else{
-            String message = "";
-            throw new StoreException(
-                message + "StoreException raised -> null value returned from persistent store "
-                    + "in method Repository::read(User)" 
-                        + _user.getScope().toString() + "])\n",
-                StoreException.ExceptionType.UNEXPECTED_DATA_TYPE_ENCOUNTERED);
-        }
+        }else result = null;
+        return result;
     }
     
     /**
@@ -8044,7 +8125,19 @@ public class Repository implements IStoreActions {
     
     @Override
     public void update(User _user)throws StoreException{
-        runSQL(Repository.EntityType.USER, Repository.PMSSQL.UPDATE_USER,_user); 
+        SystemDefinition.userS = controller.PasswordUtils.generateSalt();
+        try{
+            SystemDefinition.userP = controller.PasswordUtils.hashPassword(_user.getPassword(), SystemDefinition.userS);
+            runSQL(Repository.EntityType.USER,Repository.PMSSQL.UPDATE_USER, _user);
+        }catch(NoSuchAlgorithmException ex){
+            String message = ex.getMessage() + "\n"
+                    + "NoSuchAlgorithmException raised in Repository::insert(User)";
+            displayErrorMessage(message,"Repository error", JOptionPane.WARNING_MESSAGE);
+        }catch(InvalidKeySpecException ex){
+            String message = ex.getMessage() + "\n"
+                    + "InvalidKeySpecException raised in Repository::insert(User)";
+            displayErrorMessage(message,"Repository error", JOptionPane.WARNING_MESSAGE);
+        }
     }
     
     @Override
