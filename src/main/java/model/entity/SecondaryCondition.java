@@ -24,7 +24,7 @@ public class SecondaryCondition extends Condition implements IEntityStoreActions
     }
     
     public SecondaryCondition(Integer key){
-        this.key = key;
+        setKey(key);
         setIsSecondaryCondition(true);
     }
 

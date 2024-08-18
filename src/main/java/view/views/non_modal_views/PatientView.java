@@ -6,10 +6,11 @@ package view.views.non_modal_views;
 
 import model.non_entity.SystemDefinition;
 import model.non_entity.SystemDefinition.PatientViewActionCaption;
+
 import view.views.view_support_classes.models.PatientAppointmentHistoryTableModel;
 import view.views.view_support_classes.renderers.PatientAppointmentHistoryTableInvoiceRenderer;
-import view.views.view_support_classes.renderers.AppointmentsListTableLocalDateTimeRenderer;
-import view.views.view_support_classes.renderers.AppointmentsTableDurationRenderer;
+import view.views.view_support_classes.renderers.AppointmentHistoryTableLocalDateTimeRenderer;
+import view.views.view_support_classes.renderers.AppointmentHistoryTableDurationRenderer;
 import controller.Descriptor;
 import controller.ViewController;
 import view.View;
@@ -927,6 +928,8 @@ public class PatientView extends View
          */
         if (appointments == null) appointments = new ArrayList<>();
         
+        //tblAppointmentHistory = new JTable(new PatientAppointmentHistoryTableModel());
+        
         PatientAppointmentHistoryTableModel tableModel = 
                 (PatientAppointmentHistoryTableModel)tblAppointmentHistory.getModel(); 
         tableModel.removeAllElements();
@@ -944,8 +947,8 @@ public class PatientView extends View
                 }
             }
             this.tblAppointmentHistory.setDefaultRenderer(Invoice.class, new PatientAppointmentHistoryTableInvoiceRenderer());
-            this.tblAppointmentHistory.setDefaultRenderer(Duration.class, new AppointmentsTableDurationRenderer());
-            this.tblAppointmentHistory.setDefaultRenderer(LocalDateTime.class, new AppointmentsListTableLocalDateTimeRenderer());
+            this.tblAppointmentHistory.setDefaultRenderer(Duration.class, new AppointmentHistoryTableDurationRenderer());
+            this.tblAppointmentHistory.setDefaultRenderer(LocalDateTime.class, new AppointmentHistoryTableLocalDateTimeRenderer());
             
             TableColumnModel columnModel = this.tblAppointmentHistory.getColumnModel();
             columnModel.getColumn(3).setCellRenderer(new ScheduleTableCellRenderer());
@@ -1030,7 +1033,13 @@ public class PatientView extends View
         setGender(patient.getGender());
         //setNotes(patient.getNotes());
         setDOB(patient.getDOB());
-        populateAppointmentsHistoryTable(patient);
+        javax.swing.SwingUtilities.invokeLater(new Runnable(){
+            @Override
+            public void run(){
+                populateAppointmentsHistoryTable(patient);
+            }
+        });
+        
     }
     
     private Patient initialisePatientFromView(Patient patient){

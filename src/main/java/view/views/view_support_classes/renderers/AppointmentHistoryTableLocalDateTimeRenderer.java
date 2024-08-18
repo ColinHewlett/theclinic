@@ -4,8 +4,10 @@
  */
 package view.views.view_support_classes.renderers;
 
-import model.entity.Invoice;
 import java.awt.Component;
+import java.awt.Font;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
@@ -14,19 +16,29 @@ import javax.swing.table.TableCellRenderer;
  *
  * @author colin
  */
-public class PatientAppointmentHistoryTableInvoiceRenderer extends JLabel implements TableCellRenderer{
+
+public class AppointmentHistoryTableLocalDateTimeRenderer extends JLabel implements TableCellRenderer{
+    private DateTimeFormatter ddMMyyhhmm12Format = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm ");
     
+    public AppointmentHistoryTableLocalDateTimeRenderer()
+    {
+        super();
+        setFont(getFont().deriveFont(Font.PLAIN));
+        //Font f = super.getFont();
+        // plain
+        //this.setFont(f.deriveFont(f.getStyle() | ~Font.PLAIN));
+    }
     
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
         boolean hasFocus, int row, int column)
     {
+        setFont(getFont().deriveFont(Font.PLAIN));
         if (value != null){
-            Invoice invoice = (Invoice)value;
-            if (invoice.getKey() != 0) super.setText(invoice.getKey().toString());
-            else super.setText("--");
+            LocalDateTime startTime = (LocalDateTime)value;
+            super.setText(startTime.format(ddMMyyhhmm12Format));
         }
-        else super.setText("--");
+        else super.setText("");
         
         if (isSelected) {
             setBackground(table.getSelectionBackground());
@@ -39,5 +51,4 @@ public class PatientAppointmentHistoryTableInvoiceRenderer extends JLabel implem
         setOpaque(true);
         return this;
     }
-    
 }

@@ -30,12 +30,12 @@ import repository.IStoreActions;
 public class Patient extends Entity implements IEntityStoreActions {
     
 //<editor-fold defaultstate="collapsed" desc="Private and protected state">    
-    private Boolean isPatientKeyDefined = null;
+    //private Boolean isPatientKeyDefined = null;
     private LocalDate dob = null;
     private Patient guardian = null;
     private String gender = null;
     private Boolean isGuardianAPatient = null;
-    private Integer key  = null;
+    //private Integer key  = null;
     private String notes = null;
     private String phone1 = null;
     private String phone2 = null;

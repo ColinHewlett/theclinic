@@ -13,7 +13,7 @@ import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
 import model.non_entity.SystemDefinition;
-import  model.non_entity.Slot;
+import model.non_entity.Slot;
 
 import view.views.view_support_classes.models.ScheduleDiaryTableModel;
 
@@ -28,9 +28,9 @@ public class AppointmentsDiaryTableLocalDateTimeRenderer extends JLabel implemen
     
     public AppointmentsDiaryTableLocalDateTimeRenderer()
     {
-        //Font f = super.getFont();
-        // plain
-        //this.setFont(f.deriveFont(f.getStyle() | ~Font.PLAIN));
+        Font f = super.getFont();
+         //plain
+        this.setFont(f.deriveFont(f.getStyle() | ~Font.PLAIN));
     }
     
     private SystemDefinition.ScheduleSlotType slotMarker = null;

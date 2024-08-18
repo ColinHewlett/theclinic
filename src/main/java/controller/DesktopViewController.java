@@ -64,13 +64,13 @@ public class DesktopViewController extends ViewController{
     
     
     protected DesktopViewController(){
-        LoginViewController lvc = new LoginViewController(this);
-        ActionEvent actionEvent = new ActionEvent(
-            this,ActionEvent.ACTION_PERFORMED,
-            DesktopViewController.DesktopViewControllerActionEvent.INITIALISE_VIEW.toString());
-        lvc.actionPerformed(actionEvent);
+        //LoginViewController lvc = new LoginViewController(this);
+        //ActionEvent actionEvent = new ActionEvent(
+        //    this,ActionEvent.ACTION_PERFORMED,
+        //    DesktopViewController.DesktopViewControllerActionEvent.INITIALISE_VIEW.toString());
+        //lvc.actionPerformed(actionEvent);
         
-        if (checkCredential(lvc.getDescriptor().getControllerDescription().getLoginCredential())){
+        //if (checkCredential(lvc.getDescriptor().getControllerDescription().getLoginCredential())){
             setDescriptor(new Descriptor());
             /**
              * Constructor for DesktopView takes two arguments
@@ -115,7 +115,7 @@ public class DesktopViewController extends ViewController{
                         "Desktop view controller error",
                         JOptionPane.WARNING_MESSAGE);
             }
-        }else System.exit(0);
+        //}else System.exit(0);
     }
     
     private boolean checkCredential(Credential credential){
@@ -1555,6 +1555,16 @@ public class DesktopViewController extends ViewController{
                             setProgress(percentage);
                         }*/
                     }else if (entity.getIsAppointment()){
+                        /**
+                         * first thing create a single Invoice record with key 1066 (equals the zero invoice) to maintain RI
+                         */
+                        Invoice invoice = new Invoice(1066);
+                        invoice.setAmount(0);
+                        invoice.setDescription("");
+                        invoice.setIsDeleted(false);
+                        Patient patient = new Patient(1);
+                        invoice.setPatient(patient);
+                        invoice.insert();
                         Appointment appointmentTable = (Appointment)entity;
                         //appointmentTable.create();
                         dbfRecords = appointmentTable.importEntityFromCSV();
@@ -1619,6 +1629,9 @@ public class DesktopViewController extends ViewController{
                         }
                     }*/
                 }catch (StoreException ex){
+                    displayErrorMessage(ex.getMessage(), "Desktop view controller error",
+                            JOptionPane.WARNING_MESSAGE);
+                }catch (NullPointerException ex){
                     displayErrorMessage(ex.getMessage(), "Desktop view controller error",
                             JOptionPane.WARNING_MESSAGE);
                 }
@@ -2059,6 +2072,15 @@ public class DesktopViewController extends ViewController{
             Question question = new Question();
             question.setScope(Entity.Scope.ALL);
             question.delete();
+        }catch (StoreException ex){
+            displayErrorMessage(ex.getMessage(),
+                    "Desktop view controller",JOptionPane.WARNING_MESSAGE);
+        }
+        
+        try{
+            Invoice invoice = new Invoice();
+            invoice.setScope(Entity.Scope.ALL);
+            invoice.delete();
         }catch (StoreException ex){
             displayErrorMessage(ex.getMessage(),
                     "Desktop view controller",JOptionPane.WARNING_MESSAGE);

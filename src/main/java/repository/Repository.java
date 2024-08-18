@@ -750,12 +750,13 @@ public class Repository implements IStoreActions {
     }
     
     private void doDeleteCancelChildEntity(String sql, Entity entity)throws StoreException{
-        
         Entity delegate = null;
         try(PreparedStatement preparedStatement = getPMSStoreConnection().prepareStatement(sql);){
             if (entity.getIsAppointment()){
-                delegate = (AppointmentDelegate)entity;
-                preparedStatement.setInt(1, ((AppointmentDelegate)delegate).getAppointmentKey());
+                Appointment appointment = (Appointment)entity;
+                //delegate = (AppointmentDelegate)entity;
+                //preparedStatement.setInt(1, ((AppointmentDelegate)delegate).getAppointmentKey());
+                preparedStatement.setInt(1, (appointment.getKey()));
             }else if (entity.getIsPatientNotification()){
                 delegate = (NotificationDelegate)entity;
                 preparedStatement.setInt(1, ((NotificationDelegate)delegate).getKey());
@@ -790,6 +791,8 @@ public class Repository implements IStoreActions {
             AppointmentDelegate delegate = (AppointmentDelegate)entity;
             try (PreparedStatement preparedStatement = getPMSStoreConnection().prepareStatement(sql);){
                 preparedStatement.setBoolean(1,delegate.getIsEmergency());
+                //if (delegate.getInvoice()!=null) preparedStatement.setInt(2, delegate.getInvoice().getKey());
+                //else preparedStatement.setNull(2, java.sql.Types.INTEGER);
                 if (delegate.getInvoice()==null) preparedStatement.setInt(2, 1066);
                 else preparedStatement.setInt(2, delegate.getInvoice().getKey());
                 preparedStatement.setInt(3, 
@@ -1595,8 +1598,11 @@ public class Repository implements IStoreActions {
                     }
                     preparedStatement.setString(16, patient.getNotes());
                     preparedStatement.setLong(17, patient.getKey());
-                    if (((Patient)patient.getGuardian()).getKey() > 0){
-                        preparedStatement.setLong(18,((Patient)patient.getGuardian()).getKey());
+                    
+                    if(patient.getIsGuardianAPatient()){
+                        if (((Patient)patient.getGuardian()).getKey() > 0){
+                            preparedStatement.setLong(18,((Patient)patient.getGuardian()).getKey());
+                        }
                     }
                     else preparedStatement.setNull(18, java.sql.Types.INTEGER);
                     preparedStatement.setString(19, patient.getEmail());
@@ -4041,7 +4047,7 @@ public class Repository implements IStoreActions {
     }
 
     private Entity doPMSSQLforAppointment(Repository.PMSSQL q, Entity entity)throws StoreException{
-        Entity result = null; 
+        Entity result = new Entity(); 
         String sql = null;
         switch (q){
             case CANCEL_APPOINTMENT:
@@ -5255,22 +5261,20 @@ public class Repository implements IStoreActions {
                 break;
             case INSERT_INVOICE:
                 sql = "INSERT INTO Invoice "
-                        + "(amount,description,isDeleted,patientKey,pid) "
+                        + "(amount,description,isdeleted,patientKey,pid) "
                         + "VALUES(?,?,?,?,?);";
                 doInsertInvoice(sql, entity);
                 break; 
             case READ_INVOICE:
                 sql = "SELECT * "
                         + "FROM Invoice "
-                        + "WHERE pid = ? "
-                        + "AND isDeleted = false; ";                       
+                        + "WHERE pid = ?; ";                       
                 result = doReadSingle(sql, entity);
                 break;
             case READ_INVOICE_FOR_PATIENT:
                 sql = "SELECT * "
                         + "FROM Invoice "
                         + "WHERE patientKey = ? "
-                        + "AND isDeleted = false "
                         + "ORDER BY pid ASC;";
                 result = doReadInvoiceForPatient(sql, entity);
                 break;
@@ -5937,12 +5941,13 @@ public class Repository implements IStoreActions {
     public Integer insert(Invoice invoice)throws StoreException{
         Entity key = null;
         Entity entity;
+        /*
         IStoreClient client;
         client = runSQL(Repository.EntityType.INVOICE,
                     Repository.PMSSQL.READ_INVOICE_NEXT_HIGHEST_KEY,invoice);
         entity = (Entity)client;
         invoice.setKey(entity.getValue().x + 1);
-
+        */
         runSQL(Repository.EntityType.INVOICE,
                 Repository.PMSSQL.INSERT_INVOICE, invoice);
         

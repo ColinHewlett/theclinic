@@ -1043,11 +1043,23 @@ public class ScheduleView extends View
             case APPOINTMENTS_FOR_DAY_RECEIVED:
                 switch (getScheduleViewMode()){
                     case DIARY:
-                        configureScheduleDiaryView();
+                        javax.swing.SwingUtilities.invokeLater(new Runnable(){
+                            @Override
+                            public void run(){
+                                configureScheduleDiaryView();
+                            }
+                        });
+                        
                         break;
                     case LIST:
-                        configureScheduleListView();
-                        tblAppointments.clearSelection();
+                        javax.swing.SwingUtilities.invokeLater(new Runnable(){
+                            @Override
+                            public void run(){
+                                configureScheduleListView();
+                                tblAppointments.clearSelection();
+                            }
+                        });
+                        
                         break;
                 }
                 break;
@@ -2119,52 +2131,7 @@ public class ScheduleView extends View
                 row = getScheduleViewCurrentlySelectedRowFromDiary();
                 
                 if (row > -1){
-                    /*
-                    switch(getCurrentScheduleDiaryAction()){
-                        case NONE:
-                            break;
-                        case CANCEL_APPOINTMENT:
-                        case CREATE_APPOINTMENT:
-                        case EXTEND_APPOINTMENT_UP_AND_DOWN:
-                        case EXTEND_APPOINTMENT_UP:
-                        case EXTEND_APPOINTMENT_DOWN:
-                        case SHIFT_APPOINTMENT_UP:
-                        case SHIFT_APPOINTMENT_DOWN:
-                        case SHORTEN_APPOINTMENT: {
-                            appointment = getMyController().getDescriptor().getViewDescription().getAppointment();
-                            start = appointment.getStart();
-                            ArrayList<Slot> slots = getMyController().getDescriptor().getControllerDescription()
-                                .getAppointmentSlotsForDayInDiaryFormat();
-                            isAppointmentFound = false;
-                            count = 0;
-                            for(Slot slot : slots){
-                                for(Slot _slot : slot.get()){
-                                    if (_slot.getStart().equals(start)) {
-                                        theSlot = _slot;
-                                        isAppointmentFound = true;
-                                        break;
-                                    }
-                                    count++;
-                                }
-                                if (isAppointmentFound){
-                                    tblAppointments.setRowSelectionInterval(count,count);
-                                    int minutes = (int)theSlot.getAppointment().getDuration().toMinutes();
-                                    int intervals = (int)minutes/5;
-                                    count = count + intervals;
-                                    break;
-                                }
-                            }
-                            if (count >= 0 && count < tblAppointments.getRowCount() 
-                                    && col >= 0 && col < tblAppointments.getColumnCount()) {
-                                // Get the rectangle representing the cell at (row, col)
-                                Rectangle cellRect = tblAppointments.getCellRect(count, col, true);
-
-                                // Scroll the viewport to make the cell visible
-                                tblAppointments.scrollRectToVisible(cellRect);
-                            }
-                            break;
-                        }
-                    }*/
+                    
                     if(getViewablePortionOfSchedule()!=null)
                         this.tblAppointments.scrollRectToVisible(getViewablePortionOfSchedule());
                 }
