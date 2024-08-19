@@ -49,11 +49,12 @@
   
     
     <dependencies>
+        <!--
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>1.2.3</version> <!-- Use the latest version -->
-        </dependency>
+            <version>1.2.3</version>
+        </dependency> -->
         <!-- MySQL Connector/J -->
         <dependency>
             <groupId>mysql</groupId>
@@ -94,18 +95,20 @@
 <!-- Thanks for using https://jar-download.com -->
 
         <!-- https://mvnrepository.com/artifact/org.docx4j/docx4j-core -->
+        <!--
         <dependency>
             <groupId>org.docx4j</groupId>
             <artifactId>docx4j-core</artifactId>
             <version>11.4.11</version>
-        </dependency>
+        </dependency> -->
         <!-- Docx4j Export FO for PDF conversion -->
         <!-- https://mvnrepository.com/artifact/org.docx4j/docx4j-export-fo -->
+        <!--
         <dependency>
             <groupId>org.docx4j</groupId>
             <artifactId>docx4j-export-fo</artifactId>
             <version>8.3.3</version>
-        </dependency>
+        </dependency> -->
         
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>

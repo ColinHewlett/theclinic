@@ -112,8 +112,8 @@ import javax.print.attribute.standard.MediaSizeName;
 import java.awt.print.PrinterException;
 import java.io.*;
 import org.apache.commons.compress.utils.FileNameUtils;
-import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
-import org.docx4j.Docx4J;
+//import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
+//import org.docx4j.Docx4J;
 
 import java.awt.print.PrinterException;
 import java.awt.print.PrinterJob;
@@ -1679,11 +1679,16 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
             document.write(out);
             System.out.println(new File(".").getAbsolutePath());
             System.out.println("Word document with complex table created successfully!");
+            out.flush();
             out.close();
         }catch (IOException e) {
-            e.printStackTrace();
+            String message = e.getMessage() +"\n"
+                    + "Raised in ViewController.doPrintPatientMedicalHistoryQuestionnaireRequest()";
+            displayErrorMessage(message,"View controller error",JOptionPane.WARNING_MESSAGE);
         }catch (WordTableBuilderException ex){
-            ex.printStackTrace();
+            String message = ex.getMessage() +"\n"
+                    + "Raised in ViewController.doPrintPatientMedicalHistoryQuestionnaireRequest()";
+            displayErrorMessage(message,"View controller error",JOptionPane.WARNING_MESSAGE);
         }
     }
     
@@ -2825,6 +2830,7 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         return true;
     }
     
+    /*
     private void printDocument(String path){
         //get path name for pdf conversion of Word document
         
@@ -2852,13 +2858,14 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
             e.printStackTrace();
             System.err.println("Failed to print the document: " + e.getMessage());
         }
-    }
+    }*/
     
+    /*
     private static void convertDocxToPdf(WordprocessingMLPackage wordMLPackage, File pdfFile) throws Exception {
         OutputStream os = new FileOutputStream(pdfFile);
-        Docx4J.toPDF(wordMLPackage, os);
+        //Docx4J.toPDF(wordMLPackage, os);
         os.close();
-    }
+    }*/
     
     private static void printPDF(File pdfFile) {
         PDDocument document = null;
