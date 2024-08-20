@@ -320,6 +320,7 @@ public class PatientView extends View
         btnClearSelection.setActionCommand(Actions.REQUEST_NULL_PATIENT.toString());
         btnCloseView.setActionCommand(Actions.REQUEST_CLOSE_VIEW.toString());
         btnCreateRecoverPatient.setActionCommand(Actions.REQUEST_CREATE_RECOVER_PATIENT.toString());
+        btnFetchClinicalNotes.setText(SystemDefinition.PatientViewActionCaption.PATIENT_CLINICAL_NOTES._1());
         btnFetchClinicalNotes.setActionCommand(Actions.REQUEST_CLINICAL_NOTES.toString());
         btnFetchScheduleForSelectedAppointment.setActionCommand(Actions.REQUEST_SCHEDULE_VIEW_CONTROLLER.toString());
         btnUpdateRecoverPatient.setActionCommand(Actions.REQUEST_UPDATE_RECOVER_PATIENT.toString());
@@ -417,10 +418,8 @@ public class PatientView extends View
                 }
                 break;
             case PATIENT_VIEW_CONTROLLER_ERROR_RECEIVED:
-                //setViewDescriptor((Descriptor)e.getNewValue());
-                ViewController.displayErrorMessage(
-                        getMyController().getDescriptor().getControllerDescription().getError(),
-                        "Patient vew error", JOptionPane.WARNING_MESSAGE);
+                String message = getMyController().getDescriptor().getControllerDescription().getError();
+                JOptionPane.showInternalMessageDialog(this, message, "View error",JOptionPane.WARNING_MESSAGE);
                 break;
             case PATIENT_RECEIVED:
                 initialisePatientViewComponentFromED(); 
@@ -497,7 +496,11 @@ public class PatientView extends View
                 getMyController().sendNoOpMessage(this);
                 break;
             case REQUEST_CLOSE_VIEW:
-                doCloseViewRequest();
+                //doCloseViewRequest();
+                ActionEvent actionEvent = new ActionEvent(
+                        PatientView.this,ActionEvent.ACTION_PERFORMED,
+                        ViewController.PatientViewControllerActionEvent.VIEW_CLOSE_NOTIFICATION.toString());
+                getMyController().actionPerformed(actionEvent);
                 break;
             case REQUEST_CREATE_RECOVER_PATIENT:
                 doCreateRecoverPatientRequest();
@@ -999,10 +1002,17 @@ public class PatientView extends View
         internalFrameAdapter = new InternalFrameAdapter(){
             @Override  
             public void internalFrameClosed(InternalFrameEvent e) {
+                /**
+                 * NO ACTION REQUIRED; UPDATED CODE AS FOLLOWS
+                 * -- on close view request the VIEW_CLOSE_NOTIFICATION is sent to the controller immediately
+                 * -- the controller will send the view.setClosed(true) message to close the view before closing the view controller
+                 */
+                /*
                 ActionEvent actionEvent = new ActionEvent(
                         PatientView.this,ActionEvent.ACTION_PERFORMED,
                         ViewController.PatientViewControllerActionEvent.VIEW_CLOSE_NOTIFICATION.toString());
                 getMyController().actionPerformed(actionEvent);
+                */
             }
             @Override
             public void internalFrameActivated(InternalFrameEvent e) {

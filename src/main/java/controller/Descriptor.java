@@ -176,11 +176,11 @@ public class Descriptor {
             conditionWithState = value;
         }
         
-        private ClinicNote clinicalNote = null;
-        public ClinicNote getClinicalNote(){
+        private ClinicalNote clinicalNote = null;
+        public ClinicalNote getClinicalNote(){
             return clinicalNote; 
         }
-        public void setClinicalNote(ClinicNote value){
+        public void setClinicalNote(ClinicalNote value){
             clinicalNote = value;
         }
         
@@ -538,11 +538,11 @@ public class Descriptor {
             treatment = value;
         }
         
-        private ClinicNote clinicalNote = null;
-        public ClinicNote getClinicalNote(){
+        private ClinicalNote clinicalNote = null;
+        public ClinicalNote getClinicalNote(){
             return clinicalNote; 
         }
-        public void setClinicalNote(ClinicNote value){
+        public void setClinicalNote(ClinicalNote value){
             clinicalNote = value;
         }
         

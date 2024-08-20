@@ -28,6 +28,7 @@ import model.entity.Appointment;
 import model.entity.Patient;
 /*28/03/2024import model.PatientNote;*/
 import controller.ViewController;
+import controller.DesktopViewController;
 import view.views.view_support_classes.AppointmentDateVetoPolicy;
 import view.views.view_support_classes.renderers.TableHeaderCellBorderRenderer;
 import view.views.view_support_classes.models.EmptySlotAvailability2ColumnTableModel;
@@ -729,6 +730,7 @@ public class ScheduleView extends View
     }
     
     public void actionPerformed(ActionEvent e){
+        ActionEvent actionEvent = null;
         Appointment appointment = null;
         Patient patient = null;
         ViewController.ScheduleViewControllerActionEvent
@@ -739,7 +741,7 @@ public class ScheduleView extends View
                     case DIARY:
                         if (doAppointmentCancelConfirmation()==JOptionPane.YES_OPTION){
                             this.setViewDescriptorAppointment(this.getSelectedAppointmentFromDiary());
-                            ActionEvent actionEvent = new ActionEvent(this, 
+                            actionEvent = new ActionEvent(this, 
                                     ActionEvent.ACTION_PERFORMED,
                                     ViewController.ScheduleViewControllerActionEvent.APPOINTMENT_CANCEL_REQUEST.toString());
                             this.getMyController().actionPerformed(actionEvent);
@@ -757,7 +759,12 @@ public class ScheduleView extends View
                 doClinicNoteRequest();
                 break;
             case REQUEST_CLOSE_VIEW:
-                doCloseViewAction();
+                actionEvent = new ActionEvent(
+                        ScheduleView.this,ActionEvent.ACTION_PERFORMED,
+                        ViewController.ScheduleViewControllerActionEvent.
+                                VIEW_CLOSE_NOTIFICATION.toString());
+                ScheduleView.this.getMyController().actionPerformed(actionEvent);
+                //doCloseViewAction();
                 break;
             case REQUEST_COLOUR_PICKER:
                 doColourPickerRequest2();
@@ -781,7 +788,7 @@ public class ScheduleView extends View
                                     appointment = getAppointmentFromDiaryWithUpdates();
                                     appointment.setPatient(patient);
                                     setViewDescriptorAppointment(appointment);
-                                    ActionEvent actionEvent = new ActionEvent(this,
+                                    actionEvent = new ActionEvent(this,
                                         ActionEvent.ACTION_PERFORMED,
                                         ViewController.ScheduleViewControllerActionEvent.CREATE_APPOINTMENT_REQUEST.toString());
                                     this.getMyController().actionPerformed(actionEvent);
@@ -866,7 +873,7 @@ public class ScheduleView extends View
                                         appointment.setDuration(getAppointmentFromDiaryWithUpdates().getDuration());
                                         this.setViewDescriptorAppointment(appointment);
                                 }
-                                ActionEvent actionEvent = new ActionEvent(this,
+                                actionEvent = new ActionEvent(this,
                                         ActionEvent.ACTION_PERFORMED,
                                         ViewController.ScheduleViewControllerActionEvent.UPDATE_APPOINTMENT_REQUEST.toString());
                                 this.getMyController().actionPerformed(actionEvent);
@@ -917,7 +924,7 @@ public class ScheduleView extends View
                 break;
             case REQUEST_PRINT_SCHEDULE:
                 getMyController().getDescriptor().getViewDescription().setScheduleDay(dayDatePicker.getDate());
-                ActionEvent actionEvent = new ActionEvent(this, 
+                actionEvent = new ActionEvent(this, 
                         ActionEvent.ACTION_PERFORMED,
                         ViewController.ScheduleViewControllerActionEvent.PRINT_SCHEDULE_REQUEST.toString());
                 getMyController().actionPerformed(actionEvent);
@@ -1092,7 +1099,12 @@ public class ScheduleView extends View
                 //refreshAppointmentTableWithCurrentlySelectedDate();
                 break;
             case APPOINTMENT_SCHEDULE_ERROR_RECEIVED:
-                populateEmptySlotAvailabilityTable(getMyController().getDescriptor().getControllerDescription().getAppointments());
+                if (e.getSource() instanceof DesktopViewController){
+                    String message = getMyController().getDescriptor().getControllerDescription().getError();
+                    JOptionPane.showInternalMessageDialog(this, message, "View error",JOptionPane.WARNING_MESSAGE);
+                }
+                else populateEmptySlotAvailabilityTable(
+                        getMyController().getDescriptor().getControllerDescription().getAppointments());
                 break;
                 
         }
@@ -1326,11 +1338,13 @@ public class ScheduleView extends View
         internalFrameAdapter = new InternalFrameAdapter(){
             @Override  
             public void internalFrameClosing(InternalFrameEvent e) {
+                /*
                 ActionEvent actionEvent = new ActionEvent(
                         ScheduleView.this,ActionEvent.ACTION_PERFORMED,
                         ViewController.ScheduleViewControllerActionEvent.
                                 VIEW_CLOSE_NOTIFICATION.toString());
                 ScheduleView.this.getMyController().actionPerformed(actionEvent);
+                */
             }
             
             @Override

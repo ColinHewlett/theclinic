@@ -21,7 +21,7 @@ public interface IStoreActions {
     public Point count(SurgeryDaysAssignment surgeryDaysAssignment)throws StoreException;
     public Point count(Doctor doctor)throws StoreException;
     public Point count(Medication medication)throws StoreException;
-    public Point count(ClinicNote clinicNote)throws StoreException;
+    public Point count(ClinicalNote clinicNote)throws StoreException;
     public Point count(Treatment treatment)throws StoreException;
     public Point count(AppointmentTreatment appointmentTreatment)throws StoreException;
     public Point count(Question treatment)throws StoreException;
@@ -37,7 +37,7 @@ public interface IStoreActions {
     public void create(SurgeryDaysAssignment s)throws StoreException;
     public void create(Doctor doctor)throws StoreException;
     public void create(Medication medication)throws StoreException;
-    public void create(ClinicNote clinicNote)throws StoreException;
+    public void create(ClinicalNote clinicNote)throws StoreException;
     public void create(PrimaryCondition pc)throws StoreException;
     public void create(SecondaryCondition sc)throws StoreException;
     public void create(Treatment treatment)throws StoreException;
@@ -56,7 +56,7 @@ public interface IStoreActions {
     public void delete(SecondaryCondition sc)throws StoreException;
     public void delete(Doctor doctor)throws StoreException;
     public void delete(Medication medication)throws StoreException;
-    public void delete(ClinicNote clinicNote)throws StoreException;
+    public void delete(ClinicalNote clinicNote)throws StoreException;
     public void delete(Treatment treatment)throws StoreException;
     public void delete(AppointmentTreatment appointmentTreatment)throws StoreException;
     public void delete(Question treatment)throws StoreException;
@@ -76,7 +76,7 @@ public interface IStoreActions {
     public Integer insert(Medication medication)throws StoreException;
     public Integer insert(PrimaryCondition pc)throws StoreException;
     public Integer insert(SecondaryCondition sc)throws StoreException;
-    public Integer insert(ClinicNote clinicNote)throws StoreException;
+    public Integer insert(ClinicalNote clinicNote)throws StoreException;
     public Integer insert(Treatment treatment)throws StoreException;
     public Integer insert(AppointmentTreatment appointmentTreatment)throws StoreException;
     public Integer insert(Question treatment)throws StoreException;
@@ -94,7 +94,7 @@ public interface IStoreActions {
     public Medication read(Medication medication)throws StoreException;
     public PrimaryCondition read(PrimaryCondition pc)throws StoreException;
     public SecondaryCondition read(SecondaryCondition sc)throws StoreException;
-    public ClinicNote read(ClinicNote clinicNote)throws StoreException;
+    public ClinicalNote read(ClinicalNote clinicNote)throws StoreException;
     public Treatment read(Treatment treatment)throws StoreException;
     public AppointmentTreatment read(AppointmentTreatment appointmentTreatment)throws StoreException;
     public Question read(Question treatment)throws StoreException;
@@ -116,7 +116,7 @@ public interface IStoreActions {
     public void update(Medication medication)throws StoreException;
     public void update(PrimaryCondition pc)throws StoreException;
     public void update(SecondaryCondition sc)throws StoreException;
-    public void update(ClinicNote clinicNote)throws StoreException;
+    public void update(ClinicalNote clinicNote)throws StoreException;
     public void update(Treatment treatment)throws StoreException;
     public void update(AppointmentTreatment appointmentTreatment)throws StoreException;
     public void update(Question treatment)throws StoreException;

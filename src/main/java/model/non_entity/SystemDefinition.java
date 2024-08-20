@@ -77,7 +77,7 @@ public class SystemDefinition {
                                "<html><center>Update</center><center>selected</center><center>patient</center></html>"),
         UPDATE_RECOVER_PATIENT("<html><center>Update</center><center>selected</center><center>patient</center></html>",
                                "<html><center>Cancel</center><center>patient</center><center>recovery</center>"),
-        PATIENT_CLINICAL_NOTES("<html><center>Clinical</center><center>notes for</center><center>patient</center></html"),
+        PATIENT_CLINICAL_NOTES("<html><center>Clinical</center><center>note for</center><center>appointment</center></html"),
         SCHEDULE_FOR_APPOINTMENT("<html><center>Show</center><center>schedule for</center><center>selection</center></html>"),
         CLEAR_SELECTION("Clear selection"),
         CLOSE_VIEW("<html><center>Close</center<center>view</center></html>");
@@ -105,7 +105,7 @@ public class SystemDefinition {
 
     public enum ScheduleViewActionCaption{
         CANCEL_APPOINTMENT("<html><center>Cancel</center<center>appointment</center></html>"),
-        CLINICAL_NOTES("<html><center>Clinical</center<center>notes</center></html>"),
+        CLINICAL_NOTES("<html><center>Clinical</center<center>note for</center><center>appointment</center></html>"),
         CLOSE_VIEW("<html><center>Close</center<center>view</center></html>"),
         CREATE_UPDATE_APPOINTMENT("<html><center>Create</center<center>appointment</center></html>",
                                   "<html><center>Update</center<center>appointment</center></html>"),

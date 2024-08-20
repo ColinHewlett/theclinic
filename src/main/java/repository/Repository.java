@@ -1228,10 +1228,10 @@ public class Repository implements IStoreActions {
     }
     
     private void doInsertClinicalNote(String sql, Entity entity)throws StoreException{
-        ClinicNote clinicNote = null;
+        ClinicalNote clinicNote = null;
         if (entity != null){
             if (entity.getIsClinicNote()){
-                clinicNote = (ClinicNote)entity;
+                clinicNote = (ClinicalNote)entity;
                 try (PreparedStatement preparedStatement = getPMSStoreConnection().prepareStatement(sql);){
                     preparedStatement.setLong(1,clinicNote.getKey());;
                     preparedStatement.setString(2,clinicNote.getNotes());
@@ -2205,9 +2205,9 @@ public class Repository implements IStoreActions {
         }
     }
     
-    private ClinicNote get(ClinicNote clinicNote, ResultSet rs)throws StoreException{
-        ClinicNote result = null;
-        ArrayList<ClinicNote> collection = new ArrayList<>();
+    private ClinicalNote get(ClinicalNote clinicNote, ResultSet rs)throws StoreException{
+        ClinicalNote result = null;
+        ArrayList<ClinicalNote> collection = new ArrayList<>();
         try{
             switch (clinicNote.getScope()){
                 case SINGLE:
@@ -2216,7 +2216,7 @@ public class Repository implements IStoreActions {
                         Integer pid = rs.getInt("pid");
                         String notes = rs.getString("notes");
                         Boolean isDeleted = rs.getBoolean("isDeleted");
-                        clinicNote = new ClinicNote(pid);
+                        clinicNote = new ClinicalNote(pid);
                         clinicNote.setNotes(notes);
                         clinicNote.setIsDeleted(isDeleted);
                     }
@@ -2227,7 +2227,7 @@ public class Repository implements IStoreActions {
                             Integer pid = rs.getInt("pid");
                             String notes = rs.getString("notes");
                             Boolean isDeleted = rs.getBoolean("isDeleted");
-                            clinicNote = new ClinicNote(pid);
+                            clinicNote = new ClinicalNote(pid);
                             clinicNote.setNotes(notes);
                             clinicNote.setIsDeleted(isDeleted);
                             collection.add(clinicNote);
@@ -2721,10 +2721,10 @@ public class Repository implements IStoreActions {
     }
     
     private Entity doReadClinicalNoteForAppointment(String sql, Entity entity)throws StoreException{
-        ClinicNote clinicNote = null;
+        ClinicalNote clinicNote = null;
         if (entity != null) {
             if (entity.getIsClinicNote()) {
-                clinicNote = (ClinicNote) entity;
+                clinicNote = (ClinicalNote) entity;
                 try(PreparedStatement preparedStatement = getPMSStoreConnection().prepareStatement(sql);){
                     preparedStatement.setLong(1, clinicNote.getKey());
                     ResultSet rs = preparedStatement.executeQuery();
@@ -2746,10 +2746,10 @@ public class Repository implements IStoreActions {
     }
     /*
     private Entity doReadClinicNoteForPatient(String sql, Entity entity)throws StoreException{
-        ClinicNote clinicNote = null;
+        ClinicalNote clinicNote = null;
         if (entity != null) {
             if (entity.getIsClinicNote()) {
-                clinicNote = (ClinicNote) entity;
+                clinicNote = (ClinicalNote) entity;
                 try {
                     PreparedStatement preparedStatement = getPMSStoreConnection().prepareStatement(sql);
                     preparedStatement.setInt(1, clinicNote.getPatientKey());
@@ -3070,7 +3070,7 @@ public class Repository implements IStoreActions {
                 result = get((AppointmentTreatment)entity,rs);
                 break;
             case CLINICAL_NOTE:
-                result = get((ClinicNote)entity,rs);
+                result = get((ClinicalNote)entity,rs);
                 break;
             case DOCTOR:
                 result = get((Doctor)entity,rs);
@@ -3527,10 +3527,10 @@ public class Repository implements IStoreActions {
     
     
     private void doUpdateClinicalNote(String sql, Entity entity) throws StoreException{
-        ClinicNote clinicNote;
+        ClinicalNote clinicNote;
         if (entity != null) {
             if (entity.getIsClinicNote()){
-                    clinicNote = (ClinicNote)entity;
+                    clinicNote = (ClinicalNote)entity;
                 try(PreparedStatement preparedStatement = getPMSStoreConnection().prepareStatement(sql);){
                     preparedStatement.setString(1, clinicNote.getNotes());
                     preparedStatement.setLong(2, clinicNote.getKey());
@@ -5971,7 +5971,7 @@ public class Repository implements IStoreActions {
     }
     
     @Override
-    public Integer insert(ClinicNote clinicNote)throws StoreException{
+    public Integer insert(ClinicalNote clinicNote)throws StoreException{
         Entity key = null;
         Entity entity;
         IStoreClient client;
@@ -6501,7 +6501,7 @@ public class Repository implements IStoreActions {
     }
     
     @Override
-    public void delete(ClinicNote clinicNote)throws StoreException{
+    public void delete(ClinicalNote clinicNote)throws StoreException{
         if (clinicNote.getScope()!=null){
             switch(clinicNote.getScope()){
                case SINGLE:
@@ -7029,8 +7029,8 @@ public class Repository implements IStoreActions {
     }
     
     @Override
-    public ClinicNote read(ClinicNote clinicNote)throws StoreException{
-        ClinicNote result = null;
+    public ClinicalNote read(ClinicalNote clinicNote)throws StoreException{
+        ClinicalNote result = null;
         Entity entity = null;
 
         switch(clinicNote.getScope()){
@@ -7072,7 +7072,7 @@ public class Repository implements IStoreActions {
         }
         if (entity!=null){
             if (entity.getIsClinicNote()){
-                result = (ClinicNote)entity;
+                result = (ClinicalNote)entity;
             }
         }
         return result;
@@ -7571,7 +7571,7 @@ public class Repository implements IStoreActions {
     }
     
     @Override
-    public Point count(ClinicNote clinicNote)throws StoreException{
+    public Point count(ClinicalNote clinicNote)throws StoreException{
         Entity result = null;
         if (clinicNote !=null){
             Repository.PMSSQL sqlStatement = null;
@@ -7861,7 +7861,7 @@ public class Repository implements IStoreActions {
     }
     
     @Override
-    public void create(ClinicNote table) throws StoreException{
+    public void create(ClinicalNote table) throws StoreException{
         Entity value = null;
         runSQL(Repository.EntityType.CLINICAL_NOTE,Repository.PMSSQL.CREATE_CLINICAL_NOTE_TABLE, value);
     }
@@ -8162,7 +8162,7 @@ public class Repository implements IStoreActions {
     }
     
     @Override
-    public void update(ClinicNote clinicNote)throws StoreException{
+    public void update(ClinicalNote clinicNote)throws StoreException{
         runSQL(Repository.EntityType.CLINICAL_NOTE, Repository.PMSSQL.UPDATE_CLINIC_NOTE,clinicNote); 
     }
     
@@ -8281,7 +8281,7 @@ public class Repository implements IStoreActions {
                             create(new Notification());
                             create(new SurgeryDaysAssignment());
                             create(new Appointment());
-                            create(new ClinicNote());
+                            create(new ClinicalNote());
                             create(new Treatment());
                             create(new AppointmentTreatment());
                         }

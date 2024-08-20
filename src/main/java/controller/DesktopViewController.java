@@ -320,12 +320,40 @@ public class DesktopViewController extends ViewController{
      * @param e:ActionEvent received; indicates which ActionCommand from above list was sent
      */
     private void doActionEventForScheduleViewController(ActionEvent e){
+        ClinicalNoteViewController _cnvc = null;
         ScheduleViewController avc = (ScheduleViewController)e.getSource();
         ViewController.DesktopViewControllerActionEvent actionCommand =
                     ViewController.DesktopViewControllerActionEvent.valueOf(e.getActionCommand());
         switch(actionCommand){
             case CLINICAL_NOTE_VIEW_CONTROLLER_REQUEST:
-                doRequestForClinicalNoteViewController(e);
+                /**
+                 * check first to see if a duplicate (same appointment) clinical note is already open
+                 * if yes: send error message to controller's view
+                 */
+                _cnvc = null;
+                boolean isNoteforAppointmentAlreadyOpen = false;
+                ScheduleViewController svc = (ScheduleViewController)e.getSource();
+                for(ClinicalNoteViewController cnvc : this.clinicalNoteViewControllers){
+                    if (cnvc.getDescriptor().getControllerDescription().getAppointment()
+                            .equals(svc.getDescriptor().getControllerDescription().getAppointment())){
+                        isNoteforAppointmentAlreadyOpen = true;
+                        _cnvc = cnvc;
+                        break;
+                    }
+                }
+                if (!isNoteforAppointmentAlreadyOpen) doRequestForClinicalNoteViewController(e);
+                else{
+                    String message = "a clinical note for this appointment is already open";
+                    svc.getDescriptor().getControllerDescription().setError(message);
+                    this.firePropertyChangeEvent(
+                            ScheduleViewControllerPropertyChangeEvent.APPOINTMENT_SCHEDULE_ERROR_RECEIVED.toString(),
+                            svc.getView(),
+                            this, 
+                            null,
+                            null
+                    );
+                    _cnvc.getView().toFront();
+                }
                 break;
             case SCHEDULE_VIEW_CONTROLLER_REQUEST:  
                 doRequestForScheduleViewController(avc);
@@ -341,25 +369,63 @@ public class DesktopViewController extends ViewController{
                 );
                 break;
             case VIEW_CONTROLLER_CLOSE_NOTIFICATION:{
-                Iterator<ScheduleViewController> viewControllerIterator = 
-                        this.scheduleViewControllers.iterator();
-                while(viewControllerIterator.hasNext()){
-                    avc = viewControllerIterator.next();
-                    if (avc.equals(e.getSource())){
+                /**
+                 * check if an open ClinicalNoteView'appointment has the same date as the Schedule VC requesting to close
+                 */
+                _cnvc = null;
+                boolean isCLinicalNoteAppointmentOnScheduleView = false;
+                LocalDate day = avc.getDescriptor().getControllerDescription().getScheduleDay();
+                for(ClinicalNoteViewController cnvc : this.clinicalNoteViewControllers){
+                    Appointment appointment = 
+                            cnvc.getDescriptor().getControllerDescription().getAppointment();
+                    if(day.equals(appointment.getStart().toLocalDate())){
+                        isCLinicalNoteAppointmentOnScheduleView = true;
+                        _cnvc = cnvc;
                         break;
                     }
                 }
-                if (!this.scheduleViewControllers.remove(avc)){
-                    String message = "Could not find AppointmentViewController in "
-                                            + "DesktopViewController collection.";
-                    displayErrorMessage(message,"DesktopViewController error",JOptionPane.WARNING_MESSAGE);
-                }
-                else{
-                    if (this.isDesktopPendingClosure){
-                        this.requestViewControllersToCloseViews();
+                if(isCLinicalNoteAppointmentOnScheduleView){
+                    String message = "a clinical note is open for an appointment on this day";
+                    avc.getDescriptor().getControllerDescription().setError(message);
+                    this.firePropertyChangeEvent(
+                            ScheduleViewControllerPropertyChangeEvent.APPOINTMENT_SCHEDULE_ERROR_RECEIVED.toString(),
+                            avc.getView(),
+                            this, 
+                            null,
+                            null
+                    );
+                    _cnvc.getView().toFront();
+                }else{
+                    try{
+                        avc.getView().setClosed(true);
+                        
+                    }catch (java.beans.PropertyVetoException ex){
+                        String _message = ex.getMessage() + "\n"
+                                + "Raised in "
+                                + "DesktopViewController::doActionEventForScheduleViewController(VIEW_CONTROLLER_CLOSE_NOTIFICATION)";
+                        displayErrorMessage(_message, "View controller error",JOptionPane.WARNING_MESSAGE);
                     }
-                    if (this.scheduleViewControllers.isEmpty() && 
-                            this.patientViewControllers.isEmpty()){ 
+                    ScheduleViewController _avc = null;
+                    Iterator<ScheduleViewController> viewControllerIterator = 
+                            this.scheduleViewControllers.iterator();
+                    while(viewControllerIterator.hasNext()){
+                        _avc = viewControllerIterator.next();
+                        if (_avc.equals(e.getSource())){
+                            break;
+                        }
+                    }
+                    if (!this.scheduleViewControllers.remove(_avc)){
+                        String message = "Could not find AppointmentViewController in "
+                                                + "DesktopViewController collection.";
+                        displayErrorMessage(message,"DesktopViewController error",JOptionPane.WARNING_MESSAGE);
+                    }
+                    else{
+                        if (this.isDesktopPendingClosure){
+                            this.requestViewControllersToCloseViews();
+                        }
+                        if (this.scheduleViewControllers.isEmpty() && 
+                                this.patientViewControllers.isEmpty()){ 
+                        }
                     }
                 }
                 break;
@@ -443,6 +509,7 @@ public class DesktopViewController extends ViewController{
     
     private void doActionEventForPatientViewController(ActionEvent e){
         PatientViewController pvc = null;
+        Iterator<ClinicalNoteViewController> clinicalNoteViewControllerIterator = null;
         ViewController.DesktopViewControllerActionEvent actionCommand =
                     ViewController.DesktopViewControllerActionEvent.valueOf(e.getActionCommand());
         switch(actionCommand){
@@ -457,30 +524,98 @@ public class DesktopViewController extends ViewController{
                 );
                 break;
             case VIEW_CONTROLLER_CLOSE_NOTIFICATION:
-                Iterator<PatientViewController> viewControllerIterator = 
-                        this.patientViewControllers.iterator();
-                while(viewControllerIterator.hasNext()){
-                    pvc = viewControllerIterator.next();
-                    if (pvc.equals(e.getSource())){
+                /**
+                 * Check if the patient belonging to this PVC is the appointee in an appointment belonging to active ClinicalNOte view
+                 * if yes send PATIENT_VIEW_CONTROLLER_ERROR_RECEIVED message to PVC's view with appropriate message
+                 * if no 
+                 * -- send message to PVS's view.setClosed(true)
+                 * -- close the view controller here as normal
+                 */
+                ClinicalNoteViewController cnvc = null;
+                boolean isPatientSameInPatientViewControllerAndClinicalNotViewController = false;
+                pvc = (PatientViewController)e.getSource();
+                clinicalNoteViewControllerIterator = 
+                        this.clinicalNoteViewControllers.iterator();
+                while (clinicalNoteViewControllerIterator.hasNext()){
+                    cnvc = clinicalNoteViewControllerIterator.next();
+                    if (pvc.getDescriptor().getControllerDescription().getPatient()
+                            .equals(cnvc.getDescriptor().getControllerDescription().getAppointment().getPatient())){
+                        isPatientSameInPatientViewControllerAndClinicalNotViewController = true;
                         break;
                     }
                 }
-                if (!this.patientViewControllers.remove(pvc)){
-                    String message = "Could not find PatientViewController in "
-                                            + "DesktopViewController collection.";
-                    displayErrorMessage(message,"DesktopViewController error",JOptionPane.WARNING_MESSAGE);
-                }
-                else{
-                    if (this.isDesktopPendingClosure){
-                        this.requestViewControllersToCloseViews();
+                if (isPatientSameInPatientViewControllerAndClinicalNotViewController){
+                    String message = "Cannot close patient view while a clinical note for this patient is open";
+                    pvc.getDescriptor().getControllerDescription().setError(message);
+                    this.firePropertyChangeEvent(
+                            PatientViewControllerPropertyChangeEvent.PATIENT_VIEW_CONTROLLER_ERROR_RECEIVED.toString(), 
+                            pvc.getView(), 
+                            this, 
+                            null,
+                            null
+                    );
+                    cnvc.getView().toFront();
+                }else{
+                    try{
+                        pvc.getView().setClosed(true);
+                        
+                    }catch (java.beans.PropertyVetoException ex){
+                        String message = ex.getMessage() + "\n"
+                                + "Raised in "
+                                + "DesktopViewController::doActionEventForPatientViewController(VIEW_CONTROLLER_CLOSE_NOTIFICATION)";
+                        displayErrorMessage(message, "View controller error",JOptionPane.WARNING_MESSAGE);
                     }
-                    if (this.scheduleViewControllers.isEmpty() && 
-                            this.patientViewControllers.isEmpty()){ 
+                    Iterator<PatientViewController> viewControllerIterator = 
+                            this.patientViewControllers.iterator();
+                    while(viewControllerIterator.hasNext()){
+                        pvc = viewControllerIterator.next();
+                        if (pvc.equals(e.getSource())){
+                            break;
+                        }
+                    }
+                    if (!this.patientViewControllers.remove(pvc)){
+                        String message = "Could not find PatientViewController in "
+                                                + "DesktopViewController collection.";
+                        displayErrorMessage(message,"DesktopViewController error",JOptionPane.WARNING_MESSAGE);
+                    }
+                    else{
+                        if (this.isDesktopPendingClosure){
+                            this.requestViewControllersToCloseViews();
+                        }
+                        if (this.scheduleViewControllers.isEmpty() && 
+                                this.patientViewControllers.isEmpty()){ 
+                        }
                     }
                 }
                 break;
             case CLINICAL_NOTE_VIEW_CONTROLLER_REQUEST:
-                doRequestForClinicalNoteViewController(e);
+                cnvc = null;
+                boolean isAppointmentSameInClinicalNotViewController = false;
+                pvc = (PatientViewController)e.getSource();
+                Appointment appointment = pvc.getDescriptor().getControllerDescription().getAppointment();
+                clinicalNoteViewControllerIterator = 
+                        this.clinicalNoteViewControllers.iterator();
+                while (clinicalNoteViewControllerIterator.hasNext()){
+                    cnvc = clinicalNoteViewControllerIterator.next();
+                    if (cnvc.getDescriptor().getControllerDescription().getAppointment().equals(appointment)){
+                        isAppointmentSameInClinicalNotViewController = true;
+                        break;
+                    }
+                }
+                
+                if (!isAppointmentSameInClinicalNotViewController) doRequestForClinicalNoteViewController(e);
+                else{
+                    String message = "a clinical note is already open for this appointment";
+                    pvc.getDescriptor().getControllerDescription().setError(message);
+                    this.firePropertyChangeEvent(
+                            PatientViewControllerPropertyChangeEvent.PATIENT_VIEW_CONTROLLER_ERROR_RECEIVED.toString(), 
+                            pvc.getView(), 
+                            this, 
+                            null,
+                            null
+                    );
+                    cnvc.getView().toFront();
+                }
                 break;
             case PATIENT_INVOICE_VIEW_CONTROLLER_REQUEST:
                 doRequestForPatientInvoiceViewController(e);
@@ -1790,7 +1925,7 @@ public class DesktopViewController extends ViewController{
     private Point doRequestCountForClinicNoteTable(){
         Point result = null;
         //07/08/2022
-        ClinicNote clinicNote = new ClinicNote();
+        ClinicalNote clinicNote = new ClinicalNote();
         clinicNote.setScope(Entity.Scope.ALL);
         try{
             result = clinicNote.count();
@@ -1950,7 +2085,7 @@ public class DesktopViewController extends ViewController{
         }
         
         try{
-            ClinicNote cn = new ClinicNote();
+            ClinicalNote cn = new ClinicalNote();
             cn.setScope(Entity.Scope.ALL); 
             cn.delete();
         }catch(StoreException ex){

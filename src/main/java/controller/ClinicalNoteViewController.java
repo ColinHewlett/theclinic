@@ -5,7 +5,7 @@
 package controller;
 
 import model.entity.Entity;
-import model.entity.ClinicNote;
+import model.entity.ClinicalNote;
 import model.entity.Appointment;
 import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeEvent;
@@ -32,7 +32,22 @@ public class ClinicalNoteViewController extends ViewController{
         String error = null;
         String message = null;
         Appointment appointment = null;
-        ClinicNote clinicalNote = null;
+        ClinicalNote clinicalNote = null;
+        
+        if (e.getSource() instanceof DesktopViewController){
+            DesktopViewControllerActionEvent actionCommand = DesktopViewControllerActionEvent.valueOf(e.getActionCommand());
+            switch (actionCommand){
+                case INITIALISE_VIEW:
+                    try{
+                        doClinicalNoteForAppoinmentRequest(e);
+                    }catch(StoreException ex){
+                        message = ex.getMessage() + "\n"
+                                + "Handled in PatientClinicalNoteViewController::actionPerformed(INITIALISE_VIEW)";
+                        displayErrorMessage(message, "View controller error", JOptionPane.WARNING_MESSAGE);
+                    }
+                    break;
+            }
+        }
         
         ViewController.ClinicalNoteViewControllerActionEvent actionCommand =
                 ViewController.ClinicalNoteViewControllerActionEvent
@@ -126,7 +141,7 @@ public class ClinicalNoteViewController extends ViewController{
     private void doClinicalNoteForAppoinmentRequest(ActionEvent e)throws StoreException{
         Appointment appointment = 
                 getDescriptor().getControllerDescription().getAppointment();
-        ClinicNote clinicalNote = new ClinicNote(appointment);
+        ClinicalNote clinicalNote = new ClinicalNote(appointment);
         clinicalNote.setScope(Entity.Scope.FOR_APPOINTMENT);
         clinicalNote = clinicalNote.read();
         if (clinicalNote.get().isEmpty())
@@ -137,7 +152,8 @@ public class ClinicalNoteViewController extends ViewController{
         firePropertyChangeEvent(
             ViewController.ClinicalNoteViewControllerPropertyChangeEvent
                     .CLINICAL_NOTE_RECEIVED.toString(),
-            (View)e.getSource(),
+            getView(),
+            //(View)e.getSource(),
             this,
             null,
             null

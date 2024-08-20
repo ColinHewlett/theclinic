@@ -3,7 +3,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JInternalFrame.java to edit this template
  */
 package view.views.non_modal_views;
-import model.entity.ClinicNote;
+import model.entity.ClinicalNote;
 import model.entity.Appointment;
 import controller.ViewController;
 import model.*;
@@ -29,7 +29,7 @@ import patient_view_original_class.NotesView;
  *
  * @author colin
  */
-public class ClinicalNoteView extends View 
+public class PatientClinicalNoteForAppointmentView extends View 
         implements ActionListener, PropertyChangeListener{
 
     /**
@@ -38,7 +38,7 @@ public class ClinicalNoteView extends View
      * @param myController
      * @param desktopView 
      */
-    public ClinicalNoteView(View.Viewer myViewType, 
+    public PatientClinicalNoteForAppointmentView(View.Viewer myViewType, 
             ViewController myController,
             DesktopView desktopView) {//ViewMode arg
         setMyController(myController);
@@ -52,7 +52,7 @@ public class ClinicalNoteView extends View
         
         txaNotepad.setLineWrap(true);
         txaNotepad.setWrapStyleWord(true);
-        txaNotepad.setComponentPopupMenu(this.makePopupMenu());
+        //txaNotepad.setComponentPopupMenu(this.makePopupMenu());
         
         
         setClosable(true);
@@ -72,13 +72,13 @@ public class ClinicalNoteView extends View
                     + appointment.getAppointmentDate());
             
             this.mniCreateNote.setActionCommand(Action.REQUEST_CREATE_NOTE.toString());
-            this.mniDeleteNote.setActionCommand(Action.REQUEST_DELETE_NOTE.toString());
+            //this.mniDeleteNote.setActionCommand(Action.REQUEST_DELETE_NOTE.toString());
             this.mniUpdateNote.setActionCommand(Action.REQUEST_UPDATE_NOTE.toString());
             this.mniPasteNote.setActionCommand(Action.REQUEST_PASTE_NOTE.toString());
             this.mniCloseView.setActionCommand(Action.REQUEST_CLOSE_VIEW.toString());
             
             this.mniCreateNote.addActionListener(this);
-            this.mniDeleteNote.addActionListener(this);
+            //this.mniDeleteNote.addActionListener(this);
             this.mniUpdateNote.addActionListener(this);
             this.mniPasteNote.addActionListener(this);
             this.mniCloseView.addActionListener(this);
@@ -96,7 +96,7 @@ public class ClinicalNoteView extends View
             actionCommand = ViewController
                     .ClinicalNoteViewControllerActionEvent.CLINICAL_NOTE_FOR_APPOINTMENT_REQUEST;
             doSendActionEvent(actionCommand);
-            
+            /*
             switch (getViewMode()){
                 case CREATE:
                     titledBorder.setTitle("Clinical note (undefined)");
@@ -105,7 +105,7 @@ public class ClinicalNoteView extends View
                     titledBorder.setTitle("Clinical note");
                     break;
             }
-            
+            */
         }else{
             String message = "<html><center>Attempt to view the appointment's clinical note "
                     + "aborted</center>"
@@ -146,7 +146,7 @@ public class ClinicalNoteView extends View
         String message = null;
         String note = null;
         Appointment appointment = null;
-        ClinicNote clinicalNote = null;
+        ClinicalNote clinicalNote = null;
         actionCommand = null;
         switch (Action.valueOf(e.getActionCommand())){
             case REQUEST_CLOSE_VIEW:
@@ -159,7 +159,7 @@ public class ClinicalNoteView extends View
             case REQUEST_CREATE_NOTE:{
                 appointment = getMyController().getDescriptor().
                         getControllerDescription().getAppointment();
-                clinicalNote = new ClinicNote(appointment);
+                clinicalNote = new ClinicalNote(appointment);
                 note = txaNotepad.getText().trim();
                 if (note.isEmpty()){
                     message = "Notepad is empty, nothing to save";  
@@ -266,8 +266,8 @@ public class ClinicalNoteView extends View
         return appointment;
     }
     
-    private ClinicNote clinicalNote = null;
-    private void setClinicalNote(ClinicNote value){
+    private ClinicalNote clinicalNote = null;
+    private void setClinicalNote(ClinicalNote value){
         clinicalNote = value;
         if (clinicalNote==null) {
             setViewMode(ViewController.ViewMode.CREATE);
@@ -279,7 +279,7 @@ public class ClinicalNoteView extends View
         }
         
     }
-    private ClinicNote getClinicalNote(){
+    private ClinicalNote getClinicalNote(){
         return clinicalNote;
     }
     
@@ -290,14 +290,16 @@ public class ClinicalNoteView extends View
             case CREATE:
                 this.mniCreateNote.setEnabled(true);
                 this.mniUpdateNote.setEnabled(false);
-                this.mniDeleteNote.setEnabled(false);
+                //this.mniDeleteNote.setEnabled(false);
                 titledBorder.setTitle("Clinical note (undefined)");
+                txaNotepad.setComponentPopupMenu(this.makePopupMenu());
                 break;
             case UPDATE:
                 this.mniCreateNote.setEnabled(false);
                 this.mniUpdateNote.setEnabled(true);
-                this.mniDeleteNote.setEnabled(true);
+                //this.mniDeleteNote.setEnabled(true);
                 titledBorder.setTitle("Clinical note");
+                txaNotepad.setComponentPopupMenu(this.makePopupMenu());
                 break;
         }
     }
@@ -340,15 +342,26 @@ public class ClinicalNoteView extends View
     
     private JPopupMenu makePopupMenu(){
         JPopupMenu popup = new JPopupMenu();
-        pastePopupMenuItem = popup.add("Paste note");
+        pastePopupMenuItem = popup.add("Paste note"); 
         pastePopupMenuItem.setActionCommand(
                 Action.REQUEST_PASTE_NOTE.toString());
         pastePopupMenuItem.addActionListener(this);
         popup.add(new JPopupMenu.Separator());
-        savePopupMenuItem = popup.add("Save note");
-        savePopupMenuItem.setActionCommand(
-                Action.REQUEST_CREATE_NOTE.toString());
-        savePopupMenuItem.addActionListener(this);
+        switch(getViewMode()){
+            case CREATE:
+                savePopupMenuItem = popup.add("Save note");
+                savePopupMenuItem.setActionCommand(
+                        Action.REQUEST_CREATE_NOTE.toString());
+                savePopupMenuItem.addActionListener(this);
+                break;
+            case UPDATE:
+                savePopupMenuItem = popup.add("Update note");
+                savePopupMenuItem.setActionCommand(
+                        Action.REQUEST_UPDATE_NOTE.toString());
+                savePopupMenuItem.addActionListener(this);
+                break;
+        }
+        
         
         return popup;
                     
@@ -413,7 +426,6 @@ public class ClinicalNoteView extends View
         jMenu1 = new javax.swing.JMenu();
         mniCreateNote = new javax.swing.JMenuItem();
         mniUpdateNote = new javax.swing.JMenuItem();
-        mniDeleteNote = new javax.swing.JMenuItem();
         jSeparator1 = new javax.swing.JPopupMenu.Separator();
         mniPasteNote = new javax.swing.JMenuItem();
         jSeparator3 = new javax.swing.JPopupMenu.Separator();
@@ -431,7 +443,7 @@ public class ClinicalNoteView extends View
             pnlClinicalNoteLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlClinicalNoteLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 381, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 415, Short.MAX_VALUE)
                 .addContainerGap())
         );
         pnlClinicalNoteLayout.setVerticalGroup(
@@ -444,17 +456,14 @@ public class ClinicalNoteView extends View
 
         jMenu1.setText("File");
 
-        mniCreateNote.setText("Create clinical note");
+        mniCreateNote.setText("Save new note");
         jMenu1.add(mniCreateNote);
 
-        mniUpdateNote.setText("Update clinical note");
+        mniUpdateNote.setText("Update existing note");
         jMenu1.add(mniUpdateNote);
-
-        mniDeleteNote.setText("Delete clinical note");
-        jMenu1.add(mniDeleteNote);
         jMenu1.add(jSeparator1);
 
-        mniPasteNote.setText("Paste notes");
+        mniPasteNote.setText("Paste note");
         jMenu1.add(mniPasteNote);
         jMenu1.add(jSeparator3);
 
@@ -495,7 +504,6 @@ public class ClinicalNoteView extends View
     private javax.swing.JPopupMenu.Separator jSeparator3;
     private javax.swing.JMenuItem mniCloseView;
     private javax.swing.JMenuItem mniCreateNote;
-    private javax.swing.JMenuItem mniDeleteNote;
     private javax.swing.JMenuItem mniPasteNote;
     private javax.swing.JMenuItem mniUpdateNote;
     private javax.swing.JPanel pnlClinicalNote;

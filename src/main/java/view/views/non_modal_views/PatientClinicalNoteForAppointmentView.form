@@ -13,24 +13,19 @@
           <SubComponents>
             <MenuItem class="javax.swing.JMenuItem" name="mniCreateNote">
               <Properties>
-                <Property name="text" type="java.lang.String" value="Create clinical note"/>
+                <Property name="text" type="java.lang.String" value="Save new note"/>
               </Properties>
             </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="mniUpdateNote">
               <Properties>
-                <Property name="text" type="java.lang.String" value="Update clinical note"/>
-              </Properties>
-            </MenuItem>
-            <MenuItem class="javax.swing.JMenuItem" name="mniDeleteNote">
-              <Properties>
-                <Property name="text" type="java.lang.String" value="Delete clinical note"/>
+                <Property name="text" type="java.lang.String" value="Update existing note"/>
               </Properties>
             </MenuItem>
             <MenuItem class="javax.swing.JPopupMenu$Separator" name="jSeparator1">
             </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="mniPasteNote">
               <Properties>
-                <Property name="text" type="java.lang.String" value="Paste notes"/>
+                <Property name="text" type="java.lang.String" value="Paste note"/>
               </Properties>
             </MenuItem>
             <MenuItem class="javax.swing.JPopupMenu$Separator" name="jSeparator3">
@@ -96,7 +91,7 @@
           <Group type="103" groupAlignment="0" attributes="0">
               <Group type="102" alignment="0" attributes="0">
                   <EmptySpace max="-2" attributes="0"/>
-                  <Component id="jScrollPane1" pref="381" max="32767" attributes="0"/>
+                  <Component id="jScrollPane1" pref="415" max="32767" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
               </Group>
           </Group>

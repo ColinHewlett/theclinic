@@ -758,6 +758,7 @@ public class PatientView extends View implements ActionListener{
                 ViewController.displayErrorMessage(
                         getMyController().getDescriptor().getControllerDescription().getError(),
                         "Patient vew error", JOptionPane.WARNING_MESSAGE);
+                
                 break;
             case PATIENT_RECEIVED:
                 initialisePatientViewComponentFromED(); 

@@ -15,27 +15,27 @@ import repository.StoreException;
  *
  * @author colin
  */
-public class ClinicNote extends Entity implements IEntityStoreActions{
+public class ClinicalNote extends Entity implements IEntityStoreActions{
 
-    public ClinicNote(){
+    public ClinicalNote(){
         this.setIsClinicNote(true);
     }
     
-    public ClinicNote(Integer value){
+    public ClinicalNote(Integer value){
         this.setIsClinicNote(true);
         setKey(value);
     }
     
-    public ClinicNote(Appointment appointment){
+    public ClinicalNote(Appointment appointment){
         this.setIsClinicNote(true);
         setKey(appointment.getKey());
     }
     
-    private ArrayList<ClinicNote> collection = null;
-    public ArrayList<ClinicNote> get(){
+    private ArrayList<ClinicalNote> collection = null;
+    public ArrayList<ClinicalNote> get(){
         return collection;
     }
-    public void set(ArrayList<ClinicNote> value){
+    public void set(ArrayList<ClinicalNote> value){
         collection = value;
     }
     
@@ -76,7 +76,7 @@ public class ClinicNote extends Entity implements IEntityStoreActions{
     }
     
     @Override
-    public ClinicNote read()throws StoreException{
+    public ClinicalNote read()throws StoreException{
         /**
          * if scope = FOR_PATIENT
          * -- patientKey property must have been initialised with the patient key value

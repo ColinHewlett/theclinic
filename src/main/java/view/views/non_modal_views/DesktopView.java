@@ -621,7 +621,7 @@ public class DesktopView extends javax.swing.JFrame
         JPopupMenu popup = new JPopupMenu();
         popupMenuItem = popup.add("Paste note");
         popupMenuItem.setActionCommand(
-                ClinicalNoteView.Action.REQUEST_PASTE_NOTE.toString());
+                PatientClinicalNoteForAppointmentView.Action.REQUEST_PASTE_NOTE.toString());
         popupMenuItem.addActionListener(this);
         return popup;
                     

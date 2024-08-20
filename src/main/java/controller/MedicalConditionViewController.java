@@ -125,13 +125,19 @@ public class MedicalConditionViewController extends ViewController{
                         primaryCondition.delete();
                         getAllPrimaryConditions(e);                        
                     }catch(StoreException ex){
-                        String message = ex.getMessage() + "\nHandled in "
-                                + "MedicalConditionViewController::actionPerformed("
-                                + actionCommand + ")";
-                        displayErrorMessage(message, 
-                                "Medical condition view controller error", 
-                                JOptionPane.WARNING_MESSAGE);
-                        isError = true;
+                        String message = null;
+                        if (ex.getMessage().contains("integrity constraint violation")){
+                            error = "Selected condition currently in use; requested deletion aborted";
+                            isError = true;
+                        }else{
+                            message = ex.getMessage() + "\nHandled in "
+                                    + "MedicalConditionViewController::actionPerformed("
+                                    + actionCommand + ")";
+                            displayErrorMessage(message, 
+                                    "Medical condition view controller error", 
+                                    JOptionPane.WARNING_MESSAGE);
+                            isError = true;
+                        }
                     }
                 }
                 break;
@@ -142,19 +148,10 @@ public class MedicalConditionViewController extends ViewController{
                     secondaryCondition.delete();
                     getAllSecondaryConditionsFor(e, primaryCondition);
                 }catch(StoreException ex){
-                    String message = ex.getMessage() + "\nHandled in "
-                            + "MedicalConditionViewController::actionPerformed("
-                            + actionCommand + ")";
-                    displayErrorMessage(message, 
-                            "Medical condition view controller error", 
-                            JOptionPane.WARNING_MESSAGE);
-                    isError = true;
-                }
-                if (!isError){
-                    try{
-                        secondaryCondition.setScope(Entity.Scope.SINGLE);
-                        secondaryCondition.delete();
-                    }catch(StoreException ex){
+                    if (ex.getMessage().contains("integrity constraint violation")){
+                        error = "medical condition currently in use by one or more patients; requested deletion aborted";
+                        isError = true;
+                    }else{
                         String message = ex.getMessage() + "\nHandled in "
                                 + "MedicalConditionViewController::actionPerformed("
                                 + actionCommand + ")";
