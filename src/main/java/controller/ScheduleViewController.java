@@ -1743,15 +1743,19 @@ getDescriptor().getViewDescription().getScheduleDay());
                 doAppointmentForDayRequest(getDescriptor().getControllerDescription().getScheduleDay());
                 break;
             case VIEW_CONTROLLER_CLOSE_NOTIFICATION:{
+                ActionEvent actionEvent = new ActionEvent(
+                    this,ActionEvent.ACTION_PERFORMED,
+                    ViewController.DesktopViewControllerActionEvent.
+                            VIEW_CONTROLLER_CLOSE_NOTIFICATION.toString());
+                getMyController().actionPerformed(actionEvent);
+                /*
                 try{
-                    /**
-                     * sent by Desktop VC prior to closing this controller
-                     */
                     getView().setClosed(true);
                 }
                 catch (PropertyVetoException ex){
                     //UnspecifiedError action
                 }
+                */
             }
         }
     }

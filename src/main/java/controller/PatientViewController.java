@@ -263,12 +263,14 @@ public class PatientViewController extends ViewController {
                ViewController.DesktopViewControllerActionEvent.valueOf(e.getActionCommand());
         switch (actionCommand){
             case VIEW_CONTROLLER_CLOSE_NOTIFICATION:{//prelude to the Desktop VC closing down the Patient VC
+                /*
                 try{
                     getView().setClosed(true);   
                 }catch (PropertyVetoException ex){
                 //UnspecifiedError action
                 }
-                
+                */
+                doPatientViewClosed();
                 break;
             }
         }
