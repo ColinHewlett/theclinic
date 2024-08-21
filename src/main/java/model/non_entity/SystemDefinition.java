@@ -41,7 +41,8 @@ public class SystemDefinition {
     private static String pmsStoreType = null;
     
     public static Color BOOKABLE_SLOT_COLOR = new Color(240,240,240);
-    public static Color BOOKED_SLOT_HEADER_COLOR = new Color(245,247,208);
+    //public static Color BOOKED_SLOT_HEADER_COLOR = new Color(245,247,208);
+    public static Color BOOKED_SLOT_HEADER_COLOR = new Color(255,118,29);
     public static Color BOOKED_SLOT_BLOCK_COLOR = new Color(245,227,167);
     
     public static Color TITLED_BORDER_COLOR = new Color(0,0,153);
