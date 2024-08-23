@@ -730,9 +730,11 @@ public class Repository implements IStoreActions {
     
     private void doDeleteEmergencyAppointment(String sql, Entity entity) throws StoreException{
         if (entity.getIsAppointment()){
-            AppointmentDelegate delegate = (AppointmentDelegate)entity;
+            //AppointmentDelegate delegate = (AppointmentDelegate)entity;
+            Appointment appointment = (Appointment)entity;
             try(PreparedStatement preparedStatement = getPMSStoreConnection().prepareStatement(sql);){
-                preparedStatement.setInt(1, ((AppointmentDelegate)delegate).getAppointmentKey());
+                //preparedStatement.setInt(1, ((AppointmentDelegate)delegate).getAppointmentKey());
+                preparedStatement.setInt(1, appointment.getKey());
                 preparedStatement.execute();
             }catch(SQLException ex){
                 String message = ex.getMessage() + "\n";

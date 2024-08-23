@@ -4,6 +4,7 @@
  */
 package view.views.non_modal_views;
 
+import controller.ScheduleViewController;
 import com.bric.colorpicker.ColorPicker;
 import com.bric.colorpicker.listeners.ColorListener;
 import com.bric.colorpicker.models.ColorModel;
@@ -1120,13 +1121,14 @@ public class ScheduleView extends View
         Appointment appointment = model.getElementAt(row);
         appointment.setHasPatientBeenContacted(value);
         getMyController().getDescriptor().getViewDescription().setAppointment(appointment);
-        tblAppointments.clearSelection();
+        //tblAppointments.clearSelection();
 
         ActionEvent actionEvent = new ActionEvent(
             this,ActionEvent.ACTION_PERFORMED,
             ViewController.ScheduleViewControllerActionEvent.
                     APPOINTMENT_REMINDED_STATUS_UPDATE_REQUEST.toString());
         getMyController().actionPerformed(actionEvent);
+        tblAppointments.clearSelection();
     }
     
     @Override
