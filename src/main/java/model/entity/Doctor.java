@@ -24,7 +24,6 @@ public class Doctor extends Entity implements IEntityStoreActions{
     private String phone = null;
     private String email = null;
     private Integer patientKey = null;
-    private Integer key = null;
     private Patient patient =  null;
     private ArrayList<Doctor> collection = null;
     
@@ -34,7 +33,7 @@ public class Doctor extends Entity implements IEntityStoreActions{
     
     public Doctor(Integer key){
         setIsDoctor(true);
-        this.key = key;
+        setKey(key);
     }
     
     public Doctor(Patient patient){

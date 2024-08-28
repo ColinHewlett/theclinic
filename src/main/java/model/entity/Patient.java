@@ -520,41 +520,38 @@ public class Patient extends Entity implements IEntityStoreActions {
     //<editor-fold defaultstate="collapsed" desc="Patient Recall inner class">
     public class Recall {
 
-        private LocalDate dentalDate = null;
-        private LocalDate hygieneDate = null;
-        private Integer dentalFrequency = null;
         private Integer hygieneFrequency = null;
 
+        private LocalDate dentalDate = null;
         public LocalDate getDentalDate() {
             return dentalDate;
         }
-
         public void setDentalDate(LocalDate dentalDate) {
             this.dentalDate = dentalDate;
         }
-
+        
+        private Integer dentalFrequency = null;
         public Integer getDentalFrequency() {
             return dentalFrequency;
         }
-
         public void setDentalFrequency(Integer dentalFrequency) {
             this.dentalFrequency = dentalFrequency;
         }
 
-        public LocalDate getHygieneDate() {
-            return hygieneDate;
+        private LocalDate gbtDate = null;
+        public LocalDate getGBTDate() {
+            return gbtDate;
+        }
+        public void setGBTDate(LocalDate gbtDate) {
+            this.gbtDate = gbtDate;
         }
 
-        public void setHygieneDate(LocalDate hygieneDate) {
-            this.hygieneDate = hygieneDate;
+        private Integer gbtFrequency = null;
+        public Integer getGBTFrequency() {
+            return gbtFrequency;
         }
-
-        public Integer getHygieneFrequency() {
-            return hygieneFrequency;
-        }
-
-        public void setHygieneFrequency(Integer hygieneFrequency) {
-            this.hygieneFrequency = hygieneFrequency;
+        public void setGBTFrequency(Integer gbtFrequency) {
+            this.gbtFrequency = gbtFrequency;
         }
     }
     //</editor-fold>

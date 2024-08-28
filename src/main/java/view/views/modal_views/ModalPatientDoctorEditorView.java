@@ -127,7 +127,7 @@ public class ModalPatientDoctorEditorView extends ModalView
                             actionEvent = new ActionEvent(
                                 this,ActionEvent.ACTION_PERFORMED,
                                 ViewController.PatientViewControllerActionEvent.
-                                        PATIENT_MEDICATION_UPDATE_REQUEST.toString());
+                                        PATIENT_DOCTOR_UPDATE_REQUEST.toString());
                             this.getMyController().actionPerformed(actionEvent);
                         }else{
                             String message = "No data has been entered for the "

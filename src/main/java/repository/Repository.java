@@ -1183,6 +1183,11 @@ public class Repository implements IStoreActions {
         patient.getRecall().setDentalFrequency(rs.getInt("recallFrequency"));
         LocalDate recallDate = rs.getObject("recallDate", LocalDate.class);
         patient.getRecall().setDentalDate(recallDate);
+        
+        patient.getRecall().setGBTFrequency(rs.getInt("recallFrequencyGBT"));
+        recallDate = rs.getObject("recallDateGBT", LocalDate.class);
+        patient.getRecall().setGBTDate(recallDate);
+        
         patient.setIsGuardianAPatient(rs.getBoolean("isGuardianAPatient"));
         if (patient.getIsGuardianAPatient()) {
             int guardianKey = rs.getInt("guardianKey");
@@ -1608,6 +1613,17 @@ public class Repository implements IStoreActions {
                     }
                     else preparedStatement.setNull(18, java.sql.Types.INTEGER);
                     preparedStatement.setString(19, patient.getEmail());
+
+                    if (patient.getRecall().getGBTFrequency()==null)
+                        preparedStatement.setInt(20, 0);
+                    else
+                        preparedStatement.setInt(20, patient.getRecall().getGBTFrequency()); 
+                    if (patient.getRecall().getGBTDate() != null) {
+                        preparedStatement.setDate(21, java.sql.Date.valueOf(patient.getRecall().getGBTDate()));
+                    } else {
+                        //preparedStatement.setDate(15, java.sql.Date.valueOf(LocalDate.of(1899, 1, 1)));
+                        preparedStatement.setNull(21, java.sql.Types.DATE);
+                    }
                     
                     preparedStatement.executeUpdate();
                 } catch (SQLException ex) {
@@ -1716,7 +1732,11 @@ public class Repository implements IStoreActions {
                         preparedStatement.setNull(12, java.sql.Types.DATE);
                     }
                     preparedStatement.setBoolean(13, patient.getIsGuardianAPatient());
-                    preparedStatement.setInt(14, patient.getRecall().getDentalFrequency());
+                    
+                    if (patient.getRecall().getDentalFrequency()==null)
+                        preparedStatement.setInt(14, 0);
+                    else
+                        preparedStatement.setInt(14, patient.getRecall().getDentalFrequency());
                     if (patient.getRecall().getDentalDate() != null) {
                         preparedStatement.setDate(15, java.sql.Date.valueOf(patient.getRecall().getDentalDate()));
                     } else {
@@ -1731,7 +1751,23 @@ public class Repository implements IStoreActions {
                         preparedStatement.setNull(17, Types.INTEGER);
                     }
                     preparedStatement.setString(18, patient.getEmail());
-                    preparedStatement.setLong(19, patient.getKey());
+                    
+                    if (patient.getRecall().getGBTFrequency()==null)
+                        preparedStatement.setInt(19, 0);
+                    else
+                        preparedStatement.setInt(19, patient.getRecall().getGBTFrequency());
+
+                    if (patient.getRecall().getGBTDate() != null) {
+                        preparedStatement.setDate(20, java.sql.Date.valueOf(patient.getRecall().getGBTDate()));
+                    } else {
+                        //preparedStatement.setDate(15, java.sql.Date.valueOf(LocalDate.of(1899, 1, 1)));
+                        preparedStatement.setNull(20, java.sql.Types.DATE);
+                    }
+                    
+                    
+                    preparedStatement.setLong(21, patient.getKey());
+                    
+                    
                     preparedStatement.executeUpdate();
                 } catch (SQLException ex) {
                     throw new StoreException("SQLException message -> " + ex.getMessage() + "\n"
@@ -4326,6 +4362,8 @@ public class Repository implements IStoreActions {
                         + "isGuardianAPatient YesNo,"
                         + "recallFrequency Byte, "
                         + "recallDate DateTime, "
+                        + "recallFrequencyGBT Byte, "
+                        + "recallDateGBT DateTime, "
                         + "notes Char(255), "
                         + "guardianKey Long, "
                         + "isDeleted YesNo);";
@@ -4343,8 +4381,8 @@ public class Repository implements IStoreActions {
                     = "INSERT INTO Patient "
                     + "(title, forenames, surname, line1, line2,"
                     + "town, county, postcode,phone1, phone2, gender, dob,"
-                    + "isGuardianAPatient,recallFrequency, recallDate, notes,pid, guardianKey, email) "
-                    + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
+                    + "isGuardianAPatient,recallFrequency, recallDate, notes,pid, guardianKey, email, recallFrequencyGBT, recallDateGBT ) "
+                    + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
                 doInsertPatient(sql, entity);
                 break;
             case READ_PATIENT:
@@ -4395,52 +4433,13 @@ public class Repository implements IStoreActions {
                     + "recallDate = ?,"
                     + "notes = ?,"
                     + "guardianKey = ?, "
-                    + "email = ? "
+                    + "email = ?, "
+                    + "recallFrequencyGBT = ?, "
+                    + "recallDateGBT = ? "
                     + "WHERE pid = ? ;";
                 doUpdatePatient(sql, entity);
                 break;
-            /*
-            case COUNT_SECONDARY_CONDITION:
-                sql = "SELECT COUNT(*) as row_count FROM PrimaryCondition;";
-                result.setValue(doCount(sql,entity).getValue());
-                sql = "SELECT COUNT(*) as row_count "
-                        + "FROM PrimaryCondition "
-                        + "WHERE isDeleted = true ;";
-                result.setValue(new Point(result.getValue().x,doCount(sql,entity).getValue().x));
-                break;
-            case COUNT_PRIMARY_CONDITION:
-                sql = "SELECT COUNT(*) as row_count FROM SecondaryCondition;";
-                result.setValue(doCount(sql,entity).getValue());
-                sql = "SELECT COUNT(*) as row_count "
-                        + "FROM SecondaryCondition "
-                        + "WHERE isDeleted = true ;";
-                result.setValue(new Point(result.getValue().x,doCount(sql,entity).getValue().x));
-                break;
-            case READ_SECONDARY_CONDITION_NEXT_HIGHEST_KEY:
-                sql = "SELECT MAX(pid) as highest_key "
-                        + "FROM SecondaryCondition;";
-                result = doReadHighestKey(sql);
-                break;
-            case READ_SECONDARY_CONDITION_NEXT_HIGHEST_KEY:
-                sql = "SELECT MAX(pid) as highest_key "
-                        + "FROM PrimaryCondition;";
-                result = doReadHighestKey(sql);
-                break;
-            case INSERT_SECONDARY_CONDITION:
-                sql
-                    = "INSERT INTO PrimaryCondition "
-                    + "(pid, patientKey,description, state, notes) "
-                    + "VALUES (?,?,?,?,?);";
-                doInsertPrimaryCondition(sql, entity);
-                break;
-            case INSERT_SECONDARY_CONDITION:
-                sql
-                    = "INSERT INTO PrimaryCondition "
-                    + "(pid, primaryConditionKey, description,state) "
-                    + "VALUES (?,?,?,?);";
-                doInsertSecondaryCondition(sql, entity);
-                break;
-                */
+        
         }
         return result;
     }
@@ -8354,6 +8353,8 @@ public class Repository implements IStoreActions {
                                         "isguardianapatient boolean DEFAULT false,\n" +
                                         "recallfrequency smallint,\n" +
                                         "recalldate date,\n" +
+                                        "recallfrequencyGBT smallint,\n" +
+                                        "recalldateGBT date,\n" +
                                         "notes character varying(255) COLLATE pg_catalog.\"default\",\n" +
                                         "guardiankey integer,\n" +
                                         "pid integer NOT NULL,\n" +

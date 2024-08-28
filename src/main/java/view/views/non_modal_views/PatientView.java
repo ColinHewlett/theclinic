@@ -70,7 +70,7 @@ import view.views.view_support_classes.renderers.ScheduleTableCellRenderer;
 public class PatientView extends View 
         implements ActionListener, 
                    ListSelectionListener{
-    private JTextField txtAddressLine2 = null;
+    //private JTextField txtAddressLine2 = null;
     private javax.swing.ButtonGroup rdbGroup = null;
     //private JTable tblAppointmentHistory = null;
     
@@ -123,6 +123,7 @@ public class PatientView extends View
         REQUEST_PATIENT_RECOVER,
         REQUEST_PHONE_EMAIL_EDITOR_VIEW,
         REQUEST_PRINT_PATIENT_MEDICAL_HISTORY,
+        REQUEST_GBT_RECALL_EDITOR_VIEW,
         REQUEST_RECALL_EDITOR_VIEW,
         REQUEST_SCHEDULE_VIEW_CONTROLLER,
         REQUEST_SELECT_INVOICE,
@@ -283,23 +284,23 @@ public class PatientView extends View
         //setSelected(true);
         //setSize(getPatientViewWidth(),getPatientViewHeight());
         //some loose ends
-        txtAddressLine2 = new javax.swing.JTextField();
+        //txtAddressLine2 = new javax.swing.JTextField();
         rdbGroup = new javax.swing.ButtonGroup();
         rdbGroup.add(rdbRequestPhoneEmailEditorView);
         rdbGroup.add(rdbRequestModalRecallEditorView);
         rdbGroup.add(rdbRequestModalGuardianEditorView);
         rdbGroup.add(rdbRequestModalMedicalProfilePopup);
-        //rdbGroup.add(rdbRequestAdditionalNotes);
+        rdbGroup.add(this.rdbRequestModalGBTRecallEditorView);
         rdbRequestPhoneEmailEditorView.setActionCommand(Actions.REQUEST_PHONE_EMAIL_EDITOR_VIEW.toString());
         rdbRequestModalRecallEditorView.setActionCommand(Actions.REQUEST_RECALL_EDITOR_VIEW.toString());
         rdbRequestModalGuardianEditorView.setActionCommand(Actions.REQUEST_GUARDIAN_EDITOR_VIEW.toString());
         rdbRequestModalMedicalProfilePopup.setActionCommand(Actions.REQUEST_MEDICAL_HISTORY_POPUP.toString());
-        //rdbRequestAdditionalNotes.setActionCommand(Actions.REQUEST_ADDITIONAL_NOTES.toString());
+        this.rdbRequestModalGBTRecallEditorView.setActionCommand(Actions.REQUEST_GBT_RECALL_EDITOR_VIEW.toString());
         rdbRequestPhoneEmailEditorView.addActionListener(this);
         rdbRequestModalRecallEditorView.addActionListener(this);
         rdbRequestModalGuardianEditorView.addActionListener(this);
         rdbRequestModalMedicalProfilePopup.addActionListener(this);
-        //rdbRequestAdditionalNotes.addActionListener(this);
+        rdbRequestModalGBTRecallEditorView.addActionListener(this);
         
         cmbPatientSelector.setActionCommand(Actions.REQUEST_PATIENT.toString());
         cmbPatientSelector.addActionListener(this);
@@ -554,6 +555,9 @@ public class PatientView extends View
             case REQUEST_PHONE_EMAIL_EDITOR_VIEW:
                 doPhoneEmailEditorViewRequest();
                 break;
+            case REQUEST_GBT_RECALL_EDITOR_VIEW:
+                doGBTRecallEditorViewRequest();
+                break;
             case REQUEST_RECALL_EDITOR_VIEW:
                 doRecallEditorViewRequest();
                 break;
@@ -779,6 +783,12 @@ public class PatientView extends View
         ViewController.PatientViewControllerActionEvent request = 
                 ViewController.PatientViewControllerActionEvent.
                 PATIENT_PHONE_EMAIL_EDITOR_VIEW_REQUEST;
+        doActionFor(request);
+    }
+    private void doGBTRecallEditorViewRequest(){
+        ViewController.PatientViewControllerActionEvent request = 
+                ViewController.PatientViewControllerActionEvent.
+                PATIENT_GBT_RECALL_EDITOR_VIEW_REQUEST;
         doActionFor(request);
     }
     private void doRecallEditorViewRequest(){
@@ -1295,7 +1305,7 @@ public class PatientView extends View
         pnlPatientAddressContent = new javax.swing.JPanel();
         txtAddressLine1 = new javax.swing.JTextField();
         lblAddressLine1 = new javax.swing.JLabel();
-        txtNameLine2 = new javax.swing.JTextField();
+        txtAddressLine2 = new javax.swing.JTextField();
         lblAddressLine2 = new javax.swing.JLabel();
         lblAddressCounty = new javax.swing.JLabel();
         lblAddressPostcode = new javax.swing.JLabel();
@@ -1311,6 +1321,7 @@ public class PatientView extends View
         rdbRequestModalRecallEditorView = new javax.swing.JRadioButton();
         rdbRequestModalGuardianEditorView = new javax.swing.JRadioButton();
         rdbRequestModalMedicalProfilePopup = new javax.swing.JRadioButton();
+        rdbRequestModalGBTRecallEditorView = new javax.swing.JRadioButton();
         mbaPatientView = new javax.swing.JMenuBar();
         mnuActions = new javax.swing.JMenu();
         mniCreateNewPatient = new javax.swing.JMenuItem();
@@ -1563,7 +1574,7 @@ public class PatientView extends View
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(txtAddressCounty, javax.swing.GroupLayout.PREFERRED_SIZE, 81, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(pnlPatientAddressContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                        .addComponent(txtNameLine2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 281, Short.MAX_VALUE)
+                        .addComponent(txtAddressLine2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 281, Short.MAX_VALUE)
                         .addComponent(txtAddressLine1, javax.swing.GroupLayout.Alignment.TRAILING))))
         );
         pnlPatientAddressContentLayout.setVerticalGroup(
@@ -1574,7 +1585,7 @@ public class PatientView extends View
                     .addComponent(lblAddressLine1))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(pnlPatientAddressContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(txtNameLine2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtAddressLine2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(lblAddressLine2))
                 .addGap(10, 10, 10)
                 .addGroup(pnlPatientAddressContentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1645,11 +1656,13 @@ public class PatientView extends View
 
         rdbRequestModalMedicalProfilePopup.setText("Medical history");
 
+        rdbRequestModalGBTRecallEditorView.setText("GBT recall data");
+
         javax.swing.GroupLayout pnlFurtherDetailsLayout = new javax.swing.GroupLayout(pnlFurtherDetails);
         pnlFurtherDetails.setLayout(pnlFurtherDetailsLayout);
         pnlFurtherDetailsLayout.setHorizontalGroup(
             pnlFurtherDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlFurtherDetailsLayout.createSequentialGroup()
+            .addGroup(pnlFurtherDetailsLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(pnlFurtherDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(rdbRequestPhoneEmailEditorView)
@@ -1657,7 +1670,8 @@ public class PatientView extends View
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 47, Short.MAX_VALUE)
                 .addGroup(pnlFurtherDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(rdbRequestModalGuardianEditorView)
-                    .addComponent(rdbRequestModalMedicalProfilePopup))
+                    .addComponent(rdbRequestModalMedicalProfilePopup)
+                    .addComponent(rdbRequestModalGBTRecallEditorView))
                 .addGap(12, 12, 12))
         );
         pnlFurtherDetailsLayout.setVerticalGroup(
@@ -1667,11 +1681,13 @@ public class PatientView extends View
                 .addGroup(pnlFurtherDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(rdbRequestPhoneEmailEditorView)
                     .addComponent(rdbRequestModalGuardianEditorView))
-                .addGap(32, 32, 32)
+                .addGap(18, 18, 18)
                 .addGroup(pnlFurtherDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(rdbRequestModalRecallEditorView)
-                    .addComponent(rdbRequestModalMedicalProfilePopup))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(rdbRequestModalGBTRecallEditorView))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(rdbRequestModalMedicalProfilePopup)
+                .addGap(16, 16, 16))
         );
 
         mnuActions.setText("Actions");
@@ -1804,6 +1820,7 @@ public class PatientView extends View
     private javax.swing.JPanel pnlOperations;
     private javax.swing.JPanel pnlPatientAddressContent;
     private javax.swing.JPanel pnlPatientSelection;
+    private javax.swing.JRadioButton rdbRequestModalGBTRecallEditorView;
     private javax.swing.JRadioButton rdbRequestModalGuardianEditorView;
     private javax.swing.JRadioButton rdbRequestModalMedicalProfilePopup;
     private javax.swing.JRadioButton rdbRequestModalRecallEditorView;
@@ -1812,10 +1829,10 @@ public class PatientView extends View
     private javax.swing.JTable tblAppointmentHistory;
     private javax.swing.JTextField txtAddressCounty;
     private javax.swing.JTextField txtAddressLine1;
+    private javax.swing.JTextField txtAddressLine2;
     private javax.swing.JTextField txtAddressPostcode;
     private javax.swing.JTextField txtAddressTown;
     private javax.swing.JTextField txtNameForename;
-    private javax.swing.JTextField txtNameLine2;
     private javax.swing.JTextField txtNameSurname;
     // End of variables declaration//GEN-END:variables
 

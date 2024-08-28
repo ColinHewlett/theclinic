@@ -17,7 +17,6 @@ import model.IEntityStoreActions;
  * @author colin
  */
 public class Medication extends Entity implements IEntityStoreActions{
-    private Integer key = null;
     private Integer patientKey = null;
     private Patient patient = null;
     private String description = null;
@@ -29,7 +28,7 @@ public class Medication extends Entity implements IEntityStoreActions{
     }
     
     public Medication(Integer key){
-        this.key = key;
+        setKey(key);
         setIsMedication(true);
     }
     
@@ -39,11 +38,11 @@ public class Medication extends Entity implements IEntityStoreActions{
     }
 
     public Integer getPatientKey() {
-        return key;
+        return patientKey;
     }
 
     public void setPatientKey(Integer key) {
-        this.key = key;
+        this.patientKey = key;
     }
     
     public String getDescription() {
