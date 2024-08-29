@@ -26,6 +26,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
+import javax.swing.table.TableColumn;
 import model.entity.Patient;
 import model.non_entity.QuestionWithState;
 import model.non_entity.SystemDefinition;
@@ -126,7 +127,8 @@ public class PatientQuestionnaireView2 extends View
                 //doPatientQuestionDelete(qws);
                 doSendActionEvent(ViewController.PatientQuestionnaireViewControllerActionEvent
                         .PATIENT_QUESTION_DELETE_REQUEST);
-                
+            doSendActionEvent(ViewController.PatientQuestionnaireViewControllerActionEvent
+                .PATIENT_QUESTION_READ_REQUEST);    
         }else{
             String message = "Patient meds can only be defined using the 'Medical history' radio button\n"
                     + "on the Patient view, and then selecting the 'Medication' option";
@@ -138,62 +140,38 @@ public class PatientQuestionnaireView2 extends View
     private boolean tableValueChangedListenerActivated = false;
     @Override
     public void valueChanged(ListSelectionEvent e){
-        /**
-         * a change in row selection has occurred
-         * -- only interested in this event if a change occurs on the answers table
-         * -- and when it does need to manage the state of the action buttons
-         * 
-         */
-       /*
        if (!e.getValueIsAdjusting()) {   // Ensure the event is not fired multiple times
-            int selectedRow = tblQuestionnaire.getSelectedRow();
+            int selectedRow = tblQuestions.getSelectedRow();
             if (selectedRow!=-1){
                 tableValueChangedListenerActivated = true;
-                PatientQuestionnaireTableModel model = 
-                        (PatientQuestionnaireTableModel)tblQuestionnaire.getModel();
+                PatientQuestionTableModel model = 
+                        (PatientQuestionTableModel)tblQuestions.getModel();
                 QuestionWithState qws = 
                         (QuestionWithState) model.getElementAt(selectedRow);
-                switch(getQAMode()){
-                    case ANSWER_VIEW:
-                        txaSelectedQuestionnaireItem.setText(qws.getAnswer());
-                        break;
-                    case QUESTION_VIEW:
-                        txaSelectedQuestionnaireItem.setText(qws.getQuestion().getDescription());
-                        break;
-                }
-                
-                if (qws.getState() && (!qws.getQuestion().getOrder().equals(2))){
-                    this.btnDeletePatientAnswer.setEnabled(true);
-                    this.btnCancelEditPatientAnswer.setEnabled(true);
-                }else{ 
-                    this.btnDeletePatientAnswer.setEnabled(false);
-                    this.btnCancelEditPatientAnswer.setEnabled(false);
-                }
-            }else{
-                this.btnDeletePatientAnswer.setEnabled(false);
-                this.btnCancelEditPatientAnswer.setEnabled(false);
-            }
-       }*/
-       if (!e.getValueIsAdjusting()) {   // Ensure the event is not fired multiple times
-            int selectedRow = tblAnswers.getSelectedRow();
-            if (selectedRow!=-1){
-                tableValueChangedListenerActivated = true;
-                PatientAnswerTableModel model = 
-                        (PatientAnswerTableModel)tblAnswers.getModel();
-                QuestionWithState qws = 
-                        (QuestionWithState) model.getElementAt(selectedRow);
-                if (!qws.getState())this.txaSelectedQuestionnaireItem.setText(""); 
-                if (qws.getState() && (!qws.getQuestion().getOrder().equals(2))){
-                    this.btnDeletePatientAnswer.setEnabled(true);
-                    this.btnCancelEditPatientAnswer.setEnabled(true);
+                if (!qws.getState()){
+                    this.txaSelectedQuestionnaireItem.setText("");
+                    this.btnUploadPatientAnswer.setEnabled(false);
+                    if(qws.getQuestion().getOrder().equals(2)){
+                        this.txaSelectedQuestionnaireItem.setEditable(false);
+                        this.txaSelectedQuestionnaireItem.setText(qws.getAnswer());
+                    } 
+                }else if (qws.getState() && (!qws.getQuestion().getOrder().equals(2))){
+                    this.btnUploadPatientAnswer.setEnabled(true);
+                    this.txaSelectedQuestionnaireItem.setEditable(true);
+                    this.txaSelectedQuestionnaireItem.setText(qws.getAnswer());    
+                }else if(qws.getState() && (qws.getQuestion().getOrder().equals(2))){ 
+                    this.btnUploadPatientAnswer.setEnabled(false);
+                    this.txaSelectedQuestionnaireItem.setEditable(false);
                     this.txaSelectedQuestionnaireItem.setText(qws.getAnswer());
-                }else{ 
-                    this.btnDeletePatientAnswer.setEnabled(false);
-                    this.btnCancelEditPatientAnswer.setEnabled(false);
+                }else{
+                    this.btnUploadPatientAnswer.setEnabled(false);
+                    this.txaSelectedQuestionnaireItem.setEditable(false);
+                    this.txaSelectedQuestionnaireItem.setText("");
                 }
             }else{
-                this.btnDeletePatientAnswer.setEnabled(false);
-                this.btnCancelEditPatientAnswer.setEnabled(false);
+                this.btnUploadPatientAnswer.setEnabled(false);
+                this.txaSelectedQuestionnaireItem.setEditable(false);
+                this.txaSelectedQuestionnaireItem.setText("");
             }
        }
     }
@@ -215,7 +193,7 @@ public class PatientQuestionnaireView2 extends View
                 }
                 doSendActionEvent(VIEW_CLOSE_NOTIFICATION);
                 break;
-                
+            /*    
             case REQUEST_DELETE_PATIENT_ANSWER:
                 qws = getSelectedQuestionWithState();     
                 if (qws!=null){
@@ -234,6 +212,7 @@ public class PatientQuestionnaireView2 extends View
                                 + "Action to delete patient reply aborted";
                 }
                 break;
+                */
             /*
             case REQUEST_DISPLAY_PATIENT_ANSWER:
                 setQAMode(QAMode.ANSWER_VIEW);               
@@ -241,6 +220,7 @@ public class PatientQuestionnaireView2 extends View
             case REQUEST_DISPLAY_QUESTIONNAIRE_QUESTION:
                 setQAMode(QAMode.QUESTION_VIEW);
                 break;*/
+                /*
             case REQUEST_CANCEL_EDIT_PATIENT_ANSWER:
                 switch(getAnswerEditMode()){
                     case ON:
@@ -250,7 +230,7 @@ public class PatientQuestionnaireView2 extends View
                         setAnswerEditMode(AnswerEditMode.ON);
                         break;
                 }
-                break;
+                break;*/
             case REQUEST_UPLOAD_PATIENT_ANSWER:
                 qws = getSelectedQuestionWithState();     
                 if (qws!=null){//shouldn't be null at this stage
@@ -287,28 +267,11 @@ public class PatientQuestionnaireView2 extends View
         Patient patient = getMyController().getDescriptor()
                 .getControllerDescription().getPatient();
         setTitle(patient.toString() + " patient questionnaire");
-        btnCancelEditPatientAnswer.setActionCommand(Action.REQUEST_CANCEL_EDIT_PATIENT_ANSWER.toString());
-        btnDeletePatientAnswer.setActionCommand(Action.REQUEST_DELETE_PATIENT_ANSWER.toString());
         btnUploadPatientAnswer.setActionCommand(Action.REQUEST_UPLOAD_PATIENT_ANSWER.toString());
         btnCloseView.setActionCommand(Action.REQUEST_CLOSE_VIEW.toString());
-        btnCancelEditPatientAnswer.addActionListener(this);
-        btnDeletePatientAnswer.addActionListener(this);
         this.btnUploadPatientAnswer.addActionListener(this);
         btnCloseView.addActionListener(this);
-        
-        this.btnDeletePatientAnswer.setEnabled(false);
-        this.btnCancelEditPatientAnswer.setEnabled(false);
-        this.btnCancelEditPatientAnswer.setText(this.UPLOAD_ANSWER_MODE_TITLE);
-        
-        /*
-        rdbGroup.add(rdbShowSelectedAnswer);
-        rdbGroup.add(this.rdbShowSelectedQuestion);
-        rdbShowSelectedAnswer.setActionCommand(Action.REQUEST_DISPLAY_PATIENT_ANSWER.toString());
-        rdbShowSelectedQuestion.setActionCommand(Action.REQUEST_DISPLAY_QUESTIONNAIRE_QUESTION.toString());
-        rdbShowSelectedAnswer.addActionListener(this);
-        rdbShowSelectedQuestion.addActionListener(this);
-        rdbShowSelectedQuestion.doClick();
-        */
+
         setAnswerEditMode(AnswerEditMode.OFF);
         
         PatientQuestionTableModel model = 
@@ -331,28 +294,6 @@ public class PatientQuestionnaireView2 extends View
         
     }
     
-    /*
-    private PatientQuestionnaireTableModel initialiseTable(){
-        
-        tblQuestionnaire = new JTable(new PatientQuestionnaireTableModel());
-        scrQuestionnaireTable.setViewportView(tblQuestionnaire);
-        ViewController.setJTableColumnProperties(
-                tblQuestionnaire, scrQuestionnaireTable.getPreferredSize().width, 10, 10,80);
-        ListSelectionModel lsm = this.tblQuestionnaire.getSelectionModel();
-        lsm.addListSelectionListener(this);
-        tblQuestionnaire.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                if (!tableValueChangedListenerActivated){
-                    int selectedRow = tblQuestionnaire.rowAtPoint(e.getPoint());
-                    if (tblQuestionnaire.isRowSelected(selectedRow))
-                    tblQuestionnaire.clearSelection(); // Deselect the clicked row
-                }else tableValueChangedListenerActivated = false;
-            }
-        });
-        return (PatientQuestionnaireTableModel)tblQuestionnaire.getModel();
-    }*/
-    
     private void doSendActionEvent(ViewController.
         PatientQuestionnaireViewControllerActionEvent actionCommand){
         ActionEvent actionEvent = new ActionEvent(
@@ -364,10 +305,10 @@ public class PatientQuestionnaireView2 extends View
     private QuestionWithState getSelectedQuestionWithState(){
         QuestionWithState result = null;
         int selectedRow = 0;
-        selectedRow = this.tblAnswers.getSelectedRow();
+        selectedRow = this.tblQuestions.getSelectedRow();
         if (selectedRow!=-1){
-            PatientAnswerTableModel model = 
-                    (PatientAnswerTableModel)tblAnswers.getModel();
+            PatientQuestionTableModel model = 
+                    (PatientQuestionTableModel)tblQuestions.getModel();
             result = model.getElementAt(selectedRow);
         }
         return result;
@@ -378,44 +319,16 @@ public class PatientQuestionnaireView2 extends View
         answerEditMode = value;
         if (value.equals(AnswerEditMode.ON)) {
             this.btnUploadPatientAnswer.setEnabled(true);
-            this.btnCancelEditPatientAnswer.setText(CANCEL_ANSWER_MODE_TITLE);
             this.txaSelectedQuestionnaireItem.setEditable(true);
             //if (this.rdbShowSelectedQuestion.isSelected()) this.rdbShowSelectedAnswer.doClick();
         }else{
             this.btnUploadPatientAnswer.setEnabled(false);
-            this.btnCancelEditPatientAnswer.setText(this.UPLOAD_ANSWER_MODE_TITLE);
-            this.txaSelectedQuestionnaireItem.setEditable(false);
-            //next code re-displays original answer content
-     
-            //this.rdbShowSelectedQuestion.doClick();
-            //this.rdbShowSelectedAnswer.doClick();
-            //this.rdbShowSelectedQuestion.doClick();
+            this.txaSelectedQuestionnaireItem.setEditable(true);
         }    
     }
     private AnswerEditMode getAnswerEditMode(){
         return answerEditMode;
     }
-    
-    /*
-    private QAMode qaMode = null;
-    private void setQAMode(QAMode value){
-        qaMode = value;
-        this.txaSelectedQuestionnaireItem.setText("");
-        QuestionWithState qws = getSelectedQuestionWithState();
-        if (qws!=null) {
-            switch(value){
-                case ANSWER_VIEW:
-                    txaSelectedQuestionnaireItem.setText(qws.getAnswer());
-                    break;
-                case QUESTION_VIEW:
-                    txaSelectedQuestionnaireItem.setText(qws.getQuestion().getDescription());
-                    break;
-            }
-        } 
-    }
-    private QAMode getQAMode(){
-        return qaMode;
-    }*/
     
     private void setQuestionWithState(QuestionWithState qws){
         getMyController().getDescriptor()
@@ -436,7 +349,7 @@ public class PatientQuestionnaireView2 extends View
         }
         tblQuestions.clearSelection();
     }
-    
+    /*
     private void populateAnswersTable(QuestionWithState qws){
         PatientAnswerTableModel model = initialiseAnswersTable(); 
         tblAnswers.getModel().addTableModelListener(this);
@@ -446,7 +359,7 @@ public class PatientQuestionnaireView2 extends View
             model.addElement(questionWithState);
         }
         tblAnswers.clearSelection();
-    }
+    }*/
     
     private void populateQuestionnaireTable(QuestionWithState qws){
         /*
@@ -459,7 +372,7 @@ public class PatientQuestionnaireView2 extends View
         }
         tblQuestionnaire.clearSelection();*/
         populateQuestionsTable(qws);
-        populateAnswersTable(qws);
+        //populateAnswersTable(qws);
     }
     
     private PatientQuestionTableModel initialiseQuestionsTable(){
@@ -467,9 +380,13 @@ public class PatientQuestionnaireView2 extends View
         //scrQuestions.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
         scrQuestions.setViewportView(tblQuestions);
         ViewController.setJTableColumnProperties(
-                tblQuestions, scrQuestions.getPreferredSize().width, 15, 85);
-        //ListSelectionModel lsm = this.tblQuestions.getSelectionModel();
-        //lsm.addListSelectionListener(this);
+                tblQuestions, scrQuestions.getPreferredSize().width, 15, 1, 75);
+        TableColumn column = tblQuestions.getColumnModel().getColumn(1);
+        column.setPreferredWidth(20);
+        column.setMaxWidth(20);
+        column.setMinWidth(20);
+        ListSelectionModel lsm = this.tblQuestions.getSelectionModel();
+        lsm.addListSelectionListener(this);
         tblQuestions.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -483,6 +400,7 @@ public class PatientQuestionnaireView2 extends View
         return (PatientQuestionTableModel)tblQuestions.getModel();
     }
     
+    /*
     private PatientAnswerTableModel initialiseAnswersTable(){
         tblAnswers = new JTable(new PatientAnswerTableModel());
         scrAnswers.setViewportView(tblAnswers);
@@ -495,14 +413,15 @@ public class PatientQuestionnaireView2 extends View
             public void mouseClicked(MouseEvent e) {
                 if (!tableValueChangedListenerActivated){
                     int selectedRow = tblAnswers.rowAtPoint(e.getPoint());
-                    if (/*selectedRow!=-1 && */tblAnswers.isRowSelected(selectedRow))
+                    if (tblAnswers.isRowSelected(selectedRow))
                     tblAnswers.clearSelection(); // Deselect the clicked row
                 }else tableValueChangedListenerActivated = false;
             }
         });
         return (PatientAnswerTableModel)tblAnswers.getModel();
-    }
+    }*/
     
+/*
     private QuestionWithState doRequestQuestionPatientReplyUpdateEditor(QuestionWithState qws){
         QuestionWithState result = null;
         String patientReply = "";
@@ -522,8 +441,9 @@ public class PatientQuestionnaireView2 extends View
         }
 
         return result;
-    }
+    }*/
     
+/*
     private void doPatientQuestionDelete(QuestionWithState qws){
         String[] options = {"Yes", "No"};
         int reply;
@@ -542,7 +462,7 @@ public class PatientQuestionnaireView2 extends View
                         .PATIENT_QUESTION_DELETE_REQUEST);
         }else doSendActionEvent(ViewController.PatientQuestionnaireViewControllerActionEvent
                         .PATIENT_QUESTION_DELETE_REQUEST);
-    }
+    }*/
 
     private boolean isViewControllerErrorReceived = false;
     private void setIsViewControllerErrorReceived(boolean value){
@@ -571,16 +491,12 @@ public class PatientQuestionnaireView2 extends View
         scrQuestions = new javax.swing.JScrollPane();
         tblQuestions = new javax.swing.JTable();
         pnlOperations = new javax.swing.JPanel();
-        btnCancelEditPatientAnswer = new javax.swing.JButton();
         btnCloseView = new javax.swing.JButton();
-        btnDeletePatientAnswer = new javax.swing.JButton();
-        scrAnswers = new javax.swing.JScrollPane();
-        tblAnswers = new javax.swing.JTable();
+        btnUploadPatientAnswer = new javax.swing.JButton();
         pnlQuestionAnswerViewer = new javax.swing.JPanel();
         pnlQustionAnswerViewer = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         txaSelectedQuestionnaireItem = new javax.swing.JTextArea();
-        btnUploadPatientAnswer = new javax.swing.JButton();
 
         tblQuestions.setModel(new PatientQuestionTableModel(
         ));
@@ -591,16 +507,9 @@ public class PatientQuestionnaireView2 extends View
         pnlOperations.setBackground(new java.awt.Color(220, 220, 220));
         pnlOperations.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
-        btnCancelEditPatientAnswer.setText("<html><center>Edit</center><center>patient</center><center>reply</center></html>");
-
         btnCloseView.setText("<html><center>Close</center><center>view</center></html>");
 
-        btnDeletePatientAnswer.setText("<html><center>Delete</center><center>patient </center><center>reply</center></html>");
-        btnDeletePatientAnswer.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnDeletePatientAnswerActionPerformed(evt);
-            }
-        });
+        btnUploadPatientAnswer.setText("<html><center>Upload</center><center>patient</center><center>answer</center></html>");
 
         javax.swing.GroupLayout pnlOperationsLayout = new javax.swing.GroupLayout(pnlOperations);
         pnlOperations.setLayout(pnlOperationsLayout);
@@ -608,29 +517,22 @@ public class PatientQuestionnaireView2 extends View
             pnlOperationsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlOperationsLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(pnlOperationsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                    .addComponent(btnCloseView)
-                    .addComponent(btnCancelEditPatientAnswer, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 106, Short.MAX_VALUE)
-                    .addComponent(btnDeletePatientAnswer, javax.swing.GroupLayout.Alignment.LEADING))
+                .addGroup(pnlOperationsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(pnlOperationsLayout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(btnCloseView, javax.swing.GroupLayout.PREFERRED_SIZE, 106, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(btnUploadPatientAnswer))
                 .addContainerGap())
         );
         pnlOperationsLayout.setVerticalGroup(
             pnlOperationsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlOperationsLayout.createSequentialGroup()
-                .addGap(26, 26, 26)
-                .addComponent(btnCancelEditPatientAnswer, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(25, 25, 25)
-                .addComponent(btnDeletePatientAnswer, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(25, 25, 25)
-                .addComponent(btnCloseView, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(28, Short.MAX_VALUE))
+                .addGap(28, 28, 28)
+                .addComponent(btnUploadPatientAnswer, javax.swing.GroupLayout.PREFERRED_SIZE, 119, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(47, 47, 47)
+                .addComponent(btnCloseView, javax.swing.GroupLayout.PREFERRED_SIZE, 122, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(16, Short.MAX_VALUE))
         );
-
-        tblAnswers.setModel(new PatientAnswerTableModel(
-        ));
-        scrAnswers.setViewportView(tblAnswers);
-        ViewController.setJTableColumnProperties(
-            tblQuestions, scrQuestions.getPreferredSize().width, 10, 10,80);
 
         pnlQuestionAnswerViewer.setBorder(javax.swing.BorderFactory.createTitledBorder("Patient answer editor"));
 
@@ -639,9 +541,7 @@ public class PatientQuestionnaireView2 extends View
         txaSelectedQuestionnaireItem.setRows(5);
         txaSelectedQuestionnaireItem.setWrapStyleWord(true);
         jScrollPane1.setViewportView(txaSelectedQuestionnaireItem);
-        txaSelectedQuestionnaireItem.setEditable(false);
-
-        btnUploadPatientAnswer.setText("<html><center>Upload</center><center>patient</center><center>answer</center></html>");
+        txaSelectedQuestionnaireItem.setEditable(true);
 
         javax.swing.GroupLayout pnlQustionAnswerViewerLayout = new javax.swing.GroupLayout(pnlQustionAnswerViewer);
         pnlQustionAnswerViewer.setLayout(pnlQustionAnswerViewerLayout);
@@ -649,19 +549,14 @@ public class PatientQuestionnaireView2 extends View
             pnlQustionAnswerViewerLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlQustionAnswerViewerLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 841, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(btnUploadPatientAnswer, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(jScrollPane1)
+                .addContainerGap())
         );
         pnlQustionAnswerViewerLayout.setVerticalGroup(
             pnlQustionAnswerViewerLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlQustionAnswerViewerLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(pnlQustionAnswerViewerLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                    .addComponent(btnUploadPatientAnswer, javax.swing.GroupLayout.DEFAULT_SIZE, 62, Short.MAX_VALUE))
-                .addGap(13, 13, 13))
+            .addGroup(pnlQustionAnswerViewerLayout.createSequentialGroup()
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 43, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(12, 12, 12))
         );
 
         javax.swing.GroupLayout pnlQuestionAnswerViewerLayout = new javax.swing.GroupLayout(pnlQuestionAnswerViewer);
@@ -676,7 +571,7 @@ public class PatientQuestionnaireView2 extends View
         pnlQuestionAnswerViewerLayout.setVerticalGroup(
             pnlQuestionAnswerViewerLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlQuestionAnswerViewerLayout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap(10, Short.MAX_VALUE)
                 .addComponent(pnlQustionAnswerViewer, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 
@@ -687,28 +582,25 @@ public class PatientQuestionnaireView2 extends View
             .addGroup(layout.createSequentialGroup()
                 .addGap(12, 12, 12)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(scrQuestions, javax.swing.GroupLayout.PREFERRED_SIZE, 482, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(scrAnswers, javax.swing.GroupLayout.PREFERRED_SIZE, 482, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(scrQuestions, javax.swing.GroupLayout.DEFAULT_SIZE, 719, Short.MAX_VALUE)
                     .addComponent(pnlQuestionAnswerViewer, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGap(12, 12, 12)
                 .addComponent(pnlOperations, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(12, 12, 12))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(15, 15, 15)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(pnlOperations, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(scrAnswers, javax.swing.GroupLayout.PREFERRED_SIZE, 228, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(scrQuestions, javax.swing.GroupLayout.PREFERRED_SIZE, 228, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(pnlQuestionAnswerViewer, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(14, Short.MAX_VALUE))
+                        .addGap(15, 15, 15)
+                        .addComponent(scrQuestions, javax.swing.GroupLayout.PREFERRED_SIZE, 230, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(12, 12, 12)
+                        .addComponent(pnlQuestionAnswerViewer, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(pnlOperations, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGap(12, 12, 12))
         );
 
         scrQuestions.getAccessibleContext().setAccessibleName("");
@@ -716,23 +608,15 @@ public class PatientQuestionnaireView2 extends View
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void btnDeletePatientAnswerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeletePatientAnswerActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_btnDeletePatientAnswerActionPerformed
-
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton btnCancelEditPatientAnswer;
     private javax.swing.JButton btnCloseView;
-    private javax.swing.JButton btnDeletePatientAnswer;
     private javax.swing.JButton btnUploadPatientAnswer;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JPanel pnlOperations;
     private javax.swing.JPanel pnlQuestionAnswerViewer;
     private javax.swing.JPanel pnlQustionAnswerViewer;
-    private javax.swing.JScrollPane scrAnswers;
     private javax.swing.JScrollPane scrQuestions;
-    private javax.swing.JTable tblAnswers;
     private javax.swing.JTable tblQuestions;
     private javax.swing.JTextArea txaSelectedQuestionnaireItem;
     // End of variables declaration//GEN-END:variables

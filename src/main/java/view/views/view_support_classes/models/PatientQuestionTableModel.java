@@ -15,9 +15,10 @@ import model.non_entity.QuestionWithState;
 public class PatientQuestionTableModel extends DefaultTableModel {
     
     private ArrayList<QuestionWithState> questionWithStates = null;
-    private enum COLUMN{YesNo, Question};
+    private enum COLUMN{YesNo, No, Questionnaire};
     private final Class[] columnClass = new Class[] {
         Boolean.class,
+        Integer.class,
         String.class};
 
     public PatientQuestionTableModel(){
@@ -67,7 +68,9 @@ public class PatientQuestionTableModel extends DefaultTableModel {
             if (column.ordinal() == columnIndex){
                 result = column.toString();
                 if (result.equals("YesNo"))
-                    result = result + " ?";  
+                    result = result + " ?"; 
+                else if (result.equals("No"))
+                    result = result + ".";
                 /*
                 else if (result.equals("PatientReply"))
                     result = "Patient reply";*/
@@ -121,21 +124,19 @@ public class PatientQuestionTableModel extends DefaultTableModel {
                 else{
                     Boolean state = questionWithState.getState();
                     //String description = questionWithState.getQuestion().getDescription();
-                    //Integer order = questionWithState.getQuestion().getOrder();
+                    Integer order = questionWithState.getQuestion().getOrder();
                     String question = questionWithState.getQuestion().getDescription();
                     switch (column){
                         case YesNo:
                             result = state;
                             break;
-                        case Question:
+                        case No:
+                            result = order;
+                            break;
+                        case Questionnaire:
                             result = question;
                             break;
-                        /*
-                        case PatientReply:
-                            if (!state) result = "";
-                            else result = answer;*/      
                     }
-                    break;
                 }
             }
         }

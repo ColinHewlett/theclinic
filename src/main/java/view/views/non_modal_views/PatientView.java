@@ -517,6 +517,7 @@ public class PatientView extends View
                 break;
             case REQUEST_PATIENT_QUESTIONNAIRE:
                 doPatientQuestionnaireViewControllerRequest();
+                //JOptionPane.showInternalMessageDialog(this, "Not yet implemented", "View status",JOptionPane.INFORMATION_MESSAGE);
                 break;
             case REQUEST_MEDICAL_HISTORY:
                 //getMyController().sendNoOpMessage(this);
