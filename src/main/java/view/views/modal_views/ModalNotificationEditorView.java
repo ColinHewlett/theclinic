@@ -258,11 +258,6 @@ public class ModalNotificationEditorView extends ModalView {
         pnlPatientSelection.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Select patient", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 1, 11))); // NOI18N
 
         cmbSelectPatient.setModel(new javax.swing.DefaultComboBoxModel<model.entity.Patient>());
-        cmbSelectPatient.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cmbSelectPatientActionPerformed(evt);
-            }
-        });
 
         javax.swing.GroupLayout pnlPatientSelectionLayout = new javax.swing.GroupLayout(pnlPatientSelection);
         pnlPatientSelection.setLayout(pnlPatientSelectionLayout);
@@ -390,18 +385,8 @@ public class ModalNotificationEditorView extends ModalView {
         );
 
         btnCloseView.setText("Close view");
-        btnCloseView.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnCloseViewActionPerformed(evt);
-            }
-        });
 
         btnCreateUpdatePatientNotification.setText("Create/Update");
-        btnCreateUpdatePatientNotification.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnCreateUpdatePatientNotificationActionPerformed(evt);
-            }
-        });
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
@@ -454,28 +439,6 @@ public class ModalNotificationEditorView extends ModalView {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-
-    private void btnCreateUpdatePatientNotificationActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCreateUpdatePatientNotificationActionPerformed
-        if (getViewMode().equals(ViewController.ViewMode.Create))
-            doRequestNewPatientNotification();
-        else doRequestUpdatePatientNotification();
-    }//GEN-LAST:event_btnCreateUpdatePatientNotificationActionPerformed
-
-    private void btnCloseViewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCloseViewActionPerformed
-        doViewCloseAction();
-    }//GEN-LAST:event_btnCloseViewActionPerformed
-
-    private void cmbSelectPatientActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbSelectPatientActionPerformed
-        // TODO add your handling code here:
-        if (cmbSelectPatient.getSelectedIndex()!=-1){
-            Patient patient = (Patient)cmbSelectPatient.getSelectedItem();
-            getMyController().getDescriptor().getViewDescription().setPatient(patient);
-            ActionEvent actionEvent = new ActionEvent(
-                this,ActionEvent.ACTION_PERFORMED,
-                ViewController.NotificationViewControllerActionEvent.NOTIFICATIONS_FOR_PATIENT_REQUEST.toString());
-            this.getMyController().actionPerformed(actionEvent);
-        }
-    }//GEN-LAST:event_cmbSelectPatientActionPerformed
 
     private void doViewCloseAction(){
         String message = "Are you sure you want to close the notification editor?";

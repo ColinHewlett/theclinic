@@ -125,9 +125,6 @@
               <Connection code="new javax.swing.DefaultComboBoxModel&lt;model.entity.Patient&gt;()" type="code"/>
             </Property>
           </Properties>
-          <Events>
-            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="cmbSelectPatientActionPerformed"/>
-          </Events>
           <AuxValues>
             <AuxValue name="JavaCodeGenerator_AddingCodePost" type="java.lang.String" value="cmbSelectPatient.setBorder(javax.swing.BorderFactory.createEtchedBorder());"/>
             <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new javax.swing.JComboBox&lt;model.entity.Patient&gt;()"/>
@@ -364,17 +361,11 @@
           <Properties>
             <Property name="text" type="java.lang.String" value="Close view"/>
           </Properties>
-          <Events>
-            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnCloseViewActionPerformed"/>
-          </Events>
         </Component>
         <Component class="javax.swing.JButton" name="btnCreateUpdatePatientNotification">
           <Properties>
             <Property name="text" type="java.lang.String" value="Create/Update"/>
           </Properties>
-          <Events>
-            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnCreateUpdatePatientNotificationActionPerformed"/>
-          </Events>
         </Component>
       </SubComponents>
     </Container>
