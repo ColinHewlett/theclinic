@@ -22,7 +22,6 @@ import model.IEntityStoreActions;
 public class Notification extends Entity implements IEntityStoreActions {
   
 //<editor-fold defaultstate="collapsed" desc="Private and protected state">
-    private Integer key = null;
     private Patient patient = null;
     private LocalDate date = null;
     private String notification = null;
@@ -71,7 +70,7 @@ public class Notification extends Entity implements IEntityStoreActions {
         return patient;
     }
     
-    public void setIsActioned(boolean value){
+    public void setIsActioned(Boolean value){
         isActioned = value;
     }
     
@@ -95,6 +94,8 @@ public class Notification extends Entity implements IEntityStoreActions {
         setIsActioned(true);
         this.update();
     }
+    
+
 //</editor-fold>
     
 //<editor-fold defaultstate="collapsed" desc="Persistent storage related operations">  
