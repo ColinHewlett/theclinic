@@ -1040,26 +1040,31 @@ public class PatientView extends View
     private void initialisePatientViewComponentFromED(){  
         Patient patient = getMyController().getDescriptor().
                 getControllerDescription().getPatient();
-        if (patient.getIsKeyDefined())
-            this.cmbPatientSelector.setSelectedItem(patient);
-        this.setTitle(getSurname()); //Internal frame title
-        setPatientTitle(patient.getName().getTitle());
-        setForenames(patient.getName().getForenames());
-        setSurname(patient.getName().getSurname());
-        setLine1(patient.getAddress().getLine1());
-        setLine2(patient.getAddress().getLine2());
-        setTown(patient.getAddress().getTown());
-        setCounty(patient.getAddress().getCounty());
-        setPostcode(patient.getAddress().getPostcode());
-        setGender(patient.getGender());
-        //setNotes(patient.getNotes());
-        setDOB(patient.getDOB());
-        javax.swing.SwingUtilities.invokeLater(new Runnable(){
-            @Override
-            public void run(){
-                populateAppointmentsHistoryTable(patient);
-            }
-        });
+        if (patient!=null){
+            if (patient.getIsKeyDefined())
+                this.cmbPatientSelector.setSelectedItem(patient);
+            this.setTitle(getSurname()); //Internal frame title
+            setPatientTitle(patient.getName().getTitle());
+            setForenames(patient.getName().getForenames());
+            setSurname(patient.getName().getSurname());
+            setLine1(patient.getAddress().getLine1());
+            setLine2(patient.getAddress().getLine2());
+            setTown(patient.getAddress().getTown());
+            setCounty(patient.getAddress().getCounty());
+            setPostcode(patient.getAddress().getPostcode());
+            setGender(patient.getGender());
+            //setNotes(patient.getNotes());
+            setDOB(patient.getDOB());
+            javax.swing.SwingUtilities.invokeLater(new Runnable(){
+                @Override
+                public void run(){
+                    populateAppointmentsHistoryTable(patient);
+                }
+            });
+        }else{
+            String message = "Unexpected occurrence: selected patient is null";
+            JOptionPane.showInternalMessageDialog(this, message, "View error", JOptionPane.WARNING_MESSAGE);
+        }
         
     }
     
