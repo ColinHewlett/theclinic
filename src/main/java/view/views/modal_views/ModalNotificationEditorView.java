@@ -15,6 +15,8 @@ import view.views.view_support_classes.renderers.TableHeaderCellBorderRenderer;
 import view.View;
 import view.views.non_modal_views.DesktopView;
 import com.github.lgooddatepicker.components.DatePickerSettings;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeEvent;
@@ -34,8 +36,31 @@ import javax.swing.table.TableColumnModel;
  *
  * @author colin
  */
-public class ModalNotificationEditorView extends ModalView {
+public class ModalNotificationEditorView extends ModalView implements ActionListener{
     private ViewController.ViewMode viewMode = null;
+    
+    enum Action{
+        REQUEST_CLOSE_VIEW,
+        REQUEST_CREATE_UPDATE_NOTIFICATION,
+        REQUEST_PATIENT
+    }
+    
+    public void actionPerformed(ActionEvent e){
+        Action actionCommand = Action.valueOf(e.getActionCommand());
+        switch (actionCommand){
+            case REQUEST_CLOSE_VIEW:
+                doCloseView();
+                break;
+            case REQUEST_CREATE_UPDATE_NOTIFICATION:
+                doRequestCreateUpdateNotification();
+                break;
+            case REQUEST_PATIENT:
+                doRequestPatient();
+                break;
+            
+        }
+    }
+        
     
     private void populateNotificationHistoryTable(ArrayList<Notification> patientNotifications){
         PatientNotificationView2ColumnTableModel model = 
@@ -149,6 +174,12 @@ public class ModalNotificationEditorView extends ModalView {
         setVisible(true);
         populatePatientSelector(this.cmbSelectPatient);
         cmbSelectPatient.setEnabled(false);
+        cmbSelectPatient.setActionCommand(Action.REQUEST_PATIENT.toString());
+        cmbSelectPatient.addActionListener(this);
+        btnCloseView.setActionCommand(Action.REQUEST_CLOSE_VIEW.toString());
+        btnCloseView.addActionListener(this);
+        this.btnCreateUpdatePatientNotification.setActionCommand(Action.REQUEST_CREATE_UPDATE_NOTIFICATION.toString());
+        btnCloseView.addActionListener(this);
         tblPatientNotificationHistory.setEnabled(false);
         switch(getMyController().getDescriptor()
                 .getControllerDescription().getViewMode()){
@@ -210,6 +241,110 @@ public class ModalNotificationEditorView extends ModalView {
                 this.rdbNotificationUnactioned.setEnabled(false);
                 this.cmbSelectPatient.setEnabled(false);
         }
+    }
+    
+    private void doRequestCreateUpdateNotification() {                                                                   
+        if (getViewMode().equals(ViewController.ViewMode.Create))
+            doRequestNewPatientNotification();
+        else doRequestUpdatePatientNotification();
+    }                                                                  
+
+    private void doCloseView() {                                             
+        doViewCloseAction();
+    }                                            
+
+    private void doRequestPatient() {                                                 
+        // TODO add your handling code here:
+        if (cmbSelectPatient.getSelectedIndex()!=-1){
+            Patient patient = (Patient)cmbSelectPatient.getSelectedItem();
+            getMyController().getDescriptor().getViewDescription().setPatient(patient);
+            ActionEvent actionEvent = new ActionEvent(
+                this,ActionEvent.ACTION_PERFORMED,
+                ViewController.NotificationViewControllerActionEvent.NOTIFICATIONS_FOR_PATIENT_REQUEST.toString());
+            this.getMyController().actionPerformed(actionEvent);
+        }
+    }                                                
+
+    private void doViewCloseAction(){
+        /*
+        String message = "Are you sure you want to close the notification editor?";
+        int response = JOptionPane.showConfirmDialog(
+                this, message, "Patient notification editor", JOptionPane.YES_NO_OPTION);
+        if (response == JOptionPane.YES_OPTION){*/
+            ActionEvent actionEvent = new ActionEvent(
+                this,ActionEvent.ACTION_PERFORMED,
+                ViewController.NotificationViewControllerActionEvent.MODAL_VIEWER_DEACTIVATED.toString());
+            this.getMyController().actionPerformed(actionEvent);
+        //}
+    }
+    
+    private void doRequestNewPatientNotification(){
+        if (doValidatePatientNotificationRequest()){
+            ActionEvent actionEvent = new ActionEvent(
+                this,ActionEvent.ACTION_PERFORMED,
+                ViewController.NotificationViewControllerActionEvent.
+                        NOTIFICATION_EDITOR_CREATE_NOTIFICATION_REQUEST.toString());
+            this.getMyController().actionPerformed(actionEvent);
+        }       
+    }
+    
+    private void doRequestUpdatePatientNotification(){
+        if (doValidatePatientNotificationRequest()){
+            ActionEvent actionEvent = new ActionEvent(
+                this,ActionEvent.ACTION_PERFORMED,
+                ViewController.NotificationViewControllerActionEvent.
+                        NOTIFICATION_EDITOR_UPDATE_NOTIFICATION_REQUEST.toString());
+            this.getMyController().actionPerformed(actionEvent);
+        }
+    }
+
+    private boolean doValidatePatientNotificationRequest(){
+        boolean result = true;
+        if (this.cmbSelectPatient.getSelectedItem()==null){
+            result = false;
+            JOptionPane.showMessageDialog(
+                    this, "A patient has not been selected", 
+                    "Patient notification editor error",
+                    JOptionPane.WARNING_MESSAGE);
+        }
+        if (result){
+            if (this.dpNotificationDate.getDate()==null){
+                result = false;
+                JOptionPane.showMessageDialog(
+                    this, "A valid notificaion date has not been defined", 
+                    "Patient notification editor error",
+                    JOptionPane.WARNING_MESSAGE);
+            }    
+        }
+        if (result){
+            if (this.txaNotificationText.getText().isEmpty()){
+                result = false;
+                JOptionPane.showMessageDialog(
+                    this, "No notificaion text has not been defined", 
+                    "Patient notification editor error",
+                    JOptionPane.WARNING_MESSAGE);
+            }
+        }
+        if (result){
+            Notification notification;
+            if (getViewMode().equals(ViewController.ViewMode.Create))
+                notification = new Notification();
+            else
+                notification = getMyController().
+                        getDescriptor().getControllerDescription().getPatientNotification();
+            notification.setPatient(
+                    (Patient)this.cmbSelectPatient.getSelectedItem());
+            notification.setNotificationDate(
+                    this.dpNotificationDate.getDate());
+            notification.setNotificationText(
+                    this.txaNotificationText.getText());
+            notification.setIsActioned(rdbNotificationActioned.isSelected());
+            getMyController().getDescriptor().getViewDescription().
+                    setPatientNotification(notification);
+        }
+        else getMyController().getDescriptor().getViewDescription().
+                setPatientNotification(null);
+        return result;
     }
 
     /**
