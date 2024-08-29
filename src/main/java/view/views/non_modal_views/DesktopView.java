@@ -105,6 +105,7 @@ public class DesktopView extends javax.swing.JFrame
         REQUEST_CLOSE_VIEW,
         REQUEST_APPOINTMENT_VIEW,
         REQUEST_MEDICAL_CONDITION_VIEW,
+        REQUEST_NOTIFICATION_VIEW,
         REQUEST_PATIENT_VIEW,
         REQUEST_TREATMENT_VIEW,
         REQUEST_PRINT_NEW_PATIENT_DETAILS_VIEW,
@@ -123,7 +124,7 @@ public class DesktopView extends javax.swing.JFrame
     private final String SELECT_VIEW_MENU_TITLE = "View";
         private final String APPOINTMENT_VIEW_REQUEST_TITLE = "Appointments";
         private final String PATIENT_VIEW_REQUEST_TITLE = "Patients";
-        private final String PATIENT_NOTIFICATION_VIEW_REQUEST = "Notifications";
+        private final String PATIENT_NOTIFICATION_VIEW_REQUEST = "Notifications (patient-related)";
         private final String TREATMENT_VIEW_REQUEST = "Treatments";
         
         private final String EXIT_VIEW_REQUEST_TITLE = "Exit the Clinic practice management system";
@@ -283,16 +284,18 @@ public class DesktopView extends javax.swing.JFrame
         mnuSelectView.add(mniPatientViewRequest);
         mnuSelectView.add(mniAppointmentViewRequest);
         //mnuSelectView.add(mniTreatmentViewRequest);
-        //mnuSelectView.add(mniPatientNotificationViewRequest);
+        mnuSelectView.add(mniPatientNotificationViewRequest);
         mnuSelectView.add(new JSeparator());
         setTopDynamicFrameListDelimiter(mnuSelectView.getItemCount()-1);
         mnuSelectView.add(mniExitViewRequest);
         
         mniAppointmentViewRequest.setActionCommand(Action.REQUEST_APPOINTMENT_VIEW.toString());
         mniPatientViewRequest.setActionCommand(Action.REQUEST_PATIENT_VIEW.toString());
+        mniPatientNotificationViewRequest.setActionCommand(Action.REQUEST_NOTIFICATION_VIEW.toString());
         mniExitViewRequest.setActionCommand(Action.REQUEST_CLOSE_VIEW.toString());
         mniAppointmentViewRequest.addActionListener(this);
         mniPatientViewRequest.addActionListener(this);
+        mniPatientNotificationViewRequest.addActionListener(this);
         mniExitViewRequest.addActionListener(this);
     }
     
@@ -510,6 +513,9 @@ public class DesktopView extends javax.swing.JFrame
                                     .PRINT_SCHEDULE_REQUEST.toString());
                     this.getMyController().actionPerformed(actionEvent);
                 }
+                break;
+            case REQUEST_NOTIFICATION_VIEW:
+                this.mniNotificationViewRequestActionPerformed();
                 break;
             case REQUEST_CLOSE_VIEW:
                 mniExitRequestViewActionPerformed();
@@ -1260,4 +1266,3 @@ public class DesktopView extends javax.swing.JFrame
         }
     }
 }
-
