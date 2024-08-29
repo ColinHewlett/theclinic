@@ -84,7 +84,7 @@ public class ModalNotificationEditorView extends ModalView {
             txaNotificationText.setText(patientNotification.getNotificationText());
             if (patientNotification.getIsActioned())
                 this.rdbNotificationActioned.setSelected(true);
-            else this.rdbNotificationUnactioned.setSelected(true);
+            else this.rdbNotificationUnactioned.setSelected(false);
             this.cmbSelectPatient.setEditable(false);
             this.btnCreateUpdatePatientNotification.setText(ViewController.ViewMode.Update.toString());
         }
@@ -148,6 +148,7 @@ public class ModalNotificationEditorView extends ModalView {
                 tblPatientNotificationHistory, jScrollPane2.getPreferredSize().width, 20,80);
         setVisible(true);
         populatePatientSelector(this.cmbSelectPatient);
+        cmbSelectPatient.setEnabled(false);
         tblPatientNotificationHistory.setEnabled(false);
         switch(getMyController().getDescriptor()
                 .getControllerDescription().getViewMode()){
@@ -205,7 +206,9 @@ public class ModalNotificationEditorView extends ModalView {
             case Update:
                 btnCreateUpdatePatientNotification.
                         setText(ViewController.ViewMode.Update.toString()); 
-                this.cmbSelectPatient.setEnabled(true);
+                this.rdbNotificationActioned.setEnabled(false);
+                this.rdbNotificationUnactioned.setEnabled(false);
+                this.cmbSelectPatient.setEnabled(false);
         }
     }
 
