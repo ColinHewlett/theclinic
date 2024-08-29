@@ -137,7 +137,8 @@ public class NotificationViewController extends ViewController{
                     setViewListState(PatientNotificationViewListState.ALL_NOTIFICATION_STATE);
                     break;
                 case ACTION_NOTIFICATION_REQUEST:
-                    doActionPatientNotificationRequest();                   
+                    doActionPatientNotificationRequest();
+                    sendPrimaryViewPatientNotifications(Scope.UNACTIONED);
                     break;
                 case CREATE_NOTIFICATION_REQUEST:
                     doCreatePatientNotificationRequest();
@@ -205,6 +206,21 @@ public class NotificationViewController extends ViewController{
     }
 */
     private void doActionPatientNotificationRequest(){
+        /**
+         * 25/08/2024 change
+         * -- previous version of patient notification logic allowed more than one notification to be action at the same time
+         * -- hence the update uses a singly selected notification object in the Descriptor and not a collection
+         */
+        Notification notification = getDescriptor().getViewDescription().getNotification();
+        try{
+            notification.update();
+            doUnactionedPatientNotificationsRequest();
+        }catch (StoreException ex){
+            String message = ex.getMessage() +  "\n"
+                    + "Hasndle in NotificationViewController::doActionPatientNotificationRequest()";
+            displayErrorMessage(message, "View contgroller error", JOptionPane.WARNING_MESSAGE);
+        }
+        /*
         ArrayList<Notification> notifications = 
                 getDescriptor().getViewDescription().getPatientNotifications();
         try{
@@ -218,6 +234,7 @@ public class NotificationViewController extends ViewController{
                     "Patient notification controller error", 
                     JOptionPane.WARNING_MESSAGE);
         } 
+        */
     }
     
     /**
