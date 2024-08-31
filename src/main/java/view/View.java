@@ -241,6 +241,8 @@ public class View extends JInternalFrame
         SURGERY_DAY_EDITOR_VIEW,
         UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_VIEW,
         TEST_PATIENT_VIEW,
+        TO_DO_VIEW,
+        TO_DO_EDITOR_VIEW,
         NOTES_VIEW
     }
    
