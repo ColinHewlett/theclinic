@@ -7846,7 +7846,7 @@ public class Repository implements IStoreActions {
     }
     
     public Point count(ToDo toDo)throws StoreException{
-        
+        return null;
     }
     
     /**
@@ -8555,6 +8555,63 @@ public class Repository implements IStoreActions {
             int test = 0;
             test++;
             
+        }
+    }
+    
+    private void doInsertToDo(String sql, Entity entity) throws StoreException{
+        ToDo  toDo;
+        if (entity != null) {
+            if (entity.getIsToDo()) {
+                toDo = (ToDo) entity;
+                try (PreparedStatement preparedStatement = getPMSStoreConnection().prepareStatement(sql);){
+                    preparedStatement.setDate(1, java.sql.Date.valueOf(toDo.getDate()));
+                    preparedStatement.setString(2, (toDo.getDescription()));
+                    preparedStatement.setBoolean(3, toDo.getIsActioned());
+                    preparedStatement.setBoolean(4, toDo.getIsCancelled());
+                    preparedStatement.setBoolean(5, toDo.getIsDeleted());
+                    preparedStatement.setLong(6, toDo.getKey());
+                    preparedStatement.execute();
+                } catch (SQLException ex) {
+                    throw new StoreException("SQLException message -> " + ex.getMessage() + "\n"
+                            + "StoreException message -> exception raised in Repository::doInsertToDo()",
+                            StoreException.ExceptionType.SQL_EXCEPTION);
+                }
+            } else {
+                String msg = "StoreException -> patient toDo defined invalidly in doInsertToDo()";
+                throw new StoreException(msg, StoreException.ExceptionType.UNEXPECTED_DATA_TYPE_ENCOUNTERED);
+            }
+        } else {
+            String msg = "StoreException -> patient notificaion undefined in doInsertToDo()";
+            throw new StoreException(msg, StoreException.ExceptionType.NULL_KEY_EXCEPTION);
+        }
+    }
+    
+    private void doUpdateToDo(String sql, Entity entity) throws StoreException{
+        Patient patient;
+        ToDo  toDo;
+        if (entity != null) {
+            if (entity.getIsToDo()) {
+                toDo = (ToDo) entity;
+                try(PreparedStatement preparedStatement = getPMSStoreConnection().prepareStatement(sql);){
+                    preparedStatement.setDate(1, java.sql.Date.valueOf(toDo.getDate()));
+                    preparedStatement.setString(2, toDo.getDescription());
+                    preparedStatement.setBoolean(3, toDo.getIsActioned());
+                    preparedStatement.setBoolean(4, toDo.getIsActioned());
+                    preparedStatement.setBoolean(5, toDo.getIsCancelled());
+                    preparedStatement.setLong(6, toDo.getKey());
+                    preparedStatement.executeUpdate();
+                } catch (SQLException ex) {
+                    throw new StoreException("SQLException message -> " + ex.getMessage() + "\n"
+                            + "StoreException message -> exception raised in Repository::doUpdateToDo()",
+                            StoreException.ExceptionType.SQL_EXCEPTION);
+                }
+            } else {
+                String msg = "StoreException -> patient toDo defined invalidly in doUpdateToDo()";
+                throw new StoreException(msg, StoreException.ExceptionType.UNEXPECTED_DATA_TYPE_ENCOUNTERED);
+            }
+        } else {
+            String msg = "StoreException -> patient notificaion undefined in doUpdateToDo()";
+            throw new StoreException(msg, StoreException.ExceptionType.NULL_KEY_EXCEPTION);
         }
     }
 }
