@@ -102,7 +102,7 @@ public class Descriptor {
         Patient patient = null;
         Notification patientNotification = null;
         ArrayList<Notification> patientNotifications = null;
-        ArrayList<Patient> patients = null;
+        //ArrayList<Patient> patients = null;
         private Point tableRowCount = null;
         
         public LocalDate getScheduleDay(){
@@ -127,6 +127,14 @@ public class Descriptor {
         }
         public void setInvoice(Invoice value){
             invoice = value;
+        }
+        
+        private ToDo toDo = null;
+        public ToDo getToDo(){
+            return toDo; 
+        }
+        public void setToDo(ToDo value){
+            toDo = value;
         }
         
         private Credential newUserCredential = null;
@@ -312,11 +320,21 @@ public class Descriptor {
         protected void setPatient(Patient value){
             patient = value;
         }
+        
+        ArrayList<Patient> patients = null;
         public ArrayList<Patient> getPatients(){
             return patients;
         }
         public void setPatients (ArrayList<Patient> value){
             patients = value;
+        }
+        
+        ArrayList<ToDo> toDos = null;
+        public ArrayList<ToDo> getToDos(){
+            return toDos;
+        }
+        public void setToDos (ArrayList<ToDo> value){
+            toDos = value;
         }
         
         public String getPathForPatientCSVData(){
@@ -450,6 +468,14 @@ public class Descriptor {
         }
         public void setDoctor(Doctor value){
             doctor = value;
+        }
+        
+        private ToDo toDo = null;
+        public ToDo getToDo(){
+            return toDo; 
+        }
+        public void setToDo(ToDo value){
+            toDo = value;
         }
         
         private Credential newUserCredential = null;
