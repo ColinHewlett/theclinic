@@ -4585,6 +4585,98 @@ public class Repository implements IStoreActions {
         return result;
     }
     
+    private Entity doPMSSQLforToDo(Repository.PMSSQL q, Entity entity) throws StoreException{
+        Entity result = new Entity();
+        String sql;
+        switch (q){
+            case CANCEL_TO_DO:
+                sql = "UPDATE ToDo "
+                        + "SET isCancelled = true "
+                        + "WHERE pid = ?;";
+                doDeleteCancelChildEntity(sql, entity);
+                break;
+            case COUNT_TO_DO:
+                sql = "SELECT COUNT(*) as row_count "
+                        + "FROM ToDo ;";
+                result.setValue(doCount(sql,entity).getValue());
+                sql = "SELECT COUNT(*) as row_count "
+                        + "FROM ToDo "
+                        + "WHERE isDeleted = true;";
+                result.setValue(new Point(result.getValue().x,
+                        doCount(sql,entity).getValue().x));
+                break;
+            case CREATE_TO_DO_TABLE:
+                sql = "CREATE TABLE ToDo ("
+                        + "pid LONG PRIMARY KEY, "
+                        + "toDoDescription Char(150), "
+                        + "toDoDate Double, "
+                        + "isActioned YESNO, "
+                        + "isCancelled YESNO, "
+                        + "isDeleted YESNO; ";
+                doCreateTable(sql);
+                break;
+            case DELETE_ALL_TO_DO:
+                sql = "DELETE FROM ToDo;";
+                doDelete(sql);
+                break;
+            case DELETE_TO_DO:
+                sql = "UPDATE ToDo "
+                        + "SET isdeleted = true "
+                        + "WHERE pid = ?;";
+                doDeleteSingle(sql,entity);
+                break;
+            case INSERT_TO_DO:
+                sql = "INSERT INTO ToDo "
+                        + "(toDoDate,toDoDescription,isActioned, isCancelled, isDeleted,pid) "
+                        + "VALUES(?,?,?,?,?,?);";
+                doInsertToDo(sql, entity);
+                break; 
+            case READ_TO_DO:
+                sql = "SELECT * "
+                        + "FROM ToDo "
+                        + "WHERE pid = ?; ";                       
+                result = doReadSingle(sql, entity);
+                break;
+            case READ_TO_DO_FOR_USER:
+                sql = "SELECT * "
+                        + "FROM ToDo "
+                        + "WHERE userKey = ? "
+                        + "ORDER BY pid ASC;";
+                //result = doReadToDoForPatient(sql, entity);
+                break;
+            case READ_ALL_TO_DO:
+                sql = "SELECT * "
+                        + "FROM ToDo "
+                        + "AND isDeleted = false "
+                        + "isCancelled = false "
+                        + "ORDER BY pid ASC;";
+                break;
+            case READ_UNACTIONED_TO_DO:
+                sql = "SELECT * "
+                        + "FROM ToDo "
+                        + "WHERE isActioned = false "
+                        + "AND isDeleted = false "
+                        + "isCancelled = false "
+                        + "ORDER BY pid ASC;";
+                break;
+            case READ_TO_DO_NEXT_HIGHEST_KEY:
+                sql = "SELECT MAX(pid) as highest_key "
+                        + "FROM ToDo;";
+                result = doReadHighestKey(sql);
+                break;
+            case UPDATE_TO_DO:
+                sql = "UPDATE ToDo "
+                        + "SET toDoDate = ?, "
+                        + "toDoDescription = ?, "
+                        + "isActioned = ? "
+                        + "isCancelled = ?, "
+                        + "isDeleted = ? "
+                        + "WHERE pid = ?";
+                doUpdateToDo(sql, entity);
+        }
+        return result;
+    }
+    
     private Entity doPMSSQLforTreatment(Repository.PMSSQL q, Entity entity) throws StoreException{
         Entity result = new Entity();
         String sql;
