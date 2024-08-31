@@ -30,6 +30,7 @@ public interface IStoreActions {
     public Point count(Invoice invoice)throws StoreException;
     public Point count(TreatmentCost treatmentCost)throws StoreException;
     public Point count(User _user)throws StoreException;
+    public Point count(ToDo toDo)throws StoreException;
     
     public void create(Appointment a) throws StoreException;
     public void create(Notification pn) throws StoreException;
@@ -48,6 +49,7 @@ public interface IStoreActions {
     public void create(Invoice invoice)throws StoreException;
     public void create(TreatmentCost treatmentCost)throws StoreException;
     public void create(User _user)throws StoreException;
+    public void create(ToDo toDo)throws StoreException;
     
     public void delete(Appointment a, Integer key) throws StoreException;
     public void delete(Patient p, Integer patientKey) throws StoreException;
@@ -65,6 +67,7 @@ public interface IStoreActions {
     public void delete(Invoice invoice)throws StoreException;
     public void delete(TreatmentCost treatmentCost)throws StoreException;
     public void delete(User _user)throws StoreException;
+    public void delete(ToDo toDo)throws StoreException;
     
     public List<String[]> importEntityFromCSV(Entity entity) throws StoreException;
     
@@ -85,6 +88,7 @@ public interface IStoreActions {
     public Integer insert(Invoice invoice)throws StoreException;
     public Integer insert(TreatmentCost treatmentCost)throws StoreException;
     public Integer insert(User _user)throws StoreException;
+    public Integer insert(ToDo toDo)throws StoreException;
     
     public Appointment read(Appointment a, Integer key)throws StoreException ;
     public Patient read(Patient p, Integer key) throws StoreException;
@@ -103,6 +107,7 @@ public interface IStoreActions {
     public Invoice read(Invoice invoice)throws StoreException;
     public TreatmentCost read(TreatmentCost treatmentCost)throws StoreException;
     public User read(User _user)throws StoreException, LoginException;
+    public ToDo read(ToDo toDo)throws StoreException;
     
     public void recover(Appointment a, Integer key) throws StoreException;
     public void recover(Patient p, Integer key) throws StoreException;
@@ -125,4 +130,5 @@ public interface IStoreActions {
     public void update(Invoice invoice)throws StoreException;
     public void update(TreatmentCost treatmentCost)throws StoreException;
     public void update(User _user)throws StoreException;
+    public void update(ToDo toDo)throws StoreException;
 }
