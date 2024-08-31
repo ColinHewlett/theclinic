@@ -5844,6 +5844,10 @@ public class Repository implements IStoreActions {
                 Repository.PMSSQL.INSERT_NOTIFICATION, delegate);
         return delegate.getKey();
     }
+    
+    public Integer insert(ToDo pn)throws StoreException{
+        return 0;
+    }
 
     @Override
     public Integer insert(Doctor doctor)throws StoreException{
@@ -6720,6 +6724,10 @@ public class Repository implements IStoreActions {
          
     }
    
+    public void delete(ToDo toDo)throws StoreException{
+        
+    }
+   
     public void delete(SurgeryDaysAssignment surgeryDaysAssignment)throws StoreException{
        runSQL(Repository.EntityType.SURGERY_DAYS_ASSIGNMENT,
                Repository.PMSSQL.DELETE_SURGERY_DAYS_ASSIGNMENT,null);
@@ -7509,7 +7517,9 @@ public class Repository implements IStoreActions {
         }
     }
     
-    
+    public ToDo read(ToDo toDo)throws StoreException{
+        return null;
+    }
     
     
     public void uncancel(Notification notification, Integer notificationKey)throws StoreException{
@@ -7536,6 +7546,9 @@ public class Repository implements IStoreActions {
         runSQL(Repository.EntityType.APPOINTMENT,Repository.PMSSQL.CANCEL_APPOINTMENT, delegate);
     }
     
+    public void cancel(ToDo toDo)throws StoreException{
+        
+    }
     /*28/03/2024
     public Point count(PatientNote patientNote)throws StoreException{
         Entity result = null;
@@ -7751,6 +7764,10 @@ public class Repository implements IStoreActions {
         }
         else throw new StoreException("PatientNotification undefined in Repository.count(PatientNotification)",
                 StoreException.ExceptionType.UNEXPECTED_DATA_TYPE_ENCOUNTERED);
+    }
+    
+    public Point count(ToDo toDo)throws StoreException{
+        
     }
     
     /**
@@ -8099,6 +8116,10 @@ public class Repository implements IStoreActions {
         
     }
     
+    public void update(ToDo toDo)throws StoreException{
+        
+    }
+    
     @Override
     public void update(PatientCondition patientCondition)throws StoreException{
         if (patientCondition.getIsPatientPrimaryCondition())
@@ -8234,6 +8255,10 @@ public class Repository implements IStoreActions {
     public void create(Notification pn) throws StoreException{
         Entity value = null;
         runSQL(Repository.EntityType.PATIENT_NOTIFICATION,Repository.PMSSQL.CREATE_NOTIFICATION_TABLE, value);
+    }
+    
+    public void create(ToDo toDo) throws StoreException{
+        
     }
     
     public boolean doesPMSDatabaseExist(){

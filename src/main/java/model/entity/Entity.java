@@ -38,6 +38,7 @@ public class Entity implements IStoreClient{
     private Boolean isInvoice = false;
     private Boolean isTreatmentCost = false;
     private Boolean isUser = false;
+    private Boolean isToDo = false;
     private Scope scope = null;
     private Point value = null;
     protected Boolean isDeleted = false;
@@ -81,6 +82,7 @@ public class Entity implements IStoreClient{
         setIsInvoice(false);
         setIsTreatmentCost(false);
         setIsUser(false);
+        setIsToDo(false);
     }
     
     /**
@@ -251,6 +253,15 @@ public class Entity implements IStoreClient{
     
     public Boolean getIsUser(){
         return isUser;
+    }
+    
+    public Boolean getIsToDo(){
+        return isToDo;
+    }
+    
+    protected void setIsToDo(Boolean value){
+        if (value) resetAll();
+        isToDo= value;
     }
     
     protected void setIsUser(Boolean value){
