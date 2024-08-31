@@ -4,19 +4,388 @@
  */
 package view.views.non_modal_views;
 
+import controller.ViewController;
+import static controller.ViewController.NotificationViewControllerPropertyChangeEvent.RECEIVED_PATIENT_NOTIFICATIONS;
+import static controller.ViewController.NotificationViewControllerPropertyChangeEvent.RECEIVED_UNACTIONED_NOTIFICATIONS;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyVetoException;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Iterator;
+import javax.swing.JInternalFrame;
+import javax.swing.JOptionPane;
+import javax.swing.JTable;
+import javax.swing.ListSelectionModel;
+import javax.swing.event.InternalFrameAdapter;
+import javax.swing.event.InternalFrameEvent;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
+import javax.swing.table.TableCellRenderer;
+import model.entity.ToDo;
+import model.non_entity.SystemDefinition;
+import view.View;
+import view.views.view_support_classes.models.ToDoViewTableModel;
+import view.views.view_support_classes.renderers.PatientNotificationTableLocalDateRenderer;
+
 /**
  *
  * @author colin
  */
-public class ToDoView extends javax.swing.JInternalFrame {
+public class ToDoView extends View implements ActionListener,
+                                                             TableModelListener,
+                                                             PropertyChangeListener{
 
-    /**
-     * Creates new form ToDoView
-     */
-    public ToDoView() {
-        initComponents();
+    enum Action{
+        REQUEST_ALL_TO_DO,
+        REQUEST_CANCEL_TO_DO,
+        REQUEST_CLOSE_VIEW,
+        REQUEST_CREATE_TO_DO,
+        REQUEST_UNACTIONED_TO_DO,
+        REQUEST_UPDATE_TO_DO
     }
+    /**
+     * 
+     * @param myViewType
+     * @param myController
+     * @param desktopView 
+     */
+    public ToDoView(View.Viewer myViewType, 
+            ViewController myController, DesktopView desktopView) {
+        setTitle("Outstanding 'to do' actions");
+        this.setMyViewType(myViewType);
+        setMyController(myController);  
+        setDesktopView(desktopView);
+    }
+    
+    @Override
+    public void actionPerformed(ActionEvent e){
+        ViewController.NotificationViewControllerActionEvent
+                actionCommand = null;
+        switch (Action.valueOf(e.getActionCommand())){
+            case REQUEST_CREATE_TO_DO:
+                doCreateToDo();
+                break;
+            case REQUEST_ALL_TO_DO:
+                this.doReadAllToDos();
+                break;
+            case REQUEST_CANCEL_TO_DO:
+                this.doCancelToDo();
+                break;
+            case REQUEST_CLOSE_VIEW:
+                this.doCloseView();
+                break;
+            case REQUEST_UNACTIONED_TO_DO:
+                this.doReadUnactionedToDos();
+                break;
+            case REQUEST_UPDATE_TO_DO:
+                doUpdateToDo();
+                break;
+        }
+    }
+    
+    @Override
+    public void propertyChange(PropertyChangeEvent e){
+        ViewController.ToDoViewControllerPropertyChangeEvent
+                propertyName = ViewController.ToDoViewControllerPropertyChangeEvent.
+                        valueOf(e.getPropertyName());
+        /*
+        switch (propertyName){
+            case RECEIVED_PATIENT_TO_DOS:
+                populatePatientToDoTable(
+                        getMyController().getDescriptor().getControllerDescription().getToDo());
+                setTitle(UI_ALL_TO_DOS_TITLE);
+                this.tblToDo.clearSelection();
+                break;
+            case RECEIVED_UNACTIONED_TO_DOS:
+                populatePatientToDoTable(
+                        getMyController().getDescriptor().getControllerDescription().getPatientToDos());
+                setTitle(UI_UNACTIONED_TO_DOS_TITLE);
+                this.tblToDo.clearSelection();
+                this.rdbDisplayUnactionedToDo.setSelected(true);
+                break;
+        }*/
+    }  
+    
+    @Override
+    public void tableChanged(TableModelEvent e){
+        int row = e.getFirstRow();
+        int column = e.getColumn();
+        if(column!=-1){
+            ToDoViewTableModel model =  
+                    (ToDoViewTableModel)e.getSource();
+            Boolean value = (Boolean)model.getValueAt(row, column);
+            ToDo toDo = model.getElementAt(row);
+            toDo.setIsActioned(value);
+            getMyController().getDescriptor().getViewDescription().setToDo(toDo);
+            //tblAppointments.clearSelection();
 
+            ActionEvent actionEvent = new ActionEvent(
+                this,ActionEvent.ACTION_PERFORMED,
+                ViewController.ToDoViewControllerActionEvent.
+                        ACTION_TO_DO_REQUEST.toString());
+            getMyController().actionPerformed(actionEvent);
+            this.tblToDo.clearSelection();
+        }
+    }
+    
+    private final String UI_UNACTIONED_TO_DOS_TITLE = "Outstanding 'to do' actions";
+    private final String UI_ALL_TO_DOS_TITLE = "All 'to do' actions";
+    public void initialiseView(){
+        initComponents();
+        
+        buttonGroup1.add(this.rdbDisplayAllOptions);
+        buttonGroup1.add(this.rdbDisplayUnactionedToDo);
+        rdbDisplayAllOptions.setActionCommand(Action.REQUEST_ALL_TO_DO.toString());
+        rdbDisplayUnactionedToDo.setActionCommand(Action.REQUEST_UNACTIONED_TO_DO.toString());
+        rdbDisplayAllOptions.addActionListener(this);
+        rdbDisplayUnactionedToDo.addActionListener(this);
+        rdbDisplayUnactionedToDo.setSelected(true);
+        setUITitle(UI_UNACTIONED_TO_DOS_TITLE);
+        
+        try{
+            setVisible(true);
+            setTitle(getUITitle());
+            setClosable(true);
+            setMaximizable(false);
+            setIconifiable(true);
+            setResizable(false);
+            setSelected(true);
+            //setSize(860,520);
+
+        }
+        catch (PropertyVetoException ex){
+            
+        }
+        
+        this.pnlToDo.setBorder(javax.swing.BorderFactory.createTitledBorder(
+                javax.swing.BorderFactory.createEtchedBorder(), 
+                "To do list", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, 
+                javax.swing.border.TitledBorder.DEFAULT_POSITION, 
+                SystemDefinition.TITLED_BORDER_FONT, 
+                SystemDefinition.TITLED_BORDER_COLOR));// NOI18N
+        
+        this.pnlActions.setBorder(javax.swing.BorderFactory.createTitledBorder(
+                javax.swing.BorderFactory.createEtchedBorder(), 
+                "'To do' actions", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, 
+                javax.swing.border.TitledBorder.DEFAULT_POSITION, 
+                SystemDefinition.TITLED_BORDER_FONT, 
+                SystemDefinition.TITLED_BORDER_COLOR));// NOI18N
+        
+        
+        this.btnAddNewToDo.setActionCommand(Action.REQUEST_CREATE_TO_DO.toString());
+        this.btnAddNewToDo.addActionListener(this);
+        this.btnEditSelectedToDo.setActionCommand(Action.REQUEST_UPDATE_TO_DO.toString());
+        this.btnEditSelectedToDo.addActionListener(this);
+        this.btnCancelSelectedToDo.setActionCommand(Action.REQUEST_CANCEL_TO_DO.toString());
+        this.btnCancelSelectedToDo.addActionListener(this);
+        this.btnCloseView.setActionCommand(Action.REQUEST_CLOSE_VIEW.toString());
+        this.btnCloseView.addActionListener(this);
+        addInternalFrameListeners();
+        createToDoTable();
+        setToDoTableListener();
+        ActionEvent actionEvent = new ActionEvent(
+            this,ActionEvent.ACTION_PERFORMED,
+            ViewController.ToDoViewControllerActionEvent.UNACTIONED_TO_DO_REQUEST.toString());
+        this.getMyController().actionPerformed(actionEvent);
+        
+    }
+    
+    private boolean tableValueChangedListenerActivated = false;
+    private void setToDoTableListener(){
+        this.tblToDo.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        ListSelectionModel lsm = this.tblToDo.getSelectionModel();
+        
+        lsm.addListSelectionListener(new ListSelectionListener() {
+            @Override
+            public void valueChanged(ListSelectionEvent e) {
+                if (!e.getValueIsAdjusting()) {   // Ensure the event is not fired multiple times
+                    int selectedRow = tblToDo.getSelectedRow();
+                    if (selectedRow!=-1){
+                        tableValueChangedListenerActivated = true;
+                        //Patient patient = (Patient)tblAppointments.getModel().getValueAt(selectedRow, 0);
+                        //doScheduleTitleRefresh(patient);
+                    }
+                    //else doScheduleTitleRefresh(null);   
+                }
+            }
+        });
+        
+        tblToDo.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (!tableValueChangedListenerActivated){
+                    int selectedRow = tblToDo.rowAtPoint(e.getPoint());
+                    if (selectedRow!=-1 && tblToDo.isRowSelected(selectedRow))
+                    tblToDo.clearSelection(); // Deselect the clicked row
+                }else tableValueChangedListenerActivated = false;
+            }
+        });
+        
+    }
+    
+    
+    private void populatePatientToDoTable(ArrayList<ToDo> patientToDos){
+        ToDoViewTableModel model = 
+                (ToDoViewTableModel)this.tblToDo.getModel();
+        model.removeAllElements();
+        Iterator<ToDo> it = patientToDos.iterator();
+        while (it.hasNext()){
+            ((ToDoViewTableModel)this.tblToDo.getModel()).addElement(it.next());
+        }
+    }
+    
+    /**
+     * Establish an InternalFrameListener for when the view is closed 
+     * Setting DISPOSE_ON_CLOSE action when the window "X" is clicked, fires
+     * InternalFrameEvent.INTERNAL_FRAME_CLOSED event for the listener to let 
+     * the view controller know what's happening
+     */
+    private InternalFrameAdapter internalFrameAdapter = null;
+    public void addInternalFrameListeners(){
+        /**
+         * Establish an InternalFrameListener for when the view is closed 
+         */
+        internalFrameAdapter = new InternalFrameAdapter(){
+            @Override  
+            public void internalFrameClosed(InternalFrameEvent e) {
+                ActionEvent actionEvent = new ActionEvent(
+                        ToDoView.this,ActionEvent.ACTION_PERFORMED,
+                        ViewController.ToDoViewControllerActionEvent.
+                                VIEW_CLOSED_NOTIFICATION.toString());
+                getMyController().actionPerformed(actionEvent);
+            }
+            @Override  
+            public void internalFrameActivated(InternalFrameEvent e) {
+                ActionEvent actionEvent = new ActionEvent(
+                        ToDoView.this,ActionEvent.ACTION_PERFORMED,
+                        ViewController.ToDoViewControllerActionEvent.
+                                VIEW_ACTIVATED_NOTIFICATION.toString());
+                getMyController().actionPerformed(actionEvent);
+            }
+        };
+        this.addInternalFrameListener(internalFrameAdapter);
+        this.setDefaultCloseOperation(JInternalFrame.DISPOSE_ON_CLOSE);
+    }
+    
+    private void doCancelToDo(){
+        boolean isError = false;
+        if (this.tblToDo.getSelectedRow()==-1){
+            JOptionPane.showMessageDialog(this, "A toDo has not been selected for cancellation");
+            isError = true;
+        }
+        if (!isError){
+            String[] options = {"Yes", "No"};
+            int reply = JOptionPane.showOptionDialog(this,
+                        "Are you sure you want to cancel the selected "
+                                + "notificatiom?",null,
+                        JOptionPane.YES_NO_OPTION,
+                        JOptionPane.INFORMATION_MESSAGE,
+                        null,
+                        options,
+                        null);
+            if (reply==JOptionPane.YES_OPTION){
+                int row = this.tblToDo.getSelectedRow();
+                ToDoViewTableModel model = 
+                    (ToDoViewTableModel)this.tblToDo.getModel();
+                getMyController().getDescriptor().getViewDescription().setToDo(model.getElementAt(row));
+                ActionEvent actionEvent = new ActionEvent(
+                    this,ActionEvent.ACTION_PERFORMED,
+                    ViewController.ToDoViewControllerActionEvent.
+                            CANCEL_TO_DO_REQUEST.toString());
+                this.getMyController().actionPerformed(actionEvent);
+            }
+        }
+    }
+    
+    private void doCloseView(){
+        try{
+            this.setClosed(true);
+        }
+        catch (PropertyVetoException ex){
+            
+        }
+    }
+    
+    private void doCreateToDo(){
+        ActionEvent actionEvent = new ActionEvent(
+        this,ActionEvent.ACTION_PERFORMED,
+                ViewController.ToDoViewControllerActionEvent.CREATE_TO_DO_REQUEST.toString());
+        this.getMyController().actionPerformed(actionEvent);
+        this.tblToDo.clearSelection();
+    }
+    
+    private void doReadAllToDos(){
+        ActionEvent actionEvent = new ActionEvent(
+            this,ActionEvent.ACTION_PERFORMED,
+                    ViewController.ToDoViewControllerActionEvent.TO_DOs_REQUEST.toString());
+        this.getMyController().actionPerformed(actionEvent);
+        setUITitle(UI_ALL_TO_DOS_TITLE);
+    }
+    
+    private void doReadUnactionedToDos(){
+        ActionEvent actionEvent = new ActionEvent(
+            this,ActionEvent.ACTION_PERFORMED,
+                    ViewController.ToDoViewControllerActionEvent.UNACTIONED_TO_DO_REQUEST.toString());
+        this.getMyController().actionPerformed(actionEvent);
+        setUITitle(UI_UNACTIONED_TO_DOS_TITLE);
+    }
+    
+    private void doUpdateToDo(){
+        boolean isError = false;
+        if (this.tblToDo.getSelectedRow()==-1){
+            JOptionPane.showMessageDialog(this, "A 'to do' item has not been selected");
+            isError = true;
+        }
+        if (!isError){
+            ToDoViewTableModel model = 
+                (ToDoViewTableModel)this.tblToDo.getModel();
+            getMyController().getDescriptor().getViewDescription().setToDo(model.getElementAt(this.tblToDo.getSelectedRow()));
+            ActionEvent actionEvent = new ActionEvent(
+                    this,ActionEvent.ACTION_PERFORMED,
+                    ViewController.ToDoViewControllerActionEvent.UPDATE_TO_DO_REQUEST.toString());
+            this.getMyController().actionPerformed(actionEvent);
+            this.tblToDo.clearSelection();
+        }
+    }
+    
+    private void createToDoTable(){
+        this.tblToDo = null;
+        //this.tblToDo = new JTable(new ToDoViewTableModel());
+        ToDoViewTableModel model = (ToDoViewTableModel)tblToDo.getModel();
+       // model.addTableModelListener(this);
+        this.tblToDo.setDefaultRenderer(LocalDate.class, new PatientNotificationTableLocalDateRenderer());
+        setToDoTableDefaultRenderer(this.tblToDo.getDefaultRenderer(LocalDate.class));
+        
+        scrToDoTable.setViewportView(this.tblToDo);
+        ViewController.setJTableColumnProperties(tblToDo, 
+                scrToDoTable.getPreferredSize().width, 
+                10,15,75);
+        this.tblToDo.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        //this.tblToDos.setAutoCreateRowSorter(false);
+    }
+    
+    private TableCellRenderer patientToDoTableDefaultRenderer = null;
+    private TableCellRenderer getPatientToDoTableDefaultRenderer(){
+        return patientToDoTableDefaultRenderer;
+    }
+    private void setToDoTableDefaultRenderer(TableCellRenderer renderer){
+        patientToDoTableDefaultRenderer = renderer;
+    }
+    
+    private String UITitle = null;
+    private String getUITitle(){
+        return UITitle;
+    }
+    private void setUITitle(String title){
+        UITitle = title;
+    }
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -26,6 +395,7 @@ public class ToDoView extends javax.swing.JInternalFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        buttonGroup1 = new javax.swing.ButtonGroup();
         pnlToDo = new javax.swing.JPanel();
         scrToDoTable = new javax.swing.JScrollPane();
         tblToDo = new javax.swing.JTable();
@@ -168,6 +538,7 @@ public class ToDoView extends javax.swing.JInternalFrame {
     private javax.swing.JButton btnCancelSelectedToDo;
     private javax.swing.JButton btnCloseView;
     private javax.swing.JButton btnEditSelectedToDo;
+    private javax.swing.ButtonGroup buttonGroup1;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel pnlActions;
     private javax.swing.JPanel pnlToDo;
