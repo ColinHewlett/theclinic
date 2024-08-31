@@ -111,7 +111,7 @@ public class ModalNotificationEditorView extends ModalView implements ActionList
                 this.rdbNotificationActioned.setSelected(true);
             else this.rdbNotificationUnactioned.setSelected(false);
             this.cmbSelectPatient.setEditable(false);
-            this.btnCreateUpdatePatientNotification.setText(ViewController.ViewMode.Update.toString());
+            this.btnCreateUpdatePatientNotification.setText("<html><center>Update</center><center>patient</center><center>notification</center></html>");
         }
     }
     
@@ -164,6 +164,7 @@ public class ModalNotificationEditorView extends ModalView implements ActionList
     
     @Override
     public void initialiseView(){
+        setClosable(true);
         initComponents();
         ImageIcon icon = new ImageIcon(this.getClass().getResource("/datepickerbutton1.png"));
         JButton datePickerButton = dpNotificationDate.getComponentToggleCalendarButton();
@@ -179,7 +180,7 @@ public class ModalNotificationEditorView extends ModalView implements ActionList
         btnCloseView.setActionCommand(Action.REQUEST_CLOSE_VIEW.toString());
         btnCloseView.addActionListener(this);
         this.btnCreateUpdatePatientNotification.setActionCommand(Action.REQUEST_CREATE_UPDATE_NOTIFICATION.toString());
-        btnCloseView.addActionListener(this);
+        btnCreateUpdatePatientNotification.addActionListener(this);
         tblPatientNotificationHistory.setEnabled(false);
         switch(getMyController().getDescriptor()
                 .getControllerDescription().getViewMode()){
@@ -217,6 +218,13 @@ public class ModalNotificationEditorView extends ModalView implements ActionList
                         javax.swing.border.TitledBorder.DEFAULT_POSITION, 
                         getBorderTitleFont(), 
                         getBorderTitleColor())); // NOI18N
+        
+        pnlActions.setBorder(javax.swing.BorderFactory
+                .createTitledBorder(null, "Actions", 
+                        javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, 
+                        javax.swing.border.TitledBorder.DEFAULT_POSITION, 
+                        getBorderTitleFont(), 
+                        getBorderTitleColor())); // NOI18N
     }
 
     private ViewController.ViewMode getViewMode(){
@@ -228,7 +236,7 @@ public class ModalNotificationEditorView extends ModalView implements ActionList
         switch (viewMode){
             case Create:
                 btnCreateUpdatePatientNotification.
-                        setText(ViewController.ViewMode.Create.toString());
+                        setText("<html><center>Create</center><center>patient</center><center>notification</center></html>");
                 //this.pnlRadioButtons.setEnabled(true);
                 this.rdbNotificationActioned.setEnabled(false);
                 this.rdbNotificationUnactioned.setEnabled(false);
@@ -236,7 +244,7 @@ public class ModalNotificationEditorView extends ModalView implements ActionList
                 break;
             case Update:
                 btnCreateUpdatePatientNotification.
-                        setText(ViewController.ViewMode.Update.toString()); 
+                        setText("<html><center>Update</center><center>patient</center><center>notification</center></html>"); 
                 this.rdbNotificationActioned.setEnabled(false);
                 this.rdbNotificationUnactioned.setEnabled(false);
                 this.cmbSelectPatient.setEnabled(false);
@@ -302,15 +310,15 @@ public class ModalNotificationEditorView extends ModalView implements ActionList
         boolean result = true;
         if (this.cmbSelectPatient.getSelectedItem()==null){
             result = false;
-            JOptionPane.showMessageDialog(
+            JOptionPane.showInternalMessageDialog(
                     this, "A patient has not been selected", 
-                    "Patient notification editor error",
+                    "View error",
                     JOptionPane.WARNING_MESSAGE);
         }
         if (result){
             if (this.dpNotificationDate.getDate()==null){
                 result = false;
-                JOptionPane.showMessageDialog(
+                JOptionPane.showInternalMessageDialog(
                     this, "A valid notificaion date has not been defined", 
                     "Patient notification editor error",
                     JOptionPane.WARNING_MESSAGE);
@@ -319,7 +327,7 @@ public class ModalNotificationEditorView extends ModalView implements ActionList
         if (result){
             if (this.txaNotificationText.getText().isEmpty()){
                 result = false;
-                JOptionPane.showMessageDialog(
+                JOptionPane.showInternalMessageDialog(
                     this, "No notificaion text has not been defined", 
                     "Patient notification editor error",
                     JOptionPane.WARNING_MESSAGE);
@@ -374,9 +382,9 @@ public class ModalNotificationEditorView extends ModalView implements ActionList
         pnlNotificationHistory = new javax.swing.JPanel();
         jScrollPane2 = new javax.swing.JScrollPane();
         tblPatientNotificationHistory = new javax.swing.JTable();
-        jPanel3 = new javax.swing.JPanel();
-        btnCloseView = new javax.swing.JButton();
+        pnlActions = new javax.swing.JPanel();
         btnCreateUpdatePatientNotification = new javax.swing.JButton();
+        btnCloseView = new javax.swing.JButton();
 
         buttonGroup1.add(rdbNotificationUnactioned);
         buttonGroup1.add(rdbNotificationActioned);
@@ -519,28 +527,42 @@ public class ModalNotificationEditorView extends ModalView implements ActionList
                 .addContainerGap(15, Short.MAX_VALUE))
         );
 
-        btnCloseView.setText("Close view");
+        pnlActions.setBorder(javax.swing.BorderFactory.createTitledBorder("Actions"));
 
         btnCreateUpdatePatientNotification.setText("Create/Update");
+        btnCreateUpdatePatientNotification.setToolTipText("");
+        btnCreateUpdatePatientNotification.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCreateUpdatePatientNotificationActionPerformed(evt);
+            }
+        });
 
-        javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
-        jPanel3.setLayout(jPanel3Layout);
-        jPanel3Layout.setHorizontalGroup(
-            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
-                .addGap(56, 56, 56)
-                .addComponent(btnCreateUpdatePatientNotification, javax.swing.GroupLayout.PREFERRED_SIZE, 117, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 79, Short.MAX_VALUE)
-                .addComponent(btnCloseView, javax.swing.GroupLayout.PREFERRED_SIZE, 116, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(36, 36, 36))
+        btnCloseView.setText("<html><center>Close</center><center>view</center></html>");
+        btnCloseView.setToolTipText("");
+        btnCloseView.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCloseViewActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout pnlActionsLayout = new javax.swing.GroupLayout(pnlActions);
+        pnlActions.setLayout(pnlActionsLayout);
+        pnlActionsLayout.setHorizontalGroup(
+            pnlActionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlActionsLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(pnlActionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(btnCreateUpdatePatientNotification, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnCloseView, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap())
         );
-        jPanel3Layout.setVerticalGroup(
-            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(btnCreateUpdatePatientNotification)
-                    .addComponent(btnCloseView))
+        pnlActionsLayout.setVerticalGroup(
+            pnlActionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlActionsLayout.createSequentialGroup()
+                .addGap(10, 10, 10)
+                .addComponent(btnCreateUpdatePatientNotification, javax.swing.GroupLayout.PREFERRED_SIZE, 155, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(btnCloseView, javax.swing.GroupLayout.PREFERRED_SIZE, 155, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
 
@@ -550,31 +572,40 @@ public class ModalNotificationEditorView extends ModalView implements ActionList
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                        .addComponent(pnlNotificationDetails, javax.swing.GroupLayout.PREFERRED_SIZE, 413, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(pnlPatientSelection, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(pnlNotificationHistory, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(pnlNotificationDetails, javax.swing.GroupLayout.PREFERRED_SIZE, 413, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(pnlPatientSelection, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(pnlNotificationHistory, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(pnlActions, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(12, 12, 12))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(pnlPatientSelection, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(pnlNotificationDetails, javax.swing.GroupLayout.PREFERRED_SIZE, 162, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(pnlNotificationHistory, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(pnlPatientSelection, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(pnlNotificationDetails, javax.swing.GroupLayout.PREFERRED_SIZE, 162, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(pnlNotificationHistory, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(pnlActions, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    private void btnCreateUpdatePatientNotificationActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCreateUpdatePatientNotificationActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btnCreateUpdatePatientNotificationActionPerformed
+
+    private void btnCloseViewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCloseViewActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btnCloseViewActionPerformed
+/*
     private void doViewCloseAction(){
         String message = "Are you sure you want to close the notification editor?";
         int response = JOptionPane.showConfirmDialog(
@@ -655,7 +686,7 @@ public class ModalNotificationEditorView extends ModalView implements ActionList
         else getMyController().getDescriptor().getViewDescription().
                 setPatientNotification(null);
         return result;
-    }
+    }*/
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnCloseView;
     private javax.swing.JButton btnCreateUpdatePatientNotification;
@@ -665,11 +696,11 @@ public class ModalNotificationEditorView extends ModalView implements ActionList
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JList<String> jList1;
-    private javax.swing.JPanel jPanel3;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JSpinner jSpinner1;
+    private javax.swing.JPanel pnlActions;
     private javax.swing.JPanel pnlNotificationDetails;
     private javax.swing.JPanel pnlNotificationHistory;
     private javax.swing.JPanel pnlPatientSelection;

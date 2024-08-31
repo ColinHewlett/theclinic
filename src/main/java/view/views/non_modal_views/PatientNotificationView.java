@@ -275,7 +275,7 @@ public class PatientNotificationView extends View implements ActionListener,
     private void doCancelNotification(){
         boolean isError = false;
         if (this.tblNotifications.getSelectedRow()==-1){
-            JOptionPane.showMessageDialog(this, "A notification has not been selected for cancellation");
+            JOptionPane.showInternalMessageDialog(this, "A notification has not been selected for cancellation");
             isError = true;
         }
         if (!isError){
@@ -338,7 +338,7 @@ public class PatientNotificationView extends View implements ActionListener,
     private void doUpdateNotification(){
         boolean isError = false;
         if (this.tblNotifications.getSelectedRow()==-1){
-            JOptionPane.showMessageDialog(this, "A notification has not been selected");
+            JOptionPane.showInternalMessageDialog(this, "A notification has not been selected", "View error", JOptionPane.WARNING_MESSAGE);
             isError = true;
         }
         if (!isError){
