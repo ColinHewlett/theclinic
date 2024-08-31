@@ -2207,6 +2207,72 @@ public class Repository implements IStoreActions {
         }
     }
     
+    private ToDo get(ToDo theToDo, ResultSet rs)throws StoreException{
+        ToDo result = null;
+        ToDo toDo = null;
+        ArrayList<ToDo> collection = new ArrayList<>();
+        //ToDoDelegate delegate = new ToDoDelegate(patientToDo);
+        //delegate.set(null);
+        Patient patient = new Patient(0);
+        try{
+            switch (theToDo.getScope()){
+                case SINGLE:
+                    if (!rs.wasNull()){
+                        rs.next();
+                        int pid = rs.getInt("pid");
+                        int userKey = rs.getInt("userKey");
+                        LocalDate toDoDate = rs.getObject("toDoDate", LocalDate.class);
+                        String toDoDescription = rs.getString("toDoDescription");
+                        Boolean isActioned = rs.getBoolean("isActioned");
+                        Boolean isDeleted = rs.getBoolean("isDeleted");
+                        Boolean isCancelled = rs.getBoolean("isCancelled");
+                        toDo = new ToDo();
+                        toDo.setKey(pid);
+                        User user = new User(userKey);
+                        toDo.setUser(user);
+                        toDo.setDate(toDoDate);
+                        toDo.setDescription(toDoDescription);
+                        toDo.setIsActioned(isActioned);
+                        toDo.setIsCancelled(isCancelled);
+                        toDo.setIsDeleted(isDeleted);
+                        result = toDo;
+                    }
+                    break;
+                default:
+                    if (!rs.wasNull()){
+                        while (rs.next()){
+                           toDo = new ToDo();
+                           int pid = rs.getInt("pid");
+                           int userKey = rs.getInt("userKey");
+                           LocalDate toDoDate = rs.getObject("toDoDate", LocalDate.class);
+                           String toDoDescription = rs.getString("toDoDescription");
+                           Boolean isActioned = rs.getBoolean("isActioned");
+                           Boolean isDeleted = rs.getBoolean("isDeleted");
+                           Boolean isCancelled = rs.getBoolean("isCancelled");
+                           toDo.setKey(pid);
+                           User user = new User(userKey);
+                           toDo.setUser(user);
+                           toDo.setDate(toDoDate);
+                           toDo.setDescription(toDoDescription);
+                           toDo.setIsActioned(isActioned);
+                           toDo.setIsCancelled(isCancelled);
+                           toDo.setIsDeleted(isDeleted);
+                           collection.add(toDo);
+                        }
+                        toDo.set(collection);
+                    }
+                    result = toDo;
+                    break;
+            }
+            return result;
+             
+        }catch (SQLException ex) {
+            throw new StoreException("SQLException message -> " + ex.getMessage() + "\n"
+                    + "StoreException -> raised in Repository::get(PatientToDo,ResultSet)",
+                    StoreException.ExceptionType.SQL_EXCEPTION);
+        }
+    }
+    
     private TreatmentCost get(TreatmentCost treatmentCost, ResultSet rs)throws StoreException{
         TreatmentCost result = null;
         ArrayList<TreatmentCost> collection = new ArrayList<>();
