@@ -357,9 +357,9 @@ public class ToDoView extends View implements ActionListener,
     
     private void createToDoTable(){
         this.tblToDo = null;
-        //this.tblToDo = new JTable(new ToDoViewTableModel());
+        this.tblToDo = new JTable(new ToDoViewTableModel());
         ToDoViewTableModel model = (ToDoViewTableModel)tblToDo.getModel();
-       // model.addTableModelListener(this);
+        model.addTableModelListener(this);
         this.tblToDo.setDefaultRenderer(LocalDate.class, new PatientNotificationTableLocalDateRenderer());
         setToDoTableDefaultRenderer(this.tblToDo.getDefaultRenderer(LocalDate.class));
         
