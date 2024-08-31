@@ -6015,10 +6015,6 @@ public class Repository implements IStoreActions {
                 Repository.PMSSQL.INSERT_NOTIFICATION, delegate);
         return delegate.getKey();
     }
-    
-    public Integer insert(ToDo pn)throws StoreException{
-        return 0;
-    }
 
     @Override
     public Integer insert(Doctor doctor)throws StoreException{
@@ -6894,11 +6890,7 @@ public class Repository implements IStoreActions {
         }
          
     }
-   
-    public void delete(ToDo toDo)throws StoreException{
-        
-    }
-   
+
     public void delete(SurgeryDaysAssignment surgeryDaysAssignment)throws StoreException{
        runSQL(Repository.EntityType.SURGERY_DAYS_ASSIGNMENT,
                Repository.PMSSQL.DELETE_SURGERY_DAYS_ASSIGNMENT,null);
@@ -7687,12 +7679,7 @@ public class Repository implements IStoreActions {
                 StoreException.ExceptionType.UNEXPECTED_DATA_TYPE_ENCOUNTERED);
         }
     }
-    
-    public ToDo read(ToDo toDo)throws StoreException{
-        return null;
-    }
-    
-    
+
     public void uncancel(Notification notification, Integer notificationKey)throws StoreException{
         NotificationDelegate delegate = new NotificationDelegate(notification);
         delegate.setKey(notificationKey);
@@ -7716,10 +7703,7 @@ public class Repository implements IStoreActions {
         delegate.setAppointmentKey(appointmentKey);
         runSQL(Repository.EntityType.APPOINTMENT,Repository.PMSSQL.CANCEL_APPOINTMENT, delegate);
     }
-    
-    public void cancel(ToDo toDo)throws StoreException{
-        
-    }
+
     /*28/03/2024
     public Point count(PatientNote patientNote)throws StoreException{
         Entity result = null;
@@ -7936,11 +7920,7 @@ public class Repository implements IStoreActions {
         else throw new StoreException("PatientNotification undefined in Repository.count(PatientNotification)",
                 StoreException.ExceptionType.UNEXPECTED_DATA_TYPE_ENCOUNTERED);
     }
-    
-    public Point count(ToDo toDo)throws StoreException{
-        return null;
-    }
-    
+
     /**
      * On entry the method expects the caller's scope for the count to be defined which specifies what is being counted
      * -- all appointments
@@ -8286,11 +8266,7 @@ public class Repository implements IStoreActions {
         runSQL(Repository.EntityType.PATIENT_NOTIFICATION, Repository.PMSSQL.UPDATE_NOTIFICATION,pn);
         
     }
-    
-    public void update(ToDo toDo)throws StoreException{
-        
-    }
-    
+
     @Override
     public void update(PatientCondition patientCondition)throws StoreException{
         if (patientCondition.getIsPatientPrimaryCondition())
@@ -8427,11 +8403,7 @@ public class Repository implements IStoreActions {
         Entity value = null;
         runSQL(Repository.EntityType.PATIENT_NOTIFICATION,Repository.PMSSQL.CREATE_NOTIFICATION_TABLE, value);
     }
-    
-    public void create(ToDo toDo) throws StoreException{
-        
-    }
-    
+
     public boolean doesPMSDatabaseExist(){
         boolean result = false;
         
@@ -8705,5 +8677,126 @@ public class Repository implements IStoreActions {
             String msg = "StoreException -> patient notificaion undefined in doUpdateToDo()";
             throw new StoreException(msg, StoreException.ExceptionType.NULL_KEY_EXCEPTION);
         }
+    }
+    
+    public void cancel(ToDo toDo)throws StoreException{
+        runSQL(Repository.EntityType.TO_DO,Repository.PMSSQL.CANCEL_TO_DO, toDo);
+    }
+    
+    @Override
+    public void create(ToDo table) throws StoreException{
+        Entity value = null;
+        runSQL(Repository.EntityType.TO_DO,Repository.PMSSQL.CREATE_TO_DO_TABLE, value);
+    }
+    
+    @Override
+    public Point count(ToDo toDo)throws StoreException{
+        Entity result = null;
+        if (toDo !=null){
+            Repository.PMSSQL sqlStatement = null;
+            sqlStatement = Repository.PMSSQL.COUNT_TO_DO;
+            result = (Entity)runSQL(Repository.EntityType.TO_DO, 
+                    sqlStatement, toDo);
+        }
+        return result.getValue();
+    }
+    
+    @Override
+    public void delete(ToDo toDo)throws StoreException{
+        if (toDo.getScope()!=null){
+            switch(toDo.getScope()){
+               case SINGLE:
+                    runSQL(Repository.EntityType.TO_DO,Repository.PMSSQL.DELETE_TO_DO,toDo);
+                    break;
+               case ALL:
+                   runSQL(Repository.EntityType.TO_DO,Repository.PMSSQL.DELETE_ALL_TO_DO,null);
+                   break;
+               default:
+                    String error = "Unexpected scope encountered (" 
+                            + toDo.getScope().toString() + ")\n" 
+                            + "Raised in Repository.delete(ToDo)";
+                    throw new StoreException(error, 
+                            StoreException.ExceptionType.STORE_EXCEPTION);
+            }
+        }else{
+            String error = "Scope of toDo delete operation undefined (" 
+                    + toDo.getScope().toString() + ")\n" 
+                    + "Raised in Repository.delete(ToDo)";
+            throw new StoreException(error, 
+                    StoreException.ExceptionType.STORE_EXCEPTION);
+        }
+    }
+    
+    @Override
+    public Integer insert(ToDo toDo)throws StoreException{
+        Entity key = null;
+        Entity entity;
+        IStoreClient client;
+        client = runSQL(Repository.EntityType.TO_DO,
+                    Repository.PMSSQL.READ_TO_DO_NEXT_HIGHEST_KEY,toDo);
+        entity = (Entity)client;
+        toDo.setKey(entity.getValue().x + 1);
+
+        runSQL(Repository.EntityType.TO_DO,
+                Repository.PMSSQL.INSERT_TO_DO, toDo);
+        
+        return toDo.getKey();
+    }
+    
+    @Override
+    public ToDo read(ToDo toDo)throws StoreException{
+        ToDo result = null;
+        Entity entity = null;
+
+        switch(toDo.getScope()){
+            case SINGLE:{
+                try{
+                    entity = (Entity)runSQL(Repository.EntityType.TO_DO, 
+                            Repository.PMSSQL.READ_TO_DO, toDo);
+                }catch(StoreException ex){
+                    String message = "";
+                    throw new StoreException(
+                        message + "StoreException raised -> null value returned from persistent store "
+                            + "in method Repository::read(ToDo)" 
+                                + toDo.getScope().toString() + "])\n",
+                        StoreException.ExceptionType.UNEXPECTED_DATA_TYPE_ENCOUNTERED);
+                }
+                break;
+            }       
+            case ALL:
+                entity = (Entity)runSQL(Repository.EntityType.TO_DO,
+                            Repository.PMSSQL.READ_ALL_TO_DO, toDo);
+                break;
+                /*
+            case FOR_PATIENT:
+                entity = (Entity)runSQL(Repository.EntityType.TO_DO,
+                            Repository.PMSSQL.READ_TO_DO_FOR_PATIENT,toDo);
+                break;*/
+        }
+        if (entity!=null){
+            if (entity.getIsToDo()){
+                result = (ToDo)entity;
+                return result;
+            }else{
+                String message = "";
+                throw new StoreException(
+
+                    message + "StoreException raised -> unexpected entity type returned from persistent store "
+                        + "in method Repository::read(ToDo)\n",
+                    StoreException.ExceptionType.UNEXPECTED_DATA_TYPE_ENCOUNTERED); 
+            }
+        }else{
+            String message = "";
+            throw new StoreException(
+                message + "StoreException raised -> null value returned from persistent store "
+                    + "in method Repository::read(ToDo)" 
+                        + toDo.getScope().toString() + "])\n",
+                StoreException.ExceptionType.UNEXPECTED_DATA_TYPE_ENCOUNTERED);
+        }
+    }
+    
+    @Override
+    public void update(ToDo toDo)throws StoreException{
+        runSQL(Repository.EntityType.TO_DO, Repository.PMSSQL.UPDATE_TO_DO,toDo); 
     }
 }
