@@ -644,6 +644,32 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         CLOSE_VIEW_REQUEST_RECEIVED
         }
     
+    public static enum ToDoViewControllerActionEvent{
+        ACTION_TO_DO_REQUEST,
+        CANCEL_TO_DO_REQUEST,
+        CREATE_TO_DO_REQUEST,
+        DELETE_TO_DO_REQUEST,
+        MODAL_VIEWER_ACTIVATED,
+        MODAL_VIEWER_DEACTIVATED,
+        TO_DO_EDITOR_CLOSE_VIEW_REQUEST,
+        //PATIENT_TO_DO_EDITOR_DELETE_TO_DO_REQUEST,
+        TO_DO_EDITOR_CREATE_TO_DO_REQUEST,
+        TO_DO_EDITOR_UPDATE_TO_DO_REQUEST,
+        TO_DOs_REQUEST,
+        TO_DOs_FOR_USER_REQUEST,
+        UNACTIONED_TO_DO_REQUEST,
+        UPDATE_TO_DO_REQUEST,
+        VIEW_ACTIVATED_NOTIFICATION,
+        VIEW_CHANGED_NOTIFICATION,
+        VIEW_CLOSED_NOTIFICATION
+    }
+    
+    public static enum ToDoViewControllerPropertyChangeEvent{
+        RECEIVED_TO_DO,
+        RECEIVED_TO_DOs,
+        RECEIVED_UNACTIONED_TO_DOs,
+    }
+    
     public static enum TreatmentViewControllerActionEvent{
         TREATMENT_CREATE_REQUEST,
         TREATMENT_DELETE_REQUEST,
