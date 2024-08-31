@@ -26,15 +26,140 @@ public class ToDoView extends javax.swing.JInternalFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        pnlToDo = new javax.swing.JPanel();
+        scrToDoTable = new javax.swing.JScrollPane();
+        tblToDo = new javax.swing.JTable();
+        jPanel3 = new javax.swing.JPanel();
+        rdbDisplayUnactionedToDo = new javax.swing.JRadioButton();
+        rdbDisplayAllOptions = new javax.swing.JRadioButton();
+        pnlActions = new javax.swing.JPanel();
+        btnAddNewToDo = new javax.swing.JButton();
+        btnEditSelectedToDo = new javax.swing.JButton();
+        btnCancelSelectedToDo = new javax.swing.JButton();
+        btnCloseView = new javax.swing.JButton();
+
+        pnlToDo.setBorder(javax.swing.BorderFactory.createTitledBorder("To do list"));
+
+        tblToDo.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null}
+            },
+            new String [] {
+                "Title 1", "Title 2", "Title 3", "Title 4"
+            }
+        ));
+        scrToDoTable.setViewportView(tblToDo);
+
+        javax.swing.GroupLayout pnlToDoLayout = new javax.swing.GroupLayout(pnlToDo);
+        pnlToDo.setLayout(pnlToDoLayout);
+        pnlToDoLayout.setHorizontalGroup(
+            pnlToDoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlToDoLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(scrToDoTable, javax.swing.GroupLayout.DEFAULT_SIZE, 794, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+        pnlToDoLayout.setVerticalGroup(
+            pnlToDoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlToDoLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(scrToDoTable, javax.swing.GroupLayout.DEFAULT_SIZE, 302, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+
+        rdbDisplayUnactionedToDo.setText("only display unactioned 'To do' items");
+
+        rdbDisplayAllOptions.setText("display all 'To Do' items");
+
+        javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
+        jPanel3.setLayout(jPanel3Layout);
+        jPanel3Layout.setHorizontalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel3Layout.createSequentialGroup()
+                .addContainerGap(168, Short.MAX_VALUE)
+                .addComponent(rdbDisplayUnactionedToDo, javax.swing.GroupLayout.PREFERRED_SIZE, 232, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(113, 113, 113)
+                .addComponent(rdbDisplayAllOptions, javax.swing.GroupLayout.PREFERRED_SIZE, 191, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(123, 123, 123))
+        );
+        jPanel3Layout.setVerticalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(rdbDisplayUnactionedToDo)
+                    .addComponent(rdbDisplayAllOptions))
+                .addGap(14, 14, 14))
+        );
+
+        pnlActions.setBorder(javax.swing.BorderFactory.createTitledBorder("Actions"));
+
+        btnAddNewToDo.setText("<html><center>Create</center><center>item for</center><center>'To Do' list</center></html>");
+
+        btnEditSelectedToDo.setText("<html><center>Update</center><center>selected item</center><center>of 'To Do' list</center></html>");
+
+        btnCancelSelectedToDo.setText("<html><center>Cancel</center><center>selected item</center><center>of 'To Do' list</center></html>");
+
+        btnCloseView.setText("<html><center>Close</center><center>view</center></html>");
+
+        javax.swing.GroupLayout pnlActionsLayout = new javax.swing.GroupLayout(pnlActions);
+        pnlActions.setLayout(pnlActionsLayout);
+        pnlActionsLayout.setHorizontalGroup(
+            pnlActionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlActionsLayout.createSequentialGroup()
+                .addGap(12, 12, 12)
+                .addGroup(pnlActionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(btnCloseView, javax.swing.GroupLayout.PREFERRED_SIZE, 105, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(pnlActionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(btnAddNewToDo, javax.swing.GroupLayout.PREFERRED_SIZE, 106, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(btnEditSelectedToDo, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 105, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(btnCancelSelectedToDo, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 105, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGap(12, 12, 12))
+        );
+        pnlActionsLayout.setVerticalGroup(
+            pnlActionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlActionsLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(btnAddNewToDo, javax.swing.GroupLayout.PREFERRED_SIZE, 82, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(10, 10, 10)
+                .addComponent(btnEditSelectedToDo, javax.swing.GroupLayout.PREFERRED_SIZE, 82, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 10, Short.MAX_VALUE)
+                .addComponent(btnCancelSelectedToDo, javax.swing.GroupLayout.PREFERRED_SIZE, 83, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(10, 10, 10)
+                .addComponent(btnCloseView, javax.swing.GroupLayout.PREFERRED_SIZE, 83, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
+        );
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 747, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(17, 17, 17)
+                        .addComponent(pnlToDo, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(pnlActions, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(23, 23, 23))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 305, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addGap(18, 18, 18)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(pnlActions, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(pnlToDo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();
@@ -42,5 +167,16 @@ public class ToDoView extends javax.swing.JInternalFrame {
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnAddNewToDo;
+    private javax.swing.JButton btnCancelSelectedToDo;
+    private javax.swing.JButton btnCloseView;
+    private javax.swing.JButton btnEditSelectedToDo;
+    private javax.swing.JPanel jPanel3;
+    private javax.swing.JPanel pnlActions;
+    private javax.swing.JPanel pnlToDo;
+    private javax.swing.JRadioButton rdbDisplayAllOptions;
+    private javax.swing.JRadioButton rdbDisplayUnactionedToDo;
+    private javax.swing.JScrollPane scrToDoTable;
+    private javax.swing.JTable tblToDo;
     // End of variables declaration//GEN-END:variables
 }
