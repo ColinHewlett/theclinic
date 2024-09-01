@@ -289,6 +289,7 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         PATIENT_VIEW_CONTROLLER_REQUEST,
         
         SCHEDULE_VIEW_CONTROLLER_REQUEST,
+        TO_DO_VIEW_CONTROLLER_REQUEST,
         TEST_PATIENT_VIEW_CONTROLLER_REQUEST,
         TREATMENT_VIEW_CONTROLLER_REQUEST,
 
@@ -655,6 +656,7 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         //PATIENT_TO_DO_EDITOR_DELETE_TO_DO_REQUEST,
         TO_DO_EDITOR_CREATE_TO_DO_REQUEST,
         TO_DO_EDITOR_UPDATE_TO_DO_REQUEST,
+        TO_DO_VIEW_CONTROLLER_REQUEST,
         TO_DOs_REQUEST,
         TO_DOs_FOR_USER_REQUEST,
         UNACTIONED_TO_DO_REQUEST,

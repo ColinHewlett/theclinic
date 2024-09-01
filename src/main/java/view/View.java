@@ -108,10 +108,9 @@ public class View extends JInternalFrame
             case NOTIFICATION_VIEW:
                 setView(makeView(new PatientNotificationView(viewer, controller, desktopView)));
                 break;
-            /*28/03/2024
-            case NOTES_VIEW:
-                setView(makeView(new NotesView(viewer, controller, desktopView)));
-                break;*/
+            case TO_DO_VIEW:
+                setView(makeView(new ToDoView(viewer, controller, desktopView)));
+                break;
             case PATIENT_INVOICE_VIEW:
                 setView(makeView(new PatientInvoiceView(viewer, controller,desktopView)));
                 break;
@@ -151,6 +150,9 @@ public class View extends JInternalFrame
                 break;    
             case NOTIFICATION_EDITOR_VIEW:
                 setModalView(makeView(new ModalNotificationEditorView(viewer, controller, desktopView)));
+                break;
+            case TO_DO_EDITOR_VIEW:
+                setModalView(makeView(new ModalToDoEditorView(viewer, controller, desktopView)));
                 break;
             case PATIENT_RECOVERY_SELECTION_VIEW:
                 setModalView(makeView(new ModalPatientSelectionView(viewer, controller, desktopView)));

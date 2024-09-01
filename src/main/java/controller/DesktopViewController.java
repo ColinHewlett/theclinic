@@ -49,6 +49,7 @@ public class DesktopViewController extends ViewController{
     private ArrayList<ScheduleViewController>scheduleViewControllers = null;
     private ArrayList<NotificationViewController> notificationViewControllers = null;
     private ArrayList<PatientViewController> patientViewControllers = null;
+    private ArrayList<ToDoViewController> toDoViewControllers = null;
     private ArrayList<TreatmentViewController> treatmentViewControllers = null;
     private ArrayList<PatientInvoiceViewController> patientInvoiceViewControllers = null;
     private ArrayList<MedicalConditionViewController> medicalConditionViewControllers = null;
@@ -89,6 +90,7 @@ public class DesktopViewController extends ViewController{
             patientViewControllers = new ArrayList<>();
             importProgressViewControllers = new ArrayList<>();
             notificationViewControllers = new ArrayList<>();
+            toDoViewControllers = new ArrayList<>();
             treatmentViewControllers = new ArrayList<>();
             clinicalNoteViewControllers = new ArrayList<>();
             medicalConditionViewControllers = new ArrayList<>();
@@ -1060,6 +1062,9 @@ public class DesktopViewController extends ViewController{
                 case MEDICAL_CONDITION_VIEW_CONTROLLER_REQUEST:
                     doRequestForMedicalConditionViewController(e);
                     break;
+                case TO_DO_VIEW_CONTROLLER_REQUEST:
+                    doRequestForToDoViewController();
+                    break;
                 case TREATMENT_VIEW_CONTROLLER_REQUEST:
                     //getDescriptor().getControllerDescription().setPatient(null);
                     doRequestForTreatmentViewController(e);
@@ -1530,6 +1535,33 @@ public class DesktopViewController extends ViewController{
         }else {
             medicalConditionViewControllers.get(0).getView().toFront();
         }//do nothing because only one medical condition VC allowed
+    }
+    
+    private void doRequestForToDoViewController(){
+        if (toDoViewControllers.isEmpty()){
+            try{
+                toDoViewControllers.add(
+                                            new ToDoViewController(this,getDesktopView()));
+                ToDoViewController tvc = 
+                        toDoViewControllers.get(toDoViewControllers.size()-1);
+                tvc.setView(new View().make(View.Viewer.TO_DO_VIEW/*SCHEDULE_VIEW*/,
+                        tvc, 
+                        getDesktopView()));
+                
+                if (getDesktopViewMode().equals(DesktopViewMode.CLINIC_LOGO)){
+                        doSetupDesktopViewMode();
+                }
+                
+
+
+            }catch (StoreException ex){
+                String message = ex.getMessage();
+                JOptionPane.showMessageDialog(this.getDesktopView(), 
+                        message, "Desktop View Controller error", JOptionPane.WARNING_MESSAGE);
+            }
+        }else {
+            toDoViewControllers.get(0).getView().toFront();
+        }//toDoViewControllers not empty, so do nothing because only one patient toDo VC allowed
     }
 
     private void doRequestForNotificationViewController(){

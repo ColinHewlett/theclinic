@@ -107,6 +107,7 @@ public class DesktopView extends javax.swing.JFrame
         REQUEST_MEDICAL_CONDITION_VIEW,
         REQUEST_NOTIFICATION_VIEW,
         REQUEST_PATIENT_VIEW,
+        REQUEST_TO_DO_VIEW,
         REQUEST_TREATMENT_VIEW,
         REQUEST_PRINT_NEW_PATIENT_DETAILS_VIEW,
         REQUEST_PRINT_SCHEDULE
@@ -124,7 +125,8 @@ public class DesktopView extends javax.swing.JFrame
     private final String SELECT_VIEW_MENU_TITLE = "View";
         private final String APPOINTMENT_VIEW_REQUEST_TITLE = "Appointments";
         private final String PATIENT_VIEW_REQUEST_TITLE = "Patients";
-        private final String PATIENT_NOTIFICATION_VIEW_REQUEST = "Notifications (patient-related)";
+        private final String PATIENT_NOTIFICATION_VIEW_REQUEST_TITLE = "Notifications (patient-related)";
+        private final String TO_DO_VIEW_REQUEST_TITLE = "'To do' list";
         private final String TREATMENT_VIEW_REQUEST = "Treatments";
         
         private final String EXIT_VIEW_REQUEST_TITLE = "Exit the Clinic practice management system";
@@ -166,6 +168,7 @@ public class DesktopView extends javax.swing.JFrame
         private JMenuItem mniAppointmentViewRequest = null;
         private JMenuItem mniPatientViewRequest = null;
         private JMenuItem mniPatientNotificationViewRequest = null;
+        private JMenuItem mniToDoViewRequest = null;
         private JMenuItem mniTreatmentViewRequest = null;
         private JMenuItem mniExitViewRequest = null;
         
@@ -278,13 +281,13 @@ public class DesktopView extends javax.swing.JFrame
         setActiveMenu(mnuSelectView);
         mniAppointmentViewRequest = new JMenuItem(APPOINTMENT_VIEW_REQUEST_TITLE);
         mniPatientViewRequest = new JMenuItem(PATIENT_VIEW_REQUEST_TITLE);
-        mniPatientNotificationViewRequest = new JMenuItem(PATIENT_NOTIFICATION_VIEW_REQUEST);
-        //mniTreatmentViewRequest = new JMenuItem(TREATMENT_VIEW_REQUEST);
+        mniPatientNotificationViewRequest = new JMenuItem(PATIENT_NOTIFICATION_VIEW_REQUEST_TITLE);
+        mniToDoViewRequest = new JMenuItem(TO_DO_VIEW_REQUEST_TITLE);
         mniExitViewRequest = new JMenuItem(EXIT_VIEW_REQUEST_TITLE);
         mnuSelectView.add(mniPatientViewRequest);
         mnuSelectView.add(mniAppointmentViewRequest);
-        //mnuSelectView.add(mniTreatmentViewRequest);
         mnuSelectView.add(mniPatientNotificationViewRequest);
+        mnuSelectView.add(mniToDoViewRequest);
         mnuSelectView.add(new JSeparator());
         setTopDynamicFrameListDelimiter(mnuSelectView.getItemCount()-1);
         mnuSelectView.add(mniExitViewRequest);
@@ -292,10 +295,12 @@ public class DesktopView extends javax.swing.JFrame
         mniAppointmentViewRequest.setActionCommand(Action.REQUEST_APPOINTMENT_VIEW.toString());
         mniPatientViewRequest.setActionCommand(Action.REQUEST_PATIENT_VIEW.toString());
         mniPatientNotificationViewRequest.setActionCommand(Action.REQUEST_NOTIFICATION_VIEW.toString());
+        mniToDoViewRequest.setActionCommand(Action.REQUEST_TO_DO_VIEW.toString());
         mniExitViewRequest.setActionCommand(Action.REQUEST_CLOSE_VIEW.toString());
         mniAppointmentViewRequest.addActionListener(this);
         mniPatientViewRequest.addActionListener(this);
         mniPatientNotificationViewRequest.addActionListener(this);
+        mniToDoViewRequest.addActionListener(this);
         mniExitViewRequest.addActionListener(this);
     }
     
@@ -490,6 +495,9 @@ public class DesktopView extends javax.swing.JFrame
             case REQUEST_CHANGE_USER_PASSWORD:
                 break;
             case REQUEST_CASCADE_VIEWS:
+                break;
+            case REQUEST_TO_DO_VIEW:
+                this.doToDoViewRequest();
                 break;
             case REQUEST_PRINT_NEW_PATIENT_DETAILS_VIEW:
                 actionEvent = new ActionEvent(
@@ -818,10 +826,17 @@ public class DesktopView extends javax.swing.JFrame
         
     }
     
+    private void doToDoViewRequest(){
+        ActionEvent actionEvent = new ActionEvent(this, 
+                ActionEvent.ACTION_PERFORMED,
+                ViewController.DesktopViewControllerActionEvent.TO_DO_VIEW_CONTROLLER_REQUEST.toString());
+        this.getMyController().actionPerformed(actionEvent);
+    }
+    
     private void mniNotificationViewRequestActionPerformed() {                                                      
         ActionEvent actionEvent = new ActionEvent(this, 
                 ActionEvent.ACTION_PERFORMED,
-                DesktopViewController.DesktopViewControllerActionEvent.NOTIFICATION_VIEW_CONTROLLER_REQUEST.toString());
+                ViewController.DesktopViewControllerActionEvent.NOTIFICATION_VIEW_CONTROLLER_REQUEST.toString());
         this.getMyController().actionPerformed(actionEvent);
     }
    /* 
