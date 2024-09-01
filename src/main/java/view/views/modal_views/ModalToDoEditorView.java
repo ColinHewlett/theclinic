@@ -4,17 +4,171 @@
  */
 package view.views.modal_views;
 
+import controller.ViewController;
+import com.github.lgooddatepicker.components.DatePickerSettings;
+import static controller.ViewController.ViewMode.CREATE;
+import static controller.ViewController.ViewMode.Create;
+import static controller.ViewController.ViewMode.UPDATE;
+import static controller.ViewController.ViewMode.Update;
+import java.time.LocalDate;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import model.non_entity.SystemDefinition;
+import view.View;
+import view.views.non_modal_views.DesktopView;
+//import view.views.view_support_classes.renderers.NotificationEditorTableLocalDateRenderer;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.time.format.DateTimeFormatter;
+import javax.swing.JOptionPane;
 /**
  *
  * @author colin
  */
-public class ModalToDoEditorView extends javax.swing.JInternalFrame {
-
+public class ModalToDoEditorView extends ModalView implements ActionListener{
+    private ViewController.ViewMode viewMode = null;
+    
+    private static LocalDate date = null;
+    public static LocalDate getDate(){
+        return date;
+    }
+    
+    enum Action{
+        REQUEST_CREATE_UPDATE_TO_DO,
+        REQUEST_CLOSE_VIEW
+    }
+    public static void setDate(LocalDate value){
+        date = value;
+    }
+    
     /**
-     * Creates new form ModalToDoEditorView
+     * 
+     * @param myViewType
+     * @param myController
+     * @param desktopView 
      */
-    public ModalToDoEditorView() {
+    public ModalToDoEditorView(View.Viewer myViewType, 
+            ViewController myController, 
+            DesktopView desktopView) {
+        //ViewMode arg
+        setTitle("'To do' list editor");
+        setMyController(myController);
+        setMyViewType(myViewType);
+        setDesktopView(desktopView);
         initComponents();
+    }
+    
+    @Override
+    public void actionPerformed(ActionEvent e){
+        Action actionCommand = Action.valueOf(e.getActionCommand());
+        switch(actionCommand){
+            case REQUEST_CREATE_UPDATE_TO_DO:{
+                doCreateUpdateToDo();
+                break;
+            }
+            case REQUEST_CLOSE_VIEW:
+                doCloseView();
+                break;
+        }
+    }
+    
+    @Override
+    public void initialiseView(){
+        initComponents();
+        ImageIcon icon = new ImageIcon(this.getClass().getResource("/datepickerbutton1.png"));
+        JButton datePickerButton = dpToDoDate.getComponentToggleCalendarButton();
+        datePickerButton.setText("");
+        datePickerButton.setIcon(icon);
+        setVisible(true);
+        
+        switch(getMyController().getDescriptor()
+                .getControllerDescription().getViewMode()){
+            case CREATE:
+                break;
+            case UPDATE:
+                break;   
+        }      
+        
+        pnlToDoDetails.setBorder(javax.swing.BorderFactory.createTitledBorder(
+                javax.swing.BorderFactory.createEtchedBorder(), 
+                "To do list", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, 
+                javax.swing.border.TitledBorder.DEFAULT_POSITION, 
+                SystemDefinition.TITLED_BORDER_FONT, 
+                SystemDefinition.TITLED_BORDER_COLOR));// NOI18N;
+        
+        pnlToDoActions.setBorder(javax.swing.BorderFactory.createTitledBorder(
+                javax.swing.BorderFactory.createEtchedBorder(), 
+                "'To do' actions", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, 
+                javax.swing.border.TitledBorder.DEFAULT_POSITION, 
+                SystemDefinition.TITLED_BORDER_FONT, 
+                SystemDefinition.TITLED_BORDER_COLOR));// NOI18N;
+    }
+    
+    private ViewController.ViewMode getViewMode(){
+        return this.viewMode;
+    }
+
+    public void setViewMode(ViewController.ViewMode value){
+        this.viewMode = value;
+        switch (viewMode){
+            case Create:
+                this.btnCreateUpdateTask.
+                        setText("<html><center>Create</center><center>new task</center></html>");
+                //this.pnlRadioButtons.setEnabled(true);
+                this.rdbToDoActioned.setEnabled(false);
+                this.rdbToDoUnactioned.setEnabled(false);
+                break;
+            case Update:
+                btnCreateUpdateTask.
+                        setText("<html><center>Create</center><center>new task</center></html>"); 
+                this.rdbToDoActioned.setEnabled(false);
+                this.rdbToDoUnactioned.setEnabled(false);
+        }
+    }
+    
+    private void doCreateUpdateToDo(){
+        if (getViewMode().equals(ViewController.ViewMode.Create))
+            doRequestNewToDo();
+        else doRequestUpdateToDo();
+    }
+    
+    private void doCloseView(){
+        ActionEvent actionEvent = new ActionEvent(
+            this,ActionEvent.ACTION_PERFORMED,
+            ViewController.NotificationViewControllerActionEvent.MODAL_VIEWER_DEACTIVATED.toString());
+        this.getMyController().actionPerformed(actionEvent);
+    }
+    
+    private void doRequestNewToDo(){
+        if (this.doValidateToDoRequest()){
+            ActionEvent actionEvent = new ActionEvent(
+                this,ActionEvent.ACTION_PERFORMED,
+                ViewController.NotificationViewControllerActionEvent.
+                        NOTIFICATION_EDITOR_CREATE_NOTIFICATION_REQUEST.toString());
+            this.getMyController().actionPerformed(actionEvent);
+        }       
+    }
+    
+    private void doRequestUpdateToDo(){
+        if (doValidateToDoRequest()){
+            ActionEvent actionEvent = new ActionEvent(
+                this,ActionEvent.ACTION_PERFORMED,
+                ViewController.NotificationViewControllerActionEvent.
+                        NOTIFICATION_EDITOR_UPDATE_NOTIFICATION_REQUEST.toString());
+            this.getMyController().actionPerformed(actionEvent);
+        }
+    }
+    
+    private boolean doValidateToDoRequest(){
+        boolean result = true;
+        if (this.dpToDoDate.getDate()==null){
+            result = false;
+            JOptionPane.showInternalMessageDialog(
+                this, "A valid date has not been defined", 
+                "View error error",
+                JOptionPane.WARNING_MESSAGE);
+        }
+        return result;
     }
 
     /**
