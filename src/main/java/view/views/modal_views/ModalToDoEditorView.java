@@ -222,10 +222,10 @@ public class ModalToDoEditorView extends ModalView implements ActionListener{
 
         pnlToDoDetails.setBorder(javax.swing.BorderFactory.createTitledBorder("'to do' details"));
 
-        settings = new DatePickerSettings();
-        dpToDoDate = new com.github.lgooddatepicker.components.DatePicker(settings);
+        DatePickerSettings settings = new DatePickerSettings();
         settings.setFormatForDatesCommonEra(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-        settings.setAllowEmptyDates(false);
+        settings.setAllowKeyboardEditing(false);
+        dpToDoDate.setSettings(settings);
         //settings.setVetoPolicy(new AppointmentDateVetoPolicy());
         settings.setAllowKeyboardEditing(false);
 
