@@ -120,6 +120,7 @@ import java.awt.print.PrinterJob;
 import javax.print.attribute.HashPrintRequestAttributeSet;
 import javax.print.attribute.PrintRequestAttributeSet;
 import javax.print.attribute.standard.MediaSizeName;
+import javax.swing.table.TableColumnModel;
 import static model.entity.Question.Category.ARE_YOU;
 import static model.entity.Question.Category.HAVE_YOU;
 import static model.entity.Question.Category.YOU_AND_THE_CLINIC;
@@ -723,6 +724,27 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         pcSupport.removePropertyChangeListener(pcListener);
     }
     
+    public static void setRelativeColumnWidths(JTable table, int tableWidth, double[] percentages) {
+        //int totalWidth = table.getWidth();
+        int totalWidth = tableWidth;
+        TableColumnModel columnModel = table.getColumnModel();
+        for (int i = 0; i < percentages.length; i++) {
+            TableColumn column = columnModel.getColumn(i);
+            int width = (int) (percentages[i] * totalWidth);
+            column.setPreferredWidth(width);
+        }
+    }
+    
+    public static void setRelativeColumnWidths(JTable table, double[] percentages) {
+        int totalWidth = table.getWidth();
+        TableColumnModel columnModel = table.getColumnModel();
+        for (int i = 0; i < percentages.length; i++) {
+            TableColumn column = columnModel.getColumn(i);
+            int width = (int) (percentages[i] * totalWidth);
+            column.setPreferredWidth(width);
+        }
+    }
+    
     /**
      * utility helper method which sets the column header colour and each of the widths of the specified table's columns as per the specified WIDTH PERCENTAGES 
      * @param table; JTable whose properties are updated
@@ -750,6 +772,23 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
             }
             column.setHeaderRenderer(new TableHeaderCellBorderRenderer(Color.LIGHT_GRAY));
         }
+    }
+    
+    public static void centerInternalFrame(javax.swing.JDesktopPane desktopPane, JInternalFrame frame) {
+        // Get the size of the desktop pane
+        int desktopWidth = desktopPane.getWidth();
+        int desktopHeight = desktopPane.getHeight();
+
+        // Get the size of the internal frame
+        int frameWidth = frame.getWidth();
+        int frameHeight = frame.getHeight();
+
+        // Calculate the new location to center the internal frame
+        int x = (desktopWidth - frameWidth) / 2;
+        int y = (desktopHeight - frameHeight) / 2;
+
+        // Set the location of the internal frame
+        frame.setLocation(x, y);
     }
     
     public void centreViewOnDesktop(Frame desktopView, JInternalFrame view){

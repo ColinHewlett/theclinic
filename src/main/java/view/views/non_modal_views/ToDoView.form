@@ -67,7 +67,7 @@
           <Group type="103" groupAlignment="0" attributes="0">
               <Group type="102" alignment="0" attributes="0">
                   <EmptySpace max="-2" attributes="0"/>
-                  <Component id="scrToDoTable" pref="794" max="32767" attributes="0"/>
+                  <Component id="scrToDoTable" max="32767" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
               </Group>
           </Group>
@@ -112,7 +112,7 @@
         <DimensionLayout dim="0">
           <Group type="103" groupAlignment="0" attributes="0">
               <Group type="102" alignment="0" attributes="0">
-                  <EmptySpace max="32767" attributes="0"/>
+                  <EmptySpace pref="157" max="32767" attributes="0"/>
                   <Component id="rdbDisplayUnactionedToDo" min="-2" pref="232" max="-2" attributes="0"/>
                   <EmptySpace min="-2" pref="113" max="-2" attributes="0"/>
                   <Component id="rdbDisplayAllOptions" min="-2" pref="191" max="-2" attributes="0"/>
@@ -191,17 +191,23 @@
       <SubComponents>
         <Component class="javax.swing.JButton" name="btnAddNewToDo">
           <Properties>
-            <Property name="text" type="java.lang.String" value="&lt;html&gt;&lt;center&gt;Create&lt;/center&gt;&lt;center&gt;item for&lt;/center&gt;&lt;center&gt;&apos;To Do&apos; list&lt;/center&gt;&lt;/html&gt;"/>
+            <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+              <Connection code="&quot;&lt;html&gt;&lt;center&gt;Create&lt;/center&gt;&lt;center&gt;new task&lt;/center&gt;&lt;/html&gt;&quot;" type="code"/>
+            </Property>
           </Properties>
         </Component>
         <Component class="javax.swing.JButton" name="btnEditSelectedToDo">
           <Properties>
-            <Property name="text" type="java.lang.String" value="&lt;html&gt;&lt;center&gt;Update&lt;/center&gt;&lt;center&gt;selected item&lt;/center&gt;&lt;center&gt;of &apos;To Do&apos; list&lt;/center&gt;&lt;/html&gt;"/>
+            <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+              <Connection code="&quot;&lt;html&gt;&lt;center&gt;Update&lt;/center&gt;&lt;center&gt;selected task&lt;/center&gt;&lt;/html&gt;&quot;" type="code"/>
+            </Property>
           </Properties>
         </Component>
         <Component class="javax.swing.JButton" name="btnCancelSelectedToDo">
           <Properties>
-            <Property name="text" type="java.lang.String" value="&lt;html&gt;&lt;center&gt;Cancel&lt;/center&gt;&lt;center&gt;selected item&lt;/center&gt;&lt;center&gt;of &apos;To Do&apos; list&lt;/center&gt;&lt;/html&gt;"/>
+            <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+              <Connection code="&quot;&lt;html&gt;&lt;center&gt;Cancel&lt;/center&gt;&lt;center&gt;selected task&lt;/center&gt;&lt;center&gt;from &apos;to do&apos; list&lt;/center&gt;&lt;/html&gt;&quot;" type="code"/>
+            </Property>
           </Properties>
         </Component>
         <Component class="javax.swing.JButton" name="btnCloseView">

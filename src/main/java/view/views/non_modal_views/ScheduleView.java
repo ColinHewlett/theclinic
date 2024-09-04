@@ -65,6 +65,8 @@ import static java.awt.print.Printable.NO_SUCH_PAGE;
 import static java.awt.print.Printable.PAGE_EXISTS;
 import java.awt.print.PrinterException;
 import java.awt.Frame;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyVetoException;
 import java.io.BufferedReader;
@@ -1529,10 +1531,27 @@ public class ScheduleView extends View
         datePickerButton.setText("");
         datePickerButton.setIcon(icon);
         
+        //configureScheduleListView(0);
+        
+        
+        
         refreshAppointmentTableWithCurrentlySelectedDate();
+        /*
+        // Add a component listener to adjust column widths after it is displayed
+        this.tblAppointments.addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                adjustColumnWidthsAndViewPosition(tblAppointments);
+            }
+        });*/
     }
     
-    
+    private void adjustColumnWidthsAndViewPosition(JTable table){
+        javax.swing.SwingUtilities.invokeLater(() -> {
+            ViewController.setRelativeColumnWidths(table, new double[]{0.1,0.2,0.05,0.05,0.15,0.45});
+            ViewController.centerInternalFrame(getDesktopView().getDeskTop(), this);
+        });
+    }
     
     private void doCreateAppointmentAction() {  
         ScheduleListTableModel model = (ScheduleListTableModel)tblAppointments.getModel();
@@ -2208,7 +2227,25 @@ public class ScheduleView extends View
         tableHeader.setBackground(new Color(220,220,220));
         tableHeader.setOpaque(true); 
         ViewController.setJTableColumnProperties(tblAppointments, scrAppointmentsForDayTable.getPreferredSize().width, 10,20,5,5,15,45);
+        //ViewController.setRelativeColumnWidths(tblAppointments, new double[]{0.1,0.2,0.05,0.05,0.15,0.45});
         populateScheduleListView();
+    }
+    
+    private void configureScheduleListView(int test){
+        tblAppointments = new JTable(new ScheduleListTableModel());
+        scrAppointmentsForDayTable.setViewportView(tblAppointments);
+        ScheduleListTableModel model = (ScheduleListTableModel)tblAppointments.getModel();
+        model.addTableModelListener(this);
+        setAppointmentTableListener();
+        
+        this.tblAppointments.setDefaultRenderer(Duration.class, new AppointmentsTableDurationRenderer());
+        this.tblAppointments.setDefaultRenderer(LocalDateTime.class, new AppointmentsListTableLocalDateTimeRenderer());
+        this.tblAppointments.setDefaultRenderer(Patient.class, new AppointmentsListTablePatientRenderer());
+        JTableHeader tableHeader = this.tblAppointments.getTableHeader();
+        tableHeader.setBackground(new Color(220,220,220));
+        tableHeader.setOpaque(true); 
+        //ViewController.setJTableColumnProperties(tblAppointments, scrAppointmentsForDayTable.getPreferredSize().width, 10,20,5,5,15,45);
+        //populateScheduleListView();
     }
     
     private void configureScheduleDiaryView(){
@@ -2224,6 +2261,7 @@ public class ScheduleView extends View
         tableHeader.setBackground(new Color(220,220,220));
         tableHeader.setOpaque(true); 
         ViewController.setJTableColumnProperties(tblAppointments, scrAppointmentsForDayTable.getPreferredSize().width, 10,40,50);
+        //ViewController.setRelativeColumnWidths(tblAppointments, new double[]{0.1,0.4,0.5});
         populateScheduleDiaryView();
     }
     

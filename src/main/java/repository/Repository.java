@@ -459,6 +459,9 @@ public class Repository implements IStoreActions {
                 case SURGERY_DAYS_ASSIGNMENT:
                     result = doPMSSQLforSurgeryDaysAssignment(pmsSQL, (Entity)client);
                     break;
+                case TO_DO:
+                    result = doPMSSQLforToDo(pmsSQL, (Entity)client);
+                    break;
                 case TREATMENT:
                     result = doPMSSQLforTreatment(pmsSQL, (Entity)client);
                     break;
@@ -2211,14 +2214,35 @@ public class Repository implements IStoreActions {
         ToDo result = null;
         ToDo toDo = null;
         ArrayList<ToDo> collection = new ArrayList<>();
-        //ToDoDelegate delegate = new ToDoDelegate(patientToDo);
-        //delegate.set(null);
-        Patient patient = new Patient(0);
         try{
             switch (theToDo.getScope()){
                 case SINGLE:
-                    if (!rs.wasNull()){
-                        rs.next();
+                    if (rs.next()){ //the scope expects a single row reurn (if any)
+                        if(!rs.wasNull()){
+                            int pid = rs.getInt("pid");
+                            int userKey = rs.getInt("userKey");
+                            LocalDate toDoDate = rs.getObject("toDoDate", LocalDate.class);
+                            String toDoDescription = rs.getString("toDoDescription");
+                            Boolean isActioned = rs.getBoolean("isActioned");
+                            Boolean isDeleted = rs.getBoolean("isDeleted");
+                            Boolean isCancelled = rs.getBoolean("isCancelled");
+                            toDo = new ToDo();
+                            toDo.setKey(pid);
+                            User user = new User(userKey);
+                            toDo.setUser(user);
+                            toDo.setDate(toDoDate);
+                            toDo.setDescription(toDoDescription);
+                            toDo.setIsActioned(isActioned);
+                            toDo.setIsCancelled(isCancelled);
+                            toDo.setIsDeleted(isDeleted);
+                            result = toDo;
+                        }
+                    }
+                    result = toDo;
+                    break;
+                default: //the scope expects one or more rows returned (if any)
+                    while(rs.next()){
+                        toDo = new ToDo();
                         int pid = rs.getInt("pid");
                         int userKey = rs.getInt("userKey");
                         LocalDate toDoDate = rs.getObject("toDoDate", LocalDate.class);
@@ -2226,7 +2250,6 @@ public class Repository implements IStoreActions {
                         Boolean isActioned = rs.getBoolean("isActioned");
                         Boolean isDeleted = rs.getBoolean("isDeleted");
                         Boolean isCancelled = rs.getBoolean("isCancelled");
-                        toDo = new ToDo();
                         toDo.setKey(pid);
                         User user = new User(userKey);
                         toDo.setUser(user);
@@ -2235,32 +2258,9 @@ public class Repository implements IStoreActions {
                         toDo.setIsActioned(isActioned);
                         toDo.setIsCancelled(isCancelled);
                         toDo.setIsDeleted(isDeleted);
-                        result = toDo;
+                        collection.add(toDo);
                     }
-                    break;
-                default:
-                    if (!rs.wasNull()){
-                        while (rs.next()){
-                           toDo = new ToDo();
-                           int pid = rs.getInt("pid");
-                           int userKey = rs.getInt("userKey");
-                           LocalDate toDoDate = rs.getObject("toDoDate", LocalDate.class);
-                           String toDoDescription = rs.getString("toDoDescription");
-                           Boolean isActioned = rs.getBoolean("isActioned");
-                           Boolean isDeleted = rs.getBoolean("isDeleted");
-                           Boolean isCancelled = rs.getBoolean("isCancelled");
-                           toDo.setKey(pid);
-                           User user = new User(userKey);
-                           toDo.setUser(user);
-                           toDo.setDate(toDoDate);
-                           toDo.setDescription(toDoDescription);
-                           toDo.setIsActioned(isActioned);
-                           toDo.setIsCancelled(isCancelled);
-                           toDo.setIsDeleted(isDeleted);
-                           collection.add(toDo);
-                        }
-                        toDo.set(collection);
-                    }
+                    if (toDo!=null)toDo.set(collection);
                     result = toDo;
                     break;
             }
@@ -3228,6 +3228,9 @@ public class Repository implements IStoreActions {
             case SURGERY_DAYS_ASSIGNMENT:
                 result = get((SurgeryDaysAssignment)entity,rs);
                 break;
+            case TO_DO:
+                result = get((ToDo)entity,rs);
+                break;
             case TREATMENT:
                 result = get((Treatment)entity,rs);
                 break;
@@ -3260,6 +3263,7 @@ public class Repository implements IStoreActions {
         else if(entity.getIsQuestion()) result = EntityType.QUESTION;
         else if(entity.getIsSecondaryCondition()) result = EntityType.SECONDARY_CONDITION;
         else if(entity.getIsSurgeryDaysAssignment()) result = EntityType.SURGERY_DAYS_ASSIGNMENT;
+        else if(entity.getIsToDo()) result = EntityType.TO_DO;
         else if(entity.getIsTreatment()) result = EntityType.TREATMENT;
         else if(entity.getIsTreatmentCost()) result = EntityType.TREATMENT_COST;
         else if(entity.getIsUser()) result = EntityType.USER;
@@ -4647,17 +4651,19 @@ public class Repository implements IStoreActions {
             case READ_ALL_TO_DO:
                 sql = "SELECT * "
                         + "FROM ToDo "
-                        + "AND isDeleted = false "
-                        + "isCancelled = false "
+                        + "WHERE isDeleted = false "
+                        + "AND isCancelled = false "
                         + "ORDER BY pid ASC;";
+                result = doReadAll(sql,(ToDo)entity);
                 break;
             case READ_UNACTIONED_TO_DO:
                 sql = "SELECT * "
                         + "FROM ToDo "
                         + "WHERE isActioned = false "
                         + "AND isDeleted = false "
-                        + "isCancelled = false "
+                        + "AND isCancelled = false "
                         + "ORDER BY pid ASC;";
+                result = doReadAll(sql,(ToDo)entity);
                 break;
             case READ_TO_DO_NEXT_HIGHEST_KEY:
                 sql = "SELECT MAX(pid) as highest_key "
@@ -4668,7 +4674,7 @@ public class Repository implements IStoreActions {
                 sql = "UPDATE ToDo "
                         + "SET toDoDate = ?, "
                         + "toDoDescription = ?, "
-                        + "isActioned = ? "
+                        + "isActioned = ?, "
                         + "isCancelled = ?, "
                         + "isDeleted = ? "
                         + "WHERE pid = ?";
@@ -8660,8 +8666,8 @@ public class Repository implements IStoreActions {
                     preparedStatement.setDate(1, java.sql.Date.valueOf(toDo.getDate()));
                     preparedStatement.setString(2, toDo.getDescription());
                     preparedStatement.setBoolean(3, toDo.getIsActioned());
-                    preparedStatement.setBoolean(4, toDo.getIsActioned());
-                    preparedStatement.setBoolean(5, toDo.getIsCancelled());
+                    preparedStatement.setBoolean(4, toDo.getIsCancelled());
+                    preparedStatement.setBoolean(5, toDo.getIsDeleted());
                     preparedStatement.setLong(6, toDo.getKey());
                     preparedStatement.executeUpdate();
                 } catch (SQLException ex) {
@@ -8762,7 +8768,11 @@ public class Repository implements IStoreActions {
                         StoreException.ExceptionType.UNEXPECTED_DATA_TYPE_ENCOUNTERED);
                 }
                 break;
-            }       
+            }  
+            case UNACTIONED:
+                entity = (Entity)runSQL(Repository.EntityType.TO_DO,
+                            Repository.PMSSQL.READ_UNACTIONED_TO_DO, toDo);
+                break;
             case ALL:
                 entity = (Entity)runSQL(Repository.EntityType.TO_DO,
                             Repository.PMSSQL.READ_ALL_TO_DO, toDo);
@@ -8785,13 +8795,14 @@ public class Repository implements IStoreActions {
                         + "in method Repository::read(ToDo)\n",
                     StoreException.ExceptionType.UNEXPECTED_DATA_TYPE_ENCOUNTERED); 
             }
-        }else{
+        }else{ return null;
+            /*
             String message = "";
             throw new StoreException(
                 message + "StoreException raised -> null value returned from persistent store "
                     + "in method Repository::read(ToDo)" 
                         + toDo.getScope().toString() + "])\n",
-                StoreException.ExceptionType.UNEXPECTED_DATA_TYPE_ENCOUNTERED);
+                StoreException.ExceptionType.UNEXPECTED_DATA_TYPE_ENCOUNTERED);*/
         }
     }
     

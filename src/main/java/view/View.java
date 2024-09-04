@@ -297,18 +297,21 @@ public class View extends JInternalFrame
     //public abstract void startModal();
     
     protected final View makeView(View view){
-        view.getMyController().setView(view);
-        view.getMyController().getView().initialiseView();
-        view.getMyController().centreViewOnDesktop(view.getDesktopView(), view.getMyController().getView());
-        view.getDesktopView().getDeskTop().add(view.getMyController().getView());
-        view.toFront();
-        
-        try{
-            view.setSelected(true);
-        }catch(PropertyVetoException ex){
-            
-        }
+        //javax.swing.SwingUtilities.invokeLater(() -> {
+            view.getMyController().setView(view);
+            view.getMyController().getView().initialiseView();
+            ViewController.centerInternalFrame(view.getDesktopView().getDeskTop(), view);
+            //view.getMyController().centreViewOnDesktop(view.getDesktopView(), view.getMyController().getView());
+            view.getDesktopView().getDeskTop().add(view.getMyController().getView());
+            view.toFront();
 
+            try{
+                view.setSelected(true);
+            }catch(PropertyVetoException ex){
+
+            }
+            
+        //});
         return view;
     }
     
@@ -316,7 +319,8 @@ public class View extends JInternalFrame
         view.getMyController().setModalView(view);
         view.setLayer(JLayeredPane.MODAL_LAYER);
         view.getMyController().getModalView().initialiseView();
-        view.getMyController().centreViewOnDesktop(view.getDesktopView(), view.getMyController().getModalView());
+        ViewController.centerInternalFrame(view.getDesktopView().getDeskTop(), view.getMyController().getModalView());
+        //view.getMyController().centreViewOnDesktop(view.getDesktopView(), view.getMyController().getModalView());
         view.getDesktopView().getDeskTop().add(view.getMyController().getModalView());
         view.toFront();
         startModal(view);

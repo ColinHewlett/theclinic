@@ -10,6 +10,7 @@ import static controller.ViewController.DesktopViewControllerActionEvent.VIEW_CO
 import static controller.ViewController.displayErrorMessage;
 import model.entity.*;
 import model.non_entity.Credential;
+import model.non_entity.JarFileFinder;
 import controller.exceptions.TemplateReaderException;
 import repository.Repository;
 import model.non_entity.SystemDefinition;
@@ -258,6 +259,53 @@ public class DesktopViewController extends ViewController{
                     displayErrorMessage("Raised in doActionEventForMwedicalConditionViewController"
                             + "(case VIEW_CONTROLLER_CLOSE_NOTIFICATION)\n"
                             + message,
+                            "Desktop view controller error",
+                            JOptionPane.WARNING_MESSAGE);
+                }
+            }   
+        }
+    }
+    
+    private void doActionEventForToDoViewController(ActionEvent e){
+        String message = null;
+        ToDoViewController tdvc = (ToDoViewController)e.getSource();
+        ViewController.DesktopViewControllerActionEvent actionCommand =
+                    ViewController.DesktopViewControllerActionEvent.valueOf(e.getActionCommand());
+        switch(actionCommand){
+            case VIEW_CONTROLLER_CHANGED_NOTIFICATION:
+                firePropertyChangeEvent(
+                        ViewController.DesktopViewControllerPropertyChangeEvent.
+                                DESKTOP_VIEW_CHANGED_NOTIFICATION.toString(),
+                        getDesktopView(),
+                        this,
+                        null,
+                        null
+                );
+                break;
+            case VIEW_CONTROLLER_CLOSE_NOTIFICATION:{
+                switch (this.toDoViewControllers.size()){
+                    case 0:
+                        message = "No ToDo view controllers found in "
+                                                    + "DesktopViewController collection.";
+                        break;
+                    case 1:
+                        if (tdvc.equals(this.toDoViewControllers.get(0))){
+                            this.toDoViewControllers.remove(0);
+                        }
+                        else{
+                            message = "Could not find ToDo view controller in "
+                                                    + "DesktopViewController collection.";
+                        }
+                        break;
+                    default:
+                        message = "More than one ToDo view controller found in "
+                                                    + "DesktopViewController collection.";
+                        break;
+                }
+                if (message!=null){
+                    message = message + "\n"
+                            + "Raised in doActionEventForToDoViewController(case VIEW_CONTROLLER_CLOSE_NOTIFICATION)";
+                    displayErrorMessage(message,
                             "Desktop view controller error",
                             JOptionPane.WARNING_MESSAGE);
                 }
@@ -2283,6 +2331,9 @@ public class DesktopViewController extends ViewController{
                 case "DesktopView":
                     doActionEventForDesktopView(e);
                      break;
+                case "ToDoViewController":
+                    doActionEventForToDoViewController(e);
+                    break;
                 case "ScheduleViewController":
                     doActionEventForScheduleViewController(e);
                     break;
@@ -2322,6 +2373,8 @@ public class DesktopViewController extends ViewController{
         boolean isExceptionRaised = false;
         isDataMigrationOptionEnabled = false;
         
+        System.out.println(JarFileFinder.getPath());
+        System.out.println(JarFileFinder.getName());
         try{
             //System.out.println(args.length);
             String xmlFileName = System.getenv("PMS_SYSTEM_DEFINITION");

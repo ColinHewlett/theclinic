@@ -9,6 +9,8 @@ import view.View;
 import model.entity.Notification;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeListener;
@@ -31,6 +33,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import model.non_entity.SystemDefinition;
 import view.views.view_support_classes.models.PatientNotificationViewTableModel;
+import view.views.view_support_classes.renderers.PatientNotificationTableLocalDateRenderer;
 
 
 /**
@@ -39,6 +42,7 @@ import view.views.view_support_classes.models.PatientNotificationViewTableModel;
  */
 public class PatientNotificationView extends View implements ActionListener,
                                                              TableModelListener,
+                                                             ListSelectionListener,
                                                              PropertyChangeListener{
 
     enum Action{
@@ -133,6 +137,27 @@ public class PatientNotificationView extends View implements ActionListener,
         }
     }
     
+    @Override
+    public void valueChanged(ListSelectionEvent e){
+        if (e.getValueIsAdjusting()) return;
+            ListSelectionModel lsm = (ListSelectionModel)e.getSource();
+            if (!lsm.isSelectionEmpty()) {
+                this.btnEditSelectedNotification.setEnabled(true);
+                this.btnCancelSelectedNotification.setEnabled(true);
+                this.btnAddNewNotification.setEnabled(false);
+                int selectedRow = this.tblNotifications.getSelectedRow();
+                PatientNotificationViewTableModel model = 
+                        (PatientNotificationViewTableModel)tblNotifications.getModel();
+                Notification notification = model.getElementAt(selectedRow);
+                getMyController().getDescriptor().getViewDescription()
+                        .setPatientNotification(notification);
+            }else{
+                this.btnEditSelectedNotification.setEnabled(false);
+                this.btnCancelSelectedNotification.setEnabled(false);
+                this.btnAddNewNotification.setEnabled(true);
+            }
+    }
+    
     private final String UI_UNACTIONED_NOTIFICATIONS_TITLE = "Outstanding patient notifications";
     private final String UI_ALL_NOTIFICATIONS_TITLE = "All patient notifications";
     public void initialiseView(){
@@ -185,14 +210,35 @@ public class PatientNotificationView extends View implements ActionListener,
         this.btnCancelSelectedNotification.addActionListener(this);
         this.btnCloseView.setActionCommand(Action.REQUEST_CLOSE_VIEW.toString());
         this.btnCloseView.addActionListener(this);
+        
         addInternalFrameListeners();
         createNotificationTable();
         setNotificationTableListener();
+        
+        this.btnAddNewNotification.setEnabled(true);
+        this.btnCloseView.setEnabled(true);
+        this.btnEditSelectedNotification.setEnabled(false);
+        this.btnCancelSelectedNotification.setEnabled(false);
+        // Add a component listener to adjust column widths after it is displayed
+        tblNotifications.addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                adjustColumnWidthsAndViewPosition(tblNotifications);
+            }
+        });
+        
         ActionEvent actionEvent = new ActionEvent(
             this,ActionEvent.ACTION_PERFORMED,
             ViewController.NotificationViewControllerActionEvent.UNACTIONED_NOTIFICATIONS_REQUEST.toString());
         this.getMyController().actionPerformed(actionEvent);
         
+    }
+    
+    private void adjustColumnWidthsAndViewPosition(JTable table){
+        javax.swing.SwingUtilities.invokeLater(() -> {
+            ViewController.setRelativeColumnWidths(table, 794, new double[]{0.1,0.1,0.25,0.55});
+            ViewController.centerInternalFrame(getDesktopView().getDeskTop(), this);
+        });
     }
     
     private boolean tableValueChangedListenerActivated = false;
@@ -358,14 +404,18 @@ public class PatientNotificationView extends View implements ActionListener,
         this.tblNotifications = new JTable(new PatientNotificationViewTableModel());
         PatientNotificationViewTableModel model = (PatientNotificationViewTableModel)tblNotifications.getModel();
         model.addTableModelListener(this);
-        setNotificationTableDefaultRenderer(this.tblNotifications.getDefaultRenderer(LocalDate.class));
+        this.tblNotifications.setDefaultRenderer(LocalDate.class,new PatientNotificationTableLocalDateRenderer());
         
         scrNotificationTable.setViewportView(this.tblNotifications);
+        ViewController.setRelativeColumnWidths(tblNotifications,794, new double[]{0.1,0.1,0.25,0.55});
+        /*
         ViewController.setJTableColumnProperties(tblNotifications, 
                 scrNotificationTable.getPreferredSize().width, 
                 25,10,15,50);
+        */
         this.tblNotifications.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        //this.tblNotifications.setAutoCreateRowSorter(false);
+        ListSelectionModel lsm = this.tblNotifications.getSelectionModel();
+        lsm.addListSelectionListener(this);
     }
     
     private TableCellRenderer patientNotificationTableDefaultRenderer = null;

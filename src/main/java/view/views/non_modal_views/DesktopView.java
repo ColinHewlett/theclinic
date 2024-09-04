@@ -87,6 +87,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import javax.swing.JButton;
+import model.non_entity.JarFileFinder;
 import model.non_entity.SystemDefinition;
 
 /**
@@ -133,9 +134,9 @@ public class DesktopView extends javax.swing.JFrame
         
     private final String SETTINGS_MENU_TITLE = "Settings";
         private final String ADD_NEW_USER_TITLE = "Add new user";
-        private final String CHANGE_USER_PASSWORD_TITLE = "Change user password";
+        private final String CHANGE_USER_PASSWORD_TITLE = "Change login password";
         private final String PRINT_BLANK_MEDICAL_HISTORY_REQUEST_TITLE = "Print new patient medical history questionnaire";
-        private final String MEDICAL_CONDITION_REQUEST_TITLE = "Medical history conditions editor";
+        private final String MEDICAL_CONDITION_REQUEST_TITLE = "Medical history editor";
         private final String TREATMENTS_REQUEST_TITLE = "Treatments editor";
         private final String COLOUR_PICKER_OPTIONS_TITLE = "Colour picker options";
         private final String CASCADE_VIEWS_REQUEST_TITLE = "Cascade views";
@@ -179,6 +180,7 @@ public class DesktopView extends javax.swing.JFrame
         private JMenuItem mniMedicalConditionViewRequest = null;
         private JMenuItem mniTreatmentsViewRequest = null;
         private JMenuItem mniColorPickerOptionsViewRequest = null;
+        private JMenuItem mniPMSVersion = null;
         private JMenuItem mniCascadeViewsRequest = null;
         
     private JMenu mnuPrintedForms = null; 
@@ -250,6 +252,7 @@ public class DesktopView extends javax.swing.JFrame
         mniMedicalConditionViewRequest = new JMenuItem(MEDICAL_CONDITION_REQUEST_TITLE);
         mniTreatmentsViewRequest = new JMenuItem(TREATMENTS_REQUEST_TITLE);
         mniColorPickerOptionsViewRequest = new JMenuItem(COLOUR_PICKER_OPTIONS_TITLE);
+        mniPMSVersion = new JMenuItem(JarFileFinder.getName());
         mniCascadeViewsRequest = new JMenuItem(CASCADE_VIEWS_REQUEST_TITLE);
         mnuSettings.add(mniPrintBlankMedicalHistoryRequest);
         mnuSettings.add(new JSeparator());
@@ -260,8 +263,9 @@ public class DesktopView extends javax.swing.JFrame
         mnuSettings.add(mniChangeUserPasswordRequest);
         mnuSettings.add(new JSeparator());
         mnuSettings.add(mniColorPickerOptionsViewRequest);
-        mnuSettings.add(new JSeparator());
         mnuSettings.add(mniCascadeViewsRequest);
+        mnuSettings.add(new JSeparator());
+        mnuSettings.add(mniPMSVersion);
         mniPrintBlankMedicalHistoryRequest.setActionCommand(Action.REQUEST_PRINT_NEW_PATIENT_DETAILS_VIEW.toString());
         mniMedicalConditionViewRequest.setActionCommand(Action.REQUEST_MEDICAL_CONDITION_VIEW.toString());
         mniTreatmentsViewRequest.setActionCommand(Action.REQUEST_TREATMENT_VIEW.toString());

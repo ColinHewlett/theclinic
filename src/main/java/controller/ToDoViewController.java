@@ -121,7 +121,7 @@ public class ToDoViewController extends ViewController{
                            this,ActionEvent.ACTION_PERFORMED,
                            ViewController.DesktopViewControllerActionEvent.
                                    VIEW_CONTROLLER_CLOSE_NOTIFICATION.toString());
-                    this.getMyController().actionPerformed(actionEvent);
+                    ToDoViewController.this.getMyController().actionPerformed(actionEvent);
                     break;
                 case UNACTIONED_TO_DO_REQUEST:
                     doUnactionedToDosRequest();
@@ -332,7 +332,7 @@ public class ToDoViewController extends ViewController{
                         doNotificationsForPatientRequest();
                         break;*/
                     case TO_DO_EDITOR_CREATE_TO_DO_REQUEST:
-                        doToDoEditorCreateNotificationRequest();
+                        doToDoEditorCreateToDoRequest();
                         break;
                     case TO_DO_EDITOR_UPDATE_TO_DO_REQUEST:
                         doNotificationEditorUpdateNotificationRequest();
@@ -354,7 +354,7 @@ public class ToDoViewController extends ViewController{
         }
     }
 
-    private void doToDoEditorCreateNotificationRequest()throws StoreException{
+    private void doToDoEditorCreateToDoRequest()throws StoreException{
         ToDo toDo = 
                 getDescriptor().getViewDescription().getToDo();
         if (toDo!=null){
@@ -390,24 +390,23 @@ public class ToDoViewController extends ViewController{
     }
     
     private void sendPrimaryViewToDos(ToDo.Scope scope)throws StoreException{
-        /*
-        Notification patientNotification = new Notification();
-        patientNotification.setScope(scope);
-        patientNotification.read();
-        getDescriptor().getControllerDescription().setToDos(patientNotification.get());
+        ToDo toDo = new ToDo();
+        toDo.setScope(scope);
+        toDo.read();
+        getDescriptor().getControllerDescription().setToDos(toDo.get());
         String pcEventName;
-        if(scope.equals(Notification.Scope.UNACTIONED)) pcEventName = 
-                NotificationViewControllerPropertyChangeEvent.
-                        RECEIVED_UNACTIONED_TO_DOS.toString();
-        else pcEventName = NotificationViewControllerPropertyChangeEvent.
-                RECEIVED_PATIENT_TO_DOS.toString();       
+        if(scope.equals(ToDo.Scope.UNACTIONED)) pcEventName = 
+                ToDoViewControllerPropertyChangeEvent.
+                        RECEIVED_UNACTIONED_TO_DOs.toString();
+        else pcEventName = ToDoViewControllerPropertyChangeEvent.
+                RECEIVED_TO_DOs.toString();       
         firePropertyChangeEvent(
                 pcEventName,
                 getView(),
                 this,
                 null,
                 null
-        ); */
+        ); 
     }
     
     private void closeSecondaryView(){

@@ -360,10 +360,25 @@ public class PatientView extends View
         setPatientSelectionMode(PatientSelectionMode.PATIENT_SELECTION);
         populatePatientSelector(cmbPatientSelector);
         
+        // Add a component listener to adjust column widths after it is displayed
+        this.tblAppointmentHistory.addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                adjustColumnWidthsAndViewPosition(tblAppointmentHistory);
+            }
+        });
+        
         ActionEvent actionEvent = new ActionEvent(
                 this,ActionEvent.ACTION_PERFORMED,
                 ViewController.PatientViewControllerActionEvent.NULL_PATIENT_REQUEST.toString());
         this.getMyController().actionPerformed(actionEvent);
+    }
+    
+    private void adjustColumnWidthsAndViewPosition(JTable table){
+        javax.swing.SwingUtilities.invokeLater(() -> {
+            ViewController.setRelativeColumnWidths(table, new double[]{0.07,0.1,0.15,0.68});
+            ViewController.centerInternalFrame(getDesktopView().getDeskTop(), this);
+        });
     }
     
     class DOBDatePickerDateChangeListener implements DateChangeListener {

@@ -69,24 +69,6 @@ public class ToDo extends Entity implements IEntityStoreActions{
         return isActioned;
     }
     
-    private Boolean isCancelled = null;
-    public void setIsCancelled(Boolean value){
-        isCancelled = value;
-    }
-    public Boolean getIsCancelled(){
-        
-        return isCancelled;
-    }
-    
-    private Boolean isDeleted = null;
-    public void setIsDeleted(Boolean value){
-        if (isDeleted == null)isDeleted = false;
-        isDeleted = value;
-    }
-    public Boolean getIsDeleted(){
-        return isDeleted;
-    }
-    
     public void cancel() throws StoreException{
         new Repository().cancel(this);
     }
@@ -154,12 +136,15 @@ public class ToDo extends Entity implements IEntityStoreActions{
     public ToDo read() throws StoreException{
         Iterator it;
         ToDo result = null; 
+        result = new Repository().read(this);
         switch (getScope()){
             case SINGLE:
-                result = new Repository().read(this);
                 break;
             default:
-                set(new Repository().read(this).get());
+                if (result!=null) 
+                    set(result.get());
+                else 
+                    set(new ArrayList<>());
                 result = this;
         }
         return result;
