@@ -770,6 +770,8 @@ public class Repository implements IStoreActions {
     private void doDeleteCancelChildEntity(String sql, Entity entity)throws StoreException{
         Entity delegate = null;
         try(PreparedStatement preparedStatement = getPMSStoreConnection().prepareStatement(sql);){
+            preparedStatement.setInt(1,entity.getKey());
+            /*
             if (entity.getIsAppointment()){
                 Appointment appointment = (Appointment)entity;
                 //delegate = (AppointmentDelegate)entity;
@@ -778,8 +780,8 @@ public class Repository implements IStoreActions {
             }else if (entity.getIsPatientNotification()){
                 delegate = (NotificationDelegate)entity;
                 preparedStatement.setInt(1, ((NotificationDelegate)delegate).getKey());
-            }
-            //preparedStatement.setInt(1, ((AppointmentDelegate)delegate).getAppointmentKey());
+            }else
+            //preparedStatement.setInt(1, ((AppointmentDelegate)delegate).getAppointmentKey());*/
             preparedStatement.executeUpdate();
         }catch (SQLException ex){
                 throw new StoreException("SQLException message -> " + ex.getMessage() + "\n"
