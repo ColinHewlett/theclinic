@@ -15,11 +15,11 @@ import model.non_entity.SystemDefinition.ScheduleSlotType;
 import model.non_entity.SystemDefinition.ScheduleViewActionCaption;
 import view.views.view_support_classes.renderers.AppointmentsTableDurationRenderer;
 import view.views.view_support_classes.renderers.AppointmentsListTableLocalDateTimeRenderer;
-import view.views.view_support_classes.renderers.AppointmentsDiaryTablePatientRenderer;
+import view.views.view_support_classes.renderers.ScheduleDiaryTablePatientRenderer;
 import view.views.view_support_classes.renderers.AppointmentsListTablePatientRenderer;
-import view.views.view_support_classes.renderers.AppointmentsDiaryTableLocalDateTimeRenderer;
+import view.views.view_support_classes.renderers.ScheduleDiaryTableLocalDateTimeRenderer;
 import view.views.view_support_classes.renderers.ScheduleTableCellRenderer;
-import view.views.view_support_classes.renderers.AppointmentsDiaryTableStringRenderer;
+import view.views.view_support_classes.renderers.ScheduleDiaryTableStringRenderer;
 import view.views.dialogs.CustomComboBoxDialog;
 import view.views.dialogs.CustomComboBoxInternalDialog;
 /*28/03/2024import view.views.view_support_classes.renderers.AppointmentsTablePatientNoteRenderer;*/
@@ -2254,9 +2254,9 @@ public class ScheduleView extends View
         ScheduleDiaryTableModel model = (ScheduleDiaryTableModel)tblAppointments.getModel();
         model.addTableModelListener(this);
         setAppointmentTableListener();
-        this.tblAppointments.setDefaultRenderer(LocalDateTime.class, new AppointmentsDiaryTableLocalDateTimeRenderer());
-        this.tblAppointments.setDefaultRenderer(Patient.class, new AppointmentsDiaryTablePatientRenderer());
-        tblAppointments.getColumnModel().getColumn(2).setCellRenderer(new AppointmentsDiaryTableStringRenderer());
+        this.tblAppointments.setDefaultRenderer(LocalDateTime.class, new ScheduleDiaryTableLocalDateTimeRenderer());
+        this.tblAppointments.setDefaultRenderer(Patient.class, new ScheduleDiaryTablePatientRenderer());
+        tblAppointments.getColumnModel().getColumn(2).setCellRenderer(new ScheduleDiaryTableStringRenderer());
         JTableHeader tableHeader = this.tblAppointments.getTableHeader();
         tableHeader.setBackground(new Color(220,220,220));
         tableHeader.setOpaque(true); 

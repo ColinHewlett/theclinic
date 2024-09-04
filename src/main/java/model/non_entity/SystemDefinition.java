@@ -40,6 +40,27 @@ public class SystemDefinition {
     private static String pmsStorePostgresSQL = null;
     private static String pmsStoreType = null;
     
+    public static Color UNBOOKABLE_HEADER_SLOT_FOREGROUND = new Color(255,255,255);
+    public static Color UNBOOKABLE_HEADER_SLOT_BACKGROUND = new Color(0,0,0);
+    public static Color UNBOOKABLE_BLOCK_SLOT_FOREGROUND = new Color(255,255,255);
+    public static Color UNBOOKABLE_BLOCK_SLOT_BACKGROUND = new Color(0,0,0);
+    
+    public static Color EMERGENCY_HEADER_SLOT_FOREGROUND = new Color(255,255,255);
+    public static Color EMERGENCY_HEADER_SLOT_BACKGROUND = new Color(255,0,0);
+    public static Color EMERGENCY_BLOCK_SLOT_FOREGROUND = new Color(255,255,255);
+    public static Color EMERGENCY_BLOCK_SLOT_BACKGROUND = new Color(255,0,0);
+    
+    public static Color BOOKED_HEADER_SLOT_FOREGROUND = new Color(0,0,0);
+    public static Color BOOKED_HEADER_SLOT_BACKGROUND = new Color(255,118,29);
+    public static Color BOOKED_BLOCK_SLOT_FOREGROUND = new Color(0,0,0);
+    public static Color BOOKED_BLOCK_SLOT_BACKGROUND = new Color(245,227,167);
+    
+    public static Color BOOKABLE_SLOT_FOREGROUND = new Color(0,0,0);
+    public static Color BOOKABLE_SLOT_BACKGROUND = new Color(240,240,240);
+    
+    public static Color BOOKABLE_BLOCK_SLOT_FOREGROUND = new Color(255,255,255);
+    public static Color BOOKABLE_BLOCK_SLOT_BACKGROUND = new Color(0,0,0);
+    
     public static Color BOOKABLE_SLOT_COLOR = new Color(240,240,240);
     //public static Color BOOKED_SLOT_HEADER_COLOR = new Color(245,247,208); /* need color picker up and rnning*/u
     public static Color BOOKED_SLOT_HEADER_COLOR = new Color(255,118,29);

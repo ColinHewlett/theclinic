@@ -21,12 +21,12 @@ import view.views.view_support_classes.models.ScheduleDiaryTableModel;
  *
  * @author colin
  */
-public class AppointmentsDiaryTableLocalDateTimeRenderer extends JLabel implements TableCellRenderer{
+public class ScheduleDiaryTableLocalDateTimeRenderer extends JLabel implements TableCellRenderer{
     private DateTimeFormatter timeOnlyFormat = DateTimeFormatter.ofPattern("HH:mm");
     private ScheduleDiaryTableModel model = null;
     private Slot slot = null;
     
-    public AppointmentsDiaryTableLocalDateTimeRenderer()
+    public ScheduleDiaryTableLocalDateTimeRenderer()
     {
         Font f = super.getFont();
          //plain
@@ -68,7 +68,6 @@ public class AppointmentsDiaryTableLocalDateTimeRenderer extends JLabel implemen
         }
         else if (slot.getAppointment().getPatient().toString().equals(SystemDefinition.ScheduleSlotType.UNBOOKABLE_SCHEDULE_SLOT.mark())){
             //super.setText(SystemDefinition.ScheduleSlotType.UNBOOKABLE_SCHEDULE_SLOT.mark());
-            //super.setHorizontalAlignment(JLabel.CENTER);
             setSlotMarker(SystemDefinition.ScheduleSlotType.UNBOOKABLE_SCHEDULE_SLOT);
         }
         else {
@@ -83,23 +82,35 @@ public class AppointmentsDiaryTableLocalDateTimeRenderer extends JLabel implemen
         }else {
             switch(getSlotMarker()){
                 case UNBOOKABLE_SCHEDULE_SLOT:
-                //case BOOKABLE_SCHEDULE_SLOT:
-                    setBackground(table.getBackground());
-                    setForeground(Color.BLUE);
+                    if (isThisSlotAppointmentHeader(slot)){
+                        setBackground(SystemDefinition.UNBOOKABLE_HEADER_SLOT_BACKGROUND);
+                        setForeground(SystemDefinition.UNBOOKABLE_HEADER_SLOT_FOREGROUND);
+                    }else {
+                        setBackground(SystemDefinition.UNBOOKABLE_BLOCK_SLOT_BACKGROUND);
+                        setForeground(SystemDefinition.UNBOOKABLE_BLOCK_SLOT_FOREGROUND);
+                    }
                     break;
                 case BOOKED_SCHEDULE_SLOT:
-                    setForeground(table.getForeground());
-                    if (slot.getStart().equals(slot.getAppointment().getStart()))
-                        setBackground(SystemDefinition.BOOKED_SLOT_HEADER_COLOR);
-                    else setBackground(SystemDefinition.BOOKED_SLOT_BLOCK_COLOR);
+                    if (isThisSlotAppointmentHeader(slot)){
+                        setBackground(SystemDefinition.BOOKED_HEADER_SLOT_BACKGROUND);
+                        setForeground(SystemDefinition.BOOKED_HEADER_SLOT_FOREGROUND);
+                    }else {
+                        setBackground(SystemDefinition.BOOKED_BLOCK_SLOT_BACKGROUND);
+                        setForeground(SystemDefinition.BOOKED_BLOCK_SLOT_FOREGROUND);
+                    }
                     break;
                 case EMERGENCY_SCHEDULE_SLOT:
-                    setBackground(table.getBackground());
-                    setForeground(Color.RED);
+                    if (isThisSlotAppointmentHeader(slot)){
+                        setBackground(SystemDefinition.EMERGENCY_HEADER_SLOT_BACKGROUND);
+                        setForeground(SystemDefinition.EMERGENCY_HEADER_SLOT_FOREGROUND);
+                    }else {
+                        setBackground(SystemDefinition.EMERGENCY_BLOCK_SLOT_BACKGROUND);
+                        setForeground(SystemDefinition.EMERGENCY_BLOCK_SLOT_FOREGROUND);
+                    }
                     break;
                 case BOOKABLE_SCHEDULE_SLOT:
-                    setBackground(SystemDefinition.BOOKABLE_SLOT_COLOR);
-                    setForeground(table.getForeground());
+                    setBackground(SystemDefinition.BOOKABLE_SLOT_BACKGROUND);
+                    setForeground(SystemDefinition.BOOKABLE_SLOT_FOREGROUND);;
                     break;
 
             }
@@ -107,5 +118,9 @@ public class AppointmentsDiaryTableLocalDateTimeRenderer extends JLabel implemen
         
         setOpaque(true);
         return this;
+    }
+    
+    private boolean isThisSlotAppointmentHeader(Slot slot){
+        return slot.getStart().equals(slot.getAppointment().getStart());
     }
 }

@@ -9,6 +9,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.JTable;
 import java.awt.Component;
 import java.awt.Font;
+import javax.swing.JLabel;
 import view.views.view_support_classes.models.ScheduleDiaryTableModel;
 import model.non_entity.Slot;
 import model.non_entity.SystemDefinition;
@@ -21,7 +22,7 @@ import static model.non_entity.SystemDefinition.ScheduleSlotType.UNBOOKABLE_SCHE
  *
  * @author colin
  */
-public class AppointmentsDiaryTableStringRenderer extends DefaultTableCellRenderer{
+public class ScheduleDiaryTableStringRenderer extends DefaultTableCellRenderer{
     private ScheduleDiaryTableModel model = null;
     private Slot slot = null;
     
@@ -36,24 +37,33 @@ public class AppointmentsDiaryTableStringRenderer extends DefaultTableCellRender
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
         Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-        
+        String treatment = null;
         model = (ScheduleDiaryTableModel)table.getModel();
         slot = model.getElementAt(row);
         
-        if (slot.getAppointment().getStart().equals(slot.getStart())){
+        if (isThisSlotAppointmentHeader(slot)){
             // Custom rendering logic for string values
             if (value instanceof String) {
-                String treatment = (String) value;
+                treatment = (String) value;
+                
                 c.setFont(c.getFont().deriveFont(Font.BOLD));
             }
         }
         
         if (slot.getAppointment().getIsEmergency()){ 
+            if (isThisSlotAppointmentHeader(slot)){
+                super.setText("EMERGENCY APPOINTMENT");
+                super.setFont(getFont().deriveFont(Font.BOLD));
+                super.setHorizontalAlignment(JLabel.CENTER);
+            }
             setSlotMarker(SystemDefinition.ScheduleSlotType.EMERGENCY_SCHEDULE_SLOT);
         }else if (slot.getAppointment().getPatient() == null) {
             setSlotMarker(SystemDefinition.ScheduleSlotType.BOOKABLE_SCHEDULE_SLOT);
         }
         else if (slot.getAppointment().getPatient().toString().equals(SystemDefinition.ScheduleSlotType.UNBOOKABLE_SCHEDULE_SLOT.mark())){
+            super.setText(SystemDefinition.ScheduleSlotType.UNBOOKABLE_SCHEDULE_SLOT.mark());
+            super.setFont(getFont().deriveFont(Font.BOLD));
+            super.setHorizontalAlignment(JLabel.CENTER);
             setSlotMarker(SystemDefinition.ScheduleSlotType.UNBOOKABLE_SCHEDULE_SLOT);
         }
         else {
@@ -66,8 +76,13 @@ public class AppointmentsDiaryTableStringRenderer extends DefaultTableCellRender
         }else {
             switch(getSlotMarker()){
                 case UNBOOKABLE_SCHEDULE_SLOT:
-                    setBackground(table.getBackground());
-                    setForeground(Color.BLUE);
+                    if (isThisSlotAppointmentHeader(slot)){
+                        setBackground(SystemDefinition.UNBOOKABLE_HEADER_SLOT_BACKGROUND);
+                        setForeground(SystemDefinition.UNBOOKABLE_HEADER_SLOT_FOREGROUND);
+                    }else {
+                        setBackground(SystemDefinition.UNBOOKABLE_BLOCK_SLOT_BACKGROUND);
+                        setForeground(SystemDefinition.UNBOOKABLE_BLOCK_SLOT_FOREGROUND);
+                    }
                     break;
                 case BOOKED_SCHEDULE_SLOT:
                     setForeground(table.getForeground());
@@ -76,8 +91,13 @@ public class AppointmentsDiaryTableStringRenderer extends DefaultTableCellRender
                     else setBackground(SystemDefinition.BOOKED_SLOT_BLOCK_COLOR);
                     break;
                 case EMERGENCY_SCHEDULE_SLOT:
-                    setBackground(table.getBackground());
-                    setForeground(Color.RED);
+                    if (isThisSlotAppointmentHeader(slot)){
+                        setBackground(SystemDefinition.EMERGENCY_HEADER_SLOT_BACKGROUND);
+                        setForeground(SystemDefinition.EMERGENCY_HEADER_SLOT_FOREGROUND);
+                    }else {
+                        setBackground(SystemDefinition.EMERGENCY_BLOCK_SLOT_BACKGROUND);
+                        setForeground(SystemDefinition.EMERGENCY_BLOCK_SLOT_FOREGROUND);
+                    }
                     break;
                 case BOOKABLE_SCHEDULE_SLOT:
                     setBackground(SystemDefinition.BOOKABLE_SLOT_COLOR);
@@ -87,5 +107,9 @@ public class AppointmentsDiaryTableStringRenderer extends DefaultTableCellRender
             }
         }
         return c;
+    }
+    
+    private boolean isThisSlotAppointmentHeader(Slot slot){
+        return slot.getStart().equals(slot.getAppointment().getStart());
     }
 }
