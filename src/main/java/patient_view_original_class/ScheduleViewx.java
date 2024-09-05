@@ -115,11 +115,11 @@ public class ScheduleViewx extends View
         unbookableSlotMode = value;
         switch (unbookableSlotMode){
             case MARK:
-                btnMarkCancelSlotUnbookable.setText(ScheduleViewActionCaption.MARK_CANCEL_UNBOOKABLE_SLOT._1());
+                btnMarkCancelSlotUnbookable.setText(ScheduleViewActionCaption.MARK_CANCEL_UNBOOKABLE_SLOT_OR_MOVE_TO_ANOTHER_DAY._1());
                 btnMarkCancelSlotUnbookable.setEnabled(true);
                 break;
             case CANCEL:
-                btnMarkCancelSlotUnbookable.setText(ScheduleViewActionCaption.MARK_CANCEL_UNBOOKABLE_SLOT._2());
+                btnMarkCancelSlotUnbookable.setText(ScheduleViewActionCaption.MARK_CANCEL_UNBOOKABLE_SLOT_OR_MOVE_TO_ANOTHER_DAY._2());
                 btnMarkCancelSlotUnbookable.setEnabled(true);
                 break;
             case NONE:
@@ -421,7 +421,7 @@ public class ScheduleViewx extends View
         
         btnCreateUpdateAppointment.setText(ScheduleViewActionCaption.CREATE_UPDATE_APPOINTMENT._1());
         //btnMakeDeleteEmergencyAppointment.setText(ScheduleViewActionCaption.MAKE_DELETE_EMERGENCY_APPOINTMENT._1());
-        btnMarkCancelSlotUnbookable.setText(ScheduleViewActionCaption.MARK_CANCEL_UNBOOKABLE_SLOT._1());
+        btnMarkCancelSlotUnbookable.setText(ScheduleViewActionCaption.MARK_CANCEL_UNBOOKABLE_SLOT_OR_MOVE_TO_ANOTHER_DAY._1());
         btnCancelSelectedAppointment.setText(ScheduleViewActionCaption.CANCEL_APPOINTMENT._1());
         btnClinicalNotesForSelectedAppointment.setText(ScheduleViewActionCaption.CLINICAL_NOTES._1());
         btnSelectTreatmentRequest.setText(ScheduleViewActionCaption.SELECT_TREATMENT._1());       

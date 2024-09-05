@@ -55,18 +55,33 @@ public class ScheduleDiaryTableStringRenderer extends DefaultTableCellRenderer{
                 super.setText("EMERGENCY APPOINTMENT");
                 super.setFont(getFont().deriveFont(Font.BOLD));
                 super.setHorizontalAlignment(JLabel.CENTER);
+            }else{
+                super.setText("----- '' -----");
+                super.setFont(getFont().deriveFont(Font.BOLD));
+                super.setHorizontalAlignment(JLabel.CENTER);
             }
             setSlotMarker(SystemDefinition.ScheduleSlotType.EMERGENCY_SCHEDULE_SLOT);
         }else if (slot.getAppointment().getPatient() == null) {
             setSlotMarker(SystemDefinition.ScheduleSlotType.BOOKABLE_SCHEDULE_SLOT);
         }
         else if (slot.getAppointment().getPatient().toString().equals(SystemDefinition.ScheduleSlotType.UNBOOKABLE_SCHEDULE_SLOT.mark())){
-            super.setText(SystemDefinition.ScheduleSlotType.UNBOOKABLE_SCHEDULE_SLOT.mark());
-            super.setFont(getFont().deriveFont(Font.BOLD));
-            super.setHorizontalAlignment(JLabel.CENTER);
+            if (isThisSlotAppointmentHeader(slot)){
+                super.setText(SystemDefinition.ScheduleSlotType.UNBOOKABLE_SCHEDULE_SLOT.mark());
+                super.setHorizontalAlignment(JLabel.CENTER);
+                super.setFont(getFont().deriveFont(Font.BOLD));
+            }else{
+                super.setText("----- '' -----");
+                super.setFont(getFont().deriveFont(Font.BOLD));
+                super.setHorizontalAlignment(JLabel.CENTER);
+            }
             setSlotMarker(SystemDefinition.ScheduleSlotType.UNBOOKABLE_SCHEDULE_SLOT);
         }
         else {
+            if (!isThisSlotAppointmentHeader(slot)){
+                super.setText("----- '' -----");
+                super.setFont(getFont().deriveFont(Font.BOLD));
+                super.setHorizontalAlignment(JLabel.CENTER);
+            }
             setSlotMarker(SystemDefinition.ScheduleSlotType.BOOKED_SCHEDULE_SLOT); 
         }
 

@@ -61,8 +61,12 @@ public class ScheduleDiaryTablePatientRenderer extends JLabel implements TableCe
             if (isThisSlotAppointmentHeader(slot)){
                 super.setText(slot.getAppointment().getPatient().toString());
                 super.setFont(getFont().deriveFont(Font.BOLD));
-                super.setHorizontalAlignment(JLabel.LEFT);
-            }else super.setText("");
+                super.setHorizontalAlignment(JLabel.CENTER);
+            }else {
+                super.setText("----- '' -----");
+                super.setFont(getFont().deriveFont(Font.BOLD));
+                super.setHorizontalAlignment(JLabel.CENTER);
+            }
             setSlotMarker(SystemDefinition.ScheduleSlotType.EMERGENCY_SCHEDULE_SLOT);
             
         }else if (slot.getAppointment().getPatient().toString().equals(SystemDefinition.ScheduleSlotType.UNBOOKABLE_SCHEDULE_SLOT.mark())){
@@ -70,6 +74,10 @@ public class ScheduleDiaryTablePatientRenderer extends JLabel implements TableCe
                 super.setText(SystemDefinition.ScheduleSlotType.UNBOOKABLE_SCHEDULE_SLOT.mark());
                 super.setHorizontalAlignment(JLabel.CENTER);
                 super.setFont(getFont().deriveFont(Font.BOLD));
+            }else{
+                super.setText("----- '' -----");
+                super.setFont(getFont().deriveFont(Font.BOLD));
+                super.setHorizontalAlignment(JLabel.CENTER);
             }
             setSlotMarker(SystemDefinition.ScheduleSlotType.UNBOOKABLE_SCHEDULE_SLOT);
         }
@@ -77,9 +85,13 @@ public class ScheduleDiaryTablePatientRenderer extends JLabel implements TableCe
             if (isThisSlotAppointmentHeader(slot)){
                 super.setText(slot.getAppointment().getPatient().toString());
                 super.setFont(super.getFont().deriveFont(Font.BOLD));
-                super.setHorizontalAlignment(JLabel.LEFT);
+                super.setHorizontalAlignment(JLabel.CENTER);
             }
-            else super.setText("");
+            else {
+                super.setText("----- '' -----");
+                super.setFont(getFont().deriveFont(Font.BOLD));
+                super.setHorizontalAlignment(JLabel.CENTER);
+            }
             //super.setHorizontalAlignment(JLabel.LEFT);
             setSlotMarker(SystemDefinition.ScheduleSlotType.BOOKED_SCHEDULE_SLOT); 
         }
