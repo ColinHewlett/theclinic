@@ -1213,7 +1213,8 @@ public class ScheduleView extends View
                                         this.btnSelectTreatmentRequest.setEnabled(false);
                                         break;
                                     case EXTEND_APPOINTMENT_DOWN:
-                                        if(!getScheduleSlotType().equals(ScheduleSlotType.UNBOOKABLE_SCHEDULE_SLOT)){
+                                        if ((!(getScheduleSlotType().equals(ScheduleSlotType.EMERGENCY_SCHEDULE_SLOT))) &&
+                                                (!(getScheduleSlotType().equals(ScheduleSlotType.UNBOOKABLE_SCHEDULE_SLOT)))){
                                             this.btnCreateUpdateAppointment.setEnabled(true);
                                             this.btnClinicalNotesForSelectedAppointment.setEnabled(false);
                                             this.btnSelectTreatmentRequest.setEnabled(false);
@@ -1224,7 +1225,8 @@ public class ScheduleView extends View
                                         }
                                         break;
                                     case EXTEND_APPOINTMENT_UP:
-                                        if(!getScheduleSlotType().equals(ScheduleSlotType.UNBOOKABLE_SCHEDULE_SLOT)){
+                                        if ((!(getScheduleSlotType().equals(ScheduleSlotType.EMERGENCY_SCHEDULE_SLOT))) &&
+                                                (!(getScheduleSlotType().equals(ScheduleSlotType.UNBOOKABLE_SCHEDULE_SLOT)))){
                                             this.btnCreateUpdateAppointment.setEnabled(true);
                                             this.btnClinicalNotesForSelectedAppointment.setEnabled(false);
                                             this.btnSelectTreatmentRequest.setEnabled(false);
@@ -1235,7 +1237,8 @@ public class ScheduleView extends View
                                         }
                                         break;
                                     case EXTEND_APPOINTMENT_UP_AND_DOWN:
-                                        if(!getScheduleSlotType().equals(ScheduleSlotType.UNBOOKABLE_SCHEDULE_SLOT)){
+                                        if ((!(getScheduleSlotType().equals(ScheduleSlotType.EMERGENCY_SCHEDULE_SLOT))) &&
+                                                (!(getScheduleSlotType().equals(ScheduleSlotType.UNBOOKABLE_SCHEDULE_SLOT)))){
                                             this.btnCreateUpdateAppointment.setEnabled(true);
                                             this.btnClinicalNotesForSelectedAppointment.setEnabled(false);
                                             this.btnSelectTreatmentRequest.setEnabled(false);
@@ -1246,7 +1249,8 @@ public class ScheduleView extends View
                                         }
                                         break;
                                     case EXTEND_SHIFT_APPOINTMENT_DOWN:
-                                        if(!getScheduleSlotType().equals(ScheduleSlotType.UNBOOKABLE_SCHEDULE_SLOT)){
+                                        if ((!(getScheduleSlotType().equals(ScheduleSlotType.EMERGENCY_SCHEDULE_SLOT))) &&
+                                                (!(getScheduleSlotType().equals(ScheduleSlotType.UNBOOKABLE_SCHEDULE_SLOT)))){
                                             this.btnCreateUpdateAppointment.setEnabled(true);
                                             this.btnClinicalNotesForSelectedAppointment.setEnabled(false);
                                             this.btnSelectTreatmentRequest.setEnabled(false);
@@ -1257,7 +1261,8 @@ public class ScheduleView extends View
                                         }
                                         break;
                                     case EXTEND_SHIFT_APPOINTMENT_UP:
-                                        if(!getScheduleSlotType().equals(ScheduleSlotType.UNBOOKABLE_SCHEDULE_SLOT)){
+                                        if ((!(getScheduleSlotType().equals(ScheduleSlotType.EMERGENCY_SCHEDULE_SLOT))) &&
+                                                (!(getScheduleSlotType().equals(ScheduleSlotType.UNBOOKABLE_SCHEDULE_SLOT)))){
                                             this.btnCreateUpdateAppointment.setEnabled(true);
                                             this.btnClinicalNotesForSelectedAppointment.setEnabled(false);
                                             this.btnSelectTreatmentRequest.setEnabled(false);
@@ -1268,7 +1273,8 @@ public class ScheduleView extends View
                                         }
                                         break;
                                     case SHIFT_APPOINTMENT_DOWN:
-                                        if(!getScheduleSlotType().equals(ScheduleSlotType.UNBOOKABLE_SCHEDULE_SLOT)){
+                                        if ((!(getScheduleSlotType().equals(ScheduleSlotType.EMERGENCY_SCHEDULE_SLOT))) &&
+                                                (!(getScheduleSlotType().equals(ScheduleSlotType.UNBOOKABLE_SCHEDULE_SLOT)))){
                                             this.btnCreateUpdateAppointment.setEnabled(true);
                                             this.btnClinicalNotesForSelectedAppointment.setEnabled(false);
                                             this.btnSelectTreatmentRequest.setEnabled(false);
@@ -1279,7 +1285,8 @@ public class ScheduleView extends View
                                         }
                                         break;
                                     case SHIFT_APPOINTMENT_UP:
-                                        if(!getScheduleSlotType().equals(ScheduleSlotType.UNBOOKABLE_SCHEDULE_SLOT)){
+                                        if ((!(getScheduleSlotType().equals(ScheduleSlotType.EMERGENCY_SCHEDULE_SLOT))) &&
+                                                (!(getScheduleSlotType().equals(ScheduleSlotType.UNBOOKABLE_SCHEDULE_SLOT)))){
                                             this.btnCreateUpdateAppointment.setEnabled(true);
                                             this.btnClinicalNotesForSelectedAppointment.setEnabled(false);
                                             this.btnSelectTreatmentRequest.setEnabled(false);
@@ -1290,7 +1297,8 @@ public class ScheduleView extends View
                                         }
                                         break;
                                     case SHORTEN_APPOINTMENT:
-                                        if(!getScheduleSlotType().equals(ScheduleSlotType.UNBOOKABLE_SCHEDULE_SLOT)){
+                                        if ((!(getScheduleSlotType().equals(ScheduleSlotType.EMERGENCY_SCHEDULE_SLOT))) &&
+                                                (!(getScheduleSlotType().equals(ScheduleSlotType.UNBOOKABLE_SCHEDULE_SLOT)))){
                                             this.btnCreateUpdateAppointment.setEnabled(true);
                                             this.btnClinicalNotesForSelectedAppointment.setEnabled(false);
                                             this.btnSelectTreatmentRequest.setEnabled(false);
@@ -1308,10 +1316,11 @@ public class ScheduleView extends View
                                                     tblAppointments.clearSelection();
                                                 }else{
                                                     if (!getScheduleSlotType().equals(ScheduleSlotType.UNBOOKABLE_SCHEDULE_SLOT)){
-                                                        
                                                         this.btnClinicalNotesForSelectedAppointment.setEnabled(true);
-                                                        this.btnSelectTreatmentRequest.setEnabled(true);
-                                                    }
+                                                        if (!getScheduleSlotType().equals(ScheduleSlotType.EMERGENCY_SCHEDULE_SLOT))
+                                                            this.btnSelectTreatmentRequest.setEnabled(true);
+                                                    }else tblAppointments.clearSelection();
+                                                    
                                                 }
                                             }else {
                                                 tblAppointments.clearSelection();
@@ -1681,6 +1690,7 @@ public class ScheduleView extends View
                     ViewController.ScheduleViewControllerActionEvent.
                             SCHEDULE_EDITOR_MAKE_EMERGENCY_APPOINTMENT_REQUEST.toString());
             this.getMyController().actionPerformed(actionEvent);
+            this.disableAllScheduleOperationControls();
         }
         else{
             JOptionPane.showInternalMessageDialog(this,
@@ -1699,6 +1709,7 @@ public class ScheduleView extends View
                     ViewController.ScheduleViewControllerActionEvent.
                             SCHEDULE_EDITOR_DELETE_EMERGENCY_APPOINTMENT_REQUEST.toString());
             this.getMyController().actionPerformed(actionEvent);
+            this.disableAllScheduleOperationControls();
         }
         else{
             JOptionPane.showInternalMessageDialog(this,
@@ -2311,7 +2322,7 @@ public class ScheduleView extends View
     private void disableAllScheduleOperationControls(){
         this.btnCancelSelectedAppointment.setEnabled(false);
         this.btnClinicalNotesForSelectedAppointment.setEnabled(false);
-        this.btnCloseView.setEnabled(false);
+        //this.btnCloseView.setEnabled(false);
         this.btnCreateUpdateAppointment.setEnabled(false);
         this.btnMakeDeleteEmergencyAppointmentUndoSelection.setEnabled(false);
         this.btnMarkCancelSlotUnbookableOrMoveBookingToAnotherDay.setEnabled(false);
