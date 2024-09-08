@@ -51,9 +51,9 @@ public class ModalScheduleEditorView extends ModalView implements ActionListener
     private final String LAST_APPOINTMENT_START_TIME = "Last appointment start time";
     private final String EXIT_VIEW = "Close view";
     private final String CLOSE_CAPTION = "<html><center>Close</center><center>view</center></html>";
-    private final String CREATE_CAPTION = "<html>Create appointment</html>";
+    private final String CREATE_CAPTION = "<html><center>Create</center><center>appointment</center></html>";
     private final String EMERGENCY_CAPTION = "<html>Create emergency appointment</html>";
-    private final String UPDATE_CAPTION = "Update start & duration times";
+    private final String UPDATE_CAPTION = "<html><center>Update</center><center>appointment</center></html>";
     private final String TREATMENT_CAPTION = "<html><center>Select</center><center>treatment</center></html>";
     private final String PANEL_START_DURATION_CAPTION = "Start & duration";
     private final String PANEL_SCHEDULE_DETAILS_CAPTION = "Schedule details";
@@ -200,12 +200,15 @@ public class ModalScheduleEditorView extends ModalView implements ActionListener
                 mniLastAppointmentStartTimeActionPerformed();
                 break;
             case REQUEST_CLOSE_VIEW:
+                /*
                 int reply = JOptionPane.showInternalConfirmDialog(this, 
                         "Outstanding appointment changes will not be saved.\n"
                                 + "Close view anyway?",
                         "Confirm view closure", JOptionPane.YES_NO_OPTION);
                 if (reply == JOptionPane.YES_OPTION)
                     doCloseViewRequest();
+                */
+                doCloseViewRequest();
                 break;   
         }
     }
@@ -354,8 +357,10 @@ public class ModalScheduleEditorView extends ModalView implements ActionListener
         
         
 
-        this.btnSaveChanges.setActionCommand(Action.REQUEST_CREATE_UPDATE_EMERGENCY_APPOINTMENT.toString());
-        this.btnSaveChanges.addActionListener(this);
+        this.btnCreateUpdateChanges.setActionCommand(Action.REQUEST_CREATE_UPDATE_EMERGENCY_APPOINTMENT.toString());
+        this.btnCreateUpdateChanges.addActionListener(this);
+        this.btnCloseView.setActionCommand(Action.REQUEST_CLOSE_VIEW.toString());
+        this.btnCloseView.addActionListener(this);
                 
         setBorderTitles(BorderTitles.SCHEDULE_DETAILS);        
         setBorderTitles(BorderTitles.START_DURATION); 
@@ -529,15 +534,15 @@ public class ModalScheduleEditorView extends ModalView implements ActionListener
         viewMode = value;
         switch(viewMode){
             case CREATE:
-                this.btnSaveChanges.setText(CREATE_CAPTION);
+                this.btnCreateUpdateChanges.setText(CREATE_CAPTION);
                 this.setTitle("Create new apppointment editor for " + day.format(ddMMyyyyFormat));
                 break;
             case UPDATE:
-                this.btnSaveChanges.setText(UPDATE_CAPTION);
+                this.btnCreateUpdateChanges.setText(UPDATE_CAPTION);
                 this.setTitle("Update apppointment editor for " + day.format(ddMMyyyyFormat));
                 break;
             case EMERGENCY:
-                this.btnSaveChanges.setText(EMERGENCY_CAPTION);
+                this.btnCreateUpdateChanges.setText(EMERGENCY_CAPTION);
                 this.setTitle("Emergency apppointment editor for " + day.format(ddMMyyyyFormat));
                 break;
         }
@@ -571,7 +576,7 @@ public class ModalScheduleEditorView extends ModalView implements ActionListener
         dayDatePicker = new com.github.lgooddatepicker.components.DatePicker();
         jLabel1 = new javax.swing.JLabel();
         jPanel2 = new javax.swing.JPanel();
-        btnSaveChanges = new javax.swing.JButton();
+        btnCreateUpdateChanges = new javax.swing.JButton();
         btnCloseView = new javax.swing.JButton();
 
         jPanel1.setBorder(javax.swing.BorderFactory.createEtchedBorder());
@@ -622,7 +627,7 @@ public class ModalScheduleEditorView extends ModalView implements ActionListener
                 .addGroup(pnlStartAndDurationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(spnDurationMinutes, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel4))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
         );
 
         DatePickerSettings settings = new DatePickerSettings();
@@ -682,14 +687,14 @@ public class ModalScheduleEditorView extends ModalView implements ActionListener
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(cmbSelectPatient, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel1))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 12, Short.MAX_VALUE)
+                .addGap(12, 12, 12)
                 .addComponent(pnlScheduleDetails, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
 
         jPanel2.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
-        btnSaveChanges.setText("<html><center>Update</center><center>schedule</center></html>");
+        btnCreateUpdateChanges.setText("<html><center>Update</center><center>schedule</center></html>");
 
         btnCloseView.setText("<html><center>Close</center><center>view</center></html>");
 
@@ -700,7 +705,7 @@ public class ModalScheduleEditorView extends ModalView implements ActionListener
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addGap(12, 12, 12)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(btnSaveChanges, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 105, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnCreateUpdateChanges, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 105, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(btnCloseView, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 105, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(12, 12, 12))
         );
@@ -708,10 +713,10 @@ public class ModalScheduleEditorView extends ModalView implements ActionListener
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addGap(26, 26, 26)
-                .addComponent(btnSaveChanges, javax.swing.GroupLayout.PREFERRED_SIZE, 110, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(btnCreateUpdateChanges, javax.swing.GroupLayout.PREFERRED_SIZE, 110, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(btnCloseView, javax.swing.GroupLayout.PREFERRED_SIZE, 110, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -741,7 +746,7 @@ public class ModalScheduleEditorView extends ModalView implements ActionListener
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnCloseView;
-    private javax.swing.JButton btnSaveChanges;
+    private javax.swing.JButton btnCreateUpdateChanges;
     private javax.swing.JComboBox<Patient> cmbSelectPatient;
     private javax.swing.JComboBox<LocalDateTime> cmbSelectStartTime;
     private com.github.lgooddatepicker.components.DatePicker dayDatePicker;
