@@ -666,12 +666,14 @@ public class ScheduleViewController extends ViewController{
                 }
                 break;
             case UPDATE_APPOINTMENT_REQUEST:
-                day = changedSlotRequest.getStart().toLocalDate();
+                //day = changedSlotRequest.getStart().toLocalDate();
                 setScheduleReport(new ScheduleReport());
                 result = doAppointmentUpdateRequest(e,changedSlotRequest);
                 if(result!=null){
-                    mergeScheduleSlotsIfPossible(day);
-                    doAppointmentForDayRequest(day);
+                    //mergeScheduleSlotsIfPossible(day);
+                    //doAppointmentForDayRequest(day);
+                    mergeScheduleSlotsIfPossible(getDescriptor().getControllerDescription().getScheduleDay());
+                    doAppointmentForDayRequest(getDescriptor().getControllerDescription().getScheduleDay());
                     getDescriptor().getControllerDescription().setPatient(result.getPatient());
                     firePropertyChangeEvent(
                             ViewController.DesktopViewControllerPropertyChangeEvent.
@@ -685,7 +687,8 @@ public class ScheduleViewController extends ViewController{
                 }
                 else {
                     sendErrorToScheduleEditorView();
-                    doAppointmentForDayRequest(day);
+                    //doAppointmentForDayRequest(day);
+                    doAppointmentForDayRequest(getDescriptor().getControllerDescription().getScheduleDay());
                 }
                 break;
             case PRINT_SCHEDULE_REQUEST:
@@ -1561,8 +1564,10 @@ getDescriptor().getViewDescription().getScheduleDay());
                     }
                     catch (PropertyVetoException ex){
                     }
-                    mergeScheduleSlotsIfPossible(day);
-                    doAppointmentForDayRequest(day);
+                    //mergeScheduleSlotsIfPossible(day);
+                    //doAppointmentForDayRequest(day);
+                    mergeScheduleSlotsIfPossible(getDescriptor().getControllerDescription().getScheduleDay());
+                    doAppointmentForDayRequest(getDescriptor().getControllerDescription().getScheduleDay());
                     getDescriptor().getControllerDescription().setPatient(result.getPatient());
                     
                     
@@ -1578,7 +1583,8 @@ getDescriptor().getViewDescription().getScheduleDay());
                 else {
                     //2/12/2022
                     sendErrorToScheduleEditorView();
-                    doAppointmentForDayRequest(day); 
+                    //doAppointmentForDayRequest(day); 
+                    doAppointmentForDayRequest(getDescriptor().getControllerDescription().getScheduleDay()); 
                 }
                 break;
             case SCHEDULE_EDITOR_MAKE_EMERGENCY_APPOINTMENT_REQUEST:

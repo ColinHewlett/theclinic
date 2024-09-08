@@ -823,6 +823,13 @@ public class ScheduleView extends View
                         switch(getScheduleViewMode()){
                             case DIARY:
                                 switch(getCurrentScheduleDiaryAction()){
+                                    case CANCEL_APPOINTMENT: //confusing but means when all slots of appt are selected
+                                        /**
+                                         * action
+                                         * -- launch schedule editor in update mode
+                                         */
+                                        doUpdateAppointmentActionForDiary();
+                                        break;
                                     case EXTEND_APPOINTMENT_DOWN:{
                                         appointment = getSelectedAppointmentFromDiary();
                                         appointment.setDuration(this.getAppointmentFromDiaryWithUpdates().getDuration());
@@ -929,6 +936,7 @@ public class ScheduleView extends View
                 break;
             case REQUEST_MARK_CANCEL_UNBOOKABLE_SLOT_OR_MOVE_TO_ANOTHER_DAY:
                 btnMarkSlotUnbookableOrMoveToAnotherDayActionPerformed();
+                this.disableAllScheduleOperationControls();
                 break;
             case REQUEST_NEXT_DAY:
                 doNextDayAction();
@@ -1198,7 +1206,8 @@ public class ScheduleView extends View
                                                 this.btnClinicalNotesForSelectedAppointment.setEnabled(true);
                                                 this.btnSelectTreatmentRequest.setEnabled(true);
                                             }
-                                            this.btnMarkCancelSlotUnbookableOrMoveBookingToAnotherDay.setEnabled(true);
+                                            this.btnMarkCancelSlotUnbookableOrMoveBookingToAnotherDay.setEnabled(false);
+                                            this.setAppointmentMode(AppointmentMode.UPDATE);
                                             this.btnCancelSelectedAppointment.setEnabled(true);
                                         }else{
                                             String message = "Editing emergency appointments or unbookable slots \ncan only be managed in the 'list' format of the schedule";
@@ -1389,7 +1398,7 @@ public class ScheduleView extends View
                                     btnSelectTreatmentRequest.setEnabled(true);
                                     /*this.btnMarkCancelSlotUnbookableOrMoveBookingToAnotherDay.setText(
                                             "<html><center>Move to</center><center>another</center><center>day</center></html>");*/
-                                    btnMarkCancelSlotUnbookableOrMoveBookingToAnotherDay.setEnabled(true);
+                                    btnMarkCancelSlotUnbookableOrMoveBookingToAnotherDay.setEnabled(false);
                                     break;
                             }
                         }else{//no row is selected; so disable all buttons apart from 'close view'
@@ -1716,6 +1725,17 @@ public class ScheduleView extends View
                     "An appointment slot has not been selected;\n delete emergency appointment action aborted",  
                     "View error", JOptionPane.WARNING_MESSAGE);
         }
+    }
+    
+    private void doUpdateAppointmentActionForDiary(){
+        /**
+         * on entry view descriptor points to selected appointment in diary
+         */
+        ActionEvent actionEvent = new ActionEvent(this, 
+                ActionEvent.ACTION_PERFORMED,
+                ViewController.ScheduleViewControllerActionEvent.
+                        APPOINTMENT_UPDATE_VIEW_REQUEST.toString());
+        this.getMyController().actionPerformed(actionEvent);
     }
     
     private void doUpdateAppointmentAction() {
