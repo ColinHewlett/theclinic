@@ -76,6 +76,7 @@ public class Descriptor {
     
     public class ControllerDescription{
         ViewController.ViewMode viewMode = null;
+        ViewController.ScheduleViewMode scheduleViewMode = null;
         private Doctor doctor = null;
         private Medication medication = null;
         private Condition condition = null;
@@ -104,6 +105,13 @@ public class Descriptor {
         ArrayList<Notification> patientNotifications = null;
         //ArrayList<Patient> patients = null;
         private Point tableRowCount = null;
+        
+        public ViewController.ScheduleViewMode getScheduleViewMode(){
+            return scheduleViewMode;
+        }
+        public void setScheduleViewMode(ViewController.ScheduleViewMode value){
+            scheduleViewMode = value;
+        }
         
         public LocalDate getScheduleDay(){
             if (scheduleDay == null) scheduleDay = LocalDate.now();
@@ -445,6 +453,14 @@ public class Descriptor {
             duration = Duration.ZERO; 
             HashMap<DayOfWeek,Boolean> surgeryDaysAssignmentValue = new HashMap<>();
             
+        }
+        
+        private ViewController.ScheduleViewMode scheduleViewMode = null;
+        public ViewController.ScheduleViewMode getScheduleViewMode(){
+            return scheduleViewMode;
+        }
+        public void setScheduleViewMode(ViewController.ScheduleViewMode value){
+            scheduleViewMode = value;
         }
         
         private ConditionWithState conditionWithState = null;

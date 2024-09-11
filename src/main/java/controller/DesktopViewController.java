@@ -361,12 +361,12 @@ public class DesktopViewController extends ViewController{
     
     /**
      * ActionEvent responder; action events sent by an ActionViewController include
-     * -- SCHEDULE_VIEW_CONTROLLER_REQUEST
-     * ---- 
-     * -- APPOINTMENT_HISTORY_CHANGE_NOTIFICATION
-     * -- DISABLE_DESKTOP_CONTROLS_REQUEST
-     * -- ENABLE_DESKTOP_CONTROLS_REQUEST
-     * -- VIEW_CLOSED_NOTIFICATION
+ -- SCHEDULE_LIST_VIEW_CONTROLLER_REQUEST
+ ---- 
+ -- APPOINTMENT_HISTORY_CHANGE_NOTIFICATION
+ -- DISABLE_DESKTOP_CONTROLS_REQUEST
+ -- ENABLE_DESKTOP_CONTROLS_REQUEST
+ -- VIEW_CLOSED_NOTIFICATION
      * @param e:ActionEvent received; indicates which ActionCommand from above list was sent
      */
     private void doActionEventForScheduleViewController(ActionEvent e){
@@ -405,7 +405,23 @@ public class DesktopViewController extends ViewController{
                     _cnvc.getView().toFront();
                 }
                 break;
-            case SCHEDULE_VIEW_CONTROLLER_REQUEST:  
+            case CLOSE_SCHEDULE_VIEW_FOR_SCHEDULE_DATE_REQUEST:
+                for(ScheduleViewController _svc : this.scheduleViewControllers){
+                    if (!avc.equals(_svc)){
+                        if(avc.getDescriptor().getControllerDescription().getScheduleDay().equals(
+                                _svc.getDescriptor().getControllerDescription().getScheduleDay())){
+                            this.firePropertyChangeEvent(
+                                    ViewController.ScheduleViewControllerPropertyChangeEvent.CLOSE_VIEW_REQUEST_RECEIVED.toString(),
+                                    _svc.getView(),
+                                    _svc,
+                                    null,
+                                    null
+                            );
+                        }
+                    }
+                }
+                break;
+            case SCHEDULE_LIST_VIEW_CONTROLLER_REQUEST:  
                 doRequestForScheduleViewController(avc);
                 break;
             case VIEW_CONTROLLER_CHANGED_NOTIFICATION:
@@ -419,9 +435,37 @@ public class DesktopViewController extends ViewController{
                 );
                 break;
             case VIEW_CONTROLLER_CLOSE_NOTIFICATION:{
+                /*if (this.scheduleViewControllers.size()==1){
+                    if (this.scheduleViewControllers.get(0).equals(avc)){
+                        View frame = avc.getView();
+                        frame.dispose();
+                        if (!this.scheduleViewControllers.remove(avc)){
+                            String message = "Problem removing Schedule view controller from collection";
+                            displayErrorMessage(message,"DesktopViewController error",JOptionPane.WARNING_MESSAGE);
+                        }
+                    }else {
+                        String message = "The only view controller in schedule view controller collection is not the expected one";
+                        displayErrorMessage(message,"DesktopViewController error",JOptionPane.WARNING_MESSAGE);
+                    }
+                        
+                }else */if (!this.scheduleViewControllers.remove(avc)){
+                    String message = "Could not find AppointmentViewController in "
+                                            + "DesktopViewController collection.";
+                    displayErrorMessage(message,"DesktopViewController error",JOptionPane.WARNING_MESSAGE);
+                }else{
+                    if (this.isDesktopPendingClosure){
+                        this.requestViewControllersToCloseViews();
+                    }
+                    if (this.scheduleViewControllers.isEmpty() && 
+                            this.patientViewControllers.isEmpty()){ 
+                    }
+                }
+                break;
+                
                 /**
                  * check if an open ClinicalNoteView'appointment has the same date as the Schedule VC requesting to close
                  */
+                /*
                 _cnvc = null;
                 boolean isCLinicalNoteAppointmentOnScheduleView = false;
                 LocalDate day = avc.getDescriptor().getControllerDescription().getScheduleDay();
@@ -478,7 +522,7 @@ public class DesktopViewController extends ViewController{
                         }
                     }
                 }
-                break;
+                */
             }
         }           
     }
@@ -679,7 +723,7 @@ public class DesktopViewController extends ViewController{
             case PRINT_PATIENT_MEDICAL_HISTORY_REQUEST:
                 doRequestToPrintPatientMedicalHistory(e);
                 break;
-            case SCHEDULE_VIEW_CONTROLLER_REQUEST:
+            case SCHEDULE_LIST_VIEW_CONTROLLER_REQUEST:
                 /**
                  * VC receives a request for a new AppointmentVC from a PatientVC
                  * -- the PatientVC view's EntityDescriptorFromView object defines an appointment for the selected patient
@@ -1125,7 +1169,13 @@ public class DesktopViewController extends ViewController{
                     doRequestForViewClose();
                     break;
                 }
-                case SCHEDULE_VIEW_CONTROLLER_REQUEST:{                  
+                case SCHEDULE_LIST_VIEW_CONTROLLER_REQUEST:{  
+                    getDescriptor().getControllerDescription().setScheduleViewMode(ScheduleViewMode.LIST);
+                    doRequestForScheduleViewController2((DesktopView)e.getSource());
+                    break;
+                }
+                case SCHEDULE_DIARY_VIEW_CONTROLLER_REQUEST:{   
+                    getDescriptor().getControllerDescription().setScheduleViewMode(ScheduleViewMode.DIARY);
                     doRequestForScheduleViewController((DesktopView)e.getSource());
                     break;
                 }
@@ -1193,6 +1243,41 @@ public class DesktopViewController extends ViewController{
                 System.exit(0);
             }
         } 
+    }
+    
+    private ScheduleViewController createNewAppointmentScheduleViewControllerWithReturn(Descriptor ed){     
+        ScheduleViewController result = null;
+        try{
+            ScheduleViewController avc =
+                    new ScheduleViewController(this, getDesktopView());
+            this.scheduleViewControllers.add(avc);
+            try{
+                SurgeryDaysAssignment surgeryDaysAssignment = new SurgeryDaysAssignment();
+                surgeryDaysAssignment = surgeryDaysAssignment.read();
+                if (ed == null) ed = new Descriptor();
+                ed.getControllerDescription().setSurgeryDaysAssignment(
+                            surgeryDaysAssignment.get());  
+            }
+            catch (StoreException ex){
+                displayErrorMessage(ex.getMessage(),"DesktopViewController error",JOptionPane.WARNING_MESSAGE);
+            } 
+            avc.setDescriptor(ed);
+            
+            avc.setView(new View().make(
+                View.Viewer.SCHEDULE_VIEW,
+                avc, 
+                getDesktopView()));
+
+
+            if (getDesktopViewMode().equals(DesktopViewMode.CLINIC_LOGO)){
+                doSetupDesktopViewMode();
+            }
+            result = avc;
+        }
+        catch (StoreException ex){
+            displayErrorMessage(ex.getMessage(),"DesktopViewController error",JOptionPane.WARNING_MESSAGE);
+        }
+        return result;
     }
 
     private void createNewAppointmentScheduleViewController(Descriptor ed){       
@@ -1278,27 +1363,72 @@ public class DesktopViewController extends ViewController{
         }   
     }
     
-    private void doRequestForScheduleViewController(DesktopView desktopView){
-        ScheduleViewController activeViewController = null;
+    private void doRequestForScheduleViewController2(DesktopView desktopView){
+        /**
+         * Only one schedule view controller is allowed with a view with the same date as the SVC about to be created
+         * -- if an SVC already exists with such a view; the desktop VC sends it a CLOSE_VIEW_REQUEST_RECEIVED property change event
+         */
+        ScheduleViewController targetSVC = null;
         for(ScheduleViewController svc : scheduleViewControllers){
             /**
              * the Schedule VC has been called from the Desktop view
              * -- hence  the need to check if a schedule for today already exists
              */
             if (LocalDate.now().isEqual(svc.getDescriptor().getControllerDescription().getScheduleDay())){
-                activeViewController = svc;
+                targetSVC = svc;
                 break;
             }
         }
-        if (activeViewController!=null)
-            activeViewController.getView().toFront();
-        else {
-            Descriptor descriptor = new Descriptor();
-            descriptor.getControllerDescription().setViewMode(ViewController.ViewMode.SCHEDULE_REFERENCED_DESKTOP_VIEW);
-            descriptor.getControllerDescription().setScheduleDay(LocalDate.now());
-            createNewAppointmentScheduleViewController(descriptor);
+        if (targetSVC!=null){
+            this.firePropertyChangeEvent(
+                    ViewController.ScheduleViewControllerPropertyChangeEvent.CLOSE_VIEW_REQUEST_RECEIVED.toString(), 
+                    targetSVC.getView(),
+                    targetSVC,
+                    null,
+                    null
+            );
+        }
+
+        Descriptor descriptor = new Descriptor();
+        descriptor.getControllerDescription().setViewMode(ViewController.ViewMode.SCHEDULE_REFERENCED_DESKTOP_VIEW);
+        descriptor.getControllerDescription().setScheduleDay(LocalDate.now());
+        createNewAppointmentScheduleViewController(descriptor);
+    } 
+    
+    private void doRequestForScheduleViewController(DesktopView desktopView){
+        /**
+         * Only one schedule view controller is allowed with a view with the same date as the SVC about to be created
+         * -- if an SVC already exists with such a view; the desktop VC sends it a CLOSE_VIEW_REQUEST_RECEIVED property change event
+         */
+        ScheduleViewController targetSVC = null;
+        Descriptor descriptor = new Descriptor();
+        descriptor.getControllerDescription().setViewMode(ViewController.ViewMode.SCHEDULE_REFERENCED_DESKTOP_VIEW);
+        descriptor.getControllerDescription().setScheduleDay(LocalDate.now());
+        ScheduleViewController newSVC = createNewAppointmentScheduleViewControllerWithReturn(descriptor);
+        
+        for(ScheduleViewController svc : scheduleViewControllers){
+            /**
+             * the Schedule VC has been called from the Desktop view
+             * -- hence  the need to check if a schedule for today already exists
+             */
+            if (!svc.equals(newSVC)){
+                if (LocalDate.now().isEqual(svc.getDescriptor().getControllerDescription().getScheduleDay())){
+                    targetSVC = svc;
+                    break;
+                }
+             }
+        }
+        if (targetSVC!=null){
+            this.firePropertyChangeEvent(
+                    ViewController.ScheduleViewControllerPropertyChangeEvent.CLOSE_VIEW_REQUEST_RECEIVED.toString(), 
+                    targetSVC.getView(),
+                    targetSVC,
+                    null,
+                    null
+            );
         }
     }
+    
     
     private void doRequestForScheduleViewController(ScheduleViewController vc){
         ScheduleViewController activeViewController = null;

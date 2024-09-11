@@ -4,6 +4,104 @@
  */
 package view.views.non_modal_views;
 
+import controller.ScheduleViewController;
+import com.bric.colorpicker.ColorPicker;
+import com.bric.colorpicker.listeners.ColorListener;
+import com.bric.colorpicker.models.ColorModel;
+import com.bric.colorpicker.ColorPickerDialog;
+import model.non_entity.SystemDefinition;
+import model.non_entity.Slot;
+import model.non_entity.SystemDefinition.ScheduleSlotType;
+import model.non_entity.SystemDefinition.ScheduleViewActionCaption;
+import view.views.view_support_classes.renderers.AppointmentsTableDurationRenderer;
+import view.views.view_support_classes.renderers.AppointmentsListTableLocalDateTimeRenderer;
+import view.views.view_support_classes.renderers.ScheduleDiaryTablePatientRenderer;
+import view.views.view_support_classes.renderers.AppointmentsListTablePatientRenderer;
+import view.views.view_support_classes.renderers.ScheduleDiaryTableLocalDateTimeRenderer;
+import view.views.view_support_classes.renderers.ScheduleTableCellRenderer;
+import view.views.view_support_classes.renderers.ScheduleDiaryTableStringRenderer;
+import view.views.dialogs.CustomComboBoxDialog;
+import view.views.dialogs.CustomComboBoxInternalDialog;
+/*28/03/2024import view.views.view_support_classes.renderers.AppointmentsTablePatientNoteRenderer;*/
+import view.views.view_support_classes.models.ScheduleListTableModel;
+import view.views.view_support_classes.models.ScheduleDiaryTableModel;
+import model.entity.Appointment;
+import model.entity.Patient;
+/*28/03/2024import model.PatientNote;*/
+import controller.ViewController;
+import controller.DesktopViewController;
+import view.views.view_support_classes.AppointmentDateVetoPolicy;
+import view.views.view_support_classes.renderers.TableHeaderCellBorderRenderer;
+import view.views.view_support_classes.models.EmptySlotAvailability2ColumnTableModel;
+import view.View;
+import com.github.lgooddatepicker.components.DatePickerSettings;
+import com.github.lgooddatepicker.optionalusertools.DateChangeListener;
+import com.github.lgooddatepicker.optionalusertools.DateHighlightPolicy;
+import com.github.lgooddatepicker.zinternaltools.DateChangeEvent;
+import com.github.lgooddatepicker.zinternaltools.HighlightInformation;
+import static controller.ViewController.ScheduleViewControllerPropertyChangeEvent.APPOINTMENTS_FOR_DAY_RECEIVED;
+import static controller.ViewController.ScheduleViewControllerPropertyChangeEvent.APPOINTMENT_SCHEDULE_ERROR_RECEIVED;
+import static controller.ViewController.ScheduleViewControllerPropertyChangeEvent.APPOINTMENT_SLOTS_FROM_DAY_RECEIVED;
+import static controller.ViewController.ScheduleViewControllerPropertyChangeEvent.NON_SURGERY_DAY_EDIT_RECEIVED;
+import static controller.ViewController.ScheduleViewControllerPropertyChangeEvent.NO_APPOINTMENT_SLOTS_FROM_DAY_RECEIVED;
+import static controller.ViewController.ScheduleViewControllerPropertyChangeEvent.SURGERY_DAYS_ASSIGNMENT_RECEIVED;
+import static controller.ViewController.ViewMode.SCHEDULE_REFERENCED_DESKTOP_VIEW;
+import static controller.ViewController.ViewMode.SCHEDULE_REFERENCED_FROM_PATIENT_VIEW;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Rectangle;
+import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.print.PageFormat;
+import java.awt.print.Printable;
+import static java.awt.print.Printable.NO_SUCH_PAGE;
+import static java.awt.print.Printable.PAGE_EXISTS;
+import java.awt.print.PrinterException;
+import java.awt.Frame;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyVetoException;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.StringReader;
+import java.text.MessageFormat;
+import java.time.DayOfWeek;
+import java.time.format.DateTimeFormatter;
+import java.time.LocalTime;
+import java.util.HashMap;
+import javax.swing.event.InternalFrameAdapter;
+import javax.swing.event.InternalFrameEvent;
+import javax.swing.JOptionPane;
+import javax.swing.JColorChooser;
+import javax.swing.JButton; 
+import javax.swing.JTable;
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Iterator;
+import javax.swing.ImageIcon;
+import javax.swing.border.TitledBorder;
+import javax.swing.table.JTableHeader;
+import javax.swing.table.TableColumnModel;
+import javax.swing.SwingUtilities;
+import javax.swing.ListSelectionModel;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
+import static model.non_entity.SystemDefinition.ScheduleSlotType.BOOKABLE_SCHEDULE_SLOT;
+import static model.non_entity.SystemDefinition.ScheduleSlotType.BOOKED_SCHEDULE_SLOT;
+import static model.non_entity.SystemDefinition.ScheduleSlotType.EMERGENCY_SCHEDULE_SLOT;
+import static model.non_entity.SystemDefinition.ScheduleSlotType.UNBOOKABLE_SCHEDULE_SLOT;
 /**
  *
  * @author colin
@@ -219,8 +317,9 @@ public class ScheduleDiaryView extends javax.swing.JInternalFrame {
 
         jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder("Schedule day selection"));
 
-        settings = new DatePickerSettings();
+        DatePickerSettings settings = new DatePickerSettings();
         dayDatePicker = new com.github.lgooddatepicker.components.DatePicker(settings);
+
         settings.setFormatForDatesCommonEra(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
         settings.setAllowEmptyDates(false);
         //settings.setVetoPolicy(new AppointmentDateVetoPolicy());

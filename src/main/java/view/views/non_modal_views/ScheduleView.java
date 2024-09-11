@@ -779,12 +779,14 @@ public class ScheduleView extends View
                 doClinicNoteRequest();
                 break;
             case REQUEST_CLOSE_VIEW:
+                /*
                 actionEvent = new ActionEvent(
                         ScheduleView.this,ActionEvent.ACTION_PERFORMED,
                         ViewController.ScheduleViewControllerActionEvent.
                                 VIEW_CLOSE_NOTIFICATION.toString());
                 ScheduleView.this.getMyController().actionPerformed(actionEvent);
-                //doCloseViewAction();
+                */
+                doCloseViewAction();
                 break;
             case REQUEST_COLOUR_PICKER:
                 doColourPickerRequest2();
@@ -1076,6 +1078,9 @@ public class ScheduleView extends View
                 ViewController.ScheduleViewControllerPropertyChangeEvent.valueOf(e.getPropertyName());
         //setViewDescriptor((Descriptor)e.getNewValue());
         switch (propertyName){
+            case CLOSE_VIEW_REQUEST_RECEIVED:
+                doCloseViewAction();
+                break;
             case APPOINTMENTS_FOR_DAY_RECEIVED:
                 switch (getScheduleViewMode()){
                     case DIARY:
@@ -1460,13 +1465,13 @@ public class ScheduleView extends View
         internalFrameAdapter = new InternalFrameAdapter(){
             @Override  
             public void internalFrameClosing(InternalFrameEvent e) {
-                /*
+                ScheduleView.this.removeInternalFrameListener(internalFrameAdapter);
                 ActionEvent actionEvent = new ActionEvent(
                         ScheduleView.this,ActionEvent.ACTION_PERFORMED,
                         ViewController.ScheduleViewControllerActionEvent.
                                 VIEW_CLOSE_NOTIFICATION.toString());
                 ScheduleView.this.getMyController().actionPerformed(actionEvent);
-                */
+                
             }
             
             @Override
@@ -1780,6 +1785,7 @@ public class ScheduleView extends View
         catch (PropertyVetoException e){
             
         }
+        
     }                                            
 
     private void doScheduleDiaryActionRequest(ScheduleDiaryAction request){

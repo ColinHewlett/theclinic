@@ -104,7 +104,8 @@ public class DesktopView extends javax.swing.JFrame
         REQUEST_CASCADE_VIEWS,
         REQUEST_CHANGE_USER_PASSWORD,
         REQUEST_CLOSE_VIEW,
-        REQUEST_APPOINTMENT_VIEW,
+        REQUEST_APPOINTMENT_LIST_VIEW,
+        REQUEST_APPOINTMENT_DIARY_VIEW,
         REQUEST_MEDICAL_CONDITION_VIEW,
         REQUEST_NOTIFICATION_VIEW,
         REQUEST_PATIENT_VIEW,
@@ -124,7 +125,8 @@ public class DesktopView extends javax.swing.JFrame
     private Boolean isPMSStoreDefined = null;
     private Descriptor entityDescriptor = null;
     private final String SELECT_VIEW_MENU_TITLE = "View";
-        private final String APPOINTMENT_VIEW_REQUEST_TITLE = "Appointments";
+        private final String APPOINTMENT_LIST_VIEW_REQUEST_TITLE = "Appointments (LIST)";
+        private final String APPOINTMENT_DIARY_VIEW_REQUEST_TITLE = "Appointments (DIARY)";
         private final String PATIENT_VIEW_REQUEST_TITLE = "Patients";
         private final String PATIENT_NOTIFICATION_VIEW_REQUEST_TITLE = "Notifications (patient-related)";
         private final String TO_DO_VIEW_REQUEST_TITLE = "'To do' list";
@@ -166,7 +168,8 @@ public class DesktopView extends javax.swing.JFrame
         private final String DELETE_DATA_FROM_PMS_DATABASE_REQUEST_TITLE = "Delete all data from PMS database";
         
     private JMenu mnuSelectView = null; 
-        private JMenuItem mniAppointmentViewRequest = null;
+        private JMenuItem mniAppointmentListViewRequest = null;
+        private JMenuItem mniAppointmentDiaryViewRequest = null;
         private JMenuItem mniPatientViewRequest = null;
         private JMenuItem mniPatientNotificationViewRequest = null;
         private JMenuItem mniToDoViewRequest = null;
@@ -283,25 +286,31 @@ public class DesktopView extends javax.swing.JFrame
     private void makeSelectViewMenu(){
         mnuSelectView = new JMenu(SELECT_VIEW_MENU_TITLE);
         setActiveMenu(mnuSelectView);
-        mniAppointmentViewRequest = new JMenuItem(APPOINTMENT_VIEW_REQUEST_TITLE);
+        mniAppointmentListViewRequest = new JMenuItem(APPOINTMENT_LIST_VIEW_REQUEST_TITLE);
+        mniAppointmentDiaryViewRequest = new JMenuItem(APPOINTMENT_DIARY_VIEW_REQUEST_TITLE);
         mniPatientViewRequest = new JMenuItem(PATIENT_VIEW_REQUEST_TITLE);
         mniPatientNotificationViewRequest = new JMenuItem(PATIENT_NOTIFICATION_VIEW_REQUEST_TITLE);
         mniToDoViewRequest = new JMenuItem(TO_DO_VIEW_REQUEST_TITLE);
         mniExitViewRequest = new JMenuItem(EXIT_VIEW_REQUEST_TITLE);
         mnuSelectView.add(mniPatientViewRequest);
-        mnuSelectView.add(mniAppointmentViewRequest);
+        mnuSelectView.add(new JSeparator());
+        mnuSelectView.add(mniAppointmentListViewRequest);
+        mnuSelectView.add(mniAppointmentDiaryViewRequest);
+        mnuSelectView.add(new JSeparator());
         mnuSelectView.add(mniPatientNotificationViewRequest);
         mnuSelectView.add(mniToDoViewRequest);
         mnuSelectView.add(new JSeparator());
         setTopDynamicFrameListDelimiter(mnuSelectView.getItemCount()-1);
         mnuSelectView.add(mniExitViewRequest);
         
-        mniAppointmentViewRequest.setActionCommand(Action.REQUEST_APPOINTMENT_VIEW.toString());
+        mniAppointmentListViewRequest.setActionCommand(Action.REQUEST_APPOINTMENT_LIST_VIEW.toString());
+        mniAppointmentDiaryViewRequest.setActionCommand(Action.REQUEST_APPOINTMENT_DIARY_VIEW.toString());
         mniPatientViewRequest.setActionCommand(Action.REQUEST_PATIENT_VIEW.toString());
         mniPatientNotificationViewRequest.setActionCommand(Action.REQUEST_NOTIFICATION_VIEW.toString());
         mniToDoViewRequest.setActionCommand(Action.REQUEST_TO_DO_VIEW.toString());
         mniExitViewRequest.setActionCommand(Action.REQUEST_CLOSE_VIEW.toString());
-        mniAppointmentViewRequest.addActionListener(this);
+        mniAppointmentListViewRequest.addActionListener(this);
+        mniAppointmentDiaryViewRequest.addActionListener(this);
         mniPatientViewRequest.addActionListener(this);
         mniPatientNotificationViewRequest.addActionListener(this);
         mniToDoViewRequest.addActionListener(this);
@@ -532,8 +541,11 @@ public class DesktopView extends javax.swing.JFrame
             case REQUEST_CLOSE_VIEW:
                 mniExitRequestViewActionPerformed();
                 break;
-            case REQUEST_APPOINTMENT_VIEW:
+            case REQUEST_APPOINTMENT_LIST_VIEW:
                 mniAppointmentViewRequestActionPerformed();
+                break;
+            case REQUEST_APPOINTMENT_DIARY_VIEW:
+                doAppointmentDiaryViewRequest();
                 break;
             case REQUEST_MEDICAL_CONDITION_VIEW:
                 actionEvent = new ActionEvent(this, 
@@ -789,12 +801,21 @@ public class DesktopView extends javax.swing.JFrame
     // Variables declaration - do not modify                     
     private javax.swing.JMenuItem jMenuItem1;
     private javax.swing.JMenuBar mnbDesktop;
-    // End of variables declaration                   
+    // End of variables declaration   
+    
+   private void doAppointmentDiaryViewRequest(){
+       ActionEvent actionEvent = new ActionEvent(this, 
+                ActionEvent.ACTION_PERFORMED,
+                DesktopViewController.DesktopViewControllerActionEvent.SCHEDULE_DIARY_VIEW_CONTROLLER_REQUEST.toString());
+        String s;
+        s = actionEvent.getSource().getClass().getSimpleName();
+        this.getMyController().actionPerformed(actionEvent);
+   }
  
-   private void mniAppointmentViewRequestActionPerformed() {                                        
+   private void mniAppointmentViewRequestActionPerformed() {   
         ActionEvent actionEvent = new ActionEvent(this, 
                 ActionEvent.ACTION_PERFORMED,
-                DesktopViewController.DesktopViewControllerActionEvent.SCHEDULE_VIEW_CONTROLLER_REQUEST.toString());
+                DesktopViewController.DesktopViewControllerActionEvent.SCHEDULE_LIST_VIEW_CONTROLLER_REQUEST.toString());
         String s;
         s = actionEvent.getSource().getClass().getSimpleName();
         this.getMyController().actionPerformed(actionEvent);
@@ -1238,16 +1259,32 @@ public class DesktopView extends javax.swing.JFrame
                         break;
                     }     
                 }
-
+/*
                 for(int i = firstSeparator+1; i<mnuSelectView.getItemCount(); i++ ){
                     Component component = mnuSelectView.getMenuComponent(i);
                     if((component instanceof JMenuItem)){
                         if (((JMenuItem) component).getText().equals(EXIT_VIEW_REQUEST_TITLE))
                             break;
                         JCheckBoxMenuItem menuItem = (JCheckBoxMenuItem)component;
-                        if (entry.getKey().equals(menuItem)){
-                            menuItem.setSelected(true);
-                        }else menuItem.setSelected(false);
+                        if (component instanceof JCheckBoxMenuItem){
+                            if (entry.getKey().equals(menuItem)){
+                                menuItem.setSelected(true);
+                            }else menuItem.setSelected(false);
+                        }
+                    }
+                }
+ */               
+                for(int i = firstSeparator+1; i<mnuSelectView.getItemCount(); i++ ){
+                    Component component = mnuSelectView.getMenuComponent(i);
+                    if((component instanceof JMenuItem)){
+                        if (((JMenuItem) component).getText().equals(EXIT_VIEW_REQUEST_TITLE))
+                            break;
+                        if (component instanceof JCheckBoxMenuItem){
+                            if (entry.getKey().equals(component)){
+                                ((JCheckBoxMenuItem)component).setSelected(true);
+                                
+                            }else ((JCheckBoxMenuItem)component).setSelected(false);
+                        }
                     }
                 }
             }

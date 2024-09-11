@@ -808,21 +808,8 @@ public class ScheduleViewController extends ViewController{
                 doAppointmentUpdateViewRequest();
                 break;
             case APPOINTMENTS_FOR_DAY_REQUEST:
-                //?setEntityDescriptorFromView(((View)e.getSource()).getViewDescriptor());
-                //getDescriptor().setViewDescription(((Descriptor)(((View)e.getSource()).getViewDescriptor())).getViewDescription());
-                //?setScheduleDay(getDescriptorFromView().getViewDescription().getScheduleDay());
-                
                 setScheduleDay(getDescriptor().getViewDescription().getScheduleDay());
                 
-                /*
-                getDescriptor().getControllerDescription().
-                        setScheduleDay(getDescriptor().
-                                getViewDescription().getScheduleDay());
-                */
-                actionEvent = new ActionEvent(
-                    this,ActionEvent.ACTION_PERFORMED,
-                        ViewController.DesktopViewControllerActionEvent.SCHEDULE_VIEW_CONTROLLER_REQUEST.toString());
-                this.getMyController().actionPerformed(actionEvent);
                 
                 doAppointmentForDayRequest(getDescriptor().
                         getControllerDescription().getScheduleDay());
@@ -834,6 +821,12 @@ public class ScheduleViewController extends ViewController{
                         null,
                         getDescriptor()
                 );
+                
+                actionEvent = new ActionEvent(
+                    this,ActionEvent.ACTION_PERFORMED,
+                        ViewController.DesktopViewControllerActionEvent.
+                                CLOSE_SCHEDULE_VIEW_FOR_SCHEDULE_DATE_REQUEST/*SCHEDULE_LIST_VIEW_CONTROLLER_REQUEST*/.toString());
+                this.getMyController().actionPerformed(actionEvent);
                 break;
             /*
             case MODAL_VIEWER_ACTIVATED://notification from view uts shutting down
@@ -913,7 +906,7 @@ public class ScheduleViewController extends ViewController{
                         isEqual(getDescriptor().getControllerDescription().getScheduleDay())){
                     ActionEvent actionEvent = new ActionEvent(
                     this,ActionEvent.ACTION_PERFORMED,
-                        ViewController.ScheduleViewControllerActionEvent.SCHEDULE_VIEW_CONTROLLER_REQUEST.toString());
+                        ViewController.ScheduleViewControllerActionEvent.SCHEDULE_LIST_VIEW_CONTROLLER_REQUEST.toString());
                     this.getMyController().actionPerformed(actionEvent);
             }
         }
@@ -1141,7 +1134,7 @@ getDescriptor().getViewDescription().getScheduleDay());
         ViewController.ScheduleViewControllerActionEvent actionCommand =
                ViewController.ScheduleViewControllerActionEvent.valueOf(e.getActionCommand());        
         switch (actionCommand){
-            case SCHEDULE_VIEW_CONTROLLER_REQUEST:
+            case SCHEDULE_LIST_VIEW_CONTROLLER_REQUEST:
                 try{
                 getModalView().setClosed(true); 
                 }
@@ -1157,7 +1150,7 @@ getDescriptor().getViewDescription().getScheduleDay());
                         isEqual(getDescriptor().getControllerDescription().getScheduleDay())){
                     ActionEvent actionEvent = new ActionEvent(
                     this,ActionEvent.ACTION_PERFORMED,
-                        ViewController.ScheduleViewControllerActionEvent.SCHEDULE_VIEW_CONTROLLER_REQUEST.toString());
+                        ViewController.ScheduleViewControllerActionEvent.SCHEDULE_LIST_VIEW_CONTROLLER_REQUEST.toString());
                     this.getMyController().actionPerformed(actionEvent);
                 }
                 break;

@@ -841,7 +841,7 @@ public class PatientView extends View
             getMyController().getDescriptor().getViewDescription().setScheduleDay(day);
             ActionEvent actionEvent = new ActionEvent(
                     this,ActionEvent.ACTION_PERFORMED,
-                    ViewController.PatientViewControllerActionEvent.SCHEDULE_VIEW_CONTROLLER_REQUEST.toString());
+                    ViewController.PatientViewControllerActionEvent.SCHEDULE_LIST_VIEW_CONTROLLER_REQUEST.toString());
             this.getMyController().actionPerformed(actionEvent);
         }
     }

@@ -283,7 +283,7 @@
         <Component class="com.github.lgooddatepicker.components.DatePicker" name="dayDatePicker">
           <AuxValues>
             <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new com.github.lgooddatepicker.components.DatePicker()"/>
-            <AuxValue name="JavaCodeGenerator_InitCodePre" type="java.lang.String" value="settings = new DatePickerSettings();&#xa;dayDatePicker = new com.github.lgooddatepicker.components.DatePicker(settings);&#xa;settings.setFormatForDatesCommonEra(DateTimeFormatter.ofPattern(&quot;dd/MM/yyyy&quot;));&#xa;settings.setAllowEmptyDates(false);&#xa;//settings.setVetoPolicy(new AppointmentDateVetoPolicy());&#xa;settings.setAllowKeyboardEditing(false);"/>
+            <AuxValue name="JavaCodeGenerator_InitCodePre" type="java.lang.String" value="DatePickerSettings settings = new DatePickerSettings();&#xa;dayDatePicker = new com.github.lgooddatepicker.components.DatePicker(settings);&#xa;&#xa;settings.setFormatForDatesCommonEra(DateTimeFormatter.ofPattern(&quot;dd/MM/yyyy&quot;));&#xa;settings.setAllowEmptyDates(false);&#xa;//settings.setVetoPolicy(new AppointmentDateVetoPolicy());&#xa;settings.setAllowKeyboardEditing(false);"/>
           </AuxValues>
         </Component>
         <Component class="javax.swing.JButton" name="btnPreviousDay">

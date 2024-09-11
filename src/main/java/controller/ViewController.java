@@ -289,10 +289,13 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         PATIENT_SELECTION_VIEW_CONTROLLER_REQUEST,
         PATIENT_VIEW_CONTROLLER_REQUEST,
         
-        SCHEDULE_VIEW_CONTROLLER_REQUEST,
+        SCHEDULE_LIST_VIEW_CONTROLLER_REQUEST,
+        SCHEDULE_DIARY_VIEW_CONTROLLER_REQUEST,
         TO_DO_VIEW_CONTROLLER_REQUEST,
         TEST_PATIENT_VIEW_CONTROLLER_REQUEST,
         TREATMENT_VIEW_CONTROLLER_REQUEST,
+        
+        CLOSE_SCHEDULE_VIEW_FOR_SCHEDULE_DATE_REQUEST,
 
         INITIALISE_VIEW,
         BRING_TO_FRONT_SCHEDULE_VIEW_IF_ACTIVE_REQUEST,
@@ -528,7 +531,7 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         PATIENT_UPDATE_REQUEST,
         PRINT_PATIENT_MEDICAL_HISTORY_REQUEST,
         RECOVER_PATIENT_REQUEST,
-        SCHEDULE_VIEW_CONTROLLER_REQUEST,
+        SCHEDULE_LIST_VIEW_CONTROLLER_REQUEST,
         VIEW_ACTIVATED_NOTIFICATION,
         VIEW_CHANGED_NOTIFICATION,
         VIEW_CLOSE_NOTIFICATION, 
@@ -619,7 +622,7 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         APPOINTMENT_TREATMENT_STATE_RESET_REQUEST,
         EMPTY_SLOTS_FROM_DAY_REQUEST,
         MODAL_VIEWER_ACTIVATED,
-        SCHEDULE_VIEW_CONTROLLER_REQUEST,
+        SCHEDULE_LIST_VIEW_CONTROLLER_REQUEST,
         SURGERY_DAYS_EDIT_REQUEST,
         UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_CREATE_REQUEST,
         UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_UPDATE_REQUEST,
@@ -684,6 +687,11 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
     public static enum TreatmentViewControllerPropertyChangeEvent{
         TREATMENT_RECEIVED,
         TREATMENT_ERROR_RECEIVED
+    }
+    
+    public enum ScheduleViewMode{
+        DIARY,
+        LIST
     }
 
     public enum ViewMode {

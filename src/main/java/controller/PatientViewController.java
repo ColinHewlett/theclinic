@@ -113,7 +113,7 @@ public class PatientViewController extends ViewController {
             case PATIENT_MEDICAL_HISTORY_VIEW_CONTROLLER_REQUEST:
                 doPatientMedicalHistoryViewControllerRequest();
                 break;
-            case SCHEDULE_VIEW_CONTROLLER_REQUEST: //on selection of row in appointment history table
+            case SCHEDULE_LIST_VIEW_CONTROLLER_REQUEST: //on selection of row in appointment history table
                 doScheduleViewControllerRequest();
                 break;
             case VIEW_CLOSE_NOTIFICATION://notification from view uts shutting down
@@ -293,7 +293,7 @@ public class PatientViewController extends ViewController {
                 getDescriptor().getViewDescription().getScheduleDay());
         ActionEvent actionEvent = new ActionEvent(
             this,ActionEvent.ACTION_PERFORMED,
-            ViewController.PatientViewControllerActionEvent.SCHEDULE_VIEW_CONTROLLER_REQUEST.toString());
+            ViewController.PatientViewControllerActionEvent.SCHEDULE_LIST_VIEW_CONTROLLER_REQUEST.toString());
         this.getMyController().actionPerformed(actionEvent);
     }
     

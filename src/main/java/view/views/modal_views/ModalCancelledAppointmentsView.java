@@ -357,7 +357,7 @@ public class ModalCancelledAppointmentsView extends ModalView {
             getMyController().getDescriptor().getViewDescription().setScheduleDay(day);
             actionEvent = new ActionEvent(
                     this,ActionEvent.ACTION_PERFORMED,
-                    ViewController.ScheduleViewControllerActionEvent.SCHEDULE_VIEW_CONTROLLER_REQUEST.toString());
+                    ViewController.ScheduleViewControllerActionEvent.SCHEDULE_LIST_VIEW_CONTROLLER_REQUEST.toString());
             this.getMyController().actionPerformed(actionEvent);
             
         }else
@@ -374,7 +374,7 @@ public class ModalCancelledAppointmentsView extends ModalView {
             getMyController().getDescriptor().getViewDescription().setScheduleDay(day);
             ActionEvent actionEvent = new ActionEvent(
                     this,ActionEvent.ACTION_PERFORMED,
-                    ViewController.ScheduleViewControllerActionEvent.SCHEDULE_VIEW_CONTROLLER_REQUEST.toString());
+                    ViewController.ScheduleViewControllerActionEvent.SCHEDULE_LIST_VIEW_CONTROLLER_REQUEST.toString());
             this.getMyController().actionPerformed(actionEvent);
         }
     }//GEN-LAST:event_btnGoToScheduleForSelectedAppointmentActionPerformed
