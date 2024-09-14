@@ -121,7 +121,7 @@ public class View extends JInternalFrame
                 setView(makeView(new MedicalConditionView(viewer, controller, desktopView)));
                 break;
             case SCHEDULE_VIEW:
-                setView(makeView(new ScheduleView(viewer, controller, desktopView)));
+                setView(makeView(new ScheduleListView(viewer, controller, desktopView)));
                 break;
             case PATIENT_MEDICAL_HISTORY_VIEW:
                 setView(makeView(new PatientMedicalHistoryView(viewer, controller, desktopView)));
@@ -178,6 +178,12 @@ public class View extends JInternalFrame
             case PATIENT_SELECTION_VIEW:
                 setModalView(makeView(new ModalPatientSelectionView(viewer, controller,desktopView)));
                 break;
+            case BOOKABLE_SLOT_SCANNER_VIEW://ModalBookableSlotScannerView
+                setModalView(makeView(new ModalBookableSlotScannerView(viewer, controller,desktopView)));
+                break;
+            case UNBOOKABLE_SLOT_SCANNER_VIEW:
+                setModalView(makeView(new ModalUnbookableSlotScannerView(viewer, controller,desktopView)));
+                break;
             case NON_SURGERY_DAY_EDITOR_VIEW:
                 setModalView(makeView(new ModalNonSurgeryDayEditorView(viewer, controller, desktopView)));
                 break;
@@ -211,6 +217,8 @@ public class View extends JInternalFrame
 
     public static enum Viewer { 
         APPOINTMENT_CREATOR_VIEW,
+        BOOKABLE_SLOT_SCANNER_VIEW,
+        UNBOOKABLE_SLOT_SCANNER_VIEW,
         SCHEDULE_EDITOR_VIEW,
         APPOINTMENT_TREATMENT_VIEW,
         APPOINTMENT_EMPTY_SLOT_SCAN_CONFIGURATION_VIEW,

@@ -1,11 +1,9 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package view.views.view_support_classes.models;
 
-import model.entity.Appointment;
 import java.time.DayOfWeek;
 import java.time.Duration;
 import java.time.LocalDate;
@@ -13,43 +11,42 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import javax.swing.table.AbstractTableModel;
+import model.entity.Appointment;
 
 /**
- * A custom model for display of empty slot availability is required to handle the 
- * processing requirements. The model returns String values thus avoiding the need
- * for custom renderers.
+ *
  * @author colin
  */
-public class EmptySlotAvailability2ColumnTableModel extends AbstractTableModel{
+public class UnbookableSlotsTableModel extends AbstractTableModel{
     public static final LocalTime LAST_APPOINTMENT_SLOT = LocalTime.of(17,0);
-    public ArrayList<Appointment> emptySlots = new ArrayList<>();
-    private DateTimeFormatter emptySlotFormat = DateTimeFormatter.ofPattern("dd/MM/yy HH:mm (EEE)");
-    private enum COLUMN{EmptySlot, Duration};
+    public ArrayList<Appointment> unbookableSlots = new ArrayList<>();
+    private DateTimeFormatter unbookableSlotFormat = DateTimeFormatter.ofPattern("dd/MM/yy HH:mm (EEE)");
+    private enum COLUMN{UnbookableSlots, Duration};
     private final Class[] columnClass = new Class[] { 
         String.class,
         String.class};
     
     
-    public ArrayList<Appointment> getEmptySlots(){
-        return this.emptySlots;
+    public ArrayList<Appointment> getUnbookableSlots(){
+        return this.unbookableSlots;
     }
     
     public void addElement(Appointment a){
-        emptySlots.add(a);
+        unbookableSlots.add(a);
     }
     
     public void removeAllElements(){
-        emptySlots.clear();
+        unbookableSlots.clear();
         this.fireTableDataChanged();
     }
     
     public Appointment getElementAt(int row){
-        return emptySlots.get(row);
+        return unbookableSlots.get(row);
     }
 
     @Override
     public int getRowCount(){
-        return getEmptySlots().size();
+        return getUnbookableSlots().size();
     }
 
     @Override
@@ -62,7 +59,7 @@ public class EmptySlotAvailability2ColumnTableModel extends AbstractTableModel{
         String result = null;
         switch (columnIndex){
             case 0:
-                result = "Empty slots";
+                result = "Unbookable slots";
                 break;
             case 1:
                 result = "Duration";
@@ -80,10 +77,10 @@ public class EmptySlotAvailability2ColumnTableModel extends AbstractTableModel{
     @Override
     public Object getValueAt(int row, int columnIndex){
         Object result = null;
-        Appointment slot = getEmptySlots().get(row);
+        Appointment slot = getUnbookableSlots().get(row);
         switch (columnIndex){
             case 0:
-                result = slot.getStart().format(emptySlotFormat);  
+                result = slot.getStart().format(unbookableSlotFormat);  
                 break;   
             case 1:
                 result = convertSlotDurationToString(
@@ -157,7 +154,7 @@ public class EmptySlotAvailability2ColumnTableModel extends AbstractTableModel{
             }
             currentDate = currentDate.plusDays(--dayCount);
             result = "until " + 
-                    currentDate.atTime(LAST_APPOINTMENT_SLOT).format(emptySlotFormat);
+                    currentDate.atTime(LAST_APPOINTMENT_SLOT).format(unbookableSlotFormat);
         }
         return result;
     }
@@ -175,3 +172,4 @@ public class EmptySlotAvailability2ColumnTableModel extends AbstractTableModel{
                             || day.getDayOfWeek().equals(DayOfWeek.FRIDAY));
     }
 }
+
