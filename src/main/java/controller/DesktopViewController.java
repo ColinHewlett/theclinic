@@ -1263,8 +1263,7 @@ public class DesktopViewController extends ViewController{
             } 
             avc.setDescriptor(ed);
             
-            avc.setView(new View().make(
-                View.Viewer.SCHEDULE_VIEW,
+            avc.setView(new View().make(View.Viewer.SCHEDULE_LIST_VIEW,
                 avc, 
                 getDesktopView()));
 
@@ -1297,8 +1296,7 @@ public class DesktopViewController extends ViewController{
             } 
             avc.setDescriptor(ed);
             
-            avc.setView(new View().make(
-                View.Viewer.SCHEDULE_VIEW,
+            avc.setView(new View().make(View.Viewer.SCHEDULE_LIST_VIEW,
                 avc, 
                 getDesktopView()));
 
@@ -1722,7 +1720,7 @@ public class DesktopViewController extends ViewController{
                                             new ToDoViewController(this,getDesktopView()));
                 ToDoViewController tvc = 
                         toDoViewControllers.get(toDoViewControllers.size()-1);
-                tvc.setView(new View().make(View.Viewer.TO_DO_VIEW/*SCHEDULE_VIEW*/,
+                tvc.setView(new View().make(View.Viewer.TO_DO_VIEW/*SCHEDULE_LIST_VIEW*/,
                         tvc, 
                         getDesktopView()));
                 
@@ -1749,7 +1747,7 @@ public class DesktopViewController extends ViewController{
                                             new NotificationViewController(this,getDesktopView()));
                 NotificationViewController nvc = 
                         notificationViewControllers.get(notificationViewControllers.size()-1);
-                nvc.setView(new View().make(View.Viewer.NOTIFICATION_VIEW/*SCHEDULE_VIEW*/,
+                nvc.setView(new View().make(View.Viewer.NOTIFICATION_VIEW/*SCHEDULE_LIST_VIEW*/,
                         nvc, 
                         getDesktopView()));
                 

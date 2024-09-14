@@ -143,6 +143,7 @@ public class ScheduleListView extends View
         REQUEST_SCHEDULE_LIST_VIEW,
         REQUEST_SEARCH_AVAILABLE_SLOTS,
         REQUEST_SURGERY_DAY_EDITOR,
+        REQUEST_SWITCH_VIEW,            //SVC know which view tro switch to because the ActionEvent source the type (List/Diary) the caller is
         REQUEST_TREATMENT_VIEW,
         REQUEST_UNBOOKABLE_SLOT_SCANNER_VIEW
     }

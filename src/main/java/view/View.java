@@ -120,8 +120,11 @@ public class View extends JInternalFrame
             case MEDICAL_CONDITION_VIEW:
                 setView(makeView(new MedicalConditionView(viewer, controller, desktopView)));
                 break;
-            case SCHEDULE_VIEW:
+            case SCHEDULE_LIST_VIEW:
                 setView(makeView(new ScheduleListView(viewer, controller, desktopView)));
+                break;
+            case SCHEDULE_DIARY_VIEW:
+                setView(makeView(new ScheduleDiaryView(viewer, controller, desktopView)));
                 break;
             case PATIENT_MEDICAL_HISTORY_VIEW:
                 setView(makeView(new PatientMedicalHistoryView(viewer, controller, desktopView)));
@@ -246,7 +249,8 @@ public class View extends JInternalFrame
         PATIENT_VIEW,        
         NOTIFICATION_VIEW,
         NOTIFICATION_EDITOR_VIEW,
-        SCHEDULE_VIEW,
+        SCHEDULE_DIARY_VIEW,
+        SCHEDULE_LIST_VIEW,
         UNACTIONED_PATIENT_NOTIFICATION_VIEW,
         SURGERY_DAY_EDITOR_VIEW,
         UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_VIEW,

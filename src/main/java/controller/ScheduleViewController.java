@@ -120,7 +120,7 @@ public class ScheduleViewController extends ViewController{
             
 
             switch(the_view.getMyViewType()){
-                case SCHEDULE_VIEW:
+                case SCHEDULE_LIST_VIEW:
                     doPrimaryViewActionRequest(e);
                     break;
                 default:

@@ -106,13 +106,136 @@ import static model.non_entity.SystemDefinition.ScheduleSlotType.UNBOOKABLE_SCHE
  *
  * @author colin
  */
-public class ScheduleDiaryView extends javax.swing.JInternalFrame {
+public class ScheduleDiaryView extends View 
+                          implements ActionListener, 
+                                     ListSelectionListener,
+                                     MouseListener,
+                                     DateChangeListener,
+                                     DateHighlightPolicy{
 
     /**
-     * Creates new form ScheduleDiaryView
+     * 
+     * @param myViewType
+     * @param controller
+     * @param desktopView 
      */
-    public ScheduleDiaryView() {
-        initComponents();
+    public ScheduleDiaryView(View.Viewer myViewType, 
+            ViewController controller, 
+            DesktopView desktopView) {
+        setTitle("Appointment schedule");
+        this.setMyViewType(myViewType);
+        setMyController(controller); 
+        setDesktopView(desktopView);
+    }
+    
+    @Override
+    public void actionPerformed(ActionEvent e){
+        
+    }
+    
+    @Override
+    public void dateChanged(DateChangeEvent e){
+        getMyController().getDescriptor().getViewDescription().setScheduleDay(this.dayDatePicker.getDate());
+            clearSelectionFromScheduleTable();
+            ActionEvent actionEvent = new ActionEvent(this, ActionEvent.ACTION_PERFORMED,
+                    ViewController.ScheduleViewControllerActionEvent.APPOINTMENTS_FOR_DAY_REQUEST.toString());
+            this.getMyController().actionPerformed(actionEvent);
+    }
+    
+    @Override
+    public HighlightInformation getHighlightInformationOrNull(LocalDate date) {
+        if (date.getDayOfMonth()==7){
+            if (date.getMonthValue()==9){
+                if (date.getYear()==2022){
+                    return new HighlightInformation(Color.red, null,"holiday");
+                }
+            }
+        }
+        return null;
+    }
+    
+    private boolean tableValueChangedListenerActivated = false;
+    @Override
+    public void mouseClicked(MouseEvent e){
+        if (e.getSource() == tblScheduleMorning){
+            if (!tableValueChangedListenerActivated){
+                int selectedRow = tblScheduleMorning.rowAtPoint(e.getPoint());
+                if (selectedRow!=-1 && tblScheduleMorning.isRowSelected(selectedRow))
+                tblScheduleMorning.clearSelection(); // Deselect the clicked row
+            }else tableValueChangedListenerActivated = false;
+        }else if (e.getSource() == tblScheduleAfternoon){
+            if (!tableValueChangedListenerActivated){
+                int selectedRow = tblScheduleAfternoon.rowAtPoint(e.getPoint());
+                if (selectedRow!=-1 && tblScheduleAfternoon.isRowSelected(selectedRow))
+                tblScheduleAfternoon.clearSelection(); // Deselect the clicked row
+            }else tableValueChangedListenerActivated = false;
+        }else if (e.getSource() == tblScheduleEvening){
+            if (!tableValueChangedListenerActivated){
+                int selectedRow = tblScheduleEvening.rowAtPoint(e.getPoint());
+                if (selectedRow!=-1 && tblScheduleEvening.isRowSelected(selectedRow))
+                tblScheduleEvening.clearSelection(); // Deselect the clicked row
+            }else tableValueChangedListenerActivated = false;
+        }
+    }
+    
+    @Override
+    public void mouseEntered(MouseEvent e){
+        
+    }
+    
+    @Override
+    public void mouseExited(MouseEvent e){
+        
+    }
+    
+    @Override
+    public void mouseReleased(MouseEvent e){
+        
+    }
+    
+    @Override
+    public void mousePressed(MouseEvent e){
+        
+    }
+    
+    @Override
+    public void propertyChange(PropertyChangeEvent e){
+
+    }
+    
+    @Override
+    public void valueChanged(ListSelectionEvent e){
+        
+    }
+    
+    private ListSelectionModel lsmForScheduleMorningTable = null;
+    private void setScheduleMorningTableListener(){
+        this.tblScheduleMorning.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
+        lsmForScheduleMorningTable = this.tblScheduleMorning.getSelectionModel();
+        lsmForScheduleMorningTable.addListSelectionListener(this); 
+        tblScheduleMorning.addMouseListener(this);
+    }
+    
+    private ListSelectionModel lsmForScheduleAfternoonTable = null;
+    private void setScheduleAfternoonTableListener(){
+        this.tblScheduleAfternoon.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
+        lsmForScheduleAfternoonTable = this.tblScheduleAfternoon.getSelectionModel();
+        lsmForScheduleAfternoonTable.addListSelectionListener(this); 
+        tblScheduleAfternoon.addMouseListener(this);
+    }
+    
+    private ListSelectionModel lsmForScheduleEveningTable = null;
+    private void setScheduleEveningTableListener(){
+        this.tblScheduleEvening.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
+        lsmForScheduleEveningTable = this.tblScheduleEvening.getSelectionModel();
+        lsmForScheduleEveningTable.addListSelectionListener(this); 
+        tblScheduleEvening.addMouseListener(this);
+    }
+    
+    private void clearSelectionFromScheduleTable(){
+        if (tblScheduleMorning!=null) tblScheduleMorning.clearSelection();
+        if (this.tblScheduleAfternoon!=null) tblScheduleAfternoon.clearSelection();
+        if (tblScheduleMorning!=null) tblScheduleMorning.clearSelection();
     }
 
     /**
@@ -128,9 +251,9 @@ public class ScheduleDiaryView extends javax.swing.JInternalFrame {
         scrMorningTable = new javax.swing.JScrollPane();
         tblScheduleMorning = new javax.swing.JTable();
         scrAfternoonTable = new javax.swing.JScrollPane();
-        jTable2 = new javax.swing.JTable();
+        tblScheduleAfternoon = new javax.swing.JTable();
         scrEveningTable = new javax.swing.JScrollPane();
-        jTable3 = new javax.swing.JTable();
+        tblScheduleEvening = new javax.swing.JTable();
         jPanel2 = new javax.swing.JPanel();
         dayDatePicker = new com.github.lgooddatepicker.components.DatePicker();
         btnPreviousDay = new javax.swing.JButton();
@@ -196,7 +319,7 @@ public class ScheduleDiaryView extends javax.swing.JInternalFrame {
         ));
         scrMorningTable.setViewportView(tblScheduleMorning);
 
-        jTable2.setModel(new javax.swing.table.DefaultTableModel(
+        tblScheduleAfternoon.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null},
                 {null, null, null, null},
@@ -240,9 +363,9 @@ public class ScheduleDiaryView extends javax.swing.JInternalFrame {
                 "Title 1", "Title 2", "Title 3", "Title 4"
             }
         ));
-        scrAfternoonTable.setViewportView(jTable2);
+        scrAfternoonTable.setViewportView(tblScheduleAfternoon);
 
-        jTable3.setModel(new javax.swing.table.DefaultTableModel(
+        tblScheduleEvening.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null},
                 {null, null, null, null},
@@ -286,9 +409,9 @@ public class ScheduleDiaryView extends javax.swing.JInternalFrame {
                 "Title 1", "Title 2", "Title 3", "Title 4"
             }
         ));
-        jTable3.setMaximumSize(new java.awt.Dimension(2147483647, 700));
-        jTable3.setMinimumSize(new java.awt.Dimension(60, 700));
-        scrEveningTable.setViewportView(jTable3);
+        tblScheduleEvening.setMaximumSize(new java.awt.Dimension(2147483647, 700));
+        tblScheduleEvening.setMinimumSize(new java.awt.Dimension(60, 700));
+        scrEveningTable.setViewportView(tblScheduleEvening);
 
         javax.swing.GroupLayout pnlDiaryLayout = new javax.swing.GroupLayout(pnlDiary);
         pnlDiary.setLayout(pnlDiaryLayout);
@@ -309,9 +432,8 @@ public class ScheduleDiaryView extends javax.swing.JInternalFrame {
                 .addGap(6, 6, 6)
                 .addGroup(pnlDiaryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                     .addComponent(scrMorningTable, javax.swing.GroupLayout.DEFAULT_SIZE, 616, Short.MAX_VALUE)
-                    .addGroup(pnlDiaryLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                        .addComponent(scrAfternoonTable, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 616, Short.MAX_VALUE)
-                        .addComponent(scrEveningTable, javax.swing.GroupLayout.Alignment.LEADING)))
+                    .addComponent(scrAfternoonTable, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 616, Short.MAX_VALUE)
+                    .addComponent(scrEveningTable, javax.swing.GroupLayout.Alignment.LEADING))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -504,12 +626,12 @@ public class ScheduleDiaryView extends javax.swing.JInternalFrame {
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
-    private javax.swing.JTable jTable2;
-    private javax.swing.JTable jTable3;
     private javax.swing.JPanel pnlDiary;
     private javax.swing.JScrollPane scrAfternoonTable;
     private javax.swing.JScrollPane scrEveningTable;
     private javax.swing.JScrollPane scrMorningTable;
+    private javax.swing.JTable tblScheduleAfternoon;
+    private javax.swing.JTable tblScheduleEvening;
     private javax.swing.JTable tblScheduleMorning;
     // End of variables declaration//GEN-END:variables
 }
