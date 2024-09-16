@@ -591,8 +591,7 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         APPOINTMENT_CREATE_VIEW_REQUEST,
         SCHEDULE_EDITOR_DELETE_EMERGENCY_APPOINTMENT_REQUEST,
         SCHEDULE_EDITOR_MAKE_EMERGENCY_APPOINTMENT_REQUEST,
-        SWITCH_TO_DIARY_VIEW,
-        SWITCH_TO_LIST_VIEW,
+        SWITCH_VIEW_REQUEST,                                    //from list to diary or vice versa
         APPOINTMENT_UPDATE_VIEW_REQUEST,
         CLINICAL_NOTE_VIEW_CONTROLLER_REQUEST,
         NON_SURGERY_DAY_SCHEDULE_VIEW_REQUEST,

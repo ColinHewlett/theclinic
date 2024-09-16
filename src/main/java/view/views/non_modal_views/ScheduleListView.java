@@ -139,8 +139,6 @@ public class ScheduleListView extends View
         REQUEST_NOW,
         REQUEST_PREVIOUS_DAY,
         REQUEST_PRINT_SCHEDULE,
-        REQUEST_SCHEDULE_DIARY_VIEW,
-        REQUEST_SCHEDULE_LIST_VIEW,
         REQUEST_SEARCH_AVAILABLE_SLOTS,
         REQUEST_SURGERY_DAY_EDITOR,
         REQUEST_SWITCH_VIEW,            //SVC know which view tro switch to because the ActionEvent source the type (List/Diary) the caller is
@@ -983,6 +981,7 @@ public class ScheduleListView extends View
                 doOpenDocumentForPrinting(SystemDefinition.getPMSPrintFolder() 
                         + SystemDefinition.PATIENT_SCHEDULE_FILENAME);
                 break;
+            /*
             case REQUEST_SCHEDULE_DIARY_VIEW:
                 setScheduleViewMode(ScheduleViewMode.DIARY);
                 
@@ -995,12 +994,26 @@ public class ScheduleListView extends View
                 actionEvent = new ActionEvent(this, ActionEvent.ACTION_PERFORMED,
                         ViewController.ScheduleViewControllerActionEvent.APPOINTMENTS_FOR_DAY_REQUEST.toString());
                 this.getMyController().actionPerformed(actionEvent);
-                break;
+                break;*/
             case REQUEST_SEARCH_AVAILABLE_SLOTS:
                 doSearchAvailableSlotsAction();
                 break;
             case REQUEST_SURGERY_DAY_EDITOR:
                 mniSurgeryDaysEditorActionPerformed();
+                break;
+            case REQUEST_SWITCH_VIEW:
+                /**
+                 * flagging a view switch is pending because
+                 * -- the VC will send this view a CLOSE_VIEW_REQUEST_RECEIVED property change event 
+                 * -- and its important that in this pending state the internalFrameClosing listener is removed
+                 * -- else the listener view will send a VIEW_CLOSED_NOTIFICATION to the VC on the view's closure 
+                 * -- and the VC would then request to be removed which is not required
+                 * On closure of the view the VC will open a new ScheduleDiaryView in its place
+                 */
+                setIsViewSwitchPending(true);
+                actionEvent = new ActionEvent(this, ActionEvent.ACTION_PERFORMED,
+                        ViewController.ScheduleViewControllerActionEvent.SWITCH_VIEW_REQUEST.toString());
+                this.getMyController().actionPerformed(actionEvent);
                 break;
             case REQUEST_TREATMENT_VIEW:
                 actionEvent = new ActionEvent(
@@ -1103,6 +1116,7 @@ public class ScheduleListView extends View
         //setViewDescriptor((Descriptor)e.getNewValue());
         switch (propertyName){
             case CLOSE_VIEW_REQUEST_RECEIVED:
+                if (getIsViewSwitchPending()) removeInternalFrameListener(internalFrameAdapter);
                 doCloseViewAction();
                 break;
             case APPOINTMENTS_FOR_DAY_RECEIVED:
@@ -1466,6 +1480,14 @@ public class ScheduleListView extends View
             }
         } */     
     }
+    
+    private boolean isViewSwitchPending = false;
+    private void setIsViewSwitchPending(boolean value){
+        isViewSwitchPending = value;
+    }
+    private boolean getIsViewSwitchPending(){
+        return isViewSwitchPending;
+    }
    
     private ListSelectionModel lsmForAppointmentsListTable = null;
     private void setAppointmentTableListener(){
@@ -1525,9 +1547,9 @@ public class ScheduleListView extends View
             setIconifiable(true);
             setResizable(true);
             setSelected(true);
-            setSize(1090
+            /*setSize(1090
                     ,685
-            );
+            );*/
             toFront();
         }catch (PropertyVetoException ex){
             
@@ -1538,6 +1560,9 @@ public class ScheduleListView extends View
                     "Schedule view controller error", JOptionPane.WARNING_MESSAGE);
         }
         //setEmptySlotAvailabilityTableListener();
+        
+        this.btnSwitchView.setActionCommand(Action.REQUEST_SWITCH_VIEW.toString());
+        this.btnSwitchView.addActionListener(this);
         
         this.btnSelectBookableSlotsScanner.setEnabled(true);
         this.btnSelectBookableSlotsScanner.setActionCommand(Action.REQUEST_BOOKABLE_SLOT_SCANNER_VIEW.toString());
@@ -2241,7 +2266,7 @@ public class ScheduleListView extends View
             @Override
             public void run()
             {
-              setTitle(getMyController().getDescriptor().getViewDescription().getScheduleDay().format(DateTimeFormatter.ofPattern("dd/MM/yy")) + " Appointment schedule");
+              setTitle(getMyController().getDescriptor().getViewDescription().getScheduleDay().format(DateTimeFormatter.ofPattern("dd/MM/yy")) + "Schedule");
               setIsViewInitialised(true);       
             }
         });
@@ -2710,6 +2735,7 @@ public class ScheduleListView extends View
         }else JOptionPane.showInternalMessageDialog(
                 this, "selected appointment start is null!", "View error", JOptionPane.WARNING_MESSAGE);
     }
+    
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -2740,7 +2766,7 @@ public class ScheduleListView extends View
         pnlScheduleForDay = new javax.swing.JPanel();
         scrAppointmentsForDayTable = new javax.swing.JScrollPane();
         pnlView = new javax.swing.JPanel();
-        btnSwitchToDiaryView = new javax.swing.JButton();
+        btnSwitchView = new javax.swing.JButton();
         jMenuBar1 = new javax.swing.JMenuBar();
         mnuOptions = new javax.swing.JMenu();
         mniPrintScheduleSelection = new javax.swing.JMenuItem();
@@ -2913,7 +2939,7 @@ public class ScheduleListView extends View
 
         pnlView.setBorder(javax.swing.BorderFactory.createTitledBorder("View"));
 
-        btnSwitchToDiaryView.setText("<html><center>Switch</center><center>to diary</center><center>view</center></html>");
+        btnSwitchView.setText("<html><center>Switch</center><center>to diary</center><center>view</center></html>");
 
         javax.swing.GroupLayout pnlViewLayout = new javax.swing.GroupLayout(pnlView);
         pnlView.setLayout(pnlViewLayout);
@@ -2921,14 +2947,14 @@ public class ScheduleListView extends View
             pnlViewLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlViewLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(btnSwitchToDiaryView, javax.swing.GroupLayout.DEFAULT_SIZE, 87, Short.MAX_VALUE)
+                .addComponent(btnSwitchView, javax.swing.GroupLayout.DEFAULT_SIZE, 87, Short.MAX_VALUE)
                 .addContainerGap())
         );
         pnlViewLayout.setVerticalGroup(
             pnlViewLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlViewLayout.createSequentialGroup()
                 .addGap(25, 25, 25)
-                .addComponent(btnSwitchToDiaryView, javax.swing.GroupLayout.PREFERRED_SIZE, 88, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(btnSwitchView, javax.swing.GroupLayout.PREFERRED_SIZE, 88, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(39, Short.MAX_VALUE))
         );
 
@@ -3023,7 +3049,7 @@ public class ScheduleListView extends View
     private javax.swing.JButton btnSelectBookableSlotsScanner;
     private javax.swing.JButton btnSelectTreatmentRequest;
     private javax.swing.JButton btnSelectUnbookableSlotsScanner;
-    private javax.swing.JButton btnSwitchToDiaryView;
+    private javax.swing.JButton btnSwitchView;
     private com.github.lgooddatepicker.components.DatePicker dayDatePicker;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JPopupMenu.Separator jSeparator3;

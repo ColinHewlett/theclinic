@@ -41,6 +41,8 @@ import model.entity.AppointmentTreatment;
 import model.entity.Entity;
 import model.entity.Treatment;
 import model.non_entity.TreatmentWithState;
+import view.views.non_modal_views.ScheduleDiaryView;
+import view.views.non_modal_views.ScheduleListView;
 
 /**
  *
@@ -121,6 +123,7 @@ public class ScheduleViewController extends ViewController{
 
             switch(the_view.getMyViewType()){
                 case SCHEDULE_LIST_VIEW:
+                case SCHEDULE_DIARY_VIEW:     
                     doPrimaryViewActionRequest(e);
                     break;
                 default:
@@ -664,6 +667,9 @@ public class ScheduleViewController extends ViewController{
         ViewController.ScheduleViewControllerActionEvent actionCommand =
                ViewController.ScheduleViewControllerActionEvent.valueOf(e.getActionCommand());
         switch (actionCommand){
+            case SWITCH_VIEW_REQUEST:
+                doSwitchView();
+                break;
             case BOOKABLE_SLOT_SCANNER_VIEW_REQUEST:
                 doBookableSlotScannerViewRequest(e);
                 break;
@@ -951,6 +957,49 @@ public class ScheduleViewController extends ViewController{
             this.actionPerformed(actionEvent);     
         }
     }
+    
+    private void doSwitchView(){
+        boolean isError = false;
+        View _view = getView();
+        /*
+        this.firePropertyChangeEvent(
+            ViewController.ScheduleViewControllerPropertyChangeEvent.CLOSE_VIEW_REQUEST_RECEIVED.toString(), 
+            getView(), 
+            this,
+            null,
+            null
+        );*/
+        if (_view instanceof ScheduleListView){
+            setView(new View().make(View.Viewer.SCHEDULE_DIARY_VIEW,this, getDesktopView()));
+        }else if (_view instanceof ScheduleDiaryView){
+            setView(new View().make(View.Viewer.SCHEDULE_LIST_VIEW,this, getDesktopView()));
+        }else{
+            isError = true;
+            String message = "Unexpected view type encountered ("
+                    + _view.getClass().getSimpleName() + ")";
+            displayErrorMessage(message, "View controller error", JOptionPane.WARNING_MESSAGE);
+        }
+        if (!isError){
+            this.firePropertyChangeEvent(
+            ViewController.ScheduleViewControllerPropertyChangeEvent.CLOSE_VIEW_REQUEST_RECEIVED.toString(), 
+            _view, 
+            this,
+            null,
+            null);
+            
+            doAppointmentForDayRequest(getDescriptor().
+                    getControllerDescription().getScheduleDay());
+            firePropertyChangeEvent(
+                    ViewController.DesktopViewControllerPropertyChangeEvent.
+                            SCHEDULE_VIEW_CONTROLLER_CHANGE_NOTIFICATION.toString(),
+                    (DesktopViewController)getMyController(),
+                    this,
+                    null,
+                    getDescriptor()
+            );
+        }
+    }
+    
     private void doSurgeryDaysEditorViewAction(ActionEvent e){
         ViewController.ScheduleViewControllerActionEvent actionCommand =
                 ViewController.ScheduleViewControllerActionEvent.valueOf(e.getActionCommand());

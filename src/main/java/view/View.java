@@ -317,11 +317,11 @@ public class View extends JInternalFrame
             view.getDesktopView().getDeskTop().add(view.getMyController().getView());
             view.toFront();
 
-            try{
+            /*try{
                 view.setSelected(true);
             }catch(PropertyVetoException ex){
 
-            }
+            }*/
             
         //});
         return view;

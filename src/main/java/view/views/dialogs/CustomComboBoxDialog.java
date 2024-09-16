@@ -15,8 +15,8 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Iterator;
 import model.entity.Patient;
-import view.views.non_modal_views.ScheduleView.ScheduleDiaryAction;
-import view.views.non_modal_views.ScheduleView;
+import view.views.non_modal_views.ScheduleDiaryView.ScheduleDiaryAction;
+import view.views.non_modal_views.ScheduleDiaryView;
 
 public class CustomComboBoxDialog extends JDialog {
 
@@ -94,7 +94,7 @@ public class CustomComboBoxDialog extends JDialog {
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
     }
 
-    public CustomComboBoxDialog(Frame owner, String title, ScheduleView view) {
+    public CustomComboBoxDialog(Frame owner, String title, ScheduleDiaryView view) {
         super(owner, title, true);
         setLayout(new BorderLayout());
         

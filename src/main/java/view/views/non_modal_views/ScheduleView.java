@@ -800,12 +800,12 @@ public class ScheduleView extends View
                                 //dialog.initialise();
                                 //patient = dialog.getSelectedPatient();
                                 
-                                CustomComboBoxDialog dialog = 
-                                        new CustomComboBoxDialog(new Frame(), "Select patient for new appointment",this);
-                                dialog.setVisible(true);
-                                if (dialog.isConfirmed()) {
-                                    patient = dialog.getSelectedValue();
-                                } 
+                               //CustomComboBoxDialog dialog = 
+                                        //new CustomComboBoxDialog(new Frame(), "Select patient for new appointment",this);
+                                //dialog.setVisible(true);
+                                //if (dialog.isConfirmed()) {
+                                //    patient = dialog.getSelectedValue();
+                                //} 
                                 if (patient!=null){
                                     appointment = getAppointmentFromDiaryWithUpdates();
                                     appointment.setPatient(patient);
@@ -847,6 +847,7 @@ public class ScheduleView extends View
                                         this.setViewDescriptorAppointment(appointment);
                                         break;
                                     }
+                                    /*
                                     case EXTEND_SHIFT_APPOINTMENT_DOWN:
                                         CustomComboBoxDialog dialog = new CustomComboBoxDialog(
                                                 new Frame(), ScheduleDiaryAction.EXTEND_SHIFT_APPOINTMENT_DOWN);
@@ -889,7 +890,7 @@ public class ScheduleView extends View
                                                     break;
                                             }
                                         }
-                                        break;
+                                        break;*/
                                     case SHIFT_APPOINTMENT_DOWN:
                                     case SHIFT_APPOINTMENT_UP:{
                                         appointment = getSelectedAppointmentFromDiary();

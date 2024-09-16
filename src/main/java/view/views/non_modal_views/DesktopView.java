@@ -461,7 +461,7 @@ public class DesktopView extends javax.swing.JFrame
             mnbDesktop.add(mnuSettings);
             //mnbDesktop.add(mnuPrintedForms);
         }
-        setSize(1250,812);
+        setSize(1800,950);
         Dimension test1 = getPreferredSize();
         setVisible(true);
         
