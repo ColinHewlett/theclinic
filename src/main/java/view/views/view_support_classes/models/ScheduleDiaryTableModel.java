@@ -108,14 +108,14 @@ public class ScheduleDiaryTableModel extends DefaultTableModel{
                             result = slot.getStart();
                             break;
                         case Patient:
-                            if(slot.getAppointment()!=null){ 
+                            if(slot.getAppointment().getPatient()!=null){ 
                                 if(slot.getAppointment().getStart().toLocalTime().equals(slot.getStart().toLocalTime())){
                                     result = slot.getAppointment().getPatient();
                                 }
                             }
                             break;
                         case Treatment:
-                            if(slot.getAppointment()!=null){ 
+                            if(slot.getAppointment().getPatient()!=null){ 
                                 if(slot.getAppointment().getStart().toLocalTime().equals(slot.getStart().toLocalTime())){
                                     result = slot.getAppointment().getNotes();
                                 }

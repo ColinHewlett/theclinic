@@ -559,6 +559,7 @@ public class ScheduleDiaryView extends View
                 doCloseViewAction();
                 break;
             case APPOINTMENTS_FOR_DAY_RECEIVED:
+                
                 //javax.swing.SwingUtilities.invokeLater(new Runnable(){
                 //    @Override
                 //    public void run(){
@@ -580,7 +581,188 @@ public class ScheduleDiaryView extends View
     
     @Override
     public void valueChanged(ListSelectionEvent e){
-        
+        Slot slot = null;
+        if (e.getSource().equals(this.lsmForScheduleMorningTable)){
+            
+            ArrayList<ScheduleSlotType> slotTypes = new ArrayList<>();
+            ScheduleDiaryTableModel _model = null;
+            setScheduleDiaryTableModel((ScheduleDiaryTableModel)this.tblScheduleMorning.getModel());
+            if (!e.getValueIsAdjusting()) {   // Ensure the event is not fired multiple times
+                int[] selectedRows = tblScheduleMorning.getSelectedRows();
+                if(selectedRows!=null){
+                    if(selectedRows.length>0){
+                        setSelection(selectedRows);
+                        tableValueChangedListenerActivated = true;
+                        doScheduleTitleRefresh(getAppointmentPatientSelected());
+                        setScheduleViewCurrentlySelectedRowFromDiary(getSelection()[0]);
+
+                        ScheduleDiaryTableModel model = 
+                            (ScheduleDiaryTableModel)tblScheduleMorning.getModel();
+                        slot = model.getElementAt(getSelection()[0]);
+                        setScheduleSlotType(slot);
+                        //setCurrentlySelectedSlot(slot);
+                        getMyController().getDescriptor()
+                                .getViewDescription().setAppointment(slot.getAppointment());
+
+                        setCurrentScheduleDiaryAction(getScheduleDiaryAction());
+                        doScheduleDiaryActionRequest(getCurrentScheduleDiaryAction());
+                        disableAllScheduleOperationControls();
+                        this.btnCloseView.setEnabled(true);
+                        this.btnMakeDeleteEmergencyAppointmentUndoSelection.setEnabled(true);
+                        //setViewablePortionOfSchedule(this.scrMorningTable.getViewport().getViewRect());
+                        switch(getCurrentScheduleDiaryAction()){
+                            case CANCEL_APPOINTMENT:
+                                if ((!(getScheduleSlotType().equals(ScheduleSlotType.EMERGENCY_SCHEDULE_SLOT))) &&
+                                        (!(getScheduleSlotType().equals(ScheduleSlotType.UNBOOKABLE_SCHEDULE_SLOT)))){
+                                    if (getSelection().length==1){
+                                        //getMyController().getDescriptor().getViewDescription().setAppointment(getCurrentlySelectedSlot().getAppointment());
+                                        this.btnClinicalNotesForSelectedAppointment.setEnabled(true);
+                                        this.btnSelectTreatmentRequest.setEnabled(true);
+                                    }
+                                    this.btnMarkCancelSlotUnbookableOrMoveBookingToAnotherDay.setEnabled(false);
+                                    this.setAppointmentMode(AppointmentMode.UPDATE);
+                                    this.btnCancelSelectedAppointment.setEnabled(true);
+                                }else{
+                                    String message = "Editing emergency appointments or unbookable slots \ncan only be managed in the 'list' format of the schedule";
+                                    JOptionPane.showInternalMessageDialog(this,message,"View error",JOptionPane.WARNING_MESSAGE);
+                                    tblScheduleMorning.clearSelection();
+                                }
+
+                                break;
+                            case CREATE_APPOINTMENT:
+                                this.btnCreateUpdateAppointment.setEnabled(true);
+                                this.btnClinicalNotesForSelectedAppointment.setEnabled(false);
+                                this.btnSelectTreatmentRequest.setEnabled(false);
+                                break;
+                            case EXTEND_APPOINTMENT_DOWN:
+                                if ((!(getScheduleSlotType().equals(ScheduleSlotType.EMERGENCY_SCHEDULE_SLOT))) &&
+                                        (!(getScheduleSlotType().equals(ScheduleSlotType.UNBOOKABLE_SCHEDULE_SLOT)))){
+                                    this.btnCreateUpdateAppointment.setEnabled(true);
+                                    this.btnClinicalNotesForSelectedAppointment.setEnabled(false);
+                                    this.btnSelectTreatmentRequest.setEnabled(false);
+                                }else{
+                                    String message = "Editing emergency appointments or unbookable slots \ncan only be managed in the 'list' format of the schedule";
+                                    JOptionPane.showInternalMessageDialog(this,message,"View error",JOptionPane.WARNING_MESSAGE);
+                                    tblScheduleMorning.clearSelection();
+                                }
+                                break;
+                            case EXTEND_APPOINTMENT_UP:
+                                if ((!(getScheduleSlotType().equals(ScheduleSlotType.EMERGENCY_SCHEDULE_SLOT))) &&
+                                        (!(getScheduleSlotType().equals(ScheduleSlotType.UNBOOKABLE_SCHEDULE_SLOT)))){
+                                    this.btnCreateUpdateAppointment.setEnabled(true);
+                                    this.btnClinicalNotesForSelectedAppointment.setEnabled(false);
+                                    this.btnSelectTreatmentRequest.setEnabled(false);
+                                }else{
+                                    String message = "Editing emergency appointments or unbookable slots \ncan only be managed in the 'list' format of the schedule";
+                                    JOptionPane.showInternalMessageDialog(this,message,"View error",JOptionPane.WARNING_MESSAGE);
+                                    tblScheduleMorning.clearSelection();
+                                }
+                                break;
+                            case EXTEND_APPOINTMENT_UP_AND_DOWN:
+                                if ((!(getScheduleSlotType().equals(ScheduleSlotType.EMERGENCY_SCHEDULE_SLOT))) &&
+                                        (!(getScheduleSlotType().equals(ScheduleSlotType.UNBOOKABLE_SCHEDULE_SLOT)))){
+                                    this.btnCreateUpdateAppointment.setEnabled(true);
+                                    this.btnClinicalNotesForSelectedAppointment.setEnabled(false);
+                                    this.btnSelectTreatmentRequest.setEnabled(false);
+                                }else{
+                                    String message = "Editing emergency appointments or unbookable slots \ncan only be managed in the 'list' format of the schedule";
+                                    JOptionPane.showInternalMessageDialog(this,message,"View error",JOptionPane.WARNING_MESSAGE);
+                                    tblScheduleMorning.clearSelection();
+                                }
+                                break;
+                            case EXTEND_SHIFT_APPOINTMENT_DOWN:
+                                if ((!(getScheduleSlotType().equals(ScheduleSlotType.EMERGENCY_SCHEDULE_SLOT))) &&
+                                        (!(getScheduleSlotType().equals(ScheduleSlotType.UNBOOKABLE_SCHEDULE_SLOT)))){
+                                    this.btnCreateUpdateAppointment.setEnabled(true);
+                                    this.btnClinicalNotesForSelectedAppointment.setEnabled(false);
+                                    this.btnSelectTreatmentRequest.setEnabled(false);
+                                }else{
+                                    String message = "Editing emergency appointments or unbookable slots \ncan only be managed in the 'list' format of the schedule";
+                                    JOptionPane.showInternalMessageDialog(this,message,"View error",JOptionPane.WARNING_MESSAGE);
+                                    tblScheduleMorning.clearSelection();
+                                }
+                                break;
+                            case EXTEND_SHIFT_APPOINTMENT_UP:
+                                if ((!(getScheduleSlotType().equals(ScheduleSlotType.EMERGENCY_SCHEDULE_SLOT))) &&
+                                        (!(getScheduleSlotType().equals(ScheduleSlotType.UNBOOKABLE_SCHEDULE_SLOT)))){
+                                    this.btnCreateUpdateAppointment.setEnabled(true);
+                                    this.btnClinicalNotesForSelectedAppointment.setEnabled(false);
+                                    this.btnSelectTreatmentRequest.setEnabled(false);
+                                }else{
+                                    String message = "Editing emergency appointments or unbookable slots \ncan only be managed in the 'list' format of the schedule";
+                                    JOptionPane.showInternalMessageDialog(this,message,"View error",JOptionPane.WARNING_MESSAGE);
+                                    tblScheduleMorning.clearSelection();
+                                }
+                                break;
+                            case SHIFT_APPOINTMENT_DOWN:
+                                if ((!(getScheduleSlotType().equals(ScheduleSlotType.EMERGENCY_SCHEDULE_SLOT))) &&
+                                        (!(getScheduleSlotType().equals(ScheduleSlotType.UNBOOKABLE_SCHEDULE_SLOT)))){
+                                    this.btnCreateUpdateAppointment.setEnabled(true);
+                                    this.btnClinicalNotesForSelectedAppointment.setEnabled(false);
+                                    this.btnSelectTreatmentRequest.setEnabled(false);
+                                }else{
+                                    String message = "Editing emergency appointments or unbookable slots \ncan only be managed in the 'list' format of the schedule";
+                                    JOptionPane.showInternalMessageDialog(this,message,"View error",JOptionPane.WARNING_MESSAGE);
+                                    tblScheduleMorning.clearSelection();
+                                }
+                                break;
+                            case SHIFT_APPOINTMENT_UP:
+                                if ((!(getScheduleSlotType().equals(ScheduleSlotType.EMERGENCY_SCHEDULE_SLOT))) &&
+                                        (!(getScheduleSlotType().equals(ScheduleSlotType.UNBOOKABLE_SCHEDULE_SLOT)))){
+                                    this.btnCreateUpdateAppointment.setEnabled(true);
+                                    this.btnClinicalNotesForSelectedAppointment.setEnabled(false);
+                                    this.btnSelectTreatmentRequest.setEnabled(false);
+                                }else{
+                                    String message = "Editing emergency appointments or unbookable slots \ncan only be managed in the 'list' format of the schedule";
+                                    JOptionPane.showInternalMessageDialog(this,message,"View error",JOptionPane.WARNING_MESSAGE);
+                                    tblScheduleMorning.clearSelection();
+                                }
+                                break;
+                            case SHORTEN_APPOINTMENT:
+                                if ((!(getScheduleSlotType().equals(ScheduleSlotType.EMERGENCY_SCHEDULE_SLOT))) &&
+                                        (!(getScheduleSlotType().equals(ScheduleSlotType.UNBOOKABLE_SCHEDULE_SLOT)))){
+                                    this.btnCreateUpdateAppointment.setEnabled(true);
+                                    this.btnClinicalNotesForSelectedAppointment.setEnabled(false);
+                                    this.btnSelectTreatmentRequest.setEnabled(false);
+                                }else{
+                                    String message = "Editing emergency appointments or unbookable slots \ncan only be managed in the 'list' format of the schedule";
+                                    JOptionPane.showInternalMessageDialog(this,message,"View error",JOptionPane.WARNING_MESSAGE);
+                                    tblScheduleMorning.clearSelection();
+                                }
+                                break;
+                            case NONE:
+                                if (getSelection().length == 1){
+                                    slot = getScheduleDiaryTableModel().getElementAt(getSelection()[0]);
+                                    if (slot.getIsBooked()){
+                                        if (!slot.getIsFirstSlotOfAppointment()) {
+                                            tblScheduleMorning.clearSelection();
+                                        }else{
+                                            if (!getScheduleSlotType().equals(ScheduleSlotType.UNBOOKABLE_SCHEDULE_SLOT)){
+                                                this.btnClinicalNotesForSelectedAppointment.setEnabled(true);
+                                                if (!getScheduleSlotType().equals(ScheduleSlotType.EMERGENCY_SCHEDULE_SLOT))
+                                                    this.btnSelectTreatmentRequest.setEnabled(true);
+                                            }else tblScheduleMorning.clearSelection();
+
+                                        }
+                                    }else {
+                                        tblScheduleMorning.clearSelection();
+                                    }
+                                }else {
+                                    tblScheduleMorning.clearSelection();
+                                }
+                                break;
+                        }
+                        //setViewablePortionOfSchedule(null);
+                    }else {
+                        this.doScheduleTitleRefresh(null);
+                        this.disableAllScheduleOperationControls();
+                        this.btnCloseView.setEnabled(true);
+
+                    }
+                }
+            }
+        }
+
     }
     
     private void doCloseViewAction() {                                             
@@ -632,7 +814,32 @@ public class ScheduleDiaryView extends View
         ViewController.setJTableColumnProperties(tblScheduleEvening, scrEveningTable.getPreferredSize().width, 10,40,50);
     }
     
+    private ArrayList<Slot> scheduleRowData = null;
+    private void setScheduleSlotData(){
+        scheduleRowData = new ArrayList<Slot>();
+        ArrayList<Slot> schedule = getMyController().getDescriptor()
+                        .getControllerDescription().getAppointmentSlotsForDayInDiaryFormat();
+        Iterator<Slot> it = schedule.iterator();
+        int rowCount = 0;
+        while (it.hasNext()){
+            Slot slot = (Slot)it.next();
+            for(Slot _slot : slot.get()){
+                scheduleRowData.add(_slot);
+                rowCount++;
+            }
+        }
+        LocalDateTime start = scheduleRowData.get(0).getStart(); //first slot start time
+        for (int row=rowCount; row<108; row++){
+            Slot slot = new Slot(new Appointment());
+            slot.setStart(start.plusMinutes(row*5));
+            scheduleRowData.add(slot);
+        }
+    }
+    private ArrayList<Slot> getScheduleSlotData(){
+        return scheduleRowData;
+    }
     private void populateScheduleDiaryView(){
+        
         ScheduleDiaryTableModel modelMorning = null;
         ScheduleDiaryTableModel modelAfternoon  = null;
         ScheduleDiaryTableModel modelEvening = null;
@@ -644,18 +851,15 @@ public class ScheduleDiaryView extends View
         modelEvening = (ScheduleDiaryTableModel)tblScheduleEvening.getModel();
         modelEvening.removeAllElements();
         
-        ArrayList<Slot> schedule = getMyController().getDescriptor()
-                        .getControllerDescription().getAppointmentSlotsForDayInDiaryFormat();
-        Iterator<Slot> it = schedule.iterator();
+        setScheduleSlotData();
+        Iterator<Slot> it = getScheduleSlotData().iterator();
         int rowCount = 0;
         while (it.hasNext()){
             Slot slot = (Slot)it.next();
-            for(Slot _slot : slot.get()){
-                if (rowCount<36) modelMorning.addElement(_slot);
-                else if (rowCount<72) modelAfternoon.addElement(_slot);
-                else modelEvening.addElement(_slot);
-                rowCount++;
-            } 
+            if (rowCount<36) modelMorning.addElement(slot);
+            else if (rowCount<72) modelAfternoon.addElement(slot);
+            else modelEvening.addElement(slot);
+            rowCount++;
         }
         this.clearSelectionFromScheduleTable();
         setTitle(getMyController().getDescriptor().getControllerDescription().getScheduleDay().
@@ -1055,12 +1259,507 @@ public class ScheduleDiaryView extends View
         this.btnSelectTreatmentRequest.setEnabled(false);
     }
     
+    private Patient getAppointmentPatientSelected(){
+        Patient result = null;
+        Patient patient = null;
+        for (int row : getSelection()){
+            Slot slot = getScheduleDiaryTableModel().getElementAt(row);
+            if(slot.getIsBooked()){
+                patient = slot.getAppointment().getPatient();
+                break;
+            }
+        }
+        if (patient!=null){
+            if(!patient.getIsPatientMarkedUnbookable())
+                result = patient;
+        }else result = null;
+        return result;
+    }
+    
+    private Boolean getIsSelectedAppointmentNonContiguous(){
+        Boolean result = false;
+        boolean isFirstAppointmentSlotFound = false;
+        boolean isUnbookableSlotFoundAfterFirstAppointmentFound = false;
+        boolean isNonContiguousAppointmentSlotFound = false;
+        for(int row : getSelection()){
+            Slot slot = getScheduleDiaryTableModel().getElementAt(row);
+            if (isFirstAppointmentSlotFound){
+                if(isUnbookableSlotFoundAfterFirstAppointmentFound){
+                    if(slot.getIsBooked()) isNonContiguousAppointmentSlotFound = true;
+                    break;
+                }else if(slot.getIsBookable()) isUnbookableSlotFoundAfterFirstAppointmentFound = true;
+            }else if(slot.getIsBooked()) isFirstAppointmentSlotFound = true;
+        }
+        return isNonContiguousAppointmentSlotFound;
+    }
+    
+    private Boolean getIsMoreThanOneAppointmentSelected(){
+        Boolean result = false;
+        Appointment appointment = null;
+        for (int row : getSelection()){
+            Slot slot = getScheduleDiaryTableModel().getElementAt(row);
+            if(!slot.getIsBookable()){
+                if (appointment==null) appointment = slot.getAppointment();
+                else if(!appointment.equals(slot.getAppointment())){
+                    result = true;
+                    break;
+                }
+            }
+        }
+        return result;
+    }
+    
+    private Boolean getIsSingleSlotAppointmentFound(){
+        Boolean result = false;
+        for (int row : getSelection()){
+            Slot slot = getScheduleDiaryTableModel().getElementAt(row);
+            if (!slot.getIsBookable()){
+                result = slot.getIsSingleSlotAppointment();
+                break;
+            }
+        }
+        return result;
+    }
+    
+    private int scheduleViewCurrentlySelectedRowFromDiary = -1;
+    private void setScheduleViewCurrentlySelectedRowFromDiary(int value){
+        scheduleViewCurrentlySelectedRowFromDiary = value;
+    }
+    private int getScheduleViewCurrentlySelectedRowFromDiary(){
+        return scheduleViewCurrentlySelectedRowFromDiary;
+    }
+    
     private int[] selection = null;
     private int[] getSelection(){
         return selection;
     }
     private void setSelection(int[] value){
         selection = value;
+    }
+    
+    private ScheduleSlotType scheduleSlotType = null;
+    private void setScheduleSlotType(Appointment appointment){
+        if (appointment.getPatient()==null) 
+            scheduleSlotType = ScheduleSlotType.BOOKABLE_SCHEDULE_SLOT;
+        else if(appointment.getPatient().toString().equals(ScheduleSlotType.UNBOOKABLE_SCHEDULE_SLOT.mark()))
+            scheduleSlotType = ScheduleSlotType.UNBOOKABLE_SCHEDULE_SLOT;
+        else if(appointment.getIsEmergency())
+            scheduleSlotType = ScheduleSlotType.EMERGENCY_SCHEDULE_SLOT;
+        else scheduleSlotType = ScheduleSlotType.BOOKED_SCHEDULE_SLOT;
+    }
+    private void setScheduleSlotType(Slot slot){
+        if (slot.getAppointment().getPatient()==null) 
+            scheduleSlotType = ScheduleSlotType.BOOKABLE_SCHEDULE_SLOT;
+        else if(slot.getAppointment().getPatient().toString().equals(ScheduleSlotType.UNBOOKABLE_SCHEDULE_SLOT.mark()))
+            scheduleSlotType = ScheduleSlotType.UNBOOKABLE_SCHEDULE_SLOT;
+        else if(slot.getAppointment().getIsEmergency())
+            scheduleSlotType = ScheduleSlotType.EMERGENCY_SCHEDULE_SLOT;
+        else scheduleSlotType = ScheduleSlotType.BOOKED_SCHEDULE_SLOT;
+    }
+    private ScheduleSlotType getScheduleSlotType(){
+        return scheduleSlotType;
+    }
+    
+    private ScheduleDiaryAction getScheduleDiaryAction(){
+        ScheduleDiaryAction result = null;
+        
+        if(!(getIsMoreThanOneAppointmentSelected() || getIsSelectedAppointmentNonContiguous())){
+            if (getAppointmentExtendUpAndDown()) result = ScheduleDiaryAction.EXTEND_APPOINTMENT_UP_AND_DOWN;
+            else if (getAppointmentExtendDown()) result = ScheduleDiaryAction.EXTEND_APPOINTMENT_DOWN;
+            else if (getAppointmentExtendUp()) result = ScheduleDiaryAction.EXTEND_APPOINTMENT_UP;
+            else if (getAppointmentShiftDown()) result = ScheduleDiaryAction.SHIFT_APPOINTMENT_DOWN;
+            else if (getAppointmentShiftUp()) result = ScheduleDiaryAction.SHIFT_APPOINTMENT_UP;
+            else if (getAppointmentCancel()) result = ScheduleDiaryAction.CANCEL_APPOINTMENT;
+            else if (getAppointmentCreate()) result = ScheduleDiaryAction.CREATE_APPOINTMENT;
+            else if (getAppointmentShortening()) result = ScheduleDiaryAction.SHORTEN_APPOINTMENT;
+            else result = ScheduleDiaryAction.NONE;
+
+            if (getIsSingleSlotAppointmentFound()){
+                setAppointmentMode(AppointmentMode.UPDATE);
+                switch(result){
+                    case SHIFT_APPOINTMENT_DOWN:
+                        result = ScheduleDiaryAction.EXTEND_SHIFT_APPOINTMENT_DOWN;
+                        break;
+                    case SHIFT_APPOINTMENT_UP:
+                            result = ScheduleDiaryAction.EXTEND_SHIFT_APPOINTMENT_UP;
+                        break;   
+                }
+            }
+        }else result = ScheduleDiaryAction.NONE;
+        setCurrentScheduleDiaryAction(result);
+        return result;  
+    }
+    
+    private void doScheduleDiaryActionRequest(ScheduleDiaryAction request){
+        Appointment appointment = null;
+        Action action = null;
+        ActionEvent actionEvent = null;
+        Slot slot = null;
+        LocalDateTime start = null;
+        LocalDateTime end = null;
+        Duration duration = null;
+        Duration selectedSlotsDurationToShortenAppointmentBy = null;
+        long minutes = 0;
+        int slots = 0;
+        switch (request){
+            case CANCEL_APPOINTMENT:
+                slot = getFirstSelectedSlot();
+                setSelectedAppointmentFromDiary(slot.getAppointment());
+                //action = Action.REQUEST_CANCEL_APPOINTMENT;
+                break;
+            case CREATE_APPOINTMENT:
+                Patient patient = null;
+                slot = getFirstSelectedSlot();
+                start = slot.getStart();
+                slots = getSelection().length;
+                duration = Duration.ofMinutes(slots*5);
+                appointment = new Appointment();
+                //appointment.setPatient(patient);
+                appointment.setStart(start);
+                appointment.setDuration(duration);
+                setAppointmentFromDiaryWithUpdates(appointment);
+                setAppointmentMode(AppointmentMode.CREATE);
+                this.setAppointmentFromDiaryWithUpdates(appointment);
+                //action = Action.REQUEST_CREATE_UPDATE_APPOINTMENT;
+                break;
+            case EXTEND_APPOINTMENT_DOWN:
+                doExtendAppointmentDown();
+                //action = Action.REQUEST_CREATE_UPDATE_APPOINTMENT;
+                break;
+            case EXTEND_APPOINTMENT_UP:
+                doExtendAppointmentUp();
+                slot = getFirstSelectedSlot();
+                start = slot.getStart();
+                slot = getLastSelectedSlot();
+                setSelectedAppointmentFromDiary(slot.getAppointment());
+                LocalDateTime oldStartTime = slot.getAppointment().getStart();
+                duration = Duration.between(start, oldStartTime).plus(slot.getAppointment().getDuration());
+                //appointment = slot.getAppointment();
+                appointment = new Appointment();
+                appointment.setStart(start);
+                appointment.setDuration(duration);
+                setAppointmentFromDiaryWithUpdates(appointment);
+                setAppointmentMode(AppointmentMode.UPDATE);
+                //action = Action.REQUEST_CREATE_UPDATE_APPOINTMENT;
+                break;
+            case EXTEND_APPOINTMENT_UP_AND_DOWN:
+                slot = getFirstSelectedSlot();
+                start = slot.getStart();
+                slot = getLastSelectedSlot();
+                end = slot.getStart().plusMinutes(5);
+                duration = Duration.between(start, end);
+                for(int row : getSelection()){
+                    slot = getScheduleDiaryTableModel().getElementAt(row);
+                    if(slot.getIsBooked()){
+                        setSelectedAppointmentFromDiary(slot.getAppointment());
+                        break;
+                    }
+                }
+                if(getSelectedAppointmentFromDiary()!=null){ 
+                    appointment = new Appointment();
+                    appointment.setStart(start);
+                    appointment.setDuration(duration);
+                    setAppointmentFromDiaryWithUpdates(appointment);
+                    setAppointmentMode(AppointmentMode.UPDATE);
+                    //action = Action.REQUEST_CREATE_UPDATE_APPOINTMENT;
+                }else JOptionPane.showInternalMessageDialog(
+                        this, "selected appointment is null!", "View error", JOptionPane.WARNING_MESSAGE);
+                break;
+            case SHIFT_APPOINTMENT_DOWN:
+                doShiftAppointmentDown();
+                /**
+                 * -- locate last row of appt
+                 * -- from this and last selected row calculate minutes appt shifted
+                 * -- add these minutes to appt start
+                 */
+                
+            case SHIFT_APPOINTMENT_UP:
+                doShiftAppointmentUp();
+                /**
+                 * locate start of appt
+                 * calculate minutes difference with first selected row
+                 * adjust appt start time to start at earlier time
+                 */
+                for(int row : getSelection()){
+                    slot = getScheduleDiaryTableModel().getElementAt(row);
+                    if ((slot.getIsFirstSlotOfAppointment())!=null){
+                        if (slot.getIsFirstSlotOfAppointment()){
+                            setSelectedAppointmentFromDiary(slot.getAppointment());
+                            start = slot.getStart();
+                            break;
+                        }
+                    }
+                }
+                if(start!=null){
+                    appointment = new Appointment();
+                    //appointment = slot.getAppointment();
+                    slot = getFirstSelectedSlot();
+                    LocalDateTime newStart = slot.getStart();
+                    minutes = Duration.between(newStart,start).toMinutes();
+                    appointment.setStart(start.minusMinutes(minutes));
+                    //appointment.setDuration(slot.getAppointment().getDuration());
+                    setAppointmentFromDiaryWithUpdates(appointment);
+                    //setSelectedAppointmentFromDiary(slot.getAppointment());
+                    setAppointmentMode(AppointmentMode.UPDATE);
+                    //action = Action.REQUEST_CREATE_UPDATE_APPOINTMENT;
+                }else JOptionPane.showInternalMessageDialog(
+                        this, "selected appointment start is null!", "View error", JOptionPane.WARNING_MESSAGE);
+                break;
+            case SHORTEN_APPOINTMENT:
+                slots = getSelection().length;
+                selectedSlotsDurationToShortenAppointmentBy = Duration.ofMinutes(slots*5);
+                slot = getFirstSelectedSlot();
+                setSelectedAppointmentFromDiary(slot.getAppointment());
+                appointment = new Appointment();
+                appointment.setStart(slot.getAppointment().getStart());
+                appointment.setDuration(slot.getAppointment().getDuration().minus(selectedSlotsDurationToShortenAppointmentBy));
+                setAppointmentFromDiaryWithUpdates(appointment);
+                setAppointmentMode(AppointmentMode.UPDATE);
+                //action = Action.REQUEST_CREATE_UPDATE_APPOINTMENT;
+                break;
+            case NONE:
+                action = Action.NONE;
+                break;
+        }
+        /*
+        actionEvent = new ActionEvent(this,
+                ActionEvent.ACTION_PERFORMED,
+                action.toString());
+        this.actionPerformed(actionEvent);
+        */
+    }
+    
+    private Boolean getAppointmentExtendUpAndDown(){
+        Boolean result = false;
+        boolean isFirstSelectedSlotBookable = true;
+        boolean areSelectedSlotsAllBookable = false;
+        boolean isLastSelectedSlotBookable = true;
+
+        boolean[] requiredValues = {
+            isFirstSelectedSlotBookable,
+            !areSelectedSlotsAllBookable,
+            isLastSelectedSlotBookable};
+        Criteria criteria = new Criteria(requiredValues);
+ 
+        Slot slot = getFirstSelectedSlot();
+        if (!slot.getIsBookable()) isFirstSelectedSlotBookable = false;
+        if (slot.getIsBookable()){
+            areSelectedSlotsAllBookable = true;
+            for (int row : getSelection()){
+                slot = getScheduleDiaryTableModel().getElementAt(row);
+                if (slot.getIsBooked()){
+                    areSelectedSlotsAllBookable = false;
+                    break;
+                }
+            }
+        }
+        if (!areSelectedSlotsAllBookable){
+            slot = getLastSelectedSlot();
+            if (!slot.getIsBookable()) isLastSelectedSlotBookable = false;
+        }
+        
+        criteria.setActual(0,isFirstSelectedSlotBookable);
+        criteria.setActual(1,!areSelectedSlotsAllBookable);
+        criteria.setActual(2,isLastSelectedSlotBookable);
+
+        return criteria.check();
+    }
+    
+    private Boolean getAppointmentExtendUp(){
+        Boolean result = false;
+        boolean isFirstSelectedSlotBookable = true;
+        boolean isLastSelectedSlotBooked = true;
+        boolean isLastSelectedSlotAppointmentLastSlot = false;
+        
+        Slot slot = getFirstSelectedSlot();
+        if (slot.getIsBooked()) isFirstSelectedSlotBookable = false;
+        if(isFirstSelectedSlotBookable){
+            slot = getLastSelectedSlot();
+            if (slot.getIsBookable()) isLastSelectedSlotBooked = false;
+            if(isLastSelectedSlotBooked){
+                if (slot.getIsLastSlotOfAppointment()) isLastSelectedSlotAppointmentLastSlot = true;
+            }
+        }
+        
+
+        return isFirstSelectedSlotBookable
+                && isLastSelectedSlotBooked
+                && !isLastSelectedSlotAppointmentLastSlot;
+        
+    }
+    
+    private Boolean getAppointmentExtendDown(){
+        Boolean result = false;
+        boolean isFirstSelectedSlotBooked = true;
+        boolean isFirstSelectedSlotAppointmentFirstSlot = false;
+        boolean isLastSelectedSlotBookable = true;
+        
+        boolean[] requiredValues = {
+            isFirstSelectedSlotBooked,
+            !isFirstSelectedSlotAppointmentFirstSlot,
+            isLastSelectedSlotBookable   
+        };
+        Criteria criteria = new Criteria(requiredValues);
+        
+        Slot slot = getFirstSelectedSlot();
+        if (slot.getIsBookable()) isFirstSelectedSlotBooked = false;
+        if(isFirstSelectedSlotBooked){
+            if(slot.getIsFirstSlotOfAppointment()) 
+                isFirstSelectedSlotAppointmentFirstSlot = true;
+            if(!isFirstSelectedSlotAppointmentFirstSlot){
+                slot = getLastSelectedSlot();
+                if(slot.getIsBooked()) isLastSelectedSlotBookable = false;
+            }
+        }
+        
+        criteria.setActual(0, isFirstSelectedSlotBooked);
+        criteria.setActual(1, !isFirstSelectedSlotAppointmentFirstSlot);
+        criteria.setActual(2, isLastSelectedSlotBookable);
+        return criteria.check();
+    }
+    
+    private Boolean getAppointmentShiftDown(){
+        Boolean result = false;
+        boolean isFirstSelectedSlotBooked = true;
+        boolean isFirstSelectedSlotAppointmentFirstSlot = true;
+        boolean isLastSelectedSlotBookable = true;
+        
+        Slot slot = getFirstSelectedSlot();
+        if(slot.getIsBookable()) isFirstSelectedSlotBooked = false;
+        if (isFirstSelectedSlotBooked){
+            if (!slot.getIsFirstSlotOfAppointment()) isFirstSelectedSlotAppointmentFirstSlot = false;
+            if(isFirstSelectedSlotAppointmentFirstSlot){
+                slot = getLastSelectedSlot();
+                if(slot.getIsBooked()) isLastSelectedSlotBookable = false;
+            }
+        }
+
+        return isFirstSelectedSlotBooked
+                && isFirstSelectedSlotAppointmentFirstSlot
+                && isLastSelectedSlotBookable;
+    }
+    
+    private Boolean getAppointmentShiftUp(){
+        Boolean result = false;
+        boolean isFirstSelectedSlotBookable = true;
+        boolean isLastSelectedSlotBooked = true;
+        boolean isLastSelectedSlotAppointmentLastSlot = true;
+        
+        Slot slot = getFirstSelectedSlot();
+        if(slot.getIsBooked()) isFirstSelectedSlotBookable = false;
+        if(isFirstSelectedSlotBookable){
+            slot = getLastSelectedSlot();
+            if(slot.getIsBookable()) isLastSelectedSlotBooked = false;
+            if(isLastSelectedSlotBooked){
+                if(!slot.getIsLastSlotOfAppointment()) isLastSelectedSlotAppointmentLastSlot = false;
+            }
+        }
+        
+        
+        return isFirstSelectedSlotBookable 
+                && isLastSelectedSlotBooked
+                && isLastSelectedSlotAppointmentLastSlot;
+    }
+    
+    private Boolean getAppointmentShortening(){
+        Boolean result = false;
+        boolean isFirstSlotBooked = true;
+        boolean isFirstSlotAppointmentFirstSlot = false;
+        boolean isLastSlotBooked = true;
+        boolean isLastSlotAppointmentLastSlot = true;
+        
+        Slot slot = getFirstSelectedSlot();
+        if(slot.getIsBookable()) isFirstSlotBooked = false;
+        if(isFirstSlotBooked){
+            if (slot.getIsFirstSlotOfAppointment()) isFirstSlotAppointmentFirstSlot = true;
+            if (!isFirstSlotAppointmentFirstSlot){
+                slot = getLastSelectedSlot();
+                if(slot.getIsBookable()) isLastSlotBooked = false;
+                if (isLastSlotBooked)
+                    if(!slot.getIsLastSlotOfAppointment()) isLastSlotAppointmentLastSlot = false;
+            }   
+        }
+        
+        return isFirstSlotBooked
+                && !isFirstSlotAppointmentFirstSlot
+                && isLastSlotBooked
+                && isLastSlotAppointmentLastSlot;
+    }
+    
+    private Boolean getAppointmentCancel(){
+        Boolean result = false;
+        boolean isFirstSelectedSlotBooked = true;
+        boolean isFirstSelectedSlotAppointmentFirstSlot = true;
+        boolean isLastSelectedSlotBooked = true;
+        boolean isLastSelectedSlotAppointmentLastSlot = true;
+
+        Slot slot = getFirstSelectedSlot();
+        if (slot.getIsBookable()) isFirstSelectedSlotBooked = false;
+        if(isFirstSelectedSlotBooked){
+            if (!slot.getIsFirstSlotOfAppointment()) isFirstSelectedSlotAppointmentFirstSlot = false; 
+            if(isFirstSelectedSlotAppointmentFirstSlot){
+                slot = getLastSelectedSlot();
+                if(slot.getIsBookable()) isLastSelectedSlotBooked = false;
+                if(isLastSelectedSlotBooked){
+                    if (!slot.getIsLastSlotOfAppointment()) isLastSelectedSlotAppointmentLastSlot = false;
+                }
+            }  
+        }
+
+        return isFirstSelectedSlotBooked
+                && isFirstSelectedSlotAppointmentFirstSlot
+                && isLastSelectedSlotBooked
+                && isLastSelectedSlotAppointmentLastSlot;
+    }
+
+    private Boolean getAppointmentCreate(){     
+        boolean areSelectedSlotsAllBookable = true;
+        boolean[] values = {areSelectedSlotsAllBookable};
+        Criteria criteria = new Criteria(values);
+        
+        for (int row : getSelection()){
+            Slot slot = getScheduleDiaryTableModel().getElementAt(row);
+            if (slot.getIsBooked()){
+                areSelectedSlotsAllBookable = false;
+                break;
+            }
+        }
+        criteria.setActual(0,areSelectedSlotsAllBookable);
+        
+        return criteria.check();
+    }
+    
+    class Criteria{
+       public Criteria(boolean[] values){
+           required = values;
+           actual = new boolean[required.length];
+       }
+       
+       private boolean[] required = null;
+       public boolean[] getRequired(){
+           return required;
+       }
+       
+       private boolean[] actual = null;
+       public void setActual(int index, boolean value){
+           actual[index] = value;
+       }
+       public boolean[] getActual(){
+           return actual;
+       }
+       
+       public boolean check(){
+           boolean result = true;
+           int index = 0;
+           for (boolean value : getRequired()){
+               if(!(value && getActual()[index])){
+                   result = false;
+                   break;
+               }
+               index++;
+           }
+           return result;
+       }
     }
     
     private final DateTimeFormatter appointmentScheduleFormat = DateTimeFormatter.ofPattern("EEEE, MMMM dd yyyy ");
@@ -1134,6 +1833,9 @@ public class ScheduleDiaryView extends View
         btnClinicalNotesForSelectedAppointment = new javax.swing.JButton();
         btnSelectTreatmentRequest = new javax.swing.JButton();
         btnCloseView = new javax.swing.JButton();
+        btnMakeDeleteEmergencyAppointmentUndoSelection1 = new javax.swing.JButton();
+        btnCancelSelectedAppointment1 = new javax.swing.JButton();
+        btnSelectTreatmentRequest1 = new javax.swing.JButton();
         jPanel1 = new javax.swing.JPanel();
         btnSwitchView = new javax.swing.JButton();
         jMenuBar1 = new javax.swing.JMenuBar();
@@ -1388,24 +2090,35 @@ public class ScheduleDiaryView extends View
 
         jPanel4.setBorder(javax.swing.BorderFactory.createTitledBorder("Actions"));
 
-        btnCreateUpdateAppointment.setText(ScheduleViewActionCaption.CREATE_UPDATE_APPOINTMENT._1());
+        btnCreateUpdateAppointment.setText("<html><center>Create</center><center>new</center><center>appointment</center></html>");
 
-        btnMakeDeleteEmergencyAppointmentUndoSelection.setText(ScheduleViewActionCaption.MAKE_DELETE_EMERGENCY_APPOINTMENT_UNDO._1());
+        btnMakeDeleteEmergencyAppointmentUndoSelection.setText("<html><center>Shorten</center><center>selected</center><center>appointment</center></html>");
 
-        btnCancelSelectedAppointment.setText(ScheduleViewActionCaption.CANCEL_APPOINTMENT._1());
+        btnCancelSelectedAppointment.setText("<html><center>Cancel</center><center>selected</center><center>appointment</center></html>");
 
-        btnMarkCancelSlotUnbookableOrMoveBookingToAnotherDay.setText("");
+        btnMarkCancelSlotUnbookableOrMoveBookingToAnotherDay.setText("<html><center>Move</center><center>appointment</center><center>to another day</center></html>");
 
-        btnClinicalNotesForSelectedAppointment.setText(ScheduleViewActionCaption.CLINICAL_NOTES._1());
+        btnClinicalNotesForSelectedAppointment.setText("<html><center>Clinical note</center><center>for selected</center><center>appointment</center></html>");
         btnClinicalNotesForSelectedAppointment.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnClinicalNotesForSelectedAppointmentActionPerformed(evt);
             }
         });
 
-        btnSelectTreatmentRequest.setText(ScheduleViewActionCaption.SELECT_TREATMENT._1());
+        btnSelectTreatmentRequest.setText("<html><center>Treatment</center><center>for selected</center<center>appointment</center></html>");
+        btnSelectTreatmentRequest.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSelectTreatmentRequestActionPerformed(evt);
+            }
+        });
 
         btnCloseView.setText(ScheduleViewActionCaption.CLOSE_VIEW._1());
+
+        btnMakeDeleteEmergencyAppointmentUndoSelection1.setText("<html><center>Shift earlier</center><center>selected</center><center>appointment</center></html>");
+
+        btnCancelSelectedAppointment1.setText("<html><center>Extend earlier</center><center>selected</center><center>appointment</center></html>");
+
+        btnSelectTreatmentRequest1.setText("<html><center>Undo</center><center>current</center<center>selection</center></html>");
 
         javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
         jPanel4.setLayout(jPanel4Layout);
@@ -1413,35 +2126,44 @@ public class ScheduleDiaryView extends View
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel4Layout.createSequentialGroup()
                 .addGap(12, 12, 12)
-                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(btnCreateUpdateAppointment, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                        .addComponent(btnCloseView, javax.swing.GroupLayout.DEFAULT_SIZE, 120, Short.MAX_VALUE)
-                        .addComponent(btnSelectTreatmentRequest, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(btnClinicalNotesForSelectedAppointment, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(btnMarkCancelSlotUnbookableOrMoveBookingToAnotherDay, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(btnCancelSelectedAppointment, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(btnMakeDeleteEmergencyAppointmentUndoSelection, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(btnSelectTreatmentRequest1, javax.swing.GroupLayout.PREFERRED_SIZE, 122, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnCloseView, javax.swing.GroupLayout.PREFERRED_SIZE, 122, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnSelectTreatmentRequest, javax.swing.GroupLayout.PREFERRED_SIZE, 122, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnClinicalNotesForSelectedAppointment, javax.swing.GroupLayout.PREFERRED_SIZE, 122, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnMakeDeleteEmergencyAppointmentUndoSelection, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(btnMarkCancelSlotUnbookableOrMoveBookingToAnotherDay, javax.swing.GroupLayout.PREFERRED_SIZE, 122, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(btnCancelSelectedAppointment1, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(btnCancelSelectedAppointment, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(btnCreateUpdateAppointment, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(btnMakeDeleteEmergencyAppointmentUndoSelection1, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addGap(12, 12, 12))
         );
         jPanel4Layout.setVerticalGroup(
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel4Layout.createSequentialGroup()
-                .addGap(30, 30, 30)
-                .addComponent(btnCreateUpdateAppointment, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(26, 26, 26)
-                .addComponent(btnMakeDeleteEmergencyAppointmentUndoSelection, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(26, 26, 26)
-                .addComponent(btnCancelSelectedAppointment, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(26, 26, 26)
-                .addComponent(btnMarkCancelSlotUnbookableOrMoveBookingToAnotherDay, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(26, 26, 26)
-                .addComponent(btnClinicalNotesForSelectedAppointment, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(26, 26, 26)
-                .addComponent(btnSelectTreatmentRequest, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(26, 26, 26)
+                .addContainerGap()
+                .addComponent(btnCreateUpdateAppointment, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(12, 12, 12)
+                .addComponent(btnCancelSelectedAppointment, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(12, 12, 12)
+                .addComponent(btnCancelSelectedAppointment1, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(12, 12, 12)
+                .addComponent(btnMarkCancelSlotUnbookableOrMoveBookingToAnotherDay, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(12, 12, 12)
+                .addComponent(btnMakeDeleteEmergencyAppointmentUndoSelection1, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(12, 12, 12)
+                .addComponent(btnMakeDeleteEmergencyAppointmentUndoSelection, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(12, 12, 12)
+                .addComponent(btnClinicalNotesForSelectedAppointment, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(12, 12, 12)
+                .addComponent(btnSelectTreatmentRequest, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(12, 12, 12)
+                .addComponent(btnSelectTreatmentRequest1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 15, Short.MAX_VALUE)
                 .addComponent(btnCloseView, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
+                .addGap(22, 22, 22))
         );
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder("View format"));
@@ -1522,19 +2244,26 @@ public class ScheduleDiaryView extends View
         // TODO add your handling code here:
     }//GEN-LAST:event_btnClinicalNotesForSelectedAppointmentActionPerformed
 
+    private void btnSelectTreatmentRequestActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSelectTreatmentRequestActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btnSelectTreatmentRequestActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnCancelSelectedAppointment;
+    private javax.swing.JButton btnCancelSelectedAppointment1;
     private javax.swing.JButton btnClinicalNotesForSelectedAppointment;
     private javax.swing.JButton btnCloseView;
     private javax.swing.JButton btnCreateUpdateAppointment;
     private javax.swing.JButton btnMakeDeleteEmergencyAppointmentUndoSelection;
+    private javax.swing.JButton btnMakeDeleteEmergencyAppointmentUndoSelection1;
     private javax.swing.JButton btnMarkCancelSlotUnbookableOrMoveBookingToAnotherDay;
     private javax.swing.JButton btnNextDay;
     private javax.swing.JButton btnNow;
     private javax.swing.JButton btnPreviousDay;
     private javax.swing.JButton btnSelectBookableSlotsScanner;
     private javax.swing.JButton btnSelectTreatmentRequest;
+    private javax.swing.JButton btnSelectTreatmentRequest1;
     private javax.swing.JButton btnSelectUnbookableSlotsScanner;
     private javax.swing.JButton btnSwitchView;
     private com.github.lgooddatepicker.components.DatePicker dayDatePicker;
