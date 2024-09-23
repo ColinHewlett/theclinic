@@ -49,6 +49,14 @@ public class Slot {
         appointment = value;
     }
     
+    private boolean isSelected = false;
+    public boolean getIsSelected(){
+        return isSelected;
+    }
+    public void setIsSelected(boolean value){
+        isSelected = value;
+    }
+    
     private LocalDateTime localDateTime = null;
     public LocalDateTime getStart(){
         return localDateTime;
@@ -59,8 +67,11 @@ public class Slot {
     
     public Boolean getIsFirstSlotOfAppointment(){
         Boolean result = null;
-        if (getAppointment().getPatient()!=null) result = (getStart().equals(getAppointment().getStart()));
-        else result = null;
+        if (getAppointment().getPatient()!=null){
+            if (!getAppointment().getPatient().getIsPatientMarkedUnbookable()){
+                result = (getStart().equals(getAppointment().getStart()));
+            }else result = false;
+        }else result = false;
         return result;
     }
 
@@ -70,11 +81,13 @@ public class Slot {
         LocalDateTime start = null;
         LocalDateTime end = null;
         if(getAppointment().getPatient()!=null){
-            duration = (int)getAppointment().getDuration().toMinutes();
-            start = getAppointment().getStart();
-            end = start.plusMinutes(duration-5);
-            result = getStart().equals(end);
-        } else result = null;  
+            if (!getAppointment().getPatient().getIsPatientMarkedUnbookable()){
+                duration = (int)getAppointment().getDuration().toMinutes();
+                start = getAppointment().getStart();
+                end = start.plusMinutes(duration-5);
+                result = getStart().equals(end);
+            }else result = false; //slot is unbookable
+        } else result = false; //slot is unbooked 
         return result;
     }
     
@@ -82,20 +95,28 @@ public class Slot {
         Boolean result = null;
         if (getAppointment()!=null){
             result = getAppointment().getDuration().toMinutes() == 5;
-        }
+        }else result = false;
         return result;
     }
     
-    public Boolean getIsBookable(){
-        Boolean result = null;
-        if (getAppointment().getPatient()==null) result = true;
-        else result = false;
+    public boolean getIsBookable(){
+        boolean result = false;
+        result = getAppointment().getPatient()==null;
         return result;
     }
 
     public Boolean getIsBooked(){
-        Boolean result = null;
-        if (getAppointment().getPatient()!=null) result = true;
+        Boolean result = false;
+        if (getAppointment().getPatient()!=null) 
+            result = !getAppointment().getPatient().getIsPatientMarkedUnbookable();
+        else result = false;
+        return result;
+    }
+    
+    public Boolean getIsUnbookable(){
+        Boolean result = false;
+        if (getAppointment().getPatient()!=null)
+            result = getAppointment().getPatient().getIsPatientMarkedUnbookable();
         else result = false;
         return result;
     }

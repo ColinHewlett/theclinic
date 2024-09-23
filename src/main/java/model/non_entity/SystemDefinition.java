@@ -127,20 +127,27 @@ public class SystemDefinition {
 
     public enum ScheduleViewActionCaption{
         CANCEL_APPOINTMENT("<html><center>Cancel</center<center>appointment</center></html>"),
-        CLINICAL_NOTES("<html><center>Clinical</center<center>note for</center><center>appointment</center></html>"),
+        CLINICAL_NOTES("<html><center>Clinical</center<center>notes for</center><center>appointment</center></html>"),
         CLOSE_VIEW("<html><center>Close</center<center>view</center></html>"),
         CREATE_UPDATE_APPOINTMENT("<html><center>Create</center<center>appointment</center></html>",
                                   "<html><center>Update</center<center>appointment</center></html>"),
+        EXTEND_BOOKING("<html><center>Extend</center><center>appointment</center><center>earlier</center></html>",
+                        "<html><center>Extend</center><center>appointment</center><center>later</center></html>",
+                        "<html><center>Extend</center><center>appointment</center><center>earlier & later</center></html>"),
         MAKE_DELETE_EMERGENCY_APPOINTMENT_UNDO("<html><center>Make</center><center>emergency</center><center>appointment</center></html>",
                                           "<html><center>Delete</center><center>emergency</center><center>appointment</center></html>",
                                           "<html><center>Undo</center><center>current</center><center>selection</center></html>"),
         MARK_CANCEL_UNBOOKABLE_SLOT_OR_MOVE_TO_ANOTHER_DAY("<html><center>Make slot</center<center>unbookable</center></html>",
                                     "<html><center>Cancel</center<center>unbookable</center><center>slot</center></html>",
                                     "<html><center>Move booking</center><center>to another</center><center>day</center></html>"),
+        MOVE_BOOKING("<html><center>Move</center><center>appointment</center></html>"),
         NEXT_DAY(">>"),
         PREVIOUS_DAY("<<"),
         SEARCH_AVAILABLE_SLOTS("<html><center>Search</center><center>for</center><center>empty</center><center>schedule</center><center>slots</center</html>"),
         SELECT_TREATMENT("<html><center>Select</center<center>treatment</center></html>"),
+        SHIFT_BOOKING("<html><center>Shift</center><center>appointment</center><center>earlier</center></html>",
+                        "<html><center>Shift</center><center>appointment</center><center>later</center></html>"),
+        SHORTEN_BOOKING("<html><center>Shorten</center><center>appointment</center></html>"),
         TODAY("Today");
 
         private String first = "";

@@ -33,12 +33,12 @@ public class CustomComboBoxDialog extends JDialog {
     public CustomComboBoxDialog(Frame owner, ScheduleDiaryAction scheduleDiaryAction){
         super(owner, "", true);
         switch (scheduleDiaryAction){
-            case EXTEND_SHIFT_APPOINTMENT_DOWN:
+            case EXTEND_SHIFT_APPOINTMENT_LATER:
                 options = new String[]{"extend appointment to finish later", 
                                        "shift whole appointment later"};
                 cmbScheduleDiarySelector = new JComboBox<>(options);
                 break;
-            case EXTEND_SHIFT_APPOINTMENT_UP:
+            case EXTEND_SHIFT_APPOINTMENT_EARLIER:
                 options = new String[]{"extend appointment to finish earlier", 
                                        "shift whole appointment earlier"};
                 cmbScheduleDiarySelector = new JComboBox<>(options);
@@ -66,14 +66,14 @@ public class CustomComboBoxDialog extends JDialog {
                 confirmed = true;
                 String s = (String) cmbScheduleDiarySelector.getSelectedItem();
                 switch (scheduleDiaryAction){
-                    case EXTEND_SHIFT_APPOINTMENT_DOWN:
-                        if (s.contains("extend")) selectedDiaryAction = ScheduleDiaryAction.EXTEND_APPOINTMENT_DOWN;
-                        else selectedDiaryAction = ScheduleDiaryAction.SHIFT_APPOINTMENT_DOWN;
+                    case EXTEND_SHIFT_APPOINTMENT_LATER:
+                        if (s.contains("extend")) selectedDiaryAction = ScheduleDiaryAction.EXTEND_APPOINTMENT_LATER;
+                        else selectedDiaryAction = ScheduleDiaryAction.SHIFT_APPOINTMENT_LATER;
                         break;
-                    case EXTEND_SHIFT_APPOINTMENT_UP:
+                    case EXTEND_SHIFT_APPOINTMENT_EARLIER:
                         s = (String) cmbScheduleDiarySelector.getSelectedItem();
-                        if (s.contains("extend")) selectedDiaryAction = ScheduleDiaryAction.EXTEND_APPOINTMENT_UP;
-                        else selectedDiaryAction = ScheduleDiaryAction.SHIFT_APPOINTMENT_UP;
+                        if (s.contains("extend")) selectedDiaryAction = ScheduleDiaryAction.EXTEND_APPOINTMENT_EARLIER;
+                        else selectedDiaryAction = ScheduleDiaryAction.SHIFT_APPOINTMENT_EARLIER;
                         break;
                 }
                 dispose();
