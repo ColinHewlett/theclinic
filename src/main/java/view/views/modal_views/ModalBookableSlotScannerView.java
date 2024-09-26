@@ -252,6 +252,8 @@ public class ModalBookableSlotScannerView extends ModalView implements ActionLis
     }
      
     private void doEmptySlotAvailabilityTableRowSelection(int row){
+        ActionEvent actionEvent = null;
+        String actionCommand = null;
         Appointment appointment = 
                 ((EmptySlotAvailability2ColumnTableModel)this.tblSlotAvailability.getModel()).getElementAt(row);
         LocalDate start = appointment.getStart().toLocalDate();
@@ -265,9 +267,16 @@ public class ModalBookableSlotScannerView extends ModalView implements ActionLis
         */
         
         getMyController().getDescriptor().getViewDescription().setScheduleDay(start);
-        ActionEvent actionEvent = new ActionEvent(
-                this,ActionEvent.ACTION_PERFORMED,
-                ViewController.PatientViewControllerActionEvent.SCHEDULE_LIST_VIEW_CONTROLLER_REQUEST.toString());
+        switch(getMyController().getDescriptor().getControllerDescription().getScheduleViewMode()){
+            case DIARY:
+                actionCommand = ViewController.ScheduleViewControllerActionEvent.SCHEDULE_DIARY_VIEW_CONTROLLER_REQUEST.toString();
+                break;
+            case LIST:
+                actionCommand = ViewController.ScheduleViewControllerActionEvent.SCHEDULE_LIST_VIEW_CONTROLLER_REQUEST.toString();
+                break;
+        }
+        actionEvent = new ActionEvent(
+                this,ActionEvent.ACTION_PERFORMED,actionCommand);
         this.getMyController().actionPerformed(actionEvent);
         this.doCloseViewRequest();
     }

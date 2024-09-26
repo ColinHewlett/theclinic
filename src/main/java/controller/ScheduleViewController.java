@@ -970,8 +970,10 @@ public class ScheduleViewController extends ViewController{
             null
         );*/
         if (_view instanceof ScheduleListView){
+            getDescriptor().getControllerDescription().setScheduleViewMode(ScheduleViewMode.DIARY);
             setView(new View().make(View.Viewer.SCHEDULE_DIARY_VIEW,this, getDesktopView()));
         }else if (_view instanceof ScheduleDiaryView){
+            getDescriptor().getControllerDescription().setScheduleViewMode(ScheduleViewMode.LIST);
             setView(new View().make(View.Viewer.SCHEDULE_LIST_VIEW,this, getDesktopView()));
         }else{
             isError = true;
@@ -1589,6 +1591,12 @@ getDescriptor().getViewDescription().getScheduleDay());
                 ActionEvent actionEvent = new ActionEvent(
                     this,ActionEvent.ACTION_PERFORMED,
                         ViewController.ScheduleViewControllerActionEvent.SCHEDULE_LIST_VIEW_CONTROLLER_REQUEST.toString());
+                    this.getMyController().actionPerformed(actionEvent);
+                break;
+            case SCHEDULE_DIARY_VIEW_CONTROLLER_REQUEST:
+                actionEvent = new ActionEvent(
+                    this,ActionEvent.ACTION_PERFORMED,
+                        ViewController.ScheduleViewControllerActionEvent.SCHEDULE_DIARY_VIEW_CONTROLLER_REQUEST.toString());
                     this.getMyController().actionPerformed(actionEvent);
                 break;
         }

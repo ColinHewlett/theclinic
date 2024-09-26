@@ -169,7 +169,7 @@ public class DesktopView extends javax.swing.JFrame
         
     private JMenu mnuSelectView = null; 
         private JMenuItem mniAppointmentListViewRequest = null;
-        private JMenuItem mniAppointmentDiaryViewRequest = null;
+        //private JMenuItem mniAppointmentDiaryViewRequest = null;
         private JMenuItem mniPatientViewRequest = null;
         private JMenuItem mniPatientNotificationViewRequest = null;
         private JMenuItem mniToDoViewRequest = null;
@@ -287,7 +287,7 @@ public class DesktopView extends javax.swing.JFrame
         mnuSelectView = new JMenu(SELECT_VIEW_MENU_TITLE);
         setActiveMenu(mnuSelectView);
         mniAppointmentListViewRequest = new JMenuItem(APPOINTMENT_LIST_VIEW_REQUEST_TITLE);
-        mniAppointmentDiaryViewRequest = new JMenuItem(APPOINTMENT_DIARY_VIEW_REQUEST_TITLE);
+        //mniAppointmentDiaryViewRequest = new JMenuItem(APPOINTMENT_DIARY_VIEW_REQUEST_TITLE);
         mniPatientViewRequest = new JMenuItem(PATIENT_VIEW_REQUEST_TITLE);
         mniPatientNotificationViewRequest = new JMenuItem(PATIENT_NOTIFICATION_VIEW_REQUEST_TITLE);
         mniToDoViewRequest = new JMenuItem(TO_DO_VIEW_REQUEST_TITLE);
@@ -295,7 +295,7 @@ public class DesktopView extends javax.swing.JFrame
         mnuSelectView.add(mniPatientViewRequest);
         mnuSelectView.add(new JSeparator());
         mnuSelectView.add(mniAppointmentListViewRequest);
-        mnuSelectView.add(mniAppointmentDiaryViewRequest);
+        //mnuSelectView.add(mniAppointmentDiaryViewRequest);
         mnuSelectView.add(new JSeparator());
         mnuSelectView.add(mniPatientNotificationViewRequest);
         mnuSelectView.add(mniToDoViewRequest);
@@ -304,13 +304,13 @@ public class DesktopView extends javax.swing.JFrame
         mnuSelectView.add(mniExitViewRequest);
         
         mniAppointmentListViewRequest.setActionCommand(Action.REQUEST_APPOINTMENT_LIST_VIEW.toString());
-        mniAppointmentDiaryViewRequest.setActionCommand(Action.REQUEST_APPOINTMENT_DIARY_VIEW.toString());
+        //mniAppointmentDiaryViewRequest.setActionCommand(Action.REQUEST_APPOINTMENT_DIARY_VIEW.toString());
         mniPatientViewRequest.setActionCommand(Action.REQUEST_PATIENT_VIEW.toString());
         mniPatientNotificationViewRequest.setActionCommand(Action.REQUEST_NOTIFICATION_VIEW.toString());
         mniToDoViewRequest.setActionCommand(Action.REQUEST_TO_DO_VIEW.toString());
         mniExitViewRequest.setActionCommand(Action.REQUEST_CLOSE_VIEW.toString());
         mniAppointmentListViewRequest.addActionListener(this);
-        mniAppointmentDiaryViewRequest.addActionListener(this);
+        //mniAppointmentDiaryViewRequest.addActionListener(this);
         mniPatientViewRequest.addActionListener(this);
         mniPatientNotificationViewRequest.addActionListener(this);
         mniToDoViewRequest.addActionListener(this);
@@ -508,6 +508,7 @@ public class DesktopView extends javax.swing.JFrame
             case REQUEST_CHANGE_USER_PASSWORD:
                 break;
             case REQUEST_CASCADE_VIEWS:
+                this.cascadeInternalFrames();
                 break;
             case REQUEST_TO_DO_VIEW:
                 this.doToDoViewRequest();
@@ -568,19 +569,18 @@ public class DesktopView extends javax.swing.JFrame
     }
     
     private void cascadeInternalFrames() {
-        JInternalFrame[] frames = getDeskTop().getAllFrames();
-        int x = 0;
-        int y = 0;
-        int offset = 30;
-        for (JInternalFrame frame : frames) {
-            frame.setLocation(x, y);
-            x += offset;
-            y += offset;
-            if (x + frame.getWidth() > getDeskTop().getWidth()) {
-                x = 0;
-            }
-            if (y + frame.getHeight() > getDeskTop().getHeight()) {
-                y = 0;
+        int x = 20; int y = 20;
+            int offset = 30;
+            
+        for (JInternalFrame frame : this.getDeskTop().getAllFrames()){
+            try{
+                frame.setLocation(x,y);
+                frame.setIcon(false);
+                frame.setSelected(true);
+                x += offset;
+                y += offset;
+            }catch (java.beans.PropertyVetoException e){
+                e.printStackTrace();
             }
         }
     }

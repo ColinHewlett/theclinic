@@ -422,8 +422,12 @@ public class DesktopViewController extends ViewController{
                 }
                 break;
             case SCHEDULE_LIST_VIEW_CONTROLLER_REQUEST:  
+                //getDescriptor().getControllerDescription().setScheduleViewMode(ScheduleViewMode.LIST);
                 doRequestForScheduleViewController(avc);
                 break;
+            case SCHEDULE_DIARY_VIEW_CONTROLLER_REQUEST:
+                //getDescriptor().getControllerDescription().setScheduleViewMode(ScheduleViewMode.DIARY);
+                doRequestForScheduleViewController(avc);
             case VIEW_CONTROLLER_CHANGED_NOTIFICATION:
                 firePropertyChangeEvent(
                         ViewController.DesktopViewControllerPropertyChangeEvent.
@@ -733,6 +737,7 @@ public class DesktopViewController extends ViewController{
                 patientViewController.getDescriptor()
                         .getControllerDescription()
                         .setViewMode(ViewController.ViewMode.SCHEDULE_REFERENCED_FROM_PATIENT_VIEW);
+                patientViewController.getDescriptor().getControllerDescription().setScheduleViewMode(ScheduleViewMode.LIST);
                 createNewAppointmentScheduleViewController(patientViewController.getDescriptor());
                 break;
         }
@@ -1170,15 +1175,15 @@ public class DesktopViewController extends ViewController{
                     break;
                 }
                 case SCHEDULE_LIST_VIEW_CONTROLLER_REQUEST:{  
-                    getDescriptor().getControllerDescription().setScheduleViewMode(ScheduleViewMode.LIST);
                     doRequestForScheduleViewController2((DesktopView)e.getSource());
                     break;
                 }
-                case SCHEDULE_DIARY_VIEW_CONTROLLER_REQUEST:{   
+                /*
+                case SCHEDULE_DIARY_VIEW_CONTROLLER_REQUEST:{   //currently not used
                     getDescriptor().getControllerDescription().setScheduleViewMode(ScheduleViewMode.DIARY);
                     doRequestForScheduleViewController((DesktopView)e.getSource());
                     break;
-                }
+                }*/
                 case TEST_PATIENT_VIEW_CONTROLLER_REQUEST:{
                     doRequestForTestPatientViewController();
                     break;
@@ -1245,6 +1250,7 @@ public class DesktopViewController extends ViewController{
         } 
     }
     
+    /*
     private ScheduleViewController createNewAppointmentScheduleViewControllerWithReturn(Descriptor ed){     
         ScheduleViewController result = null;
         try{
@@ -1277,7 +1283,7 @@ public class DesktopViewController extends ViewController{
             displayErrorMessage(ex.getMessage(),"DesktopViewController error",JOptionPane.WARNING_MESSAGE);
         }
         return result;
-    }
+    }*/
 
     private void createNewAppointmentScheduleViewController(Descriptor ed){       
         try{
@@ -1296,10 +1302,14 @@ public class DesktopViewController extends ViewController{
             } 
             avc.setDescriptor(ed);
             
-            avc.setView(new View().make(View.Viewer.SCHEDULE_LIST_VIEW,
-                avc, 
-                getDesktopView()));
-
+            switch(ed.getControllerDescription().getScheduleViewMode()){
+                case LIST:
+                    avc.setView(new View().make(View.Viewer.SCHEDULE_LIST_VIEW,avc,getDesktopView()));
+                    break;
+                case DIARY:
+                    avc.setView(new View().make(View.Viewer.SCHEDULE_DIARY_VIEW,avc,getDesktopView()));
+                    break;
+            }
 
             if (getDesktopViewMode().equals(DesktopViewMode.CLINIC_LOGO)){
                 doSetupDesktopViewMode();
@@ -1389,26 +1399,28 @@ public class DesktopViewController extends ViewController{
 
         Descriptor descriptor = new Descriptor();
         descriptor.getControllerDescription().setViewMode(ViewController.ViewMode.SCHEDULE_REFERENCED_DESKTOP_VIEW);
+        descriptor.getControllerDescription().setScheduleViewMode(ScheduleViewMode.LIST);
         descriptor.getControllerDescription().setScheduleDay(LocalDate.now());
         createNewAppointmentScheduleViewController(descriptor);
     } 
     
-    private void doRequestForScheduleViewController(DesktopView desktopView){
-        /**
-         * Only one schedule view controller is allowed with a view with the same date as the SVC about to be created
-         * -- if an SVC already exists with such a view; the desktop VC sends it a CLOSE_VIEW_REQUEST_RECEIVED property change event
-         */
+    /*private void doRequestForScheduleViewController(DesktopView desktopView){
+        //
+         // Only one schedule view controller is allowed with a view with the same date as the SVC about to be created
+         // -- if an SVC already exists with such a view; the desktop VC sends it a CLOSE_VIEW_REQUEST_RECEIVED property change event
+         //
         ScheduleViewController targetSVC = null;
         Descriptor descriptor = new Descriptor();
+        descriptor.getControllerDescription().setScheduleViewMode(ScheduleViewMode.LIST);
         descriptor.getControllerDescription().setViewMode(ViewController.ViewMode.SCHEDULE_REFERENCED_DESKTOP_VIEW);
         descriptor.getControllerDescription().setScheduleDay(LocalDate.now());
         ScheduleViewController newSVC = createNewAppointmentScheduleViewControllerWithReturn(descriptor);
         
         for(ScheduleViewController svc : scheduleViewControllers){
-            /**
-             * the Schedule VC has been called from the Desktop view
-             * -- hence  the need to check if a schedule for today already exists
-             */
+            //
+             // the Schedule VC has been called from the Desktop view
+             // -- hence  the need to check if a schedule for today already exists
+             //
             if (!svc.equals(newSVC)){
                 if (LocalDate.now().isEqual(svc.getDescriptor().getControllerDescription().getScheduleDay())){
                     targetSVC = svc;
@@ -1425,7 +1437,7 @@ public class DesktopViewController extends ViewController{
                     null
             );
         }
-    }
+    }*/
     
     
     private void doRequestForScheduleViewController(ScheduleViewController vc){
@@ -1441,6 +1453,7 @@ public class DesktopViewController extends ViewController{
             activeViewController.getView().toFront();
         else {
             Descriptor descriptor = new Descriptor();
+            descriptor.getControllerDescription().setScheduleViewMode(vc.getDescriptor().getControllerDescription().getScheduleViewMode());
             descriptor.getControllerDescription().setScheduleDay(
                     vc.getDescriptor().getViewDescription().getScheduleDay());
             createNewAppointmentScheduleViewController(descriptor);
