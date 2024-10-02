@@ -47,6 +47,9 @@
  */
 package view.views.non_modal_views;
 
+import model.entity.Appointment;
+import model.entity.Patient;
+import view.views.modal_views.ModalView;
 import com.toedter.calendar.JDateChooser;
 import controller.DesktopViewController;
 import controller.ViewController;
@@ -63,6 +66,8 @@ import java.awt.event.WindowEvent;
 import java.awt.Point;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import javax.swing.JDesktopPane;
@@ -125,7 +130,7 @@ public class DesktopView extends javax.swing.JFrame
     private Boolean isPMSStoreDefined = null;
     private Descriptor entityDescriptor = null;
     private final String SELECT_VIEW_MENU_TITLE = "View";
-        private final String APPOINTMENT_LIST_VIEW_REQUEST_TITLE = "Appointments (LIST)";
+        private final String APPOINTMENT_LIST_VIEW_REQUEST_TITLE = "Appointments";
         private final String APPOINTMENT_DIARY_VIEW_REQUEST_TITLE = "Appointments (DIARY)";
         private final String PATIENT_VIEW_REQUEST_TITLE = "Patients";
         private final String PATIENT_NOTIFICATION_VIEW_REQUEST_TITLE = "Notifications (patient-related)";
@@ -256,6 +261,7 @@ public class DesktopView extends javax.swing.JFrame
         mniTreatmentsViewRequest = new JMenuItem(TREATMENTS_REQUEST_TITLE);
         mniColorPickerOptionsViewRequest = new JMenuItem(COLOUR_PICKER_OPTIONS_TITLE);
         mniPMSVersion = new JMenuItem(JarFileFinder.getName());
+        //mniPMSVersion = new JMenuItem(JarFileFinder.getPath());
         mniCascadeViewsRequest = new JMenuItem(CASCADE_VIEWS_REQUEST_TITLE);
         mnuSettings.add(mniPrintBlankMedicalHistoryRequest);
         mnuSettings.add(new JSeparator());
@@ -568,11 +574,74 @@ public class DesktopView extends javax.swing.JFrame
         }
     }
     
+    /**
+     * Cascade rules as follows
+     * -- if a modal view active do not include in cascade
+     * -- non patient or appointment view first (in any order)
+     * -- then patients
+     * -- then appointments
+     * -- an active modal form locate centrally on top after cascade
+     */
     private void cascadeInternalFrames() {
+        ArrayList<PatientView> patientViews = new ArrayList<>();
+        ArrayList<PatientView> actualPatientViews = new ArrayList<>();
+        ArrayList<BookingView> bookingViews = new ArrayList<>();
+        ArrayList<JInternalFrame> others = new ArrayList<>();
+        ArrayList<LocalDate> dates = new ArrayList<>();
+        ArrayList<JInternalFrame> cascadeFrameOrder = new ArrayList<>();
+        JInternalFrame modalView = null;
+        
         int x = 20; int y = 20;
-            int offset = 30;
-            
-        for (JInternalFrame frame : this.getDeskTop().getAllFrames()){
+            int offset = 30;  
+        if (this.getDeskTop().getAllFrames().length > 0){
+            for (JInternalFrame frame : this.getDeskTop().getAllFrames()){
+                if (frame instanceof BookingView) bookingViews.add((BookingView)frame);
+                else if (frame instanceof PatientView) patientViews.add((PatientView)frame);
+                else if (frame instanceof ModalView) modalView = frame; 
+                else others.add(frame);
+            }
+        }
+        
+        for(JInternalFrame frame : others){
+            cascadeFrameOrder.add(frame);
+        }
+        
+        for(JInternalFrame frame : patientViews){
+            cascadeFrameOrder.add(frame);
+        }
+        
+        switch (bookingViews.size()){
+            case 0:
+                break;
+            case 1:
+                cascadeFrameOrder.add(bookingViews.get(0));
+                break;
+            default:{
+                for (BookingView bookingView: bookingViews){
+                    LocalDate day = bookingView.getMyController().getDescriptor().getControllerDescription().getScheduleDay();
+                    dates.add(day);
+                }
+                Collections.sort(dates);
+                for (LocalDate date : dates){
+                    for (BookingView bookingView: bookingViews){
+                        //System.out.println(String.valueOf(++count) + "date = " + date.toString());
+                        //System.out.println(String.valueOf(++count) + "schedule date = " + bookingView.getMyController().getDescriptor().getControllerDescription().getScheduleDay().toString());
+                        
+                        if(date.isEqual(bookingView.getMyController().getDescriptor().getControllerDescription().getScheduleDay())){
+                            cascadeFrameOrder.add(bookingView);
+                            break;
+                        }
+                    }
+                }
+                break;
+            }
+        }
+        
+        Point cascadeStartingLocation = getStartingLocationForCascade(cascadeFrameOrder);
+        x = cascadeStartingLocation.x-30;
+        y = cascadeStartingLocation.y-30;
+        
+        for (JInternalFrame frame : cascadeFrameOrder){
             try{
                 frame.setLocation(x,y);
                 frame.setIcon(false);
@@ -584,6 +653,24 @@ public class DesktopView extends javax.swing.JFrame
             }
         }
     }
+    
+    private Point getStartingLocationForCascade(ArrayList<JInternalFrame> views){
+        int min_x = 0;
+        int min_y = 0;
+        ArrayList<Point> viewStartingLocations = new ArrayList<>();
+        for(JInternalFrame view : views){
+            viewStartingLocations.add(getMyController().getViewCentredLocationFor(this, view));
+        }
+        
+        for(Point point : viewStartingLocations){
+            if (min_x == 0) min_x = point.x;
+            else min_x = Math.min(min_x, point.x);
+            if (min_y==0) min_y = point.y;
+            else min_y = Math.min(min_y, point.y);
+        }
+        return new Point(min_x,min_y);
+    
+}
     
     /*
     public ActionListener getMyController(){
@@ -670,6 +757,9 @@ public class DesktopView extends javax.swing.JFrame
         ViewController.DesktopViewControllerPropertyChangeEvent propertyType = 
                 ViewController.DesktopViewControllerPropertyChangeEvent.valueOf(e.getPropertyName());
         switch (propertyType){ 
+            case CASCADE_DESKTOP_VIEWS:
+                cascadeInternalFrames();
+                break;
             case DESKTOP_VIEW_CHANGED_NOTIFICATION:
                 this.refreshDesktopFrameMenuItems(getActiveMenu());
                 break;

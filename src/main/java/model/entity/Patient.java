@@ -287,6 +287,7 @@ public class Patient extends Entity implements IEntityStoreActions {
     }
     
     public String getPhone1(){
+        if (phone1==null) phone1 = "";
         return phone1;
     }
     public void setPhone1(String phone1){
@@ -294,6 +295,7 @@ public class Patient extends Entity implements IEntityStoreActions {
     }
     
     public String getPhone2(){
+        if (phone2==null) phone2 = "";
         return phone2;
     }
     public void setPhone2(String phone2){
@@ -301,6 +303,7 @@ public class Patient extends Entity implements IEntityStoreActions {
     }
     
     public String getEmail(){
+        if (email==null) email = "";
         return email;
     }
     
@@ -350,6 +353,35 @@ public class Patient extends Entity implements IEntityStoreActions {
     }
     public void setRecall(Patient.Recall recall){
         this.recall = recall;
+    }
+    
+    public enum PhoneStatus{
+        NO_PHONE,
+        PHONE_1,
+        PHONE_2,
+        TWO_PHONES;
+    }
+    public enum EmailStatus{
+        NO_EMAIL,
+        HAS_EMAIL;
+    }
+    
+    private PhoneStatus phoneStatus = null;
+    public PhoneStatus getPhoneStatus(){
+        PhoneStatus result = null;
+        if ((getPhone1().trim().isEmpty()) && (getPhone2().trim().isEmpty()))result = PhoneStatus.NO_PHONE;
+        else if (!(getPhone1().trim().isEmpty()) && !(getPhone2().trim().isEmpty()))result = PhoneStatus.TWO_PHONES;
+        else if (getPhone1().trim().isEmpty())result = PhoneStatus.PHONE_2;
+        else result = PhoneStatus.PHONE_1;
+        return result;
+    }
+    
+    private EmailStatus emailStatus = null;
+    public EmailStatus getEmailStatus(){
+        EmailStatus result = null;
+        if(getEmail().trim().isEmpty()) result = EmailStatus.NO_EMAIL;
+        else result = EmailStatus.HAS_EMAIL;
+        return result;
     }
 
     //<editor-fold defaultstate="collapsed" desc="Patient Name inner class">

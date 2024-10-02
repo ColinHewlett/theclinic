@@ -56,6 +56,11 @@ public class ScheduleDiaryTableModel extends DefaultTableModel{
     public Slot getElementAt(int row){
         return slots.get(row);
     }
+    
+    @Override
+    public boolean isCellEditable(int row, int column) {
+        return false; // No cell is editable
+    }
 
     @Override
     public int getRowCount(){

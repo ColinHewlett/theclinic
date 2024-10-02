@@ -900,6 +900,9 @@ public class ScheduleViewController extends ViewController{
             case BOOKABLE_SLOT_SCANNER_VIEW:
                 doBookableSlotScannerViewAction(e);
                 break;
+            case UNBOOKABLE_SLOT_SCANNER_VIEW:
+                doUnBookableSlotScannerViewAction(e);
+                break;  
             case UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_VIEW:
                 doUnbookableAppointmentSlotEditorAction(e);
                 //resetEmptySlotScannerSettings();
@@ -1000,6 +1003,13 @@ public class ScheduleViewController extends ViewController{
                     getDescriptor()
             );
         }
+        firePropertyChangeEvent(
+                ViewController.DesktopViewControllerPropertyChangeEvent.CASCADE_DESKTOP_VIEWS.toString(),
+                getDesktopView(),
+                this,
+                null,
+                getDescriptor()
+        );
     }
     
     private void doSurgeryDaysEditorViewAction(ActionEvent e){
@@ -1571,6 +1581,34 @@ getDescriptor().getViewDescription().getScheduleDay());
                             "Schedule view controller error",
                             JOptionPane.WARNING_MESSAGE);
             }
+        }
+    }
+    
+    private void doUnBookableSlotScannerViewAction(ActionEvent e){
+        ViewController.ScheduleViewControllerActionEvent actionCommand =
+               ViewController.ScheduleViewControllerActionEvent.valueOf(e.getActionCommand());        
+        switch (actionCommand){
+            case EMPTY_SLOTS_FROM_DAY_REQUEST:
+                if (getDescriptor().getViewDescription().getScheduleDay()!=null){
+                    getDescriptor().getControllerDescription().setEmptySlotFromDay(
+                            getDescriptor().getViewDescription().getScheduleDay());
+                    getDescriptor().getControllerDescription().setEmptySlotMinimumDuration(
+                            getDescriptor().getViewDescription().getDuration());
+                    doAppointmentSlotsFromDayRequest();
+                }else this.resetEmptySlotScannerSettings();
+                break;
+            case SCHEDULE_LIST_VIEW_CONTROLLER_REQUEST:
+                ActionEvent actionEvent = new ActionEvent(
+                    this,ActionEvent.ACTION_PERFORMED,
+                        ViewController.ScheduleViewControllerActionEvent.SCHEDULE_LIST_VIEW_CONTROLLER_REQUEST.toString());
+                    this.getMyController().actionPerformed(actionEvent);
+                break;
+            case SCHEDULE_DIARY_VIEW_CONTROLLER_REQUEST:
+                actionEvent = new ActionEvent(
+                    this,ActionEvent.ACTION_PERFORMED,
+                        ViewController.ScheduleViewControllerActionEvent.SCHEDULE_DIARY_VIEW_CONTROLLER_REQUEST.toString());
+                    this.getMyController().actionPerformed(actionEvent);
+                break;
         }
     }
     

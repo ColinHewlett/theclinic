@@ -345,6 +345,7 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
     }
     
     public static enum DesktopViewControllerPropertyChangeEvent{
+        CASCADE_DESKTOP_VIEWS,
         APPOINTEE_CONTACT_DETAILS_FOR_SCHEDULE_VIEW_CONTROLLER_REQUEST,
         APPOINTEE_CONTACT_DETAILS_FOR_SCHEDULE_VIEW_CONTROLLER_CHANGE_NOTIFICATION,
         MEDICAL_CONDITION_VIEW_CONTROLLER_CHANGE_NOTIFICATION,
@@ -801,6 +802,17 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
 
         // Set the location of the internal frame
         frame.setLocation(x, y);
+    }
+    
+    public Point getViewCentredLocationFor(Frame desktopView, JInternalFrame view){
+        Insets insets = desktopView.getInsets();
+        Dimension deskTopViewDimension = desktopView.getSize();
+        Dimension myViewDimension = view.getSize();
+        Point point = new Point(
+                (int)((deskTopViewDimension.getWidth() - (2*insets.left)) - (myViewDimension.getWidth()))/2,
+                //(int)((deskTopViewDimension.getHeight()-insets.top) - myViewDimension.getHeight())/2);
+                (int)((deskTopViewDimension.getHeight() - (2*insets.top)) - myViewDimension.getHeight())/2);
+        return point;
     }
     
     public void centreViewOnDesktop(Frame desktopView, JInternalFrame view){

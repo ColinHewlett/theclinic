@@ -465,68 +465,6 @@ public class DesktopViewController extends ViewController{
                     }
                 }
                 break;
-                
-                /**
-                 * check if an open ClinicalNoteView'appointment has the same date as the Schedule VC requesting to close
-                 */
-                /*
-                _cnvc = null;
-                boolean isCLinicalNoteAppointmentOnScheduleView = false;
-                LocalDate day = avc.getDescriptor().getControllerDescription().getScheduleDay();
-                for(ClinicalNoteViewController cnvc : this.clinicalNoteViewControllers){
-                    Appointment appointment = 
-                            cnvc.getDescriptor().getControllerDescription().getAppointment();
-                    if(day.equals(appointment.getStart().toLocalDate())){
-                        isCLinicalNoteAppointmentOnScheduleView = true;
-                        _cnvc = cnvc;
-                        break;
-                    }
-                }
-                if(isCLinicalNoteAppointmentOnScheduleView){
-                    String message = "a clinical note is open for an appointment on this day";
-                    avc.getDescriptor().getControllerDescription().setError(message);
-                    this.firePropertyChangeEvent(
-                            ScheduleViewControllerPropertyChangeEvent.APPOINTMENT_SCHEDULE_ERROR_RECEIVED.toString(),
-                            avc.getView(),
-                            this, 
-                            null,
-                            null
-                    );
-                    _cnvc.getView().toFront();
-                }else{
-                    try{
-                        avc.getView().setClosed(true);
-                        
-                    }catch (java.beans.PropertyVetoException ex){
-                        String _message = ex.getMessage() + "\n"
-                                + "Raised in "
-                                + "DesktopViewController::doActionEventForScheduleViewController(VIEW_CONTROLLER_CLOSE_NOTIFICATION)";
-                        displayErrorMessage(_message, "View controller error",JOptionPane.WARNING_MESSAGE);
-                    }
-                    ScheduleViewController _avc = null;
-                    Iterator<ScheduleViewController> viewControllerIterator = 
-                            this.scheduleViewControllers.iterator();
-                    while(viewControllerIterator.hasNext()){
-                        _avc = viewControllerIterator.next();
-                        if (_avc.equals(e.getSource())){
-                            break;
-                        }
-                    }
-                    if (!this.scheduleViewControllers.remove(_avc)){
-                        String message = "Could not find AppointmentViewController in "
-                                                + "DesktopViewController collection.";
-                        displayErrorMessage(message,"DesktopViewController error",JOptionPane.WARNING_MESSAGE);
-                    }
-                    else{
-                        if (this.isDesktopPendingClosure){
-                            this.requestViewControllersToCloseViews();
-                        }
-                        if (this.scheduleViewControllers.isEmpty() && 
-                                this.patientViewControllers.isEmpty()){ 
-                        }
-                    }
-                }
-                */
             }
         }           
     }
@@ -1249,41 +1187,6 @@ public class DesktopViewController extends ViewController{
             }
         } 
     }
-    
-    /*
-    private ScheduleViewController createNewAppointmentScheduleViewControllerWithReturn(Descriptor ed){     
-        ScheduleViewController result = null;
-        try{
-            ScheduleViewController avc =
-                    new ScheduleViewController(this, getDesktopView());
-            this.scheduleViewControllers.add(avc);
-            try{
-                SurgeryDaysAssignment surgeryDaysAssignment = new SurgeryDaysAssignment();
-                surgeryDaysAssignment = surgeryDaysAssignment.read();
-                if (ed == null) ed = new Descriptor();
-                ed.getControllerDescription().setSurgeryDaysAssignment(
-                            surgeryDaysAssignment.get());  
-            }
-            catch (StoreException ex){
-                displayErrorMessage(ex.getMessage(),"DesktopViewController error",JOptionPane.WARNING_MESSAGE);
-            } 
-            avc.setDescriptor(ed);
-            
-            avc.setView(new View().make(View.Viewer.SCHEDULE_LIST_VIEW,
-                avc, 
-                getDesktopView()));
-
-
-            if (getDesktopViewMode().equals(DesktopViewMode.CLINIC_LOGO)){
-                doSetupDesktopViewMode();
-            }
-            result = avc;
-        }
-        catch (StoreException ex){
-            displayErrorMessage(ex.getMessage(),"DesktopViewController error",JOptionPane.WARNING_MESSAGE);
-        }
-        return result;
-    }*/
 
     private void createNewAppointmentScheduleViewController(Descriptor ed){       
         try{
@@ -1309,6 +1212,16 @@ public class DesktopViewController extends ViewController{
                 case DIARY:
                     avc.setView(new View().make(View.Viewer.SCHEDULE_DIARY_VIEW,avc,getDesktopView()));
                     break;
+            }
+            
+            if (getDesktopView().getDeskTop().getAllFrames().length>1){
+                this.firePropertyChangeEvent(
+                    ViewController.DesktopViewControllerPropertyChangeEvent.CASCADE_DESKTOP_VIEWS.toString(), 
+                    getDesktopView(),
+                    this,
+                    null,
+                    null
+                );
             }
 
             if (getDesktopViewMode().equals(DesktopViewMode.CLINIC_LOGO)){
@@ -1404,41 +1317,6 @@ public class DesktopViewController extends ViewController{
         createNewAppointmentScheduleViewController(descriptor);
     } 
     
-    /*private void doRequestForScheduleViewController(DesktopView desktopView){
-        //
-         // Only one schedule view controller is allowed with a view with the same date as the SVC about to be created
-         // -- if an SVC already exists with such a view; the desktop VC sends it a CLOSE_VIEW_REQUEST_RECEIVED property change event
-         //
-        ScheduleViewController targetSVC = null;
-        Descriptor descriptor = new Descriptor();
-        descriptor.getControllerDescription().setScheduleViewMode(ScheduleViewMode.LIST);
-        descriptor.getControllerDescription().setViewMode(ViewController.ViewMode.SCHEDULE_REFERENCED_DESKTOP_VIEW);
-        descriptor.getControllerDescription().setScheduleDay(LocalDate.now());
-        ScheduleViewController newSVC = createNewAppointmentScheduleViewControllerWithReturn(descriptor);
-        
-        for(ScheduleViewController svc : scheduleViewControllers){
-            //
-             // the Schedule VC has been called from the Desktop view
-             // -- hence  the need to check if a schedule for today already exists
-             //
-            if (!svc.equals(newSVC)){
-                if (LocalDate.now().isEqual(svc.getDescriptor().getControllerDescription().getScheduleDay())){
-                    targetSVC = svc;
-                    break;
-                }
-             }
-        }
-        if (targetSVC!=null){
-            this.firePropertyChangeEvent(
-                    ViewController.ScheduleViewControllerPropertyChangeEvent.CLOSE_VIEW_REQUEST_RECEIVED.toString(), 
-                    targetSVC.getView(),
-                    targetSVC,
-                    null,
-                    null
-            );
-        }
-    }*/
-    
     
     private void doRequestForScheduleViewController(ScheduleViewController vc){
         ScheduleViewController activeViewController = null;
@@ -1458,6 +1336,16 @@ public class DesktopViewController extends ViewController{
                     vc.getDescriptor().getViewDescription().getScheduleDay());
             createNewAppointmentScheduleViewController(descriptor);
         }
+        
+        if (scheduleViewControllers.size()>1){
+                this.firePropertyChangeEvent(
+                    ViewController.DesktopViewControllerPropertyChangeEvent.CASCADE_DESKTOP_VIEWS.toString(), 
+                    getDesktopView(),
+                    this,
+                    null,
+                    null
+                );
+            }
     }
     
     /**
@@ -1492,6 +1380,15 @@ public class DesktopViewController extends ViewController{
         if (getDesktopViewMode().equals(DesktopViewMode.CLINIC_LOGO)){
                 doSetupDesktopViewMode();
         }
+        if (getDesktopView().getDeskTop().getAllFrames().length>1){
+            this.firePropertyChangeEvent(
+                    ViewController.DesktopViewControllerPropertyChangeEvent.CASCADE_DESKTOP_VIEWS.toString(), 
+                    getDesktopView(),
+                    this, 
+                    null,
+                    null
+            );
+        }
     }
     
     private void doRequestForTreatmentViewController(ActionEvent e){
@@ -1517,6 +1414,15 @@ public class DesktopViewController extends ViewController{
         }else {
             treatmentViewControllers.get(0).getView().toFront();
         }//do nothing because only one patient notification VC allowed
+        if (getDesktopView().getDeskTop().getAllFrames().length>1){
+            this.firePropertyChangeEvent(
+                    ViewController.DesktopViewControllerPropertyChangeEvent.CASCADE_DESKTOP_VIEWS.toString(), 
+                    getDesktopView(),
+                    this, 
+                    null,
+                    null
+            );
+        }
     }
     
     private void doRequestToPrintPatientMedicalHistory(ActionEvent e){
@@ -1593,6 +1499,15 @@ public class DesktopViewController extends ViewController{
                     }else {
                         activeVCForSamePatient.getView().toFront();
                     }//do nothing because only one medical condition VC allowed
+                    if (getDesktopView().getDeskTop().getAllFrames().length>1){
+                        this.firePropertyChangeEvent(
+                                ViewController.DesktopViewControllerPropertyChangeEvent.CASCADE_DESKTOP_VIEWS.toString(), 
+                                getDesktopView(),
+                                this, 
+                                null,
+                                null
+                        );
+                    }
                 }
             }
         }
@@ -1671,6 +1586,15 @@ public class DesktopViewController extends ViewController{
                     }else {
                         activeVCForSamePatient.getView().toFront();
                     }//do nothing because only one medical condition VC allowed
+                    if (getDesktopView().getDeskTop().getAllFrames().length>1){
+                        this.firePropertyChangeEvent(
+                                ViewController.DesktopViewControllerPropertyChangeEvent.CASCADE_DESKTOP_VIEWS.toString(), 
+                                getDesktopView(),
+                                this, 
+                                null,
+                                null
+                        );
+                    }
                 }
             }
         }
@@ -1720,6 +1644,15 @@ public class DesktopViewController extends ViewController{
 
             if (getDesktopViewMode().equals(DesktopViewMode.CLINIC_LOGO)){
                     doSetupDesktopViewMode();
+            }
+            if (getDesktopView().getDeskTop().getAllFrames().length>1){
+                this.firePropertyChangeEvent(
+                        ViewController.DesktopViewControllerPropertyChangeEvent.CASCADE_DESKTOP_VIEWS.toString(), 
+                        getDesktopView(),
+                        this, 
+                        null,
+                        null
+                );
             }
         }else {
             medicalConditionViewControllers.get(0).getView().toFront();
@@ -1778,6 +1711,15 @@ public class DesktopViewController extends ViewController{
         }else {
             notificationViewControllers.get(0).getView().toFront();
         }//do nothing because only one patient notification VC allowed
+        if (getDesktopView().getDeskTop().getAllFrames().length>1){
+            this.firePropertyChangeEvent(
+                    ViewController.DesktopViewControllerPropertyChangeEvent.CASCADE_DESKTOP_VIEWS.toString(), 
+                    getDesktopView(),
+                    this, 
+                    null,
+                    null
+            );
+        }
     }
     
     private void doRequestForTestPatientViewController(){
@@ -1802,21 +1744,41 @@ public class DesktopViewController extends ViewController{
         }
     }
     private void doRequestForPatientViewController(){
-        try{
-            patientViewControllers.add(
-                                    new PatientViewController(this, getDesktopView()));
-            PatientViewController pvc = patientViewControllers.get(patientViewControllers.size()-1);
-            pvc.setView(new View().make(
-                View.Viewer.PATIENT_VIEW,
-                pvc, 
-                getDesktopView()));
-            
-            if (getDesktopViewMode().equals(DesktopViewMode.CLINIC_LOGO)){
-                    doSetupDesktopViewMode();
-            } 
+        PatientViewController anotherBlankPatientView = null;
+        for (PatientViewController pvc : patientViewControllers){
+            if (!pvc.getDescriptor().getControllerDescription().getPatient().getIsKeyDefined()){
+                anotherBlankPatientView = pvc;
+                break;
+            }
         }
-        catch (StoreException ex){
-            displayErrorMessage(ex.getMessage(),"DesktopViewController error",JOptionPane.WARNING_MESSAGE);
+        if (anotherBlankPatientView!=null){
+            anotherBlankPatientView.getView().toFront();
+        }else{
+            try{
+                patientViewControllers.add(
+                                        new PatientViewController(this, getDesktopView()));
+                PatientViewController pvc = patientViewControllers.get(patientViewControllers.size()-1);
+                pvc.setView(new View().make(
+                    View.Viewer.PATIENT_VIEW,
+                    pvc, 
+                    getDesktopView()));
+
+                if (getDesktopViewMode().equals(DesktopViewMode.CLINIC_LOGO)){
+                        doSetupDesktopViewMode();
+                } 
+                if (getDesktopView().getDeskTop().getAllFrames().length>1){
+                    this.firePropertyChangeEvent(
+                            ViewController.DesktopViewControllerPropertyChangeEvent.CASCADE_DESKTOP_VIEWS.toString(), 
+                            getDesktopView(),
+                            this, 
+                            null,
+                            null
+                    );
+                }
+            }
+            catch (StoreException ex){
+                displayErrorMessage(ex.getMessage(),"DesktopViewController error",JOptionPane.WARNING_MESSAGE);
+            }
         }
     }
     
@@ -2509,16 +2471,23 @@ public class DesktopViewController extends ViewController{
     /**
      * @param args the command line arguments
      */
-    public static void main(String[] args) {   
-    //public static void newMain() { 
+    public static void main(String[] args) {    
         boolean isExceptionRaised = false;
         isDataMigrationOptionEnabled = false;
-        
+        String xmlFileName = "";
         System.out.println(JarFileFinder.getPath());
-        System.out.println(JarFileFinder.getName());
+        //System.out.println(JarFileFinder.getName());
         try{
-            //System.out.println(args.length);
-            String xmlFileName = System.getenv("PMS_SYSTEM_DEFINITION");
+            if(!JarFileFinder.getName().equals("")){
+                for(String pathComponent : JarFileFinder.getPath().split("/")){
+                    //System.out.println(pathComponent);
+                    if (pathComponent.equals(JarFileFinder.getName()))
+                        xmlFileName = xmlFileName + "/SystemDefinition.xml";
+                    else xmlFileName = xmlFileName + "/" + pathComponent;
+                }
+            }else xmlFileName = "c:\\pms\\SystemDefinition.xml";
+            System.out.println(xmlFileName);
+            //String xmlFileName = System.getenv("PMS_SYSTEM_DEFINITION");
             TemplateReader.setTemplateFile(new File(xmlFileName));
             TemplateReader.setEntityTag("entity");
             TemplateReader.setEntityId("SystemDefinition");

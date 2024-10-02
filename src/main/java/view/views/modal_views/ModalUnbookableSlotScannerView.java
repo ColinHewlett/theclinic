@@ -7,6 +7,7 @@ package view.views.modal_views;
 import controller.ViewController;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
+import java.beans.PropertyVetoException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -114,6 +115,15 @@ public class ModalUnbookableSlotScannerView extends ModalView implements ListSel
                 this,ActionEvent.ACTION_PERFORMED,
                 ViewController.PatientViewControllerActionEvent.SCHEDULE_LIST_VIEW_CONTROLLER_REQUEST.toString());
         this.getMyController().actionPerformed(actionEvent);
+        this.doCloseViewRequest();
+    }
+    
+    private void doCloseViewRequest(){
+        try{
+            setClosed(true);
+        }catch (PropertyVetoException e){
+            
+        }
     }
     
     private ListSelectionModel lsmForSloAvailabilityTable = null;

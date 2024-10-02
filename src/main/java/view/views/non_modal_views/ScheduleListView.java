@@ -34,6 +34,7 @@ import view.views.view_support_classes.AppointmentDateVetoPolicy;
 import view.views.view_support_classes.renderers.TableHeaderCellBorderRenderer;
 import view.views.view_support_classes.models.EmptySlotAvailability2ColumnTableModel;
 import view.View;
+import view.views.non_modal_views.BookingView;
 import com.github.lgooddatepicker.components.DatePickerSettings;
 import com.github.lgooddatepicker.optionalusertools.DateChangeListener;
 import com.github.lgooddatepicker.optionalusertools.DateHighlightPolicy;
@@ -107,7 +108,7 @@ import static model.non_entity.SystemDefinition.ScheduleSlotType.UNBOOKABLE_SCHE
  *
  * @author colin
  */
-public class ScheduleListView extends View 
+public class ScheduleListView extends BookingView 
                           implements ActionListener, 
                                      ListSelectionListener,
                                      MouseListener,
@@ -2207,18 +2208,36 @@ public class ScheduleListView extends View
     }
     
     private void doScheduleTitleRefresh(Patient appointee){
+        String contacts = null;
         String tableTitle = "Appointment schedule for " 
                 + dayDatePicker.getDate().format(appointmentScheduleFormat);
         if (appointee!=null){
             if (!appointee.toString().equals(SystemDefinition.ScheduleSlotType.UNBOOKABLE_SCHEDULE_SLOT.mark())){
-                    //SystemDefinitions.UNBOOKABLE_SCHEDULE_SLOT_APPOINTMENT_KEY.toString())){
+                switch (appointee.getPhoneStatus()){
+                    case NO_PHONE:
+                        contacts = "";
+                        break;
+                    case PHONE_1:
+                        contacts = "phone " + appointee.getPhone1().trim();
+                        break;
+                    case PHONE_2:
+                        contacts = "phone " + appointee.getPhone2().trim();
+                        break;
+                    case TWO_PHONES:
+                        contacts = "phones " + appointee.getPhone1().trim() + " & " + appointee.getPhone1().trim();
+                        break;
+                }
+                switch (appointee.getEmailStatus()){
+                    case NO_EMAIL:
+                        contacts = contacts + "; no email";
+                        break;
+                    case HAS_EMAIL:
+                        contacts = contacts + "; " + appointee.getEmail().trim();
+                        break;
+                }
                 tableTitle = tableTitle + "          <"
                     + appointee.getName().getForenames() +  " " 
-                    + appointee.getName().getSurname() + "'s contact "
-                    + appointee.getPhone1();
-                if (!appointee.getPhone2().isEmpty())
-                    tableTitle = tableTitle + "; "
-                            + appointee.getPhone2(); 
+                    + appointee.getName().getSurname() + "'s contact -> " + contacts;
                 tableTitle = tableTitle + ">";   
             }
         }

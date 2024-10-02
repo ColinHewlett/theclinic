@@ -81,12 +81,12 @@ import view.views.view_support_classes.AppointmentDateVetoPolicy;
  *
  * @author colin
  */
-public class ScheduleDiaryView extends View 
-                          implements ActionListener, 
-                                     ListSelectionListener,
-                                     MouseListener,
-                                     DateChangeListener,
-                                     DateHighlightPolicy{
+public class ScheduleDiaryView extends BookingView 
+                                        implements  ActionListener, 
+                                                    ListSelectionListener,
+                                                    MouseListener,
+                                                    DateChangeListener,
+                                                    DateHighlightPolicy{
 
     /**
      * 
@@ -595,35 +595,6 @@ public class ScheduleDiaryView extends View
         JTable sourceTable = null;
         int[] selectedRows = null;
         if (!e.getValueIsAdjusting()) {   // Ensure the event is not fired multiple times
-            /*
-            if (getCurrentScheduleDiaryAction()!=null){
-                if(this.getCurrentScheduleDiaryAction().equals(ScheduleDiaryAction.CLINICAL_NOTES_TREATMENT)){
-                    //appointment = getMyController().getDescriptor().getViewDescription().getAppointment();
-                    appointment = getSelectedAppointmentFromDiary();
-                    for (Slot slot : getScheduleSlotModel()){
-                        if (slot.getIsFirstSlotOfAppointment()){
-                            if (slot.getAppointment().getKey()!=null){
-                                if (slot.getAppointment().equals(appointment)){
-                                    break;
-                                }
-                            }
-                        }
-                        row++;
-                    }
-                    if (row < 36){
-                        tblScheduleMorning.getSelectionModel().removeSelectionInterval(row, row);
-                        this.getScheduleSlotModel().get(48).setIsSelected(false);
-                    }
-                    else if (row > 71){
-                        tblScheduleEvening.getSelectionModel().removeSelectionInterval(row, row);
-                        this.getScheduleSlotModel().get(48).setIsSelected(false);
-                    }
-                    else {
-                        tblScheduleAfternoon.getSelectionModel().removeSelectionInterval(row, row);
-                        this.getScheduleSlotModel().get(48).setIsSelected(false);
-                    }
-                }
-            }*/
             
             if (e.getSource().equals(this.lsmForScheduleMorningTable)){
                 if(this.tblScheduleMorning.isFocusOwner()){
@@ -667,24 +638,15 @@ public class ScheduleDiaryView extends View
                     doScheduleDiaryActionRequest(getCurrentScheduleDiaryAction());
                     disableAllScheduleActionControlsExceptCloseView();
                     this.btnCloseView.setEnabled(true);
-                    switch(getCurrentScheduleDiaryAction()){
-                        case CLINICAL_NOTES_TREATMENT:
-                            if ((!(getScheduleSlotType().equals(ScheduleSlotType.EMERGENCY_SCHEDULE_SLOT))) &&
+                    if ((!(getScheduleSlotType().equals(ScheduleSlotType.EMERGENCY_SCHEDULE_SLOT))) &&
                                     (!(getScheduleSlotType().equals(ScheduleSlotType.UNBOOKABLE_SCHEDULE_SLOT)))){
-                                this.btnClinicalNotesForAppointmentRequest.setEnabled(true);
-                                this.btnTreatmentForAppointmentRequest.setEnabled(true);
-                                this.doScheduleTitleRefresh(getSelectedAppointmentFromDiary().getPatient());
-                            }
-                            else{
-                                String message = "Editing emergency appointments or unbookable slots \ncan only be managed in the 'list' format of the schedule";
-                                JOptionPane.showInternalMessageDialog(this,message,"View error",JOptionPane.WARNING_MESSAGE);
-                                clearSelectionFromScheduleTable();
-                            }
-                            break;
-                        case CANCEL_MOVE_APPOINTMENT:
-                            if ((!(getScheduleSlotType().equals(ScheduleSlotType.EMERGENCY_SCHEDULE_SLOT))) &&
-                                    (!(getScheduleSlotType().equals(ScheduleSlotType.UNBOOKABLE_SCHEDULE_SLOT)))){
-
+                        switch(getCurrentScheduleDiaryAction()){
+                            case CLINICAL_NOTES_TREATMENT:
+                                    this.btnClinicalNotesForAppointmentRequest.setEnabled(true);
+                                    this.btnTreatmentForAppointmentRequest.setEnabled(true);
+                                    this.doScheduleTitleRefresh(getSelectedAppointmentFromDiary().getPatient());
+                                break;
+                            case CANCEL_MOVE_APPOINTMENT:
                                 this.btnCancelAppointmentRequest.setEnabled(true);
                                 this.setAppointmentMode(AppointmentMode.UPDATE);
                                 this.btnMoveBookingRequest.setEnabled(true);
@@ -692,121 +654,73 @@ public class ScheduleDiaryView extends View
                                     this.btnClinicalNotesForAppointmentRequest.setEnabled(true);
                                     this.btnTreatmentForAppointmentRequest.setEnabled(true);
                                 }
-                            }else{
-                                String message = "Editing emergency appointments or unbookable slots \ncan only be managed in the 'list' format of the schedule";
-                                JOptionPane.showInternalMessageDialog(this,message,"View error",JOptionPane.WARNING_MESSAGE);
-                                clearSelectionFromScheduleTable();
-                            }
-                            this.doScheduleTitleRefresh(null);
-                            break;
-                        case CREATE_APPOINTMENT:
-                            this.btnCreateAppointmentRequest.setEnabled(true);
-                            this.doScheduleTitleRefresh(null);
-                            break;
-                        case EXTEND_APPOINTMENT_LATER:
-                            if ((!(getScheduleSlotType().equals(ScheduleSlotType.EMERGENCY_SCHEDULE_SLOT))) &&
-                                    (!(getScheduleSlotType().equals(ScheduleSlotType.UNBOOKABLE_SCHEDULE_SLOT)))){
+                                this.doScheduleTitleRefresh(null);
+                                break;
+                            case CREATE_APPOINTMENT:
+                                this.btnCreateAppointmentRequest.setEnabled(true);
+                                this.doScheduleTitleRefresh(null);
+                                break;
+                            case EXTEND_APPOINTMENT_LATER:
                                 setExtendAction(ExtendAction.LATER);
                                 this.btnExtendAppointmentEarlierLaterBothRequest.setEnabled(true);
                                 this.doScheduleTitleRefresh(null);
-                            }else{
-                                String message = "Editing emergency appointments or unbookable slots \ncan only be managed in the 'list' format of the schedule";
-                                JOptionPane.showInternalMessageDialog(this,message,"View error",JOptionPane.WARNING_MESSAGE);
-                                this.clearSelectionFromScheduleTable();
-                            }
-                            break;
-                        case EXTEND_APPOINTMENT_EARLIER:
-                            if ((!(getScheduleSlotType().equals(ScheduleSlotType.EMERGENCY_SCHEDULE_SLOT))) &&
-                                    (!(getScheduleSlotType().equals(ScheduleSlotType.UNBOOKABLE_SCHEDULE_SLOT)))){
+                                break;
+                            case EXTEND_APPOINTMENT_EARLIER:
                                 setExtendAction(ExtendAction.EARLIER);
                                 this.btnExtendAppointmentEarlierLaterBothRequest.setEnabled(true);
                                 this.doScheduleTitleRefresh(null);
-                            }else{
-                                String message = "Editing emergency appointments or unbookable slots \ncan only be managed in the 'list' format of the schedule";
-                                JOptionPane.showInternalMessageDialog(this,message,"View error",JOptionPane.WARNING_MESSAGE);
-                                this.clearSelectionFromScheduleTable();
-                            }
-                            break;
-                        case EXTEND_APPOINTMENT_EARLIER_AND_LATER:
-                            if ((!(getScheduleSlotType().equals(ScheduleSlotType.EMERGENCY_SCHEDULE_SLOT))) &&
-                                    (!(getScheduleSlotType().equals(ScheduleSlotType.UNBOOKABLE_SCHEDULE_SLOT)))){
-                                setExtendAction(ExtendAction.BOTH);
+                                break;
+                            case EXTEND_APPOINTMENT_EARLIER_AND_LATER:
                                 this.btnExtendAppointmentEarlierLaterBothRequest.setEnabled(true);
                                 this.doScheduleTitleRefresh(null);
-                            }else{
-                                String message = "Editing emergency appointments or unbookable slots \ncan only be managed in the 'list' format of the schedule";
-                                JOptionPane.showInternalMessageDialog(this,message,"View error",JOptionPane.WARNING_MESSAGE);
-                                this.clearSelectionFromScheduleTable();
-                            }
-                            break;
-                        case SHIFT_APPOINTMENT_LATER:
-                            if ((!(getScheduleSlotType().equals(ScheduleSlotType.EMERGENCY_SCHEDULE_SLOT))) &&
-                                    (!(getScheduleSlotType().equals(ScheduleSlotType.UNBOOKABLE_SCHEDULE_SLOT)))){
+                                break;
+                            case SHIFT_APPOINTMENT_LATER:
                                 setShiftAction(ShiftAction.LATER);
                                 this.btnShiftAppointmentEarlierLaterRequest.setEnabled(true);
                                 this.doScheduleTitleRefresh(null);
-                            }else{
-                                String message = "Editing emergency appointments or unbookable slots \ncan only be managed in the 'list' format of the schedule";
-                                JOptionPane.showInternalMessageDialog(this,message,"View error",JOptionPane.WARNING_MESSAGE);
-                                this.clearSelectionFromScheduleTable();
-                            }
-                            break;
-                        case SHIFT_APPOINTMENT_EARLIER:
-                            if ((!(getScheduleSlotType().equals(ScheduleSlotType.EMERGENCY_SCHEDULE_SLOT))) &&
-                                    (!(getScheduleSlotType().equals(ScheduleSlotType.UNBOOKABLE_SCHEDULE_SLOT)))){
+                                break;
+                            case SHIFT_APPOINTMENT_EARLIER:
                                 setShiftAction(ShiftAction.EARLIER);
                                 this.btnShiftAppointmentEarlierLaterRequest.setEnabled(true);
                                 this.doScheduleTitleRefresh(null);
-                            }else{
-                                String message = "Editing emergency appointments or unbookable slots \ncan only be managed in the 'list' format of the schedule";
-                                JOptionPane.showInternalMessageDialog(this,message,"View error",JOptionPane.WARNING_MESSAGE);
-                                this.clearSelectionFromScheduleTable();
-                            }
-                            break;
-                        case EXTEND_SHIFT_APPOINTMENT_LATER:
-                            if ((!(getScheduleSlotType().equals(ScheduleSlotType.EMERGENCY_SCHEDULE_SLOT))) &&
-                                    (!(getScheduleSlotType().equals(ScheduleSlotType.UNBOOKABLE_SCHEDULE_SLOT)))){
+                                break;
+                            case EXTEND_SHIFT_APPOINTMENT_LATER:
                                 setExtendAction(ExtendAction.LATER);
                                 this.btnExtendAppointmentEarlierLaterBothRequest.setEnabled(true);
                                 setShiftAction(ShiftAction.LATER);
                                 this.btnShiftAppointmentEarlierLaterRequest.setEnabled(true);
                                 this.doScheduleTitleRefresh(null);
-                            }else{
-                                String message = "Editing emergency appointments or unbookable slots \ncan only be managed in the 'list' format of the schedule";
-                                JOptionPane.showInternalMessageDialog(this,message,"View error",JOptionPane.WARNING_MESSAGE);
-                                tblScheduleMorning.clearSelection();
-                            }
-                            break;
-                        case EXTEND_SHIFT_APPOINTMENT_EARLIER:
-                            if ((!(getScheduleSlotType().equals(ScheduleSlotType.EMERGENCY_SCHEDULE_SLOT))) &&
-                                    (!(getScheduleSlotType().equals(ScheduleSlotType.UNBOOKABLE_SCHEDULE_SLOT)))){
+                                break;
+                            case EXTEND_SHIFT_APPOINTMENT_EARLIER:
                                 setExtendAction(ExtendAction.EARLIER);
                                 this.btnExtendAppointmentEarlierLaterBothRequest.setEnabled(true);
                                 setShiftAction(ShiftAction.EARLIER);
                                 this.btnShiftAppointmentEarlierLaterRequest.setEnabled(true);
                                 this.doScheduleTitleRefresh(null);
-                            }else{
-                                String message = "Editing emergency appointments or unbookable slots \ncan only be managed in the 'list' format of the schedule";
-                                JOptionPane.showInternalMessageDialog(this,message,"View error",JOptionPane.WARNING_MESSAGE);
-                                tblScheduleMorning.clearSelection();
-                            }
-                            break;
-                        case SHORTEN_APPOINTMENT:
-                            if ((!(getScheduleSlotType().equals(ScheduleSlotType.EMERGENCY_SCHEDULE_SLOT))) &&
-                                    (!(getScheduleSlotType().equals(ScheduleSlotType.UNBOOKABLE_SCHEDULE_SLOT)))){
+                                break;
+                            case SHORTEN_APPOINTMENT:
                                 this.btnShortenAppointmentRequest.setEnabled(true);
                                 this.doScheduleTitleRefresh(null);
-                            }else{
-                                String message = "Editing emergency appointments or unbookable slots \ncan only be managed in the 'list' format of the schedule";
+                                break;
+                            case RESET_SELECTION:
+                                clearSelectionFromScheduleTable();
+
+                                break;
+
+                        }
+                    }else{//not emergency or unbookable slot
+                        String message = null;
+                        switch(getScheduleSlotType()){
+                            case EMERGENCY_SCHEDULE_SLOT:
+                                message = "Editing emergency appointments can only be managed in the LIST format of the schedule view";
                                 JOptionPane.showInternalMessageDialog(this,message,"View error",JOptionPane.WARNING_MESSAGE);
-                                tblScheduleMorning.clearSelection();
-                            }
-                            break;
-                        case RESET_SELECTION:
-                            clearSelectionFromScheduleTable();
-                            
-                            break;
-                            
+                                break;
+                            case UNBOOKABLE_SCHEDULE_SLOT:
+                                message = "Editing unbookable slots can only be managed in the LIST format of the schedule view";
+                                JOptionPane.showInternalMessageDialog(this,message,"View error",JOptionPane.WARNING_MESSAGE);
+                                break;
+                        }
+                        this.clearSelectionFromScheduleTable();
                     }
                 }
             }
@@ -1557,19 +1471,38 @@ public class ScheduleDiaryView extends View
     private ScheduleDiaryTableModel getScheduleDiaryTableModel(){
         return scheduleDiaryTableModel;
     }
-    
+
     private void doScheduleTitleRefresh(Patient appointee){
+        String contacts = null;
         String tableTitle = "Appointment schedule for " 
                 + dayDatePicker.getDate().format(appointmentScheduleFormat);
         if (appointee!=null){
             if (!appointee.toString().equals(SystemDefinition.ScheduleSlotType.UNBOOKABLE_SCHEDULE_SLOT.mark())){
+                switch (appointee.getPhoneStatus()){
+                    case NO_PHONE:
+                        contacts = "";
+                        break;
+                    case PHONE_1:
+                        contacts = "phone " + appointee.getPhone1().trim();
+                        break;
+                    case PHONE_2:
+                        contacts = "phone " + appointee.getPhone2().trim();
+                        break;
+                    case TWO_PHONES:
+                        contacts = "phones " + appointee.getPhone1().trim() + " & " + appointee.getPhone1().trim();
+                        break;
+                }
+                switch (appointee.getEmailStatus()){
+                    case NO_EMAIL:
+                        contacts = contacts + "; no email";
+                        break;
+                    case HAS_EMAIL:
+                        contacts = contacts + "; " + appointee.getEmail().trim();
+                        break;
+                }
                 tableTitle = tableTitle + "          <"
                     + appointee.getName().getForenames() +  " " 
-                    + appointee.getName().getSurname() + "'s contact "
-                    + appointee.getPhone1();
-                if (!appointee.getPhone2().isEmpty())
-                    tableTitle = tableTitle + "; "
-                            + appointee.getPhone2(); 
+                    + appointee.getName().getSurname() + "'s contact -> " + contacts;
                 tableTitle = tableTitle + ">";   
             }
         }
