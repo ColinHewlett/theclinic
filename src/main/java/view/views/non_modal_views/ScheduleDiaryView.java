@@ -1217,7 +1217,7 @@ public class ScheduleDiaryView extends BookingView
                     .setAppointment(appointment);
             ViewController.ScheduleViewControllerActionEvent request =
                     ViewController.ScheduleViewControllerActionEvent
-                    .CLINICAL_NOTE_VIEW_CONTROLLER_REQUEST;
+                    .CLINICAL_NOTE_VIEW_REQUEST;
             ActionEvent actionEvent = new ActionEvent(this, 
                     ActionEvent.ACTION_PERFORMED,
                     request.toString());
@@ -1311,7 +1311,7 @@ public class ScheduleDiaryView extends BookingView
                     .setAppointment(appointment);
             ViewController.ScheduleViewControllerActionEvent request =
                     ViewController.ScheduleViewControllerActionEvent
-                    .CLINICAL_NOTE_VIEW_CONTROLLER_REQUEST;
+                    .CLINICAL_NOTE_VIEW_REQUEST;
             ActionEvent actionEvent = new ActionEvent(this, 
                     ActionEvent.ACTION_PERFORMED,
                     request.toString());

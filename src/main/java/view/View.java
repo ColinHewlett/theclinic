@@ -146,7 +146,7 @@ public class View extends JInternalFrame
                 setModalView(makeView(new ModalAppointmentTreatmentView(viewer, controller, desktopView)));
                 break;
             case CLINICAL_NOTE_VIEW:
-                setView(makeView(new PatientClinicalNoteForAppointmentView(viewer, controller, desktopView)));
+                setModalView(makeView(new ModalClinicalNoteView(viewer, controller, desktopView)));
                 break;
             case NOTE_TAKER:
                 setModalView(makeView(new ModalNoteTaker(viewer, controller, desktopView)));

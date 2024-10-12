@@ -17,6 +17,7 @@ import model.entity.Medication;
 import model.entity.Entity;
 import model.entity.Doctor;
 import model.entity.Appointment;
+import model.entity.ClinicalNote;
 import model.entity.Entity.Scope;
 import view.views.non_modal_views.DesktopView;
 import view.View;
@@ -107,8 +108,12 @@ public class PatientViewController extends ViewController {
                                 VIEW_CONTROLLER_CHANGED_NOTIFICATION.toString());
                 this.getMyController().actionPerformed(actionEvent);
                 break;
+                /*
             case CLINICAL_NOTE_VIEW_CONTROLLER_REQUEST: //on selection of row in appointment history table
                 doClinicalNoteViewControllerRequest();
+                break;*/
+            case CLINICAL_NOTE_VIEW_REQUEST:
+                doClinicalNoteViewRequest();
                 break;
             case PATIENT_MEDICAL_HISTORY_VIEW_CONTROLLER_REQUEST:
                 doPatientMedicalHistoryViewControllerRequest();
@@ -234,6 +239,9 @@ public class PatientViewController extends ViewController {
                         break;
                 }
                 break;
+            case CLINICAL_NOTE_VIEW:
+                doClinicalNoteViewAction(e);
+                break;
             case NOTIFICATION_EDITOR_VIEW:
                 //do nothing
                 break;
@@ -277,14 +285,134 @@ public class PatientViewController extends ViewController {
             }
         }
     }  
+    
+    private void doClinicalNoteViewRequest(){
+        getDescriptor().getControllerDescription().setAppointment(getDescriptor().getViewDescription().getAppointment());
+        setModalView((ModalView)new View().make(View.Viewer.CLINICAL_NOTE_VIEW,
+                    this, 
+                    this.getDesktopView()).getModalView());
+        ActionEvent actionEvent = new ActionEvent(
+                this,ActionEvent.ACTION_PERFORMED,
+                ViewController.DesktopViewControllerActionEvent.MODAL_VIEWER_CLOSED_NOTIFICATION.toString());
+        this.getMyController().actionPerformed(actionEvent);
+    }
+    
+    private void doClinicalNoteViewAction(ActionEvent e){
+        Appointment appointment = null;
+        ClinicalNote clinicalNote = null;
+        String message = null;
+        String error = null;
+        ViewController.ScheduleViewControllerActionEvent actionCommand =
+               ViewController.ScheduleViewControllerActionEvent.valueOf(e.getActionCommand());
+        switch (actionCommand){
+            case CLINICAL_NOTE_FOR_APPOINTMENT_REQUEST:
+                try{
+                    doClinicalNoteForAppoinmentRequest(e);
+                }catch(StoreException ex){
+                    message = ex.getMessage() + "\n"
+                            + "Handled in ClinicalNoteViewController.actionPerformed(Scope = "
+                            + actionCommand.toString() +")";
+                    displayErrorMessage(message,"View controller error",
+                            JOptionPane.WARNING_MESSAGE);
+                }
+                break;
+            case CLINICAL_NOTE_CREATE_REQUEST:
+                try{
+                    appointment = 
+                            getDescriptor().getControllerDescription().getAppointment();
+                    clinicalNote = getDescriptor()
+                            .getViewDescription().getClinicalNote();
+                    clinicalNote.insert();
+                    doClinicalNoteForAppoinmentRequest(e);
+                    if(getDescriptor().getControllerDescription()
+                            .getClinicalNote() == null){
+                        error = "Attempt to create a new clinical note failed";
+                        getDescriptor().getControllerDescription().setError(error);
+                        firePropertyChangeEvent(
+                            ViewController.ClinicalNoteViewControllerPropertyChangeEvent
+                                    .CLINICAL_NOTE_ERROR_RECEIVED.toString(),
+                            (View)e.getSource(),
+                            this,
+                            null,
+                            null
+                        );
+                    }
+                }catch(StoreException ex){
+                    message = ex.getMessage() + "\n"
+                            + "Handled in ClinicalNoteViewController.actionPerformed(Scope = "
+                            + actionCommand.toString() +")";
+                    displayErrorMessage(message,"View controller error",
+                            JOptionPane.WARNING_MESSAGE);
+                }
+                break;
+            case CLINICAL_NOTE_DELETE_REQUEST:
+                try{
+                    clinicalNote = getDescriptor()
+                                .getViewDescription().getClinicalNote();
+                    clinicalNote.setScope(Entity.Scope.SINGLE);
+                    clinicalNote.delete();
+                    doClinicalNoteForAppoinmentRequest(e);
+                }catch(StoreException ex){
+                    message = ex.getMessage() + "\n"
+                            + "Handled in ClinicalNoteViewController.actionPerformed(Scope = "
+                            + actionCommand.toString() +")";
+                    displayErrorMessage(message,"View controller error",
+                            JOptionPane.WARNING_MESSAGE);
+                }
+                break;
+            case CLINICAL_NOTE_UPDATE_REQUEST:
+                try{
+                        clinicalNote = getDescriptor()
+                                    .getViewDescription().getClinicalNote();
+                        clinicalNote.update();
+                        doClinicalNoteForAppoinmentRequest(e);
+                    }catch(StoreException ex){
+                        message = ex.getMessage() + "\n"
+                                + "Handled in ClinicalNoteViewController.actionPerformed(Scope = "
+                                + actionCommand.toString() +")";
+                        displayErrorMessage(message,"View controller error",
+                                JOptionPane.WARNING_MESSAGE);
+                    }
+                break;
+        }
+    }
+    
+    private void doClinicalNoteForAppoinmentRequest(ActionEvent e)throws StoreException{
+        Appointment appointment = 
+                getDescriptor().getControllerDescription().getAppointment();
+        ClinicalNote clinicalNote = new ClinicalNote(appointment);
+        clinicalNote.setScope(Entity.Scope.FOR_APPOINTMENT);
+        clinicalNote = clinicalNote.read();
+        if (clinicalNote.get().isEmpty())
+            getDescriptor().getControllerDescription()
+                    .setClinicalNote(null);
+        else getDescriptor().getControllerDescription()
+                    .setClinicalNote(clinicalNote.get().get(0));
+        firePropertyChangeEvent(
+            ViewController.ClinicalNoteViewControllerPropertyChangeEvent
+                    .CLINICAL_NOTE_RECEIVED.toString(),
+            //getView(),
+            (ModalView)e.getSource(),
+            this,
+            null,
+            null
+        );
+    }
 
     private void doClinicalNoteViewControllerRequest(){
         getDescriptor().getControllerDescription().setAppointment(
                 getDescriptor().getViewDescription().getAppointment());
+        setModalView((ModalView)new View().make(View.Viewer.CLINICAL_NOTE_VIEW,
+                    this, 
+                    this.getDesktopView()).getModalView());
         ActionEvent actionEvent = new ActionEvent(
+                this,ActionEvent.ACTION_PERFORMED,
+                ViewController.DesktopViewControllerActionEvent.MODAL_VIEWER_CLOSED_NOTIFICATION.toString());
+        this.getMyController().actionPerformed(actionEvent);
+        /*ActionEvent actionEvent = new ActionEvent(
             this,ActionEvent.ACTION_PERFORMED,
             ViewController.PatientViewControllerActionEvent.CLINICAL_NOTE_VIEW_CONTROLLER_REQUEST.toString());
-        this.getMyController().actionPerformed(actionEvent);
+        this.getMyController().actionPerformed(actionEvent);*/
     }
     
     private void doScheduleViewControllerRequest(){  
@@ -1513,6 +1641,16 @@ public class PatientViewController extends ViewController {
                         null,
                         getDescriptor()
                 );
+                /**
+                 * check if another patient view is open on the same patient
+                 * -- if it is the Desktop VC will send a request to the view to close 
+                 * this ensures only one patient view will be displayed on the desktop for a given patient
+                 */
+                ActionEvent actionEvent = new ActionEvent(
+                    this,ActionEvent.ACTION_PERFORMED,
+                        ViewController.DesktopViewControllerActionEvent.
+                                CLOSE_PATIENT_VIEW_WITH_SAME_PATIENT_REQUEST.toString());
+                this.getMyController().actionPerformed(actionEvent);
                 
             }catch (StoreException ex){
                 displayErrorMessage(ex.getMessage() + "\n"

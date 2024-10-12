@@ -2107,6 +2107,7 @@ public class ScheduleView extends View
         Color selectedColor = ColorPickerDialog.showDialog(null, initialColor, true);
     }
     
+    
     private void doClinicNoteRequest(Slot slot){
         Appointment appointment = slot.getAppointment();
         if (appointment!=null){
@@ -2121,7 +2122,7 @@ public class ScheduleView extends View
                     .setAppointment(appointment);
             ViewController.ScheduleViewControllerActionEvent request =
                     ViewController.ScheduleViewControllerActionEvent
-                    .CLINICAL_NOTE_VIEW_CONTROLLER_REQUEST;
+                    .CLINICAL_NOTE_VIEW_REQUEST;
             ActionEvent actionEvent = new ActionEvent(this, 
                     ActionEvent.ACTION_PERFORMED,
                     request.toString());
@@ -2144,7 +2145,7 @@ public class ScheduleView extends View
                     .setAppointment(appointment);
             ViewController.ScheduleViewControllerActionEvent request =
                     ViewController.ScheduleViewControllerActionEvent
-                    .CLINICAL_NOTE_VIEW_CONTROLLER_REQUEST;
+                    .CLINICAL_NOTE_VIEW_REQUEST;
             ActionEvent actionEvent = new ActionEvent(this, 
                     ActionEvent.ACTION_PERFORMED,
                     request.toString());

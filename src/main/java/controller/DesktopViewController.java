@@ -375,37 +375,7 @@ public class DesktopViewController extends ViewController{
         ViewController.DesktopViewControllerActionEvent actionCommand =
                     ViewController.DesktopViewControllerActionEvent.valueOf(e.getActionCommand());
         switch(actionCommand){
-            case CLINICAL_NOTE_VIEW_CONTROLLER_REQUEST:
-                /**
-                 * check first to see if a duplicate (same appointment) clinical note is already open
-                 * if yes: send error message to controller's view
-                 */
-                _cnvc = null;
-                boolean isNoteforAppointmentAlreadyOpen = false;
-                ScheduleViewController svc = (ScheduleViewController)e.getSource();
-                for(ClinicalNoteViewController cnvc : this.clinicalNoteViewControllers){
-                    if (cnvc.getDescriptor().getControllerDescription().getAppointment()
-                            .equals(svc.getDescriptor().getControllerDescription().getAppointment())){
-                        isNoteforAppointmentAlreadyOpen = true;
-                        _cnvc = cnvc;
-                        break;
-                    }
-                }
-                if (!isNoteforAppointmentAlreadyOpen) doRequestForClinicalNoteViewController(e);
-                else{
-                    String message = "a clinical note for this appointment is already open";
-                    svc.getDescriptor().getControllerDescription().setError(message);
-                    this.firePropertyChangeEvent(
-                            ScheduleViewControllerPropertyChangeEvent.APPOINTMENT_SCHEDULE_ERROR_RECEIVED.toString(),
-                            svc.getView(),
-                            this, 
-                            null,
-                            null
-                    );
-                    _cnvc.getView().toFront();
-                }
-                break;
-            case CLOSE_SCHEDULE_VIEW_FOR_SCHEDULE_DATE_REQUEST:
+            case CLOSE_SCHEDULE_VIEW_WITH_SAME_DATE_REQUEST:
                 for(ScheduleViewController _svc : this.scheduleViewControllers){
                     if (!avc.equals(_svc)){
                         if(avc.getDescriptor().getControllerDescription().getScheduleDay().equals(
@@ -624,33 +594,21 @@ public class DesktopViewController extends ViewController{
                     }
                 }
                 break;
-            case CLINICAL_NOTE_VIEW_CONTROLLER_REQUEST:
-                cnvc = null;
-                boolean isAppointmentSameInClinicalNotViewController = false;
+            case CLOSE_PATIENT_VIEW_WITH_SAME_PATIENT_REQUEST:
                 pvc = (PatientViewController)e.getSource();
-                Appointment appointment = pvc.getDescriptor().getControllerDescription().getAppointment();
-                clinicalNoteViewControllerIterator = 
-                        this.clinicalNoteViewControllers.iterator();
-                while (clinicalNoteViewControllerIterator.hasNext()){
-                    cnvc = clinicalNoteViewControllerIterator.next();
-                    if (cnvc.getDescriptor().getControllerDescription().getAppointment().equals(appointment)){
-                        isAppointmentSameInClinicalNotViewController = true;
-                        break;
+                for(PatientViewController _pvc : this.patientViewControllers){
+                    if (!pvc.equals(_pvc)){
+                        if(pvc.getDescriptor().getControllerDescription().getPatient().equals(
+                                _pvc.getDescriptor().getControllerDescription().getPatient())){
+                            this.firePropertyChangeEvent(
+                                    ViewController.PatientViewControllerPropertyChangeEvent.CLOSE_VIEW_REQUEST_RECEIVED.toString(),
+                                    _pvc.getView(),
+                                    _pvc,
+                                    null,
+                                    null
+                            );
+                        }
                     }
-                }
-                
-                if (!isAppointmentSameInClinicalNotViewController) doRequestForClinicalNoteViewController(e);
-                else{
-                    String message = "a clinical note is already open for this appointment";
-                    pvc.getDescriptor().getControllerDescription().setError(message);
-                    this.firePropertyChangeEvent(
-                            PatientViewControllerPropertyChangeEvent.PATIENT_VIEW_CONTROLLER_ERROR_RECEIVED.toString(), 
-                            pvc.getView(), 
-                            this, 
-                            null,
-                            null
-                    );
-                    cnvc.getView().toFront();
                 }
                 break;
             case PATIENT_INVOICE_VIEW_CONTROLLER_REQUEST:

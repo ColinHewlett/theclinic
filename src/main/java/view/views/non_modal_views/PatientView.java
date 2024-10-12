@@ -277,7 +277,7 @@ public class PatientView extends View
     public void initialiseView(){ 
         initComponents();
         setVisible(true);
-        setClosable(false);
+        setClosable(true);
         setMaximizable(false);
         setIconifiable(true);
         setResizable(false);
@@ -423,6 +423,18 @@ public class PatientView extends View
         ViewController.PatientViewControllerPropertyChangeEvent propertyName =
                 ViewController.PatientViewControllerPropertyChangeEvent.valueOf(e.getPropertyName());
         switch (propertyName){
+            case CLOSE_VIEW_REQUEST_RECEIVED:
+                try{
+                    /**
+                    * setClosed will fire INTERNAL_FRAME_CLOSED event for the
+                    * listener to send ActionEvent to the view controller
+                    */
+                    this.setClosed(true);
+                }
+                catch (PropertyVetoException ex){
+                    //UnspecifiedError action
+                }
+                break;
             case PATIENT_EDITOR_VIEW_CLOSED:
                 rdbGroup.clearSelection();
                 if(getMyController().getDescriptor().getControllerDescription()
@@ -656,10 +668,26 @@ public class PatientView extends View
     }
     
     private void doClinicalNotesRequest(){
+        if (this.tblAppointmentHistory.getSelectedRow()==-1){
+            JOptionPane.showMessageDialog(this, "An appointment has not been selected");
+        }
+        else{
+            int row = this.tblAppointmentHistory.getSelectedRow();
+            PatientAppointmentHistoryTableModel model = 
+                (PatientAppointmentHistoryTableModel)tblAppointmentHistory.getModel();
+            Appointment appointment = (Appointment)model.getElementAt(row);
+            getMyController().getDescriptor().getViewDescription()
+                    .setAppointment(appointment);
+            ActionEvent actionEvent = new ActionEvent(this, 
+                    ActionEvent.ACTION_PERFORMED,
+                    ViewController.PatientViewControllerActionEvent.CLINICAL_NOTE_VIEW_REQUEST.toString());
+            this.getMyController().actionPerformed(actionEvent);
+        }
+        /*
         ViewController.PatientViewControllerActionEvent request = 
                 ViewController.PatientViewControllerActionEvent
                 .CLINICAL_NOTE_VIEW_CONTROLLER_REQUEST;
-        doActionFor(request);
+        doActionFor(request);*/
     }
     
     private void doDoctorRequest(){
@@ -1033,12 +1061,12 @@ public class PatientView extends View
                  * -- on close view request the VIEW_CLOSE_NOTIFICATION is sent to the controller immediately
                  * -- the controller will send the view.setClosed(true) message to close the view before closing the view controller
                  */
-                /*
+                
                 ActionEvent actionEvent = new ActionEvent(
                         PatientView.this,ActionEvent.ACTION_PERFORMED,
                         ViewController.PatientViewControllerActionEvent.VIEW_CLOSE_NOTIFICATION.toString());
                 getMyController().actionPerformed(actionEvent);
-                */
+                
             }
             @Override
             public void internalFrameActivated(InternalFrameEvent e) {

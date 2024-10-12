@@ -14,6 +14,7 @@ import static controller.ViewController.displayErrorMessage;
 import model.entity.Entity.Scope;
 import model.entity.Appointment;
 import model.entity.Patient;
+import model.entity.ClinicalNote;
 import model.entity.SurgeryDaysAssignment;
 import repository.StoreException;//01/03/2023
 import view.views.non_modal_views.DesktopView;
@@ -227,6 +228,17 @@ public class ScheduleViewController extends ViewController{
                 this.getMyController().actionPerformed(actionEvent);
     }
     
+    private void doClinicalNoteViewRequest(){
+        getDescriptor().getControllerDescription().setAppointment(getDescriptor().getViewDescription().getAppointment());
+        setModalView((ModalView)new View().make(View.Viewer.CLINICAL_NOTE_VIEW,
+                    this, 
+                    this.getDesktopView()).getModalView());
+        ActionEvent actionEvent = new ActionEvent(
+                this,ActionEvent.ACTION_PERFORMED,
+                ViewController.DesktopViewControllerActionEvent.MODAL_VIEWER_CLOSED_NOTIFICATION.toString());
+        this.getMyController().actionPerformed(actionEvent);
+    }
+    
     private void doAppointmentCreateViewRequest(){
         /**
          * on receipt of APPOINTMENT_CREATE_VIEW_REQUEST
@@ -287,12 +299,13 @@ public class ScheduleViewController extends ViewController{
     }
     
     private void doClinicalNoteViewControllerRequest(){
+        /*
         getDescriptor().getControllerDescription().setAppointment(
                 getDescriptor().getViewDescription().getAppointment());
         ActionEvent actionEvent = new ActionEvent(
             this,ActionEvent.ACTION_PERFORMED,
             ViewController.PatientViewControllerActionEvent.CLINICAL_NOTE_VIEW_CONTROLLER_REQUEST.toString());
-        this.getMyController().actionPerformed(actionEvent);
+        this.getMyController().actionPerformed(actionEvent);*/
     }
     
     private void doUnbookableAppointmentSlotEditorViewRequest(){
@@ -676,6 +689,9 @@ public class ScheduleViewController extends ViewController{
             case UNBOOKABLE_SLOT_SCANNER_VIEW_REQUEST:
                 doUnbookableSlotScannerViewRequest();
                 break;
+            case CLINICAL_NOTE_VIEW_REQUEST:
+                doClinicalNoteViewRequest();
+                break;
             case CREATE_APPOINTMENT_REQUEST:
                 LocalDate day = changedSlotRequest.getStart().toLocalDate();
                 setScheduleReport(new ScheduleReport());
@@ -818,9 +834,10 @@ public class ScheduleViewController extends ViewController{
             case UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_VIEW_REQUEST:
                 doUnbookableAppointmentSlotEditorViewRequest();
                 break;
+                /*
             case CLINICAL_NOTE_VIEW_CONTROLLER_REQUEST:
                 doClinicalNoteViewControllerRequest();
-                break;
+                break;*/
             case APPOINTMENT_CREATE_VIEW_REQUEST:
                 getDescriptor().getControllerDescription().
                     setViewMode(ViewController.ViewMode.CREATE);
@@ -854,11 +871,15 @@ public class ScheduleViewController extends ViewController{
                         null,
                         getDescriptor()
                 );
-                
+                /**
+                 * check if another schedule view is open on the same day
+                 * -- if it is the Desktop VC will send a request to the view to close 
+                 * this ensures only one schedule view will be displayed on the desktop for a given day
+                 */
                 actionEvent = new ActionEvent(
                     this,ActionEvent.ACTION_PERFORMED,
                         ViewController.DesktopViewControllerActionEvent.
-                                CLOSE_SCHEDULE_VIEW_FOR_SCHEDULE_DATE_REQUEST/*SCHEDULE_LIST_VIEW_CONTROLLER_REQUEST*/.toString());
+                                CLOSE_SCHEDULE_VIEW_WITH_SAME_DATE_REQUEST/*SCHEDULE_LIST_VIEW_CONTROLLER_REQUEST*/.toString());
                 this.getMyController().actionPerformed(actionEvent);
                 break;
             /*
@@ -906,6 +927,9 @@ public class ScheduleViewController extends ViewController{
             case UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_VIEW:
                 doUnbookableAppointmentSlotEditorAction(e);
                 //resetEmptySlotScannerSettings();
+                break;
+            case CLINICAL_NOTE_VIEW:
+                doClinicalNoteViewAction(e);
                 break;
             case SCHEDULE_EDITOR_VIEW:
                 doScheduleEditorViewAction(e);
@@ -962,54 +986,55 @@ public class ScheduleViewController extends ViewController{
     }
     
     private void doSwitchView(){
-        boolean isError = false;
+        ScheduleViewController svc = this;
         View _view = getView();
-        /*
-        this.firePropertyChangeEvent(
-            ViewController.ScheduleViewControllerPropertyChangeEvent.CLOSE_VIEW_REQUEST_RECEIVED.toString(), 
-            getView(), 
-            this,
-            null,
-            null
-        );*/
-        if (_view instanceof ScheduleListView){
-            getDescriptor().getControllerDescription().setScheduleViewMode(ScheduleViewMode.DIARY);
-            setView(new View().make(View.Viewer.SCHEDULE_DIARY_VIEW,this, getDesktopView()));
-        }else if (_view instanceof ScheduleDiaryView){
-            getDescriptor().getControllerDescription().setScheduleViewMode(ScheduleViewMode.LIST);
-            setView(new View().make(View.Viewer.SCHEDULE_LIST_VIEW,this, getDesktopView()));
-        }else{
-            isError = true;
-            String message = "Unexpected view type encountered ("
-                    + _view.getClass().getSimpleName() + ")";
-            displayErrorMessage(message, "View controller error", JOptionPane.WARNING_MESSAGE);
-        }
-        if (!isError){
-            this.firePropertyChangeEvent(
-            ViewController.ScheduleViewControllerPropertyChangeEvent.CLOSE_VIEW_REQUEST_RECEIVED.toString(), 
-            _view, 
-            this,
-            null,
-            null);
-            
-            doAppointmentForDayRequest(getDescriptor().
-                    getControllerDescription().getScheduleDay());
-            firePropertyChangeEvent(
-                    ViewController.DesktopViewControllerPropertyChangeEvent.
-                            SCHEDULE_VIEW_CONTROLLER_CHANGE_NOTIFICATION.toString(),
-                    (DesktopViewController)getMyController(),
-                    this,
+        javax.swing.SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                boolean isError = false;
+                if (_view instanceof ScheduleListView){
+                    getDescriptor().getControllerDescription().setScheduleViewMode(ScheduleViewMode.DIARY);
+                    setView(new View().make(View.Viewer.SCHEDULE_DIARY_VIEW,svc, getDesktopView()));
+                }else if (_view instanceof ScheduleDiaryView){
+                    getDescriptor().getControllerDescription().setScheduleViewMode(ScheduleViewMode.LIST);
+                    setView(new View().make(View.Viewer.SCHEDULE_LIST_VIEW,svc, getDesktopView()));
+                }else{
+                    isError = true;
+                    String message = "Unexpected view type encountered ("
+                            + _view.getClass().getSimpleName() + ")";
+                    displayErrorMessage(message, "View controller error", JOptionPane.WARNING_MESSAGE);
+                }
+                if (!isError){
+
+                    firePropertyChangeEvent(
+                    ViewController.ScheduleViewControllerPropertyChangeEvent.CLOSE_VIEW_REQUEST_RECEIVED.toString(), 
+                    _view, 
+                    svc,
                     null,
-                    getDescriptor()
-            );
-        }
-        firePropertyChangeEvent(
-                ViewController.DesktopViewControllerPropertyChangeEvent.CASCADE_DESKTOP_VIEWS.toString(),
-                getDesktopView(),
-                this,
-                null,
-                getDescriptor()
-        );
+                    null);
+
+                    doAppointmentForDayRequest(getDescriptor().
+                            getControllerDescription().getScheduleDay());
+                    firePropertyChangeEvent(
+                            ViewController.DesktopViewControllerPropertyChangeEvent.
+                                    SCHEDULE_VIEW_CONTROLLER_CHANGE_NOTIFICATION.toString(),
+                            (DesktopViewController)getMyController(),
+                            svc,
+                            null,
+                            getDescriptor()
+                    );
+                }
+                firePropertyChangeEvent(
+                        ViewController.DesktopViewControllerPropertyChangeEvent.CASCADE_DESKTOP_VIEWS.toString(),
+                        getDesktopView(),
+                        svc,
+                        null,
+                        getDescriptor()
+                );
+            }
+        });
+        
+        
     }
     
     private void doSurgeryDaysEditorViewAction(ActionEvent e){
@@ -1178,6 +1203,28 @@ getDescriptor().getViewDescription().getScheduleDay());
                 doAppointmentSlotsFromDayRequest();
                 break;
         }
+    }
+    
+    private void doClinicalNoteForAppoinmentRequest(ActionEvent e)throws StoreException{
+        Appointment appointment = 
+                getDescriptor().getControllerDescription().getAppointment();
+        ClinicalNote clinicalNote = new ClinicalNote(appointment);
+        clinicalNote.setScope(Entity.Scope.FOR_APPOINTMENT);
+        clinicalNote = clinicalNote.read();
+        if (clinicalNote.get().isEmpty())
+            getDescriptor().getControllerDescription()
+                    .setClinicalNote(null);
+        else getDescriptor().getControllerDescription()
+                    .setClinicalNote(clinicalNote.get().get(0));
+        firePropertyChangeEvent(
+            ViewController.ClinicalNoteViewControllerPropertyChangeEvent
+                    .CLINICAL_NOTE_RECEIVED.toString(),
+            //getView(),
+            (ModalView)e.getSource(),
+            this,
+            null,
+            null
+        );
     }
     
     private Appointment doAppointmentCreateRequest(ActionEvent e, Appointment changedRequestedSlot){
@@ -1636,6 +1683,86 @@ getDescriptor().getViewDescription().getScheduleDay());
                     this,ActionEvent.ACTION_PERFORMED,
                         ViewController.ScheduleViewControllerActionEvent.SCHEDULE_DIARY_VIEW_CONTROLLER_REQUEST.toString());
                     this.getMyController().actionPerformed(actionEvent);
+                break;
+        }
+    }
+    
+    private void doClinicalNoteViewAction(ActionEvent e){
+        Appointment appointment = null;
+        ClinicalNote clinicalNote = null;
+        String message = null;
+        String error = null;
+        ViewController.ScheduleViewControllerActionEvent actionCommand =
+               ViewController.ScheduleViewControllerActionEvent.valueOf(e.getActionCommand());
+        switch (actionCommand){
+            case CLINICAL_NOTE_FOR_APPOINTMENT_REQUEST:
+                try{
+                    doClinicalNoteForAppoinmentRequest(e);
+                }catch(StoreException ex){
+                    message = ex.getMessage() + "\n"
+                            + "Handled in ClinicalNoteViewController.actionPerformed(Scope = "
+                            + actionCommand.toString() +")";
+                    displayErrorMessage(message,"View controller error",
+                            JOptionPane.WARNING_MESSAGE);
+                }
+                break;
+            case CLINICAL_NOTE_CREATE_REQUEST:
+                try{
+                    appointment = 
+                            getDescriptor().getControllerDescription().getAppointment();
+                    clinicalNote = getDescriptor()
+                            .getViewDescription().getClinicalNote();
+                    clinicalNote.insert();
+                    doClinicalNoteForAppoinmentRequest(e);
+                    if(getDescriptor().getControllerDescription()
+                            .getClinicalNote() == null){
+                        error = "Attempt to create a new clinical note failed";
+                        getDescriptor().getControllerDescription().setError(error);
+                        firePropertyChangeEvent(
+                            ViewController.ClinicalNoteViewControllerPropertyChangeEvent
+                                    .CLINICAL_NOTE_ERROR_RECEIVED.toString(),
+                            (View)e.getSource(),
+                            this,
+                            null,
+                            null
+                        );
+                    }
+                }catch(StoreException ex){
+                    message = ex.getMessage() + "\n"
+                            + "Handled in ClinicalNoteViewController.actionPerformed(Scope = "
+                            + actionCommand.toString() +")";
+                    displayErrorMessage(message,"View controller error",
+                            JOptionPane.WARNING_MESSAGE);
+                }
+                break;
+            case CLINICAL_NOTE_DELETE_REQUEST:
+                try{
+                    clinicalNote = getDescriptor()
+                                .getViewDescription().getClinicalNote();
+                    clinicalNote.setScope(Entity.Scope.SINGLE);
+                    clinicalNote.delete();
+                    doClinicalNoteForAppoinmentRequest(e);
+                }catch(StoreException ex){
+                    message = ex.getMessage() + "\n"
+                            + "Handled in ClinicalNoteViewController.actionPerformed(Scope = "
+                            + actionCommand.toString() +")";
+                    displayErrorMessage(message,"View controller error",
+                            JOptionPane.WARNING_MESSAGE);
+                }
+                break;
+            case CLINICAL_NOTE_UPDATE_REQUEST:
+                try{
+                        clinicalNote = getDescriptor()
+                                    .getViewDescription().getClinicalNote();
+                        clinicalNote.update();
+                        doClinicalNoteForAppoinmentRequest(e);
+                    }catch(StoreException ex){
+                        message = ex.getMessage() + "\n"
+                                + "Handled in ClinicalNoteViewController.actionPerformed(Scope = "
+                                + actionCommand.toString() +")";
+                        displayErrorMessage(message,"View controller error",
+                                JOptionPane.WARNING_MESSAGE);
+                    }
                 break;
         }
     }

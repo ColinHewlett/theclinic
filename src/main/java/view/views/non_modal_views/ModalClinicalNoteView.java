@@ -6,8 +6,8 @@ package view.views.non_modal_views;
 import model.entity.ClinicalNote;
 import model.entity.Appointment;
 import controller.ViewController;
-import model.*;
 import view.View;
+import view.views.modal_views.ModalView;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;  
 import java.awt.datatransfer.*;
@@ -16,20 +16,18 @@ import java.io.IOException;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;       
 import java.beans.PropertyVetoException;
-import javax.swing.KeyStroke;
 import javax.swing.JInternalFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
-import patient_view_original_class.NotesView;
 
 /**
  *
  * @author colin
  */
-public class PatientClinicalNoteForAppointmentView extends View 
+public class ModalClinicalNoteView extends ModalView 
         implements ActionListener, PropertyChangeListener{
 
     /**
@@ -38,7 +36,7 @@ public class PatientClinicalNoteForAppointmentView extends View
      * @param myController
      * @param desktopView 
      */
-    public PatientClinicalNoteForAppointmentView(View.Viewer myViewType, 
+    public ModalClinicalNoteView(View.Viewer myViewType, 
             ViewController myController,
             DesktopView desktopView) {//ViewMode arg
         setMyController(myController);
@@ -62,7 +60,7 @@ public class PatientClinicalNoteForAppointmentView extends View
         this.setMaximizable(true);
         setVisible(true);
         
-        addFrameListeners();
+        //addFrameListeners();
         
         
         Appointment appointment = getAppointment();

@@ -277,7 +277,7 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
     }
     
     public static enum DesktopViewControllerActionEvent{
-        CLINICAL_NOTE_VIEW_CONTROLLER_REQUEST,
+        //CLINICAL_NOTE_VIEW_CONTROLLER_REQUEST,
         MEDICAL_CONDITION_VIEW_CONTROLLER_REQUEST,
         NOTIFICATION_VIEW_CONTROLLER_REQUEST,
         PATIENT_INVOICE_VIEW_CONTROLLER_REQUEST,
@@ -295,7 +295,8 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         TEST_PATIENT_VIEW_CONTROLLER_REQUEST,
         TREATMENT_VIEW_CONTROLLER_REQUEST,
         
-        CLOSE_SCHEDULE_VIEW_FOR_SCHEDULE_DATE_REQUEST,
+        CLOSE_SCHEDULE_VIEW_WITH_SAME_DATE_REQUEST,
+        CLOSE_PATIENT_VIEW_WITH_SAME_PATIENT_REQUEST,
 
         INITIALISE_VIEW,
         BRING_TO_FRONT_SCHEDULE_VIEW_IF_ACTIVE_REQUEST,
@@ -507,8 +508,10 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
     public static enum PatientViewControllerActionEvent{
         //primary view requests (commands)
         
-        CLINICAL_NOTE_VIEW_CONTROLLER_REQUEST,
+        //CLINICAL_NOTE_VIEW_CONTROLLER_REQUEST,
+        CLINICAL_NOTE_VIEW_REQUEST,
         DELETED_PATIENT_REQUEST, 
+        CLOSE_PATIENT_VIEW_WITH_SAME_PATIENT_REQUEST,
         
         NULL_PATIENT_REQUEST,
         PATIENT_CREATE_REQUEST,
@@ -537,7 +540,10 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         VIEW_CHANGED_NOTIFICATION,
         VIEW_CLOSE_NOTIFICATION, 
         
-
+        CLINICAL_NOTE_FOR_APPOINTMENT_REQUEST,
+        CLINICAL_NOTE_DELETE_REQUEST,
+        CLINICAL_NOTE_CREATE_REQUEST,
+        CLINICAL_NOTE_UPDATE_REQUEST,
         CONDITION_STATE_UPDATE_REQUEST,
         PATIENT_MEDICAL_HISTORY_NOTE_TAKER_REQUEST,
         PATIENT_MEDICAL_HISTORY_NOTES_TAKEN_REQUEST,
@@ -594,7 +600,8 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         SCHEDULE_EDITOR_MAKE_EMERGENCY_APPOINTMENT_REQUEST,
         SWITCH_VIEW_REQUEST,                                    //from list to diary or vice versa
         APPOINTMENT_UPDATE_VIEW_REQUEST,
-        CLINICAL_NOTE_VIEW_CONTROLLER_REQUEST,
+        //CLINICAL_NOTE_VIEW_CONTROLLER_REQUEST,
+        CLINICAL_NOTE_VIEW_REQUEST,
         NON_SURGERY_DAY_SCHEDULE_VIEW_REQUEST,
         SURGERY_DAYS_EDITOR_VIEW_REQUEST,
         EMPTY_SLOT_SCAN_CONFIGURATION_VIEW_REQUEST,
@@ -624,6 +631,10 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         APPOINTMENT_TREATMENT_DELETE_REQUEST,
         APPOINTMENT_TREATMENT_STATE_SET_REQUEST,
         APPOINTMENT_TREATMENT_STATE_RESET_REQUEST,
+        CLINICAL_NOTE_FOR_APPOINTMENT_REQUEST,
+        CLINICAL_NOTE_DELETE_REQUEST,
+        CLINICAL_NOTE_CREATE_REQUEST,
+        CLINICAL_NOTE_UPDATE_REQUEST,
         EMPTY_SLOTS_FROM_DAY_REQUEST,
         MODAL_VIEWER_ACTIVATED,
         SCHEDULE_LIST_VIEW_CONTROLLER_REQUEST,
@@ -651,7 +662,9 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         NON_SURGERY_DAY_EDIT_RECEIVED,
         REFRESH_DISPLAY_REQUEST_RECEIVED,
         SURGERY_DAYS_ASSIGNMENT_RECEIVED,
-        CLOSE_VIEW_REQUEST_RECEIVED
+        CLOSE_VIEW_REQUEST_RECEIVED,
+        CLINICAL_NOTE_RECEIVED,
+        CLINICAL_NOTE_ERROR_RECEIVED
         }
     
     public static enum ToDoViewControllerActionEvent{

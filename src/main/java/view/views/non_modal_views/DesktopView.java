@@ -641,15 +641,17 @@ public class DesktopView extends javax.swing.JFrame
         x = cascadeStartingLocation.x-30;
         y = cascadeStartingLocation.y-30;
         
-        for (JInternalFrame frame : cascadeFrameOrder){
-            try{
-                frame.setLocation(x,y);
-                frame.setIcon(false);
-                frame.setSelected(true);
-                x += offset;
-                y += offset;
-            }catch (java.beans.PropertyVetoException e){
-                e.printStackTrace();
+        if (cascadeFrameOrder.size()>1){
+            for (JInternalFrame frame : cascadeFrameOrder){
+                try{
+                    frame.setLocation(x,y);
+                    frame.setIcon(false);
+                    frame.setSelected(true);
+                    x += offset;
+                    y += offset;
+                }catch (java.beans.PropertyVetoException e){
+                    e.printStackTrace();
+                }
             }
         }
     }
@@ -738,7 +740,7 @@ public class DesktopView extends javax.swing.JFrame
         JPopupMenu popup = new JPopupMenu();
         popupMenuItem = popup.add("Paste note");
         popupMenuItem.setActionCommand(
-                PatientClinicalNoteForAppointmentView.Action.REQUEST_PASTE_NOTE.toString());
+                ModalClinicalNoteView.Action.REQUEST_PASTE_NOTE.toString());
         popupMenuItem.addActionListener(this);
         return popup;
                     
