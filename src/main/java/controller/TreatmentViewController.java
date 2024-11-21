@@ -14,7 +14,7 @@ import model.entity.Appointment;
 import model.entity.AppointmentTreatment;
 import model.entity.Entity;
 /*28/03/2024import model.PatientNote;*/
-import repository.StoreException;
+import model.repository.StoreException;
 import view.View;
 
 /*28/03/2024import view.views.non_modal_views.NotesView;*/

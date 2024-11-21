@@ -8,15 +8,14 @@ import java.awt.Point;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Iterator;
-import model.IEntityStoreActions;
-import repository.Repository;
-import repository.StoreException;
+import model.repository.StoreException;
+import model.entity.interfaces.IEntityRepositoryActions;
 
 /**
  *
  * @author colin
  */
-public class ToDo extends Entity implements IEntityStoreActions{
+public class ToDo extends Entity implements IEntityRepositoryActions{
     
     public ToDo(){
         setIsToDo(true);
@@ -26,6 +25,7 @@ public class ToDo extends Entity implements IEntityStoreActions{
         setIsToDo(true);
         this.user = user;
     }
+    
     
     private ArrayList<ToDo> collection = null;
     public void set(ArrayList<ToDo> value){

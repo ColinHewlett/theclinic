@@ -5,17 +5,16 @@
 package model.entity;
 
 import model.entity.Appointment;
-import repository.StoreException;
-import repository.Repository;
+import model.repository.StoreException;
 import java.awt.Point;
 import java.util.ArrayList;
-import model.IEntityStoreActions;
+import model.entity.interfaces.IEntityRepositoryActions;
 
 /**
  *
  * @author colin
  */
-public class AppointmentTreatment extends Entity implements IEntityStoreActions {
+public class AppointmentTreatment extends Entity implements IEntityRepositoryActions {
     
     public AppointmentTreatment(){
         this.setIsAppointmentTreatment(true);

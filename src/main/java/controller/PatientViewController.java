@@ -22,7 +22,7 @@ import model.entity.Entity.Scope;
 import view.views.non_modal_views.DesktopView;
 import view.View;
 import view.views.modal_views.ModalView;
-import repository.StoreException;//01/03/2023
+import model.repository.StoreException;//01/03/2023
 import static controller.ViewController.displayErrorMessage;
 import java.beans.PropertyChangeSupport;
 import java.awt.event.ActionEvent;

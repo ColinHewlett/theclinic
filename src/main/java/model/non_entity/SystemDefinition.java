@@ -9,8 +9,8 @@ import model.entity.User;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Point;
-import repository.Repository;
-import repository.StoreException;
+import model.entity.Repository;
+import model.repository.StoreException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,22 +23,7 @@ public class SystemDefinition {
     //public static String BOOKABLE_SCHEDULE_SLOT_MARKER = "AVAILABLE SLOT";
     //public static String UNBOOKABLE_SCHEDULE_SLOT_MARKER = "UNBOOKABLE SLOT";
     public static Integer UNBOOKABLE_SCHEDULE_SLOT_APPOINTMENT_KEY = 1;
-    private static HashMap<String,String> systemDefinitions = null;
-    private static String pmsDebug = null;
-    private static String pmsImportAppointmentData = null;
-    private static String pmsImportPatientData = null;
-    private static String pmsLookAndFeel = null;
-    private static String pmsMasterDocument = null;
-    private static String pmsSystemDefinition = null;
-    private static String pmsNotesTemplateMode = null;
-    private static String pmsOperationMode = null;
-    private static String pmsPrintFolder = null;
-    private static String pmsSMTPBody = null;
-    private static String pmsSMTPServer = null;
-    private static String pmsSMTPUser = null;
-    private static String pmsStoreAccessURL = null;
-    private static String pmsStorePostgresSQL = null;
-    private static String pmsStoreType = null;
+    
     
     public static Color UNBOOKABLE_HEADER_SLOT_FOREGROUND = new Color(255,255,255);
     public static Color UNBOOKABLE_HEADER_SLOT_BACKGROUND = new Color(0,0,0);
@@ -76,7 +61,7 @@ public class SystemDefinition {
     public static int QUESTIONNAIRE_TABLE_DOUBLE_HEIGHT = 500;
     public static int QUESTIONNAIRE_TABLE_SINGLE_HEIGHT = 300;
     public static int QUESTIONNAIRE_TABLE_MEDICATION_ROW_COUNT = 5;
-    public static String PATIENT_SCHEDULE_FILENAME = "AppointmentSchedule.docx";
+    public static String FILENAME_FOR_SCHEDULE = "AppointmentSchedule.docx";
     public static String PATIENT_QUESTIONNAIRE_MEDICAL_HISTORY_FILENAME = "PatientMedicalHistory.docx";
     //public static String EMERGENCY_APPOINTMENT = "Emergency appointment";
     public static String userP;
@@ -93,38 +78,8 @@ public class SystemDefinition {
         LOGIN,
         NEW_USER_OR_PASSWORD
     }
-    
-    public enum PatientViewActionCaption{
-        CREATE_RECOVER_PATIENT("<html><center>Create</center><center>new</center><center>patient</center></html>",
-                               "<html><center>Update</center><center>selected</center><center>patient</center></html>"),
-        UPDATE_RECOVER_PATIENT("<html><center>Update</center><center>selected</center><center>patient</center></html>",
-                               "<html><center>Cancel</center><center>patient</center><center>recovery</center>"),
-        PATIENT_CLINICAL_NOTES("<html><center>Clinical</center><center>note for</center><center>appointment</center></html"),
-        SCHEDULE_FOR_APPOINTMENT("<html><center>Show</center><center>schedule for</center><center>selection</center></html>"),
-        CLEAR_SELECTION("Clear selection"),
-        CLOSE_VIEW("<html><center>Close</center<center>view</center></html>");
-        
-        private String _1;
-        private String _2;
-        
-        PatientViewActionCaption(String value1){
-            _1 = value1;
-        }
-        
-        PatientViewActionCaption(String value1, String value2){
-            _1 = value1;
-            _2 = value2;
-        }
-        
-        public String _1(){
-            return _1;
-        }
-        
-        public String _2(){
-            return _2;
-        }
-    }
-
+//<editor-fold defaultstate="collapsed" desc="System wide captions">
+/*
     public enum ScheduleViewActionCaption{
         CANCEL_APPOINTMENT("<html><center>Cancel</center<center>appointment</center></html>"),
         CLINICAL_NOTES("<html><center>Clinical</center<center>notes for</center><center>appointment</center></html>"),
@@ -181,6 +136,9 @@ public class SystemDefinition {
             return third;
         }
     }
+*/
+//</editor-fold>
+    
     public enum ScheduleSlotType{
         BOOKED_SCHEDULE_SLOT(null),
         BOOKABLE_SCHEDULE_SLOT("AVAILABLE SLOT"),
@@ -325,6 +283,26 @@ public class SystemDefinition {
         }
     }
     
+    public enum ScheduleTableWithContactDetails{
+        HEADER(0),
+        PATIENT(0),
+        FROM(1),
+        TO(2),
+        TREATMENT(3),
+        PHONE(4),
+        EMAIL(5);
+
+        ScheduleTableWithContactDetails(int value) {
+            this.value = value;
+        }
+
+        private final int value;
+        
+        public int column() {
+            return value;
+        }
+    }
+    
     public enum QuestionnaireTable{
         CATEGORY(0),      //selects font properties for sub heading (col 0 option)
         //NUMBERED(0),    //selects auto-numbering of questions (col 0 option)
@@ -343,6 +321,24 @@ public class SystemDefinition {
             return value;
         }
     }
+ 
+//<editor-fold defaultstate="collapsed" desc="Template PMS variables">
+    private static HashMap<String,String> systemDefinitions = null;
+    private static String pmsDebug = null;
+    private static String pmsImportAppointmentData = null;
+    private static String pmsImportPatientData = null;
+    private static String pmsLookAndFeel = null;
+    private static String pmsMasterDocument = null;
+    private static String pmsSystemDefinition = null;
+    private static String pmsNotesTemplateMode = null;
+    private static String pmsOperationMode = null;
+    private static String pmsPrintFolder = null;
+    private static String pmsSMTPBody = null;
+    private static String pmsSMTPServer = null;
+    private static String pmsSMTPUser = null;
+    private static String pmsStoreAccessURL = null;
+    private static String pmsStorePostgresSQL = null;
+    private static String pmsStoreType = null;
       
     public static String getPMSStoreType(){
         return pmsStoreType;
@@ -444,6 +440,7 @@ public class SystemDefinition {
             }
         }
     }
+//</editor-fold>
     
     public SystemDefinition(String value){
         test = value;

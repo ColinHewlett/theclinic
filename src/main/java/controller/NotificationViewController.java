@@ -16,7 +16,7 @@ import java.beans.PropertyVetoException;
  */
 import model.entity.Patient;
 
-import repository.StoreException;//01/03/2023
+import model.repository.StoreException;//01/03/2023
 import view.views.non_modal_views.DesktopView;
 import view.View;
 import java.awt.event.ActionEvent;

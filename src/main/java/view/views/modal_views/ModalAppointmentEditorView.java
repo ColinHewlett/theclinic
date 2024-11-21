@@ -7,7 +7,7 @@ package view.views.modal_views;
 
 import com.github.lgooddatepicker.components.DatePickerSettings;
 import model.entity.Patient;
-import view.views.view_support_classes.renderers.SelectStartTimeLocalDateTimeRenderer;
+import view.view_support_classes.renderers.SelectStartTimeLocalDateTimeRenderer;
 import view.views.non_modal_views.DesktopView;
 import controller.Descriptor;
 import controller.ViewController;
@@ -37,7 +37,7 @@ import javax.swing.JSeparator;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import view.views.non_modal_views.PatientView;
-import view.views.view_support_classes.AppointmentDateVetoPolicy;
+import view.view_support_classes.AppointmentDateVetoPolicy;
 
 /**
  *

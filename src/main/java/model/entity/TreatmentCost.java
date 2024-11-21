@@ -6,28 +6,28 @@ package model.entity;
 
 import java.awt.Point;
 import java.util.ArrayList;
-import model.IEntityStoreActions;
-import repository.Repository;
-import repository.StoreException;
+import model.repository.StoreException;
+import model.entity.interfaces.IEntityRepositoryActions;
 
 /**
  *
  * @author colin
  */
-public class TreatmentCost extends Entity implements IEntityStoreActions{
-    private Integer key = null;
+public class TreatmentCost extends Entity implements IEntityRepositoryActions{
     private Invoice invoice = null;
     private String description = null;
     private double amount = 0.00;
 
     private ArrayList<TreatmentCost> collection = new ArrayList<>();
     
+    
+    
     public TreatmentCost(){
         setIsTreatmentCost(true);
     }
     
     public TreatmentCost(Integer key){
-        this.key = key;
+        super.setKey(key);
         setIsTreatmentCost(true);
     }
     

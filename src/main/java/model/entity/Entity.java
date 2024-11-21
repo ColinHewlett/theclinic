@@ -5,7 +5,7 @@
  */
 package model.entity;
 
-import repository.StoreException;//01/03/2023
+import model.repository.StoreException;//01/03/2023
 import java.awt.Point;
 import model.IStoreClient;
 
@@ -39,6 +39,8 @@ public class Entity implements IStoreClient{
     private Boolean isTreatmentCost = false;
     private Boolean isUser = false;
     private Boolean isToDo = false;
+    private Boolean isPatientAppointmentData = false;
+    private Boolean isArchivedPatient = false;
     private Scope scope = null;
     private Point value = null;
     protected Boolean isDeleted = false;
@@ -58,6 +60,18 @@ public class Entity implements IStoreClient{
     
     public void setIsDeleted(Boolean value){
         isDeleted = value;
+    }
+    
+    private Integer key = null;
+    Integer getKey(){
+        return key;
+    }
+    void setKey(Integer value){
+        this.key = value;
+        if (key!=null)
+            if (key!=0) setIsKeyDefined(true);
+            else setIsKeyDefined(false);
+        else setIsKeyDefined(false); 
     }
     
     private void resetAll(){
@@ -83,6 +97,8 @@ public class Entity implements IStoreClient{
         setIsTreatmentCost(false);
         setIsUser(false);
         setIsToDo(false);
+        setIsPatientAppointmentData(false);
+        setIsArchivedPatient(false);
     }
     
     /**
@@ -90,8 +106,12 @@ public class Entity implements IStoreClient{
      */
     public enum Scope { ALL,
                         APPOINTEE_REMINDERS,    //all entities
+                        ARCHIVED,
                         CANCELLED,              //cancelled appointments
                         EMERGENCY,              //on an appointment deletion to make deletion permanent
+                        BY_PATIENT,                 //PatientAppointmentData ordered by patient surname
+                        BY_RECALL_DATE,             //PatientAppointmentData ordered by recall date
+                        BY_LAST_APPOINTMENT_DATE,   //PatientAppointmentData ordered by last appointment date
                         FOR_APPOINTMENT,        //clinic note or treatment for appointment
                         FOR_TREATMENT,          //appointment for treatment
                         FOR_QUESTION,
@@ -145,17 +165,7 @@ public class Entity implements IStoreClient{
         scope = value;
     }
     
-    private Integer key = null;
-    public Integer getKey(){
-        return key;
-    }
-    public void setKey(Integer value){
-        this.key = value;
-        if (key!=null)
-            if (key!=0) setIsKeyDefined(true);
-            else setIsKeyDefined(false);
-        else setIsKeyDefined(false); 
-    }
+    
     
     private Boolean isKeyDefined = false;
     public Boolean getIsKeyDefined(){
@@ -257,6 +267,24 @@ public class Entity implements IStoreClient{
     
     public Boolean getIsToDo(){
         return isToDo;
+    }
+    
+    public Boolean getIsPatientAppointmentData (){
+        return isPatientAppointmentData ;
+    }
+    
+    public Boolean getIsArchivedPatient (){
+        return isArchivedPatient ;
+    }
+    
+    protected void setIsArchivedPatient (Boolean value){
+        if (value) resetAll();
+        isArchivedPatient = value;
+    }
+    
+    protected void setIsPatientAppointmentData (Boolean value){
+        if (value) resetAll();
+        isPatientAppointmentData = value;
     }
     
     protected void setIsToDo(Boolean value){

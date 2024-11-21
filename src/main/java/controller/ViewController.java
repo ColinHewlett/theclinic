@@ -33,8 +33,8 @@ import model.non_entity.SystemDefinition.*;
 import view.View;
 import view.views.modal_views.ModalView;
 import view.views.non_modal_views.DesktopView;
-import view.views.view_support_classes.renderers.TableHeaderCellBorderRenderer;
-import repository.StoreException;
+import view.view_support_classes.renderers.TableHeaderCellBorderRenderer;
+import model.repository.StoreException;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionListener;
@@ -126,6 +126,7 @@ import static model.entity.Question.Category.HAVE_YOU;
 import static model.entity.Question.Category.YOU_AND_THE_CLINIC;
 import static model.non_entity.SystemDefinition.FONT.DYNAMIC;
 import static model.non_entity.SystemDefinition.FONT.TICK;
+import static model.non_entity.SystemDefinition.ScheduleTableWithContactDetails.PHONE;
 
 
 /**
@@ -260,6 +261,20 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
                                             NO_COLLISION,
                                             SLOT_START_OK,
                                             UNDEFINED}
+    
+    public static enum ArchivedPatientsViewControllerActionEvent{
+        ARCHIVED_PATIENT_REQUEST,
+        ARCHIVED_PATIENTS_SORT_REQUEST,
+        PATIENT_RESTORE_REQUEST,
+        SET_TIME_FRAME_REQUEST,
+        VIEW_ACTIVATED_NOTIFICATION,
+        VIEW_CHANGED_NOTIFICATION,
+        VIEW_CLOSE_NOTIFICATION
+    }
+    
+    public static enum ArchivedPatientsDataViewControllerPropertyChangeEvent{
+        ARCHIVED_PATIENT_RECEIVED
+    }
   
     public static enum ClinicalNoteViewControllerActionEvent{
         CLINICAL_NOTE_FOR_APPOINTMENT_REQUEST,
@@ -277,7 +292,9 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
     }
     
     public static enum DesktopViewControllerActionEvent{
-        //CLINICAL_NOTE_VIEW_CONTROLLER_REQUEST,
+        //CLINICAL_NOTE_VIEW_CONTROLLER_REQUEST,#
+        ARCHIVED_PATIENTS_VIEW_CONTROLLER_REQUEST,
+        PATIENT_APPOINTMENT_DATA_VIEW_CONTROLLER_REQUEST,
         MEDICAL_CONDITION_VIEW_CONTROLLER_REQUEST,
         NOTIFICATION_VIEW_CONTROLLER_REQUEST,
         PATIENT_INVOICE_VIEW_CONTROLLER_REQUEST,
@@ -472,6 +489,21 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         RECEIVED_PATIENT_NOTIFICATION,
         RECEIVED_PATIENT_NOTIFICATIONS,
         RECEIVED_UNACTIONED_NOTIFICATIONS,
+    }
+    
+    public static enum PatientAppointmentDataViewControllerActionEvent{
+        PATIENT_APPOINTMENT_DATA_REQUEST,
+        PATIENT_ARCHIVE_REQUEST,
+        PATIENT_APPOINTMENT_DATA_SORT_REQUEST,
+        SET_TIME_FRAME_REQUEST,
+        VIEW_ACTIVATED_NOTIFICATION,
+        VIEW_CHANGED_NOTIFICATION,
+        VIEW_CLOSE_NOTIFICATION
+    }
+    
+    public static enum PatientAppointmentDataViewControllerPropertyChangeEvent{
+        PATIENT_APPOINTMENT_DATA_RECEIVED,
+        ARCHIVED_PATIENT_RECEIVED
     }
     
     public static enum PatientMedicalHistoryViewControllerActionEvent{
@@ -718,10 +750,13 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         UPDATE,
         Update,
         EMERGENCY,
-        SLOT_SELECTED,
-        SLOT_UNSELECTED,
         SCHEDULE_REFERENCED_FROM_PATIENT_VIEW,
         SCHEDULE_REFERENCED_DESKTOP_VIEW,
+        SLOT_SELECTED,
+        SLOT_UNSELECTED,
+        WITH_CONTACT_DETAILS,
+        SORTED_BY_PATIENT,
+        SORTED_BY_APPOINTMENT,
         NO_ACTION
     } 
     
@@ -787,16 +822,21 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         for (int i = 0; i < table.getColumnModel().getColumnCount(); i++) {
             TableColumn column = table.getColumnModel().getColumn(i);
             double test = tablePreferredWidth * (percentages[i] / total);
-            if (i>0)
+            if (i>0){
                 column.setPreferredWidth((int)
                     (tablePreferredWidth * (percentages[i] / total)));
+                /*column.setMinWidth((int)
+                        (tablePreferredWidth * (percentages[i] / total)));
+                column.setMaxWidth((int)
+                        (tablePreferredWidth * (percentages[i] / total)));*/
+            }
             else{
                 column.setMinWidth((int)
                         (tablePreferredWidth * (percentages[i] / total)));
                 column.setMaxWidth((int)
                         (tablePreferredWidth * (percentages[i] / total)));
             }
-            column.setHeaderRenderer(new TableHeaderCellBorderRenderer(Color.LIGHT_GRAY));
+            //column.setHeaderRenderer(new TableHeaderCellBorderRenderer(Color.LIGHT_GRAY));
         }
     }
     
@@ -904,10 +944,10 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
                     break;
                 case UPDATE:
                     /*05/04/2024 19:31 code update */
-                    Appointment temp = new Appointment(rSlot.getKey());
-                    temp.setScope(Entity.Scope.SINGLE);
-                    temp = temp.read();
-                    rSlot.setNotes(temp.getNotes());
+                    //Appointment temp = new Appointment(rSlot.getKey());
+                    //temp.setScope(Entity.Scope.SINGLE);
+                    //temp = temp.read();
+                    //rSlot.setNotes(temp.getNotes());
                     /*end of code update*/
                     rSlot.update();
                     rSlot.setScope(Entity.Scope.SINGLE);
@@ -1231,10 +1271,10 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
                 first.setDuration(first.getDuration().plus(second.getDuration()));
                 try{
                     /*05/04/2024 19:31 code update */
-                    Appointment temp = new Appointment(first.getKey());
-                    temp.setScope(Entity.Scope.SINGLE);
-                    temp = temp.read();
-                    first.setNotes(temp.getNotes());
+                    //Appointment temp = new Appointment(first.getKey());
+                    //temp.setScope(Entity.Scope.SINGLE);
+                    //temp = temp.read();
+                    //first.setNotes(temp.getNotes());
                     /*end of code update*/
                     first.update();
                     second.setScope(Entity.Scope.SINGLE);
@@ -1491,7 +1531,8 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
                     /**
                      * check this primary condition is owned by this patient
                      */
-                    if(c.getKey().equals(_pac.getCondition().getKey())){
+                    //if(c.getKey().equals(_pac.getCondition().getKey())){
+                    if (c.equals(_pac.getCondition())){
                         /**
                          * initialise the new PrimaryConditionWitState object
                          * -- set its state property true
@@ -1619,7 +1660,8 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         for(Treatment t : treatment.get()){       
             TreatmentWithState treatmentWithState = new TreatmentWithState(t);
             for(AppointmentTreatment at : appointmentTreatment.get()){
-                if (t.getKey().equals(at.getTreatment().getKey())) {  
+                //if (t.getKey().equals(at.getTreatment().getKey())) {  
+                if(t.equals(at.getTreatment())){
                     treatmentWithState.setState(true); 
                     treatmentWithState.setComment(at.getComment());//08/04/2024 07:41
                 }
@@ -1689,7 +1731,7 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
             for(int index = 0; index < tables.size(); index++){
                 table = document.getTableArray(index);
                 tableWidth = table.getCTTbl().addNewTblPr().addNewTblW();
-                tableWidth.setW(BigInteger.valueOf(10300)); // 8000 in Twips (1/20 of a point)
+                tableWidth.setW(BigInteger.valueOf(10900)); // 8000 in Twips (1/20 of a point)
             }
             populateAppointmentScheduleHeaderTable(document.getTableArray(0), day);
             populateAppointmentScheduleTable(document.getTableArray(1));
@@ -1698,17 +1740,17 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
             document.write(out);
             //document.close();
             String path = new File(".").getAbsolutePath();
-            //path = path.substring(0,path.length() - 2) + "\\AppointmentScheduleForDay.docx";
-            //printDocument(path);
-            System.out.println(new File(".").getAbsolutePath());
-            System.out.println("Word document with complex table created successfully!");
             out.close();
+        }catch (FileNotFoundException e){
+            String message = "FileNotFoundException raised, probably because a previous version of the Word file trying to be opened is already open and needs to be closed first.\n"
+                    + "Exception handled in ViewController.doPrintAppointmentScheduleForDay() method";
+            displayErrorMessage(message, "View controller error", JOptionPane.WARNING_MESSAGE);
         }catch (IOException e) {
             e.printStackTrace();
         }
             
     }
-      
+    
     protected void doPrintPatientMedicalHistoryQuestionnaireRequest(boolean isNotForNewPatient)throws StoreException{
         setPatient(getDescriptor().getControllerDescription().getPatient());
         setIsForPatient(isNotForNewPatient);
@@ -1925,6 +1967,34 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
                 break;
             case CONFIRMED:
                 runText(cell, text, SystemDefinition.FONT.TICK, ParagraphAlignment.CENTER);
+                break;
+        }
+    }
+    
+    private void setTextInCell(XWPFTableCell cell,String text,SystemDefinition.ScheduleTableWithContactDetails entity){
+        switch(entity){
+            case HEADER://handles the schedule table header
+                runText(cell, text, SystemDefinition.FONT.SCHEDULE_HEADER, ParagraphAlignment.CENTER);
+                break;
+            case PATIENT:
+                if (text.contains("UNBOOKABLE")) runText(cell, text, SystemDefinition.FONT.DEFAULT_RED, ParagraphAlignment.CENTER);
+                else if(text.contains("AVAILABLE SLOT")) runText(cell, text, SystemDefinition.FONT.DEFAULT_BLUE, ParagraphAlignment.CENTER);
+                else runText(cell, text, SystemDefinition.FONT.DEFAULT, ParagraphAlignment.LEFT);
+                break;
+            case FROM:
+                runText(cell, text, SystemDefinition.FONT.DEFAULT, ParagraphAlignment.CENTER);
+                break;
+            case TO:
+                runText(cell, text, SystemDefinition.FONT.DEFAULT, ParagraphAlignment.CENTER);
+                break;
+            case TREATMENT:
+                runText(cell, text, SystemDefinition.FONT.DYNAMIC, ParagraphAlignment.LEFT);
+                break;
+            case PHONE:
+                runText(cell, text, SystemDefinition.FONT.DEFAULT, ParagraphAlignment.CENTER);
+                break;
+            case EMAIL:
+                runText(cell, text, SystemDefinition.FONT.DEFAULT, ParagraphAlignment.CENTER);
                 break;
         }
     }
@@ -2308,7 +2378,8 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
     private QuestionWithState getQuestionWithStateForQuestion(Question q){
         QuestionWithState result = null;
         for (QuestionWithState _qws : getQuestionWithState().get()){
-            if (q.getKey().equals(_qws.getQuestion().getKey())){
+            //if (q.getKey().equals(_qws.getQuestion().getKey())){
+            if (q.equals(_qws.getQuestion())){
                 result = _qws;
                 break;
             }
@@ -2611,46 +2682,65 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
     private void populateAppointmentScheduleTable(XWPFTable table){
         XWPFTableCell cell = null;
         int row = 0;
-        String patient = "";
+        String patient_name = "";
         String from = "";
         String to = "";
         String treatment = "";
-        String confirmed = "";
+        String patient_phone = "";
+        String patient_email = "";
         
         Iterator<Appointment> it = getDescriptor().getControllerDescription().getAppointmentSlotsForDayInListFormat().iterator();
         while (it.hasNext()){
             row++;
             Appointment appointment = (Appointment)it.next();
 
-            if (appointment.getPatient()==null) patient = "<AVAILABLE SLOT>";
-            else if (appointment.getPatient().toString()
-                    .equals(SystemDefinition.ScheduleSlotType.UNBOOKABLE_SCHEDULE_SLOT.mark()))
-                patient = "<UNBOOKABLE_SLOT>";
-            else patient = appointment.getPatient().toString();
-
-
             from = appointment.getStart().toLocalTime().format(DateTimeFormatter.ofPattern("HH:mm"));
-
             Long duration = appointment.getDuration().toMinutes();
             to = appointment.getStart().toLocalTime().plusMinutes(duration)
                     .format(DateTimeFormatter.ofPattern("HH:mm"));
-
-            treatment = appointment.getNotes();
             
+            if (appointment.getPatient()==null) {
+                patient_name = "<AVAILABLE SLOT>";
+                treatment = "";
+                patient_phone = "";
+                patient_email = "";
+            }
+            
+            else if (appointment.getPatient().toString()
+                    .equals(SystemDefinition.ScheduleSlotType.UNBOOKABLE_SCHEDULE_SLOT.mark())){
+                patient_name = "<UNBOOKABLE_SLOT>";
+                treatment = "";
+                patient_phone = "";
+                patient_email = "";
+            }   
+            else {
+                patient_name = appointment.getPatient().toString();
+                treatment = appointment.getNotes();
+                patient_email = appointment.getPatient().getEmail();
+                if (!appointment.getPatient().getPhone1().trim().isEmpty()){
+                    patient_phone = appointment.getPatient().getPhone1().trim();
+                    if (!appointment.getPatient().getPhone2().trim().isEmpty()){
+                        patient_phone = patient_phone + " / " + appointment.getPatient().getPhone2().trim();
+                    }
+                }else if (!appointment.getPatient().getPhone2().trim().isEmpty()){
+                    patient_phone = appointment.getPatient().getPhone2().trim();
+                }
+            }
+
             if (row > 1) table.createRow();//this because we already start with one blank row pluis the column headers
             setTableRowHeightInTwips(table.getRow(row), SystemDefinition.SCHEDULE_TABLE_CELL_HEIGHT);
-            cell = table.getRow(row).getCell(SystemDefinition.ScheduleTable.PATIENT.column());
-            setTextInCell(cell,patient,SystemDefinition.ScheduleTable.PATIENT);
-            cell = table.getRow(row).getCell(SystemDefinition.ScheduleTable.FROM.column());
-            setTextInCell(cell,from,SystemDefinition.ScheduleTable.FROM);
-            cell = table.getRow(row).getCell(SystemDefinition.ScheduleTable.TO.column());
-            setTextInCell(cell,to,SystemDefinition.ScheduleTable.TO);
-            cell = table.getRow(row).getCell(SystemDefinition.ScheduleTable.TREATMENT.column());
-            setTextInCell(cell,treatment,SystemDefinition.ScheduleTable.TREATMENT);
-            cell = table.getRow(row).getCell(SystemDefinition.ScheduleTable.CONFIRMED.column());
-            if (appointment.getHasPatientBeenContacted())confirmed = SystemDefinition.TICK;
-            else confirmed = null;
-            setTextInCell(cell,confirmed,SystemDefinition.ScheduleTable.CONFIRMED);
+            cell = table.getRow(row).getCell(SystemDefinition.ScheduleTableWithContactDetails.PATIENT.column());
+            setTextInCell(cell,patient_name,SystemDefinition.ScheduleTableWithContactDetails.PATIENT);
+            cell = table.getRow(row).getCell(SystemDefinition.ScheduleTableWithContactDetails.FROM.column());
+            setTextInCell(cell,from,SystemDefinition.ScheduleTableWithContactDetails.FROM);
+            cell = table.getRow(row).getCell(SystemDefinition.ScheduleTableWithContactDetails.TO.column());
+            setTextInCell(cell,to,SystemDefinition.ScheduleTableWithContactDetails.TO);
+            cell = table.getRow(row).getCell(SystemDefinition.ScheduleTableWithContactDetails.TREATMENT.column());
+            setTextInCell(cell,treatment,SystemDefinition.ScheduleTableWithContactDetails.TREATMENT);
+            cell = table.getRow(row).getCell(SystemDefinition.ScheduleTableWithContactDetails.PHONE.column());
+            setTextInCell(cell,patient_phone,SystemDefinition.ScheduleTableWithContactDetails.PHONE);
+            cell = table.getRow(row).getCell(SystemDefinition.ScheduleTableWithContactDetails.EMAIL.column());
+            setTextInCell(cell,patient_email,SystemDefinition.ScheduleTableWithContactDetails.EMAIL);
         }
     }
     

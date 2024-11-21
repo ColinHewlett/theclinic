@@ -8,15 +8,14 @@ import model.entity.Entity;
 import model.entity.Appointment;
 import java.awt.Point;
 import java.util.ArrayList;
-import model.IEntityStoreActions;
-import repository.Repository;
-import repository.StoreException;
+import model.repository.StoreException;
+import model.entity.interfaces.IEntityRepositoryActions;
 
 /**
  *
  * @author colin
  */
-public class Treatment extends Entity implements IEntityStoreActions{
+public class Treatment extends Entity implements IEntityRepositoryActions{
     public Treatment(){
         this.setIsTreatment(true);
     }
@@ -30,6 +29,7 @@ public class Treatment extends Entity implements IEntityStoreActions{
         this.setIsTreatment(true);
         this.appointment = value;
     }
+    
     
     private ArrayList<Treatment> collection = new ArrayList<>();
     public ArrayList<Treatment> get(){
@@ -53,6 +53,29 @@ public class Treatment extends Entity implements IEntityStoreActions{
     }
     public void setDescription(String value){
         description = value;
+    }
+    
+    @Override
+    public boolean equals(Object obj) 
+    { 
+        // if both the object references are  
+        // referring to the same object. 
+        if(this == obj) 
+            return true; 
+
+        // checks if the comparison involves 2 objecs of the same type 
+        /**
+         * issue arise if one of the objects is an entity (for example a Patient) and the other object is its delegate sub class
+         */
+        //if(obj == null || obj.getClass()!= this.getClass()) 
+            //return false; 
+        if (obj == null) return false;
+        // type casting of the argument.  
+        Treatment treatment = (Treatment) obj; 
+
+        // comparing the state of argument with  
+        // the state of 'this' Object. 
+        return (treatment.getKey().equals(this.getKey())); 
     }
     
     

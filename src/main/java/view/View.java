@@ -126,11 +126,16 @@ public class View extends JInternalFrame
             case SCHEDULE_DIARY_VIEW:
                 setView(makeView(new ScheduleDiaryView(viewer, controller, desktopView)));
                 break;
+            case PATIENT_APPOINTMENT_DATA_VIEW:
+                setView(makeView(new PatientAppointmentDataView(viewer, controller, desktopView)));
+                break;
+            case ARCHIVED_PATIENTS_VIEW:
+                setView(makeView(new ArchivedPatientsView(viewer, controller, desktopView)));
+                break;
             case PATIENT_MEDICAL_HISTORY_VIEW:
                 setView(makeView(new PatientMedicalHistoryView(viewer, controller, desktopView)));
                 break;
-            case PATIENT_QUESTIONNAIRE_VIEW:
-                //setView(makeView(new PatientQuestionnaireView(viewer, controller, desktopView)));
+            case PATIENT_QUESTIONNAIRE_VIEW:;
                 setView(makeView(new PatientQuestionnaireView2(viewer, controller, desktopView)));
                 break;
             case APPOINTMENTS_CANCELLED_VIEW:
@@ -220,6 +225,7 @@ public class View extends JInternalFrame
 
     public static enum Viewer { 
         APPOINTMENT_CREATOR_VIEW,
+        ARCHIVED_PATIENTS_VIEW,
         BOOKABLE_SLOT_SCANNER_VIEW,
         UNBOOKABLE_SLOT_SCANNER_VIEW,
         SCHEDULE_EDITOR_VIEW,
@@ -234,6 +240,7 @@ public class View extends JInternalFrame
         NON_SURGERY_DAY_EDITOR_VIEW,
         TREATMENT_VIEW,
         NOTE_TAKER,
+        PATIENT_APPOINTMENT_DATA_VIEW,
         PATIENT_INVOICE_VIEW,
         PATIENT_MEDICAL_HISTORY_VIEW,
         PATIENT_MEDICATION_EDITOR_VIEW,
@@ -243,7 +250,6 @@ public class View extends JInternalFrame
         PATIENT_PHONE_EMAIL_EDITOR_VIEW,
         PATIENT_GUARDIAN_EDITOR_VIEW,
         PATIENT_QUESTIONNAIRE_VIEW,
-        //PATIENT_NOTES_EDITOR_VIEW,
         PATIENT_RECOVERY_SELECTION_VIEW,
         PATIENT_SELECTION_VIEW,
         PATIENT_VIEW,        

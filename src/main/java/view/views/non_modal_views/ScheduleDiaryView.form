@@ -9,7 +9,7 @@
             <Property name="text" type="java.lang.String" value="Actions"/>
           </Properties>
           <SubComponents>
-            <MenuItem class="javax.swing.JMenuItem" name="mniPrintScheduleSelection">
+            <MenuItem class="javax.swing.JMenuItem" name="mniPrintSchedule">
               <Properties>
                 <Property name="text" type="java.lang.String" value="Print schedule"/>
               </Properties>
@@ -504,7 +504,7 @@
         <Component class="javax.swing.JButton" name="btnCloseView">
           <Properties>
             <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code="ScheduleViewActionCaption.CLOSE_VIEW._1()" type="code"/>
+              <Connection code="Captions.CLOSE_VIEW" type="code"/>
             </Property>
           </Properties>
         </Component>

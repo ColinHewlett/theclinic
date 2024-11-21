@@ -4,37 +4,27 @@
  */
 package view.views.non_modal_views;
 
-import controller.ScheduleViewController;
-import com.bric.colorpicker.ColorPicker;
 import com.bric.colorpicker.listeners.ColorListener;
 import com.bric.colorpicker.models.ColorModel;
 import com.bric.colorpicker.ColorPickerDialog;
 import model.non_entity.SystemDefinition;
 import model.non_entity.Slot;
 import model.non_entity.SystemDefinition.ScheduleSlotType;
-import model.non_entity.SystemDefinition.ScheduleViewActionCaption;
-import view.views.view_support_classes.renderers.AppointmentsTableDurationRenderer;
-import view.views.view_support_classes.renderers.AppointmentsListTableLocalDateTimeRenderer;
-import view.views.view_support_classes.renderers.ScheduleDiaryTablePatientRenderer;
-import view.views.view_support_classes.renderers.AppointmentsListTablePatientRenderer;
-import view.views.view_support_classes.renderers.ScheduleDiaryTableLocalDateTimeRenderer;
-import view.views.view_support_classes.renderers.ScheduleTableCellRenderer;
-import view.views.view_support_classes.renderers.ScheduleDiaryTableStringRenderer;
-import view.views.dialogs.CustomComboBoxDialog;
-import view.views.dialogs.CustomComboBoxInternalDialog;
-/*28/03/2024import view.views.view_support_classes.renderers.AppointmentsTablePatientNoteRenderer;*/
-import view.views.view_support_classes.models.ScheduleListTableModel;
-import view.views.view_support_classes.models.ScheduleDiaryTableModel;
+import view.view_support_classes.renderers.AppointmentsTableDurationRenderer;
+import view.view_support_classes.renderers.AppointmentsListTableLocalDateTimeRenderer;
+import view.view_support_classes.renderers.ScheduleDiaryTablePatientRenderer;
+import view.view_support_classes.renderers.ScheduleListTablePatientRenderer;
+import view.view_support_classes.renderers.ScheduleDiaryTableLocalDateTimeRenderer;
+import view.view_support_classes.renderers.ScheduleDiaryTableStringRenderer;
+import view.view_support_classes.models.ScheduleListTableModel;
+import view.view_support_classes.models.ScheduleDiaryTableModel;
 import model.entity.Appointment;
 import model.entity.Patient;
 /*28/03/2024import model.PatientNote;*/
 import controller.ViewController;
 import controller.DesktopViewController;
-import view.views.view_support_classes.AppointmentDateVetoPolicy;
-import view.views.view_support_classes.renderers.TableHeaderCellBorderRenderer;
-import view.views.view_support_classes.models.EmptySlotAvailability2ColumnTableModel;
+import view.view_support_classes.AppointmentDateVetoPolicy;
 import view.View;
-import view.views.non_modal_views.BookingView;
 import com.github.lgooddatepicker.components.DatePickerSettings;
 import com.github.lgooddatepicker.optionalusertools.DateChangeListener;
 import com.github.lgooddatepicker.optionalusertools.DateHighlightPolicy;
@@ -42,38 +32,17 @@ import com.github.lgooddatepicker.zinternaltools.DateChangeEvent;
 import com.github.lgooddatepicker.zinternaltools.HighlightInformation;
 import static controller.ViewController.ScheduleViewControllerPropertyChangeEvent.APPOINTMENTS_FOR_DAY_RECEIVED;
 import static controller.ViewController.ScheduleViewControllerPropertyChangeEvent.APPOINTMENT_SCHEDULE_ERROR_RECEIVED;
-import static controller.ViewController.ScheduleViewControllerPropertyChangeEvent.APPOINTMENT_SLOTS_FROM_DAY_RECEIVED;
-import static controller.ViewController.ScheduleViewControllerPropertyChangeEvent.NON_SURGERY_DAY_EDIT_RECEIVED;
-import static controller.ViewController.ScheduleViewControllerPropertyChangeEvent.NO_APPOINTMENT_SLOTS_FROM_DAY_RECEIVED;
-import static controller.ViewController.ScheduleViewControllerPropertyChangeEvent.SURGERY_DAYS_ASSIGNMENT_RECEIVED;
 import static controller.ViewController.ViewMode.SCHEDULE_REFERENCED_DESKTOP_VIEW;
 import static controller.ViewController.ViewMode.SCHEDULE_REFERENCED_FROM_PATIENT_VIEW;
 import java.awt.Color;
-import java.awt.Font;
-import java.awt.FontMetrics;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.awt.print.PageFormat;
-import java.awt.print.Printable;
-import static java.awt.print.Printable.NO_SUCH_PAGE;
-import static java.awt.print.Printable.PAGE_EXISTS;
-import java.awt.print.PrinterException;
-import java.awt.Frame;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyVetoException;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.StringReader;
-import java.text.MessageFormat;
 import java.time.DayOfWeek;
 import java.time.format.DateTimeFormatter;
 import java.time.LocalTime;
@@ -90,15 +59,16 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Iterator;
 import javax.swing.ImageIcon;
+import javax.swing.JMenu;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.JTableHeader;
-import javax.swing.table.TableColumnModel;
 import javax.swing.SwingUtilities;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
+import model.non_entity.Captions;
 import static model.non_entity.SystemDefinition.ScheduleSlotType.BOOKABLE_SCHEDULE_SLOT;
 import static model.non_entity.SystemDefinition.ScheduleSlotType.BOOKED_SCHEDULE_SLOT;
 import static model.non_entity.SystemDefinition.ScheduleSlotType.EMERGENCY_SCHEDULE_SLOT;
@@ -557,15 +527,15 @@ public class ScheduleListView extends BookingView
         unbookableSlotMode = value;
         switch (unbookableSlotMode){
             case MARK:
-                btnMarkCancelSlotUnbookableOrMoveBookingToAnotherDay.setText(ScheduleViewActionCaption.MARK_CANCEL_UNBOOKABLE_SLOT_OR_MOVE_TO_ANOTHER_DAY._1());
+                btnMarkCancelSlotUnbookableOrMoveBookingToAnotherDay.setText(Captions.ScheduleView.MARK_CANCEL_UNBOOKABLE_SLOT_OR_MOVE_TO_ANOTHER_DAY._1());
                 btnMarkCancelSlotUnbookableOrMoveBookingToAnotherDay.setEnabled(true);
                 break;
             case CANCEL:
-                btnMarkCancelSlotUnbookableOrMoveBookingToAnotherDay.setText(ScheduleViewActionCaption.MARK_CANCEL_UNBOOKABLE_SLOT_OR_MOVE_TO_ANOTHER_DAY._2());
+                btnMarkCancelSlotUnbookableOrMoveBookingToAnotherDay.setText(Captions.ScheduleView.MARK_CANCEL_UNBOOKABLE_SLOT_OR_MOVE_TO_ANOTHER_DAY._2());
                 btnMarkCancelSlotUnbookableOrMoveBookingToAnotherDay.setEnabled(true);
                 break;
             case MOVE:
-                btnMarkCancelSlotUnbookableOrMoveBookingToAnotherDay.setText(ScheduleViewActionCaption.MARK_CANCEL_UNBOOKABLE_SLOT_OR_MOVE_TO_ANOTHER_DAY._3());
+                btnMarkCancelSlotUnbookableOrMoveBookingToAnotherDay.setText(Captions.ScheduleView.MARK_CANCEL_UNBOOKABLE_SLOT_OR_MOVE_TO_ANOTHER_DAY._3());
                 btnMarkCancelSlotUnbookableOrMoveBookingToAnotherDay.setEnabled(true);
                 break;
             case NONE:
@@ -584,15 +554,15 @@ public class ScheduleListView extends BookingView
         emergencySlotMode = value;
         switch (emergencySlotMode){
             case MAKE:
-                btnMakeDeleteEmergencyAppointmentUndoSelection.setText(ScheduleViewActionCaption.MAKE_DELETE_EMERGENCY_APPOINTMENT_UNDO._1());
+                btnMakeDeleteEmergencyAppointmentUndoSelection.setText(Captions.ScheduleView.MAKE_DELETE_EMERGENCY_APPOINTMENT_UNDO._1());
                 btnMakeDeleteEmergencyAppointmentUndoSelection.setEnabled(true);
                 break;
             case DELETE:
-                btnMakeDeleteEmergencyAppointmentUndoSelection.setText(ScheduleViewActionCaption.MAKE_DELETE_EMERGENCY_APPOINTMENT_UNDO._2());
+                btnMakeDeleteEmergencyAppointmentUndoSelection.setText(Captions.ScheduleView.MAKE_DELETE_EMERGENCY_APPOINTMENT_UNDO._2());
                 btnMakeDeleteEmergencyAppointmentUndoSelection.setEnabled(true);
                 break;
             case UNDO:
-                btnMakeDeleteEmergencyAppointmentUndoSelection.setText(ScheduleViewActionCaption.MAKE_DELETE_EMERGENCY_APPOINTMENT_UNDO._3());
+                btnMakeDeleteEmergencyAppointmentUndoSelection.setText(Captions.ScheduleView.MAKE_DELETE_EMERGENCY_APPOINTMENT_UNDO._3());
                 btnMakeDeleteEmergencyAppointmentUndoSelection.setEnabled(true);
                 break;
             case NONE:
@@ -616,12 +586,12 @@ public class ScheduleListView extends BookingView
         appointmentMode = value;        switch(appointmentMode){
             case CREATE:
                 btnCreateUpdateAppointment.setText(
-                        ScheduleViewActionCaption.CREATE_UPDATE_APPOINTMENT._1());
+                        Captions.ScheduleView.CREATE_UPDATE_APPOINTMENT._1());
                 btnCreateUpdateAppointment.setEnabled(true);
                 break;
             case UPDATE:
                 btnCreateUpdateAppointment.setText(
-                        ScheduleViewActionCaption.CREATE_UPDATE_APPOINTMENT._2());
+                        Captions.ScheduleView.CREATE_UPDATE_APPOINTMENT._2());
                 btnCreateUpdateAppointment.setEnabled(true);
                 break;
             case NONE:
@@ -650,7 +620,7 @@ public class ScheduleListView extends BookingView
                 this.setUnbookableSlotOrMoveMode(UnbookableSlotOrMoveMode.MOVE);
                 this.btnMarkCancelSlotUnbookableOrMoveBookingToAnotherDay.setEnabled(false);
                 this.btnMarkCancelSlotUnbookableOrMoveBookingToAnotherDay.setText(
-                        ScheduleViewActionCaption.MARK_CANCEL_UNBOOKABLE_SLOT_OR_MOVE_TO_ANOTHER_DAY._3());
+                        Captions.ScheduleView.MARK_CANCEL_UNBOOKABLE_SLOT_OR_MOVE_TO_ANOTHER_DAY._3());
                 this.btnSelectTreatmentRequest.setEnabled(false);
                 break;
             case LIST:
@@ -974,28 +944,8 @@ public class ScheduleListView extends BookingView
                 doPreviousDayAction();
                 break;
             case REQUEST_PRINT_SCHEDULE:
-                getMyController().getDescriptor().getViewDescription().setScheduleDay(dayDatePicker.getDate());
-                actionEvent = new ActionEvent(this, 
-                        ActionEvent.ACTION_PERFORMED,
-                        ViewController.ScheduleViewControllerActionEvent.PRINT_SCHEDULE_REQUEST.toString());
-                getMyController().actionPerformed(actionEvent);
-                doOpenDocumentForPrinting(SystemDefinition.getPMSPrintFolder() 
-                        + SystemDefinition.PATIENT_SCHEDULE_FILENAME);
+                doPrintScheduleRequest();
                 break;
-            /*
-            case REQUEST_SCHEDULE_DIARY_VIEW:
-                setScheduleViewMode(ScheduleViewMode.DIARY);
-                
-                actionEvent = new ActionEvent(this, ActionEvent.ACTION_PERFORMED,
-                        ViewController.ScheduleViewControllerActionEvent.APPOINTMENTS_FOR_DAY_REQUEST.toString());
-                this.getMyController().actionPerformed(actionEvent);
-                break;
-            case REQUEST_SCHEDULE_LIST_VIEW:
-                setScheduleViewMode(ScheduleViewMode.LIST);
-                actionEvent = new ActionEvent(this, ActionEvent.ACTION_PERFORMED,
-                        ViewController.ScheduleViewControllerActionEvent.APPOINTMENTS_FOR_DAY_REQUEST.toString());
-                this.getMyController().actionPerformed(actionEvent);
-                break;*/
             case REQUEST_SEARCH_AVAILABLE_SLOTS:
                 doSearchAvailableSlotsAction();
                 break;
@@ -1122,7 +1072,7 @@ public class ScheduleListView extends BookingView
                 break;
             case APPOINTMENTS_FOR_DAY_RECEIVED:
                 switch (getScheduleViewMode()){
-                    case DIARY:
+                    /*case DIARY:
                         javax.swing.SwingUtilities.invokeLater(new Runnable(){
                             @Override
                             public void run(){
@@ -1130,7 +1080,7 @@ public class ScheduleListView extends BookingView
                             }
                         });
                         
-                        break;
+                        break;*/
                     case LIST:
                         javax.swing.SwingUtilities.invokeLater(new Runnable(){
                             @Override
@@ -1186,22 +1136,26 @@ public class ScheduleListView extends BookingView
     
     @Override
     public void tableChanged(TableModelEvent e){
-        int row = e.getFirstRow();
-        int column = e.getColumn();
-        ScheduleListTableModel model =  
-                (ScheduleListTableModel)e.getSource();
-        Boolean value = (Boolean)model.getValueAt(row, column);
-        Appointment appointment = model.getElementAt(row);
-        appointment.setHasPatientBeenContacted(value);
-        getMyController().getDescriptor().getViewDescription().setAppointment(appointment);
-        //tblAppointments.clearSelection();
+        if (e.getType() == TableModelEvent.UPDATE) {
+            if (e.getColumn() == 0) {
+                int row = e.getFirstRow();
+                int column = e.getColumn();
+                ScheduleListTableModel model =  
+                        (ScheduleListTableModel)e.getSource();
+                Boolean value = (Boolean)model.getValueAt(row, column);
+                Appointment appointment = model.getElementAt(row);
+                appointment.setHasPatientBeenContacted(value);
+                getMyController().getDescriptor().getViewDescription().setAppointment(appointment);
+                //tblAppointments.clearSelection();
 
-        ActionEvent actionEvent = new ActionEvent(
-            this,ActionEvent.ACTION_PERFORMED,
-            ViewController.ScheduleViewControllerActionEvent.
-                    APPOINTMENT_REMINDED_STATUS_UPDATE_REQUEST.toString());
-        getMyController().actionPerformed(actionEvent);
-        tblAppointments.clearSelection();
+                ActionEvent actionEvent = new ActionEvent(
+                    this,ActionEvent.ACTION_PERFORMED,
+                    ViewController.ScheduleViewControllerActionEvent.
+                            APPOINTMENT_REMINDED_STATUS_UPDATE_REQUEST.toString());
+                getMyController().actionPerformed(actionEvent);
+                tblAppointments.clearSelection();
+            }
+        }
     }
     
     @Override
@@ -1482,6 +1436,19 @@ public class ScheduleListView extends BookingView
         } */     
     }
     
+    /**
+     * on entry ViewDescriptor.ViewMode initialised appropriately for print request (with or without contact details)
+     */
+    private void doPrintScheduleRequest(){
+        getMyController().getDescriptor().getViewDescription().setScheduleDay(dayDatePicker.getDate());
+        ActionEvent actionEvent = new ActionEvent(this, 
+                ActionEvent.ACTION_PERFORMED,
+                ViewController.ScheduleViewControllerActionEvent.PRINT_SCHEDULE_REQUEST.toString());
+        getMyController().actionPerformed(actionEvent);
+        doOpenDocumentForPrinting(SystemDefinition.getPMSPrintFolder() 
+                + SystemDefinition.FILENAME_FOR_SCHEDULE);
+    }
+    
     private boolean isViewSwitchPending = false;
     private void setIsViewSwitchPending(boolean value){
         isViewSwitchPending = value;
@@ -1562,6 +1529,13 @@ public class ScheduleListView extends BookingView
         }
         //setEmptySlotAvailabilityTableListener();
         
+        mniPrintSchedule.setActionCommand(Action.REQUEST_PRINT_SCHEDULE.toString());
+        mniPrintSchedule.addActionListener(this);
+        this.mniCloseView.setActionCommand(Action.REQUEST_CLOSE_VIEW.toString());
+        this.mniCloseView.addActionListener(this);
+        this.mniColorPicker.setActionCommand(Action.REQUEST_COLOUR_PICKER.toString());
+        this.mniColorPicker.addActionListener(this);
+        
         this.btnSwitchView.setActionCommand(Action.REQUEST_SWITCH_VIEW.toString());
         this.btnSwitchView.addActionListener(this);
         
@@ -1580,17 +1554,17 @@ public class ScheduleListView extends BookingView
         btnSelectTreatmentRequest.setEnabled(false);
         btnCloseView.setEnabled(true);
 
-        btnCancelSelectedAppointment.setText(ScheduleViewActionCaption.CANCEL_APPOINTMENT._1());
-        btnClinicalNotesForSelectedAppointment.setText(ScheduleViewActionCaption.CLINICAL_NOTES._1());
-        btnCloseView.setText(ScheduleViewActionCaption.CLOSE_VIEW._1());
-        btnCreateUpdateAppointment.setText(ScheduleViewActionCaption.CREATE_UPDATE_APPOINTMENT._1());
-        btnMakeDeleteEmergencyAppointmentUndoSelection.setText(ScheduleViewActionCaption.MAKE_DELETE_EMERGENCY_APPOINTMENT_UNDO._1());
-        btnMarkCancelSlotUnbookableOrMoveBookingToAnotherDay.setText(ScheduleViewActionCaption.MARK_CANCEL_UNBOOKABLE_SLOT_OR_MOVE_TO_ANOTHER_DAY._1());
-        btnNextDay.setText(ScheduleViewActionCaption.NEXT_DAY._1());
-        btnNow.setText(ScheduleViewActionCaption.TODAY._1());
-        btnPreviousDay.setText(ScheduleViewActionCaption.PREVIOUS_DAY._1());
+        btnCancelSelectedAppointment.setText(Captions.ScheduleView.CANCEL_APPOINTMENT._1());
+        btnClinicalNotesForSelectedAppointment.setText(Captions.ScheduleView.CLINICAL_NOTES._1());
+        btnCloseView.setText(Captions.CLOSE_VIEW);
+        btnCreateUpdateAppointment.setText(Captions.ScheduleView.CREATE_UPDATE_APPOINTMENT._1());
+        btnMakeDeleteEmergencyAppointmentUndoSelection.setText(Captions.ScheduleView.MAKE_DELETE_EMERGENCY_APPOINTMENT_UNDO._1());
+        btnMarkCancelSlotUnbookableOrMoveBookingToAnotherDay.setText(Captions.ScheduleView.MARK_CANCEL_UNBOOKABLE_SLOT_OR_MOVE_TO_ANOTHER_DAY._1());
+        btnNextDay.setText(Captions.ScheduleView.NEXT_DAY._1());
+        btnNow.setText(Captions.ScheduleView.TODAY._1());
+        btnPreviousDay.setText(Captions.ScheduleView.PREVIOUS_DAY._1());
         //btnSearchAvailableSlotsRequest.setText(ScheduleViewActionCaption.SEARCH_AVAILABLE_SLOTS._1());
-        btnSelectTreatmentRequest.setText(ScheduleViewActionCaption.SELECT_TREATMENT._1());
+        btnSelectTreatmentRequest.setText(Captions.ScheduleView.SELECT_TREATMENT._1());
         
         
         btnCloseView.setActionCommand(Action.REQUEST_CLOSE_VIEW.toString());
@@ -1628,12 +1602,7 @@ public class ScheduleListView extends BookingView
         //rdbList.setSelected(true);
         setScheduleViewMode(ScheduleViewMode.LIST);
         
-        this.mniCloseView.setActionCommand(Action.REQUEST_CLOSE_VIEW.toString());
-        this.mniCloseView.addActionListener(this);
-        this.mniPrintScheduleSelection.setActionCommand(Action.REQUEST_PRINT_SCHEDULE.toString());
-        this.mniPrintScheduleSelection.addActionListener(this);
-        this.mniColorPicker.setActionCommand(Action.REQUEST_COLOUR_PICKER.toString());
-        this.mniColorPicker.addActionListener(this);
+        
         dayDatePicker.addDateChangeListener(this);
         
         
@@ -2331,7 +2300,7 @@ public class ScheduleListView extends BookingView
         
         this.pnlScheduleForDay.repaint();
     }*/
-    private void populateScheduleDiaryView(){
+    /*private void populateScheduleDiaryView(){
         
         ScheduleDiaryTableModel model = 
                 (ScheduleDiaryTableModel)tblAppointments.getModel();
@@ -2403,11 +2372,7 @@ public class ScheduleListView extends BookingView
                 }//else JOptionPane.showInternalMessageDialog(this, "selected appointment not found");
                 setScheduleViewCurrentlySelectedRowFromList(-1);
             }else{//getScheduleViewCurrentlySelectedRowFromList returned -1
-                /**
-                 * -- see if getScheduleViewCurrentlySelectedRowFromDiary() returns a value greater than -1
-                 * -- yes -> scroll to that row in the diary formatted table
-                 */
-                
+
                 row = getScheduleViewCurrentlySelectedRowFromDiary();
                 
                 if (row > -1){
@@ -2421,7 +2386,7 @@ public class ScheduleListView extends BookingView
             
         });
         tblAppointments.clearSelection();
-    }
+    }*/
     
     private void disableAllScheduleOperationControls(){
         this.btnCancelSelectedAppointment.setEnabled(false);
@@ -2440,10 +2405,7 @@ public class ScheduleListView extends BookingView
         ArrayList<Appointment> schedule = makeEmergencyAppointmentsFirst(
                 getMyController().getDescriptor()
                         .getControllerDescription().getAppointmentSlotsForDayInListFormat());
-        Iterator<Appointment> it = schedule.iterator();
-        while (it.hasNext()){
-            model.addElement(it.next());
-        }
+        model.setData(schedule);
         
         doScheduleTitleRefresh(null);
         setTitle(getMyController().getDescriptor().getControllerDescription().getScheduleDay().
@@ -2453,8 +2415,8 @@ public class ScheduleListView extends BookingView
                 ViewController.ScheduleViewControllerActionEvent.
                         VIEW_CHANGED_NOTIFICATION.toString());
         this.getMyController().actionPerformed(actionEvent);
-        tblAppointments.repaint();
-        this.pnlScheduleForDay.repaint();
+        //tblAppointments.repaint();
+        //this.pnlScheduleForDay.repaint();
     }
     
     private JTable tblAppointments = null;
@@ -2467,7 +2429,7 @@ public class ScheduleListView extends BookingView
         
         this.tblAppointments.setDefaultRenderer(Duration.class, new AppointmentsTableDurationRenderer());
         this.tblAppointments.setDefaultRenderer(LocalDateTime.class, new AppointmentsListTableLocalDateTimeRenderer());
-        this.tblAppointments.setDefaultRenderer(Patient.class, new AppointmentsListTablePatientRenderer());
+        this.tblAppointments.setDefaultRenderer(Patient.class, new ScheduleListTablePatientRenderer());
         JTableHeader tableHeader = this.tblAppointments.getTableHeader();
         tableHeader.setBackground(new Color(220,220,220));
         tableHeader.setOpaque(true); 
@@ -2485,7 +2447,7 @@ public class ScheduleListView extends BookingView
         
         this.tblAppointments.setDefaultRenderer(Duration.class, new AppointmentsTableDurationRenderer());
         this.tblAppointments.setDefaultRenderer(LocalDateTime.class, new AppointmentsListTableLocalDateTimeRenderer());
-        this.tblAppointments.setDefaultRenderer(Patient.class, new AppointmentsListTablePatientRenderer());
+        this.tblAppointments.setDefaultRenderer(Patient.class, new ScheduleListTablePatientRenderer());
         JTableHeader tableHeader = this.tblAppointments.getTableHeader();
         tableHeader.setBackground(new Color(220,220,220));
         tableHeader.setOpaque(true); 
@@ -2493,7 +2455,7 @@ public class ScheduleListView extends BookingView
         //populateScheduleListView();
     }
     
-    private void configureScheduleDiaryView(){
+    /*private void configureScheduleDiaryView(){
         tblAppointments = new JTable(new ScheduleDiaryTableModel());
         scrAppointmentsForDayTable.setViewportView(tblAppointments);
         ScheduleDiaryTableModel model = (ScheduleDiaryTableModel)tblAppointments.getModel();
@@ -2508,7 +2470,7 @@ public class ScheduleListView extends BookingView
         ViewController.setJTableColumnProperties(tblAppointments, scrAppointmentsForDayTable.getPreferredSize().width, 10,40,50);
         //ViewController.setRelativeColumnWidths(tblAppointments, new double[]{0.1,0.4,0.5});
         populateScheduleDiaryView();
-    }
+    }*/
     
     /*
     private void ConfigureScheduleTable(){
@@ -2549,7 +2511,7 @@ public class ScheduleListView extends BookingView
        
         this.tblAppointments.setDefaultRenderer(Duration.class, new AppointmentsTableDurationRenderer());
         this.tblAppointments.setDefaultRenderer(LocalDateTime.class, new AppointmentsListTableLocalDateTimeRenderer());
-        this.tblAppointments.setDefaultRenderer(Patient.class, new AppointmentsListTablePatientRenderer());
+        this.tblAppointments.setDefaultRenderer(Patient.class, new ScheduleListTablePatientRenderer());
         //this.tblAppointments.setDefaultRenderer(Object.class, new ScheduleTableRenderer());
         //28/03/2024this.tblAppointments.setDefaultRenderer(PatientNote.class, new AppointmentsTablePatientNoteRenderer());
         //this.tblAppointments.setModel(tableModel);
@@ -2788,7 +2750,7 @@ public class ScheduleListView extends BookingView
         btnSwitchView = new javax.swing.JButton();
         jMenuBar1 = new javax.swing.JMenuBar();
         mnuOptions = new javax.swing.JMenu();
-        mniPrintScheduleSelection = new javax.swing.JMenuItem();
+        mniPrintSchedule = new javax.swing.JMenuItem();
         mniColorPicker = new javax.swing.JMenuItem();
         jSeparator3 = new javax.swing.JPopupMenu.Separator();
         mniCloseView = new javax.swing.JMenuItem();
@@ -2874,29 +2836,34 @@ public class ScheduleListView extends BookingView
 
         pnlScheduleOperations.setBorder(javax.swing.BorderFactory.createTitledBorder("Action"));
 
-        btnCreateUpdateAppointment.setText(ScheduleViewActionCaption.CREATE_UPDATE_APPOINTMENT._1());
+        btnCreateUpdateAppointment.setText(Captions.ScheduleView.CREATE_UPDATE_APPOINTMENT._1());
+        btnCreateUpdateAppointment.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCreateUpdateAppointmentActionPerformed(evt);
+            }
+        });
 
-        btnMakeDeleteEmergencyAppointmentUndoSelection.setText(ScheduleViewActionCaption.MAKE_DELETE_EMERGENCY_APPOINTMENT_UNDO._1());
+        btnMakeDeleteEmergencyAppointmentUndoSelection.setText(Captions.ScheduleView.MAKE_DELETE_EMERGENCY_APPOINTMENT_UNDO._1());
 
-        btnCancelSelectedAppointment.setText(ScheduleViewActionCaption.CANCEL_APPOINTMENT._1());
+        btnCancelSelectedAppointment.setText(Captions.ScheduleView.CANCEL_APPOINTMENT._1());
 
         btnMarkCancelSlotUnbookableOrMoveBookingToAnotherDay.setText("");
 
-        btnClinicalNotesForSelectedAppointment.setText(ScheduleViewActionCaption.CLINICAL_NOTES._1());
+        btnClinicalNotesForSelectedAppointment.setText(Captions.ScheduleView.CLINICAL_NOTES._1());
         btnClinicalNotesForSelectedAppointment.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnClinicalNotesForSelectedAppointmentActionPerformed(evt);
             }
         });
 
-        btnSelectTreatmentRequest.setText(ScheduleViewActionCaption.SELECT_TREATMENT._1());
+        btnSelectTreatmentRequest.setText(Captions.ScheduleView.SELECT_TREATMENT._1());
         btnSelectTreatmentRequest.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnSelectTreatmentRequestActionPerformed(evt);
             }
         });
 
-        btnCloseView.setText(ScheduleViewActionCaption.CLOSE_VIEW._1());
+        btnCloseView.setText(Captions.CLOSE_VIEW);
 
         javax.swing.GroupLayout pnlScheduleOperationsLayout = new javax.swing.GroupLayout(pnlScheduleOperations);
         pnlScheduleOperations.setLayout(pnlScheduleOperationsLayout);
@@ -3013,8 +2980,8 @@ public class ScheduleListView extends BookingView
 
         mnuOptions.setText("Actions");
 
-        mniPrintScheduleSelection.setText("Print schedule");
-        mnuOptions.add(mniPrintScheduleSelection);
+        mniPrintSchedule.setText("Print schedule");
+        mnuOptions.add(mniPrintSchedule);
 
         mniColorPicker.setText("Colour picker");
         mnuOptions.add(mniColorPicker);
@@ -3054,6 +3021,10 @@ public class ScheduleListView extends BookingView
         // TODO add your handling code here:
     }//GEN-LAST:event_btnSelectTreatmentRequestActionPerformed
 
+    private void btnCreateUpdateAppointmentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCreateUpdateAppointmentActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btnCreateUpdateAppointmentActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnCancelSelectedAppointment;
@@ -3074,7 +3045,7 @@ public class ScheduleListView extends BookingView
     private javax.swing.JPopupMenu.Separator jSeparator3;
     private javax.swing.JMenuItem mniCloseView;
     private javax.swing.JMenuItem mniColorPicker;
-    private javax.swing.JMenuItem mniPrintScheduleSelection;
+    private javax.swing.JMenuItem mniPrintSchedule;
     private javax.swing.JMenu mnuOptions;
     private javax.swing.JPanel pnlAppointmentDaySelector;
     private javax.swing.JPanel pnlScheduleDaySelection;

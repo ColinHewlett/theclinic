@@ -7,19 +7,18 @@ package model.entity;
 
 //<editor-fold defaultstate="collapsed" desc="Imports">
 import model.entity.Entity;
-import repository.Repository;
-import repository.StoreException;//01/03/2023
+import model.repository.StoreException;//01/03/2023
 import java.awt.Point;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Iterator;
-import model.IEntityStoreActions;
+import model.entity.interfaces.IEntityRepositoryActions;
 //</editor-fold>
 /**
  *
  * @author colin.hewlett.solutions@gmail.com
  */
-public class Notification extends Entity implements IEntityStoreActions {
+public class Notification extends Entity implements IEntityRepositoryActions {
   
 //<editor-fold defaultstate="collapsed" desc="Private and protected state">
     private Patient patient = null;
@@ -27,6 +26,8 @@ public class Notification extends Entity implements IEntityStoreActions {
     private String notification = null;
     private Boolean isActioned = false;
     private ArrayList<Notification> collection = new ArrayList<>();
+    
+    
 
 //</editor-fold>
     

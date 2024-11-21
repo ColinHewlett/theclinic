@@ -11,7 +11,7 @@ import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeEvent;
 import view.views.non_modal_views.DesktopView;
 import model.*;
-import repository.StoreException;
+import model.repository.StoreException;
 import javax.swing.JOptionPane;
 import view.View;
 

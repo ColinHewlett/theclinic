@@ -5,12 +5,12 @@
 package view.views.non_modal_views;
 
 import model.non_entity.SystemDefinition;
-import model.non_entity.SystemDefinition.PatientViewActionCaption;
+import model.non_entity.Captions;
 
-import view.views.view_support_classes.models.PatientAppointmentHistoryTableModel;
-import view.views.view_support_classes.renderers.PatientAppointmentHistoryTableInvoiceRenderer;
-import view.views.view_support_classes.renderers.AppointmentHistoryTableLocalDateTimeRenderer;
-import view.views.view_support_classes.renderers.AppointmentHistoryTableDurationRenderer;
+import view.view_support_classes.models.PatientAppointmentHistoryTableModel;
+import view.view_support_classes.renderers.PatientAppointmentHistoryTableInvoiceRenderer;
+import view.view_support_classes.renderers.AppointmentHistoryTableLocalDateTimeRenderer;
+import view.view_support_classes.renderers.AppointmentHistoryTableDurationRenderer;
 import controller.Descriptor;
 import controller.ViewController;
 import view.View;
@@ -60,7 +60,7 @@ import javax.swing.event.TableModelListener;
 import java.io.File;
 import java.io.IOException;
 
-import view.views.view_support_classes.renderers.ScheduleTableCellRenderer;
+import view.view_support_classes.renderers.ScheduleTableCellRenderer;
 /*28/03/2024import model.PatientNote;*/
 /*28/03/2024import view.views.view_support_classes.renderers.AppointmentsTablePatientNoteRenderer;*/
 /**
@@ -221,19 +221,19 @@ public class PatientView extends View
             case PATIENT_RECOVERY:
                 titledBorder.setTitle(panelPatientRecoveryTitle);
                 titledBorder.setTitleColor(Color.RED);
-                btnCreateRecoverPatient.setText(PatientViewActionCaption.CREATE_RECOVER_PATIENT._2());
+                btnCreateRecoverPatient.setText(Captions.PatientView.CREATE_RECOVER_PATIENT._2());
                 btnCreateRecoverPatient.setForeground(Color.RED);
                 btnUpdateRecoverPatient.setEnabled(true);
-                btnUpdateRecoverPatient.setText(PatientViewActionCaption.UPDATE_RECOVER_PATIENT._2());
+                btnUpdateRecoverPatient.setText(Captions.PatientView.UPDATE_RECOVER_PATIENT._2());
                 btnUpdateRecoverPatient.setForeground(Color.RED);
                 
                 break;
             case PATIENT_SELECTION:
                 titledBorder.setTitle(panelPatientSelectionCaption);
                 titledBorder.setTitleColor(getBorderTitleColor());
-                btnCreateRecoverPatient.setText(PatientViewActionCaption.CREATE_RECOVER_PATIENT._1());
+                btnCreateRecoverPatient.setText(Captions.PatientView.CREATE_RECOVER_PATIENT._1());
                 btnCreateRecoverPatient.setForeground(Color.BLACK);
-                btnUpdateRecoverPatient.setText(PatientViewActionCaption.UPDATE_RECOVER_PATIENT._1());
+                btnUpdateRecoverPatient.setText(Captions.PatientView.UPDATE_RECOVER_PATIENT._1());
                 btnUpdateRecoverPatient.setForeground(Color.BLACK);
                 break;
         }
@@ -317,11 +317,11 @@ public class PatientView extends View
         setBorderTitles(BorderTitles.PATIENT_DETAILS);
         setBorderTitles(BorderTitles.PATIENT_EXTRA_DETAILS);
         setBorderTitles(BorderTitles.PATIENT_SELECTION);
-        this.btnClearSelection.setText(PatientViewActionCaption.CLEAR_SELECTION._1());
+        this.btnClearSelection.setText(Captions.PatientView.CLEAR_SELECTION._1());
         btnClearSelection.setActionCommand(Actions.REQUEST_NULL_PATIENT.toString());
         btnCloseView.setActionCommand(Actions.REQUEST_CLOSE_VIEW.toString());
         btnCreateRecoverPatient.setActionCommand(Actions.REQUEST_CREATE_RECOVER_PATIENT.toString());
-        btnFetchClinicalNotes.setText(SystemDefinition.PatientViewActionCaption.PATIENT_CLINICAL_NOTES._1());
+        btnFetchClinicalNotes.setText(Captions.PatientView.PATIENT_CLINICAL_NOTES._1());
         btnFetchClinicalNotes.setActionCommand(Actions.REQUEST_CLINICAL_NOTES.toString());
         btnFetchScheduleForSelectedAppointment.setActionCommand(Actions.REQUEST_SCHEDULE_VIEW_CONTROLLER.toString());
         btnUpdateRecoverPatient.setActionCommand(Actions.REQUEST_UPDATE_RECOVER_PATIENT.toString());
@@ -525,10 +525,15 @@ public class PatientView extends View
                 break;
             case REQUEST_CLOSE_VIEW:
                 //doCloseViewRequest();
-                ActionEvent actionEvent = new ActionEvent(
+                /*ActionEvent actionEvent = new ActionEvent(
                         PatientView.this,ActionEvent.ACTION_PERFORMED,
                         ViewController.PatientViewControllerActionEvent.VIEW_CLOSE_NOTIFICATION.toString());
-                getMyController().actionPerformed(actionEvent);
+                getMyController().actionPerformed(actionEvent);*/
+                try{
+                this.setClosed(true);
+                }catch (PropertyVetoException ex){
+            
+                }
                 break;
             case REQUEST_CREATE_RECOVER_PATIENT:
                 doCreateRecoverPatientRequest();
@@ -1529,7 +1534,7 @@ public class PatientView extends View
             }
         });
 
-        btnFetchScheduleForSelectedAppointment.setText(PatientViewActionCaption.SCHEDULE_FOR_APPOINTMENT._1());
+        btnFetchScheduleForSelectedAppointment.setText(Captions.PatientView.SCHEDULE_FOR_APPOINTMENT._1());
         btnFetchScheduleForSelectedAppointment.setMaximumSize(new java.awt.Dimension(2147483647, 82));
         btnFetchScheduleForSelectedAppointment.setMinimumSize(new java.awt.Dimension(99, 82));
         btnFetchScheduleForSelectedAppointment.setPreferredSize(new java.awt.Dimension(99, 82));
@@ -1669,7 +1674,7 @@ public class PatientView extends View
 
         pnlAppointmentHistory.setBorder(javax.swing.BorderFactory.createTitledBorder("Appointment history"));
 
-        tblAppointmentHistory.setModel(new view.views.view_support_classes.models.PatientAppointmentHistoryTableModel());
+        tblAppointmentHistory.setModel(new view.view_support_classes.models.PatientAppointmentHistoryTableModel());
         scrAppointmentHistory.setViewportView(tblAppointmentHistory);
         tblAppointmentHistory.addMouseListener(mouseListener);
         ViewController.setJTableColumnProperties(tblAppointmentHistory,

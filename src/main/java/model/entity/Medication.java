@@ -5,18 +5,17 @@
 package model.entity;
 
 import model.entity.Entity;
-import repository.StoreException;
-import repository.Repository;
+import model.repository.StoreException;
 import java.awt.Point;
 import java.util.ArrayList;
-import model.IEntityStoreActions;
+import model.entity.interfaces.IEntityRepositoryActions;
 
 
 /**
  * 
  * @author colin
  */
-public class Medication extends Entity implements IEntityStoreActions{
+public class Medication extends Entity implements IEntityRepositoryActions{
     private Integer patientKey = null;
     private Patient patient = null;
     private String description = null;

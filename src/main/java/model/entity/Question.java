@@ -4,18 +4,16 @@
  */
 package model.entity;
 
-import model.entity.Entity;
 import java.awt.Point;
 import java.util.ArrayList;
-import model.IEntityStoreActions;
-import repository.Repository;
-import repository.StoreException;
+import model.repository.StoreException;
+import model.entity.interfaces.IEntityRepositoryActions;
 
 /**
  *
  * @author colin
  */
-public class Question extends Entity implements IEntityStoreActions {
+public class Question extends Entity implements IEntityRepositoryActions {
 
     public enum Category{
         ARE_YOU,
@@ -27,9 +25,10 @@ public class Question extends Entity implements IEntityStoreActions {
         this.setIsQuestion(true);
     }
     
+    
     public Question(Integer key){
         this.setIsQuestion(true);
-        setKey(key);
+        this.setKey(key);
     }
     
     private ArrayList<Question> collection = new ArrayList<>();
@@ -104,5 +103,28 @@ public class Question extends Entity implements IEntityStoreActions {
     @Override
     public void update()throws StoreException{
         new Repository().update(this);
+    }
+    
+    @Override
+    public boolean equals(Object obj) 
+    { 
+        // if both the object references are  
+        // referring to the same object. 
+        if(this == obj) 
+            return true; 
+
+        // checks if the comparison involves 2 objecs of the same type 
+        /**
+         * issue arise if one of the objects is an entity (for example a Patient) and the other object is its delegate sub class
+         */
+        //if(obj == null || obj.getClass()!= this.getClass()) 
+            //return false; 
+        if (obj == null) return false;
+        // type casting of the argument.  
+        Question question = (Question) obj; 
+
+        // comparing the state of argument with  
+        // the state of 'this' Object. 
+        return (question.getKey().equals(this.getKey())); 
     }
 }

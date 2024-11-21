@@ -32,14 +32,14 @@ import javax.swing.event.InternalFrameEvent;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumnModel;
 import model.entity.Appointment;
-import view.views.view_support_classes.models.EmptySlotAvailability2ColumnTableModel;
-import view.views.view_support_classes.renderers.TableHeaderCellBorderRenderer;
+import view.view_support_classes.models.EmptySlotAvailability2ColumnTableModel;
+import view.view_support_classes.renderers.TableHeaderCellBorderRenderer;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.border.TitledBorder;
 import view.View;
 import view.views.non_modal_views.DesktopView;
-import view.views.view_support_classes.renderers.AppointmentsTableDurationRenderer;
-import view.views.view_support_classes.renderers.SelectSlotDurationRenderer;
+import view.view_support_classes.renderers.AppointmentsTableDurationRenderer;
+import view.view_support_classes.renderers.SelectSlotDurationRenderer;
 
 /**
  *

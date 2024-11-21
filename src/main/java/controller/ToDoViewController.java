@@ -13,7 +13,7 @@ import javax.swing.JOptionPane;
 import model.entity.Entity;
 import model.entity.ToDo;
 import model.entity.Patient;
-import repository.StoreException;
+import model.repository.StoreException;
 import view.View;
 import static view.View.Viewer.NOTIFICATION_EDITOR_VIEW;
 import static view.View.Viewer.NOTIFICATION_VIEW;

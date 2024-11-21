@@ -8,15 +8,14 @@ import model.entity.Patient;
 import model.entity.Entity;
 import java.awt.Point;
 import java.util.ArrayList;
-import model.IEntityStoreActions;
-import repository.Repository;
-import repository.StoreException;
+import model.repository.StoreException;
+import model.entity.interfaces.IEntityRepositoryActions;
 
 /**
  *
  * @author colin
  */
-public class PatientCondition extends Entity implements IEntityStoreActions{
+public class PatientCondition extends Entity implements IEntityRepositoryActions{
     Integer key = null;
     private String comment = null;
    

@@ -32,7 +32,7 @@ import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
 import model.*;
 import view.View;
-import view.views.view_support_classes.models.MedicalConditionWithStateTableModel;
+import view.view_support_classes.models.MedicalConditionWithStateTableModel;
 
 /**
  *

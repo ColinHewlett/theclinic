@@ -5,13 +5,13 @@
  */
 package view.views.modal_views;
 
-import view.views.view_support_classes.models.PatientNotificationView2ColumnTableModel;
-import view.views.view_support_classes.renderers.NotificationEditorTableLocalDateRenderer;
-import view.views.view_support_classes.renderers.NotificationTableKeyColorsAndLocalDateRenderer;
+import view.view_support_classes.models.PatientNotificationView2ColumnTableModel;
+import view.view_support_classes.renderers.NotificationEditorTableLocalDateRenderer;
+import view.view_support_classes.renderers.NotificationTableKeyColorsAndLocalDateRenderer;
 import controller.ViewController;
 import model.entity.Patient;
 import model.entity.Notification;
-import view.views.view_support_classes.renderers.TableHeaderCellBorderRenderer;
+import view.view_support_classes.renderers.TableHeaderCellBorderRenderer;
 import view.View;
 import view.views.non_modal_views.DesktopView;
 import com.github.lgooddatepicker.components.DatePickerSettings;

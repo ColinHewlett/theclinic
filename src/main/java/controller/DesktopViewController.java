@@ -12,10 +12,10 @@ import model.entity.*;
 import model.non_entity.Credential;
 import model.non_entity.JarFileFinder;
 import controller.exceptions.TemplateReaderException;
-import repository.Repository;
+import model.entity.Repository;
 import model.non_entity.SystemDefinition;
 import org.apache.commons.io.FilenameUtils;
-import repository.StoreException;//01/03/2023
+import model.repository.StoreException;//01/03/2023
 import view.views.non_modal_views.DesktopView;
 import java.awt.event.ActionEvent;
 import java.awt.Point;
@@ -46,18 +46,25 @@ public class DesktopViewController extends ViewController{
     private DesktopViewMode desktopViewMode;
     private boolean isDesktopPendingClosure = false;
     private DesktopView desktopView = null;
-    //private ArrayList<AppointmentRemindersViewController> appointmentRemindersViewControllers = null;
-    private ArrayList<ScheduleViewController>scheduleViewControllers = null;
-    private ArrayList<NotificationViewController> notificationViewControllers = null;
-    private ArrayList<PatientViewController> patientViewControllers = null;
-    private ArrayList<ToDoViewController> toDoViewControllers = null;
-    private ArrayList<TreatmentViewController> treatmentViewControllers = null;
-    private ArrayList<PatientInvoiceViewController> patientInvoiceViewControllers = null;
-    private ArrayList<MedicalConditionViewController> medicalConditionViewControllers = null;
-    private ArrayList<PatientMedicalHistoryViewController> patientMedicalHistoryViewControllers = new ArrayList<>();;
-    private ArrayList<PatientQuestionnaireViewController> patientQuestionnaireViewControllers = new ArrayList<>();
+    
     private ArrayList<ClinicalNoteViewController> clinicalNoteViewControllers = null;
     private ArrayList<DataMigrationProgressViewController> importProgressViewControllers = null;
+    private ArrayList<MedicalConditionViewController> medicalConditionViewControllers = null;
+    private ArrayList<PatientAppointmentDataViewController> patientAppointmentDataViewControllers = null;
+    private ArrayList<PatientMedicalHistoryViewController> patientMedicalHistoryViewControllers = new ArrayList<>();
+    private ArrayList<PatientQuestionnaireViewController> patientQuestionnaireViewControllers = new ArrayList<>();
+    private ArrayList<NotificationViewController> notificationViewControllers = null;
+    private ArrayList<PatientInvoiceViewController> patientInvoiceViewControllers = null;
+    private ArrayList<PatientViewController> patientViewControllers = null;
+    private ArrayList<ScheduleViewController>scheduleViewControllers = null;
+    private ArrayList<ToDoViewController> toDoViewControllers = null;
+    private ArrayList<TreatmentViewController> treatmentViewControllers = null;
+    
+    
+    
+    
+    
+    
     private static Boolean isDataMigrationOptionEnabled = null;
     private PropertyChangeSupport pcSupport = null;
     private Descriptor entityDescriptor = null;
@@ -422,7 +429,8 @@ public class DesktopViewController extends ViewController{
                         displayErrorMessage(message,"DesktopViewController error",JOptionPane.WARNING_MESSAGE);
                     }
                         
-                }else */if (!this.scheduleViewControllers.remove(avc)){
+                }else */
+                if (!this.scheduleViewControllers.remove(avc)){
                     String message = "Could not find AppointmentViewController in "
                                             + "DesktopViewController collection.";
                     displayErrorMessage(message,"DesktopViewController error",JOptionPane.WARNING_MESSAGE);
@@ -437,6 +445,80 @@ public class DesktopViewController extends ViewController{
                 break;
             }
         }           
+    }
+    
+    private void doActionEventForArchivedPatientsViewController(ActionEvent e){
+        String message = null;
+        ArchivedPatientsViewController vc = (ArchivedPatientsViewController)e.getSource();
+        ViewController.DesktopViewControllerActionEvent actionCommand =
+                    ViewController.DesktopViewControllerActionEvent.valueOf(e.getActionCommand());
+        switch(actionCommand){
+            case VIEW_CONTROLLER_CLOSE_NOTIFICATION:{
+                switch (this.archivedPatientsViewControllers.size()){
+                    case 0:
+                        message = "No archived patients view controllers found in "
+                                                    + "DesktopViewController collection.";
+                        break;
+                    case 1:
+                        if (vc.equals(this.archivedPatientsViewControllers.get(0))){
+                            this.archivedPatientsViewControllers.remove(0);
+                        }
+                        else{
+                            message = "Could not find archived patients view controller in "
+                                                    + "DesktopViewController collection.";
+                        }
+                        break;
+                    default:
+                        message = "More than one archived patients view view controller found in "
+                                                    + "DesktopViewController collection.";
+                        break;
+                }
+                if (message!=null){
+                    displayErrorMessage("Raised in doActionEventForArchivedPatientsViewController"
+                            + "(case = " + actionCommand.toString() + ")\n"
+                            + message,
+                            "Desktop view controller error",
+                            JOptionPane.WARNING_MESSAGE);
+                }
+            } 
+        }
+    }
+    
+    private void doActionEventForPatientAppointmentDataViewController(ActionEvent e){
+        String message = null;
+        PatientAppointmentDataViewController vc = (PatientAppointmentDataViewController)e.getSource();
+        ViewController.DesktopViewControllerActionEvent actionCommand =
+                    ViewController.DesktopViewControllerActionEvent.valueOf(e.getActionCommand());
+        switch(actionCommand){
+            case VIEW_CONTROLLER_CLOSE_NOTIFICATION:{
+                switch (this.patientAppointmentDataViewControllers.size()){
+                    case 0:
+                        message = "No patient appointment data view controllers found in "
+                                                    + "DesktopViewController collection.";
+                        break;
+                    case 1:
+                        if (vc.equals(this.patientAppointmentDataViewControllers.get(0))){
+                            this.patientAppointmentDataViewControllers.remove(0);
+                        }
+                        else{
+                            message = "Could not find patient appointment data view controller in "
+                                                    + "DesktopViewController collection.";
+                        }
+                        break;
+                    default:
+                        message = "More than one patient appointment data view view controller found in "
+                                                    + "DesktopViewController collection.";
+                        break;
+                }
+                if (message!=null){
+                    displayErrorMessage("Raised in doActionEventForPatientAppointmentDataViewController"
+                            + "(case = " + actionCommand.toString() + ")\n"
+                            + message,
+                            "Desktop view controller error",
+                            JOptionPane.WARNING_MESSAGE);
+                }
+            } 
+        }
     }
     
     private void doActionEventForPatientQuestionnaireViewController(ActionEvent e){
@@ -456,7 +538,7 @@ public class DesktopViewController extends ViewController{
                             this.patientQuestionnaireViewControllers.remove(0);
                         }
                         else{
-                            message = "Could not find patient medical history view controller in "
+                            message = "Could not find patient questionnaire view controller in "
                                                     + "DesktopViewController collection.";
                         }
                         break;
@@ -537,7 +619,7 @@ public class DesktopViewController extends ViewController{
                  * -- send message to PVS's view.setClosed(true)
                  * -- close the view controller here as normal
                  */
-                ClinicalNoteViewController cnvc = null;
+                /*ClinicalNoteViewController cnvc = null;
                 boolean isPatientSameInPatientViewControllerAndClinicalNotViewController = false;
                 pvc = (PatientViewController)e.getSource();
                 clinicalNoteViewControllerIterator = 
@@ -578,7 +660,8 @@ public class DesktopViewController extends ViewController{
                         if (pvc.equals(e.getSource())){
                             break;
                         }
-                    }
+                    }*/
+                    pvc = (PatientViewController)e.getSource();
                     if (!this.patientViewControllers.remove(pvc)){
                         String message = "Could not find PatientViewController in "
                                                 + "DesktopViewController collection.";
@@ -592,7 +675,7 @@ public class DesktopViewController extends ViewController{
                                 this.patientViewControllers.isEmpty()){ 
                         }
                     }
-                }
+                //}
                 break;
             case CLOSE_PATIENT_VIEW_WITH_SAME_PATIENT_REQUEST:
                 pvc = (PatientViewController)e.getSource();
@@ -966,20 +1049,6 @@ public class DesktopViewController extends ViewController{
                             getDescriptor()
                     );
                     break;
-                /*
-                case COUNT_PATIENT_NOTE_TABLE_REQUEST:
-                    theCount = COUNT_CLINIC_NOTE_TABLE_REQUEST();
-                    getDescriptor().getControllerDescription().setTableRowCount(theCount);
-                    firePropertyChangeEvent(
-                            ViewController.DesktopViewControllerPropertyChangeEvent.
-                                    PATIENT_NOTE_TABLE_COUNT_RECEIVED.toString(),
-                            (PropertyChangeListener)e.getSource(),
-                            this,
-                            null,
-                            getDescriptor()
-                    );
-                    break;
-                    */
                 case COUNT_CLINIC_NOTE_TABLE_REQUEST:
                     theCount = doRequestCountForClinicNoteTable();
                     getDescriptor().getControllerDescription().setTableRowCount(theCount);
@@ -1051,6 +1120,12 @@ public class DesktopViewController extends ViewController{
                             null,
                             getDescriptor()
                     );
+                    break;
+                case ARCHIVED_PATIENTS_VIEW_CONTROLLER_REQUEST:
+                    doRequestForArchivedPatientsViewController();
+                    break;
+                case PATIENT_APPOINTMENT_DATA_VIEW_CONTROLLER_REQUEST:
+                    doRequestForPatientAppointmentDataViewController();
                     break;
                 case MEDICAL_CONDITION_VIEW_CONTROLLER_REQUEST:
                     doRequestForMedicalConditionViewController(e);
@@ -1391,7 +1466,9 @@ public class DesktopViewController extends ViewController{
         Patient patient = pvc.getDescriptor().getControllerDescription().getPatient();
         if (patient!=null){
             if (patient.getIsKeyDefined()){
-                if (!patient.getKey().equals(SystemDefinition.UNBOOKABLE_SCHEDULE_SLOT_APPOINTMENT_KEY)){
+                //if (!patient.getKey().equals(SystemDefinition.UNBOOKABLE_SCHEDULE_SLOT_APPOINTMENT_KEY)){
+                //if (!patient.equals(SystemDefinition.UNBOOKABLE_SCHEDULE_SLOT_APPOINTMENT_KEY)){
+                  if (!patient.equals(new Patient(SystemDefinition.UNBOOKABLE_SCHEDULE_SLOT_APPOINTMENT_KEY))){
                     for (PatientMedicalHistoryViewController vc : patientMedicalHistoryViewControllers){
                         if (vc.getDescriptor().getControllerDescription().getPatient().equals(patient)){
                             isPMVCForSamePatientActive = true;
@@ -1417,7 +1494,7 @@ public class DesktopViewController extends ViewController{
             }
         }
     }
-    
+  
     private void doRequestForPatientQuestionnaireViewController(ActionEvent e){
         boolean isPQVCForSamePatientActive = false;
         PatientQuestionnaireViewController activeVCForSamePatient = null;
@@ -1426,7 +1503,9 @@ public class DesktopViewController extends ViewController{
         Patient patient = pvc.getDescriptor().getControllerDescription().getPatient();
         if (patient!=null){
             if (patient.getIsKeyDefined()){
-                if (!patient.getKey().equals(SystemDefinition.UNBOOKABLE_SCHEDULE_SLOT_APPOINTMENT_KEY)){
+                //if (!patient.getKey().equals(SystemDefinition.UNBOOKABLE_SCHEDULE_SLOT_APPOINTMENT_KEY)){
+                //if (!patient.equals(SystemDefinition.UNBOOKABLE_SCHEDULE_SLOT_APPOINTMENT_KEY)){
+                if (!patient.equals(new Patient(SystemDefinition.UNBOOKABLE_SCHEDULE_SLOT_APPOINTMENT_KEY))){
                     for (PatientQuestionnaireViewController vc : patientQuestionnaireViewControllers){
                         if (vc.getDescriptor().getControllerDescription().getPatient().equals(patient)){
                             isPQVCForSamePatientActive = true;
@@ -1513,7 +1592,9 @@ public class DesktopViewController extends ViewController{
         Patient patient = pvc.getDescriptor().getControllerDescription().getPatient();
         if (patient!=null){
             if (patient.getIsKeyDefined()){
-                if (!patient.getKey().equals(SystemDefinition.UNBOOKABLE_SCHEDULE_SLOT_APPOINTMENT_KEY)){
+                //if (!patient.getKey().equals(SystemDefinition.UNBOOKABLE_SCHEDULE_SLOT_APPOINTMENT_KEY)){
+                //if (!patient.equals(SystemDefinition.UNBOOKABLE_SCHEDULE_SLOT_APPOINTMENT_KEY)){
+                if (!patient.equals(new Patient(SystemDefinition.UNBOOKABLE_SCHEDULE_SLOT_APPOINTMENT_KEY))){
                     for (PatientMedicalHistoryViewController vc : patientMedicalHistoryViewControllers){
                         if (vc.getDescriptor().getControllerDescription().getPatient().equals(patient)){
                             isPMVCForSamePatientActive = true;
@@ -1615,6 +1696,76 @@ public class DesktopViewController extends ViewController{
         }else {
             medicalConditionViewControllers.get(0).getView().toFront();
         }//do nothing because only one medical condition VC allowed
+    }
+    
+    private ArrayList<ArchivedPatientsViewController> archivedPatientsViewControllers = null;
+    private void doRequestForArchivedPatientsViewController(){
+        DesktopViewController dvc = this;
+        ArchivedPatientsViewController apvc = null;
+        if (archivedPatientsViewControllers==null) archivedPatientsViewControllers = new ArrayList<>(); 
+        if (archivedPatientsViewControllers.isEmpty()){
+            archivedPatientsViewControllers.add(
+                    new ArchivedPatientsViewController(
+                            this,
+                            getDesktopView()));
+            apvc = archivedPatientsViewControllers.get(archivedPatientsViewControllers.size()-1);
+            setView(new View().make(View.Viewer.ARCHIVED_PATIENTS_VIEW,
+                        apvc, 
+                        getDesktopView()));
+            ActionEvent actionEvent = new ActionEvent(
+                    this,ActionEvent.ACTION_PERFORMED,
+                    DesktopViewController.DesktopViewControllerActionEvent.INITIALISE_VIEW.toString());
+            apvc.actionPerformed(actionEvent);
+
+            if (getDesktopView().getDeskTop().getAllFrames().length>1){
+                dvc.firePropertyChangeEvent(
+                        ViewController.DesktopViewControllerPropertyChangeEvent.CASCADE_DESKTOP_VIEWS.toString(), 
+                        getDesktopView(),
+                        this, 
+                        null,
+                        null
+                );
+            }
+            if (getDesktopViewMode().equals(DesktopViewMode.CLINIC_LOGO))
+                doSetupDesktopViewMode();
+        }else {
+            archivedPatientsViewControllers.get(0).getView().toFront();
+        }
+    }         
+    
+    private void doRequestForPatientAppointmentDataViewController(){
+        
+        DesktopViewController dvc = this;
+        PatientAppointmentDataViewController padvc = null;
+        if (patientAppointmentDataViewControllers==null) patientAppointmentDataViewControllers = new ArrayList<>(); 
+        if (patientAppointmentDataViewControllers.isEmpty()){
+            patientAppointmentDataViewControllers.add(
+                    new PatientAppointmentDataViewController(
+                            this,
+                            getDesktopView()));
+            padvc = patientAppointmentDataViewControllers.get(patientAppointmentDataViewControllers.size()-1);
+            setView(new View().make(View.Viewer.PATIENT_APPOINTMENT_DATA_VIEW,
+                        padvc, 
+                        getDesktopView()));
+            ActionEvent actionEvent = new ActionEvent(
+                    this,ActionEvent.ACTION_PERFORMED,
+                    DesktopViewController.DesktopViewControllerActionEvent.INITIALISE_VIEW.toString());
+            padvc.actionPerformed(actionEvent);
+
+            if (getDesktopView().getDeskTop().getAllFrames().length>1){
+                dvc.firePropertyChangeEvent(
+                        ViewController.DesktopViewControllerPropertyChangeEvent.CASCADE_DESKTOP_VIEWS.toString(), 
+                        getDesktopView(),
+                        this, 
+                        null,
+                        null
+                );
+            }
+            if (getDesktopViewMode().equals(DesktopViewMode.CLINIC_LOGO))
+                doSetupDesktopViewMode();
+        }else {
+            patientAppointmentDataViewControllers.get(0).getView().toFront();
+        }
     }
     
     private void doRequestForToDoViewController(){
@@ -2389,6 +2540,9 @@ public class DesktopViewController extends ViewController{
             String s;
             s = e.getSource().getClass().getSimpleName();
             switch(s){
+                case "ArchivedPatientsViewController":
+                    doActionEventForArchivedPatientsViewController(e);
+                    break;
                 case "DesktopView":
                     doActionEventForDesktopView(e);
                      break;
@@ -2407,6 +2561,9 @@ public class DesktopViewController extends ViewController{
                 case "MedicalConditionViewController":
                     doActionEventForMedicalConditionViewController(e);
                     break;
+                case "PatientAppointmentDataViewController":
+                    doActionEventForPatientAppointmentDataViewController(e);
+                    break;    
                 case "PatientMedicalHistoryViewController":
                     doActionEventForPatientMedicalHistoryViewController(e);
                     break;

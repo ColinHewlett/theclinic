@@ -129,6 +129,14 @@ public class Descriptor {
             patientCondition = value;
         }
         
+        private PatientAppointmentData patientAppointmentData = null;
+        public PatientAppointmentData getPatientAppointmentData(){
+            return patientAppointmentData; 
+        }
+        public void setPatientAppointmentData(PatientAppointmentData value){
+            patientAppointmentData = value;
+        }
+        
         private Invoice invoice = null;
         public Invoice getInvoice(){
             return invoice; 
@@ -486,6 +494,14 @@ public class Descriptor {
             doctor = value;
         }
         
+        private PatientAppointmentData patientAppointmentData = null;
+        public PatientAppointmentData getPatientAppointmentData(){
+            return patientAppointmentData; 
+        }
+        public void setPatientAppointmentData(PatientAppointmentData value){
+            patientAppointmentData = value;
+        }
+
         private ToDo toDo = null;
         public ToDo getToDo(){
             return toDo; 

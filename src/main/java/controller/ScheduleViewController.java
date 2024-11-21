@@ -16,7 +16,7 @@ import model.entity.Appointment;
 import model.entity.Patient;
 import model.entity.ClinicalNote;
 import model.entity.SurgeryDaysAssignment;
-import repository.StoreException;//01/03/2023
+import model.repository.StoreException;//01/03/2023
 import view.views.non_modal_views.DesktopView;
 import view.View;
 import view.views.modal_views.ModalView;
@@ -741,20 +741,18 @@ public class ScheduleViewController extends ViewController{
                 }
                 break;
             case PRINT_SCHEDULE_REQUEST:
-                getDescriptor().getControllerDescription().setScheduleDay(
-                        getDescriptor().getViewDescription().getScheduleDay());
                 doPrintAppointmentScheduleForDay(
-                        getDescriptor().getControllerDescription().getScheduleDay());
+                        getDescriptor().getViewDescription().getScheduleDay());
                 break;
             case APPOINTMENT_REMINDED_STATUS_UPDATE_REQUEST:
                 Appointment appointment = 
                         getDescriptor().getViewDescription().getAppointment();
                 try{
                     /*05/04/2024 19:31 code update */
-                    Appointment temp = new Appointment(appointment.getKey());
-                    temp.setScope(Entity.Scope.SINGLE);
-                    temp = temp.read();
-                    appointment.setNotes(temp.getNotes());
+                    //Appointment temp = new Appointment(appointment.getKey());
+                    //temp.setScope(Entity.Scope.SINGLE);
+                    //temp = temp.read();
+                    //appointment.setNotes(temp.getNotes());
                     /*end of code update*/
                     appointment.update();
                     /*05/04/2024 19:31 next line required to refresh schedule view*/

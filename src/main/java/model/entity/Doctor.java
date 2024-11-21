@@ -6,15 +6,14 @@ package model.entity;
 
 import java.awt.Point;
 import java.util.ArrayList;
-import model.IEntityStoreActions;
-import repository.StoreException;
-import repository.Repository;
+import model.repository.StoreException;
+import model.entity.interfaces.IEntityRepositoryActions;
 
 /**
  *
  * @author colin
  */
-public class Doctor extends Entity implements IEntityStoreActions{
+public class Doctor extends Entity implements IEntityRepositoryActions{
     private String title = null;
     private String line1 = null;
     private String line2 = null;
@@ -26,6 +25,8 @@ public class Doctor extends Entity implements IEntityStoreActions{
     private Integer patientKey = null;
     private Patient patient =  null;
     private ArrayList<Doctor> collection = null;
+    
+    
     
     public Doctor(){
         setIsDoctor(true);

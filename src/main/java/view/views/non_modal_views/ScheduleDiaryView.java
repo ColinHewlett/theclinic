@@ -4,28 +4,16 @@
  */
 package view.views.non_modal_views;
 
-import controller.ScheduleViewController;
-import com.bric.colorpicker.ColorPicker;
-import com.bric.colorpicker.listeners.ColorListener;
-import com.bric.colorpicker.models.ColorModel;
-import com.bric.colorpicker.ColorPickerDialog;
+import view.view_support_classes.models.ScheduleDiaryTableModel;
+import view.view_support_classes.renderers.ScheduleDiaryTablePatientRenderer;
+import view.view_support_classes.renderers.ScheduleDiaryTableLocalDateTimeRenderer;
+
 import model.non_entity.SystemDefinition;
 import model.non_entity.Slot;
+import model.non_entity.Captions;
 import model.non_entity.SystemDefinition.ScheduleSlotType;
-import model.non_entity.SystemDefinition.ScheduleViewActionCaption;
-import view.views.view_support_classes.renderers.AppointmentsTableDurationRenderer;
-import view.views.view_support_classes.renderers.AppointmentsListTableLocalDateTimeRenderer;
-import view.views.view_support_classes.renderers.ScheduleDiaryTablePatientRenderer;
-import view.views.view_support_classes.renderers.AppointmentsListTablePatientRenderer;
-import view.views.view_support_classes.renderers.ScheduleDiaryTableLocalDateTimeRenderer;
-import view.views.view_support_classes.renderers.ScheduleTableCellRenderer;
-import view.views.view_support_classes.renderers.ScheduleDiaryTableStringRenderer;
+import view.view_support_classes.renderers.ScheduleDiaryTableStringRenderer;
 import view.views.dialogs.CustomComboBoxDialog;
-import view.views.dialogs.CustomComboBoxInternalDialog;
-/*28/03/2024import view.views.view_support_classes.renderers.AppointmentsTablePatientNoteRenderer;*/
-import view.views.view_support_classes.models.ScheduleListTableModel;
-import view.views.view_support_classes.models.ScheduleDiaryTableModel;
-import view.views.view_support_classes.models.ScheduleDiaryEmergencyTableModel;
 import model.entity.Appointment;
 import model.entity.Patient;
 /*28/03/2024import model.PatientNote;*/
@@ -68,14 +56,11 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.JTableHeader;
-import javax.swing.table.TableColumnModel;
 import javax.swing.SwingUtilities;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import javax.swing.event.TableModelEvent;
-import javax.swing.event.TableModelListener;
-import view.views.view_support_classes.AppointmentDateVetoPolicy;
+import view.view_support_classes.AppointmentDateVetoPolicy;
 
 /**
  *
@@ -128,6 +113,13 @@ public class ScheduleDiaryView extends BookingView
         }
         //setEmptySlotAvailabilityTableListener();
         
+        mniPrintSchedule.setActionCommand(Action.REQUEST_PRINT_SCHEDULE.toString());
+        mniPrintSchedule.addActionListener(this);
+        this.mniCloseView.setActionCommand(ScheduleListView.Action.REQUEST_CLOSE_VIEW.toString());
+        this.mniCloseView.addActionListener(this);
+        this.mniColorPicker.setActionCommand(ScheduleListView.Action.REQUEST_COLOUR_PICKER.toString());
+        this.mniColorPicker.addActionListener(this);
+        
         this.btnSwitchView.setActionCommand(ScheduleListView.Action.REQUEST_SWITCH_VIEW.toString());
         this.btnSwitchView.addActionListener(this);
         
@@ -144,19 +136,19 @@ public class ScheduleDiaryView extends BookingView
         disableAllScheduleActionControlsExceptCloseView();
         
         //initialise captions for each control
-        btnCancelAppointmentRequest.setText(ScheduleViewActionCaption.CANCEL_APPOINTMENT._1());
-        btnClinicalNotesForAppointmentRequest.setText(ScheduleViewActionCaption.CLINICAL_NOTES._1());
-        btnCloseView.setText(ScheduleViewActionCaption.CLOSE_VIEW._1());
-        btnCreateAppointmentRequest.setText(ScheduleViewActionCaption.CREATE_UPDATE_APPOINTMENT._1());
-        btnExtendAppointmentEarlierLaterBothRequest.setText(ScheduleViewActionCaption.EXTEND_BOOKING._1());
-        btnMoveBookingRequest.setText(ScheduleViewActionCaption.MOVE_BOOKING._1());
-        btnShiftAppointmentEarlierLaterRequest.setText(ScheduleViewActionCaption.SHIFT_BOOKING._1());
-        btnShortenAppointmentRequest.setText(ScheduleViewActionCaption.SHORTEN_BOOKING._1());
-        btnTreatmentForAppointmentRequest.setText(ScheduleViewActionCaption.SELECT_TREATMENT._1());
+        btnCancelAppointmentRequest.setText(Captions.ScheduleView.CANCEL_APPOINTMENT._1());
+        btnClinicalNotesForAppointmentRequest.setText(Captions.ScheduleView.CLINICAL_NOTES._1());
+        btnCloseView.setText(Captions.CLOSE_VIEW);
+        btnCreateAppointmentRequest.setText(Captions.ScheduleView.CREATE_UPDATE_APPOINTMENT._1());
+        btnExtendAppointmentEarlierLaterBothRequest.setText(Captions.ScheduleView.EXTEND_BOOKING._1());
+        btnMoveBookingRequest.setText(Captions.ScheduleView.MOVE_BOOKING._1());
+        btnShiftAppointmentEarlierLaterRequest.setText(Captions.ScheduleView.SHIFT_BOOKING._1());
+        btnShortenAppointmentRequest.setText(Captions.ScheduleView.SHORTEN_BOOKING._1());
+        btnTreatmentForAppointmentRequest.setText(Captions.ScheduleView.SELECT_TREATMENT._1());
         
-        btnNextDay.setText(ScheduleViewActionCaption.NEXT_DAY._1());
-        btnNow.setText(ScheduleViewActionCaption.TODAY._1());
-        btnPreviousDay.setText(ScheduleViewActionCaption.PREVIOUS_DAY._1());
+        btnNextDay.setText(Captions.ScheduleView.NEXT_DAY._1());
+        btnNow.setText(Captions.ScheduleView.TODAY._1());
+        btnPreviousDay.setText(Captions.ScheduleView.PREVIOUS_DAY._1());
 
         btnCloseView.setActionCommand(ScheduleListView.Action.REQUEST_CLOSE_VIEW.toString());
         
@@ -199,12 +191,7 @@ public class ScheduleDiaryView extends BookingView
         //rdbList.setSelected(true);
         //setScheduleViewMode(ScheduleListView.ScheduleViewMode.LIST);
         
-        this.mniCloseView.setActionCommand(ScheduleListView.Action.REQUEST_CLOSE_VIEW.toString());
-        this.mniCloseView.addActionListener(this);
-        this.mniPrintScheduleSelection.setActionCommand(ScheduleListView.Action.REQUEST_PRINT_SCHEDULE.toString());
-        this.mniPrintScheduleSelection.addActionListener(this);
-        this.mniColorPicker.setActionCommand(ScheduleListView.Action.REQUEST_COLOUR_PICKER.toString());
-        this.mniColorPicker.addActionListener(this);
+        
         
         
         this.vetoPolicy = new AppointmentDateVetoPolicy(getMyController().getDescriptor().getControllerDescription().getSurgeryDaysAssignment());
@@ -421,13 +408,7 @@ public class ScheduleDiaryView extends BookingView
                 doPreviousDayAction();
                 break;
             case REQUEST_PRINT_SCHEDULE:
-                getMyController().getDescriptor().getViewDescription().setScheduleDay(dayDatePicker.getDate());
-                actionEvent = new ActionEvent(this, 
-                        ActionEvent.ACTION_PERFORMED,
-                        ViewController.ScheduleViewControllerActionEvent.PRINT_SCHEDULE_REQUEST.toString());
-                getMyController().actionPerformed(actionEvent);
-                doOpenDocumentForPrinting(SystemDefinition.getPMSPrintFolder() 
-                        + SystemDefinition.PATIENT_SCHEDULE_FILENAME);
+                doPrintScheduleRequest();
                 break;
             case REQUEST_SHIFT_APPOINTMENT:
                 switch(getShiftAction()){
@@ -925,6 +906,19 @@ public class ScheduleDiaryView extends BookingView
         
     }
     
+    /**
+     * on entry ViewDescriptor.ViewMode initialised appropriately for print request (with or without contact details)
+     */
+    private void doPrintScheduleRequest(){
+        getMyController().getDescriptor().getViewDescription().setScheduleDay(dayDatePicker.getDate());
+        ActionEvent actionEvent = new ActionEvent(this, 
+                ActionEvent.ACTION_PERFORMED,
+                ViewController.ScheduleViewControllerActionEvent.PRINT_SCHEDULE_REQUEST.toString());
+        getMyController().actionPerformed(actionEvent);
+        doOpenDocumentForPrinting(SystemDefinition.getPMSPrintFolder() 
+                + SystemDefinition.FILENAME_FOR_SCHEDULE);
+    }
+    
     private void configureScheduleDiaryView(){
         this.tblScheduleMorning = new JTable(new ScheduleDiaryTableModel());
         this.scrMorningTable.setViewportView(tblScheduleMorning);
@@ -963,9 +957,29 @@ public class ScheduleDiaryView extends BookingView
         ViewController.setJTableColumnProperties(tblScheduleEvening, scrEveningTable.getPreferredSize().width, 10,40,50);
     }
     
+    /**
+     * setScheduleSlotData() method
+     * -- fetches each type of appointment object (unbookable, bookable, booked)from the collection of appointment data in the ControllerDescription
+     * -- unpacks the appointment type into a contiguous set of 5 minute intervals (slots), each interval being represented by a row in the table
+     * -- initialises column 0 of the first row of the table using the start time of the first appointment object in the collection sent from the controller
+     * -- populating subsequent rows in the table from the previous row's start time plus 5 minutes
+     * -- the resulting table of data is then divided into 3 'tables' of data
+     * ---- each 'table' representing the contents of
+     * ------ the 'morning' table
+     * ------ the 'afternoon' table
+     * ------ the 'evening' table
+     */
     private ArrayList<Slot> scheduleSlotData = null;
+    private ArrayList<Slot> morningSlotData = null;
+    private ArrayList<Slot> afternoonSlotData = null;
+    private ArrayList<Slot> eveningSlotData = null;
+    private ArrayList<ArrayList> slotData = null;
     private void setScheduleSlotData(){
         scheduleSlotData = new ArrayList<Slot>();
+        morningSlotData = new ArrayList<Slot>();
+        afternoonSlotData = new ArrayList<Slot>();
+        eveningSlotData = new ArrayList<Slot>();
+        slotData = new ArrayList<ArrayList>();
         ArrayList<Slot> schedule = getMyController().getDescriptor()
                         .getControllerDescription().getAppointmentSlotsForDayInDiaryFormat();
         Iterator<Slot> it = schedule.iterator();
@@ -982,26 +996,52 @@ public class ScheduleDiaryView extends BookingView
             Slot slot = new Slot(new Appointment());
             slot.setStart(start.plusMinutes(row*5));
             scheduleSlotData.add(slot);
+        } 
+
+        it = scheduleSlotData.iterator();
+        rowCount = 0;
+        while (it.hasNext()){
+            Slot slot = (Slot)it.next();
+            if (rowCount<36) morningSlotData.add(slot);
+            else if (rowCount<72) afternoonSlotData.add(slot);
+            else eveningSlotData.add(slot);
+            rowCount++;
         }
+        slotData.add(morningSlotData);
+        slotData.add(afternoonSlotData);
+        slotData.add(eveningSlotData); 
     }
+    private ArrayList<ArrayList> getScheduleSlotData(){
+        return slotData;
+    }
+    
     private ArrayList<Slot> getScheduleSlotModel(){
         return scheduleSlotData;
     }
     private void populateScheduleDiaryView(){
-        
+        int MORNING = 0;
+        int AFTERNOON = 1;
+        int EVENING = 2;
         ScheduleDiaryTableModel modelMorning = null;
         ScheduleDiaryTableModel modelAfternoon  = null;
         ScheduleDiaryTableModel modelEvening = null;
         
+        setScheduleSlotData();
+        
         modelMorning = (ScheduleDiaryTableModel)tblScheduleMorning.getModel();
         modelMorning.removeAllElements();
+        modelMorning.setData(getScheduleSlotData().get(MORNING));
+        
         modelAfternoon = (ScheduleDiaryTableModel)tblScheduleAfternoon.getModel();
         modelAfternoon.removeAllElements();
+        modelAfternoon.setData(getScheduleSlotData().get(AFTERNOON));
+        
         modelEvening = (ScheduleDiaryTableModel)tblScheduleEvening.getModel();
         modelEvening.removeAllElements();
-        
+        modelEvening.setData(getScheduleSlotData().get(EVENING));
         setScheduleSlotData();
-        Iterator<Slot> it = getScheduleSlotModel().iterator();
+        
+        /*Iterator<Slot> it = getScheduleSlotModel().iterator();
         int rowCount = 0;
         while (it.hasNext()){
             Slot slot = (Slot)it.next();
@@ -1009,7 +1049,7 @@ public class ScheduleDiaryView extends BookingView
             else if (rowCount<72) modelAfternoon.addElement(slot);
             else modelEvening.addElement(slot);
             rowCount++;
-        }
+        }*/
         this.clearSelectionFromScheduleTable();
         setTitle(getMyController().getDescriptor().getControllerDescription().getScheduleDay().
                 format(DateTimeFormatter.ofPattern("dd/MM/yy")) + " Appointment schedule");
@@ -1236,13 +1276,13 @@ public class ScheduleDiaryView extends BookingView
         extendAction = value;
         switch(value){
             case EARLIER:
-                this.btnExtendAppointmentEarlierLaterBothRequest.setText(ScheduleViewActionCaption.EXTEND_BOOKING._1());
+                this.btnExtendAppointmentEarlierLaterBothRequest.setText(Captions.ScheduleView.EXTEND_BOOKING._1());
                 break;
             case LATER:
-                this.btnExtendAppointmentEarlierLaterBothRequest.setText(ScheduleViewActionCaption.EXTEND_BOOKING._2());
+                this.btnExtendAppointmentEarlierLaterBothRequest.setText(Captions.ScheduleView.EXTEND_BOOKING._2());
                 break;
             case BOTH:
-                this.btnExtendAppointmentEarlierLaterBothRequest.setText(ScheduleViewActionCaption.EXTEND_BOOKING._3());
+                this.btnExtendAppointmentEarlierLaterBothRequest.setText(Captions.ScheduleView.EXTEND_BOOKING._3());
                 break;
         }
     }
@@ -1255,10 +1295,10 @@ public class ScheduleDiaryView extends BookingView
         shiftAction = value;
         switch(value){
             case EARLIER:
-                this.btnShiftAppointmentEarlierLaterRequest.setText(ScheduleViewActionCaption.SHIFT_BOOKING._1());
+                this.btnShiftAppointmentEarlierLaterRequest.setText(Captions.ScheduleView.SHIFT_BOOKING._1());
                 break;
             case LATER:
-                this.btnShiftAppointmentEarlierLaterRequest.setText(ScheduleViewActionCaption.SHIFT_BOOKING._2());
+                this.btnShiftAppointmentEarlierLaterRequest.setText(Captions.ScheduleView.SHIFT_BOOKING._2());
                 break;
         }
     }
@@ -1271,7 +1311,7 @@ public class ScheduleDiaryView extends BookingView
         appointmentMode = value;        switch(appointmentMode){
             case CREATE:
                 btnCreateAppointmentRequest.setText(
-                        ScheduleViewActionCaption.CREATE_UPDATE_APPOINTMENT._1());
+                        Captions.ScheduleView.CREATE_UPDATE_APPOINTMENT._1());
                 //btnCreateAppointmentRequest.setEnabled(true);
                 break;
             case UPDATE:
@@ -2438,7 +2478,7 @@ public class ScheduleDiaryView extends BookingView
         btnUndoCurrentSelectionRequest = new javax.swing.JButton();
         jMenuBar1 = new javax.swing.JMenuBar();
         mnuOptions = new javax.swing.JMenu();
-        mniPrintScheduleSelection = new javax.swing.JMenuItem();
+        mniPrintSchedule = new javax.swing.JMenuItem();
         mniColorPicker = new javax.swing.JMenuItem();
         jSeparator3 = new javax.swing.JPopupMenu.Separator();
         mniCloseView = new javax.swing.JMenuItem();
@@ -2711,7 +2751,7 @@ public class ScheduleDiaryView extends BookingView
             }
         });
 
-        btnCloseView.setText(ScheduleViewActionCaption.CLOSE_VIEW._1());
+        btnCloseView.setText(Captions.CLOSE_VIEW);
 
         btnShiftAppointmentEarlierLaterRequest.setText("<html><center>Shift earlier</center><center>selected</center><center>appointment</center></html>");
 
@@ -2804,8 +2844,8 @@ public class ScheduleDiaryView extends BookingView
 
         mnuOptions.setText("Actions");
 
-        mniPrintScheduleSelection.setText("Print schedule");
-        mnuOptions.add(mniPrintScheduleSelection);
+        mniPrintSchedule.setText("Print schedule");
+        mnuOptions.add(mniPrintSchedule);
 
         mniColorPicker.setText("Colour picker");
         mnuOptions.add(mniColorPicker);
@@ -2889,7 +2929,7 @@ public class ScheduleDiaryView extends BookingView
     private javax.swing.JPopupMenu.Separator jSeparator3;
     private javax.swing.JMenuItem mniCloseView;
     private javax.swing.JMenuItem mniColorPicker;
-    private javax.swing.JMenuItem mniPrintScheduleSelection;
+    private javax.swing.JMenuItem mniPrintSchedule;
     private javax.swing.JMenu mnuOptions;
     private javax.swing.JPanel pnlScheduleDaySelection;
     private javax.swing.JPanel pnlScheduleOperations;

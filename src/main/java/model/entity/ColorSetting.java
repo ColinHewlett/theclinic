@@ -4,8 +4,6 @@
  */
 package model.entity;
 
-import repository.Repository;
-
 /**
  *
  * @author colin

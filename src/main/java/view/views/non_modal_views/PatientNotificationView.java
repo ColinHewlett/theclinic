@@ -32,8 +32,8 @@ import javax.swing.event.InternalFrameEvent;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import model.non_entity.SystemDefinition;
-import view.views.view_support_classes.models.PatientNotificationViewTableModel;
-import view.views.view_support_classes.renderers.PatientNotificationTableLocalDateRenderer;
+import view.view_support_classes.models.PatientNotificationViewTableModel;
+import view.view_support_classes.renderers.PatientNotificationTableLocalDateRenderer;
 
 
 /**

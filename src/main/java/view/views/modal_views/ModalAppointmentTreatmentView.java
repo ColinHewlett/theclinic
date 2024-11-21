@@ -27,8 +27,8 @@ import javax.swing.JOptionPane;
 import model.non_entity.TreatmentWithState;
 import view.View;
 import view.views.non_modal_views.DesktopView;
-import view.views.view_support_classes.models.MedicalHistoryTableModel;
-import view.views.view_support_classes.models.TreatmentWithStateTableModel;
+import view.view_support_classes.models.MedicalHistoryTableModel;
+import view.view_support_classes.models.TreatmentWithStateTableModel;
 /**
  *
  * @author colin

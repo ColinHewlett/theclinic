@@ -6,17 +6,16 @@ package model.entity;
 
 import java.awt.Point;
 import java.util.ArrayList;
-import model.IEntityStoreActions;
-import repository.Repository;
-import repository.StoreException;
-import repository.LoginException;
+import model.repository.StoreException;
+import model.repository.LoginException;
+import model.entity.interfaces.IEntityRepositoryActions;
 
 
 /**
  *
  * @author colin
  */
-public class User extends Entity implements IEntityStoreActions{
+public class User extends Entity implements IEntityRepositoryActions{
     private int test = 0;
     public User(Integer value){
         setIsUser(true);
@@ -26,6 +25,7 @@ public class User extends Entity implements IEntityStoreActions{
     public User(){
         setIsUser(true);
     }
+    
     
     private ArrayList<User> collection = new ArrayList<>();
     public ArrayList<User> get(){

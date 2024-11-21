@@ -24,7 +24,7 @@ import javax.swing.JLayeredPane;
 import javax.swing.JOptionPane;
 import javax.swing.SpinnerNumberModel;
 import view.View;
-import view.views.view_support_classes.renderers.SelectStartTimeLocalDateTimeRenderer;
+import view.view_support_classes.renderers.SelectStartTimeLocalDateTimeRenderer;
 
 /**
  * 

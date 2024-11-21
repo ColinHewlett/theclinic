@@ -7,16 +7,17 @@ package model.entity;
 import model.entity.Condition;
 import java.awt.Point;
 import java.util.ArrayList;
-import model.IEntityStoreActions;
-import repository.Repository;
-import repository.StoreException;
+import model.repository.StoreException;
+import model.entity.interfaces.IEntityRepositoryActions;
 
 /**
  *
  * @author colin
  */
-public class PrimaryCondition extends Condition implements IEntityStoreActions {
+public class PrimaryCondition extends Condition implements IEntityRepositoryActions {
     private SecondaryCondition secondaryCondition = null;
+    
+    
             
     public PrimaryCondition(){
         setIsPrimaryCondition(true);

@@ -447,7 +447,7 @@
         <Component class="javax.swing.JButton" name="btnFetchScheduleForSelectedAppointment">
           <Properties>
             <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code="PatientViewActionCaption.SCHEDULE_FOR_APPOINTMENT._1()" type="code"/>
+              <Connection code="Captions.PatientView.SCHEDULE_FOR_APPOINTMENT._1()" type="code"/>
             </Property>
             <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
               <Dimension value="[2147483647, 82]"/>
@@ -661,7 +661,7 @@
             <Component class="javax.swing.JTable" name="tblAppointmentHistory">
               <Properties>
                 <Property name="model" type="javax.swing.table.TableModel" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-                  <Connection code="new view.views.view_support_classes.models.PatientAppointmentHistoryTableModel()" type="code"/>
+                  <Connection code="new view.view_support_classes.models.PatientAppointmentHistoryTableModel()" type="code"/>
                 </Property>
               </Properties>
               <AuxValues>

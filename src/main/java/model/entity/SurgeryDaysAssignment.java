@@ -7,18 +7,17 @@ package model.entity;
 
 //<editor-fold defaultstate="collapsed" desc="Imports">
 import model.entity.Entity;
-import repository.Repository;
-import repository.StoreException;//01/03/2023
+import model.repository.StoreException;//01/03/2023
 import java.awt.Point;
 import java.time.DayOfWeek;
 import java.util.HashMap;
-import model.IEntityStoreActions;
+import model.entity.interfaces.IEntityRepositoryActions;
 //</editor-fold>
 /**
  *
  * @author colin
  */
-public class SurgeryDaysAssignment extends Entity implements IEntityStoreActions {
+public class SurgeryDaysAssignment extends Entity implements IEntityRepositoryActions {
 //<editor-fold defaultstate="collapsed" desc="Private and protected state">
     private HashMap<DayOfWeek,Boolean> assignment = new HashMap<>();
     

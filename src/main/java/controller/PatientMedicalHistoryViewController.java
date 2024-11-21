@@ -19,7 +19,7 @@ import view.views.non_modal_views.DesktopView;
 import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeEvent;
 import javax.swing.JOptionPane;
-import repository.StoreException;
+import model.repository.StoreException;
 import view.View;
 
 /**

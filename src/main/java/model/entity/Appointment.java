@@ -10,8 +10,7 @@ package model.entity;
 
 import controller.ViewController;
 import model.non_entity.SystemDefinition;
-import repository.Repository;
-import repository.StoreException;//01/03/2023
+import model.repository.StoreException;//01/03/2023
 import java.awt.Point;
 import java.time.Duration;
 import java.time.LocalDate;
@@ -20,14 +19,12 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import model.IEntityStoreActions;
-//</editor-fold>
-
+import model.entity.interfaces.IEntityRepositoryActions;
 /**
  *
  * @author colin.hewlett.solutions@gmail.com
  */
-public class Appointment extends Entity implements IEntityStoreActions{
+public class Appointment extends Entity implements IEntityRepositoryActions{
     
 //<editor-fold defaultstate="collapsed" desc="Private and protected state">
     private LocalDateTime start = null;
@@ -39,7 +36,7 @@ public class Appointment extends Entity implements IEntityStoreActions{
     private ArrayList<Appointment> collection = null;
     private static final DateTimeFormatter ddMMyyyyFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
-
+    
 //</editor-fold>   
 
 //<editor-fold defaultstate="collapsed" desc="Public interface">
@@ -47,13 +44,25 @@ public class Appointment extends Entity implements IEntityStoreActions{
     public Appointment(){
         super.setIsAppointment(true);
     } 
+    
+    public Appointment(Appointment appointment){
+        
+    }
+    
+    private Appointment anotherAppointmentLike = null;
+    public void setAnotherAppointmentLike(Appointment appointment){
+        anotherAppointmentLike = new Appointment(appointment.getKey());
+    }
+    public Appointment getAnotherAppointmentLike(){
+        return anotherAppointmentLike;
+    }
 
     /**
      * 
      * @param key 
      */
     public Appointment( int key) {
-        super.setKey(key);
+        setKey(key);
         super.setIsAppointment(true);
     }
     public ArrayList<Appointment> get(){

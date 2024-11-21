@@ -11,23 +11,20 @@ import model.entity.Entity;
 import model.entity.Doctor;
 import model.entity.Appointment;
 import model.non_entity.SystemDefinition;
-import repository.Repository;
-import repository.StoreException;//01/03/2023
+import model.repository.StoreException;//01/03/2023
 import java.awt.Point;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import model.IEntityStoreActions;
-import repository.IStoreActions;
-//</editor-fold>
-
+import model.repository.IStoreActions;
+import model.entity.interfaces.IEntityRepositoryActions;
 /**
  *
  * @author colin.hewlett.solutions@gmail.com
  */
-public class Patient extends Entity implements IEntityStoreActions {
+public class Patient extends Entity implements IEntityRepositoryActions {
     
 //<editor-fold defaultstate="collapsed" desc="Private and protected state">    
     //private Boolean isPatientKeyDefined = null;
@@ -48,6 +45,8 @@ public class Patient extends Entity implements IEntityStoreActions {
     
     
     private static final DateTimeFormatter ddMMyyyyFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    
+    
     
 //</editor-fold>
     
@@ -199,6 +198,24 @@ public class Patient extends Entity implements IEntityStoreActions {
             new Repository().update(this, this.getKey(),null);
         }
 
+    }
+    /*
+    public void archive() throws StoreException{
+        setIsArchived(true);
+        update();
+    }
+    
+    public void unArchive() throws StoreException{
+        setIsArchived(false);
+        update();
+    }*/
+    
+    private boolean archive = false;
+    public boolean getIsArchived(){
+        return archive;
+    }
+    public void setIsArchived(boolean value){
+        archive = value;
     }
 
     //</editor-fold>

@@ -16,7 +16,7 @@ import static controller.ViewController.PatientQuestionnaireViewControllerProper
 import static controller.ViewController.PatientQuestionnaireViewControllerPropertyChangeEvent.QUESTION_WITH_STATE_RECEIVED;
 import model.*;
 import view.View;
-import view.views.view_support_classes.models.PatientQuestionnaireTableModel;
+import view.view_support_classes.models.PatientQuestionnaireTableModel;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;

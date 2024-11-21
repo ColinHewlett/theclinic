@@ -9,7 +9,7 @@
             <Property name="text" type="java.lang.String" value="Actions"/>
           </Properties>
           <SubComponents>
-            <MenuItem class="javax.swing.JMenuItem" name="mniPrintScheduleSelection">
+            <MenuItem class="javax.swing.JMenuItem" name="mniPrintSchedule">
               <Properties>
                 <Property name="text" type="java.lang.String" value="Print schedule"/>
               </Properties>
@@ -301,21 +301,24 @@
             <Component class="javax.swing.JButton" name="btnCreateUpdateAppointment">
               <Properties>
                 <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-                  <Connection code="ScheduleViewActionCaption.CREATE_UPDATE_APPOINTMENT._1()" type="code"/>
+                  <Connection code="Captions.ScheduleView.CREATE_UPDATE_APPOINTMENT._1()" type="code"/>
                 </Property>
               </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnCreateUpdateAppointmentActionPerformed"/>
+              </Events>
             </Component>
             <Component class="javax.swing.JButton" name="btnMakeDeleteEmergencyAppointmentUndoSelection">
               <Properties>
                 <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-                  <Connection code="ScheduleViewActionCaption.MAKE_DELETE_EMERGENCY_APPOINTMENT_UNDO._1()" type="code"/>
+                  <Connection code="Captions.ScheduleView.MAKE_DELETE_EMERGENCY_APPOINTMENT_UNDO._1()" type="code"/>
                 </Property>
               </Properties>
             </Component>
             <Component class="javax.swing.JButton" name="btnCancelSelectedAppointment">
               <Properties>
                 <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-                  <Connection code="ScheduleViewActionCaption.CANCEL_APPOINTMENT._1()" type="code"/>
+                  <Connection code="Captions.ScheduleView.CANCEL_APPOINTMENT._1()" type="code"/>
                 </Property>
               </Properties>
             </Component>
@@ -329,7 +332,7 @@
             <Component class="javax.swing.JButton" name="btnClinicalNotesForSelectedAppointment">
               <Properties>
                 <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-                  <Connection code="ScheduleViewActionCaption.CLINICAL_NOTES._1()" type="code"/>
+                  <Connection code="Captions.ScheduleView.CLINICAL_NOTES._1()" type="code"/>
                 </Property>
               </Properties>
               <Events>
@@ -339,7 +342,7 @@
             <Component class="javax.swing.JButton" name="btnSelectTreatmentRequest">
               <Properties>
                 <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-                  <Connection code="ScheduleViewActionCaption.SELECT_TREATMENT._1()" type="code"/>
+                  <Connection code="Captions.ScheduleView.SELECT_TREATMENT._1()" type="code"/>
                 </Property>
               </Properties>
               <Events>
@@ -349,7 +352,7 @@
             <Component class="javax.swing.JButton" name="btnCloseView">
               <Properties>
                 <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-                  <Connection code="ScheduleViewActionCaption.CLOSE_VIEW._1()" type="code"/>
+                  <Connection code="Captions.CLOSE_VIEW" type="code"/>
                 </Property>
               </Properties>
             </Component>

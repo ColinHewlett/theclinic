@@ -7,7 +7,7 @@ package model.entity;
 import java.awt.Point;
 import model.entity.Entity;
 import java.util.ArrayList;
-import repository.StoreException;
+import model.repository.StoreException;
 /**
  *
  * @author colin
@@ -28,6 +28,29 @@ public abstract class Condition extends Entity {
     }
     public void setDescription(String value){
         description = value;
+    }
+    
+    @Override
+    public boolean equals(Object obj) 
+    { 
+        // if both the object references are  
+        // referring to the same object. 
+        if(this == obj) 
+            return true; 
+
+        // checks if the comparison involves 2 objecs of the same type 
+        /**
+         * issue arise if one of the objects is an entity (for example a Patient) and the other object is its delegate sub class
+         */
+        //if(obj == null || obj.getClass()!= this.getClass()) 
+            //return false; 
+        if (obj == null) return false;
+        // type casting of the argument.  
+        Condition condition = (Condition) obj; 
+
+        // comparing the state of argument with  
+        // the state of 'this' Object. 
+        return (condition.getKey().equals(this.getKey())); 
     }
 
 }

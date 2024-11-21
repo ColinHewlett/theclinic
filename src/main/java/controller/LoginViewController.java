@@ -12,8 +12,8 @@ import model.non_entity.Credential;
 import model.non_entity.SystemDefinition;
 import model.entity.User;
 import model.entity.Entity;
-import repository.StoreException;
-import repository.LoginException;
+import model.repository.StoreException;
+import model.repository.LoginException;
 /**
  *
  * @author colin

@@ -34,8 +34,8 @@ import javax.swing.table.TableCellRenderer;
 import model.entity.ToDo;
 import model.non_entity.SystemDefinition;
 import view.View;
-import view.views.view_support_classes.models.ToDoViewTableModel;
-import view.views.view_support_classes.renderers.PatientNotificationTableLocalDateRenderer;
+import view.view_support_classes.models.ToDoViewTableModel;
+import view.view_support_classes.renderers.PatientNotificationTableLocalDateRenderer;
 
 /**
  *
