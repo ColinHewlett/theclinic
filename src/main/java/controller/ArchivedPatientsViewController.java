@@ -52,7 +52,7 @@ public class ArchivedPatientsViewController extends ViewController {
                     }catch(StoreException ex){
                         String message = ex.getMessage() +"\n";
                         message = message + "Exception handled in "
-                                + this.getClass().getSimpleName() + "::actionPerformed(" + actionCommand + "(";
+                                + this.getClass().getSimpleName() + "::actionPerformed)" + actionCommand + "(";
                         displayErrorMessage(message, "View controller error", JOptionPane.WARNING_MESSAGE);
                     }          
                     break;
@@ -62,11 +62,12 @@ public class ArchivedPatientsViewController extends ViewController {
                         for(Patient _patient : patient.get()){
                             _patient.setIsArchived(false);
                             _patient.update();
+                            patient = _patient;
                         }
                     }catch(StoreException ex){
                         String message = ex.getMessage() +"\n";
                         message = message + "Exception handled in "
-                                + this.getClass().getSimpleName() + "::actionPerformed(" + actionCommand + "(";
+                                + this.getClass().getSimpleName() + "::actionPerformed)" + actionCommand + "(";
                         displayErrorMessage(message, "View controller error", JOptionPane.WARNING_MESSAGE);
                     }
                     try{
@@ -74,9 +75,20 @@ public class ArchivedPatientsViewController extends ViewController {
                     }catch(StoreException ex){
                         String message = ex.getMessage() +"\n";
                         message = message + "Exception handled in "
-                                + this.getClass().getSimpleName() + "::actionPerformed(" + actionCommand + "(";
+                                + this.getClass().getSimpleName() + "::actionPerformed)" + actionCommand + "(";
                         displayErrorMessage(message, "View controller error", JOptionPane.WARNING_MESSAGE);
                     }
+                    getDescriptor().getControllerDescription()
+                            .setPatient(patient);
+                    getDescriptor().getControllerDescription().setViewMode(ViewMode.PATIENT_RESTORE);
+                    firePropertyChangeEvent(
+                        ViewController.DesktopViewControllerPropertyChangeEvent.
+                                ARCHIVED_PATIENTS_VIEW_CONTROLLER_CHANGE_NOTIFICATION.toString(),
+                        (DesktopViewController)getMyController(),
+                        this,
+                        null,
+                        getDescriptor()
+                    );
                     break;
                 case VIEW_CLOSE_NOTIFICATION:
                     ActionEvent actionEvent = new ActionEvent(
@@ -105,7 +117,19 @@ public class ArchivedPatientsViewController extends ViewController {
     
     @Override
     public void propertyChange(PropertyChangeEvent e){
-        
+        ArchivedPatientsViewControllerPropertyChangeEvent event = 
+                ArchivedPatientsViewControllerPropertyChangeEvent.valueOf(e.getPropertyName());
+        switch(event){
+            case ARCHIVED_PATIENTS_VIEW_CONTROLLER_CHANGE_NOTIFICATION:
+                try{
+                    fetchAndSendViewPatientAppointmentData();
+                }catch(StoreException ex){
+                    String message = ex.getMessage() +"\n";
+                    message = message + "Exception handled in "
+                            + this.getClass().getSimpleName() + "::propertyChange(" + event + ")";
+                    displayErrorMessage(message, "View controller error", JOptionPane.WARNING_MESSAGE);
+                }
+        }
     }
     
     private void fetchAndSendViewPatientAppointmentData()throws StoreException{
@@ -114,7 +138,7 @@ public class ArchivedPatientsViewController extends ViewController {
         patient = patient.read();
         getDescriptor().getControllerDescription().setPatient(patient);
         firePropertyChangeEvent(
-                ViewController.ArchivedPatientsDataViewControllerPropertyChangeEvent.
+                ViewController.ArchivedPatientsViewControllerPropertyChangeEvent.
                         ARCHIVED_PATIENT_RECEIVED.toString(),
                 getView(),
                 this,

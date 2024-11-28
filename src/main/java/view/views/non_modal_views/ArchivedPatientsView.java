@@ -86,8 +86,8 @@ public class ArchivedPatientsView extends View
     
     @Override
     public void propertyChange(PropertyChangeEvent e){
-        ViewController.ArchivedPatientsDataViewControllerPropertyChangeEvent propertyName =
-                ViewController.ArchivedPatientsDataViewControllerPropertyChangeEvent.valueOf(e.getPropertyName());
+        ViewController.ArchivedPatientsViewControllerPropertyChangeEvent propertyName =
+                ViewController.ArchivedPatientsViewControllerPropertyChangeEvent.valueOf(e.getPropertyName());
         switch(propertyName){
             case ARCHIVED_PATIENT_RECEIVED:
                 populateArchivedPatientsTable(

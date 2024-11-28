@@ -54,7 +54,7 @@ public class PatientAppointmentDataViewController extends ViewController{
                     }catch(StoreException ex){
                         String message = ex.getMessage() +"\n";
                         message = message + "Exception handled in "
-                                + this.getClass().getSimpleName() + "::actionPerformed(" + actionCommand + "(";
+                                + this.getClass().getSimpleName() + "::actionPerformed)" + actionCommand + "(";
                         displayErrorMessage(message, "View controller error", JOptionPane.WARNING_MESSAGE);
                     }          
                     break;
@@ -69,7 +69,7 @@ public class PatientAppointmentDataViewController extends ViewController{
                     }catch(StoreException ex){
                         String message = ex.getMessage() +"\n";
                         message = message + "Exception handled in "
-                                + this.getClass().getSimpleName() + "::actionPerformed(" + actionCommand + "(";
+                                + this.getClass().getSimpleName() + "::actionPerformed)" + actionCommand + "(";
                         displayErrorMessage(message, "View controller error", JOptionPane.WARNING_MESSAGE);
                     }
                     try{
@@ -78,12 +78,24 @@ public class PatientAppointmentDataViewController extends ViewController{
                         pad.setScope(getDescriptor().getControllerDescription().getPatientAppointmentData().getScope());
                         getDescriptor().getViewDescription().setPatientAppointmentData(pad);
                         fetchAndSendViewPatientAppointmentData();
+                        
                     }catch(StoreException ex){
                         String message = ex.getMessage() +"\n";
                         message = message + "Exception handled in "
-                                + this.getClass().getSimpleName() + "::actionPerformed(" + actionCommand + "(";
+                                + this.getClass().getSimpleName() + "::actionPerformed)" + actionCommand + "(";
                         displayErrorMessage(message, "View controller error", JOptionPane.WARNING_MESSAGE);
                     }
+                    getDescriptor().getControllerDescription()
+                            .setPatient(pad.getPatient());
+                    getDescriptor().getControllerDescription().setViewMode(ViewMode.PATIENT_ARCHIVE);
+                    firePropertyChangeEvent(
+                        ViewController.DesktopViewControllerPropertyChangeEvent.
+                                PATIENT_APPOINTMENT_DATA_VIEW_CONTROLLER_CHANGE_NOTIFICATION.toString(),
+                        (DesktopViewController)getMyController(),
+                        this,
+                        null,
+                        getDescriptor()
+                    );
                     break;
                 case VIEW_CLOSE_NOTIFICATION:
                     ActionEvent actionEvent = new ActionEvent(
@@ -112,7 +124,20 @@ public class PatientAppointmentDataViewController extends ViewController{
     
     @Override
     public void propertyChange(PropertyChangeEvent e){
-        
+        PatientAppointmentDataViewControllerPropertyChangeEvent event = 
+                PatientAppointmentDataViewControllerPropertyChangeEvent.valueOf(e.getPropertyName());
+        switch (event){
+            case PATIENT_APPOINTMENT_DATA_VIEW_CONTROLLER_CHANGE_NOTIFICATION:
+                try{
+                    fetchAndSendViewPatientAppointmentData();
+                }catch(StoreException ex){
+                    String message = ex.getMessage() +"\n";
+                    message = message + "Exception handled in "
+                            + this.getClass().getSimpleName() + "::properetyChange(" + event + ")";
+                    displayErrorMessage(message, "View controller error", JOptionPane.WARNING_MESSAGE);
+                }
+                break;
+        }
     }
     
     private void fetchAndSendViewPatientAppointmentData()throws StoreException{

@@ -7,11 +7,104 @@
         <Property name="text" type="java.lang.String" value="jMenuItem1"/>
       </Properties>
     </Component>
+    <Menu class="javax.swing.JMenuBar" name="mnbDesktop">
+      <SubComponents>
+        <Menu class="javax.swing.JMenu" name="mnuSelectView">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="View"/>
+          </Properties>
+          <SubComponents>
+            <MenuItem class="javax.swing.JMenuItem" name="mniPatientViewRequest">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Patients"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JPopupMenu$Separator" name="jSeparator1">
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="mniScheduleViewRequest">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Appointments"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JPopupMenu$Separator" name="jSeparator2">
+            </MenuItem>
+            <Menu class="javax.swing.JMenu" name="mnuUtilities">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Utilities"/>
+              </Properties>
+              <SubComponents>
+                <MenuItem class="javax.swing.JMenuItem" name="mniArchivedPatientsViewRequest">
+                  <Properties>
+                    <Property name="text" type="java.lang.String" value="Archived patients"/>
+                  </Properties>
+                </MenuItem>
+                <MenuItem class="javax.swing.JMenuItem" name="mniPatientAppointmentDataViewRequest">
+                  <Properties>
+                    <Property name="text" type="java.lang.String" value="Last appointment date for each patient"/>
+                  </Properties>
+                </MenuItem>
+                <MenuItem class="javax.swing.JMenuItem" name="mniPatientNotificationViewRequest">
+                  <Properties>
+                    <Property name="text" type="java.lang.String" value="Outstanding patient notifications"/>
+                  </Properties>
+                </MenuItem>
+                <MenuItem class="javax.swing.JMenuItem" name="mniToDoViewRequest">
+                  <Properties>
+                    <Property name="text" type="java.lang.String" value="&apos;To do&apos; list"/>
+                  </Properties>
+                </MenuItem>
+              </SubComponents>
+            </Menu>
+            <MenuItem class="javax.swing.JPopupMenu$Separator" name="jSeparator5">
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="mniExitViewRequest">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Exit the Clinic practice management system"/>
+              </Properties>
+            </MenuItem>
+          </SubComponents>
+        </Menu>
+        <Menu class="javax.swing.JMenu" name="mnuSettings">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Settings"/>
+          </Properties>
+          <SubComponents>
+            <MenuItem class="javax.swing.JMenuItem" name="mniPrintBlankMedicalHistoryRequest">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Print off medical history questionnaire for new patient"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JPopupMenu$Separator" name="jSeparator3">
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="mniMedicalConditionViewRequest">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Medical history items editor"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="mniTreatmentsViewRequest">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Treatment items editor"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JPopupMenu$Separator" name="jSeparator4">
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="mniPMSVersion">
+            </MenuItem>
+          </SubComponents>
+        </Menu>
+        <Menu class="javax.swing.JMenu" name="mnuCascadeViews">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Cascade views"/>
+          </Properties>
+        </Menu>
+      </SubComponents>
+    </Menu>
   </NonVisualComponents>
   <Properties>
     <Property name="defaultCloseOperation" type="int" value="3"/>
   </Properties>
   <SyntheticProperties>
+    <SyntheticProperty name="menuBar" type="java.lang.String" value="mnbDesktop"/>
     <SyntheticProperty name="formSizePolicy" type="int" value="1"/>
     <SyntheticProperty name="generateCenter" type="boolean" value="false"/>
   </SyntheticProperties>
@@ -35,7 +128,7 @@
     </DimensionLayout>
     <DimensionLayout dim="1">
       <Group type="103" groupAlignment="0" attributes="0">
-          <EmptySpace min="0" pref="379" max="32767" attributes="0"/>
+          <EmptySpace min="0" pref="356" max="32767" attributes="0"/>
       </Group>
     </DimensionLayout>
   </Layout>

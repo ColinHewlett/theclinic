@@ -4820,7 +4820,8 @@ public class Repository implements IStoreActions {
                         + "AND a.start = "
                         + "(Select MAX(a2.start) "
                         + " FROM Appointment a2 "
-                        + " WHERE a.patientKey = a2.patientKey) "
+                        + " WHERE a.patientKey = a2.patientKey "
+                        + " AND a2.isCancelled = false) "
                         + "ORDER BY patient_surname,patient_forenames ASC;";
                 result = doReadAll(sql, (PatientAppointmentData )entity);
                 break;
@@ -4849,7 +4850,8 @@ public class Repository implements IStoreActions {
                         + "AND a.start = "
                         + "(Select MAX(a2.start) "
                         + " FROM Appointment a2 "
-                        + " WHERE a.patientKey = a2.patientKey) "
+                        + " WHERE a.patientKey = a2.patientKey "
+                        + " AND a2.isCancelled = false) "
                         + "ORDER BY last_appointment_date ASC;";
                 result = doReadAll(sql, (PatientAppointmentData )entity);
                 break;
@@ -9269,3 +9271,4 @@ public class Repository implements IStoreActions {
         runSQL(Repository.EntityType.TO_DO, Repository.PMSSQL.UPDATE_TO_DO,toDo); 
     }
 }
+

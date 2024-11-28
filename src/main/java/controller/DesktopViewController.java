@@ -2693,6 +2693,60 @@ public class DesktopViewController extends ViewController{
         }
     }
     
+    private void doArchivedPatientsViewControllerChangeNotification(PropertyChangeEvent e){
+        ArchivedPatientsViewController apvc = (ArchivedPatientsViewController)e.getSource();
+        setDescriptor((Descriptor)e.getNewValue());
+        for(PatientViewController pvc: this.patientViewControllers){
+            /*pvc.getDescriptor().getControllerDescription().setPatient(
+                    apvc.getDescriptor().getControllerDescription().getPatient());*/
+            firePropertyChangeEvent(
+                    ViewController.PatientViewControllerPropertyChangeEvent.
+                            PATIENT_VIEW_CHANGE_NOTIFICATION.toString(),
+                    pvc,
+                    this,
+                    null,
+                    getDescriptor()       
+            ); 
+        }
+        if (!this.patientAppointmentDataViewControllers.isEmpty()){
+            PatientAppointmentDataViewController padvc = 
+                    (PatientAppointmentDataViewController)this.patientAppointmentDataViewControllers.get(0);
+            firePropertyChangeEvent(
+                    ViewController.PatientAppointmentDataViewControllerPropertyChangeEvent.
+                            PATIENT_APPOINTMENT_DATA_VIEW_CONTROLLER_CHANGE_NOTIFICATION.toString(),
+                    padvc,
+                    this,
+                    null,
+                    null       
+            );
+        }
+        
+    }
+    
+    private void doPatientAppointmentDataViewControllerChangeNotification(PropertyChangeEvent e){
+        setDescriptor((Descriptor)e.getNewValue());
+        for(PatientViewController pvc: this.patientViewControllers){
+            firePropertyChangeEvent(
+                    ViewController.PatientViewControllerPropertyChangeEvent.
+                            PATIENT_VIEW_CHANGE_NOTIFICATION.toString(),
+                    pvc,
+                    this,
+                    null,
+                    getDescriptor()       
+            ); 
+        }
+        for(ArchivedPatientsViewController apvc: this.archivedPatientsViewControllers){
+            firePropertyChangeEvent(
+                    ViewController.ArchivedPatientsViewControllerPropertyChangeEvent.
+                            ARCHIVED_PATIENTS_VIEW_CONTROLLER_CHANGE_NOTIFICATION.toString(),
+                    apvc,
+                    this,
+                    null,
+                    getDescriptor()       
+            );
+        }
+    }
+    
     private void doScheduleViewControllerChangeNotification(PropertyChangeEvent e){
         setDescriptor((Descriptor)e.getNewValue());
         for(PatientViewController pvc: this.patientViewControllers){
@@ -2716,10 +2770,7 @@ public class DesktopViewController extends ViewController{
                                 REFRESH_DISPLAY_REQUEST.toString());
                 svc.actionPerformed(actionEvent); 
             }
-        }
-        
-        
-        
+        } 
     } 
     
     private void doTreatmentViewControllerChangeNotification(PropertyChangeEvent e){
@@ -2742,56 +2793,17 @@ public class DesktopViewController extends ViewController{
             svc.actionPerformed(actionEvent); 
         }
     } 
-    /*
-    private void doPropertyChangeEventScheduleViewController(PropertyChangeEvent e){
-        ViewController.DesktopViewControllerPropertyChangeEvent propertyName = 
-                ViewController.DesktopViewControllerPropertyChangeEvent.
-                        valueOf(e.getPropertyName());
-        switch(propertyName){
-            case SCHEDULE_VIEW_CONTROLLER_CHANGE_NOTIFICATION:{
-                setDescriptor((Descriptor)e.getNewValue());
-                for(PatientViewController pvc: this.patientViewControllers){
-                    firePropertyChangeEvent(
-                            ViewController.PatientViewControllerPropertyChangeEvent.
-                                    PATIENT_VIEW_CHANGE_NOTIFICATION.toString(),
-                            pvc,
-                            this,
-                            null,
-                            getDescriptor()       
-                    ); 
-                }
-                break;
-            }
-        }
-    } 
-    */
-    /*
-     private void doPropertyChangeEventScheduleViewController(PropertyChangeEvent e){
-        ViewController.DesktopViewControllerPropertyChangeEvent propertyName = 
-                ViewController.DesktopViewControllerPropertyChangeEvent.
-                        valueOf(e.getPropertyName());
-        switch(propertyName){
-            case SCHEDULE_VIEW_CONTROLLER_CHANGE_NOTIFICATION:{
-                setDescriptor((Descriptor)e.getNewValue());
-                for(PatientViewController pvc: this.patientViewControllers){
-                    firePropertyChangeEvent(
-                            ViewController.PatientViewControllerPropertyChangeEvent.
-                                    PATIENT_VIEW_CHANGE_NOTIFICATION.toString(),
-                            pvc,
-                            this,
-                            null,
-                            getDescriptor()       
-                    ); 
-                }
-                break;
-            }
-        }
-    } 
-    */
+
     public void propertyChange(PropertyChangeEvent e){
         ViewController.DesktopViewControllerPropertyChangeEvent propertyName =
                 ViewController.DesktopViewControllerPropertyChangeEvent.valueOf(e.getPropertyName());
         switch(propertyName){
+            case ARCHIVED_PATIENTS_VIEW_CONTROLLER_CHANGE_NOTIFICATION:
+                doArchivedPatientsViewControllerChangeNotification(e);
+                break;
+            case PATIENT_APPOINTMENT_DATA_VIEW_CONTROLLER_CHANGE_NOTIFICATION:
+                doPatientAppointmentDataViewControllerChangeNotification(e);
+                break;
             case PATIENT_VIEW_CONTROLLER_CHANGE_NOTIFICATION:
                 doPatientViewControllerChangeNotification(e);
                 break;
@@ -2804,24 +2816,7 @@ public class DesktopViewController extends ViewController{
                 
         }
     }
-    /*
-    public void propertyChange(PropertyChangeEvent e){
-        String viewController = e.getSource().getClass().getSimpleName();
-        switch(ViewControllers.valueOf(viewController)){
-            case ScheduleViewController:
-                doScheduleViewControllerChangeNotification(e);
-                break;
-            case DesktopViewController:
-                break;
-            case PatientNotificationViewController:
-                break;
-            case PatientViewController:
-                doPatientViewControllerChangeNotification(e);
-                break;
-  
-        }
-    }*/
-    
+
     static class PMSStore {  
 
         static String getPath()throws StoreException{ 

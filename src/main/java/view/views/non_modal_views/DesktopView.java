@@ -14,10 +14,84 @@
     private void initComponents() {
 
         jMenuItem1 = new javax.swing.JMenuItem();
+        mnbDesktop = new javax.swing.JMenuBar();
+        mnuSelectView = new javax.swing.JMenu();
+        mniPatientViewRequest = new javax.swing.JMenuItem();
+        jSeparator1 = new javax.swing.JPopupMenu.Separator();
+        mniScheduleViewRequest = new javax.swing.JMenuItem();
+        jSeparator2 = new javax.swing.JPopupMenu.Separator();
+        mnuUtilities = new javax.swing.JMenu();
+        mniArchivedPatientsViewRequest = new javax.swing.JMenuItem();
+        mniPatientAppointmentDataViewRequest = new javax.swing.JMenuItem();
+        mniPatientNotificationViewRequest = new javax.swing.JMenuItem();
+        mniToDoViewRequest = new javax.swing.JMenuItem();
+        jSeparator5 = new javax.swing.JPopupMenu.Separator();
+        mniExitViewRequest = new javax.swing.JMenuItem();
+        mnuSettings = new javax.swing.JMenu();
+        mniPrintBlankMedicalHistoryRequest = new javax.swing.JMenuItem();
+        jSeparator3 = new javax.swing.JPopupMenu.Separator();
+        mniMedicalConditionViewRequest = new javax.swing.JMenuItem();
+        mniTreatmentsViewRequest = new javax.swing.JMenuItem();
+        jSeparator4 = new javax.swing.JPopupMenu.Separator();
+        mniPMSVersion = new javax.swing.JMenuItem();
+        mnuCascadeViews = new javax.swing.JMenu();
 
         jMenuItem1.setText("jMenuItem1");
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+
+        mnuSelectView.setText("View");
+
+        mniPatientViewRequest.setText("Patients");
+        mnuSelectView.add(mniPatientViewRequest);
+        mnuSelectView.add(jSeparator1);
+
+        mniScheduleViewRequest.setText("Appointments");
+        mnuSelectView.add(mniScheduleViewRequest);
+        mnuSelectView.add(jSeparator2);
+
+        mnuUtilities.setText("Utilities");
+
+        mniArchivedPatientsViewRequest.setText("Archived patients");
+        mnuUtilities.add(mniArchivedPatientsViewRequest);
+
+        mniPatientAppointmentDataViewRequest.setText("Last appointment date for each patient");
+        mnuUtilities.add(mniPatientAppointmentDataViewRequest);
+
+        mniPatientNotificationViewRequest.setText("Outstanding patient notifications");
+        mnuUtilities.add(mniPatientNotificationViewRequest);
+
+        mniToDoViewRequest.setText("'To do' list");
+        mnuUtilities.add(mniToDoViewRequest);
+
+        mnuSelectView.add(mnuUtilities);
+        mnuSelectView.add(jSeparator5);
+
+        mniExitViewRequest.setText("Exit the Clinic practice management system");
+        mnuSelectView.add(mniExitViewRequest);
+
+        mnbDesktop.add(mnuSelectView);
+
+        mnuSettings.setText("Settings");
+
+        mniPrintBlankMedicalHistoryRequest.setText("Print off medical history questionnaire for new patient");
+        mnuSettings.add(mniPrintBlankMedicalHistoryRequest);
+        mnuSettings.add(jSeparator3);
+
+        mniMedicalConditionViewRequest.setText("Medical history items editor");
+        mnuSettings.add(mniMedicalConditionViewRequest);
+
+        mniTreatmentsViewRequest.setText("Treatment items editor");
+        mnuSettings.add(mniTreatmentsViewRequest);
+        mnuSettings.add(jSeparator4);
+        mnuSettings.add(mniPMSVersion);
+
+        mnbDesktop.add(mnuSettings);
+
+        mnuCascadeViews.setText("Cascade views");
+        mnbDesktop.add(mnuCascadeViews);
+
+        setJMenuBar(mnbDesktop);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -27,7 +101,7 @@
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 379, Short.MAX_VALUE)
+            .addGap(0, 356, Short.MAX_VALUE)
         );
 
         pack();
@@ -35,6 +109,27 @@
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem jMenuItem1;
+    private javax.swing.JPopupMenu.Separator jSeparator1;
+    private javax.swing.JPopupMenu.Separator jSeparator2;
+    private javax.swing.JPopupMenu.Separator jSeparator3;
+    private javax.swing.JPopupMenu.Separator jSeparator4;
+    private javax.swing.JPopupMenu.Separator jSeparator5;
+    private javax.swing.JMenuBar mnbDesktop;
+    private javax.swing.JMenuItem mniArchivedPatientsViewRequest;
+    private javax.swing.JMenuItem mniExitViewRequest;
+    private javax.swing.JMenuItem mniMedicalConditionViewRequest;
+    private javax.swing.JMenuItem mniPMSVersion;
+    private javax.swing.JMenuItem mniPatientAppointmentDataViewRequest;
+    private javax.swing.JMenuItem mniPatientNotificationViewRequest;
+    private javax.swing.JMenuItem mniPatientViewRequest;
+    private javax.swing.JMenuItem mniPrintBlankMedicalHistoryRequest;
+    private javax.swing.JMenuItem mniScheduleViewRequest;
+    private javax.swing.JMenuItem mniToDoViewRequest;
+    private javax.swing.JMenuItem mniTreatmentsViewRequest;
+    private javax.swing.JMenu mnuCascadeViews;
+    private javax.swing.JMenu mnuSelectView;
+    private javax.swing.JMenu mnuSettings;
+    private javax.swing.JMenu mnuUtilities;
     // End of variables declaration//GEN-END:variables
 */
 
@@ -83,6 +178,8 @@ import com.github.lgooddatepicker.components.DatePickerSettings;
 import com.github.lgooddatepicker.optionalusertools.DateChangeListener;
 import com.github.lgooddatepicker.zinternaltools.DateChangeEvent;
 import java.awt.Desktop;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDate;
@@ -175,32 +272,33 @@ public class DesktopView extends javax.swing.JFrame
         private final String IMPORT_DATA_REQUEST_TITLE = "Import data from CSV files to PMS database";  
         private final String IMPORT_TEMPLATED_DATA_REQUEST_TITLE = "Import templated data from SystemDefintion.xml";  
         private final String DELETE_DATA_FROM_PMS_DATABASE_REQUEST_TITLE = "Delete all data from PMS database";
-        
-    private JMenu mnuSelectView = null; 
-        private JMenuItem mniAppointmentListViewRequest = null;
+    
+    //private JMenu mnuCascadeViews = null;
+    //private JMenu mnuSelectView = null; 
+        //private JMenuItem mniAppointmentListViewRequest = null;
         //private JMenuItem mniAppointmentDiaryViewRequest = null;
-        private JMenuItem mniPatientViewRequest = null;
-        private JMenu mnuUtilities = null;
-            private JMenuItem mniArchivedPatientsViewRequest = null;
-            private JMenuItem mniPatientAppointmentDataViewRequest = null;
-            private JMenuItem mniPatientNotificationViewRequest = null;
-            private JMenuItem mniToDoViewRequest = null;
-        private JMenuItem mniTreatmentViewRequest = null;
-        private JMenuItem mniExitViewRequest = null;
+        //private JMenuItem mniPatientViewRequest = null;
+        //private JMenu mnuUtilities = null;
+            //private JMenuItem mniArchivedPatientsViewRequest = null;
+            //private JMenuItem mniPatientAppointmentDataViewRequest = null;
+            //private JMenuItem mniPatientNotificationViewRequest = null;
+            //private JMenuItem mniToDoViewRequest = null;
+        //private JMenuItem mniTreatmentViewRequest = null;
+        //private JMenuItem mniExitViewRequest = null;
         
-    private JMenu mnuSettings = null; 
+    //private JMenu mnuSettings = null; 
         private JMenuItem mniAddNewUserRequest = null;
         private JMenuItem mniChangeUserPasswordRequest = null;
-        private JMenuItem mniPrintBlankMedicalHistoryRequest = null;
-        private JMenuItem mniMedicalConditionViewRequest = null;
-        private JMenuItem mniTreatmentsViewRequest = null;
+        //private JMenuItem mniPrintBlankMedicalHistoryRequest = null;
+        //private JMenuItem mniMedicalConditionViewRequest = null;
+        //private JMenuItem mniTreatmentsViewRequest = null;
         private JMenuItem mniColorPickerOptionsViewRequest = null;
-        private JMenuItem mniPMSVersion = null;
-        private JMenuItem mniCascadeViewsRequest = null;
+        //private JMenuItem mniPMSVersion = null;
+        //private JMenuItem mniCascadeViewsRequest = null;
         
-    private JMenu mnuPrintedForms = null; 
+    //private JMenu mnuPrintedForms = null; 
         
-        private JMenuItem mniPrintScheduleViewRequest = null;    
+        //private JMenuItem mniPrintScheduleViewRequest = null;    
         
     private JMenu mnuMigrationManagement = null; 
         private JMenu mnuPMSDatabaseProfile = null; 
@@ -245,94 +343,50 @@ public class DesktopView extends javax.swing.JFrame
     private void setIsPMSStoreDefined(Boolean value){
         isPMSStoreDefined = value;
     }
- 
-    /*
-    private void makePrintedFormsMenu(){
-        mnuPrintedForms = new JMenu(PRINTED_FORMS_MENU_TITLE);
-        mniPrintBlankMedicalHistoryRequest = new JMenuItem(PRINT_BLANK_MEDICAL_HISTORY_REQUEST_TITLE);
-        mniPrintScheduleViewRequest = new JMenuItem(PRINT_SCHEDULE_REQUEST_TITLE);
-        mnuPrintedForms.add(mniPrintBlankMedicalHistoryRequest);
-        mnuPrintedForms.add(mniPrintScheduleViewRequest);
-        mniPrintBlankMedicalHistoryRequest.setActionCommand(Action.REQUEST_PRINT_NEW_PATIENT_DETAILS_VIEW.toString());
-        mniPrintScheduleViewRequest.setActionCommand(Action.REQUEST_PRINT_SCHEDULE.toString());
-        mniPrintBlankMedicalHistoryRequest.addActionListener(this);
-        mniPrintScheduleViewRequest.addActionListener(this);
-    }*/
     
-    private void makeSettingsMenu(){
-        mnuSettings = new JMenu(SETTINGS_MENU_TITLE);
-        mniAddNewUserRequest = new JMenuItem(ADD_NEW_USER_TITLE);
-        mniChangeUserPasswordRequest = new JMenuItem(CHANGE_USER_PASSWORD_TITLE);
-        mniPrintBlankMedicalHistoryRequest = new JMenuItem(PRINT_BLANK_MEDICAL_HISTORY_REQUEST_TITLE);
-        mniMedicalConditionViewRequest = new JMenuItem(MEDICAL_CONDITION_REQUEST_TITLE);
-        mniTreatmentsViewRequest = new JMenuItem(TREATMENTS_REQUEST_TITLE);
-        mniColorPickerOptionsViewRequest = new JMenuItem(COLOUR_PICKER_OPTIONS_TITLE);
-        mniPMSVersion = new JMenuItem(JarFileFinder.getName());
-        //mniPMSVersion = new JMenuItem(JarFileFinder.getPath());
-        mniCascadeViewsRequest = new JMenuItem(CASCADE_VIEWS_REQUEST_TITLE);
-        mnuSettings.add(mniPrintBlankMedicalHistoryRequest);
-        mnuSettings.add(new JSeparator());
-        mnuSettings.add(mniMedicalConditionViewRequest);
-        mnuSettings.add(mniTreatmentsViewRequest);
-        mnuSettings.add(new JSeparator());
-        mnuSettings.add(mniAddNewUserRequest);
-        mnuSettings.add(mniChangeUserPasswordRequest);
-        mnuSettings.add(new JSeparator());
-        mnuSettings.add(mniColorPickerOptionsViewRequest);
-        mnuSettings.add(mniCascadeViewsRequest);
-        mnuSettings.add(new JSeparator());
-        mnuSettings.add(mniPMSVersion);
+    private void addActionListenersToMenus(){
+        /**
+         * defines separator for the top delimiter of the dynamic display of views on the desktop
+         */
+        setTopDynamicFrameListDelimiter(mnuSelectView.getItemCount()-2);
+        //mniPMSVersion = new JMenuItem(JarFileFinder.getName());
+        mniPMSVersion.setText(JarFileFinder.getName());
+        
+        //View menu
+        mniPatientViewRequest.setActionCommand(Action.REQUEST_PATIENT_VIEW.toString());
+        mniScheduleViewRequest.setActionCommand(Action.REQUEST_APPOINTMENT_LIST_VIEW.toString());
+        mniPatientViewRequest.addActionListener(this);
+        mniScheduleViewRequest.addActionListener(this);
+        mniExitViewRequest.setActionCommand(Action.REQUEST_CLOSE_VIEW.toString());
+        mniExitViewRequest.addActionListener(this);
+        
+        //View Utilities menu
+        mniArchivedPatientsViewRequest.setActionCommand(Action.REQUEST_ARCHIVED_PATIENTS_VIEW.toString());
+        mniPatientAppointmentDataViewRequest.setActionCommand(Action.REQUEST_PATIENT_APPOINTMENT_DATA_VIEW.toString());
+        mniPatientNotificationViewRequest.setActionCommand(Action.REQUEST_NOTIFICATION_VIEW.toString());
+        mniToDoViewRequest.setActionCommand(Action.REQUEST_TO_DO_VIEW.toString());
+        mniArchivedPatientsViewRequest.addActionListener(this);
+        mniPatientNotificationViewRequest.addActionListener(this);
+        mniPatientAppointmentDataViewRequest.addActionListener(this);
+        mniToDoViewRequest.addActionListener(this);
+
+        //Settings menu
         mniPrintBlankMedicalHistoryRequest.setActionCommand(Action.REQUEST_PRINT_NEW_PATIENT_DETAILS_VIEW.toString());
         mniMedicalConditionViewRequest.setActionCommand(Action.REQUEST_MEDICAL_CONDITION_VIEW.toString());
         mniTreatmentsViewRequest.setActionCommand(Action.REQUEST_TREATMENT_VIEW.toString());
-        mniCascadeViewsRequest.setActionCommand(Action.REQUEST_CASCADE_VIEWS.toString());
-        mniAddNewUserRequest.setActionCommand(Action.REQUEST_ADD_NEW_USER.toString());
-        mniChangeUserPasswordRequest.setActionCommand(Action.REQUEST_CHANGE_USER_PASSWORD.toString());
-        mniAddNewUserRequest.addActionListener(this);
-        mniChangeUserPasswordRequest.addActionListener(this);
         mniPrintBlankMedicalHistoryRequest.addActionListener(this);
         mniMedicalConditionViewRequest.addActionListener(this);
         mniTreatmentsViewRequest.addActionListener(this);
-        mniCascadeViewsRequest.addActionListener(this);
-    }
-    
-    private void makeSelectViewMenu(){
-        mnuSelectView = new JMenu(SELECT_VIEW_MENU_TITLE);
-        setActiveMenu(mnuSelectView);
-        mniAppointmentListViewRequest = new JMenuItem(APPOINTMENT_LIST_VIEW_REQUEST_TITLE);
-        //mniAppointmentDiaryViewRequest = new JMenuItem(APPOINTMENT_DIARY_VIEW_REQUEST_TITLE);
-        mniPatientAppointmentDataViewRequest = new JMenuItem(PATIENT_APPOINTMENT_DATA_VIEW_REQUEST_TITLE);
-        mniArchivedPatientsViewRequest = new JMenuItem(ARCHIVED_PATIENTS_VIEW_REQUEST_TITLE);
-        mniPatientViewRequest = new JMenuItem(PATIENT_VIEW_REQUEST_TITLE);
-        mniPatientNotificationViewRequest = new JMenuItem(PATIENT_NOTIFICATION_VIEW_REQUEST_TITLE);
-        mniToDoViewRequest = new JMenuItem(TO_DO_VIEW_REQUEST_TITLE);
-        mniExitViewRequest = new JMenuItem(EXIT_VIEW_REQUEST_TITLE);
-        mnuSelectView.add(mniPatientViewRequest);
-        mnuSelectView.add(new JSeparator());
-        mnuSelectView.add(mniAppointmentListViewRequest);
-        //mnuSelectView.add(mniAppointmentDiaryViewRequest);
-        mnuSelectView.add(new JSeparator());
-        mnuUtilities = new JMenu(UTILITIES_MENU_TITLE);
-        mnuSelectView.add(mnuUtilities);
-        makeUtilitiesPopupMenu();
-        //mnuSelectView.add(mniPatientNotificationViewRequest);
-        //mnuSelectView.add(mniToDoViewRequest);
-        mnuSelectView.add(new JSeparator());
-        setTopDynamicFrameListDelimiter(mnuSelectView.getItemCount()-1);
-        mnuSelectView.add(mniExitViewRequest);
         
-        mniAppointmentListViewRequest.setActionCommand(Action.REQUEST_APPOINTMENT_LIST_VIEW.toString());
-        //mniAppointmentDiaryViewRequest.setActionCommand(Action.REQUEST_APPOINTMENT_DIARY_VIEW.toString());
-        mniPatientViewRequest.setActionCommand(Action.REQUEST_PATIENT_VIEW.toString());
-        //mniPatientNotificationViewRequest.setActionCommand(Action.REQUEST_NOTIFICATION_VIEW.toString());
-        //mniToDoViewRequest.setActionCommand(Action.REQUEST_TO_DO_VIEW.toString());
-        mniExitViewRequest.setActionCommand(Action.REQUEST_CLOSE_VIEW.toString());
-        mniAppointmentListViewRequest.addActionListener(this);
-        //mniAppointmentDiaryViewRequest.addActionListener(this);
-        mniPatientViewRequest.addActionListener(this);
-        //mniPatientNotificationViewRequest.addActionListener(this);
-        //mniToDoViewRequest.addActionListener(this);
-        mniExitViewRequest.addActionListener(this);
+        mnuCascadeViews.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                // Perform the desired action
+                cascadeInternalFrames();
+            }
+        });
+
+        setActiveMenu(mnuSelectView);//legacy feature to distinguish normal app behaviour from data migration
     }
     
     private void makeMigrationManagementMenu(){
@@ -368,22 +422,7 @@ public class DesktopView extends javax.swing.JFrame
                 (ActionEvent e) -> mniExitRequestViewActionPerformed());
         
     }
-    
-    private void makeUtilitiesPopupMenu(){
-        mnuUtilities.add(mniArchivedPatientsViewRequest);
-        mnuUtilities.add(mniPatientAppointmentDataViewRequest);
-        mnuUtilities.add(mniPatientNotificationViewRequest);
-        mnuUtilities.add(mniToDoViewRequest);
-        mniArchivedPatientsViewRequest.setActionCommand(Action.REQUEST_ARCHIVED_PATIENTS_VIEW.toString());
-        mniPatientAppointmentDataViewRequest.setActionCommand(Action.REQUEST_PATIENT_APPOINTMENT_DATA_VIEW.toString());
-        mniPatientNotificationViewRequest.setActionCommand(Action.REQUEST_NOTIFICATION_VIEW.toString());
-        mniToDoViewRequest.setActionCommand(Action.REQUEST_TO_DO_VIEW.toString());
-        mniArchivedPatientsViewRequest.addActionListener(this);
-        mniPatientNotificationViewRequest.addActionListener(this);
-        mniToDoViewRequest.addActionListener(this);
-        mniPatientAppointmentDataViewRequest.addActionListener(this);
-    }
-    
+
     private void makeCSVSourceFilesPopupMenu(){
         this.mniAppointmentCSVSelectionRequest = new JMenuItem(APPOINTMENT_CSV_SELECTION_REQUEST_TITLE);
         this.mniPatientCSVSelectionRequest = new JMenuItem(PATIENT_CSV_SELECTION_REQUEST_TITLE);
@@ -471,37 +510,16 @@ public class DesktopView extends javax.swing.JFrame
          * initialise frame closure actions
          */
         initFrameClosure();
-        if (isDataMigrationEnabled!=null){
-            if (isDataMigrationEnabled){
-                makeMigrationManagementMenu();
-                mnbDesktop.add(mnuMigrationManagement); 
-
-            }
-            else{
-                makeSelectViewMenu();
-                makeSettingsMenu();
-                //makePrintedFormsMenu();
-                mnbDesktop.add(mnuSelectView);
-                mnbDesktop.add(mnuSettings);
-                //mnbDesktop.add(mnuPrintedForms);
-            }
-        }
-        else{
-            makeSelectViewMenu();
-            makeSettingsMenu();
-            mnbDesktop.add(mnuSelectView); 
-            mnbDesktop.add(mnuSettings);
-            //mnbDesktop.add(mnuPrintedForms);
-        }
+        
+        addActionListenersToMenus();
+        
         setSize(1800,950);
         Dimension test1 = getPreferredSize();
         setVisible(true);
         
         //prepare for DESKTOP_VIEW
-        
         desktop = new javax.swing.JDesktopPane();
         desktop.setSize(this.getWidth(), this.getHeight()-30);
-        //System.out.println("desktopView = " + this.getWidth());
         desktopScrollPane = new DesktopViewScrollPane(desktop, this);
         desktop.setBackground(Color.BLACK);
 
@@ -731,6 +749,8 @@ public class DesktopView extends javax.swing.JFrame
     
     public void initialiseView(){
         
+        addActionListenersToMenus();
+        
         //this.setComponentPopupMenu(this.makePopupMenu());
         doActionEventRequest(ViewController.DesktopViewControllerActionEvent.GET_APPOINTMENT_CSV_PATH_REQUEST);
         doActionEventRequest(ViewController.DesktopViewControllerActionEvent.GET_PATIENT_CSV_PATH_REQUEST);
@@ -899,14 +919,75 @@ public class DesktopView extends javax.swing.JFrame
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">                          
     private void initComponents() {
-
-        jMenuItem1 = new javax.swing.JMenuItem();
         mnbDesktop = new javax.swing.JMenuBar();
+        mnuSelectView = new javax.swing.JMenu();
+        mniPatientViewRequest = new javax.swing.JMenuItem();
+        mniScheduleViewRequest = new javax.swing.JMenuItem();
+        //jSeparator1 = new javax.swing.JPopupMenu.Separator();
+        mnuUtilities = new javax.swing.JMenu();
+        mniArchivedPatientsViewRequest = new javax.swing.JMenuItem();
+        mniPatientAppointmentDataViewRequest = new javax.swing.JMenuItem();
+        mniPatientNotificationViewRequest = new javax.swing.JMenuItem();
+        mniToDoViewRequest = new javax.swing.JMenuItem();
+        jSeparator2 = new javax.swing.JPopupMenu.Separator();
+        mniExitViewRequest = new javax.swing.JMenuItem();
+        mnuSettings = new javax.swing.JMenu();
+        mniPrintBlankMedicalHistoryRequest = new javax.swing.JMenuItem();
+        jSeparator3 = new javax.swing.JPopupMenu.Separator();
+        mniMedicalConditionViewRequest = new javax.swing.JMenuItem();
+        mniTreatmentsViewRequest = new javax.swing.JMenuItem();
+        jSeparator4 = new javax.swing.JPopupMenu.Separator();
+        mniPMSVersion = new javax.swing.JMenuItem();
+        mnuCascadeViews = new javax.swing.JMenu();
+        jSeparator5 = new javax.swing.JPopupMenu.Separator();
 
-        jMenuItem1.setText("jMenuItem1");
+        mnuSelectView.setText("View");
+        mniPatientViewRequest.setText("Patients");
+        mnuSelectView.add(mniPatientViewRequest);
+        //mnuSelectView.add(jSeparator1);
+        mniScheduleViewRequest.setText("Appointments");
+        mnuSelectView.add(mniScheduleViewRequest);
+        mnuSelectView.add(jSeparator2);
+        mnuUtilities.setText("Utilities");
+        mniArchivedPatientsViewRequest.setText("Archived patients");
+        mnuUtilities.add(mniArchivedPatientsViewRequest);
+        mniPatientAppointmentDataViewRequest.setText("Last appointment date for each patient");
+        mnuUtilities.add(mniPatientAppointmentDataViewRequest);
+        mniPatientNotificationViewRequest.setText("Outstanding patient notifications");
+        mnuUtilities.add(mniPatientNotificationViewRequest);
+        mniToDoViewRequest.setText("'To do' list");
+        mnuUtilities.add(mniToDoViewRequest);
+        mnuSelectView.add(mnuUtilities);
+        mnuSelectView.add(jSeparator5);
+        mniExitViewRequest.setText("Exit the Clinic practice management system");
+        mnuSelectView.add(mniExitViewRequest);
+
+        mnbDesktop.add(mnuSelectView);
+
+        mnuSettings.setText("Settings");
+
+        mniPrintBlankMedicalHistoryRequest.setText("Print off medical history questionnaire for new patient");
+        mnuSettings.add(mniPrintBlankMedicalHistoryRequest);
+        mnuSettings.add(jSeparator3);
+
+        mniMedicalConditionViewRequest.setText("Medical history items editor");
+        mnuSettings.add(mniMedicalConditionViewRequest);
+
+        mniTreatmentsViewRequest.setText("Treatment items editor");
+        mnuSettings.add(mniTreatmentsViewRequest);
+        mnuSettings.add(jSeparator4);
+        mnuSettings.add(mniPMSVersion);
+
+        mnbDesktop.add(mnuSettings);
+
+        mnuCascadeViews.setText("Cascade views");
+        mnbDesktop.add(mnuCascadeViews);
+        
+
+        setJMenuBar(mnbDesktop);
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setJMenuBar(mnbDesktop);
+        //setJMenuBar(mnbDesktop);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -924,7 +1005,7 @@ public class DesktopView extends javax.swing.JFrame
 
     // Variables declaration - do not modify                     
     private javax.swing.JMenuItem jMenuItem1;
-    private javax.swing.JMenuBar mnbDesktop;
+    //private javax.swing.JMenuBar mnbDesktop;
     // End of variables declaration   
     
    private void doAppointmentDiaryViewRequest(){
@@ -1459,4 +1540,28 @@ public class DesktopView extends javax.swing.JFrame
             e.printStackTrace();
         }
     }
+    
+    // Variables declaration - do not modify                     
+        private javax.swing.JMenuItem mniScheduleViewRequest;
+        private javax.swing.JPopupMenu.Separator jSeparator1;
+        private javax.swing.JPopupMenu.Separator jSeparator2;
+        private javax.swing.JPopupMenu.Separator jSeparator3;
+        private javax.swing.JPopupMenu.Separator jSeparator4;
+        private javax.swing.JPopupMenu.Separator jSeparator5;
+        private javax.swing.JMenuBar mnbDesktop;
+        private javax.swing.JMenuItem mniArchivedPatientsViewRequest;
+        private javax.swing.JMenuItem mniExitViewRequest;
+        private javax.swing.JMenuItem mniMedicalConditionViewRequest;
+        private javax.swing.JMenuItem mniPMSVersion;
+        private javax.swing.JMenuItem mniPatientAppointmentDataViewRequest;
+        private javax.swing.JMenuItem mniPatientNotificationViewRequest;
+        private javax.swing.JMenuItem mniPatientViewRequest;
+        private javax.swing.JMenuItem mniPrintBlankMedicalHistoryRequest;
+        private javax.swing.JMenuItem mniToDoViewRequest;
+        private javax.swing.JMenuItem mniTreatmentsViewRequest;
+        private javax.swing.JMenu mnuCascadeViews;
+        private javax.swing.JMenu mnuSelectView;
+        private javax.swing.JMenu mnuSettings;
+        private javax.swing.JMenu mnuUtilities;
+        // End of variables declaration
 }

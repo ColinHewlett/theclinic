@@ -272,8 +272,9 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         VIEW_CLOSE_NOTIFICATION
     }
     
-    public static enum ArchivedPatientsDataViewControllerPropertyChangeEvent{
-        ARCHIVED_PATIENT_RECEIVED
+    public static enum ArchivedPatientsViewControllerPropertyChangeEvent{
+        ARCHIVED_PATIENT_RECEIVED,
+        ARCHIVED_PATIENTS_VIEW_CONTROLLER_CHANGE_NOTIFICATION
     }
   
     public static enum ClinicalNoteViewControllerActionEvent{
@@ -366,8 +367,10 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         CASCADE_DESKTOP_VIEWS,
         APPOINTEE_CONTACT_DETAILS_FOR_SCHEDULE_VIEW_CONTROLLER_REQUEST,
         APPOINTEE_CONTACT_DETAILS_FOR_SCHEDULE_VIEW_CONTROLLER_CHANGE_NOTIFICATION,
+        ARCHIVED_PATIENTS_VIEW_CONTROLLER_CHANGE_NOTIFICATION,
         MEDICAL_CONDITION_VIEW_CONTROLLER_CHANGE_NOTIFICATION,
         SCHEDULE_VIEW_CONTROLLER_CHANGE_NOTIFICATION,
+        PATIENT_APPOINTMENT_DATA_VIEW_CONTROLLER_CHANGE_NOTIFICATION,
         PATIENT_VIEW_CONTROLLER_CHANGE_NOTIFICATION,
         TREATMENT_VIEW_CONTROLLER_CHANGE_NOTIFICATION,
         PATIENT_MEDICAL_HISTORY_VIEW_CONTROLLER_CHANGE_NOTIFICATION,
@@ -502,6 +505,7 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
     }
     
     public static enum PatientAppointmentDataViewControllerPropertyChangeEvent{
+        PATIENT_APPOINTMENT_DATA_VIEW_CONTROLLER_CHANGE_NOTIFICATION,
         PATIENT_APPOINTMENT_DATA_RECEIVED,
         ARCHIVED_PATIENT_RECEIVED
     }
@@ -750,13 +754,15 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         UPDATE,
         Update,
         EMERGENCY,
+        PATIENT_ARCHIVE,
+        PATIENT_RESTORE,
         SCHEDULE_REFERENCED_FROM_PATIENT_VIEW,
         SCHEDULE_REFERENCED_DESKTOP_VIEW,
         SLOT_SELECTED,
         SLOT_UNSELECTED,
-        WITH_CONTACT_DETAILS,
         SORTED_BY_PATIENT,
         SORTED_BY_APPOINTMENT,
+        WITH_CONTACT_DETAILS,
         NO_ACTION
     } 
     
