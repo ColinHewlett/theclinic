@@ -1,12 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
-<Form version="1.9" maxVersion="1.9" type="org.netbeans.modules.form.forminfo.JFrameFormInfo">
+<Form version="1.3" maxVersion="1.9" type="org.netbeans.modules.form.forminfo.JFrameFormInfo">
   <NonVisualComponents>
-    <Component class="javax.swing.JMenuItem" name="jMenuItem1">
-      <Properties>
-        <Property name="text" type="java.lang.String" value="jMenuItem1"/>
-      </Properties>
-    </Component>
     <Menu class="javax.swing.JMenuBar" name="mnbDesktop">
       <SubComponents>
         <Menu class="javax.swing.JMenu" name="mnuSelectView">
@@ -16,17 +11,15 @@
           <SubComponents>
             <MenuItem class="javax.swing.JMenuItem" name="mniPatientViewRequest">
               <Properties>
-                <Property name="text" type="java.lang.String" value="Patients"/>
+                <Property name="text" type="java.lang.String" value="Patient"/>
               </Properties>
-            </MenuItem>
-            <MenuItem class="javax.swing.JPopupMenu$Separator" name="jSeparator1">
             </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="mniScheduleViewRequest">
               <Properties>
                 <Property name="text" type="java.lang.String" value="Appointments"/>
               </Properties>
             </MenuItem>
-            <MenuItem class="javax.swing.JPopupMenu$Separator" name="jSeparator2">
+            <MenuItem class="javax.swing.JPopupMenu$Separator" name="jSeparator1">
             </MenuItem>
             <Menu class="javax.swing.JMenu" name="mnuUtilities">
               <Properties>
@@ -55,7 +48,7 @@
                 </MenuItem>
               </SubComponents>
             </Menu>
-            <MenuItem class="javax.swing.JPopupMenu$Separator" name="jSeparator5">
+            <MenuItem class="javax.swing.JPopupMenu$Separator" name="jSeparator2">
             </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="mniExitViewRequest">
               <Properties>
@@ -89,6 +82,9 @@
             <MenuItem class="javax.swing.JPopupMenu$Separator" name="jSeparator4">
             </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="mniPMSVersion">
+              <Events>
+                <EventHandler event="focusLost" listener="java.awt.event.FocusListener" parameters="java.awt.event.FocusEvent" handler="mniPMSVersionFocusLost"/>
+              </Events>
             </MenuItem>
           </SubComponents>
         </Menu>
@@ -100,9 +96,6 @@
       </SubComponents>
     </Menu>
   </NonVisualComponents>
-  <Properties>
-    <Property name="defaultCloseOperation" type="int" value="3"/>
-  </Properties>
   <SyntheticProperties>
     <SyntheticProperty name="menuBar" type="java.lang.String" value="mnbDesktop"/>
     <SyntheticProperty name="formSizePolicy" type="int" value="1"/>
@@ -123,12 +116,12 @@
   <Layout>
     <DimensionLayout dim="0">
       <Group type="103" groupAlignment="0" attributes="0">
-          <EmptySpace min="0" pref="562" max="32767" attributes="0"/>
+          <EmptySpace min="0" pref="394" max="32767" attributes="0"/>
       </Group>
     </DimensionLayout>
     <DimensionLayout dim="1">
       <Group type="103" groupAlignment="0" attributes="0">
-          <EmptySpace min="0" pref="356" max="32767" attributes="0"/>
+          <EmptySpace min="0" pref="251" max="32767" attributes="0"/>
       </Group>
     </DimensionLayout>
   </Layout>

@@ -2199,13 +2199,18 @@ public class Repository implements IStoreActions {
     }
     
     private PatientAppointmentData get(PatientAppointmentData pad, ResultSet rs) throws StoreException{
+        int test = 0;
         PatientAppointmentData result = null;
         ArrayList<PatientAppointmentData> collection = new ArrayList<>();
         try{
             if (!rs.wasNull()){
                 while (rs.next()){
                     Integer patientKey = rs.getInt("patientKey");
+                    if (patientKey.equals(17443)){
+                        test++;
+                    }
                     String patient_forenames = rs.getString("patient_forenames");
+                   
                     String patient_surname = rs.getString("patient_surname");
                     String patient_title = rs.getString("patient_title");
                     String patient_phone1 = rs.getString("patient_phone1");
@@ -2228,8 +2233,8 @@ public class Repository implements IStoreActions {
                     patient.setEmail(patient_email);
                     patient.getRecall().setDentalDate(recall_date);
                     patient.getRecall().setDentalFrequency(recall_frequency);
-                    patient.getRecall().setDentalDate(recall_date_GBT);
-                    patient.getRecall().setDentalFrequency(recall_frequency_GBT);
+                    patient.getRecall().setGBTDate(recall_date_GBT);
+                    patient.getRecall().setGBTFrequency(recall_frequency_GBT);
                     Appointment appointment = new Appointment(appointmentKey);
                     appointment.setStart(last_appointment_date);
                     appointment.setNotes(treatment);
@@ -4722,79 +4727,6 @@ public class Repository implements IStoreActions {
         Entity result = new Entity();
         String sql;
         switch (q){
-            /*case COUNT_PATIENT_APPOINTMENT_DATA:
-                sql = "SELECT COUNT(*) as row_count FROM PatientAppointmentData ;";
-                result.setValue(doCount(sql,entity).getValue());
-                sql = "SELECT COUNT(*) as row_count "
-                        + "FROM PatientAppointmentData  "
-                        + "WHERE isArchived = true ;";
-                result.setValue(new Point(result.getValue().x,doCount(sql,entity).getValue().x));
-                break;
-            case CREATE_PATIENT_APPOINTMENT_DATA_TABLE:
-                sql = "CREATE TABLE PatientAppointmentData  ("
-                        + "patientKey Long,"
-                        + "patient_forenames CHAR(50), "
-                        + "patient_surname CHAR(50), "
-                        + "patient_title CHAR(15), "
-                        + "patient_phone1 CHAR(25), "
-                        + "patient_phone2 CHAR(25), "
-                        + "patient_email CHAR(25), "
-                        + "recall_date DateTime, "
-                        + "recall_frequency BYTE, "
-                        + "recall_date_GBT DateTime, "
-                        + "recall_frequency_GBT BYTE; "
-                        + "appointmentKey Long, "
-                        + "last_appointment_date DateTime, "
-                        + "treatment;";
-                doCreateTable(sql);
-                break;*/
-            /*case DELETE_ALL_PATIENT_APPOINTMENT_DATA :
-                sql = "DELETE FROM PatientAppointmentData ;";
-                doDelete(sql);
-                break;*/
-            /*case INSERT_PATIENT_APPOINTMENT_DATA :
-                sql
-                    = "INSERT INTO PatientAppointmentData  "
-                    + "(patientKey, "
-                        + "patient_forenames, "
-                        + "patient_surname, "
-                        + "patient_title, "
-                        + "patient_phone1, "
-                        + "patient_phone2, "
-                        + "patient_email, "
-                        + "recall_date, "
-                        + "recall_frequency, "
-                        + "recall_date_GBT, "
-                        + "recall_frequency_GBT, "
-                        + "appointmentKey, "
-                        + "last_appointment_date, "
-                        + "treatment) "
-                    + "Select p.pid, "
-                        + "p.forenames, "
-                        + "p.surname, "
-                        + "p.title, "
-                        + "p.phone1, "
-                        + "p.phone2, "
-                        + "p.email, "
-                        + "p.recallDate, "
-                        + "p.recallFrequency, "
-                        + "p.recallDateGBT, "
-                        + "p.recallFrequencyGBT, "
-                        + "a.pid, "
-                        + "a.start, "
-                        + "a.notes "
-                        + "FROM Patient p, Appointment a "
-                        + "WHERE p.pid = a.patientKey "
-                        + "AND p.pid > 1 "
-                        + "AND p.pid <> 13814 "
-                        + "AND p.isArchived = false "
-                        + "AND DatePart(\"yyyy\",a.start) BETWEEN ? AND ? "
-                        + "AND a.start = "
-                        + "(Select MAX(a2.start) "
-                        + " FROM Appointment a2 "
-                        + " WHERE a.patientKey = a2.patientKey);";
-                doInsertPatientAppointmentData (sql, entity);
-                break;*/
             case READ_PATIENT_APPOINTMENT_DATA_BY_PATIENT:
                 sql = "Select "
                         + "p.pid as patientKey, "

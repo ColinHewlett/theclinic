@@ -11,7 +11,7 @@ import model.non_entity.SystemDefinition;
 import model.non_entity.Slot;
 import model.non_entity.SystemDefinition.ScheduleSlotType;
 import view.view_support_classes.renderers.AppointmentsTableDurationRenderer;
-import view.view_support_classes.renderers.AppointmentsListTableLocalDateTimeRenderer;
+import view.view_support_classes.renderers.TableLocalTime24HourFormatCentredRenderer;
 import view.view_support_classes.renderers.ScheduleDiaryTablePatientRenderer;
 import view.view_support_classes.renderers.ScheduleListTablePatientRenderer;
 import view.view_support_classes.renderers.ScheduleDiaryTableLocalDateTimeRenderer;
@@ -1093,35 +1093,6 @@ public class ScheduleListView extends BookingView
                         break;
                 }
                 break;
-            /*
-            case SURGERY_DAYS_ASSIGNMENT_RECEIVED:
-                updateDatePickerSettings();
-                break;
-            case NON_SURGERY_DAY_EDIT_RECEIVED:
-                temporarilySuspendDatePickerDateVetoPolicy(getMyController().getDescriptor().getViewDescription().getScheduleDay());
-                break;*/
-            /*
-            case NO_APPOINTMENT_SLOTS_FROM_DAY_RECEIVED://instruction to clear list
-                titledBorder.setTitle("Available appointment slots");
-                populateEmptySlotAvailabilityTable(new ArrayList<>());
-                break;
-            case APPOINTMENT_SLOTS_FROM_DAY_RECEIVED:
-                tableTitleDuration = new AppointmentsTableDurationRenderer().renderDuration(
-                        getMyController().getDescriptor().getControllerDescription().
-                                getEmptySlotMinimumDuration());
-                tableTitleDay = getMyController().getDescriptor().getControllerDescription().
-                                getEmptySlotFromDay().format(DateTimeFormatter.ofPattern("dd/MM/yy"));
-                        //getAppointment().getStart().format(DateTimeFormatter.ofPattern("dd/MM/yy"));
-                titledBorder = (TitledBorder)this.pnlSlotAvailability.getBorder();
-                titledBorder.setTitle("Slot availability from " + tableTitleDay 
-                        + " for a duration of " + tableTitleDuration);
-                populateEmptySlotAvailabilityTable(
-                        getMyController().getDescriptor().getControllerDescription().getAppointmentSlots());
-                 // without the next lines the appointments table is unconscious of being selected?!)
-                getMyController().getDescriptor().getViewDescription().setScheduleDay(dayDatePicker.getDate());
-                //refreshAppointmentTableWithCurrentlySelectedDate();
-                break;
-            */
             case APPOINTMENT_SCHEDULE_ERROR_RECEIVED:
                 if (e.getSource() instanceof DesktopViewController){
                     String message = getMyController().getDescriptor().getControllerDescription().getError();
@@ -2428,7 +2399,7 @@ public class ScheduleListView extends BookingView
         setAppointmentTableListener();
         
         this.tblAppointments.setDefaultRenderer(Duration.class, new AppointmentsTableDurationRenderer());
-        this.tblAppointments.setDefaultRenderer(LocalDateTime.class, new AppointmentsListTableLocalDateTimeRenderer());
+        this.tblAppointments.setDefaultRenderer(LocalTime.class, new TableLocalTime24HourFormatCentredRenderer());
         this.tblAppointments.setDefaultRenderer(Patient.class, new ScheduleListTablePatientRenderer());
         JTableHeader tableHeader = this.tblAppointments.getTableHeader();
         tableHeader.setBackground(new Color(220,220,220));
@@ -2446,7 +2417,7 @@ public class ScheduleListView extends BookingView
         setAppointmentTableListener();
         
         this.tblAppointments.setDefaultRenderer(Duration.class, new AppointmentsTableDurationRenderer());
-        this.tblAppointments.setDefaultRenderer(LocalDateTime.class, new AppointmentsListTableLocalDateTimeRenderer());
+        this.tblAppointments.setDefaultRenderer(LocalDateTime.class, new TableLocalTime24HourFormatCentredRenderer());
         this.tblAppointments.setDefaultRenderer(Patient.class, new ScheduleListTablePatientRenderer());
         JTableHeader tableHeader = this.tblAppointments.getTableHeader();
         tableHeader.setBackground(new Color(220,220,220));
@@ -2510,7 +2481,7 @@ public class ScheduleListView extends BookingView
         }
        
         this.tblAppointments.setDefaultRenderer(Duration.class, new AppointmentsTableDurationRenderer());
-        this.tblAppointments.setDefaultRenderer(LocalDateTime.class, new AppointmentsListTableLocalDateTimeRenderer());
+        this.tblAppointments.setDefaultRenderer(LocalDateTime.class, new TableLocalTime24HourFormatCentredRenderer());
         this.tblAppointments.setDefaultRenderer(Patient.class, new ScheduleListTablePatientRenderer());
         //this.tblAppointments.setDefaultRenderer(Object.class, new ScheduleTableRenderer());
         //28/03/2024this.tblAppointments.setDefaultRenderer(PatientNote.class, new AppointmentsTablePatientNoteRenderer());

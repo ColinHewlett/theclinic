@@ -5,18 +5,18 @@
 package view.views.non_modal_views;
 
 import controller.ViewController;
+import model.entity.Patient;
 import model.entity.PatientAppointmentData;
-import model.non_entity.SystemDefinition;
 import model.non_entity.Captions;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyVetoException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import javax.swing.JInternalFrame;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.ListSelectionEvent;
@@ -30,6 +30,10 @@ import model.entity.Entity;
 import view.View;
 import view.view_support_classes.models.PatientAppointmentDataTableModel;
 import view.view_support_classes.renderers.AppointmentsTableLocalDateRenderer;
+import view.view_support_classes.renderers.TableLocalDateCentredRenderer;
+import view.view_support_classes.renderers.TableLocalDateTimeToLocalDateAndCentredRenderer;
+import view.view_support_classes.renderers.TableIntegerCenteredRenderer;
+import view.view_support_classes.renderers.TablePatientEmboldenedRenderer;
 
 /**
  *
@@ -175,6 +179,11 @@ public class PatientAppointmentDataView extends View
         // Set the preferred header height to fit two lines
         JTableHeader tableHeader = tblPatientAppointmentData.getTableHeader();
         tableHeader.setPreferredSize(new java.awt.Dimension(tableHeader.getPreferredSize().width, 40));
+        this.tblPatientAppointmentData.setDefaultRenderer(LocalDate.class, new TableLocalDateCentredRenderer());
+        this.tblPatientAppointmentData.setDefaultRenderer(LocalDateTime.class, new TableLocalDateTimeToLocalDateAndCentredRenderer());
+        this.tblPatientAppointmentData.setDefaultRenderer(Integer.class, new TableIntegerCenteredRenderer());
+        this.tblPatientAppointmentData.setDefaultRenderer(Patient.class, new TablePatientEmboldenedRenderer());
+        ViewController.setJTableColumnProperties(tblPatientAppointmentData, this.scrPatientAppointmentDataTable.getPreferredSize().width, 20,7,10,18,19,7,5,7,7);
         
         //javax.swing.SwingUtilities.invokeLater(() -> {
             PatientAppointmentData pad  = new PatientAppointmentData();        
@@ -240,7 +249,6 @@ public class PatientAppointmentDataView extends View
                 (PatientAppointmentDataTableModel)tblPatientAppointmentData.getModel();
         model.removeAllElements();
         model.setData(pad.get());
-        ViewController.setJTableColumnProperties(tblPatientAppointmentData, this.scrPatientAppointmentDataTable.getPreferredSize().width, 20,6,10,20,20,5,5,7,7);
     }
 
     private void initialiseViewState(PatientAppointmentData pad){

@@ -490,6 +490,46 @@ public class Patient extends Entity implements IEntityRepositoryActions {
     }
     //</editor-fold>
     
+    //<editor-fold defaultstate="collapsed" desc="Patient Recall inner class">
+    public class Recall {
+
+        private Integer hygieneFrequency = null;
+
+        private LocalDate dentalDate = null;
+        public LocalDate getDentalDate() {
+            return dentalDate;
+        }
+        public void setDentalDate(LocalDate dentalDate) {
+            this.dentalDate = dentalDate;
+        }
+        
+        private Integer dentalFrequency = null;
+        public Integer getDentalFrequency() {
+            return dentalFrequency;
+        }
+        public void setDentalFrequency(Integer dentalFrequency) {
+            this.dentalFrequency = dentalFrequency;
+        }
+
+        private LocalDate gbtDate = null;
+        public LocalDate getGBTDate() {
+            return gbtDate;
+        }
+        public void setGBTDate(LocalDate gbtDate) {
+            this.gbtDate = gbtDate;
+        }
+
+        private Integer gbtFrequency = null;
+        public Integer getGBTFrequency() {
+            return gbtFrequency;
+        }
+        public void setGBTFrequency(Integer gbtFrequency) {
+            this.gbtFrequency = gbtFrequency;
+        }
+    }
+    //</editor-fold>
+    
+    //<editor-fold defaultstate="collapsed" desc="MedicalHistory inner class">
     public class MedicalHistory{
         private ArrayList<PrimaryCondition> collection = null;
         private Doctor doctor;
@@ -565,46 +605,6 @@ public class Patient extends Entity implements IEntityRepositoryActions {
             
         }
     }
-
-    //<editor-fold defaultstate="collapsed" desc="Patient Recall inner class">
-    public class Recall {
-
-        private Integer hygieneFrequency = null;
-
-        private LocalDate dentalDate = null;
-        public LocalDate getDentalDate() {
-            return dentalDate;
-        }
-        public void setDentalDate(LocalDate dentalDate) {
-            this.dentalDate = dentalDate;
-        }
-        
-        private Integer dentalFrequency = null;
-        public Integer getDentalFrequency() {
-            return dentalFrequency;
-        }
-        public void setDentalFrequency(Integer dentalFrequency) {
-            this.dentalFrequency = dentalFrequency;
-        }
-
-        private LocalDate gbtDate = null;
-        public LocalDate getGBTDate() {
-            return gbtDate;
-        }
-        public void setGBTDate(LocalDate gbtDate) {
-            this.gbtDate = gbtDate;
-        }
-
-        private Integer gbtFrequency = null;
-        public Integer getGBTFrequency() {
-            return gbtFrequency;
-        }
-        public void setGBTFrequency(Integer gbtFrequency) {
-            this.gbtFrequency = gbtFrequency;
-        }
-    }
-    //</editor-fold>
-    
     
     //</editor-fold>
 

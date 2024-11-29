@@ -86,10 +86,10 @@ public class DesktopViewController extends ViewController{
              * -- object reference to view controller (this)
              * -- Boolean signifying whether view enables data migration functions
              */     
-            DesktopView desktopView = new DesktopView(this, isDataMigrationOptionEnabled, getDescriptor() );
+            DesktopView desktopView = new DesktopView(this );
             desktopView.setLocationRelativeTo(null);
             setDesktopView(desktopView);
-
+            desktopView.initialiseView();
 
             //view.setContentPane(view);
             pcSupport = new PropertyChangeSupport(this);
