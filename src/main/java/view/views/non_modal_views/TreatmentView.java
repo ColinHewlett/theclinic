@@ -22,7 +22,7 @@ import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import model.entity.Treatment;
 import view.View;
-import view.view_support_classes.models.TreatmentTableModel;
+import view.support_classes.models.TreatmentTableModel;
 
 /**
  *

@@ -7,7 +7,7 @@ package view.views.non_modal_views;
 import model.non_entity.SystemDefinition;
 import model.non_entity.Credential;
 import view.View;
-import view.views.dialogs.LoginDialog;
+import view.dialogs.LoginDialog;
 import controller.ViewController;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;

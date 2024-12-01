@@ -7,10 +7,10 @@ package view.views.non_modal_views;
 import model.non_entity.SystemDefinition;
 import model.non_entity.Captions;
 
-import view.view_support_classes.models.PatientAppointmentHistoryTableModel;
-import view.view_support_classes.renderers.PatientAppointmentHistoryTableInvoiceRenderer;
-import view.view_support_classes.renderers.AppointmentHistoryTableLocalDateTimeRenderer;
-import view.view_support_classes.renderers.AppointmentHistoryTableDurationRenderer;
+import view.support_classes.models.PatientAppointmentHistoryTableModel;
+import view.support_classes.renderers.PatientAppointmentHistoryTableInvoiceRenderer;
+import view.support_classes.renderers.AppointmentHistoryTableLocalDateTimeRenderer;
+import view.support_classes.renderers.AppointmentHistoryTableDurationRenderer;
 import controller.Descriptor;
 import controller.ViewController;
 import view.View;
@@ -60,7 +60,7 @@ import javax.swing.event.TableModelListener;
 import java.io.File;
 import java.io.IOException;
 
-import view.view_support_classes.renderers.ScheduleTableCellRenderer;
+import view.support_classes.renderers.ScheduleTableCellRenderer;
 /*28/03/2024import model.PatientNote;*/
 /*28/03/2024import view.views.view_support_classes.renderers.AppointmentsTablePatientNoteRenderer;*/
 /**
@@ -1674,7 +1674,7 @@ public class PatientView extends View
 
         pnlAppointmentHistory.setBorder(javax.swing.BorderFactory.createTitledBorder("Appointment history"));
 
-        tblAppointmentHistory.setModel(new view.view_support_classes.models.PatientAppointmentHistoryTableModel());
+        tblAppointmentHistory.setModel(new view.support_classes.models.PatientAppointmentHistoryTableModel());
         scrAppointmentHistory.setViewportView(tblAppointmentHistory);
         tblAppointmentHistory.addMouseListener(mouseListener);
         ViewController.setJTableColumnProperties(tblAppointmentHistory,

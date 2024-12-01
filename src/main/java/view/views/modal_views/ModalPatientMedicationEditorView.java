@@ -9,7 +9,7 @@ import model.entity.Medication;
 import model.entity.Entity;
 import model.*;
 import controller.ViewController;
-import view.view_support_classes.models.MedicationTableModel;
+import view.support_classes.models.MedicationTableModel;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.beans.PropertyVetoException;
@@ -28,7 +28,7 @@ import java.util.Iterator;
 import javax.swing.JTable;
 import view.View;
 import view.views.non_modal_views.DesktopView;
-import view.view_support_classes.models.MedicalHistoryTableModel;
+import view.support_classes.models.MedicalHistoryTableModel;
 
 /**
  *

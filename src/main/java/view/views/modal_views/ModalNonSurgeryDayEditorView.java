@@ -6,7 +6,7 @@
 package view.views.modal_views;
 
 import view.views.non_modal_views.DesktopView;
-import view.view_support_classes.AppointmentDateVetoPolicy;
+import view.support_classes.AppointmentDateVetoPolicy;
 import controller.Descriptor;
 import controller.ViewController;
 import view.View;

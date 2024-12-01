@@ -8,7 +8,7 @@ package controller;
 import model.entity.*;
 import model.non_entity.*;
 import model.non_entity.SystemDefinition.LoginViewMode;
-import view.views.dialogs.LoginDialog;
+import view.dialogs.LoginDialog;
 import java.awt.Point;
 import java.util.ArrayList;
 import java.time.Duration;

@@ -4,16 +4,16 @@
  */
 package view.views.non_modal_views;
 
-import view.view_support_classes.models.ScheduleDiaryTableModel;
-import view.view_support_classes.renderers.ScheduleDiaryTablePatientRenderer;
-import view.view_support_classes.renderers.ScheduleDiaryTableLocalDateTimeRenderer;
+import view.support_classes.models.ScheduleDiaryTableModel;
+import view.support_classes.renderers.ScheduleDiaryTablePatientRenderer;
+import view.support_classes.renderers.ScheduleDiaryTableLocalDateTimeRenderer;
 
 import model.non_entity.SystemDefinition;
 import model.non_entity.Slot;
 import model.non_entity.Captions;
 import model.non_entity.SystemDefinition.ScheduleSlotType;
-import view.view_support_classes.renderers.ScheduleDiaryTableStringRenderer;
-import view.views.dialogs.CustomComboBoxDialog;
+import view.support_classes.renderers.ScheduleDiaryTableStringRenderer;
+import view.dialogs.CustomComboBoxDialog;
 import model.entity.Appointment;
 import model.entity.Patient;
 /*28/03/2024import model.PatientNote;*/
@@ -60,7 +60,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import view.view_support_classes.AppointmentDateVetoPolicy;
+import view.support_classes.AppointmentDateVetoPolicy;
 
 /**
  *
@@ -357,7 +357,7 @@ public class ScheduleDiaryView extends BookingView
             case REQUEST_CREATE_APPOINTMENT:
                 CustomComboBoxDialog dialog = null;
                 dialog = 
-                        new CustomComboBoxDialog(new Frame(), "Select patient for new appointment",this);
+                        new CustomComboBoxDialog(new Frame(), "Appointment dialog",this);
                 dialog.setVisible(true);
                 if (dialog.isConfirmed()) {
                     patient = dialog.getSelectedValue();

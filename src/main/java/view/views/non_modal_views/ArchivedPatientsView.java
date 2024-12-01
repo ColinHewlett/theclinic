@@ -29,8 +29,8 @@ import static model.entity.Entity.Scope.BY_PATIENT;
 import model.entity.Patient;
 import model.non_entity.Captions;
 import view.View;
-import view.view_support_classes.models.ArchivedPatientsTableModel;
-import view.view_support_classes.renderers.AppointmentsTableLocalDateRenderer;
+import view.support_classes.models.ArchivedPatientsTableModel;
+import view.support_classes.renderers.AppointmentsTableLocalDateRenderer;
 
 /**
  *

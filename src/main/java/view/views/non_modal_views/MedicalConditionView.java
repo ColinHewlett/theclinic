@@ -24,7 +24,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import model.*;
 import view.View;
-import view.view_support_classes.models.MedicalConditionTableModel;
+import view.support_classes.models.MedicalConditionTableModel;
 
 /**
  *

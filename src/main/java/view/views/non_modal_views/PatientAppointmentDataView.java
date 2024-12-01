@@ -28,12 +28,12 @@ import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
 import model.entity.Entity;
 import view.View;
-import view.view_support_classes.models.PatientAppointmentDataTableModel;
-import view.view_support_classes.renderers.AppointmentsTableLocalDateRenderer;
-import view.view_support_classes.renderers.TableLocalDateCentredRenderer;
-import view.view_support_classes.renderers.TableLocalDateTimeToLocalDateAndCentredRenderer;
-import view.view_support_classes.renderers.TableIntegerCenteredRenderer;
-import view.view_support_classes.renderers.TablePatientEmboldenedRenderer;
+import view.support_classes.models.PatientAppointmentDataTableModel;
+import view.support_classes.renderers.AppointmentsTableLocalDateRenderer;
+import view.support_classes.renderers.TableLocalDateCentredRenderer;
+import view.support_classes.renderers.TableLocalDateTimeToLocalDateAndCentredRenderer;
+import view.support_classes.renderers.TableIntegerCenteredRenderer;
+import view.support_classes.renderers.TablePatientEmboldenedRenderer;
 
 /**
  *

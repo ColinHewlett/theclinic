@@ -5,8 +5,8 @@
  */
 package view.views.non_modal_views;
 
-import view.view_support_classes.models.NotificationView4ColumnTableModel;
-import view.view_support_classes.renderers.NotificationTableKeyColorsAndLocalDateRenderer;
+import view.support_classes.models.NotificationView4ColumnTableModel;
+import view.support_classes.renderers.NotificationTableKeyColorsAndLocalDateRenderer;
 import view.View;
 //import view.views.appontment_schedule_view.AppointmentsTableLocalDateTimeRenderer;
 import controller.Descriptor;

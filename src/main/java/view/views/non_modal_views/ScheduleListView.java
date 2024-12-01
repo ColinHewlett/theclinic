@@ -10,20 +10,20 @@ import com.bric.colorpicker.ColorPickerDialog;
 import model.non_entity.SystemDefinition;
 import model.non_entity.Slot;
 import model.non_entity.SystemDefinition.ScheduleSlotType;
-import view.view_support_classes.renderers.AppointmentsTableDurationRenderer;
-import view.view_support_classes.renderers.TableLocalTime24HourFormatCentredRenderer;
-import view.view_support_classes.renderers.ScheduleDiaryTablePatientRenderer;
-import view.view_support_classes.renderers.ScheduleListTablePatientRenderer;
-import view.view_support_classes.renderers.ScheduleDiaryTableLocalDateTimeRenderer;
-import view.view_support_classes.renderers.ScheduleDiaryTableStringRenderer;
-import view.view_support_classes.models.ScheduleListTableModel;
-import view.view_support_classes.models.ScheduleDiaryTableModel;
+import view.support_classes.renderers.AppointmentsTableDurationRenderer;
+import view.support_classes.renderers.TableLocalTime24HourFormatCentredRenderer;
+import view.support_classes.renderers.ScheduleDiaryTablePatientRenderer;
+import view.support_classes.renderers.ScheduleListTablePatientRenderer;
+import view.support_classes.renderers.ScheduleDiaryTableLocalDateTimeRenderer;
+import view.support_classes.renderers.ScheduleDiaryTableStringRenderer;
+import view.support_classes.models.ScheduleListTableModel;
+import view.support_classes.models.ScheduleDiaryTableModel;
 import model.entity.Appointment;
 import model.entity.Patient;
 /*28/03/2024import model.PatientNote;*/
 import controller.ViewController;
 import controller.DesktopViewController;
-import view.view_support_classes.AppointmentDateVetoPolicy;
+import view.support_classes.AppointmentDateVetoPolicy;
 import view.View;
 import com.github.lgooddatepicker.components.DatePickerSettings;
 import com.github.lgooddatepicker.optionalusertools.DateChangeListener;
@@ -1085,7 +1085,8 @@ public class ScheduleListView extends BookingView
                         javax.swing.SwingUtilities.invokeLater(new Runnable(){
                             @Override
                             public void run(){
-                                configureScheduleListView();
+                                //configureScheduleListView();
+                                populateScheduleListView();
                                 tblAppointments.clearSelection();
                             }
                         });
@@ -1564,13 +1565,8 @@ public class ScheduleListView extends BookingView
         //btnSearchAvailableSlotsRequest.addActionListener(this);
         btnSelectTreatmentRequest.addActionListener(this); 
         
-        //scheduleViewer.add(rdbList);
-        //scheduleViewer.add(rdbDiary);
-        //rdbList.setActionCommand(Action.REQUEST_SCHEDULE_LIST_VIEW.toString());
-        //rdbDiary.setActionCommand(Action.REQUEST_SCHEDULE_DIARY_VIEW.toString());
-        //rdbList.addActionListener(this);
-        //rdbDiary.addActionListener(this);
-        //rdbList.setSelected(true);
+        configureScheduleListView();
+        
         setScheduleViewMode(ScheduleViewMode.LIST);
         
         
@@ -2386,8 +2382,7 @@ public class ScheduleListView extends BookingView
                 ViewController.ScheduleViewControllerActionEvent.
                         VIEW_CHANGED_NOTIFICATION.toString());
         this.getMyController().actionPerformed(actionEvent);
-        //tblAppointments.repaint();
-        //this.pnlScheduleForDay.repaint();
+        ViewController.setJTableColumnProperties(tblAppointments, scrAppointmentsForDayTable.getPreferredSize().width, 10,20,5,5,15,45);
     }
     
     private JTable tblAppointments = null;
@@ -2405,113 +2400,8 @@ public class ScheduleListView extends BookingView
         tableHeader.setBackground(new Color(220,220,220));
         tableHeader.setOpaque(true); 
         ViewController.setJTableColumnProperties(tblAppointments, scrAppointmentsForDayTable.getPreferredSize().width, 10,20,5,5,15,45);
-        //ViewController.setRelativeColumnWidths(tblAppointments, new double[]{0.1,0.2,0.05,0.05,0.15,0.45});
-        populateScheduleListView();
     }
-    
-    private void configureScheduleListView(int test){
-        tblAppointments = new JTable(new ScheduleListTableModel());
-        scrAppointmentsForDayTable.setViewportView(tblAppointments);
-        ScheduleListTableModel model = (ScheduleListTableModel)tblAppointments.getModel();
-        model.addTableModelListener(this);
-        setAppointmentTableListener();
-        
-        this.tblAppointments.setDefaultRenderer(Duration.class, new AppointmentsTableDurationRenderer());
-        this.tblAppointments.setDefaultRenderer(LocalDateTime.class, new TableLocalTime24HourFormatCentredRenderer());
-        this.tblAppointments.setDefaultRenderer(Patient.class, new ScheduleListTablePatientRenderer());
-        JTableHeader tableHeader = this.tblAppointments.getTableHeader();
-        tableHeader.setBackground(new Color(220,220,220));
-        tableHeader.setOpaque(true); 
-        //ViewController.setJTableColumnProperties(tblAppointments, scrAppointmentsForDayTable.getPreferredSize().width, 10,20,5,5,15,45);
-        //populateScheduleListView();
-    }
-    
-    /*private void configureScheduleDiaryView(){
-        tblAppointments = new JTable(new ScheduleDiaryTableModel());
-        scrAppointmentsForDayTable.setViewportView(tblAppointments);
-        ScheduleDiaryTableModel model = (ScheduleDiaryTableModel)tblAppointments.getModel();
-        model.addTableModelListener(this);
-        setAppointmentTableListener();
-        this.tblAppointments.setDefaultRenderer(LocalDateTime.class, new ScheduleDiaryTableLocalDateTimeRenderer());
-        this.tblAppointments.setDefaultRenderer(Patient.class, new ScheduleDiaryTablePatientRenderer());
-        tblAppointments.getColumnModel().getColumn(2).setCellRenderer(new ScheduleDiaryTableStringRenderer());
-        JTableHeader tableHeader = this.tblAppointments.getTableHeader();
-        tableHeader.setBackground(new Color(220,220,220));
-        tableHeader.setOpaque(true); 
-        ViewController.setJTableColumnProperties(tblAppointments, scrAppointmentsForDayTable.getPreferredSize().width, 10,40,50);
-        //ViewController.setRelativeColumnWidths(tblAppointments, new double[]{0.1,0.4,0.5});
-        populateScheduleDiaryView();
-    }*/
-    
-    /*
-    private void ConfigureScheduleTable(){
-        if (tableModel == null) {
-            tableModel = new ScheduleListTableModel();
-            tableModel.addTableModelListener(new TableModelListener(){
-                Appointment appointment = null;
-                @Override
-                public void tableChanged(TableModelEvent e) {
-                    int row = e.getFirstRow();
-                    int column = e.getColumn();
-                    ScheduleListTableModel model =  
-                            (ScheduleListTableModel)e.getSource();
-                    Boolean value = (Boolean)model.getValueAt(row, column);
-                    appointment = model.getElementAt(row);
-                    appointment.setHasPatientBeenContacted(value);
-                    getMyController().getDescriptor().getViewDescription().setAppointment(appointment);
-                    tblAppointments.clearSelection();
-                    
-                    ActionEvent actionEvent = new ActionEvent(
-                        this,ActionEvent.ACTION_PERFORMED,
-                        ViewController.ScheduleViewControllerActionEvent.
-                                APPOINTMENT_REMINDED_STATUS_UPDATE_REQUEST.toString());
-                    getMyController().actionPerformed(actionEvent);
 
-                }
-            });
-            this.tblAppointments.setModel(tableModel);
-        }
-        tableModel.removeAllElements();
-        ArrayList<Appointment> schedule = makeEmergencyAppointmentsFirst(
-                getMyController().getDescriptor()
-                        .getControllerDescription().getAppointmentSlotsForDayInListFormat());
-        Iterator<Appointment> it = schedule.iterator();
-        while (it.hasNext()){
-            tableModel.addElement(it.next());
-        }
-       
-        this.tblAppointments.setDefaultRenderer(Duration.class, new AppointmentsTableDurationRenderer());
-        this.tblAppointments.setDefaultRenderer(LocalDateTime.class, new TableLocalTime24HourFormatCentredRenderer());
-        this.tblAppointments.setDefaultRenderer(Patient.class, new ScheduleListTablePatientRenderer());
-        //this.tblAppointments.setDefaultRenderer(Object.class, new ScheduleTableRenderer());
-        //28/03/2024this.tblAppointments.setDefaultRenderer(PatientNote.class, new AppointmentsTablePatientNoteRenderer());
-        //this.tblAppointments.setModel(tableModel);
-        //this.tblAppointments.setRowSelectionAllowed(false);
-        //this.tblAppointments.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-
-        int width = this.scrAppointmentsForDayTable.getPreferredSize().width;
-        ViewController.setJTableColumnProperties(tblAppointments, 
-                this.scrAppointmentsForDayTable.getPreferredSize().width, 
-                10,20,5,5,15,45);
-        
-        TableColumnModel columnModel = this.tblAppointments.getColumnModel();
-        //columnModel.getColumn(0).setPreferredWidth(185);
-        columnModel.getColumn(0).setHeaderRenderer(new TableHeaderCellBorderRenderer(Color.LIGHT_GRAY));
-        //columnModel.getColumn(1).setPreferredWidth(36);
-        columnModel.getColumn(1).setHeaderRenderer(new TableHeaderCellBorderRenderer(Color.LIGHT_GRAY));
-        //columnModel.getColumn(2).setPreferredWidth(36);
-        columnModel.getColumn(2).setHeaderRenderer(new TableHeaderCellBorderRenderer(Color.LIGHT_GRAY));
-        columnModel.getColumn(3).setHeaderRenderer(new TableHeaderCellBorderRenderer(Color.LIGHT_GRAY));
-        //columnModel.getColumn(4).setMinWidth(350);
-        columnModel.getColumn(4).setHeaderRenderer(new TableHeaderCellBorderRenderer(Color.LIGHT_GRAY));
-        //columnModel.getColumn(4).setCellRenderer(new ScheduleTableCellRenderer() );
-
-        columnModel.getColumn(5).setHeaderRenderer(new TableHeaderCellBorderRenderer(Color.LIGHT_GRAY));
-        JTableHeader tableHeader = this.tblAppointments.getTableHeader();
-        tableHeader.setBackground(new Color(220,220,220));
-        tableHeader.setOpaque(true);  
-    }*/
-    
     private int doAppointmentCancelConfirmation(){
         boolean isError = false;
         String name = null;
@@ -2540,18 +2430,7 @@ public class ScheduleListView extends BookingView
             name = name + getSelectedAppointmentFromDiary().getPatient().getName().getSurname();
             message = "Are you sure you want to cancel the appointment for patient " + name; 
         }
-        /*
-        if (getMyController().getDescriptor().getViewDescription().getAppointment().getPatient().toString().
-                equals(SystemDefinition.ScheduleSlotType.UNBOOKABLE_SCHEDULE_SLOT.mark())){
-            message = "Are you sure you want to cancel the unbookable appointment slot";
-        }
-        else {
-            name = getMyController().getDescriptor().getViewDescription().getAppointment().getPatient().getName().getForenames();
-            if (!name.isEmpty())name = name + " ";
-            name = name + getMyController().getDescriptor().getViewDescription().getAppointment().getPatient().getName().getSurname();
-            message = "Are you sure you want to cancel the appointment for patient " + name; 
-        }
-        */
+
         from.format(DateTimeFormatter.ofPattern("HH:mm"));
         String[] options = {"Yes", "No"};
         OKToCancelAppointment = JOptionPane.showInternalOptionDialog(this,
@@ -2874,24 +2753,25 @@ public class ScheduleListView extends BookingView
 
         pnlScheduleForDay.setBorder(javax.swing.BorderFactory.createTitledBorder("Appointment schedule for"));
 
-        scrAppointmentsForDayTable.setMaximumSize(new java.awt.Dimension(835, 333));
-        scrAppointmentsForDayTable.setPreferredSize(new java.awt.Dimension(835, 333));
+        scrAppointmentsForDayTable.setMaximumSize(new java.awt.Dimension(849, 371));
+        scrAppointmentsForDayTable.setName(""); // NOI18N
+        scrAppointmentsForDayTable.setPreferredSize(new java.awt.Dimension(849, 371));
 
         javax.swing.GroupLayout pnlScheduleForDayLayout = new javax.swing.GroupLayout(pnlScheduleForDay);
         pnlScheduleForDay.setLayout(pnlScheduleForDayLayout);
         pnlScheduleForDayLayout.setHorizontalGroup(
             pnlScheduleForDayLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlScheduleForDayLayout.createSequentialGroup()
+            .addGroup(pnlScheduleForDayLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(scrAppointmentsForDayTable, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(scrAppointmentsForDayTable, javax.swing.GroupLayout.PREFERRED_SIZE, 849, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
         pnlScheduleForDayLayout.setVerticalGroup(
             pnlScheduleForDayLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlScheduleForDayLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(scrAppointmentsForDayTable, javax.swing.GroupLayout.DEFAULT_SIZE, 370, Short.MAX_VALUE)
-                .addGap(7, 7, 7))
+                .addComponent(scrAppointmentsForDayTable, javax.swing.GroupLayout.PREFERRED_SIZE, 371, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
         );
 
         pnlView.setBorder(javax.swing.BorderFactory.createTitledBorder("View"));

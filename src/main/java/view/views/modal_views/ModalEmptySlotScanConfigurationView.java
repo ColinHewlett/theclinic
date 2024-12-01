@@ -9,7 +9,7 @@ import controller.Descriptor;
 import controller.ViewController;
 import view.View;
 import view.views.non_modal_views.DesktopView;
-import view.view_support_classes.renderers.SelectSlotDurationRenderer;
+import view.support_classes.renderers.SelectSlotDurationRenderer;
 import java.awt.AWTEvent;
 import java.awt.ActiveEvent;
 import java.awt.Color;

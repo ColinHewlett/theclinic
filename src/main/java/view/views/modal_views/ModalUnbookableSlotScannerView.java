@@ -22,9 +22,9 @@ import javax.swing.table.TableColumnModel;
 import model.entity.Appointment;
 import view.View;
 import view.views.non_modal_views.DesktopView;
-import view.view_support_classes.models.EmptySlotAvailability2ColumnTableModel;
-import view.view_support_classes.models.UnbookableSlotsTableModel;
-import view.view_support_classes.renderers.TableHeaderCellBorderRenderer;
+import view.support_classes.models.EmptySlotAvailability2ColumnTableModel;
+import view.support_classes.models.UnbookableSlotsTableModel;
+import view.support_classes.renderers.TableHeaderCellBorderRenderer;
 
 /**
  *

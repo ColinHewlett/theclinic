@@ -1722,6 +1722,8 @@ public class PatientViewController extends ViewController {
                 if (getDescriptor().getControllerDescription().getPatient().getIsKeyDefined()){
                     patient = getDescriptor().getControllerDescription().getPatient();
                     try{
+                        if (descriptor.getControllerDescription().getViewMode()==null)
+                            descriptor.getControllerDescription().setViewMode(ViewController.ViewMode.NO_ACTION);
                         switch(descriptor.getControllerDescription().getViewMode()){
                             case PATIENT_ARCHIVE:
                                 patient.setScope(Scope.SINGLE);

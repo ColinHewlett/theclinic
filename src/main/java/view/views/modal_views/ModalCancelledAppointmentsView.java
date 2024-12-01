@@ -21,11 +21,11 @@ import model.entity.Appointment;
 import model.entity.Patient;
 import view.View;
 import view.views.non_modal_views.DesktopView;
-import view.view_support_classes.models.CancelledAppointmentsTableModel;
-import view.view_support_classes.renderers.AppointmentsTableDurationRenderer;
-import view.view_support_classes.renderers.AppointmentsTableLocalDateRenderer;
-import view.view_support_classes.renderers.CancelledAppointmentsTablePatientRenderer;
-import view.view_support_classes.renderers.TableHeaderCellBorderRenderer;
+import view.support_classes.models.CancelledAppointmentsTableModel;
+import view.support_classes.renderers.AppointmentsTableDurationRenderer;
+import view.support_classes.renderers.AppointmentsTableLocalDateRenderer;
+import view.support_classes.renderers.CancelledAppointmentsTablePatientRenderer;
+import view.support_classes.renderers.TableHeaderCellBorderRenderer;
 
 /**
  *

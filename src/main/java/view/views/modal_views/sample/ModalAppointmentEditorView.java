@@ -6,7 +6,7 @@
 package view.views.modal_views.sample;
 
 import view.views.modal_views.ModalView;
-import view.view_support_classes.renderers.SelectStartTimeLocalDateTimeRenderer;
+import view.support_classes.renderers.SelectStartTimeLocalDateTimeRenderer;
 import view.views.non_modal_views.DesktopView;
 import controller.Descriptor;
 import controller.ViewController;

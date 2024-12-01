@@ -31,8 +31,8 @@ import model.entity.Patient;
 import model.non_entity.QuestionWithState;
 import model.non_entity.SystemDefinition;
 import view.View;
-import view.view_support_classes.models.PatientQuestionTableModel;
-import view.view_support_classes.models.PatientAnswerTableModel;
+import view.support_classes.models.PatientQuestionTableModel;
+import view.support_classes.models.PatientAnswerTableModel;
 
 /**
  *
