@@ -33,7 +33,7 @@ import model.non_entity.SystemDefinition.*;
 import view.View;
 import view.views.modal_views.ModalView;
 import view.views.non_modal_views.DesktopView;
-import view.view_support_classes.renderers.TableHeaderCellBorderRenderer;
+import view.support_classes.renderers.TableHeaderCellBorderRenderer;
 import model.repository.StoreException;
 import java.awt.Color;
 import java.awt.Dimension;
