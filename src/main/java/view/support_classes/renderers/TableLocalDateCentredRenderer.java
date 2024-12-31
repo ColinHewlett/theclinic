@@ -41,7 +41,7 @@ public class TableLocalDateCentredRenderer extends JLabel implements TableCellRe
             super.setText(day.format(dateOnlyFormat));
             super.setFont(getFont().deriveFont(Font.PLAIN));
             super.setHorizontalAlignment(JLabel.CENTER);
-        }
+        }else super.setText("");
 
         if (isSelected) {
             setBackground(table.getSelectionBackground());

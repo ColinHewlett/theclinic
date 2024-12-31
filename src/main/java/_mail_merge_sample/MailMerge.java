@@ -42,7 +42,6 @@ public class MailMerge {
             writer.write(mergedContent);
             writer.close();
 
-            System.out.println("Mail merge completed successfully.");
         } catch (IOException e) {
             e.printStackTrace();
         }

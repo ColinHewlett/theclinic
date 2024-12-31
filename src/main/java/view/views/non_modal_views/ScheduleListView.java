@@ -49,6 +49,7 @@ import java.time.LocalTime;
 import java.util.HashMap;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
+import javax.swing.JDesktopPane;
 import javax.swing.JOptionPane;
 import javax.swing.JColorChooser;
 import javax.swing.JButton; 
@@ -58,6 +59,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import javax.swing.ImageIcon;
 import javax.swing.JMenu;
 import javax.swing.border.TitledBorder;
@@ -73,6 +75,8 @@ import static model.non_entity.SystemDefinition.ScheduleSlotType.BOOKABLE_SCHEDU
 import static model.non_entity.SystemDefinition.ScheduleSlotType.BOOKED_SCHEDULE_SLOT;
 import static model.non_entity.SystemDefinition.ScheduleSlotType.EMERGENCY_SCHEDULE_SLOT;
 import static model.non_entity.SystemDefinition.ScheduleSlotType.UNBOOKABLE_SCHEDULE_SLOT;
+import view.views.modal_views.ModalView;
+import view.views.dialog_views.DialogView;
 
 /**
  *
@@ -103,6 +107,8 @@ public class ScheduleListView extends BookingView
         REQUEST_CLOSE_VIEW,
         REQUEST_COLOUR_PICKER,
         REQUEST_CREATE_UPDATE_APPOINTMENT,
+        REQUEST_EARLY_BOOKING_START_TIME,
+        REQUEST_LATE_BOOKING_END_TIME,
         REQUEST_MAKE_DELETE_EMERGENCY_APPOINTMENT_UNDO_SELECTION,
         REQUEST_MARK_CANCEL_UNBOOKABLE_SLOT_OR_MOVE_TO_ANOTHER_DAY,
         REQUEST_NEXT_DAY,
@@ -723,6 +729,10 @@ public class ScheduleListView extends BookingView
     
     @Override
     public void actionPerformed(ActionEvent e){
+        DialogView dialog = null;
+        List<LocalDateTime> items = null;
+        LocalDateTime timeStart = null;
+        LocalDateTime timeEnd = null;
         ActionEvent actionEvent = null;
         Appointment appointment = null;
         Patient patient = null;
@@ -744,17 +754,6 @@ public class ScheduleListView extends BookingView
                 break;
             case REQUEST_CANCEL_APPOINTMENT:
                 switch(getScheduleViewMode()){
-                    /*
-                    case DIARY:
-                        if (doAppointmentCancelConfirmation()==JOptionPane.YES_OPTION){
-                            this.setViewDescriptorAppointment(this.getSelectedAppointmentFromDiary());
-                            actionEvent = new ActionEvent(this, 
-                                    ActionEvent.ACTION_PERFORMED,
-                                    ViewController.ScheduleViewControllerActionEvent.APPOINTMENT_CANCEL_REQUEST.toString());
-                            this.getMyController().actionPerformed(actionEvent);
-                        }
-                        break;
-                    */
                     case LIST:
                         doCancelSelectedAppointmentAction();
                         break;
@@ -767,13 +766,6 @@ public class ScheduleListView extends BookingView
                 doClinicNoteRequest();
                 break;
             case REQUEST_CLOSE_VIEW:
-                /*
-                actionEvent = new ActionEvent(
-                        ScheduleView.this,ActionEvent.ACTION_PERFORMED,
-                        ViewController.ScheduleViewControllerActionEvent.
-                                VIEW_CLOSE_NOTIFICATION.toString());
-                ScheduleView.this.getMyController().actionPerformed(actionEvent);
-                */
                 doCloseViewAction();
                 break;
             case REQUEST_COLOUR_PICKER:
@@ -783,29 +775,6 @@ public class ScheduleListView extends BookingView
                 switch(getAppointmentMode()){
                     case CREATE:
                         switch(getScheduleViewMode()){
-                            /*
-                            case DIARY:
-                                //CustomComboBoxInternalDialog dialog = new CustomComboBoxInternalDialog(this);
-                                //dialog.initialise();
-                                //patient = dialog.getSelectedPatient();
-                                
-                                CustomComboBoxDialog dialog = 
-                                        new CustomComboBoxDialog(new Frame(), "Select patient for new appointment",this);
-                                dialog.setVisible(true);
-                                if (dialog.isConfirmed()) {
-                                    patient = dialog.getSelectedValue();
-                                } 
-                                if (patient!=null){
-                                    appointment = getAppointmentFromDiaryWithUpdates();
-                                    appointment.setPatient(patient);
-                                    setViewDescriptorAppointment(appointment);
-                                    actionEvent = new ActionEvent(this,
-                                        ActionEvent.ACTION_PERFORMED,
-                                        ViewController.ScheduleViewControllerActionEvent.CREATE_APPOINTMENT_REQUEST.toString());
-                                    this.getMyController().actionPerformed(actionEvent);
-                                }
-                                break;
-                                */
                             case LIST:
                                 doCreateAppointmentAction();
                                 break;
@@ -813,90 +782,6 @@ public class ScheduleListView extends BookingView
                         break;
                     case UPDATE:
                         switch(getScheduleViewMode()){
-                            /*
-                            case DIARY:
-                                switch(getCurrentScheduleDiaryAction()){
-                                    case CANCEL_APPOINTMENT: //confusing but means when all slots of appt are selected
-
-                                        doUpdateAppointmentActionForDiary();
-                                        break;
-                                    case EXTEND_APPOINTMENT_DOWN:{
-                                        appointment = getSelectedAppointmentFromDiary();
-                                        appointment.setDuration(this.getAppointmentFromDiaryWithUpdates().getDuration());
-                                        this.setViewDescriptorAppointment(appointment);
-                                        
-                                        break;
-                                    }
-                                    case EXTEND_APPOINTMENT_UP:
-                                    case EXTEND_APPOINTMENT_UP_AND_DOWN:{
-                                        appointment = getSelectedAppointmentFromDiary();
-                                        appointment.setDuration(this.getAppointmentFromDiaryWithUpdates().getDuration());
-                                        appointment.setStart(this.getAppointmentFromDiaryWithUpdates().getStart());
-                                        this.setViewDescriptorAppointment(appointment);
-                                        break;
-                                    }
-                                    case EXTEND_SHIFT_APPOINTMENT_DOWN:
-                                        CustomComboBoxDialog dialog = new CustomComboBoxDialog(
-                                                new Frame(), ScheduleDiaryAction.EXTEND_SHIFT_APPOINTMENT_DOWN);
-                                        dialog.setVisible(true);
-                                        if (dialog.isConfirmed()){
-                                            switch(dialog.getSelectedDiaryAction()){
-                                                case EXTEND_APPOINTMENT_DOWN:
-                                                    doExtendAppointmentDown();
-                                                    appointment = getSelectedAppointmentFromDiary();
-                                                    appointment.setDuration(this.getAppointmentFromDiaryWithUpdates().getDuration());
-                                                    this.setViewDescriptorAppointment(appointment);
-                                                    break;
-                                                case SHIFT_APPOINTMENT_DOWN:
-                                                    doShiftAppointmentDown();
-                                                    appointment = getSelectedAppointmentFromDiary();
-                                                    appointment.setStart(this.getAppointmentFromDiaryWithUpdates().getStart());
-                                                    this.setViewDescriptorAppointment(appointment);
-                                                    break;
-                                            }
-                                        }
-                                        break;
-                                    case EXTEND_SHIFT_APPOINTMENT_UP:
-                                        dialog = new CustomComboBoxDialog(
-                                                new Frame(), ScheduleDiaryAction.EXTEND_SHIFT_APPOINTMENT_UP);
-                                        dialog.setVisible(true);
-                                        if (dialog.isConfirmed()){
-                                            switch(dialog.getSelectedDiaryAction()){
-                                                case EXTEND_APPOINTMENT_UP:
-                                                    doExtendAppointmentUp();
-                                                    appointment = getSelectedAppointmentFromDiary();
-                                                    appointment.setDuration(this.getAppointmentFromDiaryWithUpdates().getDuration());
-                                                    appointment.setStart(this.getAppointmentFromDiaryWithUpdates().getStart());
-                                                    this.setViewDescriptorAppointment(appointment);
-                                                    break;
-                                                case SHIFT_APPOINTMENT_UP:
-                                                    doShiftAppointmentUp();
-                                                    appointment = getSelectedAppointmentFromDiary();
-                                                    appointment.setStart(this.getAppointmentFromDiaryWithUpdates().getStart());
-                                                    this.setViewDescriptorAppointment(appointment);
-                                                    break;
-                                            }
-                                        }
-                                        break;
-                                    case SHIFT_APPOINTMENT_DOWN:
-                                    case SHIFT_APPOINTMENT_UP:{
-                                        appointment = getSelectedAppointmentFromDiary();
-                                        appointment.setStart(this.getAppointmentFromDiaryWithUpdates().getStart());
-                                        this.setViewDescriptorAppointment(appointment);
-                                        break;
-                                    }
-                                    case SHORTEN_APPOINTMENT:
-                                        appointment = getSelectedAppointmentFromDiary();
-                                        appointment.setDuration(getAppointmentFromDiaryWithUpdates().getDuration());
-                                        this.setViewDescriptorAppointment(appointment);
-                                }
-                                actionEvent = new ActionEvent(this,
-                                        ActionEvent.ACTION_PERFORMED,
-                                        ViewController.ScheduleViewControllerActionEvent.UPDATE_APPOINTMENT_REQUEST.toString());
-                                this.getMyController().actionPerformed(actionEvent);
-                                this.doScheduleTitleRefresh(null);
-                                break;
-                            */
                             case LIST:
                                 doUpdateAppointmentAction();
                                 break;
@@ -905,6 +790,64 @@ public class ScheduleListView extends BookingView
                     case NONE:
                         break;
                 }
+                break;
+            case REQUEST_EARLY_BOOKING_START_TIME:
+                items = new ArrayList<LocalDateTime>();
+                appointment = (Appointment)getMyController().getDescriptor().getControllerDescription()
+                                .getAppointmentSlotsForDayInListFormat().get(0);
+                timeEnd = appointment.getStart();
+                timeStart = timeEnd.minusHours(1);
+                for (LocalDateTime item = timeStart;item.isBefore(timeEnd); item=item.plusMinutes(5)){
+                    items.add(item);
+                }
+                dialog = new View().make(
+                        View.Viewer.EARLY_BOOKING_START_EDITOR_DIALOG, 
+                        this, 
+                        items,
+                        "Early booking start time editor",
+                        "Select start time from list").getDialogView();
+                if (getDialogView().getSelectedItem()!=null){
+                    getMyController().getDescriptor().getViewDescription()
+                            .setEarlyBookingStartTime((LocalDateTime)getDialogView().getSelectedItem());
+                    actionEvent = new ActionEvent(this, ActionEvent.ACTION_PERFORMED,
+                            ViewController.ScheduleViewControllerActionEvent.FIRST_APPOINTMENT_START_TIME_REQUEST.toString());
+                    this.getMyController().actionPerformed(actionEvent); 
+                }
+                break;
+            case REQUEST_LATE_BOOKING_END_TIME:
+                /**
+                 * -- finds last appointment
+                 * -- is this is not a bookable slot
+                 * -- -- finds the start time of the last appointment
+                 * -- -- calculates the end time of appointment from its duration 
+                 * -- 
+                 */
+                items = new ArrayList<>();
+                int count = getMyController().getDescriptor().getControllerDescription()
+                                .getAppointmentSlotsForDayInListFormat().size();
+                appointment = (Appointment)getMyController().getDescriptor().getControllerDescription()
+                                .getAppointmentSlotsForDayInListFormat().get(count-1);
+                //if (appointment.getIsKeyDefined()){
+                    timeEnd = appointment.getStart().plusMinutes(appointment.getDuration().toMinutes());
+                    timeStart = timeEnd;
+                    timeEnd = timeEnd.plusHours(1);
+                    for (LocalDateTime item = timeStart;item.isBefore(timeEnd.plusMinutes(5)); item=item.plusMinutes(5)){
+                        items.add(item);
+                    }
+                    dialog = new View().make(
+                        View.Viewer.LATE_BOOKING_END_EDITOR_DIALOG, 
+                        this, 
+                        items,
+                        "Late booking end time editor",
+                        "Select end time from list").getDialogView();
+                    if (getDialogView().getSelectedItem()!=null){
+                        getMyController().getDescriptor().getViewDescription()
+                                .setLateBookingEndTime((LocalDateTime)getDialogView().getSelectedItem());
+                        actionEvent = new ActionEvent(this, ActionEvent.ACTION_PERFORMED,
+                                ViewController.ScheduleViewControllerActionEvent.LAST_APPOINTMENT_END_TIME_REQUEST.toString());
+                        this.getMyController().actionPerformed(actionEvent); 
+                    }
+                //}
                 break;
             case REQUEST_MAKE_DELETE_EMERGENCY_APPOINTMENT_UNDO_SELECTION:
                 switch(getScheduleViewMode()){
@@ -1057,11 +1000,6 @@ public class ScheduleListView extends BookingView
     
     @Override
     public void propertyChange(PropertyChangeEvent e){
-        /*
-        String tableTitleDay = null;
-                String tableTitleDuration = null;
-        TitledBorder titledBorder = (TitledBorder)this.pnlSlotAvailability.getBorder();
-*/
         ViewController.ScheduleViewControllerPropertyChangeEvent propertyName = 
                 ViewController.ScheduleViewControllerPropertyChangeEvent.valueOf(e.getPropertyName());
         //setViewDescriptor((Descriptor)e.getNewValue());
@@ -1072,25 +1010,15 @@ public class ScheduleListView extends BookingView
                 break;
             case APPOINTMENTS_FOR_DAY_RECEIVED:
                 switch (getScheduleViewMode()){
-                    /*case DIARY:
-                        javax.swing.SwingUtilities.invokeLater(new Runnable(){
-                            @Override
-                            public void run(){
-                                configureScheduleDiaryView();
-                            }
-                        });
-                        
-                        break;*/
                     case LIST:
-                        javax.swing.SwingUtilities.invokeLater(new Runnable(){
-                            @Override
-                            public void run(){
+                        //javax.swing.SwingUtilities.invokeLater(new Runnable(){
+                            //@Override
+                            //public void run(){
                                 //configureScheduleListView();
                                 populateScheduleListView();
                                 tblAppointments.clearSelection();
-                            }
-                        });
-                        
+                            //}
+                        //});
                         break;
                 }
                 break;
@@ -1397,15 +1325,7 @@ public class ScheduleListView extends BookingView
                     break;
                 }
             }
-        }/* else if(e.getSource().equals(this.lsmForSloAvailabilityTable)){
-            if (e.getValueIsAdjusting()) return;
-
-            ListSelectionModel lsm = (ListSelectionModel)e.getSource();
-            if (!lsm.isSelectionEmpty()) {
-                int selectedRow = lsm.getMinSelectionIndex();
-                doEmptySlotAvailabilityTableRowSelection(selectedRow);
-            }
-        } */     
+        } 
     }
     
     /**
@@ -1505,8 +1425,12 @@ public class ScheduleListView extends BookingView
         mniPrintSchedule.addActionListener(this);
         this.mniCloseView.setActionCommand(Action.REQUEST_CLOSE_VIEW.toString());
         this.mniCloseView.addActionListener(this);
-        this.mniColorPicker.setActionCommand(Action.REQUEST_COLOUR_PICKER.toString());
-        this.mniColorPicker.addActionListener(this);
+        this.mniEarlyBookingStartTime.setActionCommand(Action.REQUEST_EARLY_BOOKING_START_TIME.toString());
+        this.mniEarlyBookingStartTime.addActionListener(this);
+        this.mniLateBookingEndTime.setActionCommand(Action.REQUEST_LATE_BOOKING_END_TIME.toString());
+        this.mniLateBookingEndTime.addActionListener(this);
+        //this.mniColorPicker.setActionCommand(Action.REQUEST_COLOUR_PICKER.toString());
+        //this.mniColorPicker.addActionListener(this);
         
         this.btnSwitchView.setActionCommand(Action.REQUEST_SWITCH_VIEW.toString());
         this.btnSwitchView.addActionListener(this);
@@ -2182,178 +2106,16 @@ public class ScheduleListView extends BookingView
         pnlScheduleForDay.repaint();
     }
     
-    /*
-    private void doEmptySlotAvailabilityTableRowSelection(int row){
-        Appointment appointment = 
-                ((EmptySlotAvailability2ColumnTableModel)this.tblSlotAvailability.getModel()).getElementAt(row);
-        LocalDate start = appointment.getStart().toLocalDate();
-        DatePickerSettings dps = dayDatePicker.getSettings();
-        if (!dps.getVetoPolicy().isDateAllowed(start)){
-            temporarilySuspendDatePickerDateVetoPolicy(appointment.getStart().toLocalDate());
-        }
-        dayDatePicker.setDate(start);   
-    }*/
-    
-    /*
-    private void temporarilySuspendDatePickerDateVetoPolicy(LocalDate day){
-        DatePickerSettings dps = dayDatePicker.getSettings();
-        HashMap<DayOfWeek, Boolean> allDaysSurgeryDays = new HashMap<>();
-        allDaysSurgeryDays.put(DayOfWeek.MONDAY, true);
-        allDaysSurgeryDays.put(DayOfWeek.TUESDAY, true);
-        allDaysSurgeryDays.put(DayOfWeek.WEDNESDAY, true);
-        allDaysSurgeryDays.put(DayOfWeek.THURSDAY, true);
-        allDaysSurgeryDays.put(DayOfWeek.FRIDAY, true);
-        allDaysSurgeryDays.put(DayOfWeek.SATURDAY, true);
-        allDaysSurgeryDays.put(DayOfWeek.SUNDAY, true);
-        dps.setVetoPolicy(new AppointmentDateVetoPolicy(allDaysSurgeryDays));
-        dayDatePicker.setDate(day);
-        refreshAppointmentTableWithCurrentlySelectedDate();
-        dps.setVetoPolicy(vetoPolicy);
-    }*/
-    
     private void refreshAppointmentTableWithCurrentlySelectedDate(){
         ActionEvent actionEvent = new ActionEvent(this, 
                 ActionEvent.ACTION_PERFORMED,
                 ViewController.ScheduleViewControllerActionEvent.APPOINTMENTS_FOR_DAY_REQUEST.toString());
         this.getMyController().actionPerformed(actionEvent);
-        SwingUtilities.invokeLater(new Runnable() 
-        {
-            @Override
-            public void run()
-            {
-              setTitle(getMyController().getDescriptor().getViewDescription().getScheduleDay().format(DateTimeFormatter.ofPattern("dd/MM/yy")) + "Schedule");
-              setIsViewInitialised(true);       
-            }
-        });
+        setTitle(getMyController().getDescriptor().getViewDescription().getScheduleDay().format(DateTimeFormatter.ofPattern("dd/MM/yy")) + "Schedule");
+        setIsViewInitialised(true);  
+        setTitle(getMyController().getDescriptor().getViewDescription().getScheduleDay().format(DateTimeFormatter.ofPattern("dd/MM/yy")) + "Schedule");
+        setIsViewInitialised(true);  
     }
-    
-    /*private void populateEmptySlotAvailabilityTable(ArrayList<Appointment> a) {
-        if (a == null) {
-            a = new ArrayList<>();
-        }
-        EmptySlotAvailability2ColumnTableModel model;
-        if (this.tblSlotAvailability!=null){
-            scrPanelSlotAvailability.remove(this.tblSlotAvailability);   
-        }
-        this.tblSlotAvailability = new JTable(new EmptySlotAvailability2ColumnTableModel());
-        scrPanelSlotAvailability.setViewportView(this.tblSlotAvailability);
-        setEmptySlotAvailabilityTableListener();
-        model = (EmptySlotAvailability2ColumnTableModel)this.tblSlotAvailability.getModel();
-        model.removeAllElements();
-        Iterator<Appointment> it = a.iterator();
-        while (it.hasNext()){
-            ((EmptySlotAvailability2ColumnTableModel)this.tblSlotAvailability.getModel()).addElement(it.next());
-        }
-
-        JTableHeader tableHeader = this.tblSlotAvailability.getTableHeader();
-        tableHeader.setBackground(new Color(220,220,220));
-        tableHeader.setOpaque(true);
-        
-        TableColumnModel columnModel = this.tblSlotAvailability.getColumnModel();
-        columnModel.getColumn(0).setHeaderRenderer(new TableHeaderCellBorderRenderer(Color.LIGHT_GRAY));
-        columnModel.getColumn(1).setHeaderRenderer(new TableHeaderCellBorderRenderer(Color.LIGHT_GRAY));
-    }*/
-    /*
-    private void populateAppointmentsForDayTable(){
-        ConfigureScheduleTable();
-        doScheduleTitleRefresh(null);
-        setTitle(getMyController().getDescriptor().getControllerDescription().getScheduleDay().
-                format(DateTimeFormatter.ofPattern("dd/MM/yy")) + " Appointment schedule");
-        ActionEvent actionEvent = new ActionEvent(
-                this,ActionEvent.ACTION_PERFORMED,
-                ViewController.ScheduleViewControllerActionEvent.
-                        VIEW_CHANGED_NOTIFICATION.toString());
-        this.getMyController().actionPerformed(actionEvent);
-        
-        this.pnlScheduleForDay.repaint();
-    }*/
-    /*private void populateScheduleDiaryView(){
-        
-        ScheduleDiaryTableModel model = 
-                (ScheduleDiaryTableModel)tblAppointments.getModel();
-        model.removeAllElements();
-        ArrayList<Slot> schedule = getMyController().getDescriptor()
-                        .getControllerDescription().getAppointmentSlotsForDayInDiaryFormat();
-        Iterator<Slot> it = schedule.iterator();
-        while (it.hasNext()){
-            Slot slot = (Slot)it.next();
-            for(Slot _slot : slot.get()){
-                model.addElement(_slot);
-            } 
-        }
-        // Scroll to a specific row and column
-        SwingUtilities.invokeLater(() -> {  
-            Appointment appointment = null;
-            LocalDateTime start = null;
-            Slot theSlot = null;
-            int count = 0;
-            boolean isAppointmentFound = false;
-            int row = getScheduleViewCurrentlySelectedRowFromList(); // Example row to scroll to (0-based index)
-            int col = 0; // Example column to scroll to (0-based index)
-            if (row > -1){
-                count = 0;
-                ArrayList<Appointment> appointments = 
-                        getMyController().getDescriptor().getControllerDescription()
-                                .getAppointmentSlotsForDayInListFormat();
-                appointment =  appointments.get(row);
-                // Ensure the row and column are valid
-                isAppointmentFound = false;
-                for (Appointment a : appointments){
-                    if (appointment.getKey()!=null){
-                        if (a.equals(appointment)){
-                            start = a.getStart();
-                            isAppointmentFound = true;
-                        break;
-                        } 
-                    }
-                }
-                
-                if (isAppointmentFound){
-                    ArrayList<Slot> slots = getMyController().getDescriptor().getControllerDescription()
-                                .getAppointmentSlotsForDayInDiaryFormat();
-                    isAppointmentFound = false;
-                    for(Slot slot : slots){
-                        for(Slot _slot : slot.get()){
-                            if (_slot.getStart().equals(start)) {
-                                theSlot = _slot;
-                                isAppointmentFound = true;
-                                break;
-                            }
-                            count++;
-                        }
-                        if (isAppointmentFound){
-                            int minutes = (int)theSlot.getAppointment().getDuration().toMinutes();
-                            int intervals = (int)minutes/5;
-                            count = count + intervals;
-                            break;
-                        }
-                    }
-                    if (count >= 0 && count < tblAppointments.getRowCount() 
-                            && col >= 0 && col < tblAppointments.getColumnCount()) {
-                        // Get the rectangle representing the cell at (row, col)
-                        Rectangle cellRect = tblAppointments.getCellRect(count, col, true);
-
-                        // Scroll the viewport to make the cell visible
-                        tblAppointments.scrollRectToVisible(cellRect);
-                    }
-                }//else JOptionPane.showInternalMessageDialog(this, "selected appointment not found");
-                setScheduleViewCurrentlySelectedRowFromList(-1);
-            }else{//getScheduleViewCurrentlySelectedRowFromList returned -1
-
-                row = getScheduleViewCurrentlySelectedRowFromDiary();
-                
-                if (row > -1){
-                    
-                    if(getViewablePortionOfSchedule()!=null)
-                        this.tblAppointments.scrollRectToVisible(getViewablePortionOfSchedule());
-                }
-                
-                setScheduleViewCurrentlySelectedRowFromDiary(-1);
-            }
-            
-        });
-        tblAppointments.clearSelection();
-    }*/
     
     private void disableAllScheduleOperationControls(){
         this.btnCancelSelectedAppointment.setEnabled(false);
@@ -2601,7 +2363,9 @@ public class ScheduleListView extends BookingView
         jMenuBar1 = new javax.swing.JMenuBar();
         mnuOptions = new javax.swing.JMenu();
         mniPrintSchedule = new javax.swing.JMenuItem();
-        mniColorPicker = new javax.swing.JMenuItem();
+        jSeparator1 = new javax.swing.JPopupMenu.Separator();
+        mniEarlyBookingStartTime = new javax.swing.JMenuItem();
+        mniLateBookingEndTime = new javax.swing.JMenuItem();
         jSeparator3 = new javax.swing.JPopupMenu.Separator();
         mniCloseView = new javax.swing.JMenuItem();
 
@@ -2833,9 +2597,13 @@ public class ScheduleListView extends BookingView
 
         mniPrintSchedule.setText("Print schedule");
         mnuOptions.add(mniPrintSchedule);
+        mnuOptions.add(jSeparator1);
 
-        mniColorPicker.setText("Colour picker");
-        mnuOptions.add(mniColorPicker);
+        mniEarlyBookingStartTime.setText("Define early start time");
+        mnuOptions.add(mniEarlyBookingStartTime);
+
+        mniLateBookingEndTime.setText("Define late end Time");
+        mnuOptions.add(mniLateBookingEndTime);
         mnuOptions.add(jSeparator3);
 
         mniCloseView.setText("Close view");
@@ -2893,9 +2661,11 @@ public class ScheduleListView extends BookingView
     private javax.swing.JButton btnSwitchView;
     private com.github.lgooddatepicker.components.DatePicker dayDatePicker;
     private javax.swing.JMenuBar jMenuBar1;
+    private javax.swing.JPopupMenu.Separator jSeparator1;
     private javax.swing.JPopupMenu.Separator jSeparator3;
     private javax.swing.JMenuItem mniCloseView;
-    private javax.swing.JMenuItem mniColorPicker;
+    private javax.swing.JMenuItem mniEarlyBookingStartTime;
+    private javax.swing.JMenuItem mniLateBookingEndTime;
     private javax.swing.JMenuItem mniPrintSchedule;
     private javax.swing.JMenu mnuOptions;
     private javax.swing.JPanel pnlAppointmentDaySelector;

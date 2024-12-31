@@ -9,6 +9,8 @@ package view;
 /*import view.views.modal_views.ModalPatientMedicalHistory1EditorView;*/
 import view.views.non_modal_views.*;
 import view.views.modal_views.*;
+//import view.views.modal_views.dialogs.DialogUsingGenericSelectorx;
+import view.views.dialog_views.*;
 import controller.ViewController;
 import java.awt.AWTEvent;
 import java.awt.ActiveEvent;
@@ -20,7 +22,9 @@ import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.MenuComponent;
 import java.awt.Toolkit;
+import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.List;
 import view.interfaces.IView;
 import view.interfaces.IViewInternalFrameListener;
 import java.awt.event.MouseAdapter;
@@ -31,6 +35,7 @@ import java.beans.PropertyVetoException;
 import java.io.File;
 import java.io.IOException;
 import javax.swing.JCheckBox;
+import javax.swing.JDesktopPane;
 import javax.swing.JInternalFrame;
 import javax.swing.JLayeredPane;
 import javax.swing.JOptionPane;
@@ -77,6 +82,36 @@ public class View extends JInternalFrame
     
     protected void setIsViewInitialised(Boolean value){
         isViewInitialised = value;
+    }
+    
+    /**
+     * 
+     * @param <T>
+     * @param viewer
+     * @param myParentView
+     * @param items
+     * @param dialogCaption
+     * @param selectorCaption
+     * @return 
+     */
+    public <T> View make(
+            Viewer viewer,
+            View myParentView,
+            List<T> items, 
+            String dialogCaption, 
+            String selectorCaption){
+        DialogView result = null;
+        switch(viewer){
+            case EARLY_BOOKING_START_EDITOR_DIALOG:
+            case EXTEND_SHIFT_BOOKING_DIALOG:
+            case LATE_BOOKING_END_EDITOR_DIALOG:
+            case PATIENT_SELECTION_DIALOG:
+                //setDialogView(makeView(new DialogUsingGenericSelector(viewer, myParentView, items, dialogCaption, selectorCaption)));
+                result = makeView(new DialogUsingGenericSelector(viewer, myParentView, items, dialogCaption, selectorCaption));
+                myParentView.setDialogView(result);
+                break;
+        }
+        return result;
     }
     
     /**
@@ -153,6 +188,10 @@ public class View extends JInternalFrame
             case CLINICAL_NOTE_VIEW:
                 setModalView(makeView(new ModalClinicalNoteView(viewer, controller, desktopView)));
                 break;
+            case EARLY_BOOKING_START_EDITOR_DIALOG:
+            case LATE_BOOKING_END_EDITOR_DIALOG:
+                //setModalView(makeView(new DialogUsingGenericSelectorx(viewer, controller, desktopView)));
+                break;
             case NOTE_TAKER:
                 setModalView(makeView(new ModalNoteTaker(viewer, controller, desktopView)));
                 break;    
@@ -222,6 +261,7 @@ public class View extends JInternalFrame
         else if (getView()==null) return getModalView();
         else return getView();
     }
+    
 
     public static enum Viewer { 
         APPOINTMENT_CREATOR_VIEW,
@@ -234,7 +274,11 @@ public class View extends JInternalFrame
         APPOINTMENTS_CANCELLED_VIEW,
         CLINICAL_NOTE_VIEW,
         CHECKBOX_LIST_VIEW,
+        EARLY_BOOKING_START_EDITOR_DIALOG,
         EXPORT_PROGRESS_VIEW,
+        EXTEND_SHIFT_BOOKING_DIALOG,
+        LATE_BOOKING_END_EDITOR_DIALOG,
+        LATE_BOOKING_END_EDITOR_VIEW,
         MEDICAL_CONDITION_VIEW,
         MIGRATION_MANAGER_VIEW,
         NON_SURGERY_DAY_EDITOR_VIEW,
@@ -252,6 +296,7 @@ public class View extends JInternalFrame
         PATIENT_QUESTIONNAIRE_VIEW,
         PATIENT_RECOVERY_SELECTION_VIEW,
         PATIENT_SELECTION_VIEW,
+        PATIENT_SELECTION_DIALOG,
         PATIENT_VIEW,        
         NOTIFICATION_VIEW,
         NOTIFICATION_EDITOR_VIEW,
@@ -299,6 +344,14 @@ public class View extends JInternalFrame
     public void setMyViewType(Viewer value){
         myViewType = value;
     }
+    
+    private JDesktopPane parentViewDesktopPane = null;
+    public JDesktopPane getParentDesktopPane(){
+        return parentViewDesktopPane;
+    }
+    public void setParentDesktopPane(JDesktopPane value){
+        parentViewDesktopPane = value;
+    }
 
     public ViewController getMyController(){
         return myController;
@@ -315,21 +368,21 @@ public class View extends JInternalFrame
     //public abstract void startModal();
     
     protected final View makeView(View view){
-        //javax.swing.SwingUtilities.invokeLater(() -> {
-            view.getMyController().setView(view);
-            view.getMyController().getView().initialiseView();
-            ViewController.centerInternalFrame(view.getDesktopView().getDeskTop(), view);
-            //view.getMyController().centreViewOnDesktop(view.getDesktopView(), view.getMyController().getView());
-            view.getDesktopView().getDeskTop().add(view.getMyController().getView());
-            view.toFront();
+        view.getMyController().setView(view);
+        view.getMyController().getView().initialiseView();
+        ViewController.centerInternalFrame(view.getDesktopView().getDeskTop(), view);
+        view.getDesktopView().getDeskTop().add(view.getMyController().getView());
+        view.toFront();
+        return view;
+    }
 
-            /*try{
-                view.setSelected(true);
-            }catch(PropertyVetoException ex){
-
-            }*/
-            
-        //});
+    protected final DialogView makeView(DialogView view){
+        view.setLayer(JLayeredPane.MODAL_LAYER);
+        view.initialiseView();
+        ViewController.centerInternalFrame(view.getMyParentView().getDesktopPane(), view);
+        view.getMyParentView().getDesktopPane().add(view);
+        view.toFront();
+        startModal(view);
         return view;
     }
     
@@ -338,7 +391,6 @@ public class View extends JInternalFrame
         view.setLayer(JLayeredPane.MODAL_LAYER);
         view.getMyController().getModalView().initialiseView();
         ViewController.centerInternalFrame(view.getDesktopView().getDeskTop(), view.getMyController().getModalView());
-        //view.getMyController().centreViewOnDesktop(view.getDesktopView(), view.getMyController().getModalView());
         view.getDesktopView().getDeskTop().add(view.getMyController().getModalView());
         view.toFront();
         startModal(view);
@@ -349,6 +401,7 @@ public class View extends JInternalFrame
         // We need to add an additional glasspane-like component directly
         // below the frame, which intercepts all mouse events that are not
         // directed at the frame itself.
+        //view.setLayer(JLayeredPane.MODAL_LAYER);
         JPanel modalInterceptor = new JPanel();
         modalInterceptor.setOpaque(false);
         JLayeredPane lp = JLayeredPane.getLayeredPaneAbove(view);
@@ -423,6 +476,15 @@ public class View extends JInternalFrame
     
     private final void setModalView(ModalView value){
         modalView = value;
+    }
+    
+    private DialogView dialogView = null;
+    public  DialogView getDialogView(){
+        return dialogView;
+    }
+    
+    public void setDialogView(DialogView value){
+        dialogView = value;
     }
 
     @Override

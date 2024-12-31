@@ -166,8 +166,7 @@ public class DesktopViewController extends ViewController{
                         displayErrorMessage(
                                 message,"DesktopViewController error",
                                 JOptionPane.WARNING_MESSAGE);
-                    }/*else System.out.println("CVC removed("
-                            + clinicalNoteViewControllers.size() + ")");*/
+                    }
                 }else{
                     message = "Could not locate the ClinicalNote view controller "
                             + "which requested tto be removed";
@@ -1247,6 +1246,11 @@ public class DesktopViewController extends ViewController{
                     break;
             }
             
+            ActionEvent actionEvent = new ActionEvent(
+                    this,ActionEvent.ACTION_PERFORMED,
+                    DesktopViewController.DesktopViewControllerActionEvent.INITIALISE_VIEW.toString());
+             avc.actionPerformed(actionEvent);
+         
             if (getDesktopView().getDeskTop().getAllFrames().length>1){
                 this.firePropertyChangeEvent(
                     ViewController.DesktopViewControllerPropertyChangeEvent.CASCADE_DESKTOP_VIEWS.toString(), 
@@ -2591,18 +2595,14 @@ public class DesktopViewController extends ViewController{
         isDataMigrationOptionEnabled = false;
         String xmlFileName = "";
         System.out.println(JarFileFinder.getPath());
-        //System.out.println(JarFileFinder.getName());
         try{
             if(!JarFileFinder.getName().equals("")){
                 for(String pathComponent : JarFileFinder.getPath().split("/")){
-                    //System.out.println(pathComponent);
                     if (pathComponent.equals(JarFileFinder.getName()))
                         xmlFileName = xmlFileName + "/SystemDefinition.xml";
                     else xmlFileName = xmlFileName + "/" + pathComponent;
                 }
             }else xmlFileName = "c:\\pms\\SystemDefinition.xml";
-            System.out.println(xmlFileName);
-            //String xmlFileName = System.getenv("PMS_SYSTEM_DEFINITION");
             TemplateReader.setTemplateFile(new File(xmlFileName));
             TemplateReader.setEntityTag("entity");
             TemplateReader.setEntityId("SystemDefinition");

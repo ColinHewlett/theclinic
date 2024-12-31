@@ -268,9 +268,6 @@ public class DesktopView extends javax.swing.JFrame
                 Collections.sort(dates);
                 for (LocalDate date : dates){
                     for (BookingView bookingView: bookingViews){
-                        //System.out.println(String.valueOf(++count) + "date = " + date.toString());
-                        //System.out.println(String.valueOf(++count) + "schedule date = " + bookingView.getMyController().getDescriptor().getControllerDescription().getScheduleDay().toString());
-                        
                         if(date.isEqual(bookingView.getMyController().getDescriptor().getControllerDescription().getScheduleDay())){
                             cascadeFrameOrder.add(bookingView);
                             break;

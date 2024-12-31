@@ -29,9 +29,11 @@ public class TableIntegerCenteredRenderer extends JLabel implements TableCellRen
     {
         if (value != null){
             Integer frequency = (Integer)value;
-            super.setText(String.valueOf(frequency));
-            super.setFont(getFont().deriveFont(Font.PLAIN));
-            super.setHorizontalAlignment(JLabel.CENTER);
+            if (frequency > 0){
+                super.setText(String.valueOf(frequency));
+                super.setFont(getFont().deriveFont(Font.PLAIN));
+                super.setHorizontalAlignment(JLabel.CENTER);
+            }else super.setText("");
         }
 
         if (isSelected) {

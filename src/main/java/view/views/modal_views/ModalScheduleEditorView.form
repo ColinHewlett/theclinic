@@ -204,6 +204,9 @@
                   </AuxValues>
                 </Component>
                 <Component class="javax.swing.JSpinner" name="spnDurationHours">
+                  <AuxValues>
+                    <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new javax.swing.JSpinner(new SpinnerNumberModel(0,0,8,1))"/>
+                  </AuxValues>
                 </Component>
                 <Component class="javax.swing.JSpinner" name="spnDurationMinutes">
                   <AuxValues>

@@ -51,7 +51,8 @@ public class ModalAppointmentTreatmentView extends ModalView
      * @param myController
      * @param desktopView 
      */
-    public ModalAppointmentTreatmentView(View.Viewer myViewType, 
+    public ModalAppointmentTreatmentView(
+            View.Viewer myViewType, 
             ViewController myController,
             DesktopView desktopView) {//ViewMode arg
         setMyController(myController);

@@ -14,12 +14,19 @@
                 <Property name="text" type="java.lang.String" value="Print schedule"/>
               </Properties>
             </MenuItem>
-            <MenuItem class="javax.swing.JMenuItem" name="mniColorPicker">
+            <MenuItem class="javax.swing.JPopupMenu$Separator" name="jSeparator3">
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="mniEarlyBookingOption">
               <Properties>
-                <Property name="text" type="java.lang.String" value="Colour picker"/>
+                <Property name="text" type="java.lang.String" value="Defining an early appointment"/>
               </Properties>
             </MenuItem>
-            <MenuItem class="javax.swing.JPopupMenu$Separator" name="jSeparator3">
+            <MenuItem class="javax.swing.JMenuItem" name="mniLateBookingOption">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Defining a late appointment"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JPopupMenu$Separator" name="jSeparator1">
             </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="mniCloseView">
               <Properties>

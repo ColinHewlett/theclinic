@@ -496,8 +496,8 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
     
     public static enum PatientAppointmentDataViewControllerActionEvent{
         PATIENT_APPOINTMENT_DATA_REQUEST,
-        PATIENT_ARCHIVE_REQUEST,
         PATIENT_APPOINTMENT_DATA_SORT_REQUEST,
+        PATIENT_ARCHIVE_REQUEST,
         SET_TIME_FRAME_REQUEST,
         VIEW_ACTIVATED_NOTIFICATION,
         VIEW_CHANGED_NOTIFICATION,
@@ -672,6 +672,8 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         CLINICAL_NOTE_CREATE_REQUEST,
         CLINICAL_NOTE_UPDATE_REQUEST,
         EMPTY_SLOTS_FROM_DAY_REQUEST,
+        FIRST_APPOINTMENT_START_TIME_REQUEST,
+        LAST_APPOINTMENT_END_TIME_REQUEST,
         MODAL_VIEWER_ACTIVATED,
         SCHEDULE_LIST_VIEW_CONTROLLER_REQUEST,
         SCHEDULE_DIARY_VIEW_CONTROLLER_REQUEST,
@@ -1356,7 +1358,6 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
                 // Send the email
                 Transport.send(message);
 
-                System.out.println("Email sent successfully.");
             } catch (MessagingException e) {
                 e.printStackTrace();
             }catch(StoreException ex){
@@ -1381,8 +1382,6 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
 
                 // Extract text from the document
                 document = extractor.getText();
-                //System.out.println("Contents of the .docx file:");
-                //System.out.println(text);
 
                 // Close the extractor and file input stream
                 extractor.close();
@@ -1831,8 +1830,6 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
             
             FileOutputStream out = new FileOutputStream(SystemDefinition.getPMSPrintFolder() + "/PatientMedicalHistory.docx");
             document.write(out);
-            System.out.println(new File(".").getAbsolutePath());
-            System.out.println("Word document with complex table created successfully!");
             out.flush();
             out.close();
         }catch (IOException e) {
@@ -3032,43 +3029,6 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         return true;
     }
     
-    /*
-    private void printDocument(String path){
-        //get path name for pdf conversion of Word document
-        
-        int folder;
-        String filename = "";
-        String pdfFilePath = "";
-        String docxFilePath = path;
-        
-        pdfFilePath = docxFilePath.substring(0,docxFilePath.length() - 5);
-        pdfFilePath = pdfFilePath + ".pdf";
-        
-         try {
-            // Load the DOCX document using Docx4j
-            WordprocessingMLPackage wordMLPackage = WordprocessingMLPackage.load(new File(docxFilePath));
-
-            // Convert DOCX to PDF
-            File pdfFile = new File(pdfFilePath);
-            convertDocxToPdf(wordMLPackage, pdfFile);
-
-            // Print the PDF file
-            printPDF(pdfFile);
-
-            System.out.println("Document printed successfully.");
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.err.println("Failed to print the document: " + e.getMessage());
-        }
-    }*/
-    
-    /*
-    private static void convertDocxToPdf(WordprocessingMLPackage wordMLPackage, File pdfFile) throws Exception {
-        OutputStream os = new FileOutputStream(pdfFile);
-        //Docx4J.toPDF(wordMLPackage, os);
-        os.close();
-    }*/
-    
     private static void printPDF(File pdfFile) {
         PDDocument document = null;
 
@@ -3089,9 +3049,7 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
             if (job.printDialog(attr)) {
                 // Print the document
                 job.print(attr);
-            } else {
-                System.out.println("Print job cancelled by the user.");
-            }
+            } 
 
         } catch (IOException e) {
             e.printStackTrace();

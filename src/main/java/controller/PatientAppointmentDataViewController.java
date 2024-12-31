@@ -153,8 +153,6 @@ public class PatientAppointmentDataViewController extends ViewController{
         PatientAppointmentData pad = null;
         PatientAppointmentData _pad = null;
         pad = getDescriptor().getViewDescription().getPatientAppointmentData();
-        //pad.delete();
-        //pad.insert();
         _pad = pad.read();
         if (_pad==null) _pad = new PatientAppointmentData();
         _pad.setFromYear(pad.getFromYear());
@@ -178,7 +176,7 @@ public class PatientAppointmentDataViewController extends ViewController{
         PatientAppointmentData pad = new PatientAppointmentData();
         pad.setFromYear(1992);
         pad.setToYear(LocalDate.now().getYear() + 1);
-        pad.setScope(Entity.Scope.BY_LAST_APPOINTMENT_DATE);
+        pad.setScope(Entity.Scope.PATIENT_APPOINTMENT_DATA_WITH_APPOINTMENT);
         getDescriptor().getViewDescription().setPatientAppointmentData(pad);
         //fetchAndSendViewPatientAppointmentData();
     }

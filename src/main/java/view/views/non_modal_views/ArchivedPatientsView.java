@@ -24,10 +24,9 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.JTableHeader;
 import model.entity.Entity;
-import static model.entity.Entity.Scope.BY_LAST_APPOINTMENT_DATE;
-import static model.entity.Entity.Scope.BY_PATIENT;
 import model.entity.Patient;
 import model.non_entity.Captions;
+import model.non_entity.SystemDefinition;
 import view.View;
 import view.support_classes.models.ArchivedPatientsTableModel;
 import view.support_classes.renderers.AppointmentsTableLocalDateRenderer;
@@ -118,6 +117,20 @@ public class ArchivedPatientsView extends View
         setTitle("Archived patients view");
         setVisible(true);
         addInternalFrameListeners();
+        
+        this.pnlActions.setBorder(javax.swing.BorderFactory.createTitledBorder(
+        javax.swing.BorderFactory.createEtchedBorder(), 
+        "Actions", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, 
+        javax.swing.border.TitledBorder.DEFAULT_POSITION, 
+        SystemDefinition.TITLED_BORDER_FONT, 
+        SystemDefinition.TITLED_BORDER_COLOR));// NOI18N
+        
+        this.pnlArchivedPatients.setBorder(javax.swing.BorderFactory.createTitledBorder(
+        javax.swing.BorderFactory.createEtchedBorder(), 
+        "Archived patients", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, 
+        javax.swing.border.TitledBorder.DEFAULT_POSITION, 
+        SystemDefinition.TITLED_BORDER_FONT, 
+        SystemDefinition.TITLED_BORDER_COLOR));// NOI18N
         
         this.btnRestoreSelectedPatientFromArchive.setActionCommand(Action.REQUEST_RESTORE_PATIENT.toString());
         this.btnCloseView.setActionCommand(Action.REQUEST_CLOSE_VIEW.toString());
@@ -216,7 +229,7 @@ public class ArchivedPatientsView extends View
         pnlActions = new javax.swing.JPanel();
         btnRestoreSelectedPatientFromArchive = new javax.swing.JButton();
         btnCloseView = new javax.swing.JButton();
-        pnlPatientAppointmentAnalysisTable = new javax.swing.JPanel();
+        pnlArchivedPatients = new javax.swing.JPanel();
         scrPatientAppointmentDataTable = new javax.swing.JScrollPane();
         tblArchivedPatients = new javax.swing.JTable(new ArchivedPatientsTableModel());
 
@@ -243,7 +256,7 @@ public class ArchivedPatientsView extends View
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        pnlPatientAppointmentAnalysisTable.setBorder(javax.swing.BorderFactory.createTitledBorder("Archived patients"));
+        pnlArchivedPatients.setBorder(javax.swing.BorderFactory.createTitledBorder("Archived patients"));
 
         scrPatientAppointmentDataTable.setPreferredSize(new java.awt.Dimension(905, 402));
 
@@ -251,18 +264,18 @@ public class ArchivedPatientsView extends View
         );
         scrPatientAppointmentDataTable.setViewportView(tblArchivedPatients);
 
-        javax.swing.GroupLayout pnlPatientAppointmentAnalysisTableLayout = new javax.swing.GroupLayout(pnlPatientAppointmentAnalysisTable);
-        pnlPatientAppointmentAnalysisTable.setLayout(pnlPatientAppointmentAnalysisTableLayout);
-        pnlPatientAppointmentAnalysisTableLayout.setHorizontalGroup(
-            pnlPatientAppointmentAnalysisTableLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlPatientAppointmentAnalysisTableLayout.createSequentialGroup()
+        javax.swing.GroupLayout pnlArchivedPatientsLayout = new javax.swing.GroupLayout(pnlArchivedPatients);
+        pnlArchivedPatients.setLayout(pnlArchivedPatientsLayout);
+        pnlArchivedPatientsLayout.setHorizontalGroup(
+            pnlArchivedPatientsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlArchivedPatientsLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(scrPatientAppointmentDataTable, javax.swing.GroupLayout.PREFERRED_SIZE, 282, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
-        pnlPatientAppointmentAnalysisTableLayout.setVerticalGroup(
-            pnlPatientAppointmentAnalysisTableLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlPatientAppointmentAnalysisTableLayout.createSequentialGroup()
+        pnlArchivedPatientsLayout.setVerticalGroup(
+            pnlArchivedPatientsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlArchivedPatientsLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(scrPatientAppointmentDataTable, javax.swing.GroupLayout.PREFERRED_SIZE, 435, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -274,7 +287,7 @@ public class ArchivedPatientsView extends View
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGap(16, 16, 16)
-                .addComponent(pnlPatientAppointmentAnalysisTable, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(pnlArchivedPatients, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(12, 12, 12)
                 .addComponent(pnlActions, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(12, 12, 12))
@@ -284,7 +297,7 @@ public class ArchivedPatientsView extends View
             .addGroup(layout.createSequentialGroup()
                 .addGap(16, 16, 16)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(pnlPatientAppointmentAnalysisTable, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(pnlArchivedPatients, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(pnlActions, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addGap(12, 12, 12))
         );
@@ -297,7 +310,7 @@ public class ArchivedPatientsView extends View
     private javax.swing.JButton btnCloseView;
     private javax.swing.JButton btnRestoreSelectedPatientFromArchive;
     private javax.swing.JPanel pnlActions;
-    private javax.swing.JPanel pnlPatientAppointmentAnalysisTable;
+    private javax.swing.JPanel pnlArchivedPatients;
     private javax.swing.JScrollPane scrPatientAppointmentDataTable;
     private javax.swing.JTable tblArchivedPatients;
     // End of variables declaration//GEN-END:variables

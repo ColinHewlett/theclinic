@@ -113,7 +113,8 @@ public class Repository implements IStoreActions {
                                 //DELETE_ALL_PATIENT_APPOINTMENT_DATA,
                                 //INSERT_PATIENT_APPOINTMENT_DATA,
                                 READ_PATIENT_APPOINTMENT_DATA_BY_LAST_APPOINTMENT_DATE,
-                                READ_PATIENT_APPOINTMENT_DATA_BY_PATIENT,
+                                PATIENT_APPOINTMENT_DATA_WITH_APPOINTMENT,
+                                READ_PATIENT_APPOINTMENT_DATA_WITHOUT_APPOINTMENT,
                                 //UPDATE_PATIENT_APPOINTMENT_DATA,  
                                 
                                 COUNT_ARCHIVED_PATIENT,
@@ -1732,21 +1733,37 @@ public class Repository implements IStoreActions {
             throw new StoreException(msg, StoreException.ExceptionType.NULL_KEY_EXCEPTION);
         }
     }
-    
-    /*
-    private Entity doReadDeletedPatients(String sql, Patient patient)throws StoreException{
-        Entity result;
-        try(PreparedStatement preparedStatement = getPMSStoreConnection().prepareStatement(sql);){
-            ResultSet rs = preparedStatement.executeQuery();
-            result = get(patient, rs);
-            return result;
-        } catch (SQLException ex) {
-            throw new StoreException("SQLException message -> " + ex.getMessage() + "\n"
-                    + "StoreException message -> exception raised in Repository::runSQL(PatientManagementSystemSQL..) during a READ_DELETED_PATIENTS statement",
-                    StoreException.ExceptionType.SQL_EXCEPTION);
-        }  
+
+    private Entity doReadPatientAppointmentDataWithoutAppointment(String sql, Entity entity)throws StoreException{
+        PatientAppointmentData pad = null;
+        ResultSet rs = null;
+        Entity result = null;
+        if (entity!=null){
+            try(PreparedStatement preparedStatement = getPMSStoreConnection().prepareStatement(sql)){
+                if(entity.getIsPatientAppointmentData()){
+                    pad = (PatientAppointmentData)entity;
+                    rs = preparedStatement.executeQuery();
+                    result = getDataRead(entity, rs);
+                }else {
+                    rs = preparedStatement.executeQuery();
+                    result = getDataRead(entity, rs);
+                }
+                 
+            } catch (SQLException ex) {
+                throw new StoreException("SQLException message -> " + ex.getMessage() + "\n"
+                        + "StoreException message -> exception raised in Repository::doReadAll( '" + getEntityType(entity) + "' )",
+                        StoreException.ExceptionType.SQL_EXCEPTION);
+            }   
+        }else{
+            String message = "StoreException raised because entity type undefined in "
+                        + "Repository::doReadAll( '" + getEntityType(entity) + "' )";
+                throw new StoreException(message,StoreException
+                        .ExceptionType.UNEXPECTED_DATA_TYPE_ENCOUNTERED);
+            
+        }
+        return result;
     }
-    */
+    
     private Entity doReadAll(String sql, Entity entity)throws StoreException{
         PatientAppointmentData pad = null;
         ResultSet rs = null;
@@ -4727,7 +4744,32 @@ public class Repository implements IStoreActions {
         Entity result = new Entity();
         String sql;
         switch (q){
-            case READ_PATIENT_APPOINTMENT_DATA_BY_PATIENT:
+            case READ_PATIENT_APPOINTMENT_DATA_WITHOUT_APPOINTMENT:
+                sql = "Select "
+                        + "p.pid as patientKey, "
+                        + "p.forenames as patient_forenames, "
+                        + "p.surname as patient_surname, "
+                        + "p.title as patient_title, "
+                        + "p.phone1 as patient_phone1, "
+                        + "p.phone2 as patient_phone2, "
+                        + "p.email as patient_email, "
+                        + "p.recallDate as recall_date, "
+                        + "p.recallFrequency as recall_frequency, "
+                        + "p.recallDateGBT as recall_date_GBT, "
+                        + "p.recallFrequencyGBT as recall_frequency_GBT, "
+                        + "a.pid as appointmentKey, "
+                        + "a.start as last_appointment_date, "
+                        + "a.notes as treatment "
+                        + "FROM Patient p "
+                        + "LEFT JOIN Appointment a ON p.pid = a.patientKey "
+                        + "WHERE p.pid > 1 "
+                        + "AND p.pid <> 13814 "
+                        + "AND p.isArchived = false "
+                        + "AND a.patientKey IS NULL "
+                        + "ORDER BY patient_surname,patient_forenames ASC;";
+                result = doReadPatientAppointmentDataWithoutAppointment(sql, (PatientAppointmentData )entity);   
+                break;
+            case PATIENT_APPOINTMENT_DATA_WITH_APPOINTMENT:
                 sql = "Select "
                         + "p.pid as patientKey, "
                         + "p.forenames as patient_forenames, "
@@ -4749,11 +4791,11 @@ public class Repository implements IStoreActions {
                         + "AND p.pid <> 13814 "
                         + "AND p.isArchived = false "
                         + "AND DatePart(\"yyyy\",a.start) BETWEEN ? AND ? "
+                        + "AND a.isCancelled = false "
                         + "AND a.start = "
                         + "(Select MAX(a2.start) "
                         + " FROM Appointment a2 "
-                        + " WHERE a.patientKey = a2.patientKey "
-                        + " AND a2.isCancelled = false) "
+                        + " WHERE a.patientKey = a2.patientKey) "
                         + "ORDER BY patient_surname,patient_forenames ASC;";
                 result = doReadAll(sql, (PatientAppointmentData )entity);
                 break;
@@ -4787,7 +4829,7 @@ public class Repository implements IStoreActions {
                         + "ORDER BY last_appointment_date ASC;";
                 result = doReadAll(sql, (PatientAppointmentData )entity);
                 break;
-            /*case READ_PATIENT_APPOINTMENT_DATA_BY_PATIENT:
+            /*case PATIENT_APPOINTMENT_DATA_WITH_APPOINTMENT:
                 sql = "SELECT * "
                         + "FROM PatientAppointmentData p "
                         + "ORDER BY patient_surname,patient_forenames ASC;";
@@ -8582,16 +8624,12 @@ public class Repository implements IStoreActions {
     public PatientAppointmentData read(PatientAppointmentData pad) throws StoreException{
         Entity entity = null;
         switch (pad.getScope()){
-            case BY_PATIENT:
-                entity = (Entity)runSQL(Repository.EntityType.PATIENT_APPOINTMENT_DATA,Repository.PMSSQL.READ_PATIENT_APPOINTMENT_DATA_BY_PATIENT,pad);
-                break;
-            case BY_LAST_APPOINTMENT_DATE:
-                entity = (Entity)runSQL(Repository.EntityType.PATIENT_APPOINTMENT_DATA,Repository.PMSSQL.READ_PATIENT_APPOINTMENT_DATA_BY_LAST_APPOINTMENT_DATE,pad);
+            case PATIENT_APPOINTMENT_DATA_WITHOUT_APPOINTMENT:
+                entity = (Entity)runSQL(Repository.EntityType.PATIENT_APPOINTMENT_DATA,Repository.PMSSQL.READ_PATIENT_APPOINTMENT_DATA_WITHOUT_APPOINTMENT,pad);
                 break;
             default:
-                String message = "Unexpected read scope encountered (" + pad.getScope().toString() +")\n";
-                message = message = "StoreEXception raised in " + this.getClass().getSimpleName() + "::read(PatientAppointmentData)";
-                throw new StoreException(message, StoreException.ExceptionType.UNEXPECTED_READ_SCOPE_ENCOUNTERED);
+                entity = (Entity)runSQL(Repository.EntityType.PATIENT_APPOINTMENT_DATA,Repository.PMSSQL.PATIENT_APPOINTMENT_DATA_WITH_APPOINTMENT,pad);
+                break;
         }
         if (entity!=null){
             if (entity.getIsPatientAppointmentData()){

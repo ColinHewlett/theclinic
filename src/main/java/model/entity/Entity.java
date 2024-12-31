@@ -111,7 +111,6 @@ public class Entity implements IStoreClient{
                         EMERGENCY,              //on an appointment deletion to make deletion permanent
                         BY_PATIENT,                 //PatientAppointmentData ordered by patient surname
                         BY_RECALL_DATE,             //PatientAppointmentData ordered by recall date
-                        BY_LAST_APPOINTMENT_DATE,   //PatientAppointmentData ordered by last appointment date
                         FOR_APPOINTMENT,        //clinic note or treatment for appointment
                         FOR_TREATMENT,          //appointment for treatment
                         FOR_QUESTION,
@@ -126,6 +125,8 @@ public class Entity implements IStoreClient{
                         DELETED_FOR_PATIENT,    //deleted appointments for this patient (when a deleted patient is being recovered)         
                         DELETED,                //deleted patients
                         FROM_DAY,               //appointmens from this day
+                        PATIENT_APPOINTMENT_DATA_WITH_APPOINTMENT,
+                        PATIENT_APPOINTMENT_DATA_WITHOUT_APPOINTMENT, //patient appointment data for patient with no appointments
                         SINGLE,                 // this entity only
                         UNACTIONED,             //unactioned patient notifications
                         WITH_NAME,              //for duplicated username check (ADD_NEW_CREDENTIAL)

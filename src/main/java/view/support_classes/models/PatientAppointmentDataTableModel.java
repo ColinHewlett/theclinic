@@ -94,6 +94,7 @@ public class PatientAppointmentDataTableModel extends DefaultTableModel{
 
     @Override
     public Object getValueAt(int row, int columnIndex){
+        int temp = 0;
         Object result = null;
         PatientAppointmentData pad = getPatientAppointmentAnalyses().get(row);
         for (COLUMN column: COLUMN.values()){
@@ -107,7 +108,9 @@ public class PatientAppointmentDataTableModel extends DefaultTableModel{
                             result = pad.getPatient();
                             break;
                         case LastAppointment:
-                            result = pad.getAppointment().getStart().toLocalDate();
+                            if (pad.getAppointment().getIsKeyDefined())
+                                result = pad.getAppointment().getStart().toLocalDate();
+                            else result = null;
                             break;
                         case Treatment:
                             result = pad.getAppointment().getNotes();

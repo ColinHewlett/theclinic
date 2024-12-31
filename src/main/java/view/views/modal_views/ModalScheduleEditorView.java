@@ -311,31 +311,39 @@ public class ModalScheduleEditorView extends ModalView implements ActionListener
     }
     
     private void populateSelectStartTime(LocalDate day){
+        ArrayList<Appointment> appointments = getMyController().getDescriptor().
+                getControllerDescription().getAppointmentSlotsForDayInListFormat();
+        Appointment firstAppointment = appointments.get(0);
+        Appointment lastAppointment = appointments.get(appointments.size()-1);
+        
         DefaultComboBoxModel<LocalDateTime> model = new DefaultComboBoxModel<>();
         LocalDateTime value;
         if (getMyController().getDescriptor().
-                getControllerDescription().getAppointmentEarlyStart()!=null){
+                getControllerDescription().getEarlyBookingStartTime()!=null){
             value = getMyController().getDescriptor().
-                    getControllerDescription().getAppointmentEarlyStart();
+                    getControllerDescription().getEarlyBookingStartTime();
             do{
                 model.addElement(value);
                 value = value.plusMinutes(5);   
-            }while(value.isBefore(day.atTime(ViewController.FIRST_APPOINTMENT_SLOT)));
+            }while(value.isBefore(day.atTime(ViewController.LAST_APPOINTMENT_SLOT)));
+        }else{
+            value = firstAppointment.getStart();
+            do{
+                model.addElement(value);
+                value = value.plusMinutes(5);   
+            }while(value.isBefore(day.atTime(ViewController.LAST_APPOINTMENT_SLOT)));
         }
-        value = day.atTime(ViewController.FIRST_APPOINTMENT_SLOT);
-        do{
+        value = day.atTime(ViewController.LAST_APPOINTMENT_SLOT);
+        if (getMyController().getDescriptor().
+                getControllerDescription().getLateBookingEndTime()!=null){ 
+            do{
+                model.addElement(value);
+                value = value.plusMinutes(5);   
+            }while(value.isBefore(lastAppointment.getEnd()));
+            value = lastAppointment.getEnd();
             model.addElement(value);
-            value = value.plusMinutes(5);   
-        }while(!value.isAfter(day.atTime(ViewController.LAST_APPOINTMENT_SLOT)));
-        if (getMyController().getDescriptor().getControllerDescription().getAppointmentLateStart()!=null){
-            if (getMyController().getDescriptor().getControllerDescription().getAppointmentLateStart().
-                    isAfter(day.atTime(ViewController.LAST_APPOINTMENT_SLOT))){
-                do{
-                    model.addElement(value);
-                    value = value.plusMinutes(5);  
-                }while(!value.isAfter(getMyController().getDescriptor().
-                        getControllerDescription().getAppointmentLateStart()));
-            }
+        }else{
+            model.addElement(value);   
         }        
         this.cmbSelectStartTime.setModel(model);
     }
@@ -381,6 +389,7 @@ public class ModalScheduleEditorView extends ModalView implements ActionListener
         DatePickerSettings dps = dayDatePicker.getSettings();
         dps.setVetoPolicy(new AppointmentDateVetoPolicy(getMyController().getDescriptor().getControllerDescription().getSurgeryDaysAssignment()));
         dayDatePicker.setDate(getMyController().getDescriptor().getControllerDescription().getAppointment().getStart().toLocalDate());
+        
         this.cmbSelectStartTime.setSelectedItem(
                 getMyController().getDescriptor().getControllerDescription().getAppointment().getStart());
         this.spnDurationHours.setValue(getHoursFromDuration(getMyController().getDescriptor()
@@ -568,7 +577,7 @@ public class ModalScheduleEditorView extends ModalView implements ActionListener
         pnlScheduleDetails = new javax.swing.JPanel();
         pnlStartAndDuration = new javax.swing.JPanel();
         cmbSelectStartTime = cmbSelectStartTime = new javax.swing.JComboBox<LocalDateTime>();
-        spnDurationHours = new javax.swing.JSpinner();
+        spnDurationHours = new javax.swing.JSpinner(new SpinnerNumberModel(0,0,8,1));
         spnDurationMinutes = new javax.swing.JSpinner(new SpinnerNumberModel(0,0,55,5));
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();

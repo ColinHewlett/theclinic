@@ -14,8 +14,10 @@ import java.util.ArrayList;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.DayOfWeek;
 import java.util.HashMap;
+import java.util.List;
 
 
 /**
@@ -74,7 +76,7 @@ public class Descriptor {
         return controllerDescription;
     }
     
-    public class ControllerDescription{
+    public class ControllerDescription<T>{
         ViewController.ViewMode viewMode = null;
         ViewController.ScheduleViewMode scheduleViewMode = null;
         private Doctor doctor = null;
@@ -237,6 +239,30 @@ public class Descriptor {
         }
         public void setMedication(Medication value){
             medication = value;
+        }
+        
+        private LocalDateTime earlyBookingStartTime = null;
+        public LocalDateTime getEarlyBookingStartTime(){
+            return earlyBookingStartTime;
+        }
+        public void setEarlyBookingStartTime(LocalDateTime value){
+            earlyBookingStartTime = value;
+        }
+        
+        private LocalDateTime lateBookingEndTime = null;
+        public LocalDateTime getLateBookingEndTime(){
+            return lateBookingEndTime;
+        }
+        public void setLateBookingEndTime(LocalDateTime value){
+            lateBookingEndTime = value;
+        }
+        
+        private List<T> items = null;
+        public List<T> getListForDialog(){
+            return items;
+        }
+        public void setListForDialog(List<T> value){
+            items = value;
         }
         
         public LocalDateTime getAppointmentEarlyStart(){
@@ -434,7 +460,7 @@ public class Descriptor {
 
     }
     
-    public class ViewDescription {
+    public class ViewDescription<T> {
         ViewController.ViewMode viewMode = null;
         /*28/03/2024private PatientNote patientNote = null;*/
         private Appointment appointment = null;
@@ -471,6 +497,14 @@ public class Descriptor {
             scheduleViewMode = value;
         }
         
+        private T selectedItemFromDialog = null;
+        public T getSelectedItemFromDialog(){
+            return selectedItemFromDialog;
+        }
+        public void setSelectedItemFromDialog(T value){
+            selectedItemFromDialog = value;
+        }
+
         private ConditionWithState conditionWithState = null;
         public ConditionWithState getConditionWithState(){
             return conditionWithState; 
@@ -594,6 +628,22 @@ public class Descriptor {
         }
         public void setTreatment(Treatment value){
             treatment = value;
+        }
+        
+        private LocalDateTime earlyBookingStartTime = null;
+        public LocalDateTime getEarlyBookingStartTime(){
+            return earlyBookingStartTime;
+        }
+        public void setEarlyBookingStartTime(LocalDateTime value){
+            earlyBookingStartTime = value;
+        }
+        
+        private LocalDateTime lateBookingEndTime = null;
+        public LocalDateTime getLateBookingEndTime(){
+            return lateBookingEndTime;
+        }
+        public void setLateBookingEndTime(LocalDateTime value){
+            lateBookingEndTime = value;
         }
         
         private ClinicalNote clinicalNote = null;

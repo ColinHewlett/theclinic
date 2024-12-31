@@ -696,10 +696,6 @@ public class NotificationView extends View implements ItemListener {
                 (int)((deskTopViewDimension.getHeight()) - myViewDimension.getHeight())/2);
         
         view.setLocation(point);
-        System.out.println("Location = " + point);
-        System.out.println("Desktop size = " + desktopView.getSize());
-        System.out.println("Internal frame size = " + view.getSize());
-        System.out.println("2 x point x = " + desktopView.getWidth()+ "-" + view.getWidth());
     }
     
     private void createNotificationTable(){

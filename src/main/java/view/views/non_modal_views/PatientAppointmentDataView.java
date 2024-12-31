@@ -23,10 +23,14 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.ListSelectionModel;
+import javax.swing.border.TitledBorder;
 import javax.swing.table.JTableHeader;
+import javax.swing.table.TableRowSorter;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
 import model.entity.Entity;
+import model.non_entity.SystemDefinition;
 import view.View;
 import view.support_classes.models.PatientAppointmentDataTableModel;
 import view.support_classes.renderers.AppointmentsTableLocalDateRenderer;
@@ -79,6 +83,15 @@ public class PatientAppointmentDataView extends View
 
                 }
                 break;
+            case REQUEST_PATIENT_WITHOUT_APPOINTMENT:
+                pad = new PatientAppointmentData();
+                pad.setScope(Entity.Scope.PATIENT_APPOINTMENT_DATA_WITHOUT_APPOINTMENT);
+                pad.setFromYear(getMyController().getDescriptor().getControllerDescription().getPatientAppointmentData().getFromYear());
+                pad.setToYear(getMyController().getDescriptor().getControllerDescription().getPatientAppointmentData().getToYear());
+                getMyController().getDescriptor().getViewDescription().setPatientAppointmentData(pad);
+                doSendActionEvent(ViewController.
+                        PatientAppointmentDataViewControllerActionEvent.PATIENT_APPOINTMENT_DATA_REQUEST);
+                break;
             case REQUEST_SET_TIME_FRAME:
                 pad = getMyController().getDescriptor().getControllerDescription().getPatientAppointmentData();
                 pad.setFromYear((Integer)this.spnFromYear.getValue());
@@ -87,17 +100,11 @@ public class PatientAppointmentDataView extends View
                 doSendActionEvent(ViewController.
                         PatientAppointmentDataViewControllerActionEvent.PATIENT_APPOINTMENT_DATA_REQUEST);
                 break;
-            case REQUEST_SORT_TABLE:
+            case REQUEST_PATIENTS_WITH_APPOINTMENTS:
                 pad = getMyController().getDescriptor().getControllerDescription().getPatientAppointmentData();
-                
-                switch(pad.getScope()){
-                    case BY_PATIENT:
-                        pad.setScope(Entity.Scope.BY_LAST_APPOINTMENT_DATE);
-                        break;
-                    case BY_LAST_APPOINTMENT_DATE:
-                        pad.setScope(Entity.Scope.BY_PATIENT);
-                        break;
-                }
+                pad.setFromYear(getMyController().getDescriptor().getControllerDescription().getPatientAppointmentData().getFromYear());
+                pad.setToYear(getMyController().getDescriptor().getControllerDescription().getPatientAppointmentData().getToYear());
+                pad.setScope(Entity.Scope.PATIENT_APPOINTMENT_DATA_WITH_APPOINTMENT);
                 getMyController().getDescriptor().getViewDescription().setPatientAppointmentData(pad);
                 doSendActionEvent(ViewController.
                         PatientAppointmentDataViewControllerActionEvent.PATIENT_APPOINTMENT_DATA_REQUEST);
@@ -146,7 +153,33 @@ public class PatientAppointmentDataView extends View
         setVisible(true);
         addInternalFrameListeners();
       
-        //spnToYear.setValue(String.valueOf(2024));
+        this.pnlPatientAppointmentData.setBorder(javax.swing.BorderFactory.createTitledBorder(
+        javax.swing.BorderFactory.createEtchedBorder(), 
+        "Last appointment for each patient", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, 
+        javax.swing.border.TitledBorder.DEFAULT_POSITION, 
+        SystemDefinition.TITLED_BORDER_FONT, 
+        SystemDefinition.TITLED_BORDER_COLOR));// NOI18N
+        
+        this.pnlActions.setBorder(javax.swing.BorderFactory.createTitledBorder(
+        javax.swing.BorderFactory.createEtchedBorder(), 
+        "Actions", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, 
+        javax.swing.border.TitledBorder.DEFAULT_POSITION, 
+        SystemDefinition.TITLED_BORDER_FONT, 
+        SystemDefinition.TITLED_BORDER_COLOR));// NOI18N
+        
+        this.pnlTimeFrame.setBorder(javax.swing.BorderFactory.createTitledBorder(
+        javax.swing.BorderFactory.createEtchedBorder(), 
+        "Set time frame", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, 
+        javax.swing.border.TitledBorder.DEFAULT_POSITION, 
+        SystemDefinition.TITLED_BORDER_FONT, 
+        SystemDefinition.TITLED_BORDER_COLOR));// NOI18N
+        
+        this.pnlPatientActivity.setBorder(javax.swing.BorderFactory.createTitledBorder(
+        javax.swing.BorderFactory.createEtchedBorder(), 
+        "Patient activity", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, 
+        javax.swing.border.TitledBorder.DEFAULT_POSITION, 
+        SystemDefinition.TITLED_BORDER_FONT, 
+        SystemDefinition.TITLED_BORDER_COLOR));// NOI18N
         
         // Set a NumberEditor without commas
         JSpinner.NumberEditor editor1 = new JSpinner.NumberEditor(spnFromYear, "#");
@@ -158,14 +191,19 @@ public class PatientAppointmentDataView extends View
         spnFromYear.setEditor(editor1);
         spnToYear.setEditor(editor2);
         
+        this.rdbNoAppointments.setActionCommand(Action.REQUEST_PATIENT_WITHOUT_APPOINTMENT.toString());
+        this.rdbSomeAppointments.setActionCommand(Action.REQUEST_PATIENTS_WITH_APPOINTMENTS.toString());
+        this.rdbNoAppointments.addActionListener(this);
+        this.rdbSomeAppointments.addActionListener(this);
+        
+        
         this.btnArchiveSelectedPatient.setActionCommand(Action.REQUEST_ARCHIVE_PATIENT.toString());
         this.btnCloseView.setActionCommand(Action.REQUEST_CLOSE_VIEW.toString());
         this.btnSetTimeFrame.setActionCommand(Action.REQUEST_SET_TIME_FRAME.toString());
-        this.btnSortTable.setActionCommand(Action.REQUEST_SORT_TABLE.toString());
         this.btnArchiveSelectedPatient.addActionListener(this);
         this.btnCloseView.addActionListener(this);
         this.btnSetTimeFrame.addActionListener(this);
-        this.btnSortTable.addActionListener(this);
+        
         this.btnArchiveSelectedPatient.setText(
                 Captions.PatientAppointmentDataView.PATIENT_ARCHIVE_RESTORE_REQUEST_CAPTION._1());
         this.btnCloseView.setText(Captions.CLOSE_VIEW);
@@ -185,12 +223,18 @@ public class PatientAppointmentDataView extends View
         this.tblPatientAppointmentData.setDefaultRenderer(Patient.class, new TablePatientEmboldenedRenderer());
         ViewController.setJTableColumnProperties(tblPatientAppointmentData, this.scrPatientAppointmentDataTable.getPreferredSize().width, 20,7,10,18,19,7,5,7,7);
         
+        // Attach the TableRowSorter
+        PatientAppointmentDataTableModel model = (PatientAppointmentDataTableModel)this.tblPatientAppointmentData.getModel();
+        TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(model);
+        tblPatientAppointmentData.setRowSorter(sorter);
         //javax.swing.SwingUtilities.invokeLater(() -> {
             PatientAppointmentData pad  = new PatientAppointmentData();        
             pad.setFromYear(1992);
             pad.setToYear(LocalDate.now().getYear() + 1);
-            pad.setScope(Entity.Scope.BY_LAST_APPOINTMENT_DATE);
+            pad.setScope(Entity.Scope.PATIENT_APPOINTMENT_DATA_WITH_APPOINTMENT);
             getMyController().getDescriptor().getViewDescription().setPatientAppointmentData(pad);
+            
+            this.rdbSomeAppointments.setSelected(true);
             doSendActionEvent(ViewController.PatientAppointmentDataViewControllerActionEvent.PATIENT_APPOINTMENT_DATA_REQUEST);
         //});
         
@@ -245,33 +289,37 @@ public class PatientAppointmentDataView extends View
     }
     
     private void populatePatientAppointmentDataTable(PatientAppointmentData pad){
+        TitledBorder titledBorder = null;
         PatientAppointmentDataTableModel model = 
                 (PatientAppointmentDataTableModel)tblPatientAppointmentData.getModel();
         model.removeAllElements();
         model.setData(pad.get());
+        switch (pad.getScope()){
+            case PATIENT_APPOINTMENT_DATA_WITHOUT_APPOINTMENT:
+                titledBorder = (TitledBorder)pnlPatientAppointmentData.getBorder();
+                titledBorder.setTitle("Patients who have not yet had an appointment (" + pad.get().size() + ")");
+                pnlPatientAppointmentData.repaint();
+                break;
+            default:
+                titledBorder = (TitledBorder)pnlPatientAppointmentData.getBorder();
+                titledBorder.setTitle("Last appointment date for each patient (" + pad.get().size() + ")");
+                pnlPatientAppointmentData.repaint();
+                break;
+        }
     }
 
     private void initialiseViewState(PatientAppointmentData pad){
         this.spnFromYear.setValue(pad.getFromYear());
         this.spnToYear.setValue(pad.getToYear());
-        switch(pad.getScope()){
-            case BY_LAST_APPOINTMENT_DATE:
-                this.btnSortTable.setText(
-                        Captions.PatientAppointmentDataView.PATIENT_APPOINTMENT_DATA_SORT_REQUEST_CAPTION._1());
-                break;
-            case BY_PATIENT:
-                this.btnSortTable.setText(
-                        Captions.PatientAppointmentDataView.PATIENT_APPOINTMENT_DATA_SORT_REQUEST_CAPTION._2());
-                break;
-        }
         tblPatientAppointmentData.clearSelection();
     }
     
     enum Action{
         REQUEST_CLOSE_VIEW,
         REQUEST_ARCHIVE_PATIENT,
+        REQUEST_PATIENT_WITHOUT_APPOINTMENT,
         REQUEST_SET_TIME_FRAME,
-        REQUEST_SORT_TABLE
+        REQUEST_PATIENTS_WITH_APPOINTMENTS
     }
 
     /**
@@ -283,11 +331,12 @@ public class PatientAppointmentDataView extends View
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        pnlPatientAppointmentAnalysisTable = new javax.swing.JPanel();
+        rdbGroup = new javax.swing.ButtonGroup();
+        pnlPatientAppointmentData = new javax.swing.JPanel();
         scrPatientAppointmentDataTable = new javax.swing.JScrollPane();
         tblPatientAppointmentData = new javax.swing.JTable(new PatientAppointmentDataTableModel());
         pnlActions = new javax.swing.JPanel();
-        pnlSetTimeFRame = new javax.swing.JPanel();
+        pnlTimeFrame = new javax.swing.JPanel();
         spnFromYear = new javax.swing.JSpinner(new SpinnerNumberModel(2024, 1992,2030,1));
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
@@ -295,9 +344,14 @@ public class PatientAppointmentDataView extends View
         btnSetTimeFrame = new javax.swing.JButton();
         btnArchiveSelectedPatient = new javax.swing.JButton();
         btnCloseView = new javax.swing.JButton();
-        btnSortTable = new javax.swing.JButton();
+        pnlPatientActivity = new javax.swing.JPanel();
+        rdbSomeAppointments = new javax.swing.JRadioButton();
+        rdbNoAppointments = new javax.swing.JRadioButton();
 
-        pnlPatientAppointmentAnalysisTable.setBorder(javax.swing.BorderFactory.createTitledBorder("Last appointment for each patient"));
+        rdbGroup.add(rdbSomeAppointments);
+        rdbGroup.add(rdbNoAppointments);
+
+        pnlPatientAppointmentData.setBorder(javax.swing.BorderFactory.createTitledBorder("Last appointment for each patient"));
 
         scrPatientAppointmentDataTable.setPreferredSize(new java.awt.Dimension(1192, 402));
 
@@ -305,26 +359,26 @@ public class PatientAppointmentDataView extends View
         );
         scrPatientAppointmentDataTable.setViewportView(tblPatientAppointmentData);
 
-        javax.swing.GroupLayout pnlPatientAppointmentAnalysisTableLayout = new javax.swing.GroupLayout(pnlPatientAppointmentAnalysisTable);
-        pnlPatientAppointmentAnalysisTable.setLayout(pnlPatientAppointmentAnalysisTableLayout);
-        pnlPatientAppointmentAnalysisTableLayout.setHorizontalGroup(
-            pnlPatientAppointmentAnalysisTableLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlPatientAppointmentAnalysisTableLayout.createSequentialGroup()
+        javax.swing.GroupLayout pnlPatientAppointmentDataLayout = new javax.swing.GroupLayout(pnlPatientAppointmentData);
+        pnlPatientAppointmentData.setLayout(pnlPatientAppointmentDataLayout);
+        pnlPatientAppointmentDataLayout.setHorizontalGroup(
+            pnlPatientAppointmentDataLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlPatientAppointmentDataLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(scrPatientAppointmentDataTable, javax.swing.GroupLayout.PREFERRED_SIZE, 1192, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
-        pnlPatientAppointmentAnalysisTableLayout.setVerticalGroup(
-            pnlPatientAppointmentAnalysisTableLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlPatientAppointmentAnalysisTableLayout.createSequentialGroup()
+        pnlPatientAppointmentDataLayout.setVerticalGroup(
+            pnlPatientAppointmentDataLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlPatientAppointmentDataLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(scrPatientAppointmentDataTable, javax.swing.GroupLayout.PREFERRED_SIZE, 499, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(scrPatientAppointmentDataTable, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
         pnlActions.setBorder(javax.swing.BorderFactory.createTitledBorder("Actions"));
 
-        pnlSetTimeFRame.setBorder(javax.swing.BorderFactory.createTitledBorder("Time frame"));
+        pnlTimeFrame.setBorder(javax.swing.BorderFactory.createTitledBorder("Time frame"));
 
         jLabel1.setText("From year");
 
@@ -333,41 +387,71 @@ public class PatientAppointmentDataView extends View
 
         btnSetTimeFrame.setText("Set time frame");
 
-        javax.swing.GroupLayout pnlSetTimeFRameLayout = new javax.swing.GroupLayout(pnlSetTimeFRame);
-        pnlSetTimeFRame.setLayout(pnlSetTimeFRameLayout);
-        pnlSetTimeFRameLayout.setHorizontalGroup(
-            pnlSetTimeFRameLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlSetTimeFRameLayout.createSequentialGroup()
+        javax.swing.GroupLayout pnlTimeFrameLayout = new javax.swing.GroupLayout(pnlTimeFrame);
+        pnlTimeFrame.setLayout(pnlTimeFrameLayout);
+        pnlTimeFrameLayout.setHorizontalGroup(
+            pnlTimeFrameLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlTimeFrameLayout.createSequentialGroup()
                 .addGap(28, 28, 28)
-                .addGroup(pnlSetTimeFRameLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                .addGroup(pnlTimeFrameLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(spnToYear)
                     .addComponent(jLabel1)
                     .addComponent(spnFromYear)
                     .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-            .addGroup(pnlSetTimeFRameLayout.createSequentialGroup()
+            .addGroup(pnlTimeFrameLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(btnSetTimeFrame, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
         );
-        pnlSetTimeFRameLayout.setVerticalGroup(
-            pnlSetTimeFRameLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlSetTimeFRameLayout.createSequentialGroup()
+        pnlTimeFrameLayout.setVerticalGroup(
+            pnlTimeFrameLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlTimeFrameLayout.createSequentialGroup()
                 .addGap(4, 4, 4)
                 .addComponent(jLabel1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(spnFromYear, javax.swing.GroupLayout.DEFAULT_SIZE, 30, Short.MAX_VALUE)
+                .addComponent(spnFromYear, javax.swing.GroupLayout.DEFAULT_SIZE, 26, Short.MAX_VALUE)
                 .addGap(18, 18, 18)
                 .addComponent(jLabel2)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(spnToYear, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(btnSetTimeFrame)
-                .addContainerGap(14, Short.MAX_VALUE))
+                .addContainerGap(10, Short.MAX_VALUE))
         );
 
-        btnSortTable.setText("<html><center>Sort</center><center>table by</center><center>appointment date</center></html>");
-        btnSortTable.setActionCommand("");
+        btnArchiveSelectedPatient.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnArchiveSelectedPatientActionPerformed(evt);
+            }
+        });
+
+        pnlPatientActivity.setBorder(javax.swing.BorderFactory.createTitledBorder("Patient activity"));
+
+        rdbSomeAppointments.setText("1 or more appointments");
+
+        rdbNoAppointments.setText("no appointments");
+
+        javax.swing.GroupLayout pnlPatientActivityLayout = new javax.swing.GroupLayout(pnlPatientActivity);
+        pnlPatientActivity.setLayout(pnlPatientActivityLayout);
+        pnlPatientActivityLayout.setHorizontalGroup(
+            pnlPatientActivityLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlPatientActivityLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(pnlPatientActivityLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(rdbSomeAppointments, javax.swing.GroupLayout.DEFAULT_SIZE, 152, Short.MAX_VALUE)
+                    .addComponent(rdbNoAppointments, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
+        );
+        pnlPatientActivityLayout.setVerticalGroup(
+            pnlPatientActivityLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlPatientActivityLayout.createSequentialGroup()
+                .addGap(21, 21, 21)
+                .addComponent(rdbSomeAppointments)
+                .addGap(26, 26, 26)
+                .addComponent(rdbNoAppointments)
+                .addContainerGap(29, Short.MAX_VALUE))
+        );
 
         javax.swing.GroupLayout pnlActionsLayout = new javax.swing.GroupLayout(pnlActions);
         pnlActions.setLayout(pnlActionsLayout);
@@ -377,23 +461,23 @@ public class PatientAppointmentDataView extends View
                 .addContainerGap()
                 .addGroup(pnlActionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(btnCloseView, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(pnlSetTimeFRame, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(pnlTimeFrame, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(btnArchiveSelectedPatient, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(btnSortTable))
+                    .addComponent(pnlPatientActivity, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         pnlActionsLayout.setVerticalGroup(
             pnlActionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlActionsLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(pnlSetTimeFRame, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(pnlTimeFrame, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(pnlPatientActivity, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
-                .addComponent(btnArchiveSelectedPatient, javax.swing.GroupLayout.PREFERRED_SIZE, 81, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addComponent(btnSortTable, javax.swing.GroupLayout.PREFERRED_SIZE, 81, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addComponent(btnCloseView, javax.swing.GroupLayout.PREFERRED_SIZE, 87, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
+                .addComponent(btnArchiveSelectedPatient, javax.swing.GroupLayout.PREFERRED_SIZE, 124, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(38, 38, 38)
+                .addComponent(btnCloseView, javax.swing.GroupLayout.PREFERRED_SIZE, 123, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(23, 23, 23))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -402,37 +486,42 @@ public class PatientAppointmentDataView extends View
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGap(16, 16, 16)
-                .addComponent(pnlPatientAppointmentAnalysisTable, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(pnlPatientAppointmentData, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGap(12, 12, 12)
                 .addComponent(pnlActions, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(14, 14, 14))
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGap(16, 16, 16)
-                .addComponent(pnlPatientAppointmentAnalysisTable, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(12, Short.MAX_VALUE))
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(pnlActions, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(pnlPatientAppointmentData, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(pnlActions, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void btnArchiveSelectedPatientActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnArchiveSelectedPatientActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btnArchiveSelectedPatientActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnArchiveSelectedPatient;
     private javax.swing.JButton btnCloseView;
     private javax.swing.JButton btnSetTimeFrame;
-    private javax.swing.JButton btnSortTable;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JPanel pnlActions;
-    private javax.swing.JPanel pnlPatientAppointmentAnalysisTable;
-    private javax.swing.JPanel pnlSetTimeFRame;
+    private javax.swing.JPanel pnlPatientActivity;
+    private javax.swing.JPanel pnlPatientAppointmentData;
+    private javax.swing.JPanel pnlTimeFrame;
+    private javax.swing.ButtonGroup rdbGroup;
+    private javax.swing.JRadioButton rdbNoAppointments;
+    private javax.swing.JRadioButton rdbSomeAppointments;
     private javax.swing.JScrollPane scrPatientAppointmentDataTable;
     private javax.swing.JSpinner spnFromYear;
     private javax.swing.JSpinner spnToYear;

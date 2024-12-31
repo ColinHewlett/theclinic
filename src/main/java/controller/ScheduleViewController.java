@@ -36,6 +36,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Optional;
 import javax.swing.JOptionPane;
 import model.entity.AppointmentTreatment;
@@ -473,6 +474,17 @@ public class ScheduleViewController extends ViewController{
      * @param day, LocalDate
      */
     private void doAppointmentForDayRequest(LocalDate day){
+        Appointment lastAppointment = null;
+        LocalDateTime earlyStart = getDescriptor().getControllerDescription().getEarlyBookingStartTime();
+        LocalDateTime lateEnd = getDescriptor().getControllerDescription().getLateBookingEndTime();
+        if (earlyStart!=null){
+            if (!day.equals(earlyStart.toLocalDate()))
+                getDescriptor().getControllerDescription().setEarlyBookingStartTime(null);
+        }
+        if (lateEnd!=null){
+            if (!day.equals(lateEnd.toLocalDate()))
+                getDescriptor().getControllerDescription().setLateBookingEndTime(null);
+        }
         Appointment appointment = new Appointment();
         appointment.setStart(day.atStartOfDay());
         
@@ -483,20 +495,40 @@ public class ScheduleViewController extends ViewController{
             if (!appointment.get().isEmpty()){
                 if (appointment.get().get(0).getStart().
                         isBefore(day.atTime(ViewController.FIRST_APPOINTMENT_SLOT))){
-                    getDescriptor().getControllerDescription().
-                            setAppointmentEarlyStart(appointment.get().get(0).getStart());
+                    /*getDescriptor().getControllerDescription().
+                            setAppointmentEarlyStart(appointment.get().get(0).getStart());*/
+                    if (earlyStart!=null){
+                        if (!earlyStart.isBefore(appointment.get().get(0).getStart()))
+                            getDescriptor().getControllerDescription().
+                                    setEarlyBookingStartTime(appointment.get().get(0).getStart());
+                    }else{
+                        getDescriptor().getControllerDescription().
+                                    setEarlyBookingStartTime(appointment.get().get(0).getStart());
+                    }
                 }else getDescriptor().getControllerDescription().
                             setAppointmentEarlyStart(null);
             }
+            if (getDescriptor().getControllerDescription().getLateBookingEndTime()!=null){
+                if (!appointment.get().isEmpty()){ 
+                    lastAppointment = appointment.get().get(appointment.get().size()-1);
+                    if(!lastAppointment.getEnd().isBefore(getDescriptor().getControllerDescription().getLateBookingEndTime())){
+                        getDescriptor().getControllerDescription().setLateBookingEndTime(lastAppointment.getEnd());
+                    }
+                }
+            }
+            /*
             if (!appointment.get().isEmpty()){
-                if (appointment.get().get(appointment.get().size()-1).getStart().
-                        isAfter(day.atTime(ViewController.LAST_APPOINTMENT_SLOT))){
+                if ((lastAppointment.getStart().
+                        isAfter(day.atTime(ViewController.LAST_APPOINTMENT_SLOT))) ||
+                   (lastAppointment.getStart().
+                        isEqual(day.atTime(ViewController.LAST_APPOINTMENT_SLOT)))) {
                     getDescriptor().getControllerDescription().
-                            setAppointmentLateStart(appointment.get().
-                                    get(appointment.get().size()-1).getStart());
+                            setAppointmentLateStart(lastAppointment.getStart());
+                    getDescriptor().getControllerDescription().
+                            setLateBookingEndTime(lastAppointment.getStart().plusMinutes(lastAppointment.getDuration().toMinutes()));
                 }else getDescriptor().getControllerDescription().
                             setAppointmentLateStart(null);
-            }
+            }*/
             /**
              * generate appointment note from treatments selected
              */
@@ -550,8 +582,10 @@ public class ScheduleViewController extends ViewController{
                     a.setNotes(SystemDefinition.ScheduleSlotType.EMERGENCY_SCHEDULE_SLOT.mark());
                     scheduleListForTheDay.add(a);
                 }
-                for(Appointment a : getDescriptor()
-                        .getControllerDescription().getAppointmentSlotsForDayInListFormat()){
+                ArrayList<Appointment> test = getDescriptor()
+                        .getControllerDescription().getAppointmentSlotsForDayInListFormat();
+                for (Appointment a: test){ 
+                //for(Appointment a : getDescriptor().getControllerDescription().getAppointmentSlotsForDayInListFormat()){
                     scheduleListForTheDay.add(a);
                 }
                 getDescriptor().getControllerDescription()
@@ -673,120 +707,14 @@ public class ScheduleViewController extends ViewController{
      * @param e, ActionEvent received 
      */
     private void doPrimaryViewActionRequest(ActionEvent e){ 
+        ActionEvent actionEvent = null;
+        Appointment appointment = null;
         Appointment result = null;
         Appointment changedSlotRequest = 
-                getDescriptor().getViewDescription().getAppointment();
-        
+                getDescriptor().getViewDescription().getAppointment();    
         ViewController.ScheduleViewControllerActionEvent actionCommand =
                ViewController.ScheduleViewControllerActionEvent.valueOf(e.getActionCommand());
         switch (actionCommand){
-            case SWITCH_VIEW_REQUEST:
-                doSwitchView();
-                break;
-            case BOOKABLE_SLOT_SCANNER_VIEW_REQUEST:
-                doBookableSlotScannerViewRequest(e);
-                break;
-            case UNBOOKABLE_SLOT_SCANNER_VIEW_REQUEST:
-                doUnbookableSlotScannerViewRequest();
-                break;
-            case CLINICAL_NOTE_VIEW_REQUEST:
-                doClinicalNoteViewRequest();
-                break;
-            case CREATE_APPOINTMENT_REQUEST:
-                LocalDate day = changedSlotRequest.getStart().toLocalDate();
-                setScheduleReport(new ScheduleReport());
-                result = doAppointmentCreateRequest(e, getDescriptor().getViewDescription().getAppointment());
-                if (result!=null){
-                    mergeScheduleSlotsIfPossible(day);
-                    doAppointmentForDayRequest(day);
-                    getDescriptor().getControllerDescription().setPatient(result.getPatient());
-                    firePropertyChangeEvent(
-                            ViewController.DesktopViewControllerPropertyChangeEvent.
-                                    SCHEDULE_VIEW_CONTROLLER_CHANGE_NOTIFICATION.toString(),
-                            (DesktopViewController)getMyController(),
-                            this,
-                            null,
-                            getDescriptor()
-                    );
-                }
-                else {
-                    sendErrorToScheduleEditorView();
-                    doAppointmentForDayRequest(day);
-                }
-                break;
-            case UPDATE_APPOINTMENT_REQUEST:
-                //day = changedSlotRequest.getStart().toLocalDate();
-                setScheduleReport(new ScheduleReport());
-                result = doAppointmentUpdateRequest(e,changedSlotRequest);
-                if(result!=null){
-                    //mergeScheduleSlotsIfPossible(day);
-                    //doAppointmentForDayRequest(day);
-                    mergeScheduleSlotsIfPossible(getDescriptor().getControllerDescription().getScheduleDay());
-                    doAppointmentForDayRequest(getDescriptor().getControllerDescription().getScheduleDay());
-                    getDescriptor().getControllerDescription().setPatient(result.getPatient());
-                    firePropertyChangeEvent(
-                            ViewController.DesktopViewControllerPropertyChangeEvent.
-                                    SCHEDULE_VIEW_CONTROLLER_CHANGE_NOTIFICATION.toString(),
-                            (DesktopViewController)getMyController(),
-                            this,
-                            null,
-                            getDescriptor()
-                    );
-                    
-                }
-                else {
-                    sendErrorToScheduleEditorView();
-                    //doAppointmentForDayRequest(day);
-                    doAppointmentForDayRequest(getDescriptor().getControllerDescription().getScheduleDay());
-                }
-                break;
-            case PRINT_SCHEDULE_REQUEST:
-                doPrintAppointmentScheduleForDay(
-                        getDescriptor().getViewDescription().getScheduleDay());
-                break;
-            case APPOINTMENT_REMINDED_STATUS_UPDATE_REQUEST:
-                Appointment appointment = 
-                        getDescriptor().getViewDescription().getAppointment();
-                try{
-                    /*05/04/2024 19:31 code update */
-                    //Appointment temp = new Appointment(appointment.getKey());
-                    //temp.setScope(Entity.Scope.SINGLE);
-                    //temp = temp.read();
-                    //appointment.setNotes(temp.getNotes());
-                    /*end of code update*/
-                    appointment.update();
-                    /*05/04/2024 19:31 next line required to refresh schedule view*/
-                    doAppointmentForDayRequest(appointment.getStart().toLocalDate());
-                }catch (StoreException ex){
-                    displayErrorMessage(ex.getMessage(), 
-                            "Schedule view controller",JOptionPane.WARNING_MESSAGE);
-                }
-                break;
-            case APPOINTMENTS_CANCELLED_VIEW_REQUEST:
-                doAppointmentsCancelledViewRequest();
-                break;
-            case VIEW_CLOSE_NOTIFICATION:
-                ActionEvent actionEvent = new ActionEvent(
-                    this,ActionEvent.ACTION_PERFORMED,
-                    ViewController.DesktopViewControllerActionEvent.
-                            VIEW_CONTROLLER_CLOSE_NOTIFICATION.toString());
-                getMyController().actionPerformed(actionEvent);
-                break;
-            case VIEW_ACTIVATED_NOTIFICATION:
-                actionEvent = new ActionEvent(
-                        this,ActionEvent.ACTION_PERFORMED,
-                        ViewController.DesktopViewControllerActionEvent.
-                                VIEW_CONTROLLER_ACTIVATED_NOTIFICATION.toString());
-                //this.actionPerformed(actionEvent);
-                 this.getMyController().actionPerformed(actionEvent);
-                 break;
-            case VIEW_CHANGED_NOTIFICATION:
-                 actionEvent = new ActionEvent(
-                        this,ActionEvent.ACTION_PERFORMED,
-                        ViewController.DesktopViewControllerActionEvent.
-                                VIEW_CONTROLLER_CHANGED_NOTIFICATION.toString());
-                 this.getMyController().actionPerformed(actionEvent);
-                 break;
             case APPOINTMENT_CANCEL_REQUEST:
                 appointment = getDescriptor().getViewDescription().getAppointment();
                 if(!appointment.getIsEmergency()){
@@ -829,13 +757,9 @@ public class ScheduleViewController extends ViewController{
                         getDescriptor()
                 );
                 break;
-            case UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_VIEW_REQUEST:
-                doUnbookableAppointmentSlotEditorViewRequest();
+            case APPOINTMENTS_CANCELLED_VIEW_REQUEST:
+                doAppointmentsCancelledViewRequest();
                 break;
-                /*
-            case CLINICAL_NOTE_VIEW_CONTROLLER_REQUEST:
-                doClinicalNoteViewControllerRequest();
-                break;*/
             case APPOINTMENT_CREATE_VIEW_REQUEST:
                 getDescriptor().getControllerDescription().
                     setViewMode(ViewController.ViewMode.CREATE);
@@ -844,21 +768,8 @@ public class ScheduleViewController extends ViewController{
             case APPOINTMENT_EDITOR_TREATMENT_VIEW_REQUEST:
                 doOpenTreatmentView();
                 break;
-            case SCHEDULE_EDITOR_MAKE_EMERGENCY_APPOINTMENT_REQUEST:
-                doMakeEmergencyAppointmentViewRequest();
-                break;
-            case SCHEDULE_EDITOR_DELETE_EMERGENCY_APPOINTMENT_REQUEST:
-                doDeleteEmergencyAppointmentRequest();
-                break;
-            case APPOINTMENT_UPDATE_VIEW_REQUEST:
-                getDescriptor().getControllerDescription().
-                    setViewMode(ViewController.ViewMode.UPDATE);
-                doAppointmentUpdateViewRequest();
-                break;
             case APPOINTMENTS_FOR_DAY_REQUEST:
                 setScheduleDay(getDescriptor().getViewDescription().getScheduleDay());
-                
-                
                 doAppointmentForDayRequest(getDescriptor().
                         getControllerDescription().getScheduleDay());
                 firePropertyChangeEvent(
@@ -880,81 +791,195 @@ public class ScheduleViewController extends ViewController{
                                 CLOSE_SCHEDULE_VIEW_WITH_SAME_DATE_REQUEST/*SCHEDULE_LIST_VIEW_CONTROLLER_REQUEST*/.toString());
                 this.getMyController().actionPerformed(actionEvent);
                 break;
-            /*
-            case MODAL_VIEWER_ACTIVATED://notification from view uts shutting down
-                doModalViewerActivated();
+            case APPOINTMENT_REMINDED_STATUS_UPDATE_REQUEST:
+                appointment = getDescriptor().getViewDescription().getAppointment();
+                try{
+                    appointment.update();
+                    /*05/04/2024 19:31 next line required to refresh schedule view*/
+                    doAppointmentForDayRequest(appointment.getStart().toLocalDate());
+                }catch (StoreException ex){
+                    displayErrorMessage(ex.getMessage(), 
+                            "Schedule view controller",JOptionPane.WARNING_MESSAGE);
+                }
                 break;
-            */
+            case APPOINTMENT_UPDATE_VIEW_REQUEST:
+                getDescriptor().getControllerDescription().
+                    setViewMode(ViewController.ViewMode.UPDATE);
+                doAppointmentUpdateViewRequest();
+                break;
+            case BOOKABLE_SLOT_SCANNER_VIEW_REQUEST:
+                doBookableSlotScannerViewRequest(e);
+                break;
+            case CLINICAL_NOTE_VIEW_REQUEST:
+                doClinicalNoteViewRequest();
+                break;
+            case CREATE_APPOINTMENT_REQUEST:
+                LocalDate day = changedSlotRequest.getStart().toLocalDate();
+                setScheduleReport(new ScheduleReport());
+                result = doAppointmentCreateRequest(e, getDescriptor().getViewDescription().getAppointment());
+                if (result!=null){
+                    mergeScheduleSlotsIfPossible(day);
+                    doAppointmentForDayRequest(day);
+                    getDescriptor().getControllerDescription().setPatient(result.getPatient());
+                    firePropertyChangeEvent(
+                            ViewController.DesktopViewControllerPropertyChangeEvent.
+                                    SCHEDULE_VIEW_CONTROLLER_CHANGE_NOTIFICATION.toString(),
+                            (DesktopViewController)getMyController(),
+                            this,
+                            null,
+                            getDescriptor()
+                    );
+                }
+                else {
+                    sendErrorToScheduleEditorView();
+                    doAppointmentForDayRequest(day);
+                }
+                break;
+            case EMPTY_SLOT_SCAN_CONFIGURATION_VIEW_REQUEST: 
+                doEmptySlotScannerDialogRequest(e);
+                break;
+            case FIRST_APPOINTMENT_START_TIME_REQUEST:
+                LocalDateTime requestedEarlyStart = getDescriptor().getViewDescription().getEarlyBookingStartTime();
+                getDescriptor().getControllerDescription().setEarlyBookingStartTime(requestedEarlyStart);
+                /**
+                 * extra code to implement early start time
+                 */
+                doAppointmentForDayRequest(getDescriptor().getControllerDescription().getScheduleDay());
+                break;
+            case LAST_APPOINTMENT_END_TIME_REQUEST:
+                LocalDateTime requestedLateEnd = getDescriptor().getViewDescription().getLateBookingEndTime();
+                getDescriptor().getControllerDescription().setLateBookingEndTime(requestedLateEnd);
+                doAppointmentForDayRequest(getDescriptor().getControllerDescription().getScheduleDay());
+                break;
             case NON_SURGERY_DAY_SCHEDULE_VIEW_REQUEST:
                 doNonSurgeryDayScheduleViewRequest();
+                break;
+            case PRINT_SCHEDULE_REQUEST:
+                doPrintAppointmentScheduleForDay(
+                        getDescriptor().getViewDescription().getScheduleDay());
+                break;
+            case SCHEDULE_EDITOR_DELETE_EMERGENCY_APPOINTMENT_REQUEST:
+                doDeleteEmergencyAppointmentRequest();
+                break;
+            case SCHEDULE_EDITOR_MAKE_EMERGENCY_APPOINTMENT_REQUEST:
+                doMakeEmergencyAppointmentViewRequest();
                 break;
             case SURGERY_DAYS_EDITOR_VIEW_REQUEST:
                 doSurgeryDayScheduleViewRequest();
                 break;
-            case EMPTY_SLOT_SCAN_CONFIGURATION_VIEW_REQUEST: 
-                doEmptySlotScannerDialogRequest(e);
-                break;     
+            case SWITCH_VIEW_REQUEST:
+                doSwitchView();
+                break;
+            case UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_VIEW_REQUEST:
+                doUnbookableAppointmentSlotEditorViewRequest();
+                break;
+            case UNBOOKABLE_SLOT_SCANNER_VIEW_REQUEST:
+                doUnbookableSlotScannerViewRequest();
+                break;
+            case UPDATE_APPOINTMENT_REQUEST:
+                //day = changedSlotRequest.getStart().toLocalDate();
+                setScheduleReport(new ScheduleReport());
+                result = doAppointmentUpdateRequest(e,changedSlotRequest);
+                if(result!=null){
+                    //mergeScheduleSlotsIfPossible(day);
+                    //doAppointmentForDayRequest(day);
+                    mergeScheduleSlotsIfPossible(getDescriptor().getControllerDescription().getScheduleDay());
+                    doAppointmentForDayRequest(getDescriptor().getControllerDescription().getScheduleDay());
+                    getDescriptor().getControllerDescription().setPatient(result.getPatient());
+                    firePropertyChangeEvent(
+                            ViewController.DesktopViewControllerPropertyChangeEvent.
+                                    SCHEDULE_VIEW_CONTROLLER_CHANGE_NOTIFICATION.toString(),
+                            (DesktopViewController)getMyController(),
+                            this,
+                            null,
+                            getDescriptor()
+                    );
+                }
+                else {
+                    sendErrorToScheduleEditorView();
+                    //doAppointmentForDayRequest(day);
+                    doAppointmentForDayRequest(getDescriptor().getControllerDescription().getScheduleDay());
+                }
+                break;
+            case VIEW_ACTIVATED_NOTIFICATION:
+                actionEvent = new ActionEvent(
+                        this,ActionEvent.ACTION_PERFORMED,
+                        ViewController.DesktopViewControllerActionEvent.
+                                VIEW_CONTROLLER_ACTIVATED_NOTIFICATION.toString());
+                //this.actionPerformed(actionEvent);
+                 this.getMyController().actionPerformed(actionEvent);
+                 break;
+            case VIEW_CHANGED_NOTIFICATION:
+                 actionEvent = new ActionEvent(
+                        this,ActionEvent.ACTION_PERFORMED,
+                        ViewController.DesktopViewControllerActionEvent.
+                                VIEW_CONTROLLER_CHANGED_NOTIFICATION.toString());
+                 this.getMyController().actionPerformed(actionEvent);
+                 break;
+            case VIEW_CLOSE_NOTIFICATION:
+                actionEvent = new ActionEvent(
+                    this,ActionEvent.ACTION_PERFORMED,
+                    ViewController.DesktopViewControllerActionEvent.
+                            VIEW_CONTROLLER_CLOSE_NOTIFICATION.toString());
+                getMyController().actionPerformed(actionEvent);
+                break;           
+            
+                /*
+            case CLINICAL_NOTE_VIEW_CONTROLLER_REQUEST:
+                doClinicalNoteViewControllerRequest();
+                break;*/
+            /*
+            case MODAL_VIEWER_ACTIVATED://notification from view uts shutting down
+                doModalViewerActivated();
+                break;
+            */        
         }
     }
-    
-    /**
-     * redirects ActionEvents sent from secondary views that have been launched by the primary view
- -- secondary views are identified by the ActionEvent::Source property, defined in the View::ViewGype enum ; thus
- ---- SCHEDULE_EDITOR_VIEW
- ---- APPOINTMENT_EMPTY_SLOT_SCAN_CONFIGURATION_VIEW
- ---- NON_SURGERY_DAY_EDITOR_VIEW
- ---- SURGERY_DAY_EDITOR_VIEW
-     * @param e 
-     */
-    
+
     private void doSecondaryViewActionRequest(ActionEvent e){
         setModalView((ModalView)e.getSource());
         setSecondaryView(getModalView());
-        //?setEntityDescriptorFromView(this.view2.getViewDescriptor());
-        //getDescriptor().setViewDescription(this.view2.getViewDescriptor().getViewDescription());
         switch(this.getModalView().getMyViewType()){
             case APPOINTMENTS_CANCELLED_VIEW:
                 doCancelledAppointmentsViewAction(e);
                 break;
+            case APPOINTMENT_TREATMENT_VIEW:
+                doAppointmentTreatmentViewAction(e);
+                break;
             case BOOKABLE_SLOT_SCANNER_VIEW:
                 doBookableSlotScannerViewAction(e);
-                break;
-            case UNBOOKABLE_SLOT_SCANNER_VIEW:
-                doUnBookableSlotScannerViewAction(e);
-                break;  
-            case UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_VIEW:
-                doUnbookableAppointmentSlotEditorAction(e);
-                //resetEmptySlotScannerSettings();
                 break;
             case CLINICAL_NOTE_VIEW:
                 doClinicalNoteViewAction(e);
                 break;
-            case SCHEDULE_EDITOR_VIEW:
-                doScheduleEditorViewAction(e);
-                //resetEmptySlotScannerSettings();
-                break;    
-            /*case APPOINTMENT_EMPTY_SLOT_SCAN_CONFIGURATION_VIEW:
-                doEmptySlotScanConfigurationViewAction(e);
-                break;*/
-            case APPOINTMENT_TREATMENT_VIEW:
-                doAppointmentTreatmentViewAction(e);
+            case LATE_BOOKING_END_EDITOR_VIEW:
+                doLateBookingEndAction(e);
                 break;
             case NON_SURGERY_DAY_EDITOR_VIEW:
                 doNonSurgeryDayScheduleEditorViewAction(e);
+                //resetEmptySlotScannerSettings();
+                break;
+            case SCHEDULE_EDITOR_VIEW:
+                doScheduleEditorViewAction(e);
                 //resetEmptySlotScannerSettings();
                 break;
             case SURGERY_DAY_EDITOR_VIEW:
                 doSurgeryDaysEditorViewAction(e);
                 //resetEmptySlotScannerSettings();
                 break;
+            case UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_VIEW:
+                doUnbookableAppointmentSlotEditorAction(e);
+                //resetEmptySlotScannerSettings();
+                break;
+            case UNBOOKABLE_SLOT_SCANNER_VIEW:
+                doUnBookableSlotScannerViewAction(e);
+                break;  
         }
     }
     
     private void doNonSurgeryDayScheduleEditorViewAction(ActionEvent e){
         if (e.getActionCommand().equals(
                 ViewController.ScheduleViewControllerActionEvent.APPOINTMENTS_FOR_NON_SURGERY_DAY_REQUEST.toString())){
-            //?setEntityDescriptorFromView(((View)e.getSource()).getViewDescriptor());
-            //getDescriptor().setViewDescription(((Descriptor)(((View)e.getSource()).getViewDescriptor())).getViewDescription());
             try{
                 getModalView().setClosed(true);
             }
@@ -1079,10 +1104,7 @@ public class ScheduleViewController extends ViewController{
                 
         if (e.getActionCommand().equals(
                 ViewController.ScheduleViewControllerActionEvent.SURGERY_DAYS_EDIT_REQUEST.toString())){
-            //?setEntityDescriptorFromView(((View)e.getSource()).getViewDescriptor());
-            //getDescriptor().setViewDescription(((Descriptor)(((View)e.getSource()).getViewDescriptor())).getViewDescription());
             HashMap<DayOfWeek,Boolean> surgeryDaysAssignmentValue = 
-                    //?getDescriptorFromView().getViewDescription().getSurgeryDaysAssignmentValue();
                     getDescriptor().getViewDescription().getSurgeryDaysAssignmentValue();
             try{
                 getModalView().setClosed(true);
@@ -1403,8 +1425,6 @@ getDescriptor().getViewDescription().getScheduleDay());
             }
             mergeScheduleSlotsIfPossible(day);
             doAppointmentForDayRequest(day);
-            //getControllerDescriptor().getControllerDescription().setAppointment(result);
-            //getControllerDescriptor().getControllerDescription().setAppointments(result.get());
             getDescriptor().getControllerDescription().setPatient(result.getPatient());
 
             firePropertyChangeEvent(
@@ -1764,6 +1784,10 @@ getDescriptor().getViewDescription().getScheduleDay());
                 break;
         }
     }
+    
+    private void doLateBookingEndAction(ActionEvent e){
+        
+    }
 
     /**
      * 26/06/2024 05:32 update 
@@ -1773,9 +1797,6 @@ getDescriptor().getViewDescription().getScheduleDay());
         Appointment result;
         Appointment changedSlotRequest = 
                 getDescriptor().getViewDescription().getAppointment();
-        /*Appointment changedSlotRequest = 
-                getDescriptor().getControllerDescription().getAppointment();*/
-                
         LocalDate day = changedSlotRequest.getStart().toLocalDate();
         ViewController.ScheduleViewControllerActionEvent actionCommand =
                ViewController.ScheduleViewControllerActionEvent.valueOf(e.getActionCommand());        
@@ -1859,7 +1880,11 @@ getDescriptor().getViewDescription().getScheduleDay());
                 //check this requewsted for a patient not already a patient today
                 boolean isEmergencyPatientAlreadyBookedForAppointmentToday = false;
                 Patient patient = changedSlotRequest.getPatient();
-                for (Appointment appointment : getDescriptor().getControllerDescription().getAppointments()){
+                ArrayList<Appointment> test = getDescriptor()
+                        .getControllerDescription().getAppointments();
+                for (Appointment appointment : test){
+                /*for (Appointment appointment : 
+                        getDescriptor().getControllerDescription().getAppointments()){*/
                     if(appointment.getPatient().equals(patient)){
                         isEmergencyPatientAlreadyBookedForAppointmentToday = true;
                         break;
@@ -1937,29 +1962,7 @@ getDescriptor().getViewDescription().getScheduleDay());
                 break;
         } 
     }
-    
-    /*
-    private TreatmentWithState getTreatmentsWithState(
-            Appointment appointment)throws StoreException{
-        TreatmentWithState theTreatmentWithState = new TreatmentWithState();
-        Treatment treatment = new Treatment();
-        treatment.setScope(Entity.Scope.ALL);
-        treatment = treatment.read();
-        AppointmentTreatment appointmentTreatment = new AppointmentTreatment(appointment);
-        appointmentTreatment.setScope(Entity.Scope.FOR_APPOINTMENT);
-        appointmentTreatment = appointmentTreatment.read();
-        for(Treatment t : treatment.get()){
-            TreatmentWithState treatmentWithState = new TreatmentWithState(t);
-            //treatmentWithState.setDescription(t.getDescription());
-            for(AppointmentTreatment at : appointmentTreatment.get()){
-                if (t.getKey().equals(at.getTreatment().getKey()))   
-                    treatmentWithState.setState(true); 
-            }
-            theTreatmentWithState.get().add(treatmentWithState);
-        }
-        return theTreatmentWithState;
-    }
-    */
+
     private void doReopenModelAppointmentEditorView(){
         setModalView((ModalView)new View().make(View.Viewer.SCHEDULE_EDITOR_VIEW,
                     this, 
@@ -1983,13 +1986,6 @@ getDescriptor().getViewDescription().getScheduleDay());
                         View.Viewer.APPOINTMENT_TREATMENT_VIEW,
                         this, 
                         this.getDesktopView()).getModalView());
-            /*
-            ActionEvent actionEvent = new ActionEvent(
-                    this,ActionEvent.ACTION_PERFORMED,
-                    DesktopViewController.DesktopViewControllerActionEvent.MODAL_VIEWER_CLOSED.toString());
-            this.getMyController().actionPerformed(actionEvent);
-            doReopenModelAppointmentEditorView();
-            */
         }catch(StoreException ex){
             String message = ex.getMessage() + "\n"
                     + "StoreException handled in ScheduleViewController:: getTreatmentWithState()";
@@ -2010,9 +2006,14 @@ getDescriptor().getViewDescription().getScheduleDay());
     }
 
     private void doDesktopViewControllerAction(ActionEvent e){
+        LocalDate scheduleDay = getDescriptor().getControllerDescription().getScheduleDay();
         ViewController.DesktopViewControllerActionEvent actionCommand =
                ViewController.DesktopViewControllerActionEvent.valueOf(e.getActionCommand());
         switch(actionCommand){
+            case INITIALISE_VIEW:
+                /*getDescriptor().getControllerDescription().setEarlyBookingStartTime(
+                        LocalDateTime.of(scheduleDay,ViewController.FIRST_APPOINTMENT_SLOT));*/
+                break;
             case REFRESH_DISPLAY_REQUEST:
                 doAppointmentForDayRequest(getDescriptor().getControllerDescription().getScheduleDay());
                 break;
@@ -2022,14 +2023,6 @@ getDescriptor().getViewDescription().getScheduleDay());
                     ViewController.DesktopViewControllerActionEvent.
                             VIEW_CONTROLLER_CLOSE_NOTIFICATION.toString());
                 getMyController().actionPerformed(actionEvent);
-                /*
-                try{
-                    getView().setClosed(true);
-                }
-                catch (PropertyVetoException ex){
-                    //UnspecifiedError action
-                }
-                */
             }
         }
     }
@@ -2055,107 +2048,7 @@ getDescriptor().getViewDescription().getScheduleDay());
        
         return title + " " + forenames + " " + surname;
     }
-    
-    /*
-    private ScheduleReport doAppointmentCollisionCheckOnScheduleChangeRequest(
-            Appointment requestedSlot,
-            ArrayList<Appointment> appointments, ViewMode mode){
-        setScheduleReport(new ScheduleReport());
-        //scheduleReport.setState(RequestedAppointmentState.UNDEFINED);
-        Iterator<Appointment> appointmentsForDay = appointments.iterator();
-        while (appointmentsForDay.hasNext()){
-            Appointment nextScheduledSlot = appointmentsForDay.next();
-            switch(mode){
-                case CREATE:
-                    switch(getScheduleReport().getState()){
-                        
-                    //2/12/2022
-                    case SLOT_START_OK:
 
-                            if (!requestedSlot.getSlotEndTime().isAfter(nextScheduledSlot.getSlotStartTime())){
-                                scheduleReport.setState(RequestedAppointmentState.NO_COLLISION);
-                            }
-                            else{
-                                scheduleReport.setState(RequestedAppointmentState.COLLISION);
-                                scheduleReport.setError(
-                                    "The new appointment for " + requestedSlot.getAppointeeName()
-                                        + " overwrites existing appointment for " 
-                                        + nextScheduledSlot.getAppointeeNamePlusSlotStartTime());
-                            }
-                            break;
-                        case UNDEFINED:
-                            if (requestedSlot.getSlotStartTime().isBefore(nextScheduledSlot.getSlotStartTime())){
-                                scheduleReport.setState(RequestedAppointmentState.SLOT_START_OK);
-                                if (!requestedSlot.getSlotEndTime().isAfter(nextScheduledSlot.getSlotStartTime()))
-                                    scheduleReport.setState(RequestedAppointmentState.NO_COLLISION);
-                                else scheduleReport.setState(RequestedAppointmentState.COLLISION);
-                            }
-                            else if (requestedSlot.getSlotStartTime().isEqual(nextScheduledSlot.getSlotEndTime())){
-                                scheduleReport.setState(RequestedAppointmentState.SLOT_START_OK);
-                            }
-                            else if (!requestedSlot.getSlotStartTime().isAfter(nextScheduledSlot.getSlotEndTime())){
-                                scheduleReport.setState(RequestedAppointmentState.COLLISION);
-                                scheduleReport.setError(
-                                    "The new appointment for " + requestedSlot.getAppointeeName()
-                                        + " overwrites existing appointment for " 
-                                        + nextScheduledSlot.getAppointeeNamePlusSlotStartTime());
-                            }
-                    }
-                    break;
-                case UPDATE:
-                    switch(scheduleReport.getState()){
-                        case SLOT_START_OK:
-  
-                            if (!requestedSlot.getSlotEndTime().isAfter(nextScheduledSlot.getSlotStartTime()))
-                                scheduleReport.setState(RequestedAppointmentState.NO_COLLISION);
-                            else {
-                                scheduleReport.setState(RequestedAppointmentState.COLLISION);
-                                scheduleReport.setError(
-                                    "The new appointment for " + requestedSlot.getAppointeeName()
-                                        + " overwrites existing appointment for " 
-                                        + nextScheduledSlot.getAppointeeNamePlusSlotStartTime());
-                            }
-                            break;
-                        case UNDEFINED:
-
-                            if (requestedSlot.getSlotStartTime().isBefore(nextScheduledSlot.getSlotStartTime())){
-                                if (!requestedSlot.getSlotEndTime().isAfter(nextScheduledSlot.getSlotStartTime()))
-                                    scheduleReport.setState(RequestedAppointmentState.NO_COLLISION);
-                                else if (requestedSlot.getPatient().equals(nextScheduledSlot.getPatient())){
-                                    if (!requestedSlot.getSlotEndTime().isAfter(nextScheduledSlot.getSlotEndTime()))
-                                        scheduleReport.setState(RequestedAppointmentState.NO_COLLISION);
-                                    else scheduleReport.setState(RequestedAppointmentState.SLOT_START_OK);
-                                }
-                                else{//collides with an appointment for a different patient
-                                    scheduleReport.setState(RequestedAppointmentState.COLLISION);
-                                    scheduleReport.setError(
-                                            "The updated appointment for " + requestedSlot.getAppointeeName()
-                                                + " overwrites existing appointment for " 
-                                                + nextScheduledSlot.getAppointeeNamePlusSlotStartTime());
-                                }
-                            }
-                            else{
-                                if (requestedSlot.getSlotStartTime().isBefore(nextScheduledSlot.getSlotEndTime())){
-                                    if (!requestedSlot.getPatient().equals(nextScheduledSlot.getPatient())){
-                                        scheduleReport.setState(RequestedAppointmentState.COLLISION); 
-                                        scheduleReport.setError(
-                                                "The updated appointment for " + requestedSlot.getAppointeeName()
-                                                    + " overwrites existing appointment for " 
-                                                    + nextScheduledSlot.getAppointeeNamePlusSlotStartTime());
-                                    }
-                                    else scheduleReport.setState(RequestedAppointmentState.SLOT_START_OK);
-                                }
-                                else{//remain in UNDEFINED state
-
-                                }
-                            }
-                    }
-                    break;
-            }
-        }
-        return scheduleReport;
-    }
-*/
     private ArrayList<Appointment> getAvailableSlotsFromDayAndDuration(
             ArrayList<Appointment> appointments){
     //private ArrayList<Appointment> getAvailableSlotsFromDayAndDuration(
@@ -2375,10 +2268,18 @@ getDescriptor().getViewDescription().getScheduleDay());
            nextEmptySlotStartTime = LocalDateTime.of(day, 
                                         ViewController.FIRST_APPOINTMENT_SLOT); 
         }
-
+        
+        /**
+         * extra code to implement early start time
+         */
+        LocalDateTime earlyStart = getDescriptor().getControllerDescription().getEarlyBookingStartTime();
+        if (earlyStart!=null){
+            nextEmptySlotStartTime = earlyStart;
+        }
 
         ArrayList<Appointment> apptsForDayIncludingEmptySlots = new ArrayList<>();      
         Iterator<Appointment> it = appointments.iterator();
+        
         /**
          * check for no appointments on this day if no appointment create a
          * single empty slot for whole day
@@ -2414,7 +2315,7 @@ getDescriptor().getViewDescription().getScheduleDay());
                  * -- re-initialise nextEmptySlotTime to immediately follow the
                  *    the current appointment
                  */
-                else {
+                else if (durationToNextSlot.isPositive()){
                     Appointment emptySlot = createEmptyAppointmentSlot(nextEmptySlotStartTime,
                             Duration.between(nextEmptySlotStartTime, appointment.getStart()).abs());
                     apptsForDayIncludingEmptySlots.add(emptySlot);
@@ -2424,28 +2325,33 @@ getDescriptor().getViewDescription().getScheduleDay());
                 }
             }
         }
+
+        Appointment emptySlot = null;
+        Duration durationToDayEnd = null;
         Appointment lastAppointment = 
                 apptsForDayIncludingEmptySlots.get(apptsForDayIncludingEmptySlots.size()-1);
-        //06/08/2022 08:49
+
+        LocalDateTime lateEnd = getDescriptor().getControllerDescription().getLateBookingEndTime();
         if (getIsBookedStatus(lastAppointment)){
             //15/07/2023 enables an appointment to run over LAST_APPOINTMENT_SLOT time
-            /*
-            Duration durationToDayEnd = 
-                    Duration.between(nextEmptySlotStartTime.toLocalTime(), ViewController.LAST_APPOINTMENT_SLOT).abs();
-            if (!durationToDayEnd.isZero()) {
-                Appointment emptySlot = createEmptyAppointmentSlot(nextEmptySlotStartTime);
-                apptsForDayIncludingEmptySlots.add(emptySlot);
-            }
-            */
- 
-            Duration durationToDayEnd = 
-                    Duration.between(nextEmptySlotStartTime.toLocalTime(), ViewController.LAST_APPOINTMENT_SLOT);
-            if (!durationToDayEnd.isNegative()){
-                if (!durationToDayEnd.isZero()) {
-                    Appointment emptySlot = createEmptyAppointmentSlot(nextEmptySlotStartTime);
+            if (lateEnd==null){
+                durationToDayEnd = 
+                        Duration.between(nextEmptySlotStartTime.toLocalTime(), ViewController.LAST_APPOINTMENT_SLOT);
+                if (!(durationToDayEnd.isNegative() || durationToDayEnd.isZero())){
+                    emptySlot = createEmptyAppointmentSlot(nextEmptySlotStartTime);
                     apptsForDayIncludingEmptySlots.add(emptySlot);
                 }
-            }
+            }else{
+                Duration duration = Duration.between(lastAppointment.getEnd(),lateEnd);
+                if (duration.isPositive()){
+                    emptySlot = createEmptyAppointmentSlot(lastAppointment.getEnd(),duration);
+                            apptsForDayIncludingEmptySlots.add(emptySlot);
+                }
+            }     
+        }else{//available slot
+           if (lateEnd==null){
+               
+           } 
             
         }
         return apptsForDayIncludingEmptySlots;
@@ -2482,29 +2388,7 @@ getDescriptor().getViewDescription().getScheduleDay());
         if(!appointment.getPatient().getIsKeyDefined())return false;
         return true;
     } 
-    
-    /*
-    public class ScheduleReport{
-        private String error = null;
-        private RequestedAppointmentState state = null;
-        
-        private String getError(){
-            return error;
-        }
-        
-        private void setError(String value){
-            error = value;
-        }
-        
-        private RequestedAppointmentState getState(){
-            return state;
-        }
-        
-        private void setState(RequestedAppointmentState value){
-            state = value;
-        }
-    }
-    */
+   
     /**
      * method generates a Point object from the collection of Appointment objects passed to it
      * -- the Point objects's x property = number of patients who have had an appt reminder

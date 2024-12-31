@@ -83,6 +83,10 @@ public class Appointment extends Entity implements IEntityRepositoryActions{
         return result;
     }
     
+    public LocalDateTime getEnd(){
+        return getStart().plusMinutes(getDuration().toMinutes());
+    }
+    
     public String getAppointmentDate(){
         return getStart().toLocalDate()
                 .format(DateTimeFormatter.ofPattern("dd/MM/yy"));

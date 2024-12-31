@@ -29,9 +29,6 @@ public class MailMerge_2 {
                 for (XWPFRun run : runs) {
                     // Get text from each run
                     String text = run.getText(0);
-                    if (text != null) {
-                        System.out.println(text);
-                    }
                 }
             }
         } catch (IOException e) {
