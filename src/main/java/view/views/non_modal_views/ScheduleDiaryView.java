@@ -846,6 +846,20 @@ public class ScheduleDiaryView extends BookingView
         ViewController.setJTableColumnProperties(tblScheduleEvening, scrEveningTable.getPreferredSize().width, 10,40,50);
     }
     
+    /*private int getRowCountForScheduleData(){
+        LocalDateTime earlyStart = null;
+        LocalDateTime lateEnd = null;
+        //earlyStart = getMyController().getDescriptor().getControllerDescription().getEarlyBookingStartTime();
+        //lateEnd = getMyController().getDescriptor().getControllerDescription().getLateBookingEndTime();
+        Slot firstBookingSlot = (Slot)getMyController().getDescriptor().getControllerDescription().getAppointmentSlotsForDayInDiaryFormat().get(0);
+        earlyStart = firstBookingSlot.getAppointment().getStart();
+        int bookingSlotCount = getMyController().getDescriptor().getControllerDescription().getAppointmentSlotsForDayInDiaryFormat().size();
+        Slot lastBookingSlot = (Slot)getMyController().getDescriptor()
+                .getControllerDescription().getAppointmentSlotsForDayInDiaryFormat().get(bookingSlotCount-1);
+        lastBookingSlot
+                
+    }*/
+    
     /**
      * setScheduleSlotData() method
      * -- fetches each type of appointment object (unbookable, bookable, booked)from the collection of appointment data in the ControllerDescription
@@ -880,6 +894,10 @@ public class ScheduleDiaryView extends BookingView
                 rowCount++;
             }
         }
+        
+        /**
+         * if rowcount less than than 108 fill in evening table with bookable slots 
+         */
         LocalDateTime start = scheduleSlotData.get(0).getStart(); //first slot start time
         for (int row=rowCount; row<108; row++){
         /** 30/12/2024 code update*/
@@ -889,6 +907,11 @@ public class ScheduleDiaryView extends BookingView
             scheduleSlotData.add(slot);
         } 
 
+        /** 
+         * first 36 slots placed in morning table
+         * next 36 slots placed in afternoon table
+         * remaining slots placed in evening table
+         */
         it = scheduleSlotData.iterator();
         rowCount = 0;
         while (it.hasNext()){
@@ -1589,10 +1612,10 @@ public class ScheduleDiaryView extends BookingView
             }
             selectedSlotCount = 0;
             /**30/12/2024 code update */
-            if (startRowOfSelection < 108){
-                for(int row = startRowOfSelection; row < 108; row++){
-            //if (startRowOfSelection < getScheduleSlotData().size()){
-                //for(int row = startRowOfSelection; row < getScheduleSlotData().size(); row++){
+            //if (startRowOfSelection < 108){
+                //for(int row = startRowOfSelection; row < 108; row++){
+            if (startRowOfSelection < getScheduleSlotModel().size()){
+                for(int row = startRowOfSelection; row < getScheduleSlotModel().size(); row++){
                     Slot slot = getScheduleSlotModel().get(row);
                     if (slot.getIsSelected()) result[++selectedSlotCount - 1] = row;
                     else break;
@@ -1639,8 +1662,8 @@ public class ScheduleDiaryView extends BookingView
                break; 
             case 72:
                 /**30/12/2024 code update */
-                for (int row = 72; row < 108; row++ ){
-                //for (int row = 72; row < getScheduleSlotData().size(); row++ ){
+                //for (int row = 72; row < 108; row++ ){
+                for (int row = 72; row < getScheduleSlotModel().size(); row++ ){
                     Slot slot = getScheduleSlotModel().get(row);
                     slot.setIsSelected(false);
                 }

@@ -108,6 +108,10 @@ public class DesktopView extends javax.swing.JFrame
             case REQUEST_PATIENT_VIEW:
                 doActionEventRequest(DesktopViewController.
                         DesktopViewControllerActionEvent.PATIENT_VIEW_CONTROLLER_REQUEST);
+                javax.swing.SwingUtilities.invokeLater(() -> {
+                    toFront();             // Force UI update
+                });
+                
                 break;
             case REQUEST_TREATMENT_VIEW:
                 doActionEventRequest(DesktopViewController.
