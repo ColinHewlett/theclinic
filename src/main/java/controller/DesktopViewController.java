@@ -381,6 +381,12 @@ public class DesktopViewController extends ViewController{
         ViewController.DesktopViewControllerActionEvent actionCommand =
                     ViewController.DesktopViewControllerActionEvent.valueOf(e.getActionCommand());
         switch(actionCommand){
+            case PATIENT_VIEW_CONTROLLER_REQUEST:
+                //javax.swing.SwingUtilities.invokeLater(() -> { 
+                    doRequestForPatientViewControllerForDefinedPatient(e);
+                //});
+                
+                break;
             case CLOSE_SCHEDULE_VIEW_WITH_SAME_DATE_REQUEST:
                 for(ScheduleViewController _svc : this.scheduleViewControllers){
                     if (!avc.equals(_svc)){
@@ -1856,6 +1862,59 @@ public class DesktopViewController extends ViewController{
             displayErrorMessage(ex.getMessage(),"DesktopViewController error",JOptionPane.WARNING_MESSAGE);
         }
     }
+    
+    private void doRequestForPatientViewControllerForDefinedPatient(ActionEvent e){
+        boolean isSelectedPatientViewActive = false;
+        PatientViewController pvc = null;
+        PatientViewController patientView = null;
+        ScheduleViewController svc = (ScheduleViewController)e.getSource();
+        Patient patient = svc.getDescriptor().getControllerDescription().getPatient();
+        for (PatientViewController _pvc : patientViewControllers){
+            if (_pvc.getDescriptor().getControllerDescription().getPatient().equals(patient)){
+                isSelectedPatientViewActive = true;
+                pvc = _pvc;
+                break;
+            }
+        }
+        if (isSelectedPatientViewActive){
+            if(pvc!=null) pvc.getView().toFront();
+        }else{
+            try{
+                patientViewControllers.add(
+                                        new PatientViewController(this, getDesktopView()));
+                pvc = patientViewControllers.get(patientViewControllers.size()-1);
+                pvc.getDescriptor().getControllerDescription().setPatient(patient);
+                pvc.getDescriptor().getControllerDescription().setViewMode(ViewMode.UPDATE); //signals patient selected in new patient view
+                pvc.setView(new View().make(
+                    View.Viewer.PATIENT_VIEW,
+                    pvc, 
+                    getDesktopView()));
+                
+                ActionEvent actionEvent = new ActionEvent(
+                    this,ActionEvent.ACTION_PERFORMED,
+                    DesktopViewController.DesktopViewControllerActionEvent.INITIALISE_VIEW.toString());
+                pvc.actionPerformed(actionEvent);
+
+                if (getDesktopViewMode().equals(DesktopViewMode.CLINIC_LOGO)){
+                        doSetupDesktopViewMode();
+                } 
+                /*
+                if (getDesktopView().getDeskTop().getAllFrames().length>1){
+                    this.firePropertyChangeEvent(
+                            ViewController.DesktopViewControllerPropertyChangeEvent.CASCADE_DESKTOP_VIEWS.toString(), 
+                            getDesktopView(),
+                            this, 
+                            null,
+                            null
+                    );
+                }*/
+            }
+            catch (StoreException ex){
+                displayErrorMessage(ex.getMessage(),"DesktopViewController error",JOptionPane.WARNING_MESSAGE);
+            }
+        }
+    }
+    
     private void doRequestForPatientViewController(){
         PatientViewController anotherBlankPatientView = null;
         for (PatientViewController pvc : patientViewControllers){
@@ -1871,6 +1930,7 @@ public class DesktopViewController extends ViewController{
                 patientViewControllers.add(
                                         new PatientViewController(this, getDesktopView()));
                 PatientViewController pvc = patientViewControllers.get(patientViewControllers.size()-1);
+                pvc.getDescriptor().getControllerDescription().setViewMode(ViewMode.CREATE); //signals patient not selected in new patient view
                 pvc.setView(new View().make(
                     View.Viewer.PATIENT_VIEW,
                     pvc, 
@@ -2595,6 +2655,7 @@ public class DesktopViewController extends ViewController{
         isDataMigrationOptionEnabled = false;
         String xmlFileName = "";
         System.out.println(JarFileFinder.getPath());
+        System.out.println("Compiler version = " + System.getProperty("java.version"));
         try{
             if(!JarFileFinder.getName().equals("")){
                 for(String pathComponent : JarFileFinder.getPath().split("/")){
@@ -2624,16 +2685,20 @@ public class DesktopViewController extends ViewController{
                     break;
             }
         }catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(DesktopView.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            //java.util.logging.Logger.getLogger(DesktopView.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            displayErrorMessage(ex.getMessage(),"Desktop View Controller error",JOptionPane.WARNING_MESSAGE);
             isExceptionRaised = true;
         }catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(DesktopView.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            //java.util.logging.Logger.getLogger(DesktopView.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            displayErrorMessage(ex.getMessage(),"Desktop View Controller error",JOptionPane.WARNING_MESSAGE);
             isExceptionRaised = true;
         }catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(DesktopView.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            //java.util.logging.Logger.getLogger(DesktopView.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            displayErrorMessage(ex.getMessage(),"Desktop View Controller error",JOptionPane.WARNING_MESSAGE);
             isExceptionRaised = true;
         }catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(DesktopView.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            //java.util.logging.Logger.getLogger(DesktopView.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            displayErrorMessage(ex.getMessage(),"Desktop View Controller error",JOptionPane.WARNING_MESSAGE);
             isExceptionRaised = true;
         }catch (TemplateReaderException ex){
             displayErrorMessage(ex.getMessage() + "\n"
@@ -2653,12 +2718,7 @@ public class DesktopViewController extends ViewController{
             });  
         }else System.exit(0);
         
-    }
-    
-    private void importDataFromListFiles(){
-        
-    }
-    
+    }   
     
     private void doPatientViewControllerChangeNotification(PropertyChangeEvent e){
         for(ScheduleViewController asvc: this.scheduleViewControllers){

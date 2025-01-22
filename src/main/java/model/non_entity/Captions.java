@@ -82,9 +82,10 @@ public class Captions {
         MAKE_DELETE_EMERGENCY_APPOINTMENT_UNDO("<html><center>Make</center><center>emergency</center><center>appointment</center></html>",
                                           "<html><center>Delete</center><center>emergency</center><center>appointment</center></html>",
                                           "<html><center>Undo</center><center>current</center><center>selection</center></html>"),
-        MARK_CANCEL_UNBOOKABLE_SLOT_OR_MOVE_TO_ANOTHER_DAY("<html><center>Make slot</center<center>unbookable</center></html>",
+        MARK_CANCEL_UNBOOKABLE_SLOT_OR_MOVE_TO_ANOTHER_DAY_OR_FETCH_PATIENT_DETAILS("<html><center>Make slot</center<center>unbookable</center></html>",
                                     "<html><center>Cancel</center<center>unbookable</center><center>slot</center></html>",
-                                    "<html><center>Move booking</center><center>to another</center><center>day</center></html>"),
+                                    "<html><center>Move booking</center><center>to another</center><center>day</center></html>",
+                                    "<html><center>Fetch</center><center>selected patient</center><center>view</center></html>"),
         MOVE_BOOKING("<html><center>Move</center><center>appointment</center></html>"),
         NEXT_DAY(">>"),
         PREVIOUS_DAY("<<"),
@@ -98,6 +99,7 @@ public class Captions {
         private String first = "";
         private String second = "";
         private String third = "";
+        private String fourth = "";
         
         ScheduleView(String value1){
             first = value1;
@@ -114,6 +116,13 @@ public class Captions {
             third = value3;
         }
         
+        ScheduleView(String value1, String value2, String value3, String value4){
+            first = value1;
+            second = value2;
+            third = value3;
+            fourth = value4;
+        }
+        
         public String _1(){
             return first;
         }
@@ -124,6 +133,10 @@ public class Captions {
         
         public String _3(){
             return third;
+        }
+        
+        public String _4(){
+            return fourth;
         }
     }
 }

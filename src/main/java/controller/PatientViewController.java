@@ -283,6 +283,17 @@ public class PatientViewController extends ViewController {
                 doPatientViewClosed();
                 break;
             }
+            case INITIALISE_VIEW:
+                Patient patient = getDescriptor().getControllerDescription().getPatient();
+                firePropertyChangeEvent(
+                    ViewController.PatientViewControllerPropertyChangeEvent
+                            .PATIENT_TO_SELECT_RECEIVED.toString(),
+                    getView(),
+                    this,
+                    null,
+                    null
+                );
+                break;
         }
     }  
     
@@ -1694,7 +1705,6 @@ public class PatientViewController extends ViewController {
             DesktopView desktopView)throws StoreException{
         setDesktopView(desktopView);
         setMyController(controller);
-
         Patient patient = new Patient();
         patient.setScope(Scope.ALL);
         patient.read();

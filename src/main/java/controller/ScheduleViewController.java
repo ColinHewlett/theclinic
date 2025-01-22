@@ -715,6 +715,15 @@ public class ScheduleViewController extends ViewController{
         ViewController.ScheduleViewControllerActionEvent actionCommand =
                ViewController.ScheduleViewControllerActionEvent.valueOf(e.getActionCommand());
         switch (actionCommand){
+            case PATIENT_VIEW_REQUEST:
+                getDescriptor().getControllerDescription().setPatient(
+                        getDescriptor().getViewDescription().getPatient());
+                actionEvent = new ActionEvent(
+                    this,ActionEvent.ACTION_PERFORMED,
+                        ViewController.DesktopViewControllerActionEvent.
+                                PATIENT_VIEW_CONTROLLER_REQUEST.toString());
+                this.getMyController().actionPerformed(actionEvent);
+                break;
             case APPOINTMENT_CANCEL_REQUEST:
                 appointment = getDescriptor().getViewDescription().getAppointment();
                 if(!appointment.getIsEmergency()){

@@ -368,10 +368,12 @@ public class PatientView extends View
             }
         });
         
-        ActionEvent actionEvent = new ActionEvent(
-                this,ActionEvent.ACTION_PERFORMED,
-                ViewController.PatientViewControllerActionEvent.NULL_PATIENT_REQUEST.toString());
-        this.getMyController().actionPerformed(actionEvent);
+        if (getMyController().getDescriptor().getControllerDescription().getViewMode().equals(ViewController.ViewMode.CREATE)){
+            ActionEvent actionEvent = new ActionEvent(
+                    this,ActionEvent.ACTION_PERFORMED,
+                    ViewController.PatientViewControllerActionEvent.NULL_PATIENT_REQUEST.toString());
+            this.getMyController().actionPerformed(actionEvent);
+        }
     }
     
     private void adjustColumnWidthsAndViewPosition(JTable table){
@@ -419,6 +421,7 @@ public class PatientView extends View
     
     @Override
     public void propertyChange(PropertyChangeEvent e){
+        Patient patient = null;
         initialiseFromControllerViewMode();
         ViewController.PatientViewControllerPropertyChangeEvent propertyName =
                 ViewController.PatientViewControllerPropertyChangeEvent.valueOf(e.getPropertyName());
@@ -449,9 +452,13 @@ public class PatientView extends View
                 String message = getMyController().getDescriptor().getControllerDescription().getError();
                 JOptionPane.showInternalMessageDialog(this, message, "View error",JOptionPane.WARNING_MESSAGE);
                 break;
+            case PATIENT_TO_SELECT_RECEIVED:
+                patient = getMyController().getDescriptor().getControllerDescription().getPatient();
+                this.cmbPatientSelector.setSelectedItem(patient);
+                break;
             case PATIENT_RECEIVED:
                 initialisePatientViewComponentFromED(); 
-                Patient patient = getMyController()
+                patient = getMyController()
                         .getDescriptor()
                         .getControllerDescription()
                         .getPatient();
