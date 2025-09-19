@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sections xmlns="http://colinhewlettsolutions.com"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	  xsi:schemaLocation="http://colinhewlettsolutions.com SystemDefinition.xsd">	  
+	
+	<section id="SystemDefinition">
+		<project id="UNIVERSAL">
+			<key id="DEBUG">
+				<value>
+					<string>Disabled</string>
+				</value>
+			</key>
+			<key id="DESKTOP_BACKGROUND">
+				<value>
+					<color>
+						<red>0</red>
+						<green>0</green>
+						<blue>0</blue>
+					</color>
+				</value>
+			</key>
+			<key id="DESKTOP_ICON">
+				<value>
+					<string>fractal.jpg</string>
+				</value>
+			</key>
+			<key id="LOOK_AND_FEEL">
+				<value>
+					<string>Metal</string>
+				</value>
+			</key>
+			<key id="TITLED_BORDER_COLOR" >
+				<value>
+					<color>
+						<red>0</red>
+						<green>0</green>
+						<blue>153</blue>
+					</color>
+				</value>
+			</key>
+			<key id="TITLED_BORDER_FONT" >
+				<value>
+					<font>
+						<title>Segue UI</title>
+						<style>1</style>
+						<size>12</size>
+					</font>
+				</value>
+			</key>
+		</project>
+		<project id="Fractals">
+			<key id="DEPTH">
+				<value>
+					<integer>1</integer>
+				</value>
+			</key>
+			
+			<key id="FRACTAL_IMAGE_DIMENSION">
+				<value>
+					<dimension>
+						<width>1000</width>
+						<height>1000</height>
+					</dimension>
+				</value>
+			</key>
+			<key id="FRACTAL_IMAGE_ORIGIN">
+				<value>
+					<point>
+						<x>100</x>
+						<y>900</y>
+					</point>
+				</value>
+			</key>
+			<key id="TRIANGLE_SIDE">
+				<value>
+					<integer>800</integer>
+				</value>
+			</key>	
+		</project>
+		<project id="PMS" >
+			<key id="DIARY_BOOKABLE_SLOT_COLOR" >
+				<value>
+					<color>
+						<red>240</red>
+						<green>240</green>
+						<blue>240</blue>
+					</color>
+				</value>
+			</key>
+			<key id="DIARY_BOOKING_FIRST_ROW_COLOR" >
+				<value>
+					<color>
+						<red>245</red>
+						<green>247</green>
+						<blue>208</blue>
+					</color>
+				</value>
+			</key>
+			<key id="DIARY_BOOKING_REMAINING_ROWS_COLOR" >
+				<value>
+					<color>
+						<red>245</red>
+						<green>227</green>
+						<blue>167</blue>
+					</color>
+				</value>
+			</key>
+			<key id="LIST_BOOKABLE_SLOT_TEXT_COLOR_REQUEST" >
+				<value>
+					<color>
+						<red>0</red>
+						<green>0</green>
+						<blue>255</blue>
+					</color>
+				</value>
+			</key>
+			<key id="LIST_EMERGENCY_BOOKING_TEXT_COLOR" >
+				<value>
+					<color>
+						<red>255</red>
+						<green>0</green>
+						<blue>0</blue>
+					</color>
+				</value>
+			</key>
+			<key id="LIST_UNBOOKABLE_SLOT_TEXT_COLOR_REQUEST" >
+				<value>
+					<color>
+						<red>0</red>
+						<green>0</green>
+						<blue>255</blue>
+					</color>
+				</value>
+			</key>
+			<key id="MASTER_DOCUMENT">
+				<value>
+					<string>C:\Users\colin\OneDrive\Documents\pms\master_documents\MasterRecallEmail.docx</string>
+				</value>
+			</key>
+			<key id="PRINT_FOLDER">
+				<value>
+					<string>c:\pms\printouts\</string>
+				</value>
+			</key>
+			<key id="SMTP_MESSAGE">
+				<value>
+					<string>c:\user\colin\recall_message\recall.docx</string>
+				</value>
+			</key>
+			<key id="SMTP_SERVER_IN">
+				<value>
+					<string>pop.iomartcloud.com</string>
+				</value>
+			</key>
+			<key id="SMTP_SERVER_IN_PORT">
+				<value>
+					<integer>110</integer>
+				</value>
+			</key>
+			<key id="SMTP_SERVER_OUT">
+				<value>
+					<string>smtp.iomartcloud.com</string>
+				</value>
+			</key>
+			<key id="SMTP_SERVER_OUT_PORT">
+				<value>
+					<integer>547</integer>
+				</value>
+			</key>
+			<key id="SMTP_USER">
+				<value>
+					<string>admin.theclinic@jeffamos.co.uk</string>
+				</value>
+			</key>
+		    <key id="STORE_ACCESS_URL">
+				<value>
+					<string>jdbc:ucanaccess://c:/pms/repository/86.accdb</string>
+				</value>
+			</key>
+			<key id="STORE_POSTGRES_URL">
+				<value>
+					<string>jdbc:postgressql://localhost:5432/pms_test</string>
+				</value>
+			</key>
+			<key id="STORE_TYPE">
+				<value>
+					<string>ACCESS</string>
+				</value>
+			</key>
+			<key id="USERS">
+				<value>
+					<string_array>
+						<string>beverley</string>
+						<string>rosie</string>
+						<string>jeff</string>
+						<string>janine</string>
+						<string>colin</string>
+					</string_array>
+				</value>
+			</key>
+		</project>
+	</section>
+</sections>
+

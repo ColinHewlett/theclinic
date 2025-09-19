@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="http://colinhewlettsolutions.com"
+           xmlns="http://colinhewlettsolutions.com"
+           elementFormDefault="qualified"
+		   >
+
+    <!-- defines the root element 'sections' which contains at least one 'section' element -->
+	<xs:element name="sections">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="section" type="sectionType" maxOccurs="unbounded"/> <!-- note default value 'minOccurs' attribute is 1 -->
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	
+	<!-- 'section' element must contain one or more 'project' elements -->
+	<xs:complexType name="sectionType">
+		<xs:sequence>
+			<xs:element name="project" type="projectType" maxOccurs="unbounded"/> <!-- note default value 'minOccurs' attribute is 1 -->
+		</xs:sequence>
+		<xs:attribute name="id" type="xs:string" use="required"/>
+	</xs:complexType>
+	
+	<!-- 'project' element can contain zero or more 'key' elements -->
+	<xs:complexType name="projectType">
+		<xs:sequence>
+			<xs:element name="key" type="keyType" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+		<xs:attribute name="id" type="xs:string" use="required"/>
+	</xs:complexType>
+	
+	<!-- 'key' element' must contain a single 'value' element -->
+	<xs:complexType name="keyType">
+		<xs:sequence>
+			<xs:element name="value" type="valueType"/>
+		</xs:sequence>
+		<xs:attribute name="id" type="xs:string" use="required"/>
+	</xs:complexType>
+
+	<!-- 'value' element must contain a single data type chosen from a list of different data types -->
+	<xs:complexType name="valueType">
+		<xs:choice>
+			
+			<xs:element name="color" type="colorType"/>
+			<xs:element name="dimension" type="dimensionType"/>
+			<xs:element name="font" type="fontType"/>
+			<xs:element name="integer" type="xs:integer"/>
+			<xs:element name="point" type="pointType"/>
+			<xs:element name="string" type="xs:string"/>
+			<xs:element name="string_array" type="stringArrayType"/>
+		</xs:choice>
+	</xs:complexType>
+
+	<!-- colorType contains a 'red', 'green' and 'blue' elements of type integer -->
+    <xs:complexType name="colorType">
+        <xs:sequence>
+            <xs:element name="red" type="xs:integer"/>
+            <xs:element name="green" type="xs:integer"/>
+			<xs:element name="blue" type="xs:integer"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <!-- dimensionType contains a 'width' and 'height' element -->
+    <xs:complexType name="dimensionType">
+        <xs:sequence>
+            <xs:element name="width" type="xs:int"/>
+            <xs:element name="height" type="xs:int"/>
+        </xs:sequence>
+    </xs:complexType>
+	
+	<!-- fontType contains a String 'title', Integer 'style' and Integer 'size' elements -->
+    <xs:complexType name="fontType">
+        <xs:sequence>
+            <xs:element name="title" type="xs:string"/>
+            <xs:element name="style" type="xs:integer"/>
+			<xs:element name="size" type="xs:integer"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <!-- pointType contains an 'x' and 'y' element -->
+    <xs:complexType name="pointType">
+        <xs:sequence>
+            <xs:element name="x" type="xs:int"/>
+            <xs:element name="y" type="xs:int"/>
+        </xs:sequence>
+    </xs:complexType>
+
+	<!-- stringArrayType contains at least one 'string> element -->
+    <xs:complexType name="stringArrayType">
+        <xs:sequence>
+            <xs:element name="string" type="xs:string" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+</xs:schema>
