@@ -8,6 +8,7 @@ package colinhewlettsolutions.client.controller;
 import static colinhewlettsolutions.client.controller.SystemDefinition.Properties;
 import static colinhewlettsolutions.client.controller.ViewController.displayErrorMessage;
 import static colinhewlettsolutions.client.controller.ViewController.ControllerViewMode;
+import static colinhewlettsolutions.client.controller.ViewController.DesktopViewControllerPropertyChangeEvent.SET_DESKTOP_VIEW_MODE;
 import static colinhewlettsolutions.client.controller.ViewController.PatientViewControllerPropertyChangeEvent.PATIENT_VIEW_CHANGE_NOTIFICATION;
 import colinhewlettsolutions.client.model.non_entity.Credential;
 import colinhewlettsolutions.client.model.non_entity.JarFileFinder;
@@ -61,6 +62,7 @@ public class DesktopViewController extends ViewController{
     private ArrayList<PatientInvoiceViewController> patientInvoiceViewControllers = new ArrayList<>();
     private ArrayList<PatientMedicalHistoryViewController> patientMedicalHistoryViewControllers = new ArrayList<>();
     private ArrayList<PatientQuestionnaireViewController> patientQuestionnaireViewControllers = new ArrayList<>();
+    private ArrayList<PatientRecallViewController> patientRecallViewControllers = new ArrayList<>();
     private ArrayList<PatientViewController> patientViewControllers = new ArrayList<>();
     private ArrayList<ScheduleViewController>scheduleViewControllers = new ArrayList<>();
     private ArrayList<ToDoViewController> toDoViewControllers = new ArrayList<>();
@@ -86,6 +88,7 @@ public class DesktopViewController extends ViewController{
         viewControllers.add(patientInvoiceViewControllers);
         viewControllers.add(patientMedicalHistoryViewControllers);
         viewControllers.add(patientQuestionnaireViewControllers);
+        viewControllers.add(patientRecallViewControllers);
         viewControllers.add(patientViewControllers);
         viewControllers.add(scheduleViewControllers);
         viewControllers.add(toDoViewControllers);
@@ -99,6 +102,29 @@ public class DesktopViewController extends ViewController{
             }
         }
 
+    }
+    
+    public enum Actions{
+        ARCHIVED_PATIENTS_VIEW_CONTROLLER_REQUEST,
+        CLINIC_LOGO_VIEW_MODE_NOTIFICATION,
+        DESKTOP_VIEW_MODE_NOTIFICATION,
+        PATIENT_APPOINTMENT_DATA_VIEW_CONTROLLER_REQUEST,
+        PATIENT_RECALL_VIEW_CONTROLLER_REQUEST,
+        PATIENT_VIEW_CONTROLLER_REQUEST,
+        USER_SYSTEM_WIDE_FACTORY_SETTINGS_REQUEST,
+        USER_SYSTEM_WIDE_SETTINGS_REQUEST,
+        VIEW_ACTIVATED_NOTIFICATION,
+        VIEW_CHANGED_NOTIFICATION,
+        VIEW_CLOSE_REQUEST,
+        VIEW_CONTROLLER_ACTIVATED_NOTIFICATION,
+        VIEW_CONTROLLER_CHANGED_NOTIFICATION,
+        VIEW_CONTROLLER_CLOSE_NOTIFICATION
+    }
+    
+    public enum Properties{
+        CASCADE_DESKTOP_VIEWS,
+        DESKTOP_VIEW_CHANGED_NOTIFICATION,
+        SET_DESKTOP_VIEW_MODE
     }
     
     public DesktopViewController(TemplateReader templateReader,SystemDefinition systemDefinition, String projectId){
@@ -170,8 +196,8 @@ public class DesktopViewController extends ViewController{
             Boolean isDebugSMTPSet = (Boolean)getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.DEBUG_SMTP);
             if (isDebugSMTPSet){
                 System.out.println("DEBUG_SMTP enabled");
-                getDescriptor().getControllerDescription().setProperty(Properties.SMTP_SERVER_OUT, "smtp.gmail.com");
-                getDescriptor().getControllerDescription().setProperty(Properties.SMTP_USER, "colin.hewlett.solutions@gmail.com");
+                getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.SMTP_SERVER_OUT, "smtp.gmail.com");
+                getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.SMTP_USER, "colin.hewlett.solutions@gmail.com");
             }
             
             System.out.println((String)getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.DATABASE_URL));
@@ -207,85 +233,85 @@ public class DesktopViewController extends ViewController{
         desktopView.setVisible(true);
     }
     
-    private void setUserSettings(User user, HashMap<Properties,HashMap<Properties,Object>> settings){
+    private void setUserSettings(User user, HashMap<SystemDefinition.Properties,HashMap<Properties,Object>> settings){
         
     }
     
-    private HashMap<Properties, HashMap<Properties,Object>> userFactorySettings = null;
-    private void setUserFactorySettings(HashMap<Properties,HashMap<Properties,Object>> value){
+    private HashMap<SystemDefinition.Properties, HashMap<SystemDefinition.Properties,Object>> userFactorySettings = null;
+    private void setUserFactorySettings(HashMap<SystemDefinition.Properties,HashMap<SystemDefinition.Properties,Object>> value){
         userFactorySettings = value;
     }
-    private HashMap<Properties,HashMap<Properties,Object>> getUserFactorySettings(){
+    private HashMap<SystemDefinition.Properties,HashMap<SystemDefinition.Properties,Object>> getUserFactorySettings(){
         return userFactorySettings;
     }
     
     
 
     private void setUserFactorySettings(){
-        HashMap<Properties,Object> userScheduleDiaryColorFactorySettingsMap = new HashMap<>();
-        HashMap<Properties,Object> userScheduleListColorFactorySettingsMap = new HashMap<>();
-        HashMap<Properties,Object> userSystemWideFactorySettingsMap = new HashMap<>();;
-        HashMap<Properties,HashMap<Properties,Object>> userFactorySettings = new HashMap<>();
+        HashMap<SystemDefinition.Properties,Object> userScheduleDiaryColorFactorySettingsMap = new HashMap<>();
+        HashMap<SystemDefinition.Properties,Object> userScheduleListColorFactorySettingsMap = new HashMap<>();
+        HashMap<SystemDefinition.Properties,Object> userSystemWideFactorySettingsMap = new HashMap<>();;
+        HashMap<SystemDefinition.Properties,HashMap<SystemDefinition.Properties,Object>> userFactorySettings = new HashMap<>();
         //initialise schedule diary color settings
-        userScheduleDiaryColorFactorySettingsMap.put(Properties.DIARY_BOOKABLE_SLOT_BACKGROUND,
-                (Color)getDescriptor().getControllerDescription().getProperty(Properties.DIARY_BOOKABLE_SLOT_BACKGROUND));
+        userScheduleDiaryColorFactorySettingsMap.put(SystemDefinition.Properties.DIARY_BOOKABLE_SLOT_BACKGROUND,
+                (Color)getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.DIARY_BOOKABLE_SLOT_BACKGROUND));
         userScheduleDiaryColorFactorySettingsMap.put(
-                Properties.DIARY_BOOKABLE_SLOT_FOREGROUND,
-                (Color)getDescriptor().getControllerDescription().getProperty(Properties.DIARY_BOOKABLE_SLOT_FOREGROUND));
+                SystemDefinition.Properties.DIARY_BOOKABLE_SLOT_FOREGROUND,
+                (Color)getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.DIARY_BOOKABLE_SLOT_FOREGROUND));
         userScheduleDiaryColorFactorySettingsMap.put(
-                Properties.DIARY_BOOKING_FIRST_SLOT_BACKGROUND,
-                (Color)getDescriptor().getControllerDescription().getProperty(Properties.DIARY_BOOKING_FIRST_SLOT_BACKGROUND));
+                SystemDefinition.Properties.DIARY_BOOKING_FIRST_SLOT_BACKGROUND,
+                (Color)getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.DIARY_BOOKING_FIRST_SLOT_BACKGROUND));
         userScheduleDiaryColorFactorySettingsMap.put(
-                Properties.DIARY_BOOKING_FIRST_SLOT_FOREGROUND,
-                (Color)getDescriptor().getControllerDescription().getProperty(Properties.DIARY_BOOKING_FIRST_SLOT_FOREGROUND));
+                SystemDefinition.Properties.DIARY_BOOKING_FIRST_SLOT_FOREGROUND,
+                (Color)getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.DIARY_BOOKING_FIRST_SLOT_FOREGROUND));
         userScheduleDiaryColorFactorySettingsMap.put(
-                Properties.DIARY_BOOKING_REMAINING_SLOTS_BACKGROUND,
-                (Color)getDescriptor().getControllerDescription().getProperty(Properties.DIARY_BOOKING_REMAINING_SLOTS_BACKGROUND));
+                SystemDefinition.Properties.DIARY_BOOKING_REMAINING_SLOTS_BACKGROUND,
+                (Color)getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.DIARY_BOOKING_REMAINING_SLOTS_BACKGROUND));
         userScheduleDiaryColorFactorySettingsMap.put(
-                Properties.DIARY_BOOKING_REMAINING_SLOTS_FOREGROUND,
-                (Color)getDescriptor().getControllerDescription().getProperty(Properties.DIARY_BOOKING_REMAINING_SLOTS_FOREGROUND));
+                SystemDefinition.Properties.DIARY_BOOKING_REMAINING_SLOTS_FOREGROUND,
+                (Color)getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.DIARY_BOOKING_REMAINING_SLOTS_FOREGROUND));
         userScheduleDiaryColorFactorySettingsMap.put(
-                Properties.DIARY_EMERGENCY_BOOKING_SLOT_BACKGROUND,
-                (Color)getDescriptor().getControllerDescription().getProperty(Properties.DIARY_EMERGENCY_BOOKING_SLOT_BACKGROUND));
+                SystemDefinition.Properties.DIARY_EMERGENCY_BOOKING_SLOT_BACKGROUND,
+                (Color)getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.DIARY_EMERGENCY_BOOKING_SLOT_BACKGROUND));
         userScheduleDiaryColorFactorySettingsMap.put(
-                Properties.DIARY_EMERGENCY_BOOKING_SLOT_FOREGROUND,
-                (Color)getDescriptor().getControllerDescription().getProperty(Properties.DIARY_EMERGENCY_BOOKING_SLOT_FOREGROUND));
+                SystemDefinition.Properties.DIARY_EMERGENCY_BOOKING_SLOT_FOREGROUND,
+                (Color)getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.DIARY_EMERGENCY_BOOKING_SLOT_FOREGROUND));
         userScheduleDiaryColorFactorySettingsMap.put(
-                Properties.DIARY_UNBOOKABLE_SLOT_BACKGROUND,
-                (Color)getDescriptor().getControllerDescription().getProperty(Properties.DIARY_UNBOOKABLE_SLOT_BACKGROUND));
+                SystemDefinition.Properties.DIARY_UNBOOKABLE_SLOT_BACKGROUND,
+                (Color)getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.DIARY_UNBOOKABLE_SLOT_BACKGROUND));
         userScheduleDiaryColorFactorySettingsMap.put(
-                Properties.DIARY_UNBOOKABLE_SLOT_FOREGROUND,
-                (Color)getDescriptor().getControllerDescription().getProperty(Properties.DIARY_UNBOOKABLE_SLOT_FOREGROUND));
+                SystemDefinition.Properties.DIARY_UNBOOKABLE_SLOT_FOREGROUND,
+                (Color)getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.DIARY_UNBOOKABLE_SLOT_FOREGROUND));
         //initialise user schedule list color settings
         userScheduleListColorFactorySettingsMap.put(
-                Properties.LIST_BOOKABLE_SLOT_BACKGROUND,
-                (Color)getDescriptor().getControllerDescription().getProperty(Properties.LIST_BOOKABLE_SLOT_BACKGROUND));
+                SystemDefinition.Properties.LIST_BOOKABLE_SLOT_BACKGROUND,
+                (Color)getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.LIST_BOOKABLE_SLOT_BACKGROUND));
         userScheduleListColorFactorySettingsMap.put(
-                Properties.LIST_BOOKABLE_SLOT_FOREGROUND,
-                (Color)getDescriptor().getControllerDescription().getProperty(Properties.LIST_BOOKABLE_SLOT_FOREGROUND));
+                SystemDefinition.Properties.LIST_BOOKABLE_SLOT_FOREGROUND,
+                (Color)getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.LIST_BOOKABLE_SLOT_FOREGROUND));
         userScheduleListColorFactorySettingsMap.put(
-                Properties.LIST_EMERGENCY_BOOKING_BACKGROUND,
-                (Color)getDescriptor().getControllerDescription().getProperty(Properties.LIST_EMERGENCY_BOOKING_BACKGROUND));
+                SystemDefinition.Properties.LIST_EMERGENCY_BOOKING_BACKGROUND,
+                (Color)getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.LIST_EMERGENCY_BOOKING_BACKGROUND));
         userScheduleListColorFactorySettingsMap.put(
-                Properties.LIST_EMERGENCY_BOOKING_FOREGROUND,
-                (Color)getDescriptor().getControllerDescription().getProperty(Properties.LIST_EMERGENCY_BOOKING_FOREGROUND));
+                SystemDefinition.Properties.LIST_EMERGENCY_BOOKING_FOREGROUND,
+                (Color)getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.LIST_EMERGENCY_BOOKING_FOREGROUND));
         userScheduleListColorFactorySettingsMap.put(
-                Properties.LIST_UNBOOKABLE_SLOT_BACKGROUND,
-                (Color)getDescriptor().getControllerDescription().getProperty(Properties.LIST_UNBOOKABLE_SLOT_BACKGROUND));
+                SystemDefinition.Properties.LIST_UNBOOKABLE_SLOT_BACKGROUND,
+                (Color)getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.LIST_UNBOOKABLE_SLOT_BACKGROUND));
         userScheduleListColorFactorySettingsMap.put(
-                Properties.LIST_UNBOOKABLE_SLOT_FOREGROUND,
-                (Color)getDescriptor().getControllerDescription().getProperty(Properties.LIST_UNBOOKABLE_SLOT_FOREGROUND));
+                SystemDefinition.Properties.LIST_UNBOOKABLE_SLOT_FOREGROUND,
+                (Color)getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.LIST_UNBOOKABLE_SLOT_FOREGROUND));
         //initialise user system wide settings
         userSystemWideFactorySettingsMap.put(
-                Properties.TITLED_BORDER_COLOR,
-                (Color)getDescriptor().getControllerDescription().getProperty(Properties.TITLED_BORDER_COLOR));
+                SystemDefinition.Properties.TITLED_BORDER_COLOR,
+                (Color)getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.TITLED_BORDER_COLOR));
         userSystemWideFactorySettingsMap.put(
-                Properties.TITLED_BORDER_FONT,
-                (Font)getDescriptor().getControllerDescription().getProperty(Properties.TITLED_BORDER_FONT));
+                SystemDefinition.Properties.TITLED_BORDER_FONT,
+                (Font)getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.TITLED_BORDER_FONT));
         //initialise factory setting collection
-        userFactorySettings.put(Properties.USER_SCHEDULE_DIARY_SETTINGS, userScheduleDiaryColorFactorySettingsMap);
-        userFactorySettings.put(Properties.USER_SCHEDULE_LIST_SETTINGS, userScheduleDiaryColorFactorySettingsMap);
-        userFactorySettings.put(Properties.USER_SYSTEM_WIDE_SETTINGS, userScheduleDiaryColorFactorySettingsMap);
+        userFactorySettings.put(SystemDefinition.Properties.USER_SCHEDULE_DIARY_SETTINGS, userScheduleDiaryColorFactorySettingsMap);
+        userFactorySettings.put(SystemDefinition.Properties.USER_SCHEDULE_LIST_SETTINGS, userScheduleDiaryColorFactorySettingsMap);
+        userFactorySettings.put(SystemDefinition.Properties.USER_SYSTEM_WIDE_SETTINGS, userScheduleDiaryColorFactorySettingsMap);
         setUserFactorySettings(userFactorySettings);
     }
     
@@ -606,10 +632,20 @@ public class DesktopViewController extends ViewController{
     private void doActionEventForArchivedPatientsViewController(ActionEvent e){
         String message = null;
         ArchivedPatientsViewController vc = (ArchivedPatientsViewController)e.getSource();
-        ViewController.DesktopViewControllerActionEvent actionCommand =
-                    ViewController.DesktopViewControllerActionEvent.valueOf(e.getActionCommand());
+        Actions actionCommand =
+                    Actions.valueOf(e.getActionCommand());
         switch(actionCommand){
-            case VIEW_CONTROLLER_CLOSE_NOTIFICATION:{
+            case VIEW_CONTROLLER_CHANGED_NOTIFICATION ->{
+                firePropertyChangeEvent(
+                        ArchivedPatientsViewController.Properties.VIEW_CHANGE_NOTIFICATION.toString(),
+                        vc.getView(),
+                        this,
+                        null,
+                        null
+                );
+                break;
+            }
+            case VIEW_CONTROLLER_CLOSE_NOTIFICATION ->{
                 switch (this.archivedPatientsViewControllers.size()){
                     case 0:
                         message = "No archived patients view controllers found in "
@@ -643,10 +679,24 @@ public class DesktopViewController extends ViewController{
     private void doActionEventForPatientAppointmentDataViewController(ActionEvent e){
         String message = null;
         PatientAppointmentDataViewController vc = (PatientAppointmentDataViewController)e.getSource();
-        ViewController.DesktopViewControllerActionEvent actionCommand =
-                    ViewController.DesktopViewControllerActionEvent.valueOf(e.getActionCommand());
+        Actions actionCommand =
+                    Actions.valueOf(e.getActionCommand());
         switch(actionCommand){
-            case VIEW_CONTROLLER_CLOSE_NOTIFICATION:{
+            case PATIENT_RECALL_VIEW_CONTROLLER_REQUEST ->{
+                doRequestForPatientRecallViewController(e);
+                break;
+            }
+            case VIEW_CONTROLLER_CHANGED_NOTIFICATION ->{
+                firePropertyChangeEvent(
+                        ArchivedPatientsViewController.Properties.VIEW_CHANGE_NOTIFICATION.toString(),
+                        getDesktopView(),
+                        this,
+                        null,
+                        null
+                );
+                break;
+            }
+            case VIEW_CONTROLLER_CLOSE_NOTIFICATION ->{
                 switch (this.patientAppointmentDataViewControllers.size()){
                     case 0:
                         message = "No patient appointment data view controllers found in "
@@ -760,13 +810,13 @@ public class DesktopViewController extends ViewController{
                 break;
             }
             case USER_LOGIN_NOTIFICATION -> {
-                getDescriptor().getControllerDescription().setProperty(Properties.LOGIN_CREDENTIAL, 
-                        lvc.getDescriptor().getControllerDescription().getProperty(Properties.LOGIN_CREDENTIAL));
+                getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.LOGIN_CREDENTIAL, 
+                        lvc.getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.LOGIN_CREDENTIAL));
                 this.getDesktopView().enableMenus();
                 break;
             }
             case VIEW_CONTROLLER_CLOSE_NOTIFICATION -> {
-                Credential credential = (Credential)lvc.getDescriptor().getControllerDescription().getProperty(Properties.LOGIN_CREDENTIAL);
+                Credential credential = (Credential)lvc.getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.LOGIN_CREDENTIAL);
                 if (credential!=null){
                     if (!credential.getIsPasswordValid() || !credential.getIsUsernameValid()) {
                         System.exit(0);
@@ -804,7 +854,7 @@ public class DesktopViewController extends ViewController{
             }
             case USER_SYSTEM_WIDE_SETTINGS_VIEW_CONTROLLER_REQUEST ->{
                 String username = ((Credential)getDescriptor().getControllerDescription().
-                        getProperty(Properties.LOGIN_CREDENTIAL)).getUsername();
+                        getProperty(SystemDefinition.Properties.LOGIN_CREDENTIAL)).getUsername();
                 User user = new User(username);
                 UserSettings userSettings = new UserSettings(user);
                 userSettings.setScope(Entity.Scope.USER_SYSTEM_WIDE_SETTINGS);
@@ -965,7 +1015,7 @@ public class DesktopViewController extends ViewController{
             }
             case CHANGE_USER_PASSWORD_REQUEST ->{
                 getDescriptor().getControllerDescription().
-                        setProperty(Properties.LOGIN_VIEW_MODE, ViewController.LoginViewMode.OLD_PASSWORD_CHECK);
+                        setProperty(SystemDefinition.Properties.LOGIN_VIEW_MODE, ViewController.LoginViewMode.OLD_PASSWORD_CHECK);
                 doRequestForLoginViewController(e);
                 break;
             }
@@ -979,13 +1029,13 @@ public class DesktopViewController extends ViewController{
             }
             case LOGIN_VIEW_CONTROLLER_REQUEST ->{
                 getDescriptor().getControllerDescription().
-                        setProperty(Properties.LOGIN_VIEW_MODE, ViewController.LoginViewMode.LOGIN_CHECK);
+                        setProperty(SystemDefinition.Properties.LOGIN_VIEW_MODE, ViewController.LoginViewMode.LOGIN_CHECK);
                 doRequestForLoginViewController(e);
                 break;
             }
             case LOGOUT_REQUEST ->{
                 getDescriptor().getControllerDescription().
-                        setProperty(Properties.LOGIN_CREDENTIAL, new Credential());
+                        setProperty(SystemDefinition.Properties.LOGIN_CREDENTIAL, new Credential());
                 break;
             }
             case MEDICAL_CONDITION_VIEW_CONTROLLER_REQUEST ->{
@@ -1245,7 +1295,7 @@ public class DesktopViewController extends ViewController{
                 displayErrorMessage(ex.getMessage(),"DesktopViewController error",JOptionPane.WARNING_MESSAGE);
             } 
             avc.setDescriptor(ed);
-            switch((ControllerViewMode)ed.getControllerDescription().getProperty(Properties.VIEW_MODE)){
+            switch((ControllerViewMode)ed.getControllerDescription().getProperty(SystemDefinition.Properties.VIEW_MODE)){
 
                 case LIST ->{
                     avc.setView(new View().make(View.Viewer.SCHEDULE_LIST_VIEW,avc,getDesktopView()));
@@ -1765,6 +1815,39 @@ public class DesktopViewController extends ViewController{
         }//do nothing because only one medical condition VC allowed
     }
     
+    private void doRequestForPatientRecallViewController(ActionEvent e){
+        DesktopViewController dvc = this;
+        PatientRecallViewController prvc = null;
+        if (patientRecallViewControllers==null) patientRecallViewControllers = new ArrayList<>(); 
+        if (patientRecallViewControllers.isEmpty()){
+            patientRecallViewControllers.add(
+                    new PatientRecallViewController(
+                            this,
+                            getDesktopView()));
+            prvc = patientRecallViewControllers.get(patientRecallViewControllers.size()-1);
+            setView(new View().make(View.Viewer.RECALL_PATIENTS_VIEW,
+                        prvc, 
+                        getDesktopView()));
+            ActionEvent actionEvent = new ActionEvent(
+                    this,ActionEvent.ACTION_PERFORMED,
+                    DesktopViewController.DesktopViewControllerActionEvent.INITIALISE_VIEW_CONTROLLER.toString());
+            prvc.actionPerformed(actionEvent);
+
+            if (getDesktopView().getDeskTop().getAllFrames().length>1){
+                dvc.firePropertyChangeEvent(
+                        ViewController.DesktopViewControllerPropertyChangeEvent.CASCADE_DESKTOP_VIEWS.toString(), 
+                        getDesktopView(),
+                        this, 
+                        null,
+                        null
+                );
+            }
+            if (getDesktopViewMode().equals(DesktopViewMode.CLINIC_LOGO))
+                doSetupDesktopViewMode();
+        }else {
+            archivedPatientsViewControllers.get(0).getView().toFront();
+        }
+    }
     
     private void doRequestForArchivedPatientsViewController(){
         DesktopViewController dvc = this;
@@ -1774,6 +1857,7 @@ public class DesktopViewController extends ViewController{
             archivedPatientsViewControllers.add(
                     new ArchivedPatientsViewController(
                             this,
+                            getNewTemplatedDescriptor(),
                             getDesktopView()));
             apvc = archivedPatientsViewControllers.get(archivedPatientsViewControllers.size()-1);
             setView(new View().make(View.Viewer.ARCHIVED_PATIENTS_VIEW,
@@ -1811,7 +1895,7 @@ public class DesktopViewController extends ViewController{
             }
             case "ScheduleViewController" ->{
                 controllerViewMode = (ControllerViewMode)((ScheduleViewController)e.getSource()).getDescriptor().
-                        getControllerDescription().getProperty(Properties.VIEW_MODE);
+                        getControllerDescription().getProperty(SystemDefinition.Properties.VIEW_MODE);
                 break;
             }
         }
@@ -1854,6 +1938,7 @@ public class DesktopViewController extends ViewController{
             patientAppointmentDataViewControllers.add(
                     new PatientAppointmentDataViewController(
                             this,
+                            getNewTemplatedDescriptor(),
                             getDesktopView()));
             padvc = patientAppointmentDataViewControllers.get(patientAppointmentDataViewControllers.size()-1);
             setView(new View().make(View.Viewer.PATIENT_APPOINTMENT_DATA_VIEW,
@@ -2022,7 +2107,7 @@ public class DesktopViewController extends ViewController{
     private void doRequestForPatientViewController(){
         PatientViewController anotherBlankPatientView = null;
         for (PatientViewController pvc : patientViewControllers){
-            if (!((Patient)pvc.getDescriptor().getControllerDescription().getProperty(Properties.PATIENT)).getIsKeyDefined()){
+            if (!((Patient)pvc.getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.PATIENT)).getIsKeyDefined()){
                 anotherBlankPatientView = pvc;
                 break;
             }
@@ -2034,8 +2119,8 @@ public class DesktopViewController extends ViewController{
                 patientViewControllers.add(
                                         new PatientViewController(this, getNewTemplatedDescriptor(), getDesktopView()));
                 PatientViewController pvc = patientViewControllers.get(patientViewControllers.size()-1);
-                pvc.getDescriptor().getControllerDescription().setProperty(Properties.VIEW_MODE, ViewMode.CREATE); //signals patient not selected in new patient view
-                System.out.println(String.valueOf((Boolean)getDescriptor().getControllerDescription().getProperty(Properties.LOGIN_REQUIRED)).toCharArray());
+                pvc.getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.VIEW_MODE, ViewMode.CREATE); //signals patient not selected in new patient view
+                System.out.println(String.valueOf((Boolean)getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.LOGIN_REQUIRED)).toCharArray());
                 pvc.setView(new View().make(
                     View.Viewer.PATIENT_VIEW,
                     pvc, 
@@ -2694,8 +2779,7 @@ public class DesktopViewController extends ViewController{
 
     @Override
     public void actionPerformed(ActionEvent e){
-        ViewController.DesktopViewControllerActionEvent actionCommand = 
-                ViewController.DesktopViewControllerActionEvent.valueOf(e.getActionCommand());
+        Actions actionCommand = Actions.valueOf(e.getActionCommand());
         switch (actionCommand){
             case VIEW_ACTIVATED_NOTIFICATION ->{
                 if (getDesktopViewMode().equals(DesktopViewMode.CLINIC_LOGO))
@@ -2718,7 +2802,7 @@ public class DesktopViewController extends ViewController{
                 ViewController viewController = view.getMyController();
                 //ViewController viewController = (ViewController)e.getSource();
                 String username = ((Credential)getDescriptor().getControllerDescription().
-                        getProperty(Properties.LOGIN_CREDENTIAL)).getUsername();
+                        getProperty(SystemDefinition.Properties.LOGIN_CREDENTIAL)).getUsername();
                 User user = new User(username);
                 UserSettings userSettings = new UserSettings(user);
                 userSettings.setScope(Entity.Scope.USER_SYSTEM_WIDE_SETTINGS);
@@ -2926,9 +3010,9 @@ public class DesktopViewController extends ViewController{
         //setDescriptor((Descriptor)e.getNewValue());
         Descriptor pvcDescriptor = (Descriptor)e.getNewValue(); 
         for(PatientViewController pvc: this.patientViewControllers){
-            if (pvc.getDescriptor().getControllerDescription().getProperty(Properties.PATIENT)
-                    .equals(pvcDescriptor.getControllerDescription().getProperty(Properties.PATIENT))){
-                pvc.getDescriptor().getControllerDescription().setProperty(Properties.DESCRIPTOR, pvcDescriptor);
+            if (pvc.getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.PATIENT)
+                    .equals(pvcDescriptor.getControllerDescription().getProperty(SystemDefinition.Properties.PATIENT))){
+                pvc.getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.DESCRIPTOR, pvcDescriptor);
                 firePropertyChangeEvent(
                         ViewController.PatientViewControllerPropertyChangeEvent.PATIENT_VIEW_CHANGE_NOTIFICATION.toString(),
                         pvc,
@@ -2941,7 +3025,7 @@ public class DesktopViewController extends ViewController{
         for(ArchivedPatientsViewController apvc: this.archivedPatientsViewControllers){
             firePropertyChangeEvent(
                     ViewController.ArchivedPatientsViewControllerPropertyChangeEvent.
-                            ARCHIVED_PATIENTS_VIEW_CONTROLLER_CHANGE_NOTIFICATION.toString(),
+                            VIEW_CHANGE_NOTIFICATION.toString(),
                     apvc,
                     this,
                     null,

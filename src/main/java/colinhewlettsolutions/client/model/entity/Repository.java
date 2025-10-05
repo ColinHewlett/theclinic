@@ -2624,6 +2624,7 @@ public class Repository implements IStoreActions {
                     Integer appointmentKey = rs.getInt("appointmentKey");
                     LocalDateTime last_appointment_date = rs.getObject("last_appointment_date", LocalDateTime.class);
                     String treatment = rs.getString("treatment");
+                    //Boolean isCancelled = rs.getBoolean("isCancelled");
                     pad = new PatientAppointmentData();
                     Patient patient = new Patient(patientKey);
                     
@@ -2646,6 +2647,7 @@ public class Repository implements IStoreActions {
                     appointment.setStart(last_appointment_date);
                     appointment.setNotes(treatment);
                     pad.setAppointment(appointment);
+                    //pad.setIsCancelled(isCancelled);
                     pad.setPatient(patient);
                     collection.add(pad);
                 }
@@ -4839,8 +4841,8 @@ public class Repository implements IStoreActions {
                 //sql = "SELECT a.pid, a.Start, a.PatientKey, a.Duration, a.Notes, a.hasPatientBeenContacted "
                 sql = "SELECT * "        
                         + "FROM Appointment AS a "
-                        + "WHERE a.pid = ? "
-                        + "AND isDeleted = false;";
+                        + "WHERE a.pid = ?; ";
+                        /*+ "AND isDeleted = false;";*/
                 result = doReadSingle(sql, entity);
                 break;
             case READ_APPOINTMENTS:
@@ -5163,7 +5165,7 @@ public class Repository implements IStoreActions {
                         + "AND p.pid <> 13814 "
                         + "AND p.isArchived = false "
                         + "AND DatePart(\"yyyy\",a.start) BETWEEN ? AND ? "
-                        + "AND a.isCancelled = false "
+                        /*+ "AND a.isCancelled = false "*/
                         + "AND a.start = "
                         + "(Select MAX(a2.start) "
                         + " FROM Appointment a2 "
@@ -9426,6 +9428,9 @@ public class Repository implements IStoreActions {
                 }catch(ClassNotFoundException ex){
                     displayErrorMessage(ex.getMessage(),"Repository constructor error",JOptionPane.WARNING_MESSAGE);
                 }
+                break;
+            }
+            case MYSQL ->{
                 break;
             }
             case POSTGRES ->{

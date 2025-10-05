@@ -29,6 +29,7 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.*;
 import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.beans.PropertyVetoException;
 import java.time.Duration;
 import java.time.format.DateTimeFormatter;
@@ -72,7 +73,8 @@ import colinhewlettsolutions.client.view.support_classes.renderers.ScheduleTable
  */
 public class PatientView extends View 
         implements ActionListener, 
-                   ListSelectionListener{
+                   ListSelectionListener,
+                   PropertyChangeListener{
     //private JTextField txtAddressLine2 = null;
     private javax.swing.ButtonGroup rdbGroup = null;
     //private JTable tblAppointmentHistory = null;
@@ -308,10 +310,6 @@ public class PatientView extends View
         setMaximizable(false);
         setIconifiable(true);
         setResizable(false);
-        //setSelected(true);
-        //setSize(getPatientViewWidth(),getPatientViewHeight());
-        //some loose ends
-        //txtAddressLine2 = new javax.swing.JTextField();
         rdbGroup = new javax.swing.ButtonGroup();
         rdbGroup.add(rdbRequestPhoneEmailEditorView);
         rdbGroup.add(rdbRequestModalRecallEditorView);

@@ -53,14 +53,24 @@ public class PatientAppointmentData extends Entity implements IEntityRepositoryA
     
     @Override
     public PatientAppointmentData read()throws StoreException{
+        Appointment appointment = null;
         PatientAppointmentData pad = getRepository().read(this);
-        if (pad!=null){
-            /*
-            for (PatientAppointmentData _pad : pad.get()){
-                _pad.setClinicalNote();
+            switch(getScope()){
+                case PATIENT_APPOINTMENT_DATA_WITH_APPOINTMENT ->{
+                    if (pad!=null){
+                        for(PatientAppointmentData _pad : pad.get()){
+                            appointment = _pad.getAppointment();
+                            if (appointment.getKey() == 0){
+                                System.out.println("zero value appointment key");
+                            }
+                            appointment.setPatient(_pad.getPatient());
+                            appointment.setScope(Entity.Scope.SINGLE);
+                            appointment = appointment.read();
+                            _pad.setAppointment(appointment);
+                        }
+                    }
+                }
             }
-            */
-        }
         return pad;
     }
     

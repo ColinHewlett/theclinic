@@ -182,6 +182,10 @@ public class View extends JInternalFrame
             case NOTIFICATION_VIEW:
                 setView(makeView(new PatientNotificationView(viewer, controller, desktopView)));
                 break;
+            case RECALL_PATIENTS_VIEW:
+                setView(makeView(new RecallPatientsView(viewer, controller, desktopView)));
+                break; 
+                
             case PATIENT_APPOINTMENT_DATA_VIEW:
                 setView(makeView(new PatientAppointmentDataView(viewer, controller, desktopView)));
                 break;
@@ -335,6 +339,7 @@ public class View extends JInternalFrame
         PATIENT_SELECTION_DIALOG,
         PATIENT_SELECTION_VIEW,
         PATIENT_VIEW,
+        RECALL_PATIENTS_VIEW,
         MODAL_PROGRESS_VIEW,
         SCHEDULE_DIARY_VIEW,
         SCHEDULE_EDITOR_VIEW,
@@ -514,7 +519,7 @@ public class View extends JInternalFrame
         return modalView;
     }
     
-    private final void setModalView(ModalView value){
+    private void setModalView(ModalView value){
         modalView = value;
     }
     
@@ -527,10 +532,9 @@ public class View extends JInternalFrame
         dialogView = value;
     }
 
-    @Override
-    public void propertyChange(PropertyChangeEvent ex){
-        
-    }
+    
+    public void propertyChange(PropertyChangeEvent ex){};
+    
     
     public void doOpenDocumentForPrinting(String filepath){
         File file = new File(filepath);

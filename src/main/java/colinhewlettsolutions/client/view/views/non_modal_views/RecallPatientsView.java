@@ -4,17 +4,45 @@
  */
 package colinhewlettsolutions.client.view.views.non_modal_views;
 
+import colinhewlettsolutions.client.controller.ViewController;
+import colinhewlettsolutions.client.view.View;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 /**
  *
  * @author colin
  */
-public class RecallPatientView extends javax.swing.JInternalFrame {
-
+public class RecallPatientsView extends View
+                                implements ActionListener{ //View implements an empty overridden propertyChange method
+    
+    public enum ViewMode{
+        BY_DATE,                
+        BY_SELECTION
+    }
     /**
-     * Creates new form PatientRecallerView
+     * 
+     * @param myViewType
+     * @param myController
+     * @param desktopView 
      */
-    public RecallPatientView() {
-        initComponents();
+    public RecallPatientsView(View.Viewer myViewType, 
+            ViewController myController,
+            DesktopView desktopView) {//ViewMode arg
+        setMyController(myController);
+        setMyViewType(myViewType);
+        setDesktopView(desktopView);  
+    } 
+    
+    @Override
+    public void actionPerformed(ActionEvent e){
+        
+    }
+    
+    @Override
+    public void propertyChange(PropertyChangeEvent e){
+        
     }
 
     /**

@@ -4,7 +4,6 @@
  */
 package colinhewlettsolutions.client.view.views.modal_views;
 
-import colinhewlettsolutions.client.controller.PatientAppointmentDataViewController;
 import colinhewlettsolutions.client.controller.SystemDefinition;
 import colinhewlettsolutions.client.controller.SystemDefinition.Properties;
 import colinhewlettsolutions.client.controller.ViewController;
@@ -24,13 +23,24 @@ import java.beans.PropertyVetoException;
 public class ModalProgressView extends ModalView implements ActionListener,
                                                             PropertyChangeListener{
     
-    enum Action{
+    public enum Actions{
+        PROCESS_DATA_REQUEST,
+        PROCESS_PENDING_REQUEST,
+        PROCESS_START_REQUEST,
+        PROCESS_STOP_REQUEST,
+        REFRESH_DATA_REQUEST,
         REQUEST_CLOSE_VIEW,
         REQUEST_PROCESS_START_STOP
     }
     
+    public enum Properties{
+        PROCESS_CHANGE_NOTIFICATION,
+        PROCESS_UPDATE_NOTIFICATION
+    }
+    
     public enum ViewMode{
         NULL,
+        PROCESS_ENDED,
         PROCESS_PENDING,
         PROCESS_STARTED,
         PROCESS_STOPPED
@@ -51,29 +61,29 @@ public class ModalProgressView extends ModalView implements ActionListener,
     
     @Override
     public void actionPerformed(ActionEvent e){
-        Action actionRequest = Action.valueOf(e.getActionCommand());
+        Actions actionRequest = Actions.valueOf(e.getActionCommand());
         switch(actionRequest){
             case REQUEST_CLOSE_VIEW ->{
                 doCloseViewRequest();
                 break;
             }
             case REQUEST_PROCESS_START_STOP ->{
-                PatientAppointmentDataViewController.ViewMode mode = (PatientAppointmentDataViewController.ViewMode)getMyController().getDescriptor().getControllerDescription().getProperty(Properties.VIEW_MODE);
+                ViewMode mode = (ViewMode)getMyController().getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.VIEW_MODE);
                 switch (mode){
                     case PROCESS_PENDING ->{
-                        doSendActionEvent(PatientAppointmentDataViewController.Actions.PROCESS_PENDING_REQUEST);
+                        doSendActionEvent(Actions.PROCESS_START_REQUEST);
                         break;
                     }
                     case PROCESS_STARTED ->{
-                        doSendActionEvent(PatientAppointmentDataViewController.Actions.PROCESS_STOP_REQUEST);
+                        doSendActionEvent(Actions.PROCESS_STOP_REQUEST);
                         break;
                     }
                     case PROCESS_STOPPED ->{
-                        doSendActionEvent(PatientAppointmentDataViewController.Actions.PROCESS_START_REQUEST);
+                        //doSendActionEvent(Actions.PROCESS_START_REQUEST);
                         break;
                     }
                 }
-                doSendActionEvent(PatientAppointmentDataViewController.Actions.PROCESS_START_REQUEST);
+                //doSendActionEvent(Actions.PROCESS_START_REQUEST);
                 break;
             }
         }
@@ -81,15 +91,15 @@ public class ModalProgressView extends ModalView implements ActionListener,
     
     @Override
     public void propertyChange(PropertyChangeEvent e){
-        PatientAppointmentDataViewController.Properties property = PatientAppointmentDataViewController.Properties.valueOf(e.getPropertyName());
+        Properties property = Properties.valueOf(e.getPropertyName());
         switch (property){
             case PROCESS_CHANGE_NOTIFICATION ->{
-                PatientAppointmentDataViewController.ViewMode mode = (PatientAppointmentDataViewController.ViewMode)getMyController().getDescriptor().getControllerDescription().getProperty(Properties.VIEW_MODE);
+                ViewMode mode = (ViewMode)getMyController().getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.VIEW_MODE);
                 switch (mode){
                     case PROCESS_ENDED ->{
                         this.btnStartStopProcess.setText("<html><center>Start</center></html>");
                         this.btnStartStopProcess.setEnabled(false);
-                        doSendActionEvent(PatientAppointmentDataViewController.Actions.PATIENT_APPOINTMENT_DATA_REQUEST);
+                        doSendActionEvent(Actions.REFRESH_DATA_REQUEST);
                     }
                     case PROCESS_PENDING ->{
                         this.btnStartStopProcess.setEnabled(true);
@@ -126,14 +136,14 @@ public class ModalProgressView extends ModalView implements ActionListener,
         initComponents();
         displayItemCounter();
         proProgressBar.setStringPainted(true);
-        btnStartStopProcess.setActionCommand(Action.REQUEST_PROCESS_START_STOP.toString());
-        btnCloseView.setActionCommand(Action.REQUEST_CLOSE_VIEW.toString());
+        btnStartStopProcess.setActionCommand(Actions.REQUEST_PROCESS_START_STOP.toString());
+        btnCloseView.setActionCommand(Actions.REQUEST_CLOSE_VIEW.toString());
         btnStartStopProcess.addActionListener(this);
         btnCloseView.addActionListener(this);
     }
     
     private void displayItemCounter(){
-        Point itemCounter = (Point)getMyController().getDescriptor().getControllerDescription().getProperty(Properties.ITEM_COUNTER);
+        Point itemCounter = (Point)getMyController().getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.ITEM_COUNTER);
         setItemValue(itemCounter.x);
         setItemTotal(itemCounter.y);
         lblItemCounter.setText(String.valueOf(getItemValue()) + " / " + String.valueOf(getItemTotal()));
@@ -151,12 +161,13 @@ public class ModalProgressView extends ModalView implements ActionListener,
         }
     }
     
-    private void doSendActionEvent(PatientAppointmentDataViewController.Actions actionCommand){
+    private void doSendActionEvent(Actions actionCommand){
+        /*
         if (getMyController().getDescriptor().getViewDescription().getProperty(SystemDefinition.Properties.PATIENT_APPOINTMENT_DATA) == null){
             PatientAppointmentData pad = (PatientAppointmentData)getMyController().getDescriptor().getControllerDescription().
                     getProperty(SystemDefinition.Properties.PATIENT_APPOINTMENT_DATA);
                 getMyController().getDescriptor().getViewDescription().setProperty(SystemDefinition.Properties.PATIENT_APPOINTMENT_DATA, pad);
-        }
+        }*/
         ActionEvent actionEvent = new ActionEvent(
             this,ActionEvent.ACTION_PERFORMED,
             actionCommand.toString());

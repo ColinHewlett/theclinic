@@ -32,22 +32,24 @@ public class PatientAppointmentDataViewController extends ViewController{
         PATIENT_APPOINTMENT_DATA_REQUEST,
         PATIENT_ARCHIVE_REQUEST,
         PATIENT_RECALL_ACTIVITY_STATUS_CHANGE,
+        PATIENT_RECALL_VIEW_REQUEST,
         VIEW_CLOSE_NOTIFICATION,
         VIEW_ACTIVATED_NOTIFICATION,
         VIEW_CHANGED_NOTIFICATION,
         //secondary view action requests
-        PROCESS_PENDING_REQUEST,
-        PROCESS_START_REQUEST,
-        PROCESS_STOP_REQUEST,
-        MODAL_VIEW_CLOSE_NOTIFICATION 
+        //PROCESS_PENDING_REQUEST,
+        //PROCESS_START_REQUEST,
+        //PROCESS_STOP_REQUEST,
+        //REFRESH_DATA_REQUEST,
+        //MODAL_VIEW_CLOSE_NOTIFICATION 
     }
     
     public enum Properties{
         PATIENT_APPOINTMENT_DATA_RECEIVED,
-        PATIENT_APPOINTMENT_DATA_VIEW_CONTROLLER_CHANGE_NOTIFICATION,
-        PROCESS_CHANGE_NOTIFICATION,
-        PROCESS_ENDED_NOTIFICATION,
-        PROCESS_UPDATE_NOTIFICATION
+        VIEW_CHANGE_NOTIFICATION,
+        //PROCESS_CHANGE_NOTIFICATION,
+        //PROCESS_ENDED_NOTIFICATION,
+        //PROCESS_UPDATE_NOTIFICATION
     }
     
     public enum ViewMode{
@@ -59,9 +61,11 @@ public class PatientAppointmentDataViewController extends ViewController{
     
     public PatientAppointmentDataViewController(
             DesktopViewController controller,
+            Descriptor descriptor,
             DesktopView desktopView){
         setMyController(controller);
-        setDesktopView(desktopView);  
+        setDesktopView(desktopView); 
+        setDescriptor(descriptor);
     }
     
     @Override
@@ -96,19 +100,16 @@ public class PatientAppointmentDataViewController extends ViewController{
     private void doSecondaryViewActionRequest(ActionEvent e){
         PatientAppointmentData pad = (PatientAppointmentData)getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.PATIENT_APPOINTMENT_DATA);
         ActionEvent actionEvent = null;
-        Actions actionCommand =
-               Actions.valueOf(e.getActionCommand());
+        ModalProgressView.Actions actionCommand =
+               ModalProgressView.Actions.valueOf(e.getActionCommand());
         View the_view = (View)e.getSource();
         switch (the_view.getMyViewType()){
             case MODAL_PROGRESS_VIEW ->{
                 switch(actionCommand){
-                    case MODAL_VIEW_CLOSE_NOTIFICATION ->{
-                        break;
-                    }
                     case PROCESS_PENDING_REQUEST ->{
                         
                         firePropertyChangeEvent(
-                                Properties.PROCESS_CHANGE_NOTIFICATION.toString(),
+                                ModalProgressView.Properties.PROCESS_CHANGE_NOTIFICATION.toString(),
                                 getModalView(),
                                 this,
                                 null,
@@ -120,9 +121,9 @@ public class PatientAppointmentDataViewController extends ViewController{
                         getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.ITEM_COUNTER, new Point(0, pad .get().size()));
                         setItemCount(((Point)getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.ITEM_COUNTER)).x);
                         setItemTotal(((Point)getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.ITEM_COUNTER)).y);
-                        getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.VIEW_MODE,ViewMode.PROCESS_STARTED);
+                        getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.VIEW_MODE,ModalProgressView.ViewMode.PROCESS_STARTED);
                         firePropertyChangeEvent(
-                                Properties.PROCESS_CHANGE_NOTIFICATION.toString(),
+                                ModalProgressView.Properties.PROCESS_CHANGE_NOTIFICATION.toString(),
                                 getModalView(),
                                 this,
                                 null,
@@ -132,34 +133,14 @@ public class PatientAppointmentDataViewController extends ViewController{
                         break;
                     }
                     case PROCESS_STOP_REQUEST ->{
-                        getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.VIEW_MODE,ViewMode.PROCESS_STOPPED);
+                        getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.VIEW_MODE,ModalProgressView.ViewMode.PROCESS_STOPPED);
                         firePropertyChangeEvent(
-                                Properties.PROCESS_CHANGE_NOTIFICATION.toString(),
+                                ModalProgressView.Properties.PROCESS_CHANGE_NOTIFICATION.toString(),
                                 getModalView(),
                                 this,
                                 null,
                                 null
                         );
-
-                        /*
-                        try{
-                            pad = (PatientAppointmentData)getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.PATIENT_APPOINTMENT_DATA);
-                            pad = pad.read();
-                            getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.PATIENT_APPOINTMENT_DATA, pad);
-                            firePropertyChangeEvent(
-                                    ViewController.PatientAppointmentDataViewControllerPropertyChangeEvent.
-                                            PATIENT_APPOINTMENT_DATA_RECEIVED.toString(),
-                                    getView(),
-                                    this,
-                                    null,
-                                    null
-                            );
-                        }catch(StoreException ex){
-                            String message = ex.getMessage() + "\n"
-                                    + "Handled in PatientAppointmentDataViewController::doSecondaryViewActionRequest(PROCESS_STOP_REQUEST)";
-                            displayErrorMessage(message, "View controller error", JOptionPane.WARNING_MESSAGE);
-                        }
-                        break;*/
                     }
                     /**
                      * Following case is actioned on 2 property change events received in ModalProgressView
@@ -167,7 +148,7 @@ public class PatientAppointmentDataViewController extends ViewController{
                      * -- [2] on receipt of PROCESS_CHANGE_NOTIFICATION with a view mode defines as PROCESS_ENDED
                      * In either case the PatientAppointmentData table is refreshed 
                      */
-                    case PATIENT_APPOINTMENT_DATA_REQUEST ->{
+                    case REFRESH_DATA_REQUEST ->{
                         try{
                             fetchAndSendViewPatientAppointmentData();
                         }catch(StoreException ex){
@@ -185,6 +166,7 @@ public class PatientAppointmentDataViewController extends ViewController{
                             JOptionPane.WARNING_MESSAGE);
                     }
                 }
+                break;
             }
             
         }
@@ -198,9 +180,9 @@ public class PatientAppointmentDataViewController extends ViewController{
             protected Void doInBackground() throws Exception {  
                 try{
                     for(PatientAppointmentData _pad : pad.get()){
-                        ViewMode viewMode = (ViewMode)getDescriptor().getControllerDescription().
+                        ModalProgressView.ViewMode viewMode = (ModalProgressView.ViewMode)getDescriptor().getControllerDescription().
                                 getProperty(SystemDefinition.Properties.VIEW_MODE);
-                        if (viewMode.equals(ViewMode.PROCESS_STOPPED)) break;
+                        if (viewMode.equals(ModalProgressView.ViewMode.PROCESS_STOPPED)) break;
                         Patient patient = _pad.getPatient();
                         patient.setIsArchived(true);
                         patient.update();
@@ -208,7 +190,7 @@ public class PatientAppointmentDataViewController extends ViewController{
                         getDescriptor().getControllerDescription().
                                 setProperty(SystemDefinition.Properties.ITEM_COUNTER, new Point(getItemCount(), getItemTotal()));
                         firePropertyChangeEvent(
-                                Properties.PROCESS_UPDATE_NOTIFICATION.toString(),
+                                ModalProgressView.Properties.PROCESS_UPDATE_NOTIFICATION.toString(),
                                 getModalView(),
                                 this,
                                 null,
@@ -226,9 +208,9 @@ public class PatientAppointmentDataViewController extends ViewController{
             @Override
             protected void done(){
                 getDescriptor().getControllerDescription().
-                                setProperty(SystemDefinition.Properties.VIEW_MODE, ViewMode.PROCESS_ENDED);
+                                setProperty(SystemDefinition.Properties.VIEW_MODE, ModalProgressView.ViewMode.PROCESS_ENDED);
                 firePropertyChangeEvent(
-                        Properties.PROCESS_CHANGE_NOTIFICATION.toString(),
+                        ModalProgressView.Properties.PROCESS_CHANGE_NOTIFICATION.toString(),
                         getModalView(),
                         this,
                         null,
@@ -266,53 +248,9 @@ public class PatientAppointmentDataViewController extends ViewController{
                 getDescriptor().getControllerDescription().setProperty(SystemDefinition.
                         Properties.ITEM_COUNTER, new Point(patientsArchivedSoFar, patientsToArchiveTotal));
                 getDescriptor().getControllerDescription().
-                        setProperty(SystemDefinition.Properties.VIEW_MODE, ViewMode.PROCESS_PENDING);
+                        setProperty(SystemDefinition.Properties.VIEW_MODE, ModalProgressView.ViewMode.PROCESS_PENDING);
                 setModalView((ModalView)new View().make(View.Viewer.MODAL_PROGRESS_VIEW,
                         this, this.getDesktopView()).getModalView());
-                /**
-                try{
-                    for(PatientAppointmentData _pad : pad.get()){
-                        patient = _pad.getPatient();
-                        patient.setIsArchived(true);
-                        patient.update();
-                    }
-                }catch(StoreException ex){
-                    String message = ex.getMessage() +"\n";
-                    message = message + "Exception handled in "
-                            + this.getClass().getSimpleName() + "::actionPerformed)" + actionCommand + "(";
-                    displayErrorMessage(message, "View controller error", JOptionPane.WARNING_MESSAGE);
-                }
-                try{
-                    pad.setFromYear((
-                            (PatientAppointmentData)getDescriptor()
-                                    .getControllerDescription().getProperty(SystemDefinition.Properties.PATIENT_APPOINTMENT_DATA)).getFromYear());
-                    pad.setToYear((
-                            (PatientAppointmentData)getDescriptor()
-                                    .getControllerDescription().getProperty(SystemDefinition.Properties.PATIENT_APPOINTMENT_DATA)).getToYear());
-                    pad.setScope((
-                            (PatientAppointmentData)getDescriptor()
-                                    .getControllerDescription().getProperty(SystemDefinition.Properties.PATIENT_APPOINTMENT_DATA)).getScope());
-                    getDescriptor().getViewDescription().setProperty(SystemDefinition.Properties.PATIENT_APPOINTMENT_DATA, pad);
-                    fetchAndSendViewPatientAppointmentData();
-                }catch(StoreException ex){
-                    String message = ex.getMessage() +"\n";
-                    message = message + "Exception handled in "
-                            + this.getClass().getSimpleName() + "::actionPerformed)" + actionCommand + "(";
-                    displayErrorMessage(message, "View controller error", JOptionPane.WARNING_MESSAGE);
-                }
-                getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.PATIENT, patient);
-                getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.VIEW_MODE,ViewMode.PATIENT_ARCHIVE);
-                firePropertyChangeEvent(
-                    ViewController.DesktopViewControllerPropertyChangeEvent.
-                            PATIENT_APPOINTMENT_DATA_VIEW_CONTROLLER_CHANGE_NOTIFICATION.toString(),
-                    getMyController(),
-                    this,
-                    null,
-                    getDescriptor()
-                );
-                System.out.println("3 " + String.valueOf((Boolean)getMyController().getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.LOGIN_REQUIRED)));
-                System.out.println("3 desktopView " + String.valueOf((Boolean)getDesktopView().getMyController().getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.LOGIN_REQUIRED)));
-                */
                 break;
             }
             case PATIENT_RECALL_ACTIVITY_STATUS_CHANGE ->{
@@ -329,11 +267,18 @@ public class PatientAppointmentDataViewController extends ViewController{
                 }
                 break;
             }
-
+            case PATIENT_RECALL_VIEW_REQUEST ->{
+                actionEvent = new ActionEvent(
+                    this,ActionEvent.ACTION_PERFORMED,
+                    DesktopViewController.Actions.
+                            PATIENT_RECALL_VIEW_CONTROLLER_REQUEST.toString());
+                getMyController().actionPerformed(actionEvent);
+                break;
+            }
             case VIEW_CLOSE_NOTIFICATION ->{
                 actionEvent = new ActionEvent(
                     this,ActionEvent.ACTION_PERFORMED,
-                    ViewController.DesktopViewControllerActionEvent.
+                    DesktopViewController.Actions.
                             VIEW_CONTROLLER_CLOSE_NOTIFICATION.toString());
                 getMyController().actionPerformed(actionEvent);
                 break;
@@ -341,7 +286,7 @@ public class PatientAppointmentDataViewController extends ViewController{
             case VIEW_ACTIVATED_NOTIFICATION ->{
                 actionEvent = new ActionEvent(
                         this,ActionEvent.ACTION_PERFORMED,
-                        ViewController.DesktopViewControllerActionEvent.
+                        DesktopViewController.Actions.
                                 VIEW_CONTROLLER_ACTIVATED_NOTIFICATION.toString());
                  this.getMyController().actionPerformed(actionEvent);
                  break;
@@ -349,7 +294,7 @@ public class PatientAppointmentDataViewController extends ViewController{
             case VIEW_CHANGED_NOTIFICATION ->{
                  actionEvent = new ActionEvent(
                         this,ActionEvent.ACTION_PERFORMED,
-                        ViewController.DesktopViewControllerActionEvent.
+                        DesktopViewController.Actions.
                                 VIEW_CONTROLLER_CHANGED_NOTIFICATION.toString());
                  this.getMyController().actionPerformed(actionEvent);
                  break;
@@ -362,7 +307,7 @@ public class PatientAppointmentDataViewController extends ViewController{
         PatientAppointmentDataViewController.Properties property = 
                 PatientAppointmentDataViewController.Properties.valueOf(e.getPropertyName());
         switch (property){
-            case PATIENT_APPOINTMENT_DATA_VIEW_CONTROLLER_CHANGE_NOTIFICATION ->{
+            case VIEW_CHANGE_NOTIFICATION ->{
                 try{
                     fetchAndSendViewPatientAppointmentData();
                 }catch(StoreException ex){
@@ -412,8 +357,7 @@ public class PatientAppointmentDataViewController extends ViewController{
         _pad.setScope(pad.getScope());
         getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.PATIENT_APPOINTMENT_DATA, _pad);
         firePropertyChangeEvent(
-                ViewController.PatientAppointmentDataViewControllerPropertyChangeEvent.
-                        PATIENT_APPOINTMENT_DATA_RECEIVED.toString(),
+                Properties.PATIENT_APPOINTMENT_DATA_RECEIVED.toString(),
                 getView(),
                 this,
                 null,

@@ -724,9 +724,9 @@ public class DesktopView extends javax.swing.JFrame
         mniPatientViewRequest = new javax.swing.JMenuItem();
         jSeparator1 = new javax.swing.JPopupMenu.Separator();
         mnuUtilities = new javax.swing.JMenu();
+        mniPatientAppointmentDataViewRequest = new javax.swing.JMenuItem();
         mniArchivedPatientsViewRequest = new javax.swing.JMenuItem();
         mniPatientInvoices = new javax.swing.JMenuItem();
-        mniPatientAppointmentDataViewRequest = new javax.swing.JMenuItem();
         jSeparator2 = new javax.swing.JPopupMenu.Separator();
         mniExitViewRequest = new javax.swing.JMenuItem();
         mnuSettings = new javax.swing.JMenu();
@@ -749,14 +749,14 @@ public class DesktopView extends javax.swing.JFrame
 
         mnuUtilities.setText("Patient utilities");
 
-        mniArchivedPatientsViewRequest.setText("Archive");
+        mniPatientAppointmentDataViewRequest.setText("Latest appointment and recall data for each patient");
+        mnuUtilities.add(mniPatientAppointmentDataViewRequest);
+
+        mniArchivedPatientsViewRequest.setText("Patient archive");
         mnuUtilities.add(mniArchivedPatientsViewRequest);
 
-        mniPatientInvoices.setText("Invoices");
+        mniPatientInvoices.setText("Patient invoices");
         mnuUtilities.add(mniPatientInvoices);
-
-        mniPatientAppointmentDataViewRequest.setText("Last appointment and recall date");
-        mnuUtilities.add(mniPatientAppointmentDataViewRequest);
 
         mnuSelectView.add(mnuUtilities);
         mnuSelectView.add(jSeparator2);

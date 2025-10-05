@@ -4,7 +4,6 @@
  */
 package colinhewlettsolutions.client.view.views.non_modal_views;
 
-import colinhewlettsolutions.client.controller.SystemDefinition;
 import colinhewlettsolutions.client.controller.SystemDefinition.Properties;
 import com.bric.colorpicker.listeners.ColorListener;
 import com.bric.colorpicker.models.ColorModel;
@@ -14,10 +13,7 @@ import colinhewlettsolutions.client.model.non_entity.Slot;
 import colinhewlettsolutions.client.controller.SystemDefinition.ScheduleSlotType;
 import colinhewlettsolutions.client.view.support_classes.renderers.AppointmentsTableDurationRenderer;
 import colinhewlettsolutions.client.view.support_classes.renderers.TableLocalTime24HourFormatCentredRenderer;
-import colinhewlettsolutions.client.view.support_classes.renderers.ScheduleDiaryTablePatientRenderer;
 import colinhewlettsolutions.client.view.support_classes.renderers.ScheduleListTablePatientRenderer;
-import colinhewlettsolutions.client.view.support_classes.renderers.ScheduleDiaryTableLocalDateTimeRenderer;
-import colinhewlettsolutions.client.view.support_classes.renderers.ScheduleDiaryTableStringRenderer;
 import colinhewlettsolutions.client.view.support_classes.models.ScheduleListTableModel;
 import colinhewlettsolutions.client.view.support_classes.models.ScheduleDiaryTableModel;
 import colinhewlettsolutions.client.model.entity.Appointment;
@@ -43,6 +39,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.beans.PropertyVetoException;
 import java.time.DayOfWeek;
 import java.time.format.DateTimeFormatter;
@@ -72,11 +69,6 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import colinhewlettsolutions.client.model.non_entity.Captions;
-import static colinhewlettsolutions.client.controller.SystemDefinition.ScheduleSlotType.BOOKABLE_SCHEDULE_SLOT;
-import static colinhewlettsolutions.client.controller.SystemDefinition.ScheduleSlotType.BOOKED_SCHEDULE_SLOT;
-import static colinhewlettsolutions.client.controller.SystemDefinition.ScheduleSlotType.EMERGENCY_SCHEDULE_SLOT;
-import static colinhewlettsolutions.client.controller.SystemDefinition.ScheduleSlotType.UNBOOKABLE_SCHEDULE_SLOT;
-import colinhewlettsolutions.client.view.views.modal_views.ModalView;
 import colinhewlettsolutions.client.view.views.dialog_views.DialogView;
 import static colinhewlettsolutions.client.controller.ViewController.ViewMode.SCHEDULE_REQUESTED_FROM_DESKTOP_VIEW;
 
@@ -86,12 +78,14 @@ import static colinhewlettsolutions.client.controller.ViewController.ViewMode.SC
  */
 public class ScheduleListView extends BookingView 
                           implements ActionListener, 
-                                     ListSelectionListener,
-                                     MouseListener,
+                                     ColorListener,
                                      DateChangeListener,
                                      DateHighlightPolicy,
-                                     TableModelListener,
-                                     ColorListener{
+                                     ListSelectionListener,
+                                     MouseListener,
+                                     PropertyChangeListener,
+                                     TableModelListener
+                                     {
     
     //private ScheduleListTableModel tableModel = null;
     private InternalFrameAdapter internalFrameAdapter = null;

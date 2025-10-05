@@ -10,16 +10,18 @@ import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
 import colinhewlettsolutions.client.model.entity.Appointment;
 import colinhewlettsolutions.client.model.entity.Patient;
+import colinhewlettsolutions.client.model.entity.PatientAppointmentData;
 import colinhewlettsolutions.client.controller.SystemDefinition;
+import colinhewlettsolutions.client.view.support_classes.models.PatientAppointmentDataTableModel;
+import java.awt.Color;
+import java.awt.Font;
 
 /**
  *
  * @author colin
  */
 public class PatientAppointmentDataTablePatientRenderer extends JLabel implements TableCellRenderer{
-    private boolean isUnbookable = false;
-    private Appointment appointment = null;
-    //ScheduleListTableModel listModel = null;
+    private PatientAppointmentDataTableModel model = null;
     
     public PatientAppointmentDataTablePatientRenderer()
     {
@@ -27,29 +29,49 @@ public class PatientAppointmentDataTablePatientRenderer extends JLabel implement
         // bold
         //this.setFont(f.deriveFont(f.getStyle() | ~Font.PLAIN));
     }
-    private SystemDefinition.ScheduleSlotType slotMarker = null;
-    private SystemDefinition.ScheduleSlotType getSlotMarker(){
-        return slotMarker;
-    }
-    private void setSlotMarker(SystemDefinition.ScheduleSlotType value){
-        slotMarker = value;
-    }
     
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
         boolean hasFocus, int row, int column)
     {
+        model = (PatientAppointmentDataTableModel)table.getModel();
+        PatientAppointmentData pad = (PatientAppointmentData)model.getElementAt(row);
+
         
-        Patient patient = (Patient)value;
-        super.setText(patient.toString());
-        super.setHorizontalAlignment(JLabel.LEFT);
+        if (value != null){
+            Patient patient = (Patient)value;
+            super.setText(patient.toString());
+            super.setFont(getFont().deriveFont(Font.BOLD));
+            super.setHorizontalAlignment(JLabel.LEFT);
+            if (pad.getAppointment().getIsCancelled()){
+                setColor(Color.red);
+                super.setForeground(getColor());
+            }
+            else {
+                setColor(Color.black);
+                super.setForeground(getColor());
+            }
+        }
 
         if (isSelected) {
             setBackground(table.getSelectionBackground());
             setForeground(table.getSelectionForeground());
+        } else{
+            setBackground(table.getBackground());
+            setForeground(getColor());
         }
-       
+            
+        
         setOpaque(true);
         return this;
+
+    }
+   
+    private Color color = null;
+    private void setColor(Color value){
+        color = value;
+    }
+    private Color getColor(){
+        return color;
     }
 }

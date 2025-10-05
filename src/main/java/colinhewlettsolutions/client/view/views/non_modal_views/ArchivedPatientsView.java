@@ -4,34 +4,28 @@
  */
 package colinhewlettsolutions.client.view.views.non_modal_views;
 
+import colinhewlettsolutions.client.controller.ArchivedPatientsViewController;
 import colinhewlettsolutions.client.controller.SystemDefinition.Properties;
-import colinhewlettsolutions.client.controller.Descriptor;
 import colinhewlettsolutions.client.controller.ViewController;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.beans.PropertyVetoException;
-import java.text.DecimalFormat;
-import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Iterator;
 import javax.swing.JInternalFrame;
-import javax.swing.JSpinner;
-import javax.swing.SpinnerNumberModel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import javax.swing.table.JTableHeader;
-import colinhewlettsolutions.client.model.entity.Entity;
 import colinhewlettsolutions.client.model.entity.Patient;
 import colinhewlettsolutions.client.model.non_entity.Captions;
 import colinhewlettsolutions.client.controller.SystemDefinition;
 import colinhewlettsolutions.client.view.View;
 import colinhewlettsolutions.client.view.support_classes.models.ArchivedPatientsTableModel;
-import colinhewlettsolutions.client.view.support_classes.renderers.AppointmentsTableLocalDateRenderer;
+import javax.swing.border.TitledBorder;
 
 /**
  *
@@ -39,8 +33,12 @@ import colinhewlettsolutions.client.view.support_classes.renderers.AppointmentsT
  */
 public class ArchivedPatientsView extends View 
         implements ActionListener, 
-                   ListSelectionListener,
-                   PropertyChangeListener{
+                   ListSelectionListener{ //View implenents PropertyChangeListener, and an empty proprtyChange method
+     
+    enum BorderTitles{
+        ACTIONS,
+        ARCHIVED_PATIENTS
+    }
     
     /**
      * 
@@ -61,41 +59,45 @@ public class ArchivedPatientsView extends View
     @Override
     public void actionPerformed(ActionEvent e){
         Patient patient = null;
-        Action actionCommand = Action.valueOf(e.getActionCommand());
+        ArchivedPatientsViewController.Actions actionCommand = ArchivedPatientsViewController.Actions.valueOf(e.getActionCommand());
         switch (actionCommand){
-            case REQUEST_RESTORE_PATIENT:
+            case PATIENT_RESTORE_REQUEST ->{
                 patient = new Patient();
                 patient.set(getSelectedRows());
                 if (!patient.get().isEmpty()){
                     getMyController().getDescriptor().getViewDescription().setProperty(Properties.PATIENT, patient);
-                    doSendActionEvent(ViewController.
-                        ArchivedPatientsViewControllerActionEvent.PATIENT_RESTORE_REQUEST);
+                    doSendActionEvent(actionCommand);
                 }
-                
-                
                 break;
-            case REQUEST_CLOSE_VIEW:
+            }
+            case VIEW_CHANGED_NOTIFICATION ->{
+                doSendActionEvent(actionCommand);
+            }
+            case VIEW_CLOSE_NOTIFICATION ->{
                 try{
                     this.setClosed(true);   
                 }catch (PropertyVetoException ex){
 
                 }
-
                 break;
+            }
         }
         
     }
     
     @Override
     public void propertyChange(PropertyChangeEvent e){
-        ViewController.ArchivedPatientsViewControllerPropertyChangeEvent propertyName =
-                ViewController.ArchivedPatientsViewControllerPropertyChangeEvent.valueOf(e.getPropertyName());
+        ArchivedPatientsViewController.Properties propertyName =
+                ArchivedPatientsViewController.Properties.valueOf(e.getPropertyName());
         switch(propertyName){
-            case ARCHIVED_PATIENT_RECEIVED:
+            case ARCHIVED_PATIENTS_RECEIVED ->{
                 populateArchivedPatientsTable(
                         (Patient)getMyController().getDescriptor().
                                 getControllerDescription().getProperty(Properties.PATIENT));
+                doSendActionEvent(ArchivedPatientsViewController.Actions.VIEW_CHANGED_NOTIFICATION);
                 break;
+            }
+            
         }
     }
     
@@ -120,27 +122,10 @@ public class ArchivedPatientsView extends View
         setTitle("Archived patients view");
         setVisible(true);
         addInternalFrameListeners();
+        setScheduleTitledBorderSettings();
         
-        this.pnlActions.setBorder(javax.swing.BorderFactory.createTitledBorder(
-        javax.swing.BorderFactory.createEtchedBorder(), 
-        "Actions", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, 
-        javax.swing.border.TitledBorder.DEFAULT_POSITION, 
-        (java.awt.Font)getMyController().getDescriptor().getControllerDescription().
-                        getProperty(Properties.TITLED_BORDER_FONT),
-                (java.awt.Color)getMyController().getDescriptor().getControllerDescription().
-                        getProperty(Properties.TITLED_BORDER_COLOR)));
-        
-        this.pnlArchivedPatients.setBorder(javax.swing.BorderFactory.createTitledBorder(
-        javax.swing.BorderFactory.createEtchedBorder(), 
-        "Archived patients", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, 
-        javax.swing.border.TitledBorder.DEFAULT_POSITION, 
-        (java.awt.Font)getMyController().getDescriptor().getControllerDescription().
-                        getProperty(Properties.TITLED_BORDER_FONT),
-                (java.awt.Color)getMyController().getDescriptor().getControllerDescription().
-                        getProperty(Properties.TITLED_BORDER_COLOR)));
-        
-        this.btnRestoreSelectedPatientFromArchive.setActionCommand(Action.REQUEST_RESTORE_PATIENT.toString());
-        this.btnCloseView.setActionCommand(Action.REQUEST_CLOSE_VIEW.toString());
+        this.btnRestoreSelectedPatientFromArchive.setActionCommand(ArchivedPatientsViewController.Actions.PATIENT_RESTORE_REQUEST.toString());
+        this.btnCloseView.setActionCommand(ArchivedPatientsViewController.Actions.VIEW_CLOSE_NOTIFICATION.toString());
         this.btnRestoreSelectedPatientFromArchive.addActionListener(this);
         this.btnCloseView.addActionListener(this);
         this.btnRestoreSelectedPatientFromArchive.setText(
@@ -156,8 +141,55 @@ public class ArchivedPatientsView extends View
         //doSendActionEvent(ViewController.ArchivedPatientsViewControllerActionEvent.ARCHIVED_PATIENT_REQUEST);
         ActionEvent actionEvent = new ActionEvent(
             this,ActionEvent.ACTION_PERFORMED,
-            ViewController.ArchivedPatientsViewControllerActionEvent.ARCHIVED_PATIENT_REQUEST.toString());
+            ArchivedPatientsViewController.Actions.ARCHIVED_PATIENTS_REQUEST.toString());
         getMyController().actionPerformed(actionEvent);
+        
+    }
+    private String tableTitle = null;
+    private void setTableTitle(String value){
+        tableTitle = value;
+    }
+    private String getTableTitle(){
+        return tableTitle;
+    }
+    
+    private void setScheduleTitledBorderSettings(){
+        setBorderTitles(BorderTitles.ACTIONS,"Actions");
+        setBorderTitles(BorderTitles.ARCHIVED_PATIENTS,"Archived patients");
+        setTableTitle("Archived patients");
+    }
+    
+    private void setBorderTitles(BorderTitles borderTitles, String caption){
+        JPanel panel = null;
+        boolean isPanelBackgroundDefault = false;
+        switch (borderTitles){
+            case ACTIONS:
+                panel = this.pnlActions;
+                isPanelBackgroundDefault = false;
+                break;
+            case ARCHIVED_PATIENTS:
+                panel = this.pnlArchivedPatients;
+                isPanelBackgroundDefault = true;
+                break;      
+        }
+        
+        if (panel!=null){
+            panel.setBorder(
+                javax.swing.BorderFactory.createTitledBorder(
+                    javax.swing.BorderFactory.createEtchedBorder(), 
+                    caption, 
+                    javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, 
+                    javax.swing.border.TitledBorder.DEFAULT_POSITION, 
+                    (java.awt.Font)getMyController().getDescriptor().getControllerDescription().
+                            getProperty(SystemDefinition.Properties.TITLED_BORDER_FONT),
+                    (java.awt.Color)getMyController().getDescriptor().getControllerDescription().
+                            getProperty(SystemDefinition.Properties.TITLED_BORDER_COLOR)));
+            if (!isPanelBackgroundDefault)
+                panel.setBackground(new java.awt.Color(220, 220, 220));
+        }else{
+            String message = "Unexpected null value for titled border panel encountered in PatientView::setBorderTitles() method";
+            JOptionPane.showMessageDialog(this, message, "View error", JOptionPane.WARNING_MESSAGE);
+        }
         
     }
     
@@ -187,18 +219,18 @@ public class ArchivedPatientsView extends View
          internalFrameAdapter = new InternalFrameAdapter(){
             @Override  
             public void internalFrameClosed(InternalFrameEvent e) {
-                doSendActionEvent(ViewController.ArchivedPatientsViewControllerActionEvent.VIEW_CLOSE_NOTIFICATION); 
+                doSendActionEvent(ArchivedPatientsViewController.Actions.VIEW_CLOSE_NOTIFICATION); 
             }
             @Override
             public void internalFrameActivated(InternalFrameEvent e) {
-                doSendActionEvent(ViewController.ArchivedPatientsViewControllerActionEvent.VIEW_ACTIVATED_NOTIFICATION); 
+                doSendActionEvent(ArchivedPatientsViewController.Actions.VIEW_ACTIVATED_NOTIFICATION); 
             }
         };
         this.addInternalFrameListener(internalFrameAdapter);
         this.setDefaultCloseOperation(JInternalFrame.DISPOSE_ON_CLOSE);
     }
     
-    private void doSendActionEvent(ViewController.ArchivedPatientsViewControllerActionEvent actionCommand){
+    private void doSendActionEvent(ArchivedPatientsViewController.Actions actionCommand){
         //if (getMyController().getDescriptor().getViewDescription().getProperty(Properties.PATIENT) != null){
             ActionEvent actionEvent = new ActionEvent(
                 this,ActionEvent.ACTION_PERFORMED,
@@ -214,6 +246,9 @@ public class ArchivedPatientsView extends View
         model.removeAllElements();
         model.setData(patient.get());
         ViewController.setJTableColumnProperties(tblArchivedPatients, this.scrPatientAppointmentDataTable.getPreferredSize().width, 100);
+        TitledBorder titledBorder = (TitledBorder)pnlArchivedPatients.getBorder();
+        titledBorder.setTitle(getTableTitle() + " (" + patient.get().size() + ")");
+        this.pnlArchivedPatients.repaint();
     }
 
     enum Action{

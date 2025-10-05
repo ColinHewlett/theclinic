@@ -39,6 +39,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.beans.PropertyVetoException;
 import java.time.DayOfWeek;
 import java.time.format.DateTimeFormatter;
@@ -71,10 +72,12 @@ import static colinhewlettsolutions.client.controller.ViewController.ViewMode.SC
  */
 public class ScheduleDiaryView extends BookingView 
                                         implements  ActionListener, 
+                                                    DateChangeListener,
+                                                    DateHighlightPolicy,
                                                     ListSelectionListener,
                                                     MouseListener,
-                                                    DateChangeListener,
-                                                    DateHighlightPolicy{
+                                                    PropertyChangeListener
+                                                    {
 
     /**
      * 

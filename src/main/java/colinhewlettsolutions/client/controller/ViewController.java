@@ -196,7 +196,7 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
     
     public static enum ArchivedPatientsViewControllerPropertyChangeEvent{
         ARCHIVED_PATIENT_RECEIVED,
-        ARCHIVED_PATIENTS_VIEW_CONTROLLER_CHANGE_NOTIFICATION
+        VIEW_CHANGE_NOTIFICATION
     }
   
     public static enum ClinicalNoteViewControllerActionEvent{

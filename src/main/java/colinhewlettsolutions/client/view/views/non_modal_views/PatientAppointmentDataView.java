@@ -10,6 +10,9 @@ import colinhewlettsolutions.client.controller.ViewController;
 import colinhewlettsolutions.client.model.entity.Patient;
 import colinhewlettsolutions.client.model.entity.PatientAppointmentData;
 import colinhewlettsolutions.client.model.non_entity.Captions;
+import com.github.lgooddatepicker.components.DatePickerSettings;
+import com.github.lgooddatepicker.optionalusertools.DateChangeListener;
+import com.github.lgooddatepicker.zinternaltools.DateChangeEvent;
 import java.awt.Component;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
@@ -19,6 +22,7 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyVetoException;
 import java.text.DecimalFormat;
+import java.time.format.DateTimeFormatter;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -26,6 +30,8 @@ import java.util.List;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.ListSelectionEvent;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JInternalFrame;
 import javax.swing.JSpinner;
@@ -55,7 +61,10 @@ import colinhewlettsolutions.client.view.support_classes.renderers.AppointmentsT
 import colinhewlettsolutions.client.view.support_classes.renderers.TableLocalDateCentredRenderer;
 import colinhewlettsolutions.client.view.support_classes.renderers.TableLocalDateTimeToLocalDateAndCentredRenderer;
 import colinhewlettsolutions.client.view.support_classes.renderers.TableIntegerCenteredRenderer;
-import colinhewlettsolutions.client.view.support_classes.renderers.TablePatientEmboldenedRenderer;
+//import colinhewlettsolutions.client.view.support_classes.renderers.TablePatientEmboldenedRenderer;
+import colinhewlettsolutions.client.view.support_classes.renderers.PatientAppointmentDataTablePatientRenderer;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.event.TableModelEvent;
 import javax.swing.table.TableColumnModel;
 
@@ -77,6 +86,14 @@ public class PatientAppointmentDataView extends View
         REQUEST_PATIENT_WITHOUT_APPOINTMENT,
         REQUEST_SET_TIME_FRAME,
         
+    }
+    
+    enum BorderTitles{
+        ACTIONS,
+        PAD_TABLE,
+        PATIENT_ACTIVITY,
+        RECALL_CRITERIA,
+        SET_TIME_FRAME  
     }
     
     /**
@@ -220,11 +237,12 @@ public class PatientAppointmentDataView extends View
         Descriptor descriptor = getMyController().getMyController().getDescriptor();
         System.out.println(String.valueOf((Boolean)descriptor.getControllerDescription().getProperty(SystemDefinition.Properties.LOGIN_REQUIRED)));
         initComponents();
-        setTitle("Patient appointment data");
+        //setTitle("Patient appointment data");
         setVisible(true);
         addInternalFrameListeners();
+        setScheduleTitledBorderSettings();
       
-        this.pnlPatientAppointmentData.setBorder(javax.swing.BorderFactory.createTitledBorder(
+        /*this.pnlPatientAppointmentData.setBorder(javax.swing.BorderFactory.createTitledBorder(
         javax.swing.BorderFactory.createEtchedBorder(), 
         "Last appointment for each patient", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, 
         javax.swing.border.TitledBorder.DEFAULT_POSITION, 
@@ -258,7 +276,7 @@ public class PatientAppointmentDataView extends View
         (java.awt.Font)getMyController().getDescriptor().getControllerDescription().
                         getProperty(SystemDefinition.Properties.TITLED_BORDER_FONT),
                 (java.awt.Color)getMyController().getDescriptor().getControllerDescription().
-                        getProperty(SystemDefinition.Properties.TITLED_BORDER_COLOR)));
+                        getProperty(SystemDefinition.Properties.TITLED_BORDER_COLOR)));*/
         
         // Set a NumberEditor without commas
         JSpinner.NumberEditor editor1 = new JSpinner.NumberEditor(spnFromYear, "#");
@@ -297,7 +315,7 @@ public class PatientAppointmentDataView extends View
         this.tblPatientAppointmentData.setDefaultRenderer(LocalDate.class, new TableLocalDateCentredRenderer());
         this.tblPatientAppointmentData.setDefaultRenderer(LocalDateTime.class, new TableLocalDateTimeToLocalDateAndCentredRenderer());
         //this.tblPatientAppointmentData.setDefaultRenderer(Integer.class, new TableIntegerCenteredRenderer());
-        this.tblPatientAppointmentData.setDefaultRenderer(Patient.class, new TablePatientEmboldenedRenderer());
+        this.tblPatientAppointmentData.setDefaultRenderer(Patient.class, new PatientAppointmentDataTablePatientRenderer());
         ViewController.setJTableColumnProperties(tblPatientAppointmentData, this.scrPatientAppointmentDataTable.getPreferredSize().width, 5,5,15,6,10,18,10,6,6,6,6);
         
         tblPatientAppointmentData.getModel().addTableModelListener(this);
@@ -386,6 +404,68 @@ public class PatientAppointmentDataView extends View
         
     }
     
+    private void setScheduleTitledBorderSettings(){
+        setBorderTitles(BorderTitles.ACTIONS,"Actions");
+        setBorderTitles(BorderTitles.PAD_TABLE,getTableTitle());
+        setBorderTitles(BorderTitles.PATIENT_ACTIVITY,"Patient activity");
+        setBorderTitles(BorderTitles.RECALL_CRITERIA, "Recall criteria");
+        setBorderTitles(BorderTitles.SET_TIME_FRAME, "Set time frame");
+    }
+    
+    private void setBorderTitles(BorderTitles borderTitles, String caption){
+        JPanel panel = null;
+        boolean isPanelBackgroundDefault = false;
+        switch (borderTitles){
+            case ACTIONS:
+                panel = this.pnlActions;
+                isPanelBackgroundDefault = false;
+                break;
+            case PAD_TABLE:
+                panel = this.pnlPatientAppointmentData;
+                isPanelBackgroundDefault = true;
+                break;
+            case PATIENT_ACTIVITY:
+                panel = this.pnlPatientActivity;
+                isPanelBackgroundDefault = true;
+                break;
+            case RECALL_CRITERIA:
+                panel = this.pnlRecallCriteria;
+                isPanelBackgroundDefault = true;
+                break;
+            case SET_TIME_FRAME:
+                panel = this.pnlTimeFrame;
+                isPanelBackgroundDefault = true;
+                break;       
+        }
+        
+        if (panel!=null){
+            panel.setBorder(
+                javax.swing.BorderFactory.createTitledBorder(
+                    javax.swing.BorderFactory.createEtchedBorder(), 
+                    caption, 
+                    javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, 
+                    javax.swing.border.TitledBorder.DEFAULT_POSITION, 
+                    (java.awt.Font)getMyController().getDescriptor().getControllerDescription().
+                            getProperty(SystemDefinition.Properties.TITLED_BORDER_FONT),
+                    (java.awt.Color)getMyController().getDescriptor().getControllerDescription().
+                            getProperty(SystemDefinition.Properties.TITLED_BORDER_COLOR)));
+            if (!isPanelBackgroundDefault)
+                panel.setBackground(new java.awt.Color(220, 220, 220));
+        }else{
+            String message = "Unexpected null value for titled border panel encountered in PatientView::setBorderTitles() method";
+            JOptionPane.showMessageDialog(this, message, "View error", JOptionPane.WARNING_MESSAGE);
+        }
+        
+    }
+    
+    private String tableTitle = null;
+    private void setTableTitle(String value){
+        tableTitle = value;
+    }
+    private String getTableTitle(){
+        return tableTitle;
+    }
+    
     private int findColumnIndexByHeader(TableColumnModel columnModel, String headerName) {
         for (int i = 0; i < columnModel.getColumnCount(); i++) {
             TableColumn column = columnModel.getColumn(i);
@@ -453,17 +533,19 @@ public class PatientAppointmentDataView extends View
         model.removeAllElements();
         model.setData(pad.get());
         switch (pad.getScope()){
-            case PATIENT_APPOINTMENT_DATA_WITHOUT_APPOINTMENT:
-                titledBorder = (TitledBorder)pnlPatientAppointmentData.getBorder();
-                titledBorder.setTitle("Patients who have not yet had an appointment (" + pad.get().size() + ")");
-                pnlPatientAppointmentData.repaint();
+            case PATIENT_APPOINTMENT_DATA_WITHOUT_APPOINTMENT ->{
+                setTableTitle("Inactive patients, had no appointments yet");
                 break;
-            default:
-                titledBorder = (TitledBorder)pnlPatientAppointmentData.getBorder();
-                titledBorder.setTitle("Last appointment date for each patient (" + pad.get().size() + ")");
-                pnlPatientAppointmentData.repaint();
+            }
+            default ->{
+                setTableTitle("Active patients, had at least one appopintment");
                 break;
+            }
+
         }
+        titledBorder = (TitledBorder)pnlPatientAppointmentData.getBorder();
+        titledBorder.setTitle(getTableTitle() + " (" + pad.get().size() + ")");
+        pnlPatientAppointmentData.repaint();
     }
 
     private void initialiseViewState(PatientAppointmentData pad){
@@ -472,7 +554,32 @@ public class PatientAppointmentDataView extends View
         tblPatientAppointmentData.clearSelection();
     }
     
+    private LocalDate fromRecallDate = null;
+    private void setFromRecallDate(LocalDate value){
+        fromRecallDate = value;
+    }
+    private LocalDate getFromRecallDate(){
+        return fromRecallDate;
+    }
     
+    class DOBDatePickerDateChangeListener implements DateChangeListener {
+        @Override
+        public void dateChanged(DateChangeEvent event) {
+            /**
+             * Update logged at 30/10/2021 08:32
+             * inherited view status (set if any changes have been made to form since its initialisation)
+             * is initialised to true (date changed)
+             */
+            setViewStatus(true);
+            LocalDate date = event.getNewDate();
+            setFromRecallDate(date);
+            /*
+            if (date != null) {
+                lblNameAge.setText("(" + String.valueOf(getAge(date)) + " yrs)");
+            } 
+            */
+        }
+    }
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -500,11 +607,27 @@ public class PatientAppointmentDataView extends View
         rdbSomeAppointments = new javax.swing.JRadioButton();
         rdbNoAppointments = new javax.swing.JRadioButton();
         btnFetchPatientRecaller = new javax.swing.JButton();
+        pnlRecallCriteria = new javax.swing.JPanel();
+        rdbSelectGBTRecalls = new javax.swing.JRadioButton();
+        rdbSelectNonGBTRecalls = new javax.swing.JRadioButton();
+        dobDatePicker = new com.github.lgooddatepicker.components.DatePicker();
+        ImageIcon icon = new ImageIcon(this.getClass().getResource("/datepickerbutton1.png"));
+        JButton datePickerButton = dobDatePicker.getComponentToggleCalendarButton();
+        datePickerButton.setText("");
+        datePickerButton.setIcon(icon);
+        DatePickerSettings settings = new DatePickerSettings();
+        settings.setFormatForDatesCommonEra(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+        settings.setAllowKeyboardEditing(false);
+        dobDatePicker.setSettings(settings);
+        dobDatePicker.addDateChangeListener(new DOBDatePickerDateChangeListener());
+        ;
 
         rdbGroup.add(rdbSomeAppointments);
         rdbGroup.add(rdbNoAppointments);
 
-        pnlPatientAppointmentData.setBorder(javax.swing.BorderFactory.createTitledBorder("Last appointment for each patient"));
+        setTitle("Latest appointment and recall data for each patient");
+
+        pnlPatientAppointmentData.setBorder(javax.swing.BorderFactory.createTitledBorder(getTableTitle()));
 
         scrPatientAppointmentDataTable.setPreferredSize(new java.awt.Dimension(1192, 402));
 
@@ -518,15 +641,13 @@ public class PatientAppointmentDataView extends View
             pnlPatientAppointmentDataLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlPatientAppointmentDataLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(scrPatientAppointmentDataTable, javax.swing.GroupLayout.DEFAULT_SIZE, 1236, Short.MAX_VALUE)
-                .addContainerGap())
+                .addComponent(scrPatientAppointmentDataTable, javax.swing.GroupLayout.DEFAULT_SIZE, 1240, Short.MAX_VALUE))
         );
         pnlPatientAppointmentDataLayout.setVerticalGroup(
             pnlPatientAppointmentDataLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlPatientAppointmentDataLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(scrPatientAppointmentDataTable, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addContainerGap())
+                .addComponent(scrPatientAppointmentDataTable, javax.swing.GroupLayout.PREFERRED_SIZE, 680, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 0, Short.MAX_VALUE))
         );
 
         pnlActions.setBorder(javax.swing.BorderFactory.createTitledBorder("Actions"));
@@ -545,30 +666,35 @@ public class PatientAppointmentDataView extends View
         pnlTimeFrameLayout.setHorizontalGroup(
             pnlTimeFrameLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlTimeFrameLayout.createSequentialGroup()
-                .addGap(28, 28, 28)
-                .addGroup(pnlTimeFrameLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(spnToYear)
-                    .addComponent(jLabel1)
-                    .addComponent(spnFromYear)
-                    .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-            .addGroup(pnlTimeFrameLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(btnSetTimeFrame, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addContainerGap())
+                .addGroup(pnlTimeFrameLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(pnlTimeFrameLayout.createSequentialGroup()
+                        .addComponent(btnSetTimeFrame, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addContainerGap())
+                    .addGroup(pnlTimeFrameLayout.createSequentialGroup()
+                        .addGroup(pnlTimeFrameLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jLabel1)
+                            .addComponent(spnFromYear))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGroup(pnlTimeFrameLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(spnToYear)
+                            .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 64, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(16, 16, 16))))
         );
         pnlTimeFrameLayout.setVerticalGroup(
             pnlTimeFrameLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlTimeFrameLayout.createSequentialGroup()
-                .addGap(4, 4, 4)
-                .addComponent(jLabel1)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(spnFromYear, javax.swing.GroupLayout.DEFAULT_SIZE, 26, Short.MAX_VALUE)
-                .addGap(18, 18, 18)
-                .addComponent(jLabel2)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(spnToYear, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
+                .addContainerGap()
+                .addGroup(pnlTimeFrameLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addGroup(pnlTimeFrameLayout.createSequentialGroup()
+                        .addComponent(jLabel1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(spnFromYear))
+                    .addGroup(pnlTimeFrameLayout.createSequentialGroup()
+                        .addComponent(jLabel2)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(spnToYear, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 12, Short.MAX_VALUE)
                 .addComponent(btnSetTimeFrame)
                 .addContainerGap(10, Short.MAX_VALUE))
         );
@@ -579,7 +705,7 @@ public class PatientAppointmentDataView extends View
             }
         });
 
-        pnlPatientActivity.setBorder(javax.swing.BorderFactory.createTitledBorder("Patient activity"));
+        pnlPatientActivity.setBorder(javax.swing.BorderFactory.createTitledBorder("Patients with "));
 
         rdbSomeAppointments.setText("1 or more appointments");
 
@@ -592,18 +718,18 @@ public class PatientAppointmentDataView extends View
             .addGroup(pnlPatientActivityLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(pnlPatientActivityLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(rdbSomeAppointments, javax.swing.GroupLayout.DEFAULT_SIZE, 152, Short.MAX_VALUE)
+                    .addComponent(rdbSomeAppointments, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(rdbNoAppointments, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         pnlPatientActivityLayout.setVerticalGroup(
             pnlPatientActivityLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlPatientActivityLayout.createSequentialGroup()
-                .addGap(21, 21, 21)
+                .addContainerGap()
                 .addComponent(rdbSomeAppointments)
-                .addGap(26, 26, 26)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(rdbNoAppointments)
-                .addContainerGap(29, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         btnFetchPatientRecaller.setText("<html><center>Fetch recaller</center><center>for selected patients</center></html>");
@@ -613,6 +739,38 @@ public class PatientAppointmentDataView extends View
             }
         });
 
+        pnlRecallCriteria.setBorder(javax.swing.BorderFactory.createTitledBorder("Recall criteria"));
+
+        rdbSelectGBTRecalls.setText("GBT recalls");
+
+        rdbSelectNonGBTRecalls.setText("non-GBT recalls");
+
+        javax.swing.GroupLayout pnlRecallCriteriaLayout = new javax.swing.GroupLayout(pnlRecallCriteria);
+        pnlRecallCriteria.setLayout(pnlRecallCriteriaLayout);
+        pnlRecallCriteriaLayout.setHorizontalGroup(
+            pnlRecallCriteriaLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlRecallCriteriaLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(pnlRecallCriteriaLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(rdbSelectNonGBTRecalls, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(rdbSelectGBTRecalls, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(pnlRecallCriteriaLayout.createSequentialGroup()
+                        .addComponent(dobDatePicker, javax.swing.GroupLayout.PREFERRED_SIZE, 141, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 0, Short.MAX_VALUE)))
+                .addContainerGap())
+        );
+        pnlRecallCriteriaLayout.setVerticalGroup(
+            pnlRecallCriteriaLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlRecallCriteriaLayout.createSequentialGroup()
+                .addGap(12, 12, 12)
+                .addComponent(dobDatePicker, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(rdbSelectGBTRecalls)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(rdbSelectNonGBTRecalls)
+                .addContainerGap())
+        );
+
         javax.swing.GroupLayout pnlActionsLayout = new javax.swing.GroupLayout(pnlActions);
         pnlActions.setLayout(pnlActionsLayout);
         pnlActionsLayout.setHorizontalGroup(
@@ -620,11 +778,12 @@ public class PatientAppointmentDataView extends View
             .addGroup(pnlActionsLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(pnlActionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(btnCloseView, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(btnCloseView, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 186, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(pnlTimeFrame, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(btnArchiveSelectedPatient, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(pnlPatientActivity, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(btnFetchPatientRecaller))
+                    .addComponent(btnFetchPatientRecaller, javax.swing.GroupLayout.PREFERRED_SIZE, 186, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(pnlRecallCriteria, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(btnArchiveSelectedPatient, javax.swing.GroupLayout.PREFERRED_SIZE, 186, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap())
         );
         pnlActionsLayout.setVerticalGroup(
@@ -633,14 +792,16 @@ public class PatientAppointmentDataView extends View
                 .addContainerGap()
                 .addComponent(pnlTimeFrame, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(pnlPatientActivity, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addComponent(btnArchiveSelectedPatient, javax.swing.GroupLayout.PREFERRED_SIZE, 82, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(20, 20, 20)
-                .addComponent(btnFetchPatientRecaller, javax.swing.GroupLayout.PREFERRED_SIZE, 82, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(20, 20, 20)
+                .addComponent(pnlPatientActivity, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(pnlRecallCriteria, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(12, 12, 12)
+                .addComponent(btnArchiveSelectedPatient, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(12, 12, 12)
+                .addComponent(btnFetchPatientRecaller, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(12, 12, 12)
                 .addComponent(btnCloseView, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
+                .addGap(17, 17, 17))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -658,10 +819,10 @@ public class PatientAppointmentDataView extends View
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGap(16, 16, 16)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(pnlPatientAppointmentData, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(pnlActions, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(pnlPatientAppointmentData, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(pnlActions, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(37, Short.MAX_VALUE))
         );
 
         pack();
@@ -681,15 +842,22 @@ public class PatientAppointmentDataView extends View
     private javax.swing.JButton btnCloseView;
     private javax.swing.JButton btnFetchPatientRecaller;
     private javax.swing.JButton btnSetTimeFrame;
+    private com.github.lgooddatepicker.components.DatePicker dobDatePicker;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JPanel pnlActions;
     private javax.swing.JPanel pnlPatientActivity;
+    private javax.swing.JPanel pnlPatientActivity1;
     private javax.swing.JPanel pnlPatientAppointmentData;
+    private javax.swing.JPanel pnlRecallCriteria;
     private javax.swing.JPanel pnlTimeFrame;
     private javax.swing.ButtonGroup rdbGroup;
     private javax.swing.JRadioButton rdbNoAppointments;
+    private javax.swing.JRadioButton rdbNoAppointments1;
+    private javax.swing.JRadioButton rdbSelectGBTRecalls;
+    private javax.swing.JRadioButton rdbSelectNonGBTRecalls;
     private javax.swing.JRadioButton rdbSomeAppointments;
+    private javax.swing.JRadioButton rdbSomeAppointments1;
     private javax.swing.JScrollPane scrPatientAppointmentDataTable;
     private javax.swing.JSpinner spnFromYear;
     private javax.swing.JSpinner spnToYear;
