@@ -107,10 +107,13 @@ public class DesktopViewController extends ViewController{
     public enum Actions{
         ARCHIVED_PATIENTS_VIEW_CONTROLLER_REQUEST,
         CLINIC_LOGO_VIEW_MODE_NOTIFICATION,
+        CLOSE_PATIENT_VIEW_WITH_SAME_PATIENT_REQUEST,
+        CLOSE_SCHEDULE_VIEW_WITH_SAME_DATE_REQUEST,
         DESKTOP_VIEW_MODE_NOTIFICATION,
         PATIENT_APPOINTMENT_DATA_VIEW_CONTROLLER_REQUEST,
         PATIENT_RECALL_VIEW_CONTROLLER_REQUEST,
         PATIENT_VIEW_CONTROLLER_REQUEST,
+        SCHEDULE_LIST_VIEW_CONTROLLER_REQUEST,
         USER_SYSTEM_WIDE_FACTORY_SETTINGS_REQUEST,
         USER_SYSTEM_WIDE_SETTINGS_REQUEST,
         VIEW_ACTIVATED_NOTIFICATION,
@@ -636,13 +639,26 @@ public class DesktopViewController extends ViewController{
                     Actions.valueOf(e.getActionCommand());
         switch(actionCommand){
             case VIEW_CONTROLLER_CHANGED_NOTIFICATION ->{
+                /*
                 firePropertyChangeEvent(
                         ArchivedPatientsViewController.Properties.VIEW_CHANGE_NOTIFICATION.toString(),
                         vc.getView(),
                         this,
                         null,
                         null
-                );
+                );*/
+                
+                if (!this.patientAppointmentDataViewControllers.isEmpty()){
+                    PatientAppointmentDataViewController padvc = patientAppointmentDataViewControllers.get(0);
+                    firePropertyChangeEvent(
+                            PatientAppointmentDataViewController.Properties.VIEW_CHANGE_NOTIFICATION.toString(),
+                            padvc,
+                            this,
+                            null,
+                            null
+                    );
+                }
+                
                 break;
             }
             case VIEW_CONTROLLER_CLOSE_NOTIFICATION ->{
@@ -687,13 +703,33 @@ public class DesktopViewController extends ViewController{
                 break;
             }
             case VIEW_CONTROLLER_CHANGED_NOTIFICATION ->{
-                firePropertyChangeEvent(
+                
+                /**
+                 * remove existing code
+                 
+                 firePropertyChangeEvent(
                         ArchivedPatientsViewController.Properties.VIEW_CHANGE_NOTIFICATION.toString(),
                         getDesktopView(),
                         this,
                         null,
                         null
-                );
+                );*/
+                
+                /**
+                 * check for an active ArchivedPatientsViewController
+                 * -- yes; send property change event 
+                 */
+                if (!this.archivedPatientsViewControllers.isEmpty()){
+                   ArchivedPatientsViewController avc =  archivedPatientsViewControllers.get(0);
+                   firePropertyChangeEvent(
+                            ArchivedPatientsViewController.Properties.VIEW_CHANGE_NOTIFICATION.toString(),
+                            avc,
+                            this,
+                            null,
+                            null
+                    );
+                }
+                
                 break;
             }
             case VIEW_CONTROLLER_CLOSE_NOTIFICATION ->{

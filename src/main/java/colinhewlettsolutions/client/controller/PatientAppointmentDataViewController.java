@@ -249,8 +249,51 @@ public class PatientAppointmentDataViewController extends ViewController{
                         Properties.ITEM_COUNTER, new Point(patientsArchivedSoFar, patientsToArchiveTotal));
                 getDescriptor().getControllerDescription().
                         setProperty(SystemDefinition.Properties.VIEW_MODE, ModalProgressView.ViewMode.PROCESS_PENDING);
+                
+                try{
+                    for(PatientAppointmentData _pad : pad.get()){
+                        
+                        /**
+                         * disable Properties.VIEW_MODE update
+                         
+                        ModalProgressView.ViewMode viewMode = (ModalProgressView.ViewMode)getDescriptor().getControllerDescription().
+                                getProperty(SystemDefinition.Properties.VIEW_MODE);*/
+                        
+                        patient = _pad.getPatient();
+                        patient.setIsArchived(true);
+                        patient.update();
+                    }
+                    
+                    /**
+                     * refresh PAD table in view
+                     */
+                    fetchAndSendViewPatientAppointmentData();
+                    
+                    /**
+                     * let the controller know a view change has occurred
+                     */
+                    actionEvent = new ActionEvent(
+                            this,ActionEvent.ACTION_PERFORMED,
+                            DesktopViewController.Actions.
+                                    VIEW_CONTROLLER_CHANGED_NOTIFICATION.toString());
+                     this.getMyController().actionPerformed(actionEvent);
+                    
+                    
+                }catch(StoreException ex){
+                    String message = ex.getMessage() +"\n";
+                    message = message + "Exception handled in "
+                            + this.getClass().getSimpleName() + "::actionPerfprmed( " + actionCommand + " )";
+                    displayErrorMessage(message, "View controller error", JOptionPane.WARNING_MESSAGE);
+                }
+                
+                /**
+                 * disable ModalProgressView
+                 
                 setModalView((ModalView)new View().make(View.Viewer.MODAL_PROGRESS_VIEW,
                         this, this.getDesktopView()).getModalView());
+                */
+                
+                
                 break;
             }
             case PATIENT_RECALL_ACTIVITY_STATUS_CHANGE ->{

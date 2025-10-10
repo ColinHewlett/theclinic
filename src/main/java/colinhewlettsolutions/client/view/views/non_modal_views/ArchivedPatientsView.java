@@ -94,10 +94,9 @@ public class ArchivedPatientsView extends View
                 populateArchivedPatientsTable(
                         (Patient)getMyController().getDescriptor().
                                 getControllerDescription().getProperty(Properties.PATIENT));
-                doSendActionEvent(ArchivedPatientsViewController.Actions.VIEW_CHANGED_NOTIFICATION);
+                //doSendActionEvent(ArchivedPatientsViewController.Actions.VIEW_CHANGED_NOTIFICATION);
                 break;
             }
-            
         }
     }
     

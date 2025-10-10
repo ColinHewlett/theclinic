@@ -98,7 +98,7 @@ public class ArchivedPatientsViewController extends ViewController {
         switch(event){
             case VIEW_CHANGE_NOTIFICATION ->{
                 try{
-                    fetchAndSendViewPatientAppointmentData();
+                    fetchAndSendArchivedPatients();
                 }catch(StoreException ex){
                     String message = ex.getMessage() +"\n";
                     message = message + "Exception handled in "
@@ -119,7 +119,7 @@ public class ArchivedPatientsViewController extends ViewController {
             
             case ARCHIVED_PATIENTS_REQUEST ->{
                 try{
-                    fetchAndSendViewPatientAppointmentData();
+                    fetchAndSendArchivedPatients();
                 }catch(StoreException ex){
                     String message = ex.getMessage() +"\n";
                     message = message + "Exception handled in "
@@ -138,8 +138,29 @@ public class ArchivedPatientsViewController extends ViewController {
                 getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.PATIENT,patient);
                 getDescriptor().getControllerDescription().
                         setProperty(SystemDefinition.Properties.VIEW_MODE, ModalProgressView.ViewMode.PROCESS_PENDING);
+                
+                /**
+                 * disable call to model process view
+                 
                 setModalView((ModalView)new View().make(View.Viewer.MODAL_PROGRESS_VIEW,
-                        this, this.getDesktopView()).getModalView());
+                        this, this.getDesktopView()).getModalView());*/
+                
+                try{
+                    for(Patient _patient : patient.get()){
+                        _patient.setIsArchived(false);
+                        _patient.update();
+                    }
+                    fetchAndSendArchivedPatients();
+                    actionEvent = new ActionEvent(
+                        this,ActionEvent.ACTION_PERFORMED,
+                        DesktopViewController.Actions.VIEW_CONTROLLER_CHANGED_NOTIFICATION.toString());
+                    getMyController().actionPerformed(actionEvent);
+                }catch(StoreException ex){
+                    String message = ex.getMessage() +"\n";
+                    message = message + "Exception handled in "
+                            + this.getClass().getSimpleName() + "::doPrimaryViewActionRequest( " + actionCommand.toString() + " )";
+                    displayErrorMessage(message, "View controller error", JOptionPane.WARNING_MESSAGE);
+                }
                 break;
             }
             case VIEW_CLOSE_NOTIFICATION ->{
@@ -221,7 +242,7 @@ public class ArchivedPatientsViewController extends ViewController {
                      */
                     case REFRESH_DATA_REQUEST ->{
                         try{
-                            fetchAndSendViewPatientAppointmentData();
+                            fetchAndSendArchivedPatients();
                         }catch(StoreException ex){
                             String message = ex.getMessage() +"\n";
                             message = message + "Exception handled in "
@@ -290,7 +311,7 @@ public class ArchivedPatientsViewController extends ViewController {
         worker.execute();
     }
     
-    private void fetchAndSendViewPatientAppointmentData()throws StoreException{
+    private void fetchAndSendArchivedPatients()throws StoreException{
         Patient patient = new Patient();
         patient.setScope(Entity.Scope.ARCHIVED);
         patient = patient.read();
