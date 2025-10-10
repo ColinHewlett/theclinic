@@ -288,8 +288,8 @@ public class ArchivedPatientsView extends View
             pnlActionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlActionsLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(btnRestoreSelectedPatientFromArchive, javax.swing.GroupLayout.PREFERRED_SIZE, 202, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(30, 30, 30)
+                .addComponent(btnRestoreSelectedPatientFromArchive, javax.swing.GroupLayout.PREFERRED_SIZE, 97, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(135, 135, 135)
                 .addComponent(btnCloseView, javax.swing.GroupLayout.PREFERRED_SIZE, 203, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
