@@ -7,6 +7,12 @@ package colinhewlettsolutions.client.view.views.non_modal_views;
 import colinhewlettsolutions.client.controller.ArchivedPatientsViewController;
 import colinhewlettsolutions.client.controller.SystemDefinition.Properties;
 import colinhewlettsolutions.client.controller.ViewController;
+import colinhewlettsolutions.client.model.entity.Patient;
+import colinhewlettsolutions.client.model.entity.PatientAppointmentData;
+import colinhewlettsolutions.client.model.non_entity.Captions;
+import colinhewlettsolutions.client.controller.SystemDefinition;
+import colinhewlettsolutions.client.view.View;
+import colinhewlettsolutions.client.view.support_classes.models.ArchivedPatientsTableModel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
@@ -20,11 +26,7 @@ import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import colinhewlettsolutions.client.model.entity.Patient;
-import colinhewlettsolutions.client.model.non_entity.Captions;
-import colinhewlettsolutions.client.controller.SystemDefinition;
-import colinhewlettsolutions.client.view.View;
-import colinhewlettsolutions.client.view.support_classes.models.ArchivedPatientsTableModel;
+
 import javax.swing.border.TitledBorder;
 
 /**
@@ -58,14 +60,14 @@ public class ArchivedPatientsView extends View
     
     @Override
     public void actionPerformed(ActionEvent e){
-        Patient patient = null;
+        PatientAppointmentData pad = null;
         ArchivedPatientsViewController.Actions actionCommand = ArchivedPatientsViewController.Actions.valueOf(e.getActionCommand());
         switch (actionCommand){
             case PATIENT_RESTORE_REQUEST ->{
-                patient = new Patient();
-                patient.set(getSelectedRows());
-                if (!patient.get().isEmpty()){
-                    getMyController().getDescriptor().getViewDescription().setProperty(Properties.PATIENT, patient);
+                pad = new PatientAppointmentData();
+                pad.set(getSelectedRows());
+                if (!pad.get().isEmpty()){
+                    getMyController().getDescriptor().getViewDescription().setProperty(Properties.PATIENT_APPOINTMENT_DATA, pad);
                     doSendActionEvent(actionCommand);
                 }
                 break;
@@ -92,8 +94,8 @@ public class ArchivedPatientsView extends View
         switch(propertyName){
             case ARCHIVED_PATIENTS_RECEIVED ->{
                 populateArchivedPatientsTable(
-                        (Patient)getMyController().getDescriptor().
-                                getControllerDescription().getProperty(Properties.PATIENT));
+                        (PatientAppointmentData)getMyController().getDescriptor().
+                                getControllerDescription().getProperty(Properties.PATIENT_APPOINTMENT_DATA));
                 //doSendActionEvent(ArchivedPatientsViewController.Actions.VIEW_CHANGED_NOTIFICATION);
                 break;
             }
@@ -192,21 +194,21 @@ public class ArchivedPatientsView extends View
         
     }
     
-    private ArrayList<Patient> aps = new ArrayList<>();
+    private ArrayList<PatientAppointmentData> pads = new ArrayList<>();
     private void setSelectedRows(int[] value){
-        aps = new ArrayList<>();
+        pads = new ArrayList<>();
         if (value!=null){
             if (value.length>0){
                 for (int selectedRow = 0; value.length-1 >= selectedRow; selectedRow++){
                     ArchivedPatientsTableModel model = (ArchivedPatientsTableModel)tblArchivedPatients.getModel();
-                    Patient patient = model.getElementAt(value[selectedRow]);
-                    aps.add(patient);
+                    PatientAppointmentData pad = model.getElementAt(value[selectedRow]);
+                    pads.add(pad);
                 }
             }
         } 
     }
-    private ArrayList<Patient> getSelectedRows (){
-        return aps;
+    private ArrayList<PatientAppointmentData> getSelectedRows (){
+        return pads;
     }
     
     
@@ -239,14 +241,14 @@ public class ArchivedPatientsView extends View
         
     }
     
-    private void populateArchivedPatientsTable(Patient patient){
+    private void populateArchivedPatientsTable(PatientAppointmentData pad){
         ArchivedPatientsTableModel model = 
                 (ArchivedPatientsTableModel)tblArchivedPatients.getModel();
         model.removeAllElements();
-        model.setData(patient.get());
-        ViewController.setJTableColumnProperties(tblArchivedPatients, this.scrPatientAppointmentDataTable.getPreferredSize().width, 100);
+        model.setData(pad.get());
+        ViewController.setJTableColumnProperties(tblArchivedPatients, this.scrPatientAppointmentDataTable.getPreferredSize().width, 80,20);
         TitledBorder titledBorder = (TitledBorder)pnlArchivedPatients.getBorder();
-        titledBorder.setTitle(getTableTitle() + " (" + patient.get().size() + ")");
+        titledBorder.setTitle(getTableTitle() + " (" + pad.get().size() + ")");
         this.pnlArchivedPatients.repaint();
     }
 
@@ -288,8 +290,8 @@ public class ArchivedPatientsView extends View
             pnlActionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlActionsLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(btnRestoreSelectedPatientFromArchive, javax.swing.GroupLayout.PREFERRED_SIZE, 97, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(135, 135, 135)
+                .addComponent(btnRestoreSelectedPatientFromArchive, javax.swing.GroupLayout.PREFERRED_SIZE, 214, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
                 .addComponent(btnCloseView, javax.swing.GroupLayout.PREFERRED_SIZE, 203, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );

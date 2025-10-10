@@ -8,27 +8,29 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import javax.swing.table.DefaultTableModel;
 import colinhewlettsolutions.client.model.entity.Patient;
+import colinhewlettsolutions.client.model.entity.PatientAppointmentData;
 /**
  *
  * @author colin
  */
 public class ArchivedPatientsTableModel extends DefaultTableModel{
-    private ArrayList<Patient> data = null;
+    private ArrayList<PatientAppointmentData> data = null;
 
-    private enum COLUMN{Patient};
+    private enum COLUMN{Patient,LastBooking};
     private final Class[] columnClass = new Class[] {
-        Patient.class
+        Patient.class,
+        LocalDate.class
         };
 
     public ArchivedPatientsTableModel(){
         data = new ArrayList<>();  
     }
     
-    public ArrayList<Patient> getArchivedPatients(){
+    public ArrayList<PatientAppointmentData> getArchivedPatients(){
         return this.data;
     }
     
-    public void setData(ArrayList<Patient> newData) {
+    public void setData(ArrayList<PatientAppointmentData> newData) {
         this.data = newData;
         fireTableDataChanged(); // Notify JTable
     }
@@ -38,7 +40,7 @@ public class ArchivedPatientsTableModel extends DefaultTableModel{
         fireTableDataChanged();
     }
     
-    public Patient getElementAt(int row){
+    public PatientAppointmentData getElementAt(int row){
         return data.get(row);
     }
 
@@ -60,6 +62,8 @@ public class ArchivedPatientsTableModel extends DefaultTableModel{
         for (COLUMN column: COLUMN.values()){
             if (column.ordinal() == columnIndex){
                 result = column.toString();
+                if (result.equals("LastBooking"))
+                    result = "<html><center>Last</center><center>booking</center></html>";
             }
         }
         return result;
@@ -72,17 +76,22 @@ public class ArchivedPatientsTableModel extends DefaultTableModel{
     @Override
     public Object getValueAt(int row, int columnIndex){
         Object result = null;
-        Patient patient = getArchivedPatients().get(row);
+        PatientAppointmentData pad = getArchivedPatients().get(row);
         for (COLUMN column: COLUMN.values()){
             if (column.ordinal() == columnIndex){
-                if (patient == null){
+                if (pad == null){
                     return null;
                 }
                 else{
                     switch (column){
-                        case Patient:
-                            result = patient;
+                        case Patient -> {
+                            result = pad.getPatient();
                             break;
+                        }
+                        case LastBooking -> {
+                            result = pad.getAppointment().getStart().toLocalDate();
+                            break;
+                        }
                     }
                     break;
                 }

@@ -112,7 +112,6 @@ public class ArchivedPatientsViewController extends ViewController {
 
     private void doPrimaryViewActionRequest(ActionEvent e){
         ActionEvent actionEvent = null;
-        Patient patient = null;
         PatientAppointmentData pad = null;
         Actions actionCommand = Actions.valueOf(e.getActionCommand());
         switch(actionCommand){
@@ -130,12 +129,13 @@ public class ArchivedPatientsViewController extends ViewController {
             }
 
             case PATIENT_RESTORE_REQUEST ->{
-                patient = (Patient)getDescriptor().getViewDescription().getProperty(SystemDefinition.Properties.PATIENT);
-                setItemTotal(patient.get().size());
+                pad = (PatientAppointmentData)getDescriptor().getViewDescription().
+                        getProperty(SystemDefinition.Properties.PATIENT_APPOINTMENT_DATA);
+                setItemTotal(pad.get().size());
                 setItemCount(0);
                 getDescriptor().getControllerDescription().setProperty(SystemDefinition.
                         Properties.ITEM_COUNTER, new Point(getItemCount(), getItemTotal()));
-                getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.PATIENT,patient);
+                getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.PATIENT_APPOINTMENT_DATA,pad);
                 getDescriptor().getControllerDescription().
                         setProperty(SystemDefinition.Properties.VIEW_MODE, ModalProgressView.ViewMode.PROCESS_PENDING);
                 
@@ -146,9 +146,10 @@ public class ArchivedPatientsViewController extends ViewController {
                         this, this.getDesktopView()).getModalView());*/
                 
                 try{
-                    for(Patient _patient : patient.get()){
-                        _patient.setIsArchived(false);
-                        _patient.update();
+                    for(PatientAppointmentData _pad : pad.get()){
+                        Patient patient = _pad.getPatient();
+                        patient.setIsArchived(false);
+                        patient.update();
                     }
                     fetchAndSendArchivedPatients();
                     actionEvent = new ActionEvent(
@@ -312,10 +313,10 @@ public class ArchivedPatientsViewController extends ViewController {
     }
     
     private void fetchAndSendArchivedPatients()throws StoreException{
-        Patient patient = new Patient();
-        patient.setScope(Entity.Scope.ARCHIVED);
-        patient = patient.read();
-        getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.PATIENT, patient);
+        PatientAppointmentData pad = new PatientAppointmentData();
+        pad.setScope(Entity.Scope.ARCHIVED);
+        pad = pad.read();
+        getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.PATIENT_APPOINTMENT_DATA, pad);
         firePropertyChangeEvent(
                 Properties.ARCHIVED_PATIENTS_RECEIVED.toString(),
                 getView(),
