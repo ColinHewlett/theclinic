@@ -2026,8 +2026,10 @@ public class Repository implements IStoreActions {
             try(PreparedStatement preparedStatement = getPMSStoreConnection().prepareStatement(sql)){
                 if(entity.getIsPatientAppointmentData()){
                     pad = (PatientAppointmentData)entity;
-                    preparedStatement.setInt(1,pad.getFromYear());
-                    preparedStatement.setInt(2,pad.getToYear());
+                    if(!pad.getScope().equals(Entity.Scope.ARCHIVED)){
+                        preparedStatement.setInt(1,pad.getFromYear());
+                        preparedStatement.setInt(2,pad.getToYear());
+                    }
                     rs = preparedStatement.executeQuery();
                     result = getDataRead(entity, rs);
                 }else {
