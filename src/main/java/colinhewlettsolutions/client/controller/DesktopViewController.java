@@ -106,16 +106,26 @@ public class DesktopViewController extends ViewController{
     
     public enum Actions{
         ARCHIVED_PATIENTS_VIEW_CONTROLLER_REQUEST,
+        CHANGE_USER_PASSWORD_REQUEST,
         CLINIC_LOGO_VIEW_MODE_NOTIFICATION,
         CLOSE_PATIENT_VIEW_WITH_SAME_PATIENT_REQUEST,
         CLOSE_SCHEDULE_VIEW_WITH_SAME_DATE_REQUEST,
         DESKTOP_VIEW_MODE_NOTIFICATION,
+        LOGOUT_REQUEST,
+        MEDICAL_CONDITION_VIEW_CONTROLLER_REQUEST,
         PATIENT_APPOINTMENT_DATA_VIEW_CONTROLLER_REQUEST,
+        PATIENT_MEDICAL_HISTORY_VIEW_CONTROLLER_REQUEST,
+        PATIENT_QUESTIONNAIRE_VIEW_CONTROLLER_REQUEST,
         PATIENT_RECALL_VIEW_CONTROLLER_REQUEST,
         PATIENT_VIEW_CONTROLLER_REQUEST,
+        PRINT_NEW_PATIENT_DETAILS_REQUEST,
+        PRINT_SCHEDULE_REQUEST,
         SCHEDULE_LIST_VIEW_CONTROLLER_REQUEST,
+        TO_DO_VIEW_CONTROLLER_REQUEST,
+        TREATMENT_VIEW_CONTROLLER_REQUEST,
         USER_SYSTEM_WIDE_FACTORY_SETTINGS_REQUEST,
         USER_SYSTEM_WIDE_SETTINGS_REQUEST,
+        USER_SYSTEM_WIDE_SETTINGS_VIEW_CONTROLLER_REQUEST,
         VIEW_ACTIVATED_NOTIFICATION,
         VIEW_CHANGED_NOTIFICATION,
         VIEW_CLOSE_REQUEST,
@@ -1040,10 +1050,9 @@ public class DesktopViewController extends ViewController{
      * @param e source of event is X_DesktopView object
      */
     private void doActionEventForDesktopView(ActionEvent e){ 
-        ViewController.DesktopViewControllerActionEvent actionCommand = null;
+        DesktopViewController.Actions actionCommand = null;
 
-        actionCommand =
-                ViewController.DesktopViewControllerActionEvent.valueOf(e.getActionCommand());
+        actionCommand = DesktopViewController.Actions.valueOf(e.getActionCommand());
         switch (actionCommand){
             case ARCHIVED_PATIENTS_VIEW_CONTROLLER_REQUEST ->{
                 doRequestForArchivedPatientsViewController();
@@ -1063,12 +1072,13 @@ public class DesktopViewController extends ViewController{
                 setDesktopViewMode(DesktopViewMode.DESKTOP);
                 break;
             }
+            /*
             case LOGIN_VIEW_CONTROLLER_REQUEST ->{
                 getDescriptor().getControllerDescription().
                         setProperty(SystemDefinition.Properties.LOGIN_VIEW_MODE, ViewController.LoginViewMode.LOGIN_CHECK);
                 doRequestForLoginViewController(e);
                 break;
-            }
+            }*/
             case LOGOUT_REQUEST ->{
                 getDescriptor().getControllerDescription().
                         setProperty(SystemDefinition.Properties.LOGIN_CREDENTIAL, new Credential());
@@ -1078,10 +1088,11 @@ public class DesktopViewController extends ViewController{
                 doRequestForMedicalConditionViewController(e);
                 break;
             }
+            /*
             case NOTIFICATION_VIEW_CONTROLLER_REQUEST ->{
                 doRequestForNotificationViewController();
                 break;
-            }
+            }*/
             case PATIENT_APPOINTMENT_DATA_VIEW_CONTROLLER_REQUEST ->{
                 doRequestForPatientAppointmentDataViewController();
                 break;
@@ -1132,10 +1143,11 @@ public class DesktopViewController extends ViewController{
                 doRequestForViewClose();
                 break;
             }
-            case VIEW_CLOSED_NOTIFICATION ->{/* user has attempted to close Desktop view*/
+            /*
+            case VIEW_CLOSED_NOTIFICATION ->{// user has attempted to close Desktop view
                 doRequestForViewNotification();
                 break;
-            }  
+            } */ 
             default ->{
                 doCheckForMigrationActionCommand(e);
                 break;
@@ -1796,7 +1808,7 @@ public class DesktopViewController extends ViewController{
         MedicalConditionViewController mcvc = null;
         medicalConditionViewControllers.add(
                 new MedicalConditionViewController(
-                        this,getDesktopView()));
+                        this,getNewTemplatedDescriptor(),getDesktopView()));
         mcvc = medicalConditionViewControllers
                 .get(medicalConditionViewControllers.size()-1);
         ActionEvent actionEvent = new ActionEvent(
@@ -1822,6 +1834,7 @@ public class DesktopViewController extends ViewController{
             medicalConditionViewControllers.add(
                     new MedicalConditionViewController(
                             this,
+                            getNewTemplatedDescriptor(),
                             getDesktopView()));
             mcvc = medicalConditionViewControllers.get(medicalConditionViewControllers.size()-1);
             setView(new View().make(View.Viewer.MEDICAL_CONDITION_VIEW,
@@ -2141,6 +2154,7 @@ public class DesktopViewController extends ViewController{
     }
     
     private void doRequestForPatientViewController(){
+        
         PatientViewController anotherBlankPatientView = null;
         for (PatientViewController pvc : patientViewControllers){
             if (!((Patient)pvc.getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.PATIENT)).getIsKeyDefined()){
@@ -2152,6 +2166,7 @@ public class DesktopViewController extends ViewController{
             anotherBlankPatientView.getView().toFront();
         }else{
             try{
+                
                 patientViewControllers.add(
                                         new PatientViewController(this, getNewTemplatedDescriptor(), getDesktopView()));
                 PatientViewController pvc = patientViewControllers.get(patientViewControllers.size()-1);
@@ -2161,10 +2176,15 @@ public class DesktopViewController extends ViewController{
                     View.Viewer.PATIENT_VIEW,
                     pvc, 
                     getDesktopView()));
-
-                if (getDesktopViewMode().equals(DesktopViewMode.CLINIC_LOGO)){
-                        doSetupDesktopViewMode();
-                } 
+            }
+            catch (StoreException ex){
+                displayErrorMessage(ex.getMessage(),"DesktopViewController error",JOptionPane.WARNING_MESSAGE);
+            }  
+            /*
+            javax.swing.SwingUtilities.invokeLater(() -> {
+                PatientViewController pvc = this.patientViewControllers.get(patientViewControllers.size()-1);
+                Point location = pvc.getView().getLocation();
+                System.out.println("(1)Patient view location = " + String.valueOf(location.x) + ", " +String.valueOf(location.y) );
                 if (getDesktopView().getDeskTop().getAllFrames().length>1){
                     this.firePropertyChangeEvent(
                             ViewController.DesktopViewControllerPropertyChangeEvent.CASCADE_DESKTOP_VIEWS.toString(), 
@@ -2174,10 +2194,12 @@ public class DesktopViewController extends ViewController{
                             null
                     );
                 }
-            }
-            catch (StoreException ex){
-                displayErrorMessage(ex.getMessage(),"DesktopViewController error",JOptionPane.WARNING_MESSAGE);
-            }
+                location = pvc.getView().getLocation();
+                System.out.println("(2)Patient view location = " + String.valueOf(location.x) + ", " +String.valueOf(location.y) );
+                if (getDesktopViewMode().equals(DesktopViewMode.CLINIC_LOGO)){
+                        doSetupDesktopViewMode();
+                } 
+            });*/
         }
     }
     
@@ -3120,7 +3142,7 @@ public class DesktopViewController extends ViewController{
     } 
 
     public void propertyChange(PropertyChangeEvent e){
-        System.out.println("5 " + String.valueOf((Boolean)getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.LOGIN_REQUIRED)));
+        //System.out.println("5 " + String.valueOf((Boolean)getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.LOGIN_REQUIRED)));
         ViewController.DesktopViewControllerPropertyChangeEvent propertyName =
                 ViewController.DesktopViewControllerPropertyChangeEvent.valueOf(e.getPropertyName());
         switch(propertyName){

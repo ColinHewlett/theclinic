@@ -1176,8 +1176,8 @@ public class ScheduleListView extends BookingView
                 ActionEvent.ACTION_PERFORMED,
                 ViewController.ScheduleViewControllerActionEvent.PRINT_SCHEDULE_REQUEST.toString());
         getMyController().actionPerformed(actionEvent);
-        doOpenDocumentForPrinting(SystemDefinition.getPMSPrintFolder() 
-                + SystemDefinition.FILENAME_FOR_SCHEDULE);
+        String printFolder = (String)getMyController().getDescriptor().getControllerDescription().getProperty(Properties.PRINT_FOLDER);
+        doOpenDocumentForPrinting(printFolder + SystemDefinition.FILENAME_FOR_SCHEDULE);
     }
     
     private boolean isViewSwitchPending = false;

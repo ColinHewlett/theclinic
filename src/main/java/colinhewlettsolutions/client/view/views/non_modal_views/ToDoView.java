@@ -51,7 +51,7 @@ public class ToDoView extends View implements ActionListener,
     enum Action{
         REQUEST_ALL_TO_DO,
         REQUEST_CANCEL_TO_DO,
-        REQUEST_CLOSE_VIEW,
+        MINIMISE_VIEW,
         REQUEST_CREATE_TO_DO,
         REQUEST_UNACTIONED_TO_DO,
         REQUEST_UPDATE_TO_DO
@@ -64,7 +64,7 @@ public class ToDoView extends View implements ActionListener,
      */
     public ToDoView(View.Viewer myViewType, 
             ViewController myController, DesktopView desktopView) {
-        setTitle("Outstanding 'to do' actions");
+        setTitle("'To Do' list");
         this.setMyViewType(myViewType);
         setMyController(myController);  
         setDesktopView(desktopView);
@@ -84,8 +84,13 @@ public class ToDoView extends View implements ActionListener,
             case REQUEST_CANCEL_TO_DO:
                 this.doCancelToDo();
                 break;
-            case REQUEST_CLOSE_VIEW:
-                this.doCloseView();
+            case MINIMISE_VIEW:
+                try{
+                    this.setIcon(true);
+                }catch (PropertyVetoException ex){
+                    String message = ex.getMessage()  + "\n";
+                    JOptionPane.showMessageDialog(this, message + "Exception raised in ToDoView::actionPerformed( " + e.getActionCommand() + " )");
+                }
                 break;
             case REQUEST_UNACTIONED_TO_DO:
                 this.doReadUnactionedToDos();
@@ -164,12 +169,17 @@ public class ToDoView extends View implements ActionListener,
         }
     }
     
-    private final String UI_UNACTIONED_TO_DOS_TITLE = "Outstanding 'to do' actions";
-    private final String UI_ALL_TO_DOS_TITLE = "All 'to do' actions";
+    private final String UI_UNACTIONED_TO_DOS_TITLE = "'To do' list";
+    private final String UI_ALL_TO_DOS_TITLE = "'To do' list";
     public void initialiseView(){
         //javax.swing.SwingUtilities.invokeLater(() -> {
             initComponents();
-
+            try{
+                this.setIcon(true);
+            }catch (PropertyVetoException ex){
+                
+            }
+            setClosable(false);
             buttonGroup1.add(this.rdbDisplayAllOptions);
             buttonGroup1.add(this.rdbDisplayUnactionedToDo);
             rdbDisplayAllOptions.setActionCommand(Action.REQUEST_ALL_TO_DO.toString());
@@ -219,8 +229,8 @@ public class ToDoView extends View implements ActionListener,
             this.btnEditSelectedToDo.addActionListener(this);
             this.btnCancelSelectedToDo.setActionCommand(Action.REQUEST_CANCEL_TO_DO.toString());
             this.btnCancelSelectedToDo.addActionListener(this);
-            this.btnCloseView.setActionCommand(Action.REQUEST_CLOSE_VIEW.toString());
-            this.btnCloseView.addActionListener(this);
+            this.btnMinimiseView.setActionCommand(Action.MINIMISE_VIEW.toString());
+            this.btnMinimiseView.addActionListener(this);
             
             this.btnEditSelectedToDo.setEnabled(false);
             this.btnCancelSelectedToDo.setEnabled(false);
@@ -477,7 +487,7 @@ public class ToDoView extends View implements ActionListener,
         btnAddNewToDo = new javax.swing.JButton();
         btnEditSelectedToDo = new javax.swing.JButton();
         btnCancelSelectedToDo = new javax.swing.JButton();
-        btnCloseView = new javax.swing.JButton();
+        btnMinimiseView = new javax.swing.JButton();
 
         pnlToDo.setBorder(javax.swing.BorderFactory.createTitledBorder("To do list"));
 
@@ -544,7 +554,7 @@ public class ToDoView extends View implements ActionListener,
 
         btnCancelSelectedToDo.setText("<html><center>Cancel</center><center>selected task</center><center>from 'to do' list</center></html>");
 
-        btnCloseView.setText("<html><center>Close</center><center>view</center></html>");
+        btnMinimiseView.setText("<html><center>Minimise</center><center>view</center></html>");
 
         javax.swing.GroupLayout pnlActionsLayout = new javax.swing.GroupLayout(pnlActions);
         pnlActions.setLayout(pnlActionsLayout);
@@ -553,7 +563,7 @@ public class ToDoView extends View implements ActionListener,
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlActionsLayout.createSequentialGroup()
                 .addGap(12, 12, 12)
                 .addGroup(pnlActionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(btnCloseView, javax.swing.GroupLayout.PREFERRED_SIZE, 105, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnMinimiseView, javax.swing.GroupLayout.PREFERRED_SIZE, 105, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(pnlActionsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                         .addComponent(btnAddNewToDo, javax.swing.GroupLayout.PREFERRED_SIZE, 106, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(btnEditSelectedToDo, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 105, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -570,7 +580,7 @@ public class ToDoView extends View implements ActionListener,
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 10, Short.MAX_VALUE)
                 .addComponent(btnCancelSelectedToDo, javax.swing.GroupLayout.PREFERRED_SIZE, 83, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(10, 10, 10)
-                .addComponent(btnCloseView, javax.swing.GroupLayout.PREFERRED_SIZE, 83, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(btnMinimiseView, javax.swing.GroupLayout.PREFERRED_SIZE, 83, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
 
@@ -607,8 +617,8 @@ public class ToDoView extends View implements ActionListener,
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAddNewToDo;
     private javax.swing.JButton btnCancelSelectedToDo;
-    private javax.swing.JButton btnCloseView;
     private javax.swing.JButton btnEditSelectedToDo;
+    private javax.swing.JButton btnMinimiseView;
     private javax.swing.ButtonGroup buttonGroup1;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel pnlActions;

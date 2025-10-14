@@ -106,8 +106,9 @@ public class Repository implements IStoreActions {
                                 //CREATE_PATIENT_APPOINTMENT_DATA_TABLE,
                                 //DELETE_ALL_PATIENT_APPOINTMENT_DATA,
                                 //INSERT_PATIENT_APPOINTMENT_DATA,
+                                READ_ARCHIVED_PATIENT_APPOINTMENT_DATA,
                                 READ_PATIENT_APPOINTMENT_DATA_BY_LAST_APPOINTMENT_DATE,
-                                PATIENT_APPOINTMENT_DATA_WITH_APPOINTMENT,
+                                READ_PATIENT_APPOINTMENT_DATA_WITH_APPOINTMENT,
                                 READ_PATIENT_APPOINTMENT_DATA_WITHOUT_APPOINTMENT,
                                 //UPDATE_PATIENT_APPOINTMENT_DATA,  
                                 
@@ -5112,6 +5113,35 @@ public class Repository implements IStoreActions {
         Entity result = new Entity();
         String sql;
         switch (q){
+            case READ_ARCHIVED_PATIENT_APPOINTMENT_DATA:
+                sql = "Select "
+                        + "p.pid as patientKey, "
+                        + "p.forenames as patient_forenames, "
+                        + "p.surname as patient_surname, "
+                        + "p.title as patient_title, "
+                        + "p.phone1 as patient_phone1, "
+                        + "p.phone2 as patient_phone2, "
+                        + "p.email as patient_email, "
+                        + "p.recallDate as recall_date, "
+                        + "p.recallFrequency as recall_frequency, "
+                        + "p.recallDateGBT as recall_date_GBT, "
+                        + "p.recallFrequencyGBT as recall_frequency_GBT, "
+                        + "p.isRequestToSendPatientGBTRecallPending, "
+                        + "p.isRequestToSendPatientNonGBTRecallPending, "
+                        + "p.lastGBTRecallSentDate, "
+                        + "p.lastNonGBTRecallSentDate, "
+                        + "a.pid as appointmentKey, "
+                        + "a.start as last_appointment_date, "
+                        + "a.notes as treatment "
+                        + "FROM Patient p "
+                        + "LEFT JOIN appointment as a ON ("
+                        + "a.start = DMax (\"start\", \"appointment\", \"patientKey=\" & p.pid)) "
+                        + "AND (a.patientKey = p.pid) "
+                        + "WHERE p.isArchived = true "
+                        + "ORDER BY p.surname, p.forenames ASC;";
+                System.out.println(sql);
+                result = doReadAll(sql, (PatientAppointmentData )entity);
+                break;
             case READ_PATIENT_APPOINTMENT_DATA_WITHOUT_APPOINTMENT:
                 sql = "Select "
                         + "p.pid as patientKey, "
@@ -5141,7 +5171,7 @@ public class Repository implements IStoreActions {
                         + "ORDER BY patient_surname,patient_forenames ASC;";
                 result = doReadPatientAppointmentDataWithoutAppointment(sql, (PatientAppointmentData )entity);   
                 break;
-            case PATIENT_APPOINTMENT_DATA_WITH_APPOINTMENT:
+            case READ_PATIENT_APPOINTMENT_DATA_WITH_APPOINTMENT:
                 sql = "Select "
                         + "p.pid as patientKey, "
                         + "p.forenames as patient_forenames, "
@@ -5404,7 +5434,7 @@ public class Repository implements IStoreActions {
                         + "FROM ToDo "
                         + "WHERE isDeleted = false "
                         + "AND isCancelled = false "
-                        + "ORDER BY pid ASC;";
+                        + "ORDER BY pid DESC;";
                 result = doReadAll(sql,(ToDo)entity);
                 break;
             case READ_UNACTIONED_TO_DO:
@@ -5413,7 +5443,7 @@ public class Repository implements IStoreActions {
                         + "WHERE isActioned = false "
                         + "AND isDeleted = false "
                         + "AND isCancelled = false "
-                        + "ORDER BY pid ASC;";
+                        + "ORDER BY pid DESC;";
                 result = doReadAll(sql,(ToDo)entity);
                 break;
             case READ_TO_DO_NEXT_HIGHEST_KEY:
@@ -9168,11 +9198,17 @@ public class Repository implements IStoreActions {
     public PatientAppointmentData read(PatientAppointmentData pad) throws StoreException{
         Entity entity = null;
         switch (pad.getScope()){
+            case ARCHIVED:
+                entity = (Entity)runSQL(Repository.EntityType.PATIENT_APPOINTMENT_DATA,Repository.PMSSQL.READ_ARCHIVED_PATIENT_APPOINTMENT_DATA,pad);
+                break;
             case PATIENT_APPOINTMENT_DATA_WITHOUT_APPOINTMENT:
                 entity = (Entity)runSQL(Repository.EntityType.PATIENT_APPOINTMENT_DATA,Repository.PMSSQL.READ_PATIENT_APPOINTMENT_DATA_WITHOUT_APPOINTMENT,pad);
                 break;
+            case PATIENT_APPOINTMENT_DATA_WITH_APPOINTMENT:
+                entity = (Entity)runSQL(Repository.EntityType.PATIENT_APPOINTMENT_DATA,Repository.PMSSQL.READ_PATIENT_APPOINTMENT_DATA_WITH_APPOINTMENT,pad);
+                break;
             default:
-                entity = (Entity)runSQL(Repository.EntityType.PATIENT_APPOINTMENT_DATA,Repository.PMSSQL.PATIENT_APPOINTMENT_DATA_WITH_APPOINTMENT,pad);
+                
                 break;
         }
         if (entity!=null){

@@ -89,7 +89,12 @@ public class ArchivedPatientsTableModel extends DefaultTableModel{
                             break;
                         }
                         case LastBooking -> {
-                            result = pad.getAppointment().getStart().toLocalDate();
+                            if (pad.getAppointment() != null){
+                                if (pad.getAppointment().getStart() != null){
+                                    result = pad.getAppointment().getStart().toLocalDate();
+                                }
+                            }
+                            
                             break;
                         }
                     }

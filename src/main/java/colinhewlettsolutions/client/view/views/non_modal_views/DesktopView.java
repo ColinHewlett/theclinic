@@ -70,75 +70,63 @@ public class DesktopView extends javax.swing.JFrame
             case REQUEST_ADD_NEW_USER:
                 break;
             case REQUEST_ARCHIVED_PATIENTS_VIEW:
-                doActionEventRequest(DesktopViewController.
-                        DesktopViewControllerActionEvent.ARCHIVED_PATIENTS_VIEW_CONTROLLER_REQUEST);
+                doActionEventRequest(DesktopViewController.Actions.ARCHIVED_PATIENTS_VIEW_CONTROLLER_REQUEST);
                 break;
             case REQUEST_CASCADE_VIEWS:
                 this.cascadeInternalFrames();
                 break;
             case REQUEST_CHANGE_USER_PASSWORD:
-        doActionEventRequest(DesktopViewController.
-                        DesktopViewControllerActionEvent.CHANGE_USER_PASSWORD_REQUEST);
+                doActionEventRequest(DesktopViewController.Actions.CHANGE_USER_PASSWORD_REQUEST);
                 break;
             case REQUEST_CLOSE_VIEW:
-                doActionEventRequest(DesktopViewController.
-                        DesktopViewControllerActionEvent.VIEW_CLOSE_REQUEST);
+                doActionEventRequest(DesktopViewController.Actions.VIEW_CLOSE_REQUEST);
                 break;
             case REQUEST_LOGOUT: {
                 if (this.getDeskTop().getAllFrames().length > 0)
                     JOptionPane.showMessageDialog(this,"Cannot logout while a view is open on the desktop","Log out request", JOptionPane.INFORMATION_MESSAGE);
                         
                 else{ 
-                    doActionEventRequest(DesktopViewController.
-                            DesktopViewControllerActionEvent.LOGOUT_REQUEST);
+                    doActionEventRequest(DesktopViewController.Actions.LOGOUT_REQUEST);
                     doRequestUserToLogin();
                 }
                 break;
             }
             case REQUEST_MEDICAL_CONDITION_VIEW:
-                doActionEventRequest(DesktopViewController.
-                        DesktopViewControllerActionEvent.MEDICAL_CONDITION_VIEW_CONTROLLER_REQUEST);
+                doActionEventRequest(DesktopViewController.Actions.MEDICAL_CONDITION_VIEW_CONTROLLER_REQUEST);
                 break;
+            /*
             case REQUEST_NOTIFICATION_VIEW:
-                doActionEventRequest(DesktopViewController.
-                        DesktopViewControllerActionEvent.NOTIFICATION_VIEW_CONTROLLER_REQUEST);
-                break;
+                doActionEventRequest(DesktopViewController.Actions.NOTIFICATION_VIEW_CONTROLLER_REQUEST);
+                break;*/
             case REQUEST_PATIENT_APPOINTMENT_DATA_VIEW:
-                doActionEventRequest(DesktopViewController.
-                        DesktopViewControllerActionEvent.PATIENT_APPOINTMENT_DATA_VIEW_CONTROLLER_REQUEST);
+                doActionEventRequest(DesktopViewController.Actions.PATIENT_APPOINTMENT_DATA_VIEW_CONTROLLER_REQUEST);
                 break;
             case REQUEST_PATIENT_VIEW:
-                System.out.println("3 " + String.valueOf((Boolean)getMyController().getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.LOGIN_REQUIRED)));
-                doActionEventRequest(DesktopViewController.
-                        DesktopViewControllerActionEvent.PATIENT_VIEW_CONTROLLER_REQUEST);
+                //System.out.println("3 " + String.valueOf((Boolean)getMyController().getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.LOGIN_REQUIRED)));
+                doActionEventRequest(DesktopViewController.Actions.PATIENT_VIEW_CONTROLLER_REQUEST);
                 javax.swing.SwingUtilities.invokeLater(() -> {
                     toFront();             // Force UI update
                 });
                 break;          
             case REQUEST_PRINT_NEW_PATIENT_DETAILS_VIEW:
-                doActionEventRequest(DesktopViewController.
-                        DesktopViewControllerActionEvent.PRINT_NEW_PATIENT_DETAILS_REQUEST);
-                doOpenDocumentForPrinting(SystemDefinition.getPMSPrintFolder() 
-                        + SystemDefinition.PATIENT_QUESTIONNAIRE_MEDICAL_HISTORY_FILENAME); 
+                doActionEventRequest(DesktopViewController.Actions.PRINT_NEW_PATIENT_DETAILS_REQUEST);
+                String printFolder = (String)getMyController().getDescriptor().getControllerDescription().getProperty(Properties.PRINT_FOLDER);
+                doOpenDocumentForPrinting(printFolder + SystemDefinition.PATIENT_QUESTIONNAIRE_MEDICAL_HISTORY_FILENAME);
                 break;
             case REQUEST_PRINT_SCHEDULE:
                 doPrintSchedule();
                 break;
             case REQUEST_SCHEDULE_LIST_VIEW:
-                doActionEventRequest(DesktopViewController.
-                        DesktopViewControllerActionEvent.SCHEDULE_LIST_VIEW_CONTROLLER_REQUEST);
+                doActionEventRequest(DesktopViewController.Actions.SCHEDULE_LIST_VIEW_CONTROLLER_REQUEST);
                 break;
             case REQUEST_TO_DO_VIEW:
-                doActionEventRequest(DesktopViewController.
-                        DesktopViewControllerActionEvent.TO_DO_VIEW_CONTROLLER_REQUEST);
+                doActionEventRequest(DesktopViewController.Actions.TO_DO_VIEW_CONTROLLER_REQUEST);
                 break;
             case REQUEST_TREATMENT_VIEW:
-                doActionEventRequest(DesktopViewController.
-                        DesktopViewControllerActionEvent.TREATMENT_VIEW_CONTROLLER_REQUEST);
+                doActionEventRequest(DesktopViewController.Actions.TREATMENT_VIEW_CONTROLLER_REQUEST);
                 break;
             case REQUEST_USER_SYSTEM_WIDE_SETTINGS_VIEW:
-                doActionEventRequest(DesktopViewController.
-                        DesktopViewControllerActionEvent.USER_SYSTEM_WIDE_SETTINGS_VIEW_CONTROLLER_REQUEST);
+                doActionEventRequest(DesktopViewController.Actions.USER_SYSTEM_WIDE_SETTINGS_VIEW_CONTROLLER_REQUEST);
                 break;
         }
     }
@@ -214,7 +202,7 @@ public class DesktopView extends javax.swing.JFrame
         getContentPane().setBackground(Color.BLACK);
         setSize(getWidth()+1,getHeight());
         setSize(getWidth()-1,getHeight());
-        doActionEventRequest(ViewController.DesktopViewControllerActionEvent.CLINIC_LOGO_VIEW_MODE_NOTIFICATION);
+        doActionEventRequest(DesktopViewController.Actions.CLINIC_LOGO_VIEW_MODE_NOTIFICATION);
         setLocationRelativeTo(null);
         
         
@@ -223,6 +211,7 @@ public class DesktopView extends javax.swing.JFrame
             doRequestUserToLogin();
             
         } 
+        doActionEventRequest(DesktopViewController.Actions.TO_DO_VIEW_CONTROLLER_REQUEST);
     }
     
     public void disableMenus(){
@@ -344,83 +333,103 @@ public class DesktopView extends javax.swing.JFrame
      * -- then appointments
      * -- an active modal form locate centrally on top after cascade
      */
+    public static PatientView pvView = null;
     private void cascadeInternalFrames() {
         ArrayList<PatientView> patientViews = new ArrayList<>();
-        ArrayList<PatientView> actualPatientViews = new ArrayList<>();
+        //ArrayList<PatientView> actualPatientViews = new ArrayList<>();
         ArrayList<BookingView> bookingViews = new ArrayList<>();
         ArrayList<JInternalFrame> others = new ArrayList<>();
         ArrayList<LocalDate> dates = new ArrayList<>();
         ArrayList<JInternalFrame> cascadeFrameOrder = new ArrayList<>();
-        JInternalFrame modalView = null;
-        
-        int x = 20; int y = 20;
+        //JInternalFrame modalView = null;
+        //System.println.out
+        //javax.swing.SwingUtilities.invokeLater(() -> {
+            int x = 20; int y = 20;
             int offset = 30;  
-        if (this.getDeskTop().getAllFrames().length > 0){
-            for (JInternalFrame frame : this.getDeskTop().getAllFrames()){
-                if (frame instanceof BookingView) bookingViews.add((BookingView)frame);
-                else if (frame instanceof PatientView) patientViews.add((PatientView)frame);
-                else if (frame instanceof ModalView) modalView = frame; 
-                else others.add(frame);
-            }
-        }
-        
-        for(JInternalFrame frame : others){
-            cascadeFrameOrder.add(frame);
-        }
-        
-        for(JInternalFrame frame : patientViews){
-            cascadeFrameOrder.add(frame);
-        }
-        
-        switch (bookingViews.size()){
-            case 0:
-                break;
-            case 1:
-                cascadeFrameOrder.add(bookingViews.get(0));
-                break;
-            default:{
-                for (BookingView bookingView: bookingViews){
-                    LocalDate day = (LocalDate)bookingView.getMyController().getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.SCHEDULE_DAY);
-                    dates.add(day);
-                }
-                Collections.sort(dates);
-                for (LocalDate date : dates){
-                    for (BookingView bookingView: bookingViews){
-                        LocalDate theScheduleDay = (LocalDate)bookingView.getMyController().getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.SCHEDULE_DAY);
-                        if(date.isEqual(theScheduleDay)){
-                            cascadeFrameOrder.add(bookingView);
-                            break;
+            if (this.getDeskTop().getAllFrames().length > 0){
+                for (JInternalFrame frame : this.getDeskTop().getAllFrames()){
+                    if (!frame.isIcon()){
+                        if (frame instanceof BookingView) bookingViews.add((BookingView)frame);
+                        else if (frame instanceof PatientView) {
+                            patientViews.add((PatientView)frame);
+                            pvView = (PatientView)frame;
                         }
+                        //else if (frame instanceof ModalView) modalView = frame; 
+                        else others.add(frame);
                     }
                 }
-                break;
             }
-        }
-        
-        Point cascadeStartingLocation = getStartingLocationForCascade(cascadeFrameOrder);
-        x = cascadeStartingLocation.x-30;
-        y = cascadeStartingLocation.y-30;
-        
-        if (cascadeFrameOrder.size()>1){
-            for (JInternalFrame frame : cascadeFrameOrder){
-                try{
-                    frame.setLocation(x,y);
-                    frame.setIcon(false);
-                    frame.setSelected(true);
-                    x += offset;
-                    y += offset;
-                }catch (java.beans.PropertyVetoException e){
-                    e.printStackTrace();
+
+            for(JInternalFrame frame : others){
+                cascadeFrameOrder.add(frame);
+            }
+
+            for(JInternalFrame frame : patientViews){
+                cascadeFrameOrder.add(frame);
+            }
+
+            switch (bookingViews.size()){
+                case 0:
+                    break;
+                case 1:
+                    cascadeFrameOrder.add(bookingViews.get(0));
+                    break;
+                default:{
+                    for (BookingView bookingView: bookingViews){
+                        LocalDate day = (LocalDate)bookingView.getMyController().getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.SCHEDULE_DAY);
+                        dates.add(day);
+                    }
+                    Collections.sort(dates);
+                    for (LocalDate date : dates){
+                        for (BookingView bookingView: bookingViews){
+                            LocalDate theScheduleDay = (LocalDate)bookingView.getMyController().getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.SCHEDULE_DAY);
+                            if(date.isEqual(theScheduleDay)){
+                                cascadeFrameOrder.add(bookingView);
+                                break;
+                            }
+                        }
+                    }
+                    break;
                 }
             }
-        }
+
+            Point cascadeStartingLocation = getStartingLocationForCascade(cascadeFrameOrder);
+            x = cascadeStartingLocation.x-30;
+            y = cascadeStartingLocation.y-30;
+
+            if (cascadeFrameOrder.size()>1){
+                for (JInternalFrame frame : cascadeFrameOrder){
+                    try{
+                        frame.setLocation(x,y);
+                        frame.setIcon(false);
+                        frame.setSelected(true);
+                        
+                        x += offset;
+                        y += offset;
+                    }catch (java.beans.PropertyVetoException e){
+                        e.printStackTrace();
+                    }
+                }
+            }             // Force UI update
+        //});
+        
     }
     
-    private void doActionEventRequest(DesktopViewController.DesktopViewControllerActionEvent action){
+    private void doActionEventRequest(DesktopViewController.Actions action){
         ActionEvent actionEvent = new ActionEvent(this, 
                 ActionEvent.ACTION_PERFORMED,
                 action.toString());
         this.getMyController().actionPerformed(actionEvent);
+        
+        /*if (!((action.toString().equals("CLINIC_LOGO_VIEW_MODE_NOTIFICATION")) 
+                || (action.toString().equals("DESKTOP_VIEW_MODE_NOTIFICATION"))
+                || (action.toString().equals("TO_DO_VIEW_CONTROLLER_REQUEST"))
+                || (action.toString().equals("SCHEDULE_LIST_VIEW_CONTROLLER_REQUEST"))
+                || (action.toString().equals("PATIENT_VIEW_CONTROLLER_REQUEST"))) ){
+            System.out.println("doActionEventRequest(" + action.toString() + ")");
+            Point location = DesktopView.pvView.getLocation();
+            System.out.println("(3)Patient view location = " + String.valueOf(location.x) + ", " +String.valueOf(location.y) );
+        }*/
     }
     
     public void doOpenDocumentForPrinting(String filepath){
@@ -448,8 +457,7 @@ public class DesktopView extends javax.swing.JFrame
         if (day!=null) {
             DesktopViewController myController = (DesktopViewController)getMyController();
             //myController.getDescriptor().getControllerDescription().setScheduleDay(day);
-            doActionEventRequest(DesktopViewController.
-                DesktopViewControllerActionEvent.PRINT_SCHEDULE_REQUEST);
+            doActionEventRequest(DesktopViewController.Actions.PRINT_SCHEDULE_REQUEST);
         }
     }
     
@@ -459,7 +467,7 @@ public class DesktopView extends javax.swing.JFrame
         getContentPane().setBackground(Color.BLACK);
         setSize(getWidth()+1,getHeight());
         setSize(getWidth()-1,getHeight());
-        doActionEventRequest(ViewController.DesktopViewControllerActionEvent.CLINIC_LOGO_VIEW_MODE_NOTIFICATION);
+        doActionEventRequest(DesktopViewController.Actions.CLINIC_LOGO_VIEW_MODE_NOTIFICATION);
     }
     
     public void doSetDesktopViewMode(){
@@ -467,7 +475,7 @@ public class DesktopView extends javax.swing.JFrame
         setSize(getWidth()+1,getHeight());
         setSize(getWidth()-1,getHeight());
         setContentPane(desktopScrollPane);
-        doActionEventRequest(ViewController.DesktopViewControllerActionEvent.DESKTOP_VIEW_MODE_NOTIFICATION);
+        doActionEventRequest(DesktopViewController.Actions.DESKTOP_VIEW_MODE_NOTIFICATION);
     }
     
     public javax.swing.JDesktopPane getDeskTop(){

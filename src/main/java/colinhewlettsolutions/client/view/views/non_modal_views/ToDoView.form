@@ -161,7 +161,7 @@
               <Group type="102" alignment="1" attributes="0">
                   <EmptySpace min="-2" pref="12" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="1" attributes="0">
-                      <Component id="btnCloseView" alignment="1" min="-2" pref="105" max="-2" attributes="0"/>
+                      <Component id="btnMinimiseView" alignment="1" min="-2" pref="105" max="-2" attributes="0"/>
                       <Group type="103" alignment="1" groupAlignment="0" attributes="0">
                           <Component id="btnAddNewToDo" alignment="0" min="-2" pref="106" max="-2" attributes="0"/>
                           <Component id="btnEditSelectedToDo" alignment="1" min="-2" pref="105" max="-2" attributes="0"/>
@@ -182,7 +182,7 @@
                   <EmptySpace pref="10" max="32767" attributes="0"/>
                   <Component id="btnCancelSelectedToDo" min="-2" pref="83" max="-2" attributes="0"/>
                   <EmptySpace min="-2" pref="10" max="-2" attributes="0"/>
-                  <Component id="btnCloseView" min="-2" pref="83" max="-2" attributes="0"/>
+                  <Component id="btnMinimiseView" min="-2" pref="83" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
               </Group>
           </Group>
@@ -210,9 +210,9 @@
             </Property>
           </Properties>
         </Component>
-        <Component class="javax.swing.JButton" name="btnCloseView">
+        <Component class="javax.swing.JButton" name="btnMinimiseView">
           <Properties>
-            <Property name="text" type="java.lang.String" value="&lt;html&gt;&lt;center&gt;Close&lt;/center&gt;&lt;center&gt;view&lt;/center&gt;&lt;/html&gt;"/>
+            <Property name="text" type="java.lang.String" value="&lt;html&gt;&lt;center&gt;Minimise&lt;/center&gt;&lt;center&gt;view&lt;/center&gt;&lt;/html&gt;"/>
           </Properties>
         </Component>
       </SubComponents>

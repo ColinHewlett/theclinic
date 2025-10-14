@@ -26,8 +26,9 @@ import colinhewlettsolutions.client.view.views.non_modal_views.DesktopView;
 public class MedicalConditionViewController extends ViewController{
     
     public MedicalConditionViewController(DesktopViewController controller,
-                               DesktopView desktopView){
+                               Descriptor descriptor, DesktopView desktopView){
         setMyController(controller);
+        setDescriptor(descriptor);
         setDesktopView(desktopView);  
     }
     

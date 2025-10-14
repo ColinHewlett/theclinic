@@ -1664,9 +1664,15 @@ public class PatientViewController extends ViewController {
     public void propertyChange(PropertyChangeEvent e){
         //Descriptor descriptor = (Descriptor)e.getNewValue();
         Descriptor desktopViewDescriptor = (Descriptor)e.getNewValue();
-        Descriptor descriptor = 
+        /*Descriptor descriptor = 
                 (Descriptor)getDescriptor().getControllerDescription().
+                        getProperty(Properties.DESCRIPTOR);*/
+        
+        Descriptor descriptor = 
+                (Descriptor)getMyController().getDescriptor().getControllerDescription().
                         getProperty(Properties.DESCRIPTOR);
+        
+        
         Patient patient = null;
         ViewController.PatientViewControllerPropertyChangeEvent propertyName = 
                 ViewController.PatientViewControllerPropertyChangeEvent.
@@ -1681,21 +1687,37 @@ public class PatientViewController extends ViewController {
                 /**
                  * 26/04/2024 08:13 update
                  */
-                if (((Patient)descriptor.getControllerDescription().getProperty(Properties.PATIENT)).getIsKeyDefined()){
-                    descriptor.getControllerDescription().getProperty(Properties.PATIENT);
-                    patient = (Patient)descriptor.getControllerDescription().getProperty(Properties.PATIENT);
-                    try{
-                        //if (descriptor.getControllerDescription().getViewMode()==null)
-                        if (descriptor.getControllerDescription().
-                                getProperty(Properties.VIEW_MODE)==null)
-                            descriptor.getControllerDescription().
-                                    setProperty(Properties.VIEW_MODE, ViewController.ViewMode.NO_ACTION);
-                        switch(descriptor.getControllerDescription().getProperty(Properties.VIEW_MODE)){
-                            case ViewController.ViewMode.PATIENT_ARCHIVE ->{
-                                patient.setScope(Scope.SINGLE);
-                                patient = patient.read();
-                                if (patient.getIsArchived()) doNullPatientRequest();
-                                else{
+                patient = (Patient)descriptor.getControllerDescription().getProperty(Properties.PATIENT);
+                if (patient!=null) {
+                    if (((Patient)descriptor.getControllerDescription().getProperty(Properties.PATIENT)).getIsKeyDefined()){
+                        descriptor.getControllerDescription().getProperty(Properties.PATIENT);
+                        patient = (Patient)descriptor.getControllerDescription().getProperty(Properties.PATIENT);
+                        try{
+                            //if (descriptor.getControllerDescription().getViewMode()==null)
+                            if (descriptor.getControllerDescription().
+                                    getProperty(Properties.VIEW_MODE)==null)
+                                descriptor.getControllerDescription().
+                                        setProperty(Properties.VIEW_MODE, ViewController.ViewMode.NO_ACTION);
+                            switch(descriptor.getControllerDescription().getProperty(Properties.VIEW_MODE)){
+                                case ViewController.ViewMode.PATIENT_ARCHIVE ->{
+                                    patient.setScope(Scope.SINGLE);
+                                    patient = patient.read();
+                                    if (patient.getIsArchived()) doNullPatientRequest();
+                                    else{
+                                        doNullPatientRequest();
+                                        getDescriptor().getControllerDescription().setProperty(Properties.PATIENT, patient);
+                                        firePropertyChangeEvent(
+                                                ViewController.PatientViewControllerPropertyChangeEvent.
+                                                        PATIENT_RECEIVED.toString(),
+                                                getView(),
+                                                this,
+                                                null,
+                                                getDescriptor()
+                                        );
+                                    }
+                                    break;
+                                }
+                                default ->{
                                     doNullPatientRequest();
                                     getDescriptor().getControllerDescription().setProperty(Properties.PATIENT, patient);
                                     firePropertyChangeEvent(
@@ -1706,46 +1728,33 @@ public class PatientViewController extends ViewController {
                                             null,
                                             getDescriptor()
                                     );
+                                    break;   
                                 }
-                                break;
                             }
-                            default ->{
-                                doNullPatientRequest();
-                                getDescriptor().getControllerDescription().setProperty(Properties.PATIENT, patient);
-                                firePropertyChangeEvent(
-                                        ViewController.PatientViewControllerPropertyChangeEvent.
-                                                PATIENT_RECEIVED.toString(),
-                                        getView(),
-                                        this,
-                                        null,
-                                        getDescriptor()
-                                );
-                                break;   
-                            }
+                        }catch(StoreException ex){
+                            displayErrorMessage(ex.getMessage() + "\nRaised in propertyChange() method",
+                                "Patient view controller error", JOptionPane.WARNING_MESSAGE);
                         }
-                    }catch(StoreException ex){
-                        displayErrorMessage(ex.getMessage() + "\nRaised in propertyChange() method",
-                            "Patient view controller error", JOptionPane.WARNING_MESSAGE);
-                    }
-                }else {//if no patient selected refresh patient list
-                    try{
-                    patient = new Patient();
-                    patient.setScope(Scope.ALL);
-                    patient = patient.read();
-                    getDescriptor().getControllerDescription().setProperty(Properties.PATIENTS, patient.get());
-                    firePropertyChangeEvent(
-                            ViewController.PatientViewControllerPropertyChangeEvent.
-                                    PATIENTS_RECEIVED.toString(),
-                            getView(),
-                            this,
-                            null,
-                            getDescriptor()
-                    ); 
-                    }catch(StoreException ex){
-                        displayErrorMessage(ex.getMessage() + "\nRaised in propertyChange() method",
-                            "Patient view controller error", JOptionPane.WARNING_MESSAGE);
-                    }
-                }                      
+                    }else {//if no patient selected refresh patient list
+                        try{
+                        patient = new Patient();
+                        patient.setScope(Scope.ALL);
+                        patient = patient.read();
+                        getDescriptor().getControllerDescription().setProperty(Properties.PATIENTS, patient.get());
+                        firePropertyChangeEvent(
+                                ViewController.PatientViewControllerPropertyChangeEvent.
+                                        PATIENTS_RECEIVED.toString(),
+                                getView(),
+                                this,
+                                null,
+                                getDescriptor()
+                        ); 
+                        }catch(StoreException ex){
+                            displayErrorMessage(ex.getMessage() + "\nRaised in propertyChange() method",
+                                "Patient view controller error", JOptionPane.WARNING_MESSAGE);
+                        }
+                    } 
+                }
                 break; 
             } 
             

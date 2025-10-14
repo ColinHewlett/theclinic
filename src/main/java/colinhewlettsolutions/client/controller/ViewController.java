@@ -1740,7 +1740,8 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
             populateAppointmentScheduleHeaderTable(document.getTableArray(0), day);
             populateAppointmentScheduleTable(document.getTableArray(1));
             
-            FileOutputStream out = new FileOutputStream(SystemDefinition.getPMSPrintFolder() + "/AppointmentSchedule.docx");
+            String printFolder = (String)getMyController().getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.PRINT_FOLDER);
+            FileOutputStream out = new FileOutputStream(printFolder + "/AppointmentSchedule.docx");
             document.write(out);
             //document.close();
             String path = new File(".").getAbsolutePath();
@@ -1827,7 +1828,10 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
             populate(TableName.PATIENT_MEDICAL_HISTORY);
             
             
-            FileOutputStream out = new FileOutputStream(SystemDefinition.getPMSPrintFolder() + "/PatientMedicalHistory.docx");
+            //FileOutputStream out = new FileOutputStream(SystemDefinition.Properties.getPMSPrintFolder() + "/PatientMedicalHistory.docx");
+            //FileOutputStream out = new FileOutputStream(SystemDefinition.Properties.PRINT_FOLDER + "/PatientMedicalHistory.docx");      
+            String fileToPrint = ((String)getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.PRINT_FOLDER)) + "/PatientMedicalHistory.docx";
+            FileOutputStream out = new FileOutputStream(fileToPrint);
             document.write(out);
             out.flush();
             out.close();
