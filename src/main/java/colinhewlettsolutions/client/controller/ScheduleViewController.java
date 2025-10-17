@@ -889,7 +889,7 @@ public class ScheduleViewController extends ViewController{
                 doSwitchView();
                 break;
             case UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_VIEW_REQUEST:
-                //doUnbookableAppointmentSlotEditorViewRequest();
+                doUnbookableAppointmentSlotEditorViewRequest();
                 break;
             case UNBOOKABLE_SLOT_SCANNER_VIEW_REQUEST:
                 doUnbookableSlotScannerViewRequest();
@@ -957,6 +957,90 @@ public class ScheduleViewController extends ViewController{
                 break;
             */        
         }
+    }
+    
+    private void doUnbookableAppointmentSlotEditorViewRequest(){
+        Appointment appointment = null;
+        getDescriptor().getControllerDescription().setViewMode(null);
+        View.setViewer(View.Viewer.UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_VIEW);
+        switch (getDescriptor().getViewDescription().getViewMode()){
+            case SLOT_SELECTED:{
+                /*if(getDescriptor().getViewDescription().
+                        getAppointment().getPatient() == null){//check if this slot is occupied by a patient*/
+                appointment = (Appointment)getDescriptor().
+                        getViewDescription().getProperty(SystemDefinition.Properties.APPOINTMENT);
+                if(appointment.getPatient() == null){//check if this slot is occupied by a patient
+                    //NO must be unbooked
+                    getDescriptor().getControllerDescription().
+                            setProperty(SystemDefinition.Properties.APPOINTMENT, appointment);
+                    getDescriptor().getControllerDescription().
+                            setProperty(SystemDefinition.Properties.VIEW_MODE,ViewController.ViewMode.CREATE);
+                    /*
+                    getDescriptor().getControllerDescription().setAppointment(
+                            getDescriptor().getViewDescription().getAppointment());
+                    getDescriptor().getControllerDescription().
+                            setViewMode(ViewController.ViewMode.CREATE);   */  
+                }
+                else if (appointment.getIsUnbookableSlot()){//is this an UNBOOKABLE slot
+                    getDescriptor().getControllerDescription().
+                            setProperty(SystemDefinition.Properties.APPOINTMENT, appointment);
+                    getDescriptor().getControllerDescription().
+                            setProperty(SystemDefinition.Properties.VIEW_MODE,ViewController.ViewMode.UPDATE);
+                    
+                            /*
+                        getAppointment().getIsUnbookableSlot()){//is this an UNBOOKABLE slot
+                    getDescriptor().getControllerDescription().setAppointment(
+                        getDescriptor().getViewDescription().getAppointment());
+                    getDescriptor().getControllerDescription().
+                            setViewMode(ViewController.ViewMode.UPDATE);*/
+                }
+                else {//YES slot already occupied by a patient
+                    displayErrorMessage("The selected slot is already occupied "
+                            + "and therefor cannot be marked as unbookable",
+                        "Appointment schedule view controller error", JOptionPane.WARNING_MESSAGE);
+                    getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.VIEW_MODE, null);
+                    /*getDescriptor().getControllerDescription().
+                            setViewMode(null);*/
+                }
+                break; 
+            }
+            case SLOT_UNSELECTED:
+                getDescriptor().getControllerDescription().
+                        setProperty(SystemDefinition.Properties.APPOINTMENT, new Appointment());
+                getDescriptor().getControllerDescription().
+                        setProperty(SystemDefinition.Properties.VIEW_MODE, ViewController.ViewMode.CREATE);
+                /*
+                getDescriptor().getControllerDescription().
+                        setAppointment(new Appointment());
+                getDescriptor().getControllerDescription().
+                        setViewMode(ViewController.ViewMode.CREATE);*/
+                break;
+            case UPDATE: // indicates schedule view UPDATE button clicked se;ecvted unbookable slot
+                getDescriptor().getControllerDescription().
+                        setProperty(SystemDefinition.Properties.APPOINTMENT,appointment);
+                getDescriptor().getControllerDescription().
+                        setProperty(SystemDefinition.Properties.VIEW_MODE, ViewController.ViewMode.UPDATE);
+                /*getDescriptor().getControllerDescription().setAppointment(
+                    getDescriptor().getViewDescription().getAppointment());
+                getDescriptor().getControllerDescription().
+                        setViewMode(ViewController.ViewMode.UPDATE);*/
+                break;
+        }
+
+        //this.view2 = View.factory(this, getDescriptor(), this.desktopView);
+        setModalView((ModalView)new View().make(
+                    View.Viewer.UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_VIEW,
+                    this, 
+                    this.getDesktopView()).getModalView());
+        /**
+         * ENABLE_CONTROLS_REQUEST requests DesktopViewController to enable menu options in its view
+         * -- note: View.factory when opening a modal JInternalFrame does not return until the JInternalFrame has been closed
+         * -- at which stage its appropriate to re-enable the View menu on the Desktop View Controller's view
+         */
+        ActionEvent actionEvent = new ActionEvent(
+               this,ActionEvent.ACTION_PERFORMED,
+               ViewController.DesktopViewControllerActionEvent.MODAL_VIEWER_CLOSED_NOTIFICATION.toString());
+        this.getMyController().actionPerformed(actionEvent);
     }
     
     private void doActionEventFor(DesktopViewController.Actions action){
