@@ -142,6 +142,19 @@ public class DesktopView extends javax.swing.JFrame
                 break;
             case DESKTOP_VIEW_CHANGED_NOTIFICATION:
                 this.refreshDesktopFrameMenuItems(getActiveMenu());
+                /*
+                if (this.getDeskTop().getAllFrames().length > 0){
+                    int count = 0;
+                    for (JInternalFrame frame : this.getDeskTop().getAllFrames()){
+                        if (frame.isIcon()){
+                            count++;
+                        }
+                    }
+                    if (count == this.getDeskTop().getAllFrames().length){
+                        doSetClinicLogoViewMode();
+                    }
+                }*/
+                
                 break;
             case SET_DESKTOP_VIEW_MODE:
                 setViewDescriptor((Descriptor)e.getNewValue());
@@ -211,7 +224,7 @@ public class DesktopView extends javax.swing.JFrame
             doRequestUserToLogin();
             
         } 
-        doActionEventRequest(DesktopViewController.Actions.TO_DO_VIEW_CONTROLLER_REQUEST);
+        //doActionEventRequest(DesktopViewController.Actions.TO_DO_VIEW_CONTROLLER_REQUEST);
     }
     
     public void disableMenus(){

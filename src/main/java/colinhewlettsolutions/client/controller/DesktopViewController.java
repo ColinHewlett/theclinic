@@ -111,7 +111,10 @@ public class DesktopViewController extends ViewController{
         CLOSE_PATIENT_VIEW_WITH_SAME_PATIENT_REQUEST,
         CLOSE_SCHEDULE_VIEW_WITH_SAME_DATE_REQUEST,
         DESKTOP_VIEW_MODE_NOTIFICATION,
+        INITIALISE_VIEW_CONTROLLER,
         LOGOUT_REQUEST,
+        MODAL_VIEWER_ACTIVATED_NOTIFICATION,
+        MODAL_VIEWER_CLOSED_NOTIFICATION,
         MEDICAL_CONDITION_VIEW_CONTROLLER_REQUEST,
         PATIENT_APPOINTMENT_DATA_VIEW_CONTROLLER_REQUEST,
         PATIENT_MEDICAL_HISTORY_VIEW_CONTROLLER_REQUEST,
@@ -120,6 +123,7 @@ public class DesktopViewController extends ViewController{
         PATIENT_VIEW_CONTROLLER_REQUEST,
         PRINT_NEW_PATIENT_DETAILS_REQUEST,
         PRINT_SCHEDULE_REQUEST,
+        REFRESH_DISPLAY_REQUEST,
         SCHEDULE_LIST_VIEW_CONTROLLER_REQUEST,
         TO_DO_VIEW_CONTROLLER_REQUEST,
         TREATMENT_VIEW_CONTROLLER_REQUEST,
@@ -128,6 +132,7 @@ public class DesktopViewController extends ViewController{
         USER_SYSTEM_WIDE_SETTINGS_VIEW_CONTROLLER_REQUEST,
         VIEW_ACTIVATED_NOTIFICATION,
         VIEW_CHANGED_NOTIFICATION,
+        VIEW_CLOSED_NOTIFICATION,
         VIEW_CLOSE_REQUEST,
         VIEW_CONTROLLER_ACTIVATED_NOTIFICATION,
         VIEW_CONTROLLER_CHANGED_NOTIFICATION,
@@ -578,8 +583,8 @@ public class DesktopViewController extends ViewController{
     private void doActionEventForScheduleViewController(ActionEvent e){
         ClinicalNoteViewController _cnvc = null;
         ScheduleViewController avc = (ScheduleViewController)e.getSource();
-        ViewController.DesktopViewControllerActionEvent actionCommand =
-                    ViewController.DesktopViewControllerActionEvent.valueOf(e.getActionCommand());
+        DesktopViewController.Actions actionCommand =
+                    DesktopViewController.Actions.valueOf(e.getActionCommand());
         switch(actionCommand){
             case CLOSE_SCHEDULE_VIEW_WITH_SAME_DATE_REQUEST:
                 for(ScheduleViewController _svc : this.scheduleViewControllers){
@@ -607,9 +612,12 @@ public class DesktopViewController extends ViewController{
                 //getDescriptor().getControllerDescription().setScheduleViewMode(ScheduleViewMode.LIST);
                 doRequestForScheduleViewController(avc);
                 break;
-            case SCHEDULE_DIARY_VIEW_CONTROLLER_REQUEST:
+            //case SCHEDULE_DIARY_VIEW_CONTROLLER_REQUEST:
                 //getDescriptor().getControllerDescription().setScheduleViewMode(ScheduleViewMode.DIARY);
-                doRequestForScheduleViewController(avc);
+                //doRequestForScheduleViewController(avc);
+            case TO_DO_VIEW_CONTROLLER_REQUEST:
+                doRequestForToDoViewController();
+                break;
             case USER_SYSTEM_WIDE_SETTINGS_VIEW_CONTROLLER_REQUEST:
                 doRequestForUserSystemWideSettingsViewController(e);
                 break;

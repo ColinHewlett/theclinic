@@ -8,6 +8,7 @@ import colinhewlettsolutions.client.controller.SystemDefinition.Properties;
 import com.bric.colorpicker.listeners.ColorListener;
 import com.bric.colorpicker.models.ColorModel;
 import com.bric.colorpicker.ColorPickerDialog;
+import colinhewlettsolutions.client.controller.ScheduleViewController;
 import colinhewlettsolutions.client.controller.SystemDefinition;
 import colinhewlettsolutions.client.model.non_entity.Slot;
 import colinhewlettsolutions.client.controller.SystemDefinition.ScheduleSlotType;
@@ -115,6 +116,7 @@ public class ScheduleListView extends BookingView
         REQUEST_SEARCH_AVAILABLE_SLOTS,
         REQUEST_SURGERY_DAY_EDITOR,
         REQUEST_SWITCH_VIEW,            //SVC know which view tro switch to because the ActionEvent source the type (List/Diary) the caller is
+        REQUEST_TO_DO_LIST_VIEW,
         REQUEST_TREATMENT_VIEW,
         REQUEST_UNBOOKABLE_SLOT_SCANNER_VIEW,
         REQUEST_USER_SCHEDULE_LIST_COLOR_SETTINGS_VIEW
@@ -741,18 +743,10 @@ public class ScheduleListView extends BookingView
         Action actionCommand = Action.valueOf(e.getActionCommand());
         switch (actionCommand){
             case REQUEST_BOOKABLE_SLOT_SCANNER_VIEW:
-                actionEvent = new ActionEvent(
-                        this,ActionEvent.ACTION_PERFORMED,
-                        ViewController.ScheduleViewControllerActionEvent.
-                                BOOKABLE_SLOT_SCANNER_VIEW_REQUEST.toString());
-                getMyController().actionPerformed(actionEvent);
+                doActionEventFor(ScheduleViewController.Actions.BOOKABLE_SLOT_SCANNER_VIEW_REQUEST);
                 break;
             case REQUEST_UNBOOKABLE_SLOT_SCANNER_VIEW:
-                actionEvent = new ActionEvent(
-                        this,ActionEvent.ACTION_PERFORMED,
-                        ViewController.ScheduleViewControllerActionEvent.
-                                UNBOOKABLE_SLOT_SCANNER_VIEW_REQUEST.toString());
-                getMyController().actionPerformed(actionEvent);
+                doActionEventFor(ScheduleViewController.Actions.UNBOOKABLE_SLOT_SCANNER_VIEW_REQUEST);
                 break;
             case REQUEST_CANCEL_APPOINTMENT:
                 switch(getScheduleViewMode()){
@@ -811,9 +805,7 @@ public class ScheduleListView extends BookingView
                 if (getDialogView().getSelectedItem()!=null){
                     getMyController().getDescriptor().getViewDescription()
                             .setProperty(SystemDefinition.Properties.EARLY_BOOKING_START_TIME, (LocalDateTime)getDialogView().getSelectedItem());
-                    actionEvent = new ActionEvent(this, ActionEvent.ACTION_PERFORMED,
-                            ViewController.ScheduleViewControllerActionEvent.FIRST_APPOINTMENT_START_TIME_REQUEST.toString());
-                    this.getMyController().actionPerformed(actionEvent); 
+                    doActionEventFor(ScheduleViewController.Actions.FIRST_APPOINTMENT_START_TIME_REQUEST);
                 }
                 break;
             case REQUEST_LATE_BOOKING_END_TIME:
@@ -846,9 +838,7 @@ public class ScheduleListView extends BookingView
                         getMyController().getDescriptor().getViewDescription()
                                 .setProperty(SystemDefinition.Properties.LATE_BOOKING_END_TIME, 
                                         (LocalDateTime)getDialogView().getSelectedItem());
-                        actionEvent = new ActionEvent(this, ActionEvent.ACTION_PERFORMED,
-                                ViewController.ScheduleViewControllerActionEvent.LAST_APPOINTMENT_END_TIME_REQUEST.toString());
-                        this.getMyController().actionPerformed(actionEvent); 
+                        doActionEventFor(ScheduleViewController.Actions.LAST_APPOINTMENT_END_TIME_REQUEST);
                     }
                 //}
                 break;
@@ -909,23 +899,16 @@ public class ScheduleListView extends BookingView
                  * On closure of the view the VC will open a new ScheduleDiaryView in its place
                  */
                 setIsViewSwitchPending(true);
-                actionEvent = new ActionEvent(this, ActionEvent.ACTION_PERFORMED,
-                        ViewController.ScheduleViewControllerActionEvent.SWITCH_VIEW_REQUEST.toString());
-                this.getMyController().actionPerformed(actionEvent);
+                doActionEventFor(ScheduleViewController.Actions.SWITCH_VIEW_REQUEST);
+                break;
+            case REQUEST_TO_DO_LIST_VIEW:
+                doActionEventFor(ScheduleViewController.Actions.TO_DO_LIST_VIEW_REQUEST);
                 break;
             case REQUEST_TREATMENT_VIEW:
-                actionEvent = new ActionEvent(
-                this, ActionEvent.ACTION_PERFORMED,
-                        ViewController.ScheduleViewControllerActionEvent.
-                                APPOINTMENT_EDITOR_TREATMENT_VIEW_REQUEST.toString());
-                getMyController().actionPerformed(actionEvent);
+                doActionEventFor(ScheduleViewController.Actions.APPOINTMENT_EDITOR_TREATMENT_VIEW_REQUEST);
                 break; 
             case REQUEST_USER_SCHEDULE_LIST_COLOR_SETTINGS_VIEW:
-                actionEvent = new ActionEvent(
-                        this,ActionEvent.ACTION_PERFORMED,
-                        ViewController.ScheduleViewControllerActionEvent.
-                                USER_SCHEDULE_LIST_SETTINGS_EDITOR_VIEW_REQUEST.toString());
-                getMyController().actionPerformed(actionEvent);
+                doActionEventFor(ScheduleViewController.Actions.USER_SCHEDULE_LIST_SETTINGS_EDITOR_VIEW_REQUEST);
                 break;
             case NONE:
                 Toolkit.getDefaultToolkit().beep();
@@ -954,9 +937,7 @@ public class ScheduleListView extends BookingView
         getMyController().getDescriptor().getViewDescription().
                 setProperty(SystemDefinition.Properties.SCHEDULE_DAY, this.dayDatePicker.getDate());
             if (tblAppointments!=null) tblAppointments.clearSelection();
-            ActionEvent actionEvent = new ActionEvent(this, ActionEvent.ACTION_PERFORMED,
-                    ViewController.ScheduleViewControllerActionEvent.APPOINTMENTS_FOR_DAY_REQUEST.toString());
-            this.getMyController().actionPerformed(actionEvent);
+            doActionEventFor(ScheduleViewController.Actions.APPOINTMENTS_FOR_DAY_REQUEST);
     }
     
     @Override
@@ -1066,12 +1047,7 @@ public class ScheduleListView extends BookingView
                 appointment.setHasPatientBeenContacted(value);
                 getMyController().getDescriptor().getViewDescription().setProperty(SystemDefinition.Properties.APPOINTMENT, value);
                 //tblAppointments.clearSelection();
-
-                ActionEvent actionEvent = new ActionEvent(
-                    this,ActionEvent.ACTION_PERFORMED,
-                    ViewController.ScheduleViewControllerActionEvent.
-                            APPOINTMENT_REMINDED_STATUS_UPDATE_REQUEST.toString());
-                getMyController().actionPerformed(actionEvent);
+                doActionEventFor(ScheduleViewController.Actions.APPOINTMENT_REMINDED_STATUS_UPDATE_REQUEST);
                 tblAppointments.clearSelection();
             }
         }
@@ -1080,6 +1056,12 @@ public class ScheduleListView extends BookingView
     @Override
     public void colorChanged(ColorModel colorModel){
 
+    }
+    
+    private void doActionEventFor(ScheduleViewController.Actions action){
+        ActionEvent actionEvent = new ActionEvent(this, ActionEvent.ACTION_PERFORMED,
+                action.toString());
+        this.getMyController().actionPerformed(actionEvent);
     }
     
     private boolean tableValueChangedListenerActivated = false;
@@ -1172,10 +1154,7 @@ public class ScheduleListView extends BookingView
      */
     private void doPrintScheduleRequest(){
         getMyController().getDescriptor().getViewDescription().setProperty(SystemDefinition.Properties.SCHEDULE_DAY, dayDatePicker.getDate());
-        ActionEvent actionEvent = new ActionEvent(this, 
-                ActionEvent.ACTION_PERFORMED,
-                ViewController.ScheduleViewControllerActionEvent.PRINT_SCHEDULE_REQUEST.toString());
-        getMyController().actionPerformed(actionEvent);
+        doActionEventFor(ScheduleViewController.Actions.PRINT_SCHEDULE_REQUEST);
         String printFolder = (String)getMyController().getDescriptor().getControllerDescription().getProperty(Properties.PRINT_FOLDER);
         doOpenDocumentForPrinting(printFolder + SystemDefinition.FILENAME_FOR_SCHEDULE);
     }
@@ -1213,6 +1192,8 @@ public class ScheduleListView extends BookingView
             @Override  
             public void internalFrameClosing(InternalFrameEvent e) {
                 ScheduleListView.this.removeInternalFrameListener(internalFrameAdapter);
+                //doActionEventFor(ScheduleViewController.Actions.VIEW_CLOSE_NOTIFICATION);
+                //doActionEventFor(ScheduleViewController.Actions.VIEW_CLOSE_NOTIFICATION);
                 ActionEvent actionEvent = new ActionEvent(
                         ScheduleListView.this,ActionEvent.ACTION_PERFORMED,
                         ViewController.ScheduleViewControllerActionEvent.
@@ -1284,8 +1265,8 @@ public class ScheduleListView extends BookingView
             mnuOptions.add(mniCloseView);
         }
         
-        this.btnSwitchView.setActionCommand(Action.REQUEST_SWITCH_VIEW.toString());
-        this.btnSwitchView.addActionListener(this);
+        this.btnRequestToDoLIst.setActionCommand(Action.REQUEST_TO_DO_LIST_VIEW.toString());
+        this.btnRequestToDoLIst.addActionListener(this);
         
         this.btnSelectBookableSlotsScanner.setEnabled(true);
         this.btnSelectBookableSlotsScanner.setActionCommand(Action.REQUEST_BOOKABLE_SLOT_SCANNER_VIEW.toString());
@@ -1353,16 +1334,13 @@ public class ScheduleListView extends BookingView
          * -- yes; send request to controller to fetch settings from store
          * -- no; fetch default settings for titled border settings
          */
-        ActionEvent actionEvent = null;
+
+/*        ActionEvent actionEvent = null;
         if ((Boolean)getMyController().getDescriptor().getControllerDescription().getProperty(Properties.LOGIN_REQUIRED)){
-            actionEvent = new ActionEvent(this, ActionEvent.ACTION_PERFORMED,
-                    ViewController.ScheduleViewControllerActionEvent.USER_SCHEDULE_LIST_SETTINGS_REQUEST.toString());
-            this.getMyController().actionPerformed(actionEvent);
-            actionEvent = new ActionEvent(this, ActionEvent.ACTION_PERFORMED,
-                    ViewController.DesktopViewControllerActionEvent.USER_SYSTEM_WIDE_SETTINGS_REQUEST.toString());
-            this.getMyController().getMyController().actionPerformed(actionEvent);
+            doActionEventFor(ScheduleViewController.Actions.USER_SETTINGS_LIST_SETTINGS_REQUEST);
+            doActionEventFor(ScheduleViewController.Actions.USER_SYSTEM_WIDE_SETTINGS_REQUEST);
         }
-        setScheduleTitledBorderSettings();
+        setScheduleTitledBorderSettings();*/
 
         this.vetoPolicy = new AppointmentDateVetoPolicy((HashMap<DayOfWeek,Boolean>)getMyController().getDescriptor().
                 getControllerDescription().getProperty(SystemDefinition.Properties.SURGERY_DAYS_ASSIGNMENT));
@@ -1442,7 +1420,7 @@ public class ScheduleListView extends BookingView
         setBorderTitles(BorderTitles.SCHEDULE_DATE_SELECTION);
         setBorderTitles(BorderTitles.SCHEDULE_FOR_DAY);
         setBorderTitles(BorderTitles.SLOT_SCANNER);
-        setBorderTitles(BorderTitles.VIEW_FORMAT);
+        //setBorderTitles(BorderTitles.VIEW_FORMAT);
     }
     
     /**
@@ -1549,10 +1527,7 @@ public class ScheduleListView extends BookingView
                     setViewMode(ViewController.ViewMode.SLOT_SELECTED);
             getMyController().getDescriptor().getViewDescription().setProperty(SystemDefinition.Properties.APPOINTMENT, model.getElementAt(row));
         }
-        ActionEvent actionEvent = new ActionEvent(this,
-                ActionEvent.ACTION_PERFORMED,
-                ViewController.ScheduleViewControllerActionEvent.APPOINTMENT_CREATE_VIEW_REQUEST.toString());
-        this.getMyController().actionPerformed(actionEvent);
+        doActionEventFor(ScheduleViewController.Actions.APPOINTMENT_CREATE_VIEW_REQUEST);
     }  
     
     private void makeEmergencyAppointment(){
@@ -1560,11 +1535,7 @@ public class ScheduleListView extends BookingView
         int row = this.tblAppointments.getSelectedRow();
         if (row != -1){
             getMyController().getDescriptor().getViewDescription().setProperty(SystemDefinition.Properties.APPOINTMENT, model.getElementAt(row));
-            ActionEvent actionEvent = new ActionEvent(this, 
-                    ActionEvent.ACTION_PERFORMED,
-                    ViewController.ScheduleViewControllerActionEvent.
-                            SCHEDULE_EDITOR_MAKE_EMERGENCY_APPOINTMENT_REQUEST.toString());
-            this.getMyController().actionPerformed(actionEvent);
+            doActionEventFor(ScheduleViewController.Actions.SCHEDULE_EDITOR_MAKE_EMERGENCY_APPOINTMENT_REQUEST);
             this.disableAllScheduleOperationControls();
         }
         else{
@@ -1579,11 +1550,7 @@ public class ScheduleListView extends BookingView
         int row = this.tblAppointments.getSelectedRow();
         if (row != -1){
             getMyController().getDescriptor().getViewDescription().setProperty(SystemDefinition.Properties.APPOINTMENT, model.getElementAt(row));
-            ActionEvent actionEvent = new ActionEvent(this, 
-                    ActionEvent.ACTION_PERFORMED,
-                    ViewController.ScheduleViewControllerActionEvent.
-                            SCHEDULE_EDITOR_DELETE_EMERGENCY_APPOINTMENT_REQUEST.toString());
-            this.getMyController().actionPerformed(actionEvent);
+            doActionEventFor(ScheduleViewController.Actions.SCHEDULE_EDITOR_DELETE_EMERGENCY_APPOINTMENT_REQUEST);
             this.disableAllScheduleOperationControls();
         }
         else{
@@ -1597,11 +1564,7 @@ public class ScheduleListView extends BookingView
         /**
          * on entry view descriptor points to selected appointment in diary
          */
-        ActionEvent actionEvent = new ActionEvent(this, 
-                ActionEvent.ACTION_PERFORMED,
-                ViewController.ScheduleViewControllerActionEvent.
-                        APPOINTMENT_UPDATE_VIEW_REQUEST.toString());
-        this.getMyController().actionPerformed(actionEvent);
+        doActionEventFor(ScheduleViewController.Actions.APPOINTMENT_UPDATE_VIEW_REQUEST);
     }
     
     private void doUpdateAppointmentAction() {
@@ -1622,19 +1585,11 @@ public class ScheduleListView extends BookingView
             getMyController().getDescriptor().getViewDescription().
                     setViewMode(ViewController.ViewMode.UPDATE);
             getMyController().getDescriptor().getViewDescription().setProperty(SystemDefinition.Properties.APPOINTMENT, model.getElementAt(row));
-            ActionEvent actionEvent = new ActionEvent(this, 
-                    ActionEvent.ACTION_PERFORMED,
-                    ViewController.ScheduleViewControllerActionEvent.
-                            UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_VIEW_REQUEST.toString());
-            this.getMyController().actionPerformed(actionEvent);
+            doActionEventFor(ScheduleViewController.Actions.UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_VIEW_REQUEST);
         }
         else{
             getMyController().getDescriptor().getViewDescription().setProperty(SystemDefinition.Properties.APPOINTMENT, model.getElementAt(row));
-            ActionEvent actionEvent = new ActionEvent(this, 
-                    ActionEvent.ACTION_PERFORMED,
-                    ViewController.ScheduleViewControllerActionEvent.
-                            APPOINTMENT_UPDATE_VIEW_REQUEST.toString());
-            this.getMyController().actionPerformed(actionEvent);
+            doActionEventFor(ScheduleViewController.Actions.APPOINTMENT_UPDATE_VIEW_REQUEST);
         }
     }                                                    
 
@@ -1792,11 +1747,7 @@ public class ScheduleListView extends BookingView
         // TODO add your handling code here:
         LocalDate searchStartDate = dayDatePicker.getDate();
         getMyController().getDescriptor().getViewDescription().setProperty(SystemDefinition.Properties.SCHEDULE_DAY, searchStartDate);
-        ActionEvent actionEvent = new ActionEvent(this, 
-                    ActionEvent.ACTION_PERFORMED,
-                    ViewController.ScheduleViewControllerActionEvent.
-                            EMPTY_SLOT_SCAN_CONFIGURATION_VIEW_REQUEST.toString());
-        this.getMyController().actionPerformed(actionEvent);
+        doActionEventFor(ScheduleViewController.Actions.EMPTY_SLOT_SCAN_CONFIGURATION_VIEW_REQUEST);
     }
     
     private void doNowAction(){
@@ -1820,11 +1771,7 @@ public class ScheduleListView extends BookingView
     private void doSearchAvailableSlotsAction(){
         LocalDate searchStartDate = dayDatePicker.getDate();
         getMyController().getDescriptor().getViewDescription().setProperty(SystemDefinition.Properties.SCHEDULE_DAY, searchStartDate);
-        ActionEvent actionEvent = new ActionEvent(this,
-            ActionEvent.ACTION_PERFORMED,
-            ViewController.ScheduleViewControllerActionEvent.
-            EMPTY_SLOT_SCAN_CONFIGURATION_VIEW_REQUEST.toString());
-        this.getMyController().actionPerformed(actionEvent);
+        doActionEventFor(ScheduleViewController.Actions.EMPTY_SLOT_SCAN_CONFIGURATION_VIEW_REQUEST);
     }     
     
     private void doCancelSelectedAppointmentAction() {                                                             
@@ -1884,10 +1831,7 @@ public class ScheduleListView extends BookingView
                         options,
                         null);
         if (OKToCancelAppointment==JOptionPane.YES_OPTION){
-            ActionEvent actionEvent = new ActionEvent(this, 
-                    ActionEvent.ACTION_PERFORMED,
-                    ViewController.ScheduleViewControllerActionEvent.APPOINTMENT_CANCEL_REQUEST.toString());
-            this.getMyController().actionPerformed(actionEvent);
+            doActionEventFor(ScheduleViewController.Actions.APPOINTMENT_CANCEL_REQUEST);
         }
     }
     
@@ -1908,10 +1852,7 @@ public class ScheduleListView extends BookingView
                     if (patient!=null){
                         getMyController().getDescriptor().getViewDescription().setProperty(SystemDefinition.Properties.PATIENT, patient);
                     }
-                    ActionEvent actionEvent = new ActionEvent(this, 
-                            ActionEvent.ACTION_PERFORMED,
-                            ViewController.ScheduleViewControllerActionEvent.PATIENT_VIEW_REQUEST.toString());
-                    this.getMyController().actionPerformed(actionEvent);
+                    doActionEventFor(ScheduleViewController.Actions.PATIENT_VIEW_REQUEST);
                 }
                 break;
             case MARK:
@@ -1924,32 +1865,19 @@ public class ScheduleListView extends BookingView
     }
     
     private void mniSurgeryDaysEditorActionPerformed(){
-        ActionEvent actionEvent = new ActionEvent(this, 
-                    ActionEvent.ACTION_PERFORMED,
-                    ViewController.ScheduleViewControllerActionEvent.SURGERY_DAYS_EDITOR_VIEW_REQUEST.toString());
-        this.getMyController().actionPerformed(actionEvent);
+        doActionEventFor(ScheduleViewController.Actions.SURGERY_DAYS_EDITOR_VIEW_REQUEST);
     }
 
     private void mniSelectNonSurgeryDayActionPerformed(){
-        ActionEvent actionEvent = new ActionEvent(this, 
-                ActionEvent.ACTION_PERFORMED,
-                ViewController.ScheduleViewControllerActionEvent.NON_SURGERY_DAY_SCHEDULE_VIEW_REQUEST.toString());
-        this.getMyController().actionPerformed(actionEvent);
+        doActionEventFor(ScheduleViewController.Actions.NON_SURGERY_DAY_SCHEDULE_VIEW_REQUEST);
     }
     
-    private void doCancelledAppointmentsViewAction() {                                                             
-        ActionEvent actionEvent = new ActionEvent(this, 
-                        ActionEvent.ACTION_PERFORMED,
-                        ViewController.ScheduleViewControllerActionEvent.
-                                APPOINTMENTS_CANCELLED_VIEW_REQUEST.toString());
-                this.getMyController().actionPerformed(actionEvent);
+    private void doCancelledAppointmentsViewAction() {  
+        doActionEventFor(ScheduleViewController.Actions.APPOINTMENTS_CANCELLED_VIEW_REQUEST);
     }
     
     private void doUnbookableSlotInCancelMode(){
-        ActionEvent actionEvent = new ActionEvent(this,
-                ActionEvent.ACTION_PERFORMED,
-                ViewController.ScheduleViewControllerActionEvent.APPOINTMENT_CANCEL_REQUEST.toString());
-        this.getMyController().actionPerformed(actionEvent);
+        doActionEventFor(ScheduleViewController.Actions.APPOINTMENT_CANCEL_REQUEST);
         setUnbookableSlotOrMoveOrFetchPatientMode(UnbookableSlotOrMoveOrFetchPatientMode.MARK);
     }
     
@@ -1967,10 +1895,7 @@ public class ScheduleListView extends BookingView
                     setViewMode(ViewController.ViewMode.SLOT_UNSELECTED);
             getMyController().getDescriptor().getViewDescription().setProperty(SystemDefinition.Properties.APPOINTMENT,null);
         }
-        ActionEvent actionEvent = new ActionEvent(this,
-                ActionEvent.ACTION_PERFORMED,
-                ViewController.ScheduleViewControllerActionEvent.UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_VIEW_REQUEST.toString());
-        this.getMyController().actionPerformed(actionEvent);
+        doActionEventFor(ScheduleViewController.Actions.UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_VIEW_REQUEST);
     }
     
     private void doMoveBookingToAnotherDay(){
@@ -2002,13 +1927,7 @@ public class ScheduleListView extends BookingView
         if (appointment!=null){
             getMyController().getDescriptor().getViewDescription()
                     .setProperty(SystemDefinition.Properties.APPOINTMENT,appointment);
-            ViewController.ScheduleViewControllerActionEvent request =
-                    ViewController.ScheduleViewControllerActionEvent
-                    .CLINICAL_NOTE_VIEW_REQUEST;
-            ActionEvent actionEvent = new ActionEvent(this, 
-                    ActionEvent.ACTION_PERFORMED,
-                    request.toString());
-            this.getMyController().actionPerformed(actionEvent);
+            doActionEventFor(ScheduleViewController.Actions.CLINICAL_NOTE_VIEW_REQUEST);
         }
     }
     
@@ -2025,13 +1944,7 @@ public class ScheduleListView extends BookingView
         if (appointment!=null){
             getMyController().getDescriptor().getViewDescription()
                     .setProperty(SystemDefinition.Properties.APPOINTMENT,appointment);
-            ViewController.ScheduleViewControllerActionEvent request =
-                    ViewController.ScheduleViewControllerActionEvent
-                    .CLINICAL_NOTE_VIEW_REQUEST;
-            ActionEvent actionEvent = new ActionEvent(this, 
-                    ActionEvent.ACTION_PERFORMED,
-                    request.toString());
-            this.getMyController().actionPerformed(actionEvent);
+            doActionEventFor(ScheduleViewController.Actions.CLINICAL_NOTE_VIEW_REQUEST);
         }
     }
     
@@ -2075,10 +1988,7 @@ public class ScheduleListView extends BookingView
     }
     
     private void refreshAppointmentTableWithCurrentlySelectedDate(){
-        ActionEvent actionEvent = new ActionEvent(this, 
-                ActionEvent.ACTION_PERFORMED,
-                ViewController.ScheduleViewControllerActionEvent.APPOINTMENTS_FOR_DAY_REQUEST.toString());
-        this.getMyController().actionPerformed(actionEvent);
+        doActionEventFor(ScheduleViewController.Actions.APPOINTMENTS_FOR_DAY_REQUEST);
         setTitle(((LocalDate)getMyController().getDescriptor().getViewDescription().
                 getProperty(SystemDefinition.Properties.SCHEDULE_DAY)).format(DateTimeFormatter.ofPattern("dd/MM/yy")) + "Schedule");
         setIsViewInitialised(true);  
@@ -2111,11 +2021,7 @@ public class ScheduleListView extends BookingView
         setTitle(((LocalDate)getMyController().getDescriptor().getControllerDescription().
                 getProperty(SystemDefinition.Properties.SCHEDULE_DAY)).
                 format(DateTimeFormatter.ofPattern("dd/MM/yy")) + " Appointment schedule");
-        ActionEvent actionEvent = new ActionEvent(
-                this,ActionEvent.ACTION_PERFORMED,
-                ViewController.ScheduleViewControllerActionEvent.
-                        VIEW_CHANGED_NOTIFICATION.toString());
-        this.getMyController().actionPerformed(actionEvent);
+        doActionEventFor(ScheduleViewController.Actions.VIEW_CHANGED_NOTIFICATION);
         ViewController.setJTableColumnProperties(tblAppointments, scrAppointmentsForDayTable.getPreferredSize().width, 10,20,5,5,15,45);
     }
     
@@ -2331,7 +2237,7 @@ public class ScheduleListView extends BookingView
         pnlScheduleForDay = new javax.swing.JPanel();
         scrAppointmentsForDayTable = new javax.swing.JScrollPane();
         pnlView = new javax.swing.JPanel();
-        btnSwitchView = new javax.swing.JButton();
+        btnRequestToDoLIst = new javax.swing.JButton();
         jMenuBar1 = new javax.swing.JMenuBar();
         mnuOptions = new javax.swing.JMenu();
         mniPrintSchedule = new javax.swing.JMenuItem();
@@ -2464,7 +2370,7 @@ public class ScheduleListView extends BookingView
                     .addComponent(btnCancelSelectedAppointment, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(btnMakeDeleteEmergencyAppointmentUndoSelection, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(btnCloseView, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(btnCreateUpdateAppointment, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 108, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(btnCreateUpdateAppointment, javax.swing.GroupLayout.Alignment.LEADING))
                 .addGap(10, 10, 10))
         );
         pnlScheduleOperationsLayout.setVerticalGroup(
@@ -2510,9 +2416,9 @@ public class ScheduleListView extends BookingView
                 .addContainerGap())
         );
 
-        pnlView.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "View", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.TOP, new java.awt.Font("Segoe UI", 1, 14))); // NOI18N
+        pnlView.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1));
 
-        btnSwitchView.setText("<html><center>Switch</center><center>to diary</center><center>view</center></html>");
+        btnRequestToDoLIst.setText("<html><center>Show</center><center>'To Do'</center><center>list</center></html>");
 
         javax.swing.GroupLayout pnlViewLayout = new javax.swing.GroupLayout(pnlView);
         pnlView.setLayout(pnlViewLayout);
@@ -2520,15 +2426,15 @@ public class ScheduleListView extends BookingView
             pnlViewLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlViewLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(btnSwitchView, javax.swing.GroupLayout.DEFAULT_SIZE, 87, Short.MAX_VALUE)
+                .addComponent(btnRequestToDoLIst, javax.swing.GroupLayout.DEFAULT_SIZE, 87, Short.MAX_VALUE)
                 .addContainerGap())
         );
         pnlViewLayout.setVerticalGroup(
             pnlViewLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlViewLayout.createSequentialGroup()
                 .addGap(25, 25, 25)
-                .addComponent(btnSwitchView, javax.swing.GroupLayout.PREFERRED_SIZE, 88, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(44, Short.MAX_VALUE))
+                .addComponent(btnRequestToDoLIst, javax.swing.GroupLayout.PREFERRED_SIZE, 111, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(21, 21, 21))
         );
 
         javax.swing.GroupLayout pnlScheduleDaySelectionLayout = new javax.swing.GroupLayout(pnlScheduleDaySelection);
@@ -2630,10 +2536,10 @@ public class ScheduleListView extends BookingView
     private javax.swing.JButton btnNextDay;
     private javax.swing.JButton btnNow;
     private javax.swing.JButton btnPreviousDay;
+    private javax.swing.JButton btnRequestToDoLIst;
     private javax.swing.JButton btnSelectBookableSlotsScanner;
     private javax.swing.JButton btnSelectTreatmentRequest;
     private javax.swing.JButton btnSelectUnbookableSlotsScanner;
-    private javax.swing.JButton btnSwitchView;
     private com.github.lgooddatepicker.components.DatePicker dayDatePicker;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JPopupMenu.Separator jSeparator1;

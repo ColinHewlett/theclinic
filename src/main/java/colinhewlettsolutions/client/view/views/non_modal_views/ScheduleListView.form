@@ -287,7 +287,7 @@
                           <Component id="btnCancelSelectedAppointment" alignment="0" max="32767" attributes="0"/>
                           <Component id="btnMakeDeleteEmergencyAppointmentUndoSelection" alignment="0" max="32767" attributes="0"/>
                           <Component id="btnCloseView" max="32767" attributes="0"/>
-                          <Component id="btnCreateUpdateAppointment" alignment="0" min="-2" pref="108" max="-2" attributes="0"/>
+                          <Component id="btnCreateUpdateAppointment" alignment="0" min="-2" max="-2" attributes="0"/>
                       </Group>
                       <EmptySpace min="-2" pref="10" max="-2" attributes="0"/>
                   </Group>
@@ -424,10 +424,8 @@
         <Container class="javax.swing.JPanel" name="pnlView">
           <Properties>
             <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
-              <Border info="org.netbeans.modules.form.compat2.border.TitledBorderInfo">
-                <TitledBorder position="2" title="View">
-                  <Font PropertyName="font" name="Segoe UI" size="14" style="1"/>
-                </TitledBorder>
+              <Border info="org.netbeans.modules.form.compat2.border.EmptyBorderInfo">
+                <EmptyBorder/>
               </Border>
             </Property>
           </Properties>
@@ -437,7 +435,7 @@
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" alignment="0" attributes="0">
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="btnSwitchView" pref="87" max="32767" attributes="0"/>
+                      <Component id="btnRequestToDoLIst" pref="87" max="32767" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                   </Group>
               </Group>
@@ -446,16 +444,16 @@
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" alignment="0" attributes="0">
                       <EmptySpace min="-2" pref="25" max="-2" attributes="0"/>
-                      <Component id="btnSwitchView" min="-2" pref="88" max="-2" attributes="0"/>
-                      <EmptySpace pref="44" max="32767" attributes="0"/>
+                      <Component id="btnRequestToDoLIst" min="-2" pref="111" max="-2" attributes="0"/>
+                      <EmptySpace min="-2" pref="21" max="-2" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
           </Layout>
           <SubComponents>
-            <Component class="javax.swing.JButton" name="btnSwitchView">
+            <Component class="javax.swing.JButton" name="btnRequestToDoLIst">
               <Properties>
-                <Property name="text" type="java.lang.String" value="&lt;html&gt;&lt;center&gt;Switch&lt;/center&gt;&lt;center&gt;to diary&lt;/center&gt;&lt;center&gt;view&lt;/center&gt;&lt;/html&gt;"/>
+                <Property name="text" type="java.lang.String" value="&lt;html&gt;&lt;center&gt;Show&lt;/center&gt;&lt;center&gt;&apos;To Do&apos;&lt;/center&gt;&lt;center&gt;list&lt;/center&gt;&lt;/html&gt;"/>
               </Properties>
             </Component>
           </SubComponents>

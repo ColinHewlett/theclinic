@@ -51,6 +51,41 @@ import colinhewlettsolutions.client.view.views.non_modal_views.ScheduleListView;
  * @author colin
  */
 public class ScheduleViewController extends ViewController{
+    
+    public enum Actions{
+        APPOINTMENT_CANCEL_REQUEST,
+        APPOINTMENTS_CANCELLED_VIEW_REQUEST,
+        APPOINTMENT_CREATE_VIEW_REQUEST,
+        APPOINTMENT_EDITOR_TREATMENT_VIEW_REQUEST,
+        APPOINTMENTS_FOR_DAY_REQUEST,
+        APPOINTMENT_REMINDED_STATUS_UPDATE_REQUEST,
+        APPOINTMENT_UPDATE_VIEW_REQUEST,
+        BOOKABLE_SLOT_SCANNER_VIEW_REQUEST,
+        CREATE_APPOINTMENT_REQUEST,
+        CLINICAL_NOTE_VIEW_REQUEST,
+        EMPTY_SLOT_SCAN_CONFIGURATION_VIEW_REQUEST,
+        FIRST_APPOINTMENT_START_TIME_REQUEST,
+        LAST_APPOINTMENT_END_TIME_REQUEST,
+        NON_SURGERY_DAY_SCHEDULE_VIEW_REQUEST,
+        PATIENT_VIEW_REQUEST,
+        PRINT_SCHEDULE_REQUEST,
+        SCHEDULE_EDITOR_DELETE_EMERGENCY_APPOINTMENT_REQUEST,
+        SCHEDULE_EDITOR_MAKE_EMERGENCY_APPOINTMENT_REQUEST,
+        SWITCH_VIEW_REQUEST,
+        SURGERY_DAYS_EDITOR_VIEW_REQUEST,
+        TO_DO_LIST_VIEW_REQUEST,
+        UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_VIEW_REQUEST,
+        UNBOOKABLE_SLOT_SCANNER_VIEW_REQUEST,
+        UPDATE_APPOINTMENT_REQUEST,
+        USER_SCHEDULE_DIARY_SETTINGS_EDITOR_VIEW_REQUEST,
+        USER_SCHEDULE_DIARY_SETTINGS_REQUEST,
+        USER_SCHEDULE_LIST_SETTINGS_EDITOR_VIEW_REQUEST,
+        USER_SCHEDULE_LIST_SETTINGS_REQUEST,
+        VIEW_ACTIVATED_NOTIFICATION,
+        VIEW_CHANGED_NOTIFICATION,
+        VIEW_CLOSE_NOTIFICATION
+                
+    }
 
     private enum RequestedAppointmentState{ 
                                             REQUESTED_SLOT_STATE_UNDEFINED,
@@ -146,10 +181,7 @@ public class ScheduleViewController extends ViewController{
          * -- note: View.factory when opening a modal JInternalFrame does not return until the JInternalFrame has been closed
          * -- at which stage its appropriate to re-enable the View menu on the Desktop View Controller's view
          */
-        ActionEvent actionEvent = new ActionEvent(
-               this,ActionEvent.ACTION_PERFORMED,
-               DesktopViewController.DesktopViewControllerActionEvent.MODAL_VIEWER_CLOSED_NOTIFICATION.toString());
-        this.getMyController().actionPerformed(actionEvent);
+        doActionEventFor(DesktopViewController.Actions.MODAL_VIEWER_CLOSED_NOTIFICATION);
         
         
        /* ActionEvent actionEvent = new ActionEvent(
@@ -169,10 +201,7 @@ public class ScheduleViewController extends ViewController{
          * -- note: View.factory when opening a modal JInternalFrame does not return until the JInternalFrame has been closed
          * -- at which stage its appropriate to re-enable the View menu on the Desktop View Controller's view
          */
-        ActionEvent actionEvent = new ActionEvent(
-               this,ActionEvent.ACTION_PERFORMED,
-               DesktopViewController.DesktopViewControllerActionEvent.MODAL_VIEWER_CLOSED_NOTIFICATION.toString());
-        this.getMyController().actionPerformed(actionEvent);
+        doActionEventFor(DesktopViewController.Actions.MODAL_VIEWER_CLOSED_NOTIFICATION);
         
         
         /*ActionEvent actionEvent = new ActionEvent(
@@ -260,20 +289,14 @@ public class ScheduleViewController extends ViewController{
         setModalView((ModalView)new View().make(View.Viewer.UNBOOKABLE_SLOT_SCANNER_VIEW,
                     this, 
                     this.getDesktopView()).getModalView());
-        ActionEvent actionEvent = new ActionEvent(
-                       this,ActionEvent.ACTION_PERFORMED,
-                       ViewController.DesktopViewControllerActionEvent.MODAL_VIEWER_CLOSED_NOTIFICATION.toString());
-                this.getMyController().actionPerformed(actionEvent);
+        doActionEventFor(DesktopViewController.Actions.MODAL_VIEWER_CLOSED_NOTIFICATION);
     }
     
     private void doBookableSlotScannerViewRequest(ActionEvent e){
         setModalView((ModalView)new View().make(View.Viewer.BOOKABLE_SLOT_SCANNER_VIEW,
                     this, 
                     this.getDesktopView()).getModalView());
-        ActionEvent actionEvent = new ActionEvent(
-                       this,ActionEvent.ACTION_PERFORMED,
-                       ViewController.DesktopViewControllerActionEvent.MODAL_VIEWER_CLOSED_NOTIFICATION.toString());
-                this.getMyController().actionPerformed(actionEvent);
+        doActionEventFor(DesktopViewController.Actions.MODAL_VIEWER_CLOSED_NOTIFICATION);
     }
     
     private void doClinicalNoteViewRequest(){
@@ -283,10 +306,7 @@ public class ScheduleViewController extends ViewController{
         setModalView((ModalView)new View().make(View.Viewer.CLINICAL_NOTE_VIEW,
                     this, 
                     this.getDesktopView()).getModalView());
-        ActionEvent actionEvent = new ActionEvent(
-                this,ActionEvent.ACTION_PERFORMED,
-                ViewController.DesktopViewControllerActionEvent.MODAL_VIEWER_CLOSED_NOTIFICATION.toString());
-        this.getMyController().actionPerformed(actionEvent);
+        doActionEventFor(DesktopViewController.Actions.MODAL_VIEWER_CLOSED_NOTIFICATION);
     }
     
     private void doAppointmentCreateViewRequest(){
@@ -326,10 +346,7 @@ public class ScheduleViewController extends ViewController{
                  * -- note: View.factory when opening a modal JInternalFrame does not return until the JInternalFrame has been closed
                  * -- at which stage its appropriate to re-enable the View menu on the Desktop View Controller's view
                  */
-                ActionEvent actionEvent = new ActionEvent(
-                       this,ActionEvent.ACTION_PERFORMED,
-                       ViewController.DesktopViewControllerActionEvent.MODAL_VIEWER_CLOSED_NOTIFICATION.toString());
-                this.getMyController().actionPerformed(actionEvent);
+                doActionEventFor(DesktopViewController.Actions.MODAL_VIEWER_CLOSED_NOTIFICATION);
             }else{
                 if (((Appointment)getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.APPOINTMENT)).getPatient().toString()
                         .equals(SystemDefinition.ScheduleSlotType.UNBOOKABLE_SCHEDULE_SLOT.mark())) 
@@ -409,10 +426,7 @@ public class ScheduleViewController extends ViewController{
          * -- note: View.factory when opening a modal JInternalFrame does not return until the JInternalFrame has been closed
          * -- at which stage its appropriate to re-enable the View menu on the Desktop View Controller's view
          */
-        ActionEvent actionEvent = new ActionEvent(
-               this,ActionEvent.ACTION_PERFORMED,
-               ViewController.DesktopViewControllerActionEvent.MODAL_VIEWER_CLOSED_NOTIFICATION.toString());
-        this.getMyController().actionPerformed(actionEvent);
+        doActionEventFor(DesktopViewController.Actions.MODAL_VIEWER_CLOSED_NOTIFICATION);
     }
     
     private void doDeleteEmergencyAppointmentRequest(){
@@ -508,10 +522,7 @@ public class ScheduleViewController extends ViewController{
         /**
          * APPOINTMENTS_VIEW_CLOSED
          */
-        ActionEvent actionEvent = new ActionEvent(
-               this,ActionEvent.ACTION_PERFORMED,
-               DesktopViewController.DesktopViewControllerActionEvent.VIEW_CLOSED_NOTIFICATION.toString());
-        this.actionPerformed(actionEvent); 
+        doActionEventFor(DesktopViewController.Actions.VIEW_CLOSED_NOTIFICATION); 
     }
     
     /**
@@ -628,10 +639,7 @@ public class ScheduleViewController extends ViewController{
              * -- note: View.factory when opening a modal JInternalFrame does not return until the JInternalFrame has been closed
              * -- at which stage its appropriate to re-enable the View menu on the Desktop View Controller's view
              */
-            ActionEvent actionEvent = new ActionEvent(
-                   this,ActionEvent.ACTION_PERFORMED,
-                   DesktopViewController.DesktopViewControllerActionEvent.MODAL_VIEWER_CLOSED_NOTIFICATION.toString());
-            this.getMyController().actionPerformed(actionEvent);
+            doActionEventFor(DesktopViewController.Actions.MODAL_VIEWER_CLOSED_NOTIFICATION); 
         }
         catch (StoreException ex){
             String message = ex.getMessage();
@@ -652,10 +660,7 @@ public class ScheduleViewController extends ViewController{
              * -- note: View.factory when opening a modal JInternalFrame does not return until the JInternalFrame has been closed
              * -- at which stage its appropriate to re-enable the View menu on the Desktop View Controller's view
              */
-            ActionEvent actionEvent = new ActionEvent(
-                   this,ActionEvent.ACTION_PERFORMED,
-                   DesktopViewController.DesktopViewControllerActionEvent.MODAL_VIEWER_CLOSED_NOTIFICATION.toString());
-            this.getMyController().actionPerformed(actionEvent);
+            doActionEventFor(DesktopViewController.Actions.MODAL_VIEWER_CLOSED_NOTIFICATION); 
         }
         catch (StoreException ex){
             String message = ex.getMessage();
@@ -677,10 +682,7 @@ public class ScheduleViewController extends ViewController{
          * -- note: View.factory when opening a modal JInternalFrame does not return until the JInternalFrame has been closed
          * -- at which stage its appropriate to re-enable the View menu on the Desktop View Controller's view
          */
-        ActionEvent actionEvent = new ActionEvent(
-                this,ActionEvent.ACTION_PERFORMED,
-                DesktopViewController.DesktopViewControllerActionEvent.MODAL_VIEWER_CLOSED_NOTIFICATION.toString());
-        this.getMyController().actionPerformed(actionEvent);
+        doActionEventFor(DesktopViewController.Actions.MODAL_VIEWER_CLOSED_NOTIFICATION);
     }
 
     /**
@@ -719,8 +721,9 @@ public class ScheduleViewController extends ViewController{
         Appointment result = null;
         Appointment changedSlotRequest = 
                 (Appointment)getDescriptor().getViewDescription().getProperty(SystemDefinition.Properties.APPOINTMENT);
-        ViewController.ScheduleViewControllerActionEvent actionCommand =
-               ViewController.ScheduleViewControllerActionEvent.valueOf(e.getActionCommand());
+        ScheduleViewController.Actions actionCommand = ScheduleViewController.Actions.valueOf(e.getActionCommand());
+        /*ViewController.ScheduleViewControllerActionEvent actionCommand =
+               ViewController.ScheduleViewControllerActionEvent.valueOf(e.getActionCommand());*/
         switch (actionCommand){
             case APPOINTMENT_CANCEL_REQUEST:
                 appointment = (Appointment)getDescriptor().getViewDescription().getProperty(SystemDefinition.Properties.APPOINTMENT);
@@ -793,11 +796,7 @@ public class ScheduleViewController extends ViewController{
                  * -- if it is the Desktop VC will send a request to the view to close 
                  * this ensures only one schedule view will be displayed on the desktop for a given day
                  */
-                actionEvent = new ActionEvent(
-                    this,ActionEvent.ACTION_PERFORMED,
-                        ViewController.DesktopViewControllerActionEvent.
-                                CLOSE_SCHEDULE_VIEW_WITH_SAME_DATE_REQUEST/*SCHEDULE_LIST_VIEW_CONTROLLER_REQUEST*/.toString());
-                this.getMyController().actionPerformed(actionEvent);
+                doActionEventFor(DesktopViewController.Actions.CLOSE_SCHEDULE_VIEW_WITH_SAME_DATE_REQUEST);
                 break;
             case APPOINTMENT_REMINDED_STATUS_UPDATE_REQUEST:
                 appointment = (Appointment)getDescriptor().getViewDescription().getProperty(SystemDefinition.Properties.APPOINTMENT);
@@ -866,15 +865,14 @@ public class ScheduleViewController extends ViewController{
             case PATIENT_VIEW_REQUEST:
                 getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.PATIENT,
                         (Patient)getDescriptor().getViewDescription().getProperty(SystemDefinition.Properties.PATIENT));
-                actionEvent = new ActionEvent(
-                    this,ActionEvent.ACTION_PERFORMED,
-                        ViewController.DesktopViewControllerActionEvent.
-                                PATIENT_VIEW_CONTROLLER_REQUEST.toString());
-                this.getMyController().actionPerformed(actionEvent);
+                doActionEventFor(DesktopViewController.Actions.PATIENT_VIEW_CONTROLLER_REQUEST);
                 break;
             case PRINT_SCHEDULE_REQUEST:
                 doPrintAppointmentScheduleForDay(
                         (LocalDate)getDescriptor().getViewDescription().getProperty(SystemDefinition.Properties.SCHEDULE_DAY));
+                break;
+            case TO_DO_LIST_VIEW_REQUEST:
+                doActionEventFor(DesktopViewController.Actions.TO_DO_VIEW_CONTROLLER_REQUEST);
                 break;
             case SCHEDULE_EDITOR_DELETE_EMERGENCY_APPOINTMENT_REQUEST:
                 doDeleteEmergencyAppointmentRequest();
@@ -938,26 +936,13 @@ public class ScheduleViewController extends ViewController{
                 doUserScheduleListColorSettingsViewRequest();
                 break;
             case VIEW_ACTIVATED_NOTIFICATION:
-                actionEvent = new ActionEvent(
-                        this,ActionEvent.ACTION_PERFORMED,
-                        ViewController.DesktopViewControllerActionEvent.
-                                VIEW_CONTROLLER_ACTIVATED_NOTIFICATION.toString());
-                //this.actionPerformed(actionEvent);
-                 this.getMyController().actionPerformed(actionEvent);
+                doActionEventFor(DesktopViewController.Actions.VIEW_CONTROLLER_ACTIVATED_NOTIFICATION);
                  break;
             case VIEW_CHANGED_NOTIFICATION:
-                 actionEvent = new ActionEvent(
-                        this,ActionEvent.ACTION_PERFORMED,
-                        ViewController.DesktopViewControllerActionEvent.
-                                VIEW_CONTROLLER_CHANGED_NOTIFICATION.toString());
-                 this.getMyController().actionPerformed(actionEvent);
+                doActionEventFor(DesktopViewController.Actions.VIEW_CONTROLLER_CHANGED_NOTIFICATION);
                  break;
             case VIEW_CLOSE_NOTIFICATION:
-                actionEvent = new ActionEvent(
-                    this,ActionEvent.ACTION_PERFORMED,
-                    ViewController.DesktopViewControllerActionEvent.
-                            VIEW_CONTROLLER_CLOSE_NOTIFICATION.toString());
-                getMyController().actionPerformed(actionEvent);
+                doActionEventFor(DesktopViewController.Actions.VIEW_CONTROLLER_CLOSE_NOTIFICATION);
                 break;           
             
                 /*
@@ -970,6 +955,12 @@ public class ScheduleViewController extends ViewController{
                 break;
             */        
         }
+    }
+    
+    private void doActionEventFor(DesktopViewController.Actions action){
+        ActionEvent actionEvent = new ActionEvent(this, ActionEvent.ACTION_PERFORMED,
+                action.toString());
+        this.getMyController().actionPerformed(actionEvent);
     }
     
     private void doUserSettingsRequest(Entity.Scope scope){
@@ -1146,11 +1137,7 @@ public class ScheduleViewController extends ViewController{
                     break;
                 }
                 case VIEW_CLOSE_NOTIFICATION ->{
-                    ActionEvent actionEvent = new ActionEvent(
-                        this,ActionEvent.ACTION_PERFORMED,
-                        ViewController.DesktopViewControllerActionEvent.
-                                VIEW_CONTROLLER_CLOSE_NOTIFICATION.toString());
-                    getMyController().actionPerformed(actionEvent);
+                    doActionEventFor(DesktopViewController.Actions.VIEW_CONTROLLER_CLOSE_NOTIFICATION);
                     break;
                 }
                 case VIEW_CHANGED_NOTIFICATION ->{
@@ -1212,10 +1199,7 @@ public class ScheduleViewController extends ViewController{
             /**
              * DISABLE_CONTROLS_REQUEST requests DesktopViewController to disable menu options in its view
              */
-            ActionEvent actionEvent = new ActionEvent(
-                    this,ActionEvent.ACTION_PERFORMED,
-                    ViewController.DesktopViewControllerActionEvent.MODAL_VIEWER_ACTIVATED_NOTIFICATION.toString());
-            this.actionPerformed(actionEvent);     
+            doActionEventFor(DesktopViewController.Actions.MODAL_VIEWER_ACTIVATED_NOTIFICATION);    
         }
     }
     
@@ -1362,11 +1346,7 @@ public class ScheduleViewController extends ViewController{
             /**
              * passes message to DesktopView Controller to disable the VIEW control
              */
-            ActionEvent actionEvent = new ActionEvent(
-                    this,ActionEvent.ACTION_PERFORMED,
-                    ViewController.DesktopViewControllerActionEvent.MODAL_VIEWER_ACTIVATED_NOTIFICATION.toString());
-            this.actionPerformed(actionEvent); 
-            
+            doActionEventFor(DesktopViewController.Actions.MODAL_VIEWER_ACTIVATED_NOTIFICATION);            
         }
     }
     
@@ -2180,10 +2160,7 @@ public class ScheduleViewController extends ViewController{
         setModalView((ModalView)new View().make(View.Viewer.SCHEDULE_EDITOR_VIEW,
                     this, 
                     this.getDesktopView()).getModalView());
-        ActionEvent actionEvent = new ActionEvent(
-                this,ActionEvent.ACTION_PERFORMED,
-                DesktopViewController.DesktopViewControllerActionEvent.MODAL_VIEWER_CLOSED_NOTIFICATION.toString());
-        this.getMyController().actionPerformed(actionEvent);
+        doActionEventFor(DesktopViewController.Actions.MODAL_VIEWER_CLOSED_NOTIFICATION);
     }
     
     private void doOpenTreatmentView(){
@@ -2220,8 +2197,10 @@ public class ScheduleViewController extends ViewController{
 
     private void doDesktopViewControllerAction(ActionEvent e){
         LocalDate scheduleDay = (LocalDate)getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.SCHEDULE_DAY);
-        ViewController.DesktopViewControllerActionEvent actionCommand =
-               ViewController.DesktopViewControllerActionEvent.valueOf(e.getActionCommand());
+        /*ViewController.DesktopViewControllerActionEvent actionCommand =
+               ViewController.DesktopViewControllerActionEvent.valueOf(e.getActionCommand());*/
+        DesktopViewController.Actions actionCommand =
+               DesktopViewController.Actions.valueOf(e.getActionCommand());
         switch(actionCommand){
             case INITIALISE_VIEW_CONTROLLER:
                 /*getDescriptor().getControllerDescription().setEarlyBookingStartTime(
@@ -2231,11 +2210,7 @@ public class ScheduleViewController extends ViewController{
                 doAppointmentForDayRequest((LocalDate)getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.SCHEDULE_DAY));
                 break;
             case VIEW_CONTROLLER_CLOSE_NOTIFICATION:{
-                ActionEvent actionEvent = new ActionEvent(
-                    this,ActionEvent.ACTION_PERFORMED,
-                    ViewController.DesktopViewControllerActionEvent.
-                            VIEW_CONTROLLER_CLOSE_NOTIFICATION.toString());
-                getMyController().actionPerformed(actionEvent);
+                doActionEventFor(DesktopViewController.Actions.VIEW_CONTROLLER_CLOSE_NOTIFICATION);
             }
         }
     }
