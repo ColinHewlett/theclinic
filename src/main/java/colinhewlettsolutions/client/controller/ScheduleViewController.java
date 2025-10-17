@@ -74,7 +74,9 @@ public class ScheduleViewController extends ViewController{
         SWITCH_VIEW_REQUEST,
         SURGERY_DAYS_EDITOR_VIEW_REQUEST,
         TO_DO_LIST_VIEW_REQUEST,
+        UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_CREATE_REQUEST,
         UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_VIEW_REQUEST,
+        UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_UPDATE_REQUEST,
         UNBOOKABLE_SLOT_SCANNER_VIEW_REQUEST,
         UPDATE_APPOINTMENT_REQUEST,
         USER_SCHEDULE_DIARY_SETTINGS_EDITOR_VIEW_REQUEST,
@@ -373,7 +375,7 @@ public class ScheduleViewController extends ViewController{
         this.getMyController().actionPerformed(actionEvent);*/
     }
     
-    private void doUnbookableAppointmentSlotEditorViewRequest(){
+    private void MODAL_VIEWER_CLOSED_NOTIFICATION(){
         getDescriptor().getControllerDescription().setViewMode(null);
         View.setViewer(View.Viewer.UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_VIEW);
         switch (getDescriptor().getViewDescription().getViewMode()){
@@ -887,7 +889,7 @@ public class ScheduleViewController extends ViewController{
                 doSwitchView();
                 break;
             case UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_VIEW_REQUEST:
-                doUnbookableAppointmentSlotEditorViewRequest();
+                //doUnbookableAppointmentSlotEditorViewRequest();
                 break;
             case UNBOOKABLE_SLOT_SCANNER_VIEW_REQUEST:
                 doUnbookableSlotScannerViewRequest();

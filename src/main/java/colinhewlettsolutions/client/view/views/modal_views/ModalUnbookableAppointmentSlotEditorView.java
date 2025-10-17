@@ -6,13 +6,16 @@ package colinhewlettsolutions.client.view.views.modal_views;
 
 import colinhewlettsolutions.client.controller.SystemDefinition;
 import colinhewlettsolutions.client.controller.Descriptor;
+import colinhewlettsolutions.client.controller.ScheduleViewController;
 import colinhewlettsolutions.client.controller.ViewController;
 import colinhewlettsolutions.client.model.entity.Appointment;
 import colinhewlettsolutions.client.view.views.non_modal_views.DesktopView;
+import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.beans.PropertyVetoException;
 import java.time.Duration;
 import java.time.LocalDate;
@@ -30,7 +33,15 @@ import colinhewlettsolutions.client.view.support_classes.renderers.SelectStartTi
  * 
  * @author colin
  */
-public class ModalUnbookableAppointmentSlotEditorView extends ModalView {
+public class ModalUnbookableAppointmentSlotEditorView extends ModalView
+                                                      implements ActionListener,
+                                                                 PropertyChangeListener{
+    
+    enum Actions{
+        REQUEST_CLOSE_VIEW,
+        REQUEST_SAVE_UNBOOKABLE_SLOT,
+        
+    }
     private final DateTimeFormatter ddMMyyyyFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy");
     /**
      * 
@@ -47,6 +58,25 @@ public class ModalUnbookableAppointmentSlotEditorView extends ModalView {
         setDesktopView(desktopView);
     }
 
+    @Override
+    public void actionPerformed(ActionEvent e){
+        Actions action = Actions.valueOf(e.getActionCommand());
+        switch(action) {
+            case REQUEST_CLOSE_VIEW ->{
+                try{
+                    this.setClosed(true);
+                }
+                catch (PropertyVetoException ex){
+
+                }
+                break;
+            }
+            case REQUEST_SAVE_UNBOOKABLE_SLOT ->{
+                doSaveUnbookableSlotRequest();
+                break;
+            }
+        }
+    }
     
     @Override
     public void propertyChange(PropertyChangeEvent e){
@@ -59,6 +89,33 @@ public class ModalUnbookableAppointmentSlotEditorView extends ModalView {
                 JOptionPane.showInternalMessageDialog(this, error, 
                         "View controller error", JOptionPane.WARNING_MESSAGE);
                 break;
+        }
+    }
+    
+    private void doSaveUnbookableSlotRequest(){
+        int OKToSaveAppointment = JOptionPane.YES_OPTION;
+        initialiseEntityDescriptorFromView();
+
+        //if (getViewDescriptor().getControllerDescription().getAppointment().getDuration().isZero())
+        if (((Appointment)getMyController().getDescriptor().getViewDescription().
+                getProperty(SystemDefinition.Properties.APPOINTMENT)).getDuration().isZero())
+            JOptionPane.showMessageDialog(this, "Duration for unbookable slot undefined ((equals zero minutes)");
+
+        //ViewController.ScheduleViewControllerActionEvent action = null;
+        ScheduleViewController.Actions action = null;
+        switch(getMyController().getDescriptor().
+                getControllerDescription().getViewMode()){
+            case CREATE:
+                action = ScheduleViewController.Actions.
+                    UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_CREATE_REQUEST;
+                break;
+            case UPDATE:
+                action = ScheduleViewController.Actions.
+                    UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_UPDATE_REQUEST;
+                break;
+        }
+        if (OKToSaveAppointment==JOptionPane.YES_OPTION){
+            doActionEventFor(action);
         }
     }
     
@@ -109,6 +166,9 @@ public class ModalUnbookableAppointmentSlotEditorView extends ModalView {
             }
         });
         
+        this.btnCloseVew.setActionCommand(Actions.REQUEST_CLOSE_VIEW.toString());
+        this.btnSaveUnbookableSlot.setActionCommand(Actions.REQUEST_SAVE_UNBOOKABLE_SLOT.toString());
+        
         LocalDate day = (LocalDate)getMyController().getDescriptor().getViewDescription().
                 getProperty(SystemDefinition.Properties.SCHEDULE_DAY);
         this.cmbSelectStartTime.setMaximumRowCount(20);
@@ -154,6 +214,12 @@ public class ModalUnbookableAppointmentSlotEditorView extends ModalView {
     
     private Integer getMinutesFromDuration(long duration){
         return (int)duration % 60;
+    }
+    
+    private void doActionEventFor(ScheduleViewController.Actions action){
+        ActionEvent actionEvent = new ActionEvent(this, ActionEvent.ACTION_PERFORMED,
+                action.toString());
+        this.getMyController().actionPerformed(actionEvent);
     }
 
     /**
@@ -254,18 +320,8 @@ public class ModalUnbookableAppointmentSlotEditorView extends ModalView {
         jPanel4.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
         btnSaveUnbookableSlot.setText("Save");
-        btnSaveUnbookableSlot.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnSaveUnbookableSlotActionPerformed(evt);
-            }
-        });
 
         btnCloseVew.setText("Close view");
-        btnCloseVew.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnCloseVewActionPerformed(evt);
-            }
-        });
 
         javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
         jPanel4.setLayout(jPanel4Layout);
@@ -325,47 +381,7 @@ public class ModalUnbookableAppointmentSlotEditorView extends ModalView {
         // TODO add your handling code here:
     }//GEN-LAST:event_chkIsAllDayActionPerformed
 
-    private void btnSaveUnbookableSlotActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSaveUnbookableSlotActionPerformed
-        int OKToSaveAppointment = JOptionPane.YES_OPTION;
-        evt = null;
-        initialiseEntityDescriptorFromView();
-
-        //if (getViewDescriptor().getControllerDescription().getAppointment().getDuration().isZero())
-        if (((Appointment)getMyController().getDescriptor().getViewDescription().
-                getProperty(SystemDefinition.Properties.APPOINTMENT)).getDuration().isZero())
-            JOptionPane.showMessageDialog(this, "Duration for unbookable slot undefined ((equals zero minutes)");
-        else {
-
-        }
-        ViewController.ScheduleViewControllerActionEvent action = null;
-        switch(getMyController().getDescriptor().
-                getControllerDescription().getViewMode()){
-            case CREATE:
-                action = ViewController.ScheduleViewControllerActionEvent.
-                    UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_CREATE_REQUEST;
-                break;
-            case UPDATE:
-                action = ViewController.ScheduleViewControllerActionEvent.
-                    UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_UPDATE_REQUEST;
-                break;
-        }
-        if (OKToSaveAppointment==JOptionPane.YES_OPTION){
-                    evt = new ActionEvent(ModalUnbookableAppointmentSlotEditorView.this,
-                                ActionEvent.ACTION_PERFORMED,
-                                action.toString());
-                            ModalUnbookableAppointmentSlotEditorView.this.getMyController().actionPerformed(evt);
-        }
-    }//GEN-LAST:event_btnSaveUnbookableSlotActionPerformed
-
-    private void btnCloseVewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCloseVewActionPerformed
-        try{
-            this.setClosed(true);
-        }
-        catch (PropertyVetoException ex){
-            
-        }
-    }//GEN-LAST:event_btnCloseVewActionPerformed
-
+    
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnCloseVew;
