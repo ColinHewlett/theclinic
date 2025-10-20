@@ -83,7 +83,7 @@ public class Captions {
                                           "<html><center>Delete</center><center>emergency</center><center>appointment</center></html>",
                                           "<html><center>Undo</center><center>current</center><center>selection</center></html>"),
         MARK_CANCEL_UNBOOKABLE_SLOT_OR_MOVE_TO_ANOTHER_DAY_OR_FETCH_PATIENT_DETAILS("<html><center>Make slot</center<center>unbookable</center></html>",
-                                    "<html><center>Cancel</center<center>unbookable</center><center>slot</center></html>",
+                                    "<html><center>Update/cancel</center<center>unbookable</center><center>slot</center></html>",
                                     "<html><center>Move booking</center><center>to another</center><center>day</center></html>",
                                     "<html><center>Fetch</center><center>selected patient</center><center>view</center></html>"),
         MOVE_BOOKING("<html><center>Move</center><center>appointment</center></html>"),

@@ -74,6 +74,7 @@ public class ScheduleViewController extends ViewController{
         SWITCH_VIEW_REQUEST,
         SURGERY_DAYS_EDITOR_VIEW_REQUEST,
         TO_DO_LIST_VIEW_REQUEST,
+        UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_CANCEL_REQUEST,
         UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_CREATE_REQUEST,
         UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_VIEW_REQUEST,
         UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_UPDATE_REQUEST,
@@ -1683,16 +1684,23 @@ public class ScheduleViewController extends ViewController{
                 (Appointment)getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.APPOINTMENT);
         changedSlotRequest.setPatient(new Patient(1));
         LocalDate day = changedSlotRequest.getStart().toLocalDate();
-        ViewController.ScheduleViewControllerActionEvent actionCommand =
-               ViewController.ScheduleViewControllerActionEvent.valueOf(e.getActionCommand());        
+        ScheduleViewController.Actions actionCommand =
+               ScheduleViewController.Actions.valueOf(e.getActionCommand());        
         setScheduleReport(new ScheduleReport());
         switch (actionCommand){
-            case UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_CREATE_REQUEST:
+            case UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_CANCEL_REQUEST ->{
+                doAppointmentCancelRequest();
+                result = new Appointment();
+                break;
+            }
+            case UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_CREATE_REQUEST ->{
                 result = doAppointmentCreateRequest(e, changedSlotRequest);
                 break;
-            case UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_UPDATE_REQUEST:
+            }
+            case UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_UPDATE_REQUEST ->{
                 result = doAppointmentUpdateRequest(e, changedSlotRequest);
                 break;
+            }
         }
         if (result!=null){
             try{

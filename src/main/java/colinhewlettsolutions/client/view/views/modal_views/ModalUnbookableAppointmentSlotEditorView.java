@@ -40,7 +40,7 @@ public class ModalUnbookableAppointmentSlotEditorView extends ModalView
     enum Actions{
         REQUEST_CLOSE_VIEW,
         REQUEST_SAVE_UNBOOKABLE_SLOT,
-        
+        REQUEST_CANCEL_UNBOOKABLE_SLOT   
     }
     private final DateTimeFormatter ddMMyyyyFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy");
     /**
@@ -71,6 +71,10 @@ public class ModalUnbookableAppointmentSlotEditorView extends ModalView
                 }
                 break;
             }
+            case REQUEST_CANCEL_UNBOOKABLE_SLOT ->{
+                doCancelUnbookableSlotRequest();
+                break;
+            }
             case REQUEST_SAVE_UNBOOKABLE_SLOT ->{
                 doSaveUnbookableSlotRequest();
                 break;
@@ -92,8 +96,25 @@ public class ModalUnbookableAppointmentSlotEditorView extends ModalView
         }
     }
     
+    private void doCancelUnbookableSlotRequest(){
+        String[] options = {"Yes", "No"};
+        String message = "Are you sure you want this unbookable slot cancelled?";
+        int close = JOptionPane.showOptionDialog(this,
+                        message,null,
+                        JOptionPane.YES_NO_OPTION,
+                        JOptionPane.INFORMATION_MESSAGE,
+                        null,
+                        options,
+                        null);
+        if (close == JOptionPane.YES_OPTION){
+            initialiseEntityDescriptorFromView();
+            doActionEventFor(ScheduleViewController.
+                    Actions.UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_CANCEL_REQUEST);
+        }
+    }
+    
     private void doSaveUnbookableSlotRequest(){
-        int OKToSaveAppointment = JOptionPane.YES_OPTION;
+        //int OKToSaveAppointment = JOptionPane.YES_OPTION;
         initialiseEntityDescriptorFromView();
 
         //if (getViewDescriptor().getControllerDescription().getAppointment().getDuration().isZero())
@@ -103,8 +124,11 @@ public class ModalUnbookableAppointmentSlotEditorView extends ModalView
 
         //ViewController.ScheduleViewControllerActionEvent action = null;
         ScheduleViewController.Actions action = null;
-        switch(getMyController().getDescriptor().
-                getControllerDescription().getViewMode()){
+        /*switch(getMyController().getDescriptor().
+                getControllerDescription().getViewMode()){*/
+        ViewController.ViewMode viewMode = (ViewController.ViewMode)getMyController().getDescriptor().getControllerDescription().
+                getProperty(SystemDefinition.Properties.VIEW_MODE);
+        switch(viewMode){
             case CREATE:
                 action = ScheduleViewController.Actions.
                     UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_CREATE_REQUEST;
@@ -114,9 +138,7 @@ public class ModalUnbookableAppointmentSlotEditorView extends ModalView
                     UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_UPDATE_REQUEST;
                 break;
         }
-        if (OKToSaveAppointment==JOptionPane.YES_OPTION){
-            doActionEventFor(action);
-        }
+        doActionEventFor(action);
     }
     
     private void populateSelectStartTime(LocalDate day){
@@ -167,7 +189,26 @@ public class ModalUnbookableAppointmentSlotEditorView extends ModalView
         });
         
         this.btnCloseVew.setActionCommand(Actions.REQUEST_CLOSE_VIEW.toString());
-        this.btnSaveUnbookableSlot.setActionCommand(Actions.REQUEST_SAVE_UNBOOKABLE_SLOT.toString());
+        
+        this.btnCreateUpdateUnbookableSlot.setActionCommand(Actions.REQUEST_SAVE_UNBOOKABLE_SLOT.toString());
+        this.btnCreateUpdateUnbookableSlot.addActionListener(this);
+        ViewController.ViewMode viewMode = (ViewController.ViewMode)getMyController().getDescriptor().getControllerDescription().
+                getProperty(SystemDefinition.Properties.VIEW_MODE);
+        switch(viewMode){
+            case CREATE ->{
+                this.btnCreateUpdateUnbookableSlot.setText("Create");
+                this.btnCancelUnbookableSlot.setEnabled(false);
+                break;
+            }
+            case UPDATE ->{
+                this.btnCreateUpdateUnbookableSlot.setText("Update");
+                this.btnCancelUnbookableSlot.setEnabled(true);
+                this.btnCancelUnbookableSlot.setActionCommand(Actions.REQUEST_CANCEL_UNBOOKABLE_SLOT.toString());
+                this.btnCancelUnbookableSlot.addActionListener(this);
+                break;
+            }    
+        }
+        this.btnCloseVew.addActionListener(this);
         
         LocalDate day = (LocalDate)getMyController().getDescriptor().getViewDescription().
                 getProperty(SystemDefinition.Properties.SCHEDULE_DAY);
@@ -178,6 +219,8 @@ public class ModalUnbookableAppointmentSlotEditorView extends ModalView
         this.setTitle("Unbookable slot editor (" + day.format(ddMMyyyyFormat) + ")");
         Appointment appointment = (Appointment)getMyController().getDescriptor().getControllerDescription().
                 getProperty(SystemDefinition.Properties.APPOINTMENT);
+        if (appointment.getNotes()!=null)
+            this.txtReasonForUnbookableSlot.setText(appointment.getNotes());
         if (appointment.getPatient()==null){
             if (appointment.getStart()==null){
                 appointment.setStart(LocalDateTime.of(day, LocalTime.of(9,0)));
@@ -194,7 +237,8 @@ public class ModalUnbookableAppointmentSlotEditorView extends ModalView
             }
 
         }  
-        else if (getMyController().getDescriptor().getControllerDescription().getViewMode().equals(ViewController.ViewMode.UPDATE)){    
+        //else if (getMyController().getDescriptor().getControllerDescription().getViewMode().equals(ViewController.ViewMode.UPDATE)){ 
+        else if (viewMode.equals(ViewController.ViewMode.UPDATE)){
             initialiseStartTimeAndDurationControls();    
             this.chkIsAllDay.setSelected(false);
             /*28/03/2024this.txaNotes.setText(getMyController()
@@ -231,7 +275,6 @@ public class ModalUnbookableAppointmentSlotEditorView extends ModalView
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        chkIsAllDay = new javax.swing.JCheckBox();
         pnlSlotDetails = new javax.swing.JPanel();
         cmbSelectStartTime = new javax.swing.JComboBox<>();
         jLabel1 = new javax.swing.JLabel();
@@ -239,19 +282,13 @@ public class ModalUnbookableAppointmentSlotEditorView extends ModalView
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
         spnDurationMinutes = new javax.swing.JSpinner(new SpinnerNumberModel(0,0,55,5));
-        jPanel2 = new javax.swing.JPanel();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        txaNotes = new javax.swing.JTextArea();
+        chkIsAllDay = new javax.swing.JCheckBox();
+        pnlReasonForUnbookableSlot = new javax.swing.JPanel();
+        txtReasonForUnbookableSlot = new javax.swing.JTextField();
         jPanel4 = new javax.swing.JPanel();
-        btnSaveUnbookableSlot = new javax.swing.JButton();
+        btnCreateUpdateUnbookableSlot = new javax.swing.JButton();
         btnCloseVew = new javax.swing.JButton();
-
-        chkIsAllDay.setText("Make whole day unbookable");
-        chkIsAllDay.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                chkIsAllDayActionPerformed(evt);
-            }
-        });
+        btnCancelUnbookableSlot = new javax.swing.JButton();
 
         pnlSlotDetails.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Slot details", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Segoe UI", 1, 12))); // NOI18N
 
@@ -263,85 +300,109 @@ public class ModalUnbookableAppointmentSlotEditorView extends ModalView
 
         jLabel3.setText("Minutes");
 
+        chkIsAllDay.setText("Make whole day unbookable");
+        chkIsAllDay.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                chkIsAllDayActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout pnlSlotDetailsLayout = new javax.swing.GroupLayout(pnlSlotDetails);
         pnlSlotDetails.setLayout(pnlSlotDetailsLayout);
         pnlSlotDetailsLayout.setHorizontalGroup(
             pnlSlotDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlSlotDetailsLayout.createSequentialGroup()
-                .addGap(75, 75, 75)
-                .addComponent(jLabel1)
-                .addGap(18, 18, 18)
-                .addComponent(cmbSelectStartTime, javax.swing.GroupLayout.PREFERRED_SIZE, 61, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlSlotDetailsLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jLabel2)
-                .addGap(18, 18, 18)
-                .addComponent(spnDurationHours, javax.swing.GroupLayout.DEFAULT_SIZE, 65, Short.MAX_VALUE)
-                .addGap(18, 18, 18)
-                .addComponent(jLabel3)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(spnDurationMinutes, javax.swing.GroupLayout.PREFERRED_SIZE, 51, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(24, 24, 24))
+                .addGroup(pnlSlotDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(chkIsAllDay)
+                    .addGroup(pnlSlotDetailsLayout.createSequentialGroup()
+                        .addGap(50, 50, 50)
+                        .addGroup(pnlSlotDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(pnlSlotDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlSlotDetailsLayout.createSequentialGroup()
+                                    .addComponent(jLabel1)
+                                    .addGap(18, 18, 18))
+                                .addGroup(pnlSlotDetailsLayout.createSequentialGroup()
+                                    .addComponent(jLabel2)
+                                    .addGap(37, 37, 37)))
+                            .addGroup(pnlSlotDetailsLayout.createSequentialGroup()
+                                .addComponent(jLabel3)
+                                .addGap(26, 26, 26)))
+                        .addGroup(pnlSlotDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                            .addComponent(spnDurationHours, javax.swing.GroupLayout.PREFERRED_SIZE, 1, Short.MAX_VALUE)
+                            .addComponent(cmbSelectStartTime, javax.swing.GroupLayout.PREFERRED_SIZE, 61, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(spnDurationMinutes, javax.swing.GroupLayout.PREFERRED_SIZE, 1, Short.MAX_VALUE))))
+                .addContainerGap(82, Short.MAX_VALUE))
         );
         pnlSlotDetailsLayout.setVerticalGroup(
             pnlSlotDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlSlotDetailsLayout.createSequentialGroup()
                 .addContainerGap()
+                .addComponent(chkIsAllDay)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(pnlSlotDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel1)
                     .addComponent(cmbSelectStartTime, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
+                .addGap(12, 12, 12)
                 .addGroup(pnlSlotDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2)
-                    .addComponent(spnDurationHours, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(spnDurationHours, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(12, 12, 12)
+                .addGroup(pnlSlotDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel3)
                     .addComponent(spnDurationMinutes, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(23, Short.MAX_VALUE))
+                .addGap(15, 15, 15))
         );
 
-        jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createTitledBorder(null, "Note", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Segoe UI", 1, 12)), "Notes", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Segoe UI", 1, 12))); // NOI18N
+        pnlReasonForUnbookableSlot.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createTitledBorder(null, "Note", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Segoe UI", 1, 12)), "Reason for unbookable slot", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Segoe UI", 1, 12))); // NOI18N
 
-        txaNotes.setColumns(20);
-        txaNotes.setRows(5);
-        jScrollPane1.setViewportView(txaNotes);
-
-        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
-        jPanel2.setLayout(jPanel2Layout);
-        jPanel2Layout.setHorizontalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane1)
+        javax.swing.GroupLayout pnlReasonForUnbookableSlotLayout = new javax.swing.GroupLayout(pnlReasonForUnbookableSlot);
+        pnlReasonForUnbookableSlot.setLayout(pnlReasonForUnbookableSlotLayout);
+        pnlReasonForUnbookableSlotLayout.setHorizontalGroup(
+            pnlReasonForUnbookableSlotLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlReasonForUnbookableSlotLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(txtReasonForUnbookableSlot)
+                .addContainerGap())
         );
-        jPanel2Layout.setVerticalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 86, javax.swing.GroupLayout.PREFERRED_SIZE)
+        pnlReasonForUnbookableSlotLayout.setVerticalGroup(
+            pnlReasonForUnbookableSlotLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlReasonForUnbookableSlotLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(txtReasonForUnbookableSlot, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(12, Short.MAX_VALUE))
         );
 
-        jPanel4.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        jPanel4.setBorder(javax.swing.BorderFactory.createTitledBorder("Actions"));
 
-        btnSaveUnbookableSlot.setText("Save");
+        btnCreateUpdateUnbookableSlot.setText("Create");
 
-        btnCloseVew.setText("Close view");
+        btnCloseVew.setText("<html><center>Close</center><center>view</center></html>");
+
+        btnCancelUnbookableSlot.setText("<html><center>Cancel</centre><center>unbookable</center><center>slot</center></html>");
 
         javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
         jPanel4.setLayout(jPanel4Layout);
         jPanel4Layout.setHorizontalGroup(
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel4Layout.createSequentialGroup()
-                .addGap(26, 26, 26)
-                .addComponent(btnSaveUnbookableSlot)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(btnCloseVew)
-                .addGap(21, 21, 21))
+                .addGap(12, 12, 12)
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(btnCancelUnbookableSlot)
+                    .addComponent(btnCreateUpdateUnbookableSlot, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(btnCloseVew))
+                .addGap(12, 12, 12))
         );
         jPanel4Layout.setVerticalGroup(
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel4Layout.createSequentialGroup()
-                .addGap(10, 10, 10)
-                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(btnSaveUnbookableSlot)
-                    .addComponent(btnCloseVew))
-                .addGap(10, 10, 10))
+                .addContainerGap()
+                .addComponent(btnCreateUpdateUnbookableSlot, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(btnCancelUnbookableSlot, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(btnCloseVew, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(12, 12, 12))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -350,28 +411,24 @@ public class ModalUnbookableAppointmentSlotEditorView extends ModalView
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jPanel2, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(pnlSlotDetails, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap())
-            .addGroup(layout.createSequentialGroup()
-                .addGap(72, 72, 72)
-                .addComponent(chkIsAllDay)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                    .addComponent(pnlReasonForUnbookableSlot, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(pnlSlotDetails, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(12, 12, 12)
+                .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(12, 12, 12))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(chkIsAllDay)
-                .addGap(18, 18, 18)
-                .addComponent(pnlSlotDetails, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(12, 12, 12)
-                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(6, 6, 6)
-                .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(pnlSlotDetails, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(pnlReasonForUnbookableSlot, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGap(12, 12, 12))
         );
 
         pack();
@@ -384,20 +441,20 @@ public class ModalUnbookableAppointmentSlotEditorView extends ModalView
     
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnCancelUnbookableSlot;
     private javax.swing.JButton btnCloseVew;
-    private javax.swing.JButton btnSaveUnbookableSlot;
+    private javax.swing.JButton btnCreateUpdateUnbookableSlot;
     private javax.swing.JCheckBox chkIsAllDay;
     private javax.swing.JComboBox<LocalDateTime> cmbSelectStartTime;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
-    private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel4;
-    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JPanel pnlReasonForUnbookableSlot;
     private javax.swing.JPanel pnlSlotDetails;
     private javax.swing.JSpinner spnDurationHours;
     private javax.swing.JSpinner spnDurationMinutes;
-    private javax.swing.JTextArea txaNotes;
+    private javax.swing.JTextField txtReasonForUnbookableSlot;
     // End of variables declaration//GEN-END:variables
 
     private Duration getDurationFromView(){
@@ -417,16 +474,19 @@ public class ModalUnbookableAppointmentSlotEditorView extends ModalView
                 setStart((LocalDateTime)this.cmbSelectStartTime.getSelectedItem());
         ((Appointment)getMyController().getDescriptor().getViewDescription().getProperty(SystemDefinition.Properties.APPOINTMENT)).
                 setDuration(getDurationFromView());
+        ((Appointment)getMyController().getDescriptor().getViewDescription().getProperty(SystemDefinition.Properties.APPOINTMENT)).
+                setNotes(this.txtReasonForUnbookableSlot.getText());
+        /*
         if (getMyController()
                 .getDescriptor()
                 .getControllerDescription()
                 .getViewMode().equals(ViewController.ViewMode.CREATE)){
-            /*28/03/2024patientNote = new PatientNote();
+            //28/03/2024patientNote = new PatientNote();
             getMyController().getDescriptor()
                 .getViewDescription()
                 .getAppointment()
-                .setPatientNote(patientNote);*/
-        }   
+                .setPatientNote(patientNote);
+        }  */ 
         /*28/03/2024getMyController().getDescriptor()
                 .getViewDescription()
                 .getAppointment()
