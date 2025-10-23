@@ -1354,6 +1354,7 @@ public class DesktopViewController extends ViewController{
             switch((ControllerViewMode)ed.getControllerDescription().getProperty(SystemDefinition.Properties.VIEW_MODE)){
 
                 case LIST ->{
+                    System.out.println("Desktop displayable after before ScheduleView created = " + getDesktopView().getDeskTop().isDisplayable());
                     avc.setView(new View().make(View.Viewer.SCHEDULE_LIST_VIEW,avc,getDesktopView()));
                     break;
                 }
@@ -2135,16 +2136,17 @@ public class DesktopViewController extends ViewController{
                     View.Viewer.PATIENT_VIEW,
                     pvc, 
                     getDesktopView()));
-                
+                this.getDesktopView().add(pvc.getView());
+                /*
                 ActionEvent actionEvent = new ActionEvent(
                     this,ActionEvent.ACTION_PERFORMED,
                     DesktopViewController.DesktopViewControllerActionEvent.INITIALISE_VIEW_CONTROLLER.toString());
-                pvc.actionPerformed(actionEvent);
+                pvc.actionPerformed(actionEvent);*/
 
                 if (getDesktopViewMode().equals(DesktopViewMode.CLINIC_LOGO)){
                         doSetupDesktopViewMode();
                 } 
-                /*
+                
                 if (getDesktopView().getDeskTop().getAllFrames().length>1){
                     this.firePropertyChangeEvent(
                             ViewController.DesktopViewControllerPropertyChangeEvent.CASCADE_DESKTOP_VIEWS.toString(), 
@@ -2153,7 +2155,7 @@ public class DesktopViewController extends ViewController{
                             null,
                             null
                     );
-                }*/
+                }
             }
             catch (StoreException ex){
                 displayErrorMessage(ex.getMessage(),"DesktopViewController error",JOptionPane.WARNING_MESSAGE);
@@ -2179,11 +2181,27 @@ public class DesktopViewController extends ViewController{
                                         new PatientViewController(this, getNewTemplatedDescriptor(), getDesktopView()));
                 PatientViewController pvc = patientViewControllers.get(patientViewControllers.size()-1);
                 pvc.getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.VIEW_MODE, ViewMode.CREATE); //signals patient not selected in new patient view
-                System.out.println(String.valueOf((Boolean)getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.LOGIN_REQUIRED)).toCharArray());
+                //System.out.println(String.valueOf((Boolean)getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.LOGIN_REQUIRED)).toCharArray());
+                getDesktopView().getDeskTop().setVisible(true);
+                System.out.println("Desktop displayable after before PatientView created = " + getDesktopView().getDeskTop().isDisplayable());
                 pvc.setView(new View().make(
                     View.Viewer.PATIENT_VIEW,
                     pvc, 
                     getDesktopView()));
+                /*
+                if (getDesktopViewMode().equals(DesktopViewMode.CLINIC_LOGO)){
+                        doSetupDesktopViewMode();
+                } 
+                if (getDesktopView().getDeskTop().getAllFrames().length>1){
+                    this.firePropertyChangeEvent(
+                            ViewController.DesktopViewControllerPropertyChangeEvent.CASCADE_DESKTOP_VIEWS.toString(), 
+                            getDesktopView(),
+                            this, 
+                            null,
+                            null
+                    );
+                }*/
+                
             }
             catch (StoreException ex){
                 displayErrorMessage(ex.getMessage(),"DesktopViewController error",JOptionPane.WARNING_MESSAGE);

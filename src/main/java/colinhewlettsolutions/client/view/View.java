@@ -46,6 +46,7 @@ import javax.swing.JInternalFrame;
 import javax.swing.JLayeredPane;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 
 /**
  *
@@ -413,12 +414,191 @@ public class View extends JInternalFrame
     //public abstract void startModal();
     
     protected final View makeView(View view){
+        /*view.getMyController().setView(view);
+        view.getDesktopView().getDeskTop().add(view.getMyController().getView());
+        view.getMyController().getView().initialiseView();
+        //System.out.println("PatientView size: " + getSize());
+        //System.out.println("PatientView preferred size: " + getPreferredSize());
+        ViewController.centerInternalFrame(view.getDesktopView().getDeskTop(), view);
+        setVisible(true);
+        //view.toFront;
+        debugFrameState(view,view.getDesktopView().getDeskTop());
+
+        //view.getDesktopView().getDeskTop().revalidate();  // <-- ensure layout happens
+        //view.getDesktopView().getDeskTop().repaint();     // <-- ensure it’s drawn
+        //SwingUtilities.invokeLater(() -> view.moveToFront());
+        //try {
+        //    view.setSelected(true);  // forces activation, triggers paint
+        //} catch (PropertyVetoException e) {
+        //    e.printStackTrace();
+        //}
+
+        //return view;*/
+        /*
         view.getMyController().setView(view);
         view.getMyController().getView().initialiseView();
         ViewController.centerInternalFrame(view.getDesktopView().getDeskTop(), view);
         view.getDesktopView().getDeskTop().add(view.getMyController().getView());
         view.toFront();
+        debugFrameState(view,view.getDesktopView().getDeskTop());
+        */
+        
+        view.getMyController().setView(view);
+    JDesktopPane desktop = view.getDesktopView().getDeskTop();
+
+    // Add before setting visibility
+    desktop.add(view, JDesktopPane.DEFAULT_LAYER);
+
+    // Initialise view *after* adding
+    view.initialiseView();
+
+    // Ensure a sensible size
+    //if (view.getWidth() <= 0 || view.getHeight() <= 0)
+    //    view.setSize(857, 600);
+
+    // Center after sizing
+    ViewController.centerInternalFrame(desktop, view);
+/*
+    // Defer visibility and selection until Swing has added the frame
+    SwingUtilities.invokeLater(() -> {
+        view.setVisible(true);       // trigger addNotify()
+        desktop.revalidate();
+        desktop.repaint();
+
+        try {
+            view.setSelected(true);  // activates frame
+        } catch (PropertyVetoException e) {
+            e.printStackTrace();
+        }
+
+        System.out.println("After invokeLater: isShowing=" + view.isShowing());
+    });
+*/
+        // Wait until desktop is actually displayable before making frame visible
+        Runnable showFrame = () -> {
+            view.setVisible(true);
+            try {
+                view.setSelected(true);
+            } catch (PropertyVetoException e) {
+                e.printStackTrace();
+            }
+            desktop.revalidate();
+            desktop.repaint();
+            System.out.println(view.getTitle() + " now showing: " + view.isShowing());
+        };
+
+        if (desktop.isDisplayable()) {
+            SwingUtilities.invokeLater(showFrame);
+        } else {
+            // If desktop isn't ready yet, wait for it to become displayable
+            desktop.addHierarchyListener(e -> {
+                if ((e.getChangeFlags() & java.awt.event.HierarchyEvent.DISPLAYABILITY_CHANGED) != 0
+                        && desktop.isDisplayable()) {
+                    SwingUtilities.invokeLater(showFrame);
+                }
+            });
+        }
         return view;
+    }
+    
+    protected final View makeViewx(View view) {
+        view.getMyController().setView(view);
+        var desktop = view.getDesktopView().getDeskTop();
+
+        desktop.add(view); // add first
+
+        view.initialiseView(); // set up contents
+
+        // ensure proper sizing
+        if (view.getWidth() <= 0 || view.getHeight() <= 0) {
+            view.setSize(857, 600);
+        }
+
+        ViewController.centerInternalFrame(desktop, view);
+
+        SwingUtilities.invokeLater(() -> {
+            desktop.revalidate();
+            desktop.repaint();
+            view.setVisible(true);  // <- now safe, layout is valid
+            try { view.setSelected(true); } catch (Exception ignore) {}
+            System.out.println(view.getTitle() + " isShowing()=" + view.isShowing());
+        });
+
+        return view;
+    }
+    
+    protected final View makeViewxx(View view) {
+        view.getMyController().setView(view);
+        final JDesktopPane desktop = view.getDesktopView().getDeskTop();
+
+        Runnable addAndShow = () -> {
+            // add once (avoid duplicate add if already parented)
+            if (view.getParent() == null) {
+                desktop.add(view, JDesktopPane.DEFAULT_LAYER);
+            }
+
+            // populate the view before showing
+            view.initialiseView();
+
+            // ensure sensible size
+            if (view.getWidth() <= 0 || view.getHeight() <= 0) {
+                view.setSize(857, 600);
+            }
+
+            ViewController.centerInternalFrame(desktop, view);
+
+            // Final visibility/activation on next EDT turn
+            SwingUtilities.invokeLater(() -> {
+                view.setVisible(true);
+                try { if (!view.isSelected()) view.setSelected(true); }
+                catch (PropertyVetoException ex) { ex.printStackTrace(); }
+                desktop.revalidate();
+                desktop.repaint();
+                view.moveToFront();
+                System.out.println(">>> " + view.getTitle() + " isShowing(): " + view.isShowing());
+            });
+        };
+
+        if (desktop.isDisplayable()) {
+            // Desktop already ready — add now (on EDT)
+            SwingUtilities.invokeLater(addAndShow);
+        } else {
+            // Desktop not ready — wait until it becomes displayable, then add
+            java.awt.event.HierarchyListener l = new java.awt.event.HierarchyListener() {
+                @Override
+                public void hierarchyChanged(java.awt.event.HierarchyEvent e) {
+                    // listen for displayability change
+                    if ((e.getChangeFlags() & java.awt.event.HierarchyEvent.DISPLAYABILITY_CHANGED) != 0 && desktop.isDisplayable()) {
+                        desktop.removeHierarchyListener(this); // fire once
+                        SwingUtilities.invokeLater(addAndShow);
+                    }
+                }
+            };
+            desktop.addHierarchyListener(l);
+        }
+
+        return view;
+    }
+    
+    private void debugFrameState(JInternalFrame f, JDesktopPane desktop) {
+        System.out.println("---- debugFrameState ----");
+        System.out.println("title: " + f.getTitle());
+        System.out.println("isVisible: " + f.isVisible());
+        System.out.println("isShowing: " + f.isShowing());
+        System.out.println("isDisplayable: " + f.isDisplayable());
+        System.out.println("isSelected: " + f.isSelected());
+        System.out.println("isIcon: " + f.isIcon());
+        System.out.println("isMaximum: " + f.isMaximum());
+        System.out.println("bounds: " + f.getBounds());
+        System.out.println("rootPane: " + f.getRootPane());
+        System.out.println("content count: " + f.getContentPane().getComponentCount());
+        System.out.println("ui: " + f.getUI());
+        System.out.println("desktop layer: " + desktop.getLayer(f));
+        System.out.println("desktop children:");
+        for (Component c : desktop.getComponents()) {
+            System.out.println("  " + c.getClass().getName() + " bounds=" + c.getBounds() + " visible=" + c.isVisible());
+        }
+        System.out.println("-------------------------");
     }
 
     protected final DialogView makeView(DialogView view){

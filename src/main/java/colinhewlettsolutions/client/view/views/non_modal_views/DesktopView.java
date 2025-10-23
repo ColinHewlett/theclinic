@@ -104,9 +104,10 @@ public class DesktopView extends javax.swing.JFrame
             case REQUEST_PATIENT_VIEW:
                 //System.out.println("3 " + String.valueOf((Boolean)getMyController().getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.LOGIN_REQUIRED)));
                 doActionEventRequest(DesktopViewController.Actions.PATIENT_VIEW_CONTROLLER_REQUEST);
+                /*
                 javax.swing.SwingUtilities.invokeLater(() -> {
                     toFront();             // Force UI update
-                });
+                });*/
                 break;          
             case REQUEST_PRINT_NEW_PATIENT_DETAILS_VIEW:
                 doActionEventRequest(DesktopViewController.Actions.PRINT_NEW_PATIENT_DETAILS_REQUEST);

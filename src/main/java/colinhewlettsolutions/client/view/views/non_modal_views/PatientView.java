@@ -307,11 +307,33 @@ public class PatientView extends View
     public void initialiseView(){ 
         
         initComponents();
-        setVisible(true);
+        
+        javax.swing.SwingUtilities.invokeLater(() -> {
+            for (java.awt.Component c : getContentPane().getComponents()) {
+                System.out.println(c.getClass().getSimpleName() + " preferredSize=" + c.getPreferredSize());
+            }
+        });
+        
+        //System.out.println("RootPane: " + getRootPane());
+        //System.out.println("UI delegate: " + getUI());
+        //setVisible(true);
         setClosable(true);
         setMaximizable(false);
         setIconifiable(true);
         setResizable(false);
+        setVisible(true);
+        setSize(857,600);
+        //System.out.println("PatientView size: " + getSize());
+        //System.out.println("PatientView preferred size: " + getPreferredSize());
+        //setLocation(20, 20); // ensure it's within the visible area
+        //moveToFront();
+        /*toFront();
+        requestFocusInWindow();
+        try{
+            setSelected(true);
+        }catch(PropertyVetoException ex){
+            
+        }*/
         rdbGroup = new javax.swing.ButtonGroup();
         rdbGroup.add(rdbRequestPhoneEmailEditorView);
         rdbGroup.add(rdbRequestModalRecallEditorView);
@@ -407,6 +429,19 @@ public class PatientView extends View
                     ViewController.PatientViewControllerActionEvent.NULL_PATIENT_REQUEST.toString());
             this.getMyController().actionPerformed(actionEvent);
         }
+        
+        System.out.println("PatientView content count: " + getContentPane().getComponentCount());
+        for (java.awt.Component c : getContentPane().getComponents()) {
+            System.out.println("  -> " + c.getClass().getName() +
+                               " visible=" + c.isVisible() +
+                               " bounds=" + c.getBounds());
+        }
+
+        // Debug paint overlay
+        getContentPane().setBackground(java.awt.Color.ORANGE);
+        getRootPane().setBorder(javax.swing.BorderFactory.createLineBorder(java.awt.Color.RED, 4));
+        revalidate();
+        repaint();
 
     }
     
@@ -1888,7 +1923,7 @@ public class PatientView extends View
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(pnlAddress, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(pnlName, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 7, Short.MAX_VALUE)
                 .addComponent(pnlOperations, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
