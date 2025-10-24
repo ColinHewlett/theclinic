@@ -226,6 +226,9 @@ public class View extends JInternalFrame
             case PATIENT_VIEW:
                 setView(makeView(new PatientView(viewer, controller,desktopView)));
                 break;
+            case MODAL_DATE_DIALOG:
+                setModalView(makeView(new ModalProgressView(viewer, controller,desktopView)));
+                break;
             case MODAL_PROGRESS_VIEW:
                 setModalView(makeView(new ModalProgressView(viewer, controller,desktopView)));
                 break;
@@ -341,6 +344,7 @@ public class View extends JInternalFrame
         PATIENT_SELECTION_VIEW,
         PATIENT_VIEW,
         RECALL_PATIENTS_VIEW,
+        MODAL_DATE_DIALOG,
         MODAL_PROGRESS_VIEW,
         SCHEDULE_DIARY_VIEW,
         SCHEDULE_EDITOR_VIEW,

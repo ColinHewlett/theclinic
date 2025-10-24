@@ -20,7 +20,10 @@ import javax.swing.DefaultListModel;
 public class ModalCheckBoxListView extends ModalView {
 
     /**
-     * Creates new form ModalCheckBoxListView
+     * 
+     * @param myViewType
+     * @param myController
+     * @param desktopView 
      */
     public ModalCheckBoxListView(
             View.Viewer myViewType,
@@ -29,6 +32,7 @@ public class ModalCheckBoxListView extends ModalView {
         initComponents();
     }
     
+    @Override
     public void initialiseView(){
         ArrayList<JCheckBox> checkBoxs = getOptions();
         

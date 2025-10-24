@@ -226,6 +226,7 @@ public class DesktopView extends javax.swing.JFrame
             
         } 
         //doActionEventRequest(DesktopViewController.Actions.TO_DO_VIEW_CONTROLLER_REQUEST);
+        doActionEventRequest(DesktopViewController.Actions.SCHEDULE_LIST_VIEW_CONTROLLER_REQUEST);
     }
     
     public void disableMenus(){

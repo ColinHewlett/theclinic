@@ -689,7 +689,7 @@
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Component id="rdbRequestPhoneEmailEditorView" alignment="0" min="-2" max="-2" attributes="0"/>
                       <Component id="rdbRequestModalRecallEditorView" alignment="0" min="-2" max="-2" attributes="0"/>
-                      <Component id="rdbRequestOpenDocumentStore" alignment="0" min="-2" max="-2" attributes="0"/>
+                      <Component id="rdbRequestOpenDocumentStorePopup" alignment="0" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace pref="47" max="32767" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
@@ -717,7 +717,7 @@
                   <EmptySpace max="32767" attributes="0"/>
                   <Group type="103" groupAlignment="3" attributes="0">
                       <Component id="rdbRequestModalMedicalProfilePopup" alignment="3" min="-2" max="-2" attributes="0"/>
-                      <Component id="rdbRequestOpenDocumentStore" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="rdbRequestOpenDocumentStorePopup" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace min="-2" pref="16" max="-2" attributes="0"/>
               </Group>
@@ -750,7 +750,7 @@
             <Property name="text" type="java.lang.String" value="GBT recall data"/>
           </Properties>
         </Component>
-        <Component class="javax.swing.JRadioButton" name="rdbRequestOpenDocumentStore">
+        <Component class="javax.swing.JRadioButton" name="rdbRequestOpenDocumentStorePopup">
           <Properties>
             <Property name="text" type="java.lang.String" value="Document store"/>
           </Properties>

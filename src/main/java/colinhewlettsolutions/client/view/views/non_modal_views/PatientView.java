@@ -23,11 +23,9 @@ import colinhewlettsolutions.client.model.entity.Entity;
 import com.github.lgooddatepicker.components.DatePickerSettings;
 import com.github.lgooddatepicker.optionalusertools.DateChangeListener;
 import com.github.lgooddatepicker.zinternaltools.DateChangeEvent;
-import colinhewlettsolutions.client.controller.TemplateReader;
-import java.awt.Desktop;
 import java.awt.Color;
-import java.awt.Font;
 import java.awt.event.*;
+import java.awt.Window;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyVetoException;
@@ -46,6 +44,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.JComboBox;
 import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
@@ -65,6 +64,13 @@ import java.io.File;
 import java.io.IOException;
 
 import colinhewlettsolutions.client.view.support_classes.renderers.ScheduleTableCellRenderer;
+import com.github.lgooddatepicker.components.DatePicker;
+import java.awt.BorderLayout;
+import java.awt.Dialog;
+import java.awt.FlowLayout;
+import javax.swing.JDialog;
+import javax.swing.JFileChooser;
+import javax.swing.SwingUtilities;
 /*28/03/2024import model.PatientNote;*/
 /*28/03/2024import view.views.view_support_classes.renderers.AppointmentsTablePatientNoteRenderer;*/
 /**
@@ -115,7 +121,8 @@ public class PatientView extends View
         REQUEST_CLINICAL_NOTES,
         REQUEST_CREATE_RECOVER_PATIENT,
         REQUEST_DOCTOR,
-        REQUEST_DOCUMENT_STORE,
+        REQUEST_DOCUMENT_STORE_POPUP,
+        REQUEST_GBT_RECALL_EDITOR_VIEW,
         REQUEST_GUARDIAN_EDITOR_VIEW,
         REQUEST_MEDICAL_HISTORY_POPUP,
         REQUEST_MEDICAL_HISTORY,
@@ -124,18 +131,22 @@ public class PatientView extends View
         REQUEST_NULL_PATIENT,
         REQUEST_PATIENT,
         REQUEST_PATIENT_DELETE,
+        REQUEST_PATIENT_DOCUMENT,
         REQUEST_PATIENT_QUESTIONNAIRE,
         REQUEST_PATIENT_RECALLS,
         REQUEST_PATIENT_RECOVER,
+        REQUEST_PATIENT_SCAN,
         REQUEST_PHONE_EMAIL_EDITOR_VIEW,
         REQUEST_PRINT_PATIENT_MEDICAL_HISTORY,
-        REQUEST_GBT_RECALL_EDITOR_VIEW,
         REQUEST_RECALL_EDITOR_VIEW,
         REQUEST_SCHEDULE_VIEW_CONTROLLER,
         REQUEST_SELECT_INVOICE,
+        REQUEST_UPLOAD_FILE_TO_DOCUMENT_STORE,
+        REQUEST_UPLOAD_SCAN_TO_DOCUMENT_STORE,
         REQUEST_UNTITLED_NAME,
         REQUEST_UPDATE_RECOVER_PATIENT
     }
+    enum FileType {DOCUMENT, SCAN}
     private enum BorderTitles { APPOINTMENT_HISTORY,
                                 ACTIONS,
                                 PATIENT_ADDRESS,
@@ -333,18 +344,19 @@ public class PatientView extends View
         rdbGroup.add(rdbRequestModalGuardianEditorView);
         rdbGroup.add(rdbRequestModalMedicalProfilePopup);
         rdbGroup.add(this.rdbRequestModalGBTRecallEditorView);
-        rdbGroup.add(this.rdbRequestOpenDocumentStore);
+        rdbGroup.add(this.rdbRequestOpenDocumentStorePopup);
         rdbRequestPhoneEmailEditorView.setActionCommand(Actions.REQUEST_PHONE_EMAIL_EDITOR_VIEW.toString());
         rdbRequestModalRecallEditorView.setActionCommand(Actions.REQUEST_RECALL_EDITOR_VIEW.toString());
         rdbRequestModalGuardianEditorView.setActionCommand(Actions.REQUEST_GUARDIAN_EDITOR_VIEW.toString());
         rdbRequestModalMedicalProfilePopup.setActionCommand(Actions.REQUEST_MEDICAL_HISTORY_POPUP.toString());
-        rdbRequestOpenDocumentStore.setActionCommand(Actions.REQUEST_DOCUMENT_STORE.toString());
+        rdbRequestOpenDocumentStorePopup.setActionCommand(Actions.REQUEST_DOCUMENT_STORE_POPUP.toString());
         rdbRequestModalGBTRecallEditorView.setActionCommand(Actions.REQUEST_GBT_RECALL_EDITOR_VIEW.toString());
         rdbRequestPhoneEmailEditorView.addActionListener(this);
         rdbRequestModalRecallEditorView.addActionListener(this);
         rdbRequestModalGuardianEditorView.addActionListener(this);
         rdbRequestModalMedicalProfilePopup.addActionListener(this);
         rdbRequestModalGBTRecallEditorView.addActionListener(this);
+        rdbRequestOpenDocumentStorePopup.addActionListener(this);
         
         cmbPatientSelector.setActionCommand(Actions.REQUEST_PATIENT.toString());
         cmbPatientSelector.addActionListener(this);
@@ -582,25 +594,10 @@ public class PatientView extends View
     @Override
     public void actionPerformed(ActionEvent e){
         switch(Actions.valueOf(e.getActionCommand())){
-            case REQUEST_DOCUMENT_STORE:
-                break;
-            case REQUEST_PRINT_PATIENT_MEDICAL_HISTORY:
-                doActionFor(ViewController.PatientViewControllerActionEvent
-                        .PRINT_PATIENT_MEDICAL_HISTORY_REQUEST);
-                String printFolder = (String)getMyController().getDescriptor().getControllerDescription().getProperty(Properties.PRINT_FOLDER);
-                doOpenDocumentForPrinting(printFolder + SystemDefinition.PATIENT_QUESTIONNAIRE_MEDICAL_HISTORY_FILENAME);
-                /*doOpenDocumentForPrinting(SystemDefinition.getPMSPrintFolder() 
-                        + SystemDefinition.PATIENT_QUESTIONNAIRE_MEDICAL_HISTORY_FILENAME);*/
-                break;
-            case REQUEST_PATIENT_RECALLS:
-                getMyController().sendNoOpMessage(this);
+            case REQUEST_ADDITIONAL_NOTES:
+                doAdditionalNotesREquest();
                 break;
             case REQUEST_CLOSE_VIEW:
-                //doCloseViewRequest();
-                /*ActionEvent actionEvent = new ActionEvent(
-                        PatientView.this,ActionEvent.ACTION_PERFORMED,
-                        ViewController.PatientViewControllerActionEvent.VIEW_CLOSE_NOTIFICATION.toString());
-                getMyController().actionPerformed(actionEvent);*/
                 try{
                     this.setClosed(true);
                 }catch (PropertyVetoException ex){
@@ -616,12 +613,22 @@ public class PatientView extends View
             case REQUEST_DOCTOR:
                 doDoctorRequest();
                 break;
+            case REQUEST_DOCUMENT_STORE_POPUP:
+                if (this.cmbPatientSelector.getSelectedIndex()!=-1){
+                    doDocumentStorePopupRequest();
+                }else{
+                    JOptionPane.showInternalMessageDialog(this, 
+                            "a patient has to be selected before document store options "
+                                    + "can be displayed","Patient view error", 
+                                    JOptionPane.WARNING_MESSAGE);
+                }
+                rdbGroup.clearSelection();
+                break;
+            case REQUEST_GBT_RECALL_EDITOR_VIEW:
+                doGBTRecallEditorViewRequest();
+                break;
             case REQUEST_GUARDIAN_EDITOR_VIEW:
                 doGuardianEditorViewRequest();
-                break;
-            case REQUEST_PATIENT_QUESTIONNAIRE:
-                doPatientQuestionnaireViewControllerRequest();
-                //JOptionPane.showInternalMessageDialog(this, "Not yet implemented", "View status",JOptionPane.INFORMATION_MESSAGE);
                 break;
             case REQUEST_MEDICAL_HISTORY:
                 //getMyController().sendNoOpMessage(this);
@@ -651,23 +658,44 @@ public class PatientView extends View
             case REQUEST_PATIENT_DELETE:
                 doPatientDeleteRequest();
                 break;
+            case REQUEST_PATIENT_DOCUMENT:
+                doPatientDocumentRequest();
+                break;
+            case REQUEST_PATIENT_QUESTIONNAIRE:
+                doPatientQuestionnaireViewControllerRequest();
+                //JOptionPane.showInternalMessageDialog(this, "Not yet implemented", "View status",JOptionPane.INFORMATION_MESSAGE);
+                break;
+            case REQUEST_PATIENT_RECALLS:
+                getMyController().sendNoOpMessage(this);
+                break;
             case REQUEST_PATIENT_RECOVER:
                 doPatientRecoverRequest();
                 break;
-            case REQUEST_ADDITIONAL_NOTES:
-                doAdditionalNotesREquest();
+            case REQUEST_PATIENT_SCAN:
+                doPatientScanRequest();
                 break;
             case REQUEST_PHONE_EMAIL_EDITOR_VIEW:
                 doPhoneEmailEditorViewRequest();
                 break;
-            case REQUEST_GBT_RECALL_EDITOR_VIEW:
-                doGBTRecallEditorViewRequest();
+            case REQUEST_PRINT_PATIENT_MEDICAL_HISTORY:
+                doActionFor(ViewController.PatientViewControllerActionEvent
+                        .PRINT_PATIENT_MEDICAL_HISTORY_REQUEST);
+                String printFolder = (String)getMyController().getDescriptor().getControllerDescription().getProperty(Properties.PRINT_FOLDER);
+                doOpenDocumentForPrinting(printFolder + SystemDefinition.PATIENT_QUESTIONNAIRE_MEDICAL_HISTORY_FILENAME);
+                /*doOpenDocumentForPrinting(SystemDefinition.getPMSPrintFolder() 
+                        + SystemDefinition.PATIENT_QUESTIONNAIRE_MEDICAL_HISTORY_FILENAME);*/
                 break;
             case REQUEST_RECALL_EDITOR_VIEW:
                 doRecallEditorViewRequest();
                 break;
             case REQUEST_SCHEDULE_VIEW_CONTROLLER:
                 doScheduleViewControllerRequest();
+                break;
+            case REQUEST_UPLOAD_FILE_TO_DOCUMENT_STORE:
+                doUploadFileRequest(FileType.DOCUMENT);
+                break;
+            case REQUEST_UPLOAD_SCAN_TO_DOCUMENT_STORE:
+                doUploadFileRequest(FileType.SCAN);
                 break;
             case REQUEST_UNTITLED_NAME:
                 doUntitledNameRequest();
@@ -676,6 +704,55 @@ public class PatientView extends View
                 doUpdateRecoverPatientRequest();
                 break;     
         }
+    }
+    
+
+    private void doUploadFileRequest(FileType fileType){
+        switch (fileType){
+            case DOCUMENT ->{
+                FileNameExtensionFilter imageFilter = new FileNameExtensionFilter(
+                        "Word Files (*.docx)", "docx");
+                break;
+            }
+            case SCAN ->{
+                doDateDialog();
+                FileNameExtensionFilter imageFilter = new FileNameExtensionFilter(
+                        "Image Files (*.jpg, *.png, *.gif)", "jpg", "png", "gif");
+                break;
+            }
+        }
+    }
+    
+    private void doDateDialog(){
+        // Create the JDialog
+            Window parentWindow = SwingUtilities.getWindowAncestor(this);
+            JDialog dialog = new JDialog(parentWindow, "Select a date for the scan", Dialog.ModalityType.APPLICATION_MODAL);
+            dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+            dialog.setLayout(new BorderLayout());
+            dialog.setSize(300, 150);
+            dialog.setLocationRelativeTo(this);
+
+            // Add LGoodDatePicker component
+            DatePicker datePicker = new DatePicker();
+            ImageIcon icon = new ImageIcon(this.getClass().getResource("/datepickerbutton1.png"));
+            JButton datePickerButton = dobDatePicker.getComponentToggleCalendarButton();
+            datePickerButton.setText("");
+            datePickerButton.setIcon(icon);
+            JButton okButton = new JButton("OK");
+            okButton.addActionListener(e -> {
+                System.out.println("Selected date: " + datePicker.getDate());
+                dialog.dispose();
+            });
+
+            // Layout
+            JPanel panel = new JPanel(new FlowLayout());
+            panel.add(new JLabel("Choose a date:"));
+            panel.add(datePicker);
+
+            dialog.add(panel, BorderLayout.CENTER);
+            dialog.add(okButton, BorderLayout.SOUTH);
+
+            dialog.setVisible(true);
     }
     
     private void doCloseViewRequest(){
@@ -779,11 +856,56 @@ public class PatientView extends View
                 PATIENT_GUARDIAN_EDITOR_VIEW_REQUEST;
         doActionFor(request);
     }
+    
+    private void doPatientDocumentRequest(){
+        
+    }
+    
+    private void doPatientScanRequest(){
+        
+    }
+    
+    private void doDocumentStorePopupRequest(){
+        JMenuItem menuItem = null;
+        JPopupMenu popup = new JPopupMenu("Store options");
+        JLabel title = new JLabel("       Store options");
+        popup.add(title);    
+        popup.addSeparator();
+        
+        popup.setVisible(true);
+        Patient patient = (Patient)cmbPatientSelector.getSelectedItem();
+        
+        /*ArrayList<String> items = 
+                TemplateReader.extract(patient.getMedicalHistory());*/
+        
+        menuItem = popup.add("Get document");
+        menuItem.setActionCommand(
+                Actions.REQUEST_PATIENT_DOCUMENT.toString());
+        menuItem.addActionListener(this);
+        
+        menuItem = popup.add("Get scan");
+        menuItem.setActionCommand(
+                Actions.REQUEST_PATIENT_SCAN.toString());
+        menuItem.addActionListener(this);
+        
+        popup.addSeparator();
+        menuItem = popup.add("Upload document to store");
+        menuItem.setActionCommand(Actions.REQUEST_UPLOAD_FILE_TO_DOCUMENT_STORE.toString());
+        menuItem.addActionListener(this);
+        
+        menuItem = popup.add("Upload scan to store");
+        menuItem.setActionCommand(Actions.REQUEST_UPLOAD_SCAN_TO_DOCUMENT_STORE.toString());
+        menuItem.addActionListener(this);
+        
+        popup.show(this.rdbRequestOpenDocumentStorePopup, 
+                rdbRequestOpenDocumentStorePopup.getX()-50,
+                rdbRequestOpenDocumentStorePopup.getY()-50 );
+    }
 
     private void doMedicalHistoryPopupRequest(){
         JMenuItem menuItem = null;
         JPopupMenu popup = new JPopupMenu("Select option");
-        JLabel title = new JLabel("       Select options");
+        JLabel title = new JLabel("       Select option");
         popup.add(title);    
         popup.addSeparator();
         
@@ -813,47 +935,6 @@ public class PatientView extends View
                 Actions.REQUEST_PATIENT_QUESTIONNAIRE.toString());
         menuItem.addActionListener(this);
         
-        /*
-        ArrayList<String> items = new ArrayList<>();
-        items.set(0,"Medical history");
-        items.set(1,"Medication");
-        items.set(2,"Doctor");
-        items.set(3,"Questionnaire");
-        Iterator itemsIterator = items.iterator();
-        while(itemsIterator.hasNext()){
-            String item = (String)itemsIterator.next();
-            switch(item){
-                case "Medical history" ->{
-                    menuItem = popup.add(item);
-                    menuItem.setActionCommand(
-                            Actions.REQUEST_MEDICAL_HISTORY.toString());
-                    menuItem.addActionListener(this);
-                    break;
-                }
-                case "Medication" ->{
-                    menuItem = popup.add(item);
-                    menuItem.setActionCommand(
-                            Actions.REQUEST_MEDICATION.toString());
-                    menuItem.addActionListener(this);
-                    break;
-                }
-                case "Doctor" ->{
-                    menuItem = popup.add(item);
-                    menuItem.setActionCommand(
-                            Actions.REQUEST_DOCTOR.toString());
-                    menuItem.addActionListener(this);
-                    break;
-                }
-                case "Questionnaire" ->{
-                    menuItem = popup.add(item);
-                    menuItem.setActionCommand(
-                            Actions.REQUEST_PATIENT_QUESTIONNAIRE.toString());
-                    menuItem.addActionListener(this);
-                    break;
-                }
-            }
-            
-        }*/
         popup.addSeparator();
         menuItem = popup.add("Print questionnaire & medical history");
         menuItem.setActionCommand(Actions.REQUEST_PRINT_PATIENT_MEDICAL_HISTORY.toString());
@@ -1486,7 +1567,7 @@ public class PatientView extends View
         rdbRequestModalGuardianEditorView = new javax.swing.JRadioButton();
         rdbRequestModalMedicalProfilePopup = new javax.swing.JRadioButton();
         rdbRequestModalGBTRecallEditorView = new javax.swing.JRadioButton();
-        rdbRequestOpenDocumentStore = new javax.swing.JRadioButton();
+        rdbRequestOpenDocumentStorePopup = new javax.swing.JRadioButton();
         mbaPatientView = new javax.swing.JMenuBar();
         mnuActions = new javax.swing.JMenu();
         mniCreateNewPatient = new javax.swing.JMenuItem();
@@ -1823,7 +1904,7 @@ public class PatientView extends View
 
         rdbRequestModalGBTRecallEditorView.setText("GBT recall data");
 
-        rdbRequestOpenDocumentStore.setText("Document store");
+        rdbRequestOpenDocumentStorePopup.setText("Document store");
 
         javax.swing.GroupLayout pnlFurtherDetailsLayout = new javax.swing.GroupLayout(pnlFurtherDetails);
         pnlFurtherDetails.setLayout(pnlFurtherDetailsLayout);
@@ -1834,7 +1915,7 @@ public class PatientView extends View
                 .addGroup(pnlFurtherDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(rdbRequestPhoneEmailEditorView)
                     .addComponent(rdbRequestModalRecallEditorView)
-                    .addComponent(rdbRequestOpenDocumentStore))
+                    .addComponent(rdbRequestOpenDocumentStorePopup))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 47, Short.MAX_VALUE)
                 .addGroup(pnlFurtherDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(rdbRequestModalGuardianEditorView)
@@ -1856,7 +1937,7 @@ public class PatientView extends View
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(pnlFurtherDetailsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(rdbRequestModalMedicalProfilePopup)
-                    .addComponent(rdbRequestOpenDocumentStore))
+                    .addComponent(rdbRequestOpenDocumentStorePopup))
                 .addGap(16, 16, 16))
         );
 
@@ -1994,7 +2075,7 @@ public class PatientView extends View
     private javax.swing.JRadioButton rdbRequestModalGuardianEditorView;
     private javax.swing.JRadioButton rdbRequestModalMedicalProfilePopup;
     private javax.swing.JRadioButton rdbRequestModalRecallEditorView;
-    private javax.swing.JRadioButton rdbRequestOpenDocumentStore;
+    private javax.swing.JRadioButton rdbRequestOpenDocumentStorePopup;
     private javax.swing.JRadioButton rdbRequestPhoneEmailEditorView;
     private javax.swing.JScrollPane scrAppointmentHistory;
     private javax.swing.JTable tblAppointmentHistory;
