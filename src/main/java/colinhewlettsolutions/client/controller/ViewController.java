@@ -742,6 +742,7 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         TITLED_BORDER_FONT_CHANGE_RECEIVED
     }
     
+    
     public enum ControllerViewMode{
         DIARY,
         LIST,
@@ -750,13 +751,15 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
     }
 
     public enum ViewMode {
-        CREATE,
-        Create,
-        UPDATE,
-        Update,
+        CREATE,Create,
+        //DIARY,
+        DOCUMENT,
         EMERGENCY,
+        //LIST,
+        NO_ACTION,
         PATIENT_ARCHIVE,
         PATIENT_RESTORE,
+        SCAN,
         SCHEDULE_REFERENCED_FROM_PATIENT_VIEW,
         SCHEDULE_REQUESTED_FROM_DESKTOP_VIEW,
         SLOT_SELECTED,
@@ -764,7 +767,7 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         SORTED_BY_PATIENT,
         SORTED_BY_APPOINTMENT,
         WITH_CONTACT_DETAILS,
-        NO_ACTION
+        UPDATE,Update
     } 
     
     

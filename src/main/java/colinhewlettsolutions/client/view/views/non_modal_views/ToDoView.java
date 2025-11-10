@@ -270,7 +270,7 @@ public class ToDoView extends View implements ActionListener,
     private void adjustColumnWidthsAndViewPosition(JTable table){
         javax.swing.SwingUtilities.invokeLater(() -> {
             ViewController.setRelativeColumnWidths(table, 794, new double[]{0.1,0.15,0.75});
-            ViewController.centerInternalFrame(getDesktopView().getDeskTop(), this);
+            //ViewController.centerInternalFrame(getDesktopView().getDeskTop(), this);
         });
     }
     

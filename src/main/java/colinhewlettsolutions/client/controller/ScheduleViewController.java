@@ -61,8 +61,12 @@ public class ScheduleViewController extends ViewController{
         APPOINTMENT_REMINDED_STATUS_UPDATE_REQUEST,
         APPOINTMENT_UPDATE_VIEW_REQUEST,
         BOOKABLE_SLOT_SCANNER_VIEW_REQUEST,
-        CREATE_APPOINTMENT_REQUEST,
+        CLINICAL_NOTE_CREATE_REQUEST,
+        CLINICAL_NOTE_DELETE_REQUEST,
+        CLINICAL_NOTE_FOR_APPOINTMENT_REQUEST,
         CLINICAL_NOTE_VIEW_REQUEST,
+        CLINICAL_NOTE_UPDATE_REQUEST,
+        CREATE_APPOINTMENT_REQUEST,
         EMPTY_SLOT_SCAN_CONFIGURATION_VIEW_REQUEST,
         FIRST_APPOINTMENT_START_TIME_REQUEST,
         LAST_APPOINTMENT_END_TIME_REQUEST,
@@ -1299,11 +1303,11 @@ public class ScheduleViewController extends ViewController{
                 boolean isError = false;
                 if (_view instanceof ScheduleListView){
                     getDescriptor().getControllerDescription().
-                            setProperty(SystemDefinition.Properties.VIEW_MODE, ControllerViewMode.DIARY);
+                            setProperty(SystemDefinition.Properties.CONTROLLER_VIEW_MODE, ControllerViewMode.DIARY);
                     setView(new View().make(View.Viewer.SCHEDULE_DIARY_VIEW,svc, getDesktopView()));
                 }else if (_view instanceof ScheduleDiaryView){
                     getDescriptor().getControllerDescription().
-                            setProperty(SystemDefinition.Properties.VIEW_MODE, ControllerViewMode.LIST);
+                            setProperty(SystemDefinition.Properties.CONTROLLER_VIEW_MODE, ControllerViewMode.LIST);
                     setView(new View().make(View.Viewer.SCHEDULE_LIST_VIEW,svc, getDesktopView()));
                 }else{
                     isError = true;

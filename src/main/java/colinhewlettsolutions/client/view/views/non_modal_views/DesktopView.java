@@ -73,7 +73,7 @@ public class DesktopView extends javax.swing.JFrame
                 doActionEventRequest(DesktopViewController.Actions.ARCHIVED_PATIENTS_VIEW_CONTROLLER_REQUEST);
                 break;
             case REQUEST_CASCADE_VIEWS:
-                this.cascadeInternalFrames();
+                this.cascadeInternalFrames(CascadeOrder.TOP_TO_FRONT);
                 break;
             case REQUEST_CHANGE_USER_PASSWORD:
                 doActionEventRequest(DesktopViewController.Actions.CHANGE_USER_PASSWORD_REQUEST);
@@ -102,13 +102,8 @@ public class DesktopView extends javax.swing.JFrame
                 doActionEventRequest(DesktopViewController.Actions.PATIENT_APPOINTMENT_DATA_VIEW_CONTROLLER_REQUEST);
                 break;
             case REQUEST_PATIENT_VIEW:
-                //System.out.println("3 " + String.valueOf((Boolean)getMyController().getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.LOGIN_REQUIRED)));
                 doActionEventRequest(DesktopViewController.Actions.PATIENT_VIEW_CONTROLLER_REQUEST);
-                /*
-                javax.swing.SwingUtilities.invokeLater(() -> {
-                    toFront();             // Force UI update
-                });*/
-                break;          
+                break;
             case REQUEST_PRINT_NEW_PATIENT_DETAILS_VIEW:
                 doActionEventRequest(DesktopViewController.Actions.PRINT_NEW_PATIENT_DETAILS_REQUEST);
                 String printFolder = (String)getMyController().getDescriptor().getControllerDescription().getProperty(Properties.PRINT_FOLDER);
@@ -139,7 +134,7 @@ public class DesktopView extends javax.swing.JFrame
                 ViewController.DesktopViewControllerPropertyChangeEvent.valueOf(e.getPropertyName());
         switch (propertyType){ 
             case CASCADE_DESKTOP_VIEWS:
-                cascadeInternalFrames();
+                cascadeInternalFrames(CascadeOrder.TOP_TO_FRONT);
                 break;
             case DESKTOP_VIEW_CHANGED_NOTIFICATION:
                 this.refreshDesktopFrameMenuItems(getActiveMenu());
@@ -183,12 +178,6 @@ public class DesktopView extends javax.swing.JFrame
             lastIndex = mnuSettings.getItemCount() - 1;
             this.mniSystemWideSettings = new javax.swing.JMenuItem("System wide settings");
             mnuSettings.insert(mniSystemWideSettings,lastIndex-1);
-           
-           /*
-           this.mnuUtilities.add(new javax.swing.JPopupMenu.Separator());
-           this.mniSystemWideSettings = new javax.swing.JMenuItem();
-           mniSystemWideSettings.setText("System wide settings");
-           this.mnuUtilities.add(mniSystemWideSettings);*/
         }
         addActionListenersToMenus();
         
@@ -226,7 +215,7 @@ public class DesktopView extends javax.swing.JFrame
             
         } 
         //doActionEventRequest(DesktopViewController.Actions.TO_DO_VIEW_CONTROLLER_REQUEST);
-        doActionEventRequest(DesktopViewController.Actions.SCHEDULE_LIST_VIEW_CONTROLLER_REQUEST);
+        //doActionEventRequest(DesktopViewController.Actions.SCHEDULE_LIST_VIEW_CONTROLLER_REQUEST);
     }
     
     public void disableMenus(){
@@ -329,7 +318,7 @@ public class DesktopView extends javax.swing.JFrame
             @Override
             public void mouseClicked(MouseEvent e) {
                 // Perform the desired action
-                cascadeInternalFrames();
+                cascadeInternalFrames(CascadeOrder.TOP_TO_FRONT);
             }
         });
 
@@ -349,64 +338,87 @@ public class DesktopView extends javax.swing.JFrame
      * -- an active modal form locate centrally on top after cascade
      */
     public static PatientView pvView = null;
-    private void cascadeInternalFrames() {
+    
+    enum CascadeOrder {TOP_TO_FRONT, SPECIFIC}
+    
+    private void cascadeInternalFrames(CascadeOrder cascadeOrder) {
         ArrayList<PatientView> patientViews = new ArrayList<>();
         //ArrayList<PatientView> actualPatientViews = new ArrayList<>();
         ArrayList<BookingView> bookingViews = new ArrayList<>();
+        ArrayList<JInternalFrame> inverted = new ArrayList<>();
         ArrayList<JInternalFrame> others = new ArrayList<>();
         ArrayList<LocalDate> dates = new ArrayList<>();
         ArrayList<JInternalFrame> cascadeFrameOrder = new ArrayList<>();
+        int x = 20; int y= 20; int offset = 30;
+        switch(cascadeOrder){
+            case TOP_TO_FRONT ->{
+                if (this.getDeskTop().getAllFrames().length > 0){
+                    for (JInternalFrame frame : this.getDeskTop().getAllFrames()){
+                        if (!frame.isIcon()){
+                            others.add(frame);
+                        } 
+                    }
+                    for(int index = others.size()-1;index > -1; index--){
+                        cascadeFrameOrder.add(others.get(index));
+                    }
+                }
+                break;
+            }
+            case SPECIFIC ->{
+                if (this.getDeskTop().getAllFrames().length > 0){
+                    for (JInternalFrame frame : this.getDeskTop().getAllFrames()){
+                        if (!frame.isIcon()){
+                            if (frame instanceof BookingView) bookingViews.add((BookingView)frame);
+                            else if (frame instanceof PatientView) {
+                                patientViews.add((PatientView)frame);
+                                pvView = (PatientView)frame;
+                            }
+                            //else if (frame instanceof ModalView) modalView = frame; 
+                            else others.add(frame);
+                        }
+                    }
+                }
+
+                for(JInternalFrame frame : others){
+                    cascadeFrameOrder.add(frame);
+                }
+
+                for(JInternalFrame frame : patientViews){
+                    cascadeFrameOrder.add(frame);
+                }
+
+                switch (bookingViews.size()){
+                    case 0:
+                        break;
+                    case 1:
+                        cascadeFrameOrder.add(bookingViews.get(0));
+                        break;
+                    default:{
+                        for (BookingView bookingView: bookingViews){
+                            LocalDate day = (LocalDate)bookingView.getMyController().getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.SCHEDULE_DAY);
+                            dates.add(day);
+                        }
+                        Collections.sort(dates);
+                        for (LocalDate date : dates){
+                            for (BookingView bookingView: bookingViews){
+                                LocalDate theScheduleDay = (LocalDate)bookingView.getMyController().getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.SCHEDULE_DAY);
+                                if(date.isEqual(theScheduleDay)){
+                                    cascadeFrameOrder.add(bookingView);
+                                    break;
+                                }
+                            }
+                        }
+                        break;
+                    }
+                }
+                break;
+            }
+        }
+        
         //JInternalFrame modalView = null;
         //System.println.out
         //javax.swing.SwingUtilities.invokeLater(() -> {
-            int x = 20; int y = 20;
-            int offset = 30;  
-            if (this.getDeskTop().getAllFrames().length > 0){
-                for (JInternalFrame frame : this.getDeskTop().getAllFrames()){
-                    if (!frame.isIcon()){
-                        if (frame instanceof BookingView) bookingViews.add((BookingView)frame);
-                        else if (frame instanceof PatientView) {
-                            patientViews.add((PatientView)frame);
-                            pvView = (PatientView)frame;
-                        }
-                        //else if (frame instanceof ModalView) modalView = frame; 
-                        else others.add(frame);
-                    }
-                }
-            }
-
-            for(JInternalFrame frame : others){
-                cascadeFrameOrder.add(frame);
-            }
-
-            for(JInternalFrame frame : patientViews){
-                cascadeFrameOrder.add(frame);
-            }
-
-            switch (bookingViews.size()){
-                case 0:
-                    break;
-                case 1:
-                    cascadeFrameOrder.add(bookingViews.get(0));
-                    break;
-                default:{
-                    for (BookingView bookingView: bookingViews){
-                        LocalDate day = (LocalDate)bookingView.getMyController().getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.SCHEDULE_DAY);
-                        dates.add(day);
-                    }
-                    Collections.sort(dates);
-                    for (LocalDate date : dates){
-                        for (BookingView bookingView: bookingViews){
-                            LocalDate theScheduleDay = (LocalDate)bookingView.getMyController().getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.SCHEDULE_DAY);
-                            if(date.isEqual(theScheduleDay)){
-                                cascadeFrameOrder.add(bookingView);
-                                break;
-                            }
-                        }
-                    }
-                    break;
-                }
-            }
+            
 
             Point cascadeStartingLocation = getStartingLocationForCascade(cascadeFrameOrder);
             x = cascadeStartingLocation.x-30;
@@ -724,6 +736,7 @@ public class DesktopView extends javax.swing.JFrame
         REQUEST_NOTIFICATION_VIEW,
         REQUEST_PATIENT_APPOINTMENT_DATA_VIEW,
         REQUEST_PATIENT_VIEW,
+        REQUEST_PATIENT_VIEW_TEST,
         REQUEST_PRINT_NEW_PATIENT_DETAILS_VIEW,
         REQUEST_PRINT_SCHEDULE,
         REQUEST_SCHEDULE_LIST_VIEW,

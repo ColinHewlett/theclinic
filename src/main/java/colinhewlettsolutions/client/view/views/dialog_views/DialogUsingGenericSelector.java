@@ -100,7 +100,7 @@ public class DialogUsingGenericSelector<T> extends DialogView implements ActionL
         javax.swing.border.TitledBorder.DEFAULT_POSITION, 
         (java.awt.Font)getMyParentView().getMyController().getDescriptor().getControllerDescription().
                 getProperty(SystemDefinition.Properties.TITLED_BORDER_FONT),
-        (java.awt.Color)getMyController().getDescriptor().getControllerDescription().
+        (java.awt.Color)getMyParentView().getMyController().getDescriptor().getControllerDescription().
                 getProperty(SystemDefinition.Properties.TITLED_BORDER_COLOR)));
         
         pnlActions.setBorder(javax.swing.BorderFactory.createTitledBorder(
@@ -109,7 +109,7 @@ public class DialogUsingGenericSelector<T> extends DialogView implements ActionL
         javax.swing.border.TitledBorder.DEFAULT_POSITION, 
         (java.awt.Font)getMyParentView().getMyController().getDescriptor().getControllerDescription().
                 getProperty(SystemDefinition.Properties.TITLED_BORDER_FONT),
-        (java.awt.Color)getMyController().getDescriptor().getControllerDescription().
+        (java.awt.Color)getMyParentView().getMyController().getDescriptor().getControllerDescription().
                 getProperty(SystemDefinition.Properties.TITLED_BORDER_COLOR)));
         
         TitledBorder titledBorder = (TitledBorder)pnlSelector.getBorder();

@@ -5,10 +5,13 @@
 package colinhewlettsolutions.client.view.views.non_modal_views;
 
 import colinhewlettsolutions.client.controller.DesktopViewController;
+import colinhewlettsolutions.client.controller.PatientViewController;
 import colinhewlettsolutions.client.controller.SystemDefinition;
 import colinhewlettsolutions.client.controller.SystemDefinition.Properties;
 import colinhewlettsolutions.client.model.non_entity.Captions;
 import colinhewlettsolutions.client.model.non_entity.Credential;
+import colinhewlettsolutions.client.view.views.dialog_views.NativeFileChooser;
+import colinhewlettsolutions.client.view.dialogs.CreateInternalDialog;
 import colinhewlettsolutions.client.view.support_classes.models.PatientAppointmentHistoryTableModel;
 import colinhewlettsolutions.client.view.support_classes.renderers.PatientAppointmentHistoryTableInvoiceRenderer;
 import colinhewlettsolutions.client.view.support_classes.renderers.AppointmentHistoryTableLocalDateTimeRenderer;
@@ -37,8 +40,11 @@ import java.time.LocalDateTime;
 import java.time.Period;
 import java.util.ArrayList;
 import java.util.Iterator;
+import javax.swing.event.PopupMenuEvent;
+import javax.swing.event.PopupMenuListener;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -64,10 +70,12 @@ import java.io.File;
 import java.io.IOException;
 
 import colinhewlettsolutions.client.view.support_classes.renderers.ScheduleTableCellRenderer;
+import colinhewlettsolutions.client.view.views.dialog_views.DialogView;
 import com.github.lgooddatepicker.components.DatePicker;
 import java.awt.BorderLayout;
 import java.awt.Dialog;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.SwingUtilities;
@@ -141,8 +149,8 @@ public class PatientView extends View
         REQUEST_RECALL_EDITOR_VIEW,
         REQUEST_SCHEDULE_VIEW_CONTROLLER,
         REQUEST_SELECT_INVOICE,
-        REQUEST_UPLOAD_FILE_TO_DOCUMENT_STORE,
-        REQUEST_UPLOAD_SCAN_TO_DOCUMENT_STORE,
+        REQUEST_UPLOAD_FILE_TO_PATIENT_DOCUMENT_STORE,
+        REQUEST_UPLOAD_SCAN_TO_PATIENT_DOCUMENT_STORE,
         REQUEST_UNTITLED_NAME,
         REQUEST_UPDATE_RECOVER_PATIENT
     }
@@ -293,6 +301,7 @@ public class PatientView extends View
         setMyViewType(myViewType);
         setMyController(myController); 
         setDesktopView(desktopView);
+        initComponents();
     }
     
     @Override
@@ -317,7 +326,7 @@ public class PatientView extends View
     @Override
     public void initialiseView(){ 
         
-        initComponents();
+        //initComponents();
         //System.out.println("RootPane: " + getRootPane());
         //System.out.println("UI delegate: " + getUI());
         //setVisible(true);
@@ -326,7 +335,7 @@ public class PatientView extends View
         setIconifiable(true);
         setResizable(false);
         setVisible(true);
-        setSize(857,600);
+        //setSize(857,600);
         //System.out.println("PatientView size: " + getSize());
         //System.out.println("PatientView preferred size: " + getPreferredSize());
         //setLocation(20, 20); // ensure it's within the visible area
@@ -358,6 +367,9 @@ public class PatientView extends View
         rdbRequestModalGBTRecallEditorView.addActionListener(this);
         rdbRequestOpenDocumentStorePopup.addActionListener(this);
         
+        System.out.println("Document store x = " + rdbRequestOpenDocumentStorePopup.getX());
+        System.out.println("Document store y = " + rdbRequestOpenDocumentStorePopup.getY());
+        
         cmbPatientSelector.setActionCommand(Actions.REQUEST_PATIENT.toString());
         cmbPatientSelector.addActionListener(this);
         
@@ -376,7 +388,7 @@ public class PatientView extends View
         setScheduleTitledBorderSettings();
 
         
-        doActionFor(ViewController.PatientViewControllerActionEvent.SETTINGS_TITLED_BORDER_REQUEST);
+        doActionEventFor(PatientViewController.Actions.SETTINGS_TITLED_BORDER_REQUEST);
         this.btnClearSelection.setText(Captions.PatientView.CLEAR_SELECTION._1());
         btnClearSelection.setActionCommand(Actions.REQUEST_NULL_PATIENT.toString());
         btnCloseView.setActionCommand(Actions.REQUEST_CLOSE_VIEW.toString());
@@ -431,7 +443,7 @@ public class PatientView extends View
         if (getMyController().getDescriptor().getControllerDescription().getProperty(Properties.VIEW_MODE).equals(ViewController.ViewMode.CREATE)){
             actionEvent = new ActionEvent(
                     this,ActionEvent.ACTION_PERFORMED,
-                    ViewController.PatientViewControllerActionEvent.NULL_PATIENT_REQUEST.toString());
+                    PatientViewController.Actions.NULL_PATIENT_REQUEST.toString());
             this.getMyController().actionPerformed(actionEvent);
         }
 
@@ -440,7 +452,7 @@ public class PatientView extends View
     private void adjustColumnWidthsAndViewPosition(JTable table){
         javax.swing.SwingUtilities.invokeLater(() -> {
             ViewController.setRelativeColumnWidths(table, new double[]{0.07,0.1,0.15,0.68});
-            ViewController.centerInternalFrame(getDesktopView().getDeskTop(), this);
+            //ViewController.centerInternalFrame(getDesktopView().getDeskTop(), this);
         });
     }
     
@@ -548,7 +560,7 @@ public class PatientView extends View
 
                     ActionEvent actionEvent = new ActionEvent(
                     this,ActionEvent.ACTION_PERFORMED,
-                            ViewController.PatientViewControllerActionEvent.
+                            PatientViewController.Actions.
                                     VIEW_CHANGED_NOTIFICATION.toString());
                     this.getMyController().actionPerformed(actionEvent);
                     break;
@@ -575,7 +587,7 @@ public class PatientView extends View
 
                     actionEvent = new ActionEvent(
                             this,ActionEvent.ACTION_PERFORMED,
-                            ViewController.PatientViewControllerActionEvent.
+                            PatientViewController.Actions.
                                     VIEW_CHANGED_NOTIFICATION.toString());
                     this.getMyController().actionPerformed(actionEvent);
                     break;
@@ -660,6 +672,7 @@ public class PatientView extends View
                 break;
             case REQUEST_PATIENT_DOCUMENT:
                 doPatientDocumentRequest();
+                rdbGroup.clearSelection();
                 break;
             case REQUEST_PATIENT_QUESTIONNAIRE:
                 doPatientQuestionnaireViewControllerRequest();
@@ -673,12 +686,13 @@ public class PatientView extends View
                 break;
             case REQUEST_PATIENT_SCAN:
                 doPatientScanRequest();
+                rdbGroup.clearSelection();
                 break;
             case REQUEST_PHONE_EMAIL_EDITOR_VIEW:
                 doPhoneEmailEditorViewRequest();
                 break;
             case REQUEST_PRINT_PATIENT_MEDICAL_HISTORY:
-                doActionFor(ViewController.PatientViewControllerActionEvent
+                doActionEventFor(PatientViewController.Actions
                         .PRINT_PATIENT_MEDICAL_HISTORY_REQUEST);
                 String printFolder = (String)getMyController().getDescriptor().getControllerDescription().getProperty(Properties.PRINT_FOLDER);
                 doOpenDocumentForPrinting(printFolder + SystemDefinition.PATIENT_QUESTIONNAIRE_MEDICAL_HISTORY_FILENAME);
@@ -691,11 +705,13 @@ public class PatientView extends View
             case REQUEST_SCHEDULE_VIEW_CONTROLLER:
                 doScheduleViewControllerRequest();
                 break;
-            case REQUEST_UPLOAD_FILE_TO_DOCUMENT_STORE:
-                doUploadFileRequest(FileType.DOCUMENT);
+            case REQUEST_UPLOAD_FILE_TO_PATIENT_DOCUMENT_STORE:
+                doFileChooserDialog(ViewController.ViewMode.DOCUMENT);
+                rdbGroup.clearSelection();
                 break;
-            case REQUEST_UPLOAD_SCAN_TO_DOCUMENT_STORE:
-                doUploadFileRequest(FileType.SCAN);
+            case REQUEST_UPLOAD_SCAN_TO_PATIENT_DOCUMENT_STORE:
+                doFileChooserDialog(ViewController.ViewMode.SCAN);
+                rdbGroup.clearSelection();
                 break;
             case REQUEST_UNTITLED_NAME:
                 doUntitledNameRequest();
@@ -706,53 +722,73 @@ public class PatientView extends View
         }
     }
     
-
-    private void doUploadFileRequest(FileType fileType){
-        switch (fileType){
+    private void doFileChooserDialog(ViewController.ViewMode viewMode){
+        DialogView dialog = null;
+        String title = null;
+        File selectedFile = null;
+        String[] allowedFileExtensions = null;
+        ArrayList<File> document = new ArrayList<>();
+        switch(viewMode){
             case DOCUMENT ->{
-                FileNameExtensionFilter imageFilter = new FileNameExtensionFilter(
-                        "Word Files (*.docx)", "docx");
+                title = "Select Word file to upload";
+                allowedFileExtensions = new String[] {"docx"};
+                selectedFile = NativeFileChooser.showOpenDialog(
+                    this, title, new File(System.getProperty("user.home")), allowedFileExtensions);
+                if (selectedFile!=null) document.add(selectedFile);
                 break;
             }
             case SCAN ->{
-                doDateDialog();
-                FileNameExtensionFilter imageFilter = new FileNameExtensionFilter(
-                        "Image Files (*.jpg, *.png, *.gif)", "jpg", "png", "gif");
+                title = "Select first page of scan to upload";
+                allowedFileExtensions = new String[] {"jpg", "png", "gif"};
+                ArrayList<Integer> items = new ArrayList<>();
+                items.add(1);
+                items.add(2);
+                dialog = new View().make(
+                        View.Viewer.COMPOSITE_SCAN_COUNT_DIALOG, 
+                        this, 
+                        items,
+                        "Composite scan file for patient",
+                        "Select number of pages to upload").getDialogView();
+                if (getDialogView().getSelectedItem()!=null){
+                    int index = (Integer)getDialogView().getSelectedItem();
+                    for (index = 1;index <=items.size();index++){
+                        switch(index){
+                            case 1 ->{
+                                if (items.size()>1){
+                                    title = "Select first page of scan to upload";
+                                }else title = "Select file to upload";
+                                break;
+                            }
+                            case 2 ->{
+                                title = "Select second page of scan to upload";
+                                break;
+                            }
+                            case 3 ->{
+                                title = "Select third page of scan to upload";
+                                break;
+                            }
+                            case 4 ->{
+                                title = "Select fourth page of scan to upload"; 
+                                break;
+                            }
+                        }
+                        selectedFile = NativeFileChooser.showOpenDialog(
+                            this, title, new File(System.getProperty("user.home")), allowedFileExtensions);
+                        if (selectedFile!=null){
+                            document.add(selectedFile);
+                        }    
+                    }
+                }
                 break;
             }
         }
-    }
-    
-    private void doDateDialog(){
-        // Create the JDialog
-            Window parentWindow = SwingUtilities.getWindowAncestor(this);
-            JDialog dialog = new JDialog(parentWindow, "Select a date for the scan", Dialog.ModalityType.APPLICATION_MODAL);
-            dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-            dialog.setLayout(new BorderLayout());
-            dialog.setSize(300, 150);
-            dialog.setLocationRelativeTo(this);
-
-            // Add LGoodDatePicker component
-            DatePicker datePicker = new DatePicker();
-            ImageIcon icon = new ImageIcon(this.getClass().getResource("/datepickerbutton1.png"));
-            JButton datePickerButton = dobDatePicker.getComponentToggleCalendarButton();
-            datePickerButton.setText("");
-            datePickerButton.setIcon(icon);
-            JButton okButton = new JButton("OK");
-            okButton.addActionListener(e -> {
-                System.out.println("Selected date: " + datePicker.getDate());
-                dialog.dispose();
-            });
-
-            // Layout
-            JPanel panel = new JPanel(new FlowLayout());
-            panel.add(new JLabel("Choose a date:"));
-            panel.add(datePicker);
-
-            dialog.add(panel, BorderLayout.CENTER);
-            dialog.add(okButton, BorderLayout.SOUTH);
-
-            dialog.setVisible(true);
+        if (!document.isEmpty()){
+            getMyController().getDescriptor().getViewDescription().
+                    setProperty(Properties.PATIENT_DOCUMENT, document);
+            getMyController().getDescriptor().getViewDescription().
+                    setProperty(Properties.VIEW_MODE, viewMode);
+            doActionEventFor(PatientViewController.Actions.UPLOAD_TO_PATIENT_DOCUMENT_STORE_REQUEST);
+        }
     }
     
     private void doCloseViewRequest(){
@@ -808,7 +844,7 @@ public class PatientView extends View
                         setPatientSelectionMode(PatientSelectionMode.PATIENT_SELECTION);
                         ActionEvent actionEvent = new ActionEvent(
                                 this,ActionEvent.ACTION_PERFORMED,
-                                ViewController.PatientViewControllerActionEvent.RECOVER_PATIENT_REQUEST.toString());
+                                PatientViewController.Actions.RECOVER_PATIENT_REQUEST.toString());
                         this.getMyController().actionPerformed(actionEvent);
                         break;
                 }
@@ -834,7 +870,7 @@ public class PatientView extends View
                     .setProperty(SystemDefinition.Properties.APPOINTMENT, appointment);
             ActionEvent actionEvent = new ActionEvent(this, 
                     ActionEvent.ACTION_PERFORMED,
-                    ViewController.PatientViewControllerActionEvent.CLINICAL_NOTE_VIEW_REQUEST.toString());
+                    PatientViewController.Actions.CLINICAL_NOTE_VIEW_REQUEST.toString());
             this.getMyController().actionPerformed(actionEvent);
         }
         /*
@@ -845,72 +881,178 @@ public class PatientView extends View
     }
     
     private void doDoctorRequest(){
-        ViewController.PatientViewControllerActionEvent request = 
-                ViewController.PatientViewControllerActionEvent.
+        PatientViewController.Actions request = 
+                PatientViewController.Actions.
                 PATIENT_DOCTOR_EDITOR_VIEW_REQUEST;
-        doActionFor(request);
+        doActionEventFor(request);
     }
     private void doGuardianEditorViewRequest(){
-        ViewController.PatientViewControllerActionEvent request = 
-                ViewController.PatientViewControllerActionEvent.
+        PatientViewController.Actions request = 
+                PatientViewController.Actions.
                 PATIENT_GUARDIAN_EDITOR_VIEW_REQUEST;
-        doActionFor(request);
+        doActionEventFor(request);
     }
     
     private void doPatientDocumentRequest(){
-        
+        getMyController().getDescriptor().getViewDescription().setProperty(Properties.VIEW_MODE, ViewController.ViewMode.DOCUMENT);
+        doActionEventFor(PatientViewController.Actions.PATIENT_DOCUMENT_STORE_VIEW_REQUEST);
     }
     
     private void doPatientScanRequest(){
-        
+        getMyController().getDescriptor().getViewDescription().setProperty(Properties.VIEW_MODE, ViewController.ViewMode.SCAN);
+        doActionEventFor(PatientViewController.Actions.PATIENT_DOCUMENT_STORE_VIEW_REQUEST);
     }
     
-    private void doDocumentStorePopupRequest(){
+    private void doCreatePopupMenuPackages(){
         JMenuItem menuItem = null;
-        JPopupMenu popup = new JPopupMenu("Store options");
-        JLabel title = new JLabel("       Store options");
-        popup.add(title);    
-        popup.addSeparator();
+        JLabel title = null;
+        JPopupMenu documentStorePopupMenu = new JPopupMenu("Store options");
+        title = new JLabel("       Store options"); 
+        documentStorePopupMenu.add(title);
+        documentStorePopupMenu.addSeparator();
         
-        popup.setVisible(true);
-        Patient patient = (Patient)cmbPatientSelector.getSelectedItem();
-        
-        /*ArrayList<String> items = 
-                TemplateReader.extract(patient.getMedicalHistory());*/
-        
-        menuItem = popup.add("Get document");
+        menuItem = documentStorePopupMenu.add("Get Word document");
         menuItem.setActionCommand(
                 Actions.REQUEST_PATIENT_DOCUMENT.toString());
         menuItem.addActionListener(this);
         
-        menuItem = popup.add("Get scan");
+        menuItem = documentStorePopupMenu.add("Get medical history");
+        menuItem.setActionCommand(
+                Actions.REQUEST_PATIENT_SCAN.toString());
+        menuItem.addActionListener(this);
+        
+        documentStorePopupMenu.addSeparator();
+        menuItem = documentStorePopupMenu.add("Upload document to store");
+        menuItem.setActionCommand(Actions.REQUEST_UPLOAD_FILE_TO_PATIENT_DOCUMENT_STORE.toString());
+        menuItem.addActionListener(this);
+        
+        menuItem = documentStorePopupMenu.add("Upload scan to store");
+        menuItem.setActionCommand(Actions.REQUEST_UPLOAD_SCAN_TO_PATIENT_DOCUMENT_STORE.toString());
+        menuItem.addActionListener(this);
+        
+        this.rdbRequestOpenDocumentStorePopup.putClientProperty("popup",documentStorePopupMenu);
+    }
+    
+    private void doDocumentStorePopupRequest(){
+        Patient patient = (Patient)cmbPatientSelector.getSelectedItem();
+        JMenuItem menuItem = null;
+        JPopupMenu popup = new JPopupMenu();
+        JLabel label = new JLabel("Select option for " + patient);
+        label.setForeground((Color)getMyController().getDescriptor().getControllerDescription().
+                getProperty(Properties.TITLED_BORDER_COLOR));
+        popup.add(label);    
+        popup.addSeparator();
+        
+        popup.setVisible(true);
+        
+        
+        menuItem = popup.add("Get Word document from store");
+        menuItem.setActionCommand(
+                Actions.REQUEST_PATIENT_DOCUMENT.toString());
+        menuItem.addActionListener(this);
+        
+        menuItem = popup.add("Get medical history from store");
         menuItem.setActionCommand(
                 Actions.REQUEST_PATIENT_SCAN.toString());
         menuItem.addActionListener(this);
         
         popup.addSeparator();
         menuItem = popup.add("Upload document to store");
-        menuItem.setActionCommand(Actions.REQUEST_UPLOAD_FILE_TO_DOCUMENT_STORE.toString());
+        menuItem.setActionCommand(Actions.REQUEST_UPLOAD_FILE_TO_PATIENT_DOCUMENT_STORE.toString());
         menuItem.addActionListener(this);
         
-        menuItem = popup.add("Upload scan to store");
-        menuItem.setActionCommand(Actions.REQUEST_UPLOAD_SCAN_TO_DOCUMENT_STORE.toString());
+        menuItem = popup.add("Upload medical history to store");
+        menuItem.setActionCommand(Actions.REQUEST_UPLOAD_SCAN_TO_PATIENT_DOCUMENT_STORE.toString());
         menuItem.addActionListener(this);
-        
-        popup.show(this.rdbRequestOpenDocumentStorePopup, 
-                rdbRequestOpenDocumentStorePopup.getX()-50,
-                rdbRequestOpenDocumentStorePopup.getY()-50 );
-    }
 
+        /*popup.show(this.rdbRequestOpenDocumentStorePopup, 
+                rdbRequestOpenDocumentStorePopup.getX(),
+                rdbRequestOpenDocumentStorePopup.getY());*/
+        popup.show(this.rdbRequestOpenDocumentStorePopup, 
+                7,14);
+        System.out.println("Document store x = " + rdbRequestOpenDocumentStorePopup.getX());
+        System.out.println("Document store y = " + rdbRequestOpenDocumentStorePopup.getY());
+        //doCreatePopupMenuPackages();
+        //this.rdbRequestOpenDocumentStorePopup.addMouseListener(clickHandler);
+    }
+    /*
+    MouseAdapter popupHandler = new MouseAdapter() {
+        @Override
+        public void mousePressed(MouseEvent e) {
+            maybeShowPopup(e);
+        }
+
+        @Override
+        public void mouseReleased(MouseEvent e) {
+            maybeShowPopup(e);
+        }
+
+        private void maybeShowPopup(MouseEvent e) {
+            if (e.isPopupTrigger()) {
+                JRadioButton source = (JRadioButton)e.getSource();
+                source.setSelected(true);
+                source.repaint();
+
+                JPopupMenu menu = (JPopupMenu)source.getClientProperty("popup");
+                menu.show(source, e.getX()-50, e.getY()-50);
+            }
+        }
+    };*/
+
+    // --- Shared mouse listener ---
+    /*
+    MouseAdapter clickHandler = new MouseAdapter() {
+        @Override
+        public void mousePressed(MouseEvent e) {
+            if (SwingUtilities.isLeftMouseButton(e)) {
+                JRadioButton source = (JRadioButton) e.getSource();
+                source.setSelected(true);
+                
+                source.getModel().setArmed(true);
+                source.getModel().setPressed(true);
+                source.repaint();
+                
+                SwingUtilities.invokeLater(() ->{
+                    showPopupFor(source, e.getX(), e.getY());
+                });
+            }
+        }
+
+        private void showPopupFor(JRadioButton source, int x, int y) {
+            JPopupMenu menu = (JPopupMenu) source.getClientProperty("popup");
+            if (menu == null) return;
+
+            // Keep button visually "pressed" while popup visible
+            //source.getModel().setArmed(true);
+            //source.getModel().setPressed(true);
+            //source.repaint();
+
+            menu.addPopupMenuListener(new PopupMenuListener() {
+                @Override public void popupMenuWillBecomeVisible(PopupMenuEvent e) {}
+                @Override public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
+                    source.getModel().setArmed(false);
+                    source.getModel().setPressed(false);
+                    source.repaint();
+                }
+                @Override public void popupMenuCanceled(PopupMenuEvent e) {}
+            });
+
+            menu.show(source, x, y);
+        }
+    };*/
+    
     private void doMedicalHistoryPopupRequest(){
+        Patient patient = (Patient)cmbPatientSelector.getSelectedItem();
         JMenuItem menuItem = null;
-        JPopupMenu popup = new JPopupMenu("Select option");
-        JLabel title = new JLabel("       Select option");
-        popup.add(title);    
+        JPopupMenu popup = new JPopupMenu();
+        JLabel label = new JLabel("Select medical history option for " + patient);
+        label.setForeground((Color)getMyController().getDescriptor().getControllerDescription().
+                getProperty(Properties.TITLED_BORDER_COLOR));
+        popup.add(label);    
         popup.addSeparator();
         
         popup.setVisible(true);
-        Patient patient = (Patient)cmbPatientSelector.getSelectedItem();
+        
         
         /*ArrayList<String> items = 
                 TemplateReader.extract(patient.getMedicalHistory());*/
@@ -939,15 +1081,17 @@ public class PatientView extends View
         menuItem = popup.add("Print questionnaire & medical history");
         menuItem.setActionCommand(Actions.REQUEST_PRINT_PATIENT_MEDICAL_HISTORY.toString());
         menuItem.addActionListener(this);
+        /*popup.show(this.rdbRequestModalMedicalProfilePopup, 
+                rdbRequestModalMedicalProfilePopup.getX(),
+                rdbRequestModalMedicalProfilePopup.getY());*/
         popup.show(this.rdbRequestModalMedicalProfilePopup, 
-                rdbRequestModalMedicalProfilePopup.getX()-50,
-                rdbRequestModalMedicalProfilePopup.getY()-50 );
+                7,14);
     }
     private void doMedicationRequest(){
-        ViewController.PatientViewControllerActionEvent request = 
-                ViewController.PatientViewControllerActionEvent.
+        PatientViewController.Actions request = 
+                PatientViewController.Actions.
                 PATIENT_MEDICATION_EDITOR_VIEW_REQUEST;
-        doActionFor(request);
+        doActionEventFor(request);
     }
     private void doNullPatientRequest(){
         getMyController().getDescriptor().
@@ -955,7 +1099,7 @@ public class PatientView extends View
         this.cmbPatientSelector.setSelectedIndex(-1);
         ActionEvent actionEvent = new ActionEvent(
             this,ActionEvent.ACTION_PERFORMED,
-            ViewController.PatientViewControllerActionEvent
+            PatientViewController.Actions
                     .NULL_PATIENT_REQUEST.toString());
         this.getMyController().actionPerformed(actionEvent);
     }
@@ -969,7 +1113,7 @@ public class PatientView extends View
             if (response==JOptionPane.YES_OPTION){
                 ActionEvent actionEvent = new ActionEvent(
                     this,ActionEvent.ACTION_PERFORMED,
-                    ViewController.PatientViewControllerActionEvent.PATIENT_DELETE_REQUEST.toString());
+                    PatientViewController.Actions.PATIENT_DELETE_REQUEST.toString());
                 this.getMyController().actionPerformed(actionEvent);
             }
         }
@@ -981,20 +1125,20 @@ public class PatientView extends View
         setPatientSelectionMode(PatientSelectionMode.PATIENT_RECOVERY);
         ActionEvent actionEvent = new ActionEvent(
             this,ActionEvent.ACTION_PERFORMED,
-            ViewController.PatientViewControllerActionEvent.PATIENT_RECOVER_REQUEST.toString());
+            PatientViewController.Actions.PATIENT_RECOVER_REQUEST.toString());
         this.getMyController().actionPerformed(actionEvent);
         mniRecoverDeletedPatient.setEnabled(false);
         mniCreateNewPatient.setEnabled(false);
         this.btnUpdateRecoverPatient.setEnabled(true);
     }
     private void doPatientRequest(){
-        ViewController.PatientViewControllerActionEvent event = null; 
+        PatientViewController.Actions event = null; 
         switch(getPatientSelectionMode()){
             case PATIENT_SELECTION:
-                event = ViewController.PatientViewControllerActionEvent.PATIENT_REQUEST;
+                event = PatientViewController.Actions.PATIENT_REQUEST;
                 break;
             case PATIENT_RECOVERY:
-                event = ViewController.PatientViewControllerActionEvent.DELETED_PATIENT_REQUEST;
+                event = PatientViewController.Actions.DELETED_PATIENT_REQUEST;
                 break;
         }
         if (cmbPatientSelector.getSelectedIndex()!=-1){
@@ -1007,45 +1151,45 @@ public class PatientView extends View
         }
     }
     private void doAdditionalNotesREquest(){
-        ViewController.PatientViewControllerActionEvent request = 
-                ViewController.PatientViewControllerActionEvent.
+        PatientViewController.Actions request = 
+                PatientViewController.Actions.
                 PATIENT_ADDITIONAL_NOTES_VIEW_REQUEST;
-        doActionFor(request);
+        doActionEventFor(request);
     }
     private void doPhoneEmailEditorViewRequest(){
-        ViewController.PatientViewControllerActionEvent request = 
-                ViewController.PatientViewControllerActionEvent.
+        PatientViewController.Actions request = 
+                PatientViewController.Actions.
                 PATIENT_PHONE_EMAIL_EDITOR_VIEW_REQUEST;
-        doActionFor(request);
+        doActionEventFor(request);
     }
     private void doGBTRecallEditorViewRequest(){
-        ViewController.PatientViewControllerActionEvent request = 
-                ViewController.PatientViewControllerActionEvent.
+        PatientViewController.Actions request = 
+                PatientViewController.Actions.
                 PATIENT_GBT_RECALL_EDITOR_VIEW_REQUEST;
-        doActionFor(request);
+        doActionEventFor(request);
     }
     private void doRecallEditorViewRequest(){
-        ViewController.PatientViewControllerActionEvent request = 
-                ViewController.PatientViewControllerActionEvent.
+        PatientViewController.Actions request = 
+                PatientViewController.Actions.
                 PATIENT_RECALL_EDITOR_VIEW_REQUEST;
-        doActionFor(request);
+        doActionEventFor(request);
     }
     private void doPatientQuestionnaireViewControllerRequest(){
         ActionEvent actionEvent = new ActionEvent(
                 this,ActionEvent.ACTION_PERFORMED,
-                ViewController.PatientViewControllerActionEvent.PATIENT_QUESTIONNAIRE_VIEW_CONTROLLER_REQUEST.toString());
+                PatientViewController.Actions.PATIENT_QUESTIONNAIRE_VIEW_CONTROLLER_REQUEST.toString());
         this.getMyController().actionPerformed(actionEvent);
     }
     private void doPatientMedicalHistoryViewControllerRequest(){
         ActionEvent actionEvent = new ActionEvent(
                 this,ActionEvent.ACTION_PERFORMED,
-                ViewController.PatientViewControllerActionEvent.PATIENT_MEDICAL_HISTORY_VIEW_CONTROLLER_REQUEST.toString());
+                PatientViewController.Actions.PATIENT_MEDICAL_HISTORY_VIEW_CONTROLLER_REQUEST.toString());
         this.getMyController().actionPerformed(actionEvent);
     }
     private void doPrintPatientMedicalHistory(){
         ActionEvent actionEvent = new ActionEvent(
                 this,ActionEvent.ACTION_PERFORMED,
-                ViewController.PatientViewControllerActionEvent.PRINT_PATIENT_MEDICAL_HISTORY_REQUEST.toString());
+                PatientViewController.Actions.PRINT_PATIENT_MEDICAL_HISTORY_REQUEST.toString());
         this.getMyController().actionPerformed(actionEvent);
     }
     private void doScheduleViewControllerRequest(){
@@ -1058,7 +1202,7 @@ public class PatientView extends View
             getMyController().getDescriptor().getViewDescription().setProperty(SystemDefinition.Properties.SCHEDULE_DAY, day);
             ActionEvent actionEvent = new ActionEvent(
                     this,ActionEvent.ACTION_PERFORMED,
-                    ViewController.PatientViewControllerActionEvent.SCHEDULE_LIST_VIEW_CONTROLLER_REQUEST.toString());
+                    PatientViewController.Actions.SCHEDULE_LIST_VIEW_CONTROLLER_REQUEST.toString());
             this.getMyController().actionPerformed(actionEvent);
         }
     }
@@ -1094,7 +1238,7 @@ public class PatientView extends View
                         setProperty(SystemDefinition.Properties.PATIENT, initialisePatientFromView(patient));
                 ActionEvent actionEvent = new ActionEvent(
                         this,ActionEvent.ACTION_PERFORMED,
-                        ViewController.PatientViewControllerActionEvent.PATIENT_UPDATE_REQUEST.toString());
+                        PatientViewController.Actions.PATIENT_UPDATE_REQUEST.toString());
                 this.getMyController().actionPerformed(actionEvent);
             }
         }
@@ -1102,7 +1246,14 @@ public class PatientView extends View
             JOptionPane.showMessageDialog(this, "Update operation cannot proceed unless an existing patient is currently selected");
     }
     
-    private void doActionFor(
+    private void doActionEventFor(PatientViewController.Actions request){
+        ActionEvent actionEvent = new ActionEvent(
+            this,ActionEvent.ACTION_PERFORMED,
+            request.toString());
+        this.getMyController().actionPerformed(actionEvent);
+    }
+    /*
+    private void doActionForx(
             ViewController.PatientViewControllerActionEvent request){
         ActionEvent actionEvent = new ActionEvent(
             this,ActionEvent.ACTION_PERFORMED,
@@ -1114,7 +1265,7 @@ public class PatientView extends View
                     VIEW_CHANGED_NOTIFICATION.toString());
         this.getMyController().actionPerformed(actionEvent);
         rdbGroup.clearSelection();
-    }
+    }*/
     
     private void createNewPatientActionPerformed(){
         
@@ -1127,7 +1278,7 @@ public class PatientView extends View
                                         .getControllerDescription().getProperty(SystemDefinition.Properties.PATIENT)));
                 ActionEvent actionEvent = new ActionEvent(
                         this,ActionEvent.ACTION_PERFORMED,
-                        ViewController.PatientViewControllerActionEvent.PATIENT_CREATE_REQUEST.toString());
+                        PatientViewController.Actions.PATIENT_CREATE_REQUEST.toString());
                 this.getMyController().actionPerformed(actionEvent);
             }
         }
@@ -1260,7 +1411,7 @@ public class PatientView extends View
                 
                 ActionEvent actionEvent = new ActionEvent(
                         PatientView.this,ActionEvent.ACTION_PERFORMED,
-                        ViewController.PatientViewControllerActionEvent.VIEW_CLOSED_NOTIFICATION.toString());
+                        PatientViewController.Actions.VIEW_CLOSED_NOTIFICATION.toString());
                 getMyController().actionPerformed(actionEvent);
                 
             }
@@ -1268,7 +1419,7 @@ public class PatientView extends View
             public void internalFrameActivated(InternalFrameEvent e) {
                 ActionEvent actionEvent = new ActionEvent(
                         PatientView.this,ActionEvent.ACTION_PERFORMED,
-                        ViewController.PatientViewControllerActionEvent.VIEW_ACTIVATED_NOTIFICATION.toString());
+                        PatientViewController.Actions.VIEW_ACTIVATED_NOTIFICATION.toString());
                 getMyController().actionPerformed(actionEvent);
             }
         };

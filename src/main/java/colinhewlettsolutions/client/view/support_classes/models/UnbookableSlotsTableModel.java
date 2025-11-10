@@ -21,8 +21,9 @@ public class UnbookableSlotsTableModel extends AbstractTableModel{
     public static final LocalTime LAST_APPOINTMENT_SLOT = LocalTime.of(17,0);
     public ArrayList<Appointment> unbookableSlots = new ArrayList<>();
     private DateTimeFormatter unbookableSlotFormat = DateTimeFormatter.ofPattern("dd/MM/yy HH:mm (EEE)");
-    private enum COLUMN{UnbookableSlots, Duration};
+    private enum COLUMN{UnbookableSlots, Duration, Reason};
     private final Class[] columnClass = new Class[] { 
+        String.class,
         String.class,
         String.class};
     
@@ -64,6 +65,9 @@ public class UnbookableSlotsTableModel extends AbstractTableModel{
             case 1:
                 result = "Duration";
                 break;
+            case 2:
+                result = "Reason";
+                break;
             }
 
         return result;
@@ -86,6 +90,9 @@ public class UnbookableSlotsTableModel extends AbstractTableModel{
                 result = convertSlotDurationToString(
                     slot.getDuration(), slot.getStart().toLocalDate());   
                 break; 
+            case 2:
+                result = (slot.getStart()!=null) ? slot.getNotes() : "";
+                break;
         }
         return (String)result;
     }

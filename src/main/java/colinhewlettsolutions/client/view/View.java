@@ -109,6 +109,7 @@ public class View extends JInternalFrame
             String selectorCaption){
         DialogView result = null;
         switch(viewer){
+            case COMPOSITE_SCAN_COUNT_DIALOG:
             case EARLY_BOOKING_START_EDITOR_DIALOG:
             case EXTEND_SHIFT_BOOKING_DIALOG:
             case LATE_BOOKING_END_EDITOR_DIALOG:
@@ -158,6 +159,9 @@ public class View extends JInternalFrame
                 break;
             case EXPORT_PROGRESS_VIEW:
                 setView(makeView(new DataMigrationProgressView(viewer, controller,desktopView)));
+                break;
+            case IMAGE_VIEWER:
+                setView(makeView(new ImageViewer(viewer, controller, desktopView)));
                 break;
             case LOGIN_NEW_PASSWORD_EDITOR_VIEW:
                 setView(makeView(new LoginNewPasswordEditorView(viewer, controller, desktopView)));
@@ -226,8 +230,14 @@ public class View extends JInternalFrame
             case PATIENT_VIEW:
                 setView(makeView(new PatientView(viewer, controller,desktopView)));
                 break;
+            case PATIENT_VIEW_TEST:
+                setView(makeView(new PatientViewTest(viewer, controller,desktopView)));
+                break;    
             case MODAL_DATE_DIALOG:
-                setModalView(makeView(new ModalProgressView(viewer, controller,desktopView)));
+                setModalView(makeView(new ModalDateDialog(viewer, controller,desktopView)));
+                break;
+            case MODAL_DOCUMENT_STORE_VIEW:
+                setModalView(makeView(new ModalDocumentStoreView(viewer, controller,desktopView)));
                 break;
             case MODAL_PROGRESS_VIEW:
                 setModalView(makeView(new ModalProgressView(viewer, controller,desktopView)));
@@ -314,9 +324,11 @@ public class View extends JInternalFrame
         BOOKABLE_SLOT_SCANNER_VIEW,
         CLINICAL_NOTE_VIEW,
         CHECKBOX_LIST_VIEW,
+        COMPOSITE_SCAN_COUNT_DIALOG,
         EARLY_BOOKING_START_EDITOR_DIALOG,
         EXPORT_PROGRESS_VIEW,
         EXTEND_SHIFT_BOOKING_DIALOG,
+        IMAGE_VIEWER,
         LATE_BOOKING_END_EDITOR_DIALOG,
         LATE_BOOKING_END_EDITOR_VIEW,
         LOGIN_OLD_PASSWORD_CHECK_VIEW,
@@ -343,9 +355,11 @@ public class View extends JInternalFrame
         PATIENT_SELECTION_DIALOG,
         PATIENT_SELECTION_VIEW,
         PATIENT_VIEW,
+        PATIENT_VIEW_TEST,
         RECALL_PATIENTS_VIEW,
         MODAL_DATE_DIALOG,
         MODAL_PROGRESS_VIEW,
+        MODAL_DOCUMENT_STORE_VIEW,
         SCHEDULE_DIARY_VIEW,
         SCHEDULE_EDITOR_VIEW,
         SCHEDULE_LIST_VIEW,
@@ -479,6 +493,7 @@ public class View extends JInternalFrame
     });
 */
         // Wait until desktop is actually displayable before making frame visible
+        /*
         Runnable showFrame = () -> {
             view.setVisible(true);
             try {
@@ -501,7 +516,7 @@ public class View extends JInternalFrame
                     SwingUtilities.invokeLater(showFrame);
                 }
             });
-        }
+        }*/
         return view;
     }
     

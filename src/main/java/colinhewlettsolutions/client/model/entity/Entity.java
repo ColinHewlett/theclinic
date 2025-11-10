@@ -79,7 +79,7 @@ public class Entity implements IStoreClient{
     }
     
     private Integer key = null;
-    Integer getKey(){
+    public Integer getKey(){
         return key;
     }
     void setKey(Integer value){

@@ -38,10 +38,43 @@ public class TemplateReader {
      * @param xml
      * @return boolean; true if validated
      */
+    
+    public TemplateReader()throws TemplateReaderException{
+        DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+        factory = dbFactory;
+        try{    
+            // Allow DOCTYPE declarations
+            dbFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", false);
+
+            // Allow general entities (for &PROJECT_ID;)
+            dbFactory.setFeature("http://xml.org/sax/features/external-general-entities", true);
+
+            // Allow parameter entities if needed
+            dbFactory.setFeature("http://xml.org/sax/features/external-parameter-entities", true);
+
+            //DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+        }catch(ParserConfigurationException ex){
+            String message = ex.getMessage() + "\n"
+                    + "ParserConfigurationException raised in getTemplate() method";
+            throw new TemplateReaderException(message, 
+                    TemplateReaderException
+                            .ExceptionType.PARSER_CONFIGURATION_ERROR);
+        }
+        
+    }
+    
+    private DocumentBuilderFactory factory = null;
+    private DocumentBuilderFactory getFactory(){
+        return factory;
+    }
+    private void setFactory(DocumentBuilderFactory value){
+        factory = value;
+    }
+    
     public boolean validateXMLSchema(File xsd, File xml) {
         try {
-            SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-            Schema schema = factory.newSchema(xsd);
+            SchemaFactory sFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+            Schema schema = sFactory.newSchema(xsd);
             Validator validator = schema.newValidator();
             validator.validate(new StreamSource(xml));
             return true;
@@ -78,8 +111,11 @@ public class TemplateReader {
     public Element getRootElement()throws TemplateReaderException{
         Element result = null;
         try{
-            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+            
+
+            
+            //DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+            DocumentBuilder dBuilder = getFactory().newDocumentBuilder();
             Document doc = dBuilder.parse(getTemplateFile());
             doc.getDocumentElement().normalize();  
 

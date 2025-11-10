@@ -7,7 +7,7 @@ package colinhewlettsolutions.client.controller;
 
 import static colinhewlettsolutions.client.controller.SystemDefinition.Properties;
 import static colinhewlettsolutions.client.controller.ViewController.displayErrorMessage;
-import static colinhewlettsolutions.client.controller.ViewController.ControllerViewMode;
+//import static colinhewlettsolutions.client.controller.ViewController.ControllerViewMode;
 import static colinhewlettsolutions.client.controller.ViewController.DesktopViewControllerPropertyChangeEvent.SET_DESKTOP_VIEW_MODE;
 import static colinhewlettsolutions.client.controller.ViewController.PatientViewControllerPropertyChangeEvent.PATIENT_VIEW_CHANGE_NOTIFICATION;
 import colinhewlettsolutions.client.model.non_entity.Credential;
@@ -74,9 +74,8 @@ public class DesktopViewController extends ViewController{
     private PropertyChangeSupport pcSupport = new PropertyChangeSupport(this);
     private int count = 0;
     private int recordCount = 0;
-
+    private TemplateReader templateReader = null;
     private colinhewlettsolutions.client.controller.SystemDefinition systemDefinition;
-    private TemplateReader templateReader;
     
     private void removeAllViewControllers(){
         ArrayList viewControllers = new ArrayList<>();
@@ -117,6 +116,7 @@ public class DesktopViewController extends ViewController{
         MODAL_VIEWER_CLOSED_NOTIFICATION,
         MEDICAL_CONDITION_VIEW_CONTROLLER_REQUEST,
         PATIENT_APPOINTMENT_DATA_VIEW_CONTROLLER_REQUEST,
+        PATIENT_INVOICE_VIEW_CONTROLLER_REQUEST,
         PATIENT_MEDICAL_HISTORY_VIEW_CONTROLLER_REQUEST,
         PATIENT_QUESTIONNAIRE_VIEW_CONTROLLER_REQUEST,
         PATIENT_RECALL_VIEW_CONTROLLER_REQUEST,
@@ -145,11 +145,11 @@ public class DesktopViewController extends ViewController{
         SET_DESKTOP_VIEW_MODE
     }
     
-    public DesktopViewController(TemplateReader templateReader,SystemDefinition systemDefinition, String projectId){
+    public DesktopViewController(String projectId){
        String xmlFileName = "";
         String xsdFileName = "";
-        this.systemDefinition = systemDefinition;
-        this.templateReader = templateReader;
+        //this.systemDefinition = systemDefinition;
+        //this.templateReader = templateReader;
         System.out.println(JarFileFinder.getPath());
         System.out.println("Compiler version = " + System.getProperty("java.version"));
         try{
@@ -167,8 +167,16 @@ public class DesktopViewController extends ViewController{
              */
             String pathToProjectFolder = null;
             if(!JarFileFinder.getName().equals("")){
+                //xmlFileName = JarFileFinder.getPath() +
+                //String root = JarFileFinder.getPath().substring(0,1);
+                //root = root + ":/" + projectId;
+                xmlFileName = JarFileFinder.getPath().substring(0,JarFileFinder.getPath().lastIndexOf('/')) + "/SystemDefinition.xml";
+                xsdFileName = JarFileFinder.getPath().substring(0,JarFileFinder.getPath().lastIndexOf('/')) + "/SystemDefinition.xsd";
+                System.out.println("xmlFilename = " + xmlFileName);
+                /*
                 pathToProjectFolder = 
                         JarFileFinder.getPath().substring(0,(JarFileFinder.getPath().lastIndexOf(projectId + "/") + projectId.length()));
+                System.out.println("pathToProjectFolder = " + JarFileFinder.getPath().substring(0,(JarFileFinder.getPath().lastIndexOf(projectId + "/") + projectId.length())));
                 if (pathToProjectFolder==null){
                     systemDefinition.setSystemExitMessage("Unable to locate specified project folder; program exited");
                     System.exit(2);
@@ -176,7 +184,7 @@ public class DesktopViewController extends ViewController{
                     xmlFileName = pathToProjectFolder + "/SystemDefinition.xml";
                     xsdFileName = pathToProjectFolder + "/SystemDefinition.xsd";
                     System.out.println("xml file name = " + xmlFileName);
-                }
+                }*/
             }else {
                 switch(projectId){
                     case "Fractals" ->{
@@ -191,7 +199,9 @@ public class DesktopViewController extends ViewController{
                     }
                 }
             }
+            
             System.out.println(xmlFileName);
+            templateReader = new TemplateReader();
             if(!templateReader.validateXMLSchema(new File(xsdFileName), new File(xmlFileName))){
                 throw new TemplateReaderException(
                         "Invalid XML document format encountered",TemplateReaderException.ExceptionType.SAX_EXCEPTION); 
@@ -1046,7 +1056,7 @@ public class DesktopViewController extends ViewController{
                 patientViewController.getDescriptor().getControllerDescription().
                         setProperty(SystemDefinition.Properties.VIEW_MODE,ViewController.ViewMode.SCHEDULE_REFERENCED_FROM_PATIENT_VIEW);
                 patientViewController.getDescriptor().getControllerDescription().
-                        setProperty(SystemDefinition.Properties.VIEW_MODE, ControllerViewMode.LIST);
+                        setProperty(SystemDefinition.Properties.CONTROLLER_VIEW_MODE, ControllerViewMode.LIST);
                 
                 createNewAppointmentScheduleViewController(patientViewController.getDescriptor());
                 break;
@@ -1351,7 +1361,8 @@ public class DesktopViewController extends ViewController{
                 displayErrorMessage(ex.getMessage(),"DesktopViewController error",JOptionPane.WARNING_MESSAGE);
             } 
             avc.setDescriptor(ed);
-            switch((ControllerViewMode)ed.getControllerDescription().getProperty(SystemDefinition.Properties.VIEW_MODE)){
+            /* 7/11/2025 issue - works ok in 1.52 but null pointer in 1.76
+            switch((ControllerViewMode)ed.getControllerDescription().getProperty(SystemDefinition.Properties.CONTROLLER_VIEW_MODE)){
 
                 case LIST ->{
                     System.out.println("Desktop displayable after before ScheduleView created = " + getDesktopView().getDeskTop().isDisplayable());
@@ -1362,8 +1373,10 @@ public class DesktopViewController extends ViewController{
                     avc.setView(new View().make(View.Viewer.SCHEDULE_DIARY_VIEW,avc,getDesktopView()));
                     break;
                 }
-            }
-            
+            }*/
+            //assume only LIST format available
+            System.out.println("Desktop displayable after before ScheduleView created = " + getDesktopView().getDeskTop().isDisplayable());
+                    avc.setView(new View().make(View.Viewer.SCHEDULE_LIST_VIEW,avc,getDesktopView()));
             ActionEvent actionEvent = new ActionEvent(
                     this,ActionEvent.ACTION_PERFORMED,
                     DesktopViewController.DesktopViewControllerActionEvent.INITIALISE_VIEW_CONTROLLER.toString());
@@ -1480,7 +1493,7 @@ public class DesktopViewController extends ViewController{
                         ViewController.ViewMode.SCHEDULE_REQUESTED_FROM_DESKTOP_VIEW);
         
         descriptor.getControllerDescription().
-                setProperty(SystemDefinition.Properties.VIEW_MODE, ControllerViewMode.LIST);
+                setProperty(SystemDefinition.Properties.CONTROLLER_VIEW_MODE, ControllerViewMode.LIST);
         descriptor.getControllerDescription().
                 setProperty(SystemDefinition.Properties.SCHEDULE_DAY, LocalDate.now());
         createNewAppointmentScheduleViewController(descriptor);
@@ -1953,7 +1966,7 @@ public class DesktopViewController extends ViewController{
             }
             case "ScheduleViewController" ->{
                 controllerViewMode = (ControllerViewMode)((ScheduleViewController)e.getSource()).getDescriptor().
-                        getControllerDescription().getProperty(SystemDefinition.Properties.VIEW_MODE);
+                        getControllerDescription().getProperty(SystemDefinition.Properties.CONTROLLER_VIEW_MODE);
                 break;
             }
         }
@@ -2038,6 +2051,15 @@ public class DesktopViewController extends ViewController{
                         doSetupDesktopViewMode();
                 }
                 
+                if (getDesktopView().getDeskTop().getAllFrames().length>1){
+                    this.firePropertyChangeEvent(
+                            ViewController.DesktopViewControllerPropertyChangeEvent.CASCADE_DESKTOP_VIEWS.toString(), 
+                            getDesktopView(),
+                            this, 
+                            null,
+                            null
+                    );
+                }
 
 
             }catch (StoreException ex){
@@ -2083,28 +2105,6 @@ public class DesktopViewController extends ViewController{
                     null,
                     null
             );
-        }
-    }
-    
-    private void doRequestForTestPatientViewController(){
-        try{
-            
-            patientViewControllers.add(
-                                    new PatientViewController(this, new Descriptor(), getDesktopView()));
-            
-            PatientViewController pvc = patientViewControllers.get(patientViewControllers.size()-1);
-            pvc.setView(new View().make(
-                View.Viewer.TEST_PATIENT_VIEW,
-                pvc, 
-                getDesktopView()));
-            
-            if (getDesktopViewMode().equals(DesktopViewMode.CLINIC_LOGO)){
-                    doSetupDesktopViewMode();
-            } 
-        
-        }
-        catch (StoreException ex){
-            displayErrorMessage(ex.getMessage(),"DesktopViewController error",JOptionPane.WARNING_MESSAGE);
         }
     }
     
@@ -2188,10 +2188,11 @@ public class DesktopViewController extends ViewController{
                     View.Viewer.PATIENT_VIEW,
                     pvc, 
                     getDesktopView()));
-                /*
+                
                 if (getDesktopViewMode().equals(DesktopViewMode.CLINIC_LOGO)){
                         doSetupDesktopViewMode();
                 } 
+                
                 if (getDesktopView().getDeskTop().getAllFrames().length>1){
                     this.firePropertyChangeEvent(
                             ViewController.DesktopViewControllerPropertyChangeEvent.CASCADE_DESKTOP_VIEWS.toString(), 
@@ -2200,7 +2201,7 @@ public class DesktopViewController extends ViewController{
                             null,
                             null
                     );
-                }*/
+                }
                 
             }
             catch (StoreException ex){
@@ -3014,7 +3015,8 @@ public class DesktopViewController extends ViewController{
             javax.swing.SwingUtilities.invokeLater(new Runnable() {
                 @Override
                 public void run() {
-                    new DesktopViewController(new TemplateReader(), new SystemDefinition(),args[0]);
+                    //new DesktopViewController(new TemplateReader(), new SystemDefinition(),args[0]);
+                    new DesktopViewController(args[0]);
                 }
             });
         }else {

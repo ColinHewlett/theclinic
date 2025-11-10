@@ -271,7 +271,7 @@ public class ModalBookableSlotScannerView extends ModalView implements ActionLis
         
         getMyController().getDescriptor().getViewDescription().setProperty(SystemDefinition.Properties.SCHEDULE_DAY, start);
         switch((ViewController.ControllerViewMode)getMyController().getDescriptor().getControllerDescription().
-                getProperty(SystemDefinition.Properties.VIEW_MODE)){
+                getProperty(SystemDefinition.Properties.CONTROLLER_VIEW_MODE)){
             case DIARY:
                 actionCommand = ViewController.ScheduleViewControllerActionEvent.SCHEDULE_DIARY_VIEW_CONTROLLER_REQUEST.toString();
                 break;

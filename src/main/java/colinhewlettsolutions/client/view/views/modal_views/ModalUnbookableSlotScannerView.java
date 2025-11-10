@@ -27,6 +27,7 @@ import colinhewlettsolutions.client.view.views.non_modal_views.DesktopView;
 import colinhewlettsolutions.client.view.support_classes.models.EmptySlotAvailability2ColumnTableModel;
 import colinhewlettsolutions.client.view.support_classes.models.UnbookableSlotsTableModel;
 import colinhewlettsolutions.client.view.support_classes.renderers.TableHeaderCellBorderRenderer;
+import java.util.Set;
 
 /**
  *
@@ -74,6 +75,8 @@ public class ModalUnbookableSlotScannerView extends ModalView implements ListSel
                 (ArrayList<Appointment>)getMyController().getDescriptor().getControllerDescription().
                         getProperty(SystemDefinition.Properties.APPOINTMENT_SLOTS);
         this.populateUnbookableSlotTable(unbookableSlots);
+        ViewController.setJTableColumnProperties(this.tblUnbookableSlots, this.scrPanelUnbookableSlots.getPreferredSize().width, 30,20,50);
+        
         addInternalFrameListeners();
         
     }
@@ -196,8 +199,8 @@ public class ModalUnbookableSlotScannerView extends ModalView implements ListSel
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(scrPanelUnbookableSlots, javax.swing.GroupLayout.PREFERRED_SIZE, 373, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(scrPanelUnbookableSlots, javax.swing.GroupLayout.DEFAULT_SIZE, 406, Short.MAX_VALUE)
+                .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)

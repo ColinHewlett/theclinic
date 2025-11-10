@@ -535,9 +535,11 @@ public class SystemDefinition {
         APPOINTMENT_SLOTS_FOR_DAY_IN_DIARY_FORMAT,
         APPOINTMENT_SLOTS_FOR_DAY_IN_LIST_FORMAT,
         APPOINTMENTS,
+        CAPTION,
         CLINICAL_NOTE,
         CONDITION,
         CONDITION_WITH_STATE,
+        DATE_TIME,
         DESCRIPTOR,
         DIARY_BOOKING_FIRST_SLOT_BACKGROUND,
         DIARY_BOOKING_FIRST_SLOT_FOREGROUND,
@@ -550,6 +552,7 @@ public class SystemDefinition {
         DIARY_UNBOOKABLE_SLOT_BACKGROUND,
         DIARY_UNBOOKABLE_SLOT_FOREGROUND,
         DOCTOR,
+        DOCUMENT_STORE,
         DURATION,
         EARLY_BOOKING_START_TIME,
         EMPTY_SLOT_FROM_DAY,
@@ -569,6 +572,7 @@ public class SystemDefinition {
         PATIENT,
         PATIENT_APPOINTMENT_DATA,
         PATIENT_CONDITION,
+        PATIENT_DOCUMENT,
         PATIENT_NOTIFICATION,
         PATIENT_NOTIFICATIONS,
         PRIMARY_CONDITION,
@@ -576,6 +580,7 @@ public class SystemDefinition {
         PRINT_FOLDER,
         QUESTION_WITH_STATE,
         RECALL_MASTER_DOCUMENT,
+        IMAGE_FOR_VIEWING,
         SCHEDULE_DAY,
         SMTP_MESSAGE,
         SMTP_SERVER_IN,
@@ -597,7 +602,7 @@ public class SystemDefinition {
         USER_SCHEDULE_DIARY_SETTINGS,
         USER_SCHEDULE_LIST_SETTINGS,
         USER_SYSTEM_WIDE_SETTINGS,
-        VIEW_MODE
+        VIEW_MODE, CONTROLLER_VIEW_MODE
     }
     
     public enum ViewControllers{

@@ -4,10 +4,16 @@
  */
 package colinhewlettsolutions.client.view.views.modal_views;
 
+import colinhewlettsolutions.client.controller.PatientViewController;
+import colinhewlettsolutions.client.controller.SystemDefinition;
 import colinhewlettsolutions.client.controller.ViewController;
 import colinhewlettsolutions.client.view.View;
 import colinhewlettsolutions.client.view.views.non_modal_views.DesktopView;
 import com.github.lgooddatepicker.components.DatePickerSettings;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.time.*;
+import java.beans.PropertyVetoException;
 import java.time.format.DateTimeFormatter;
 import javax.swing.ImageIcon;
 
@@ -15,7 +21,8 @@ import javax.swing.ImageIcon;
  *
  * @author colin
  */
-public class ModalDateDialog extends ModalView {
+public class ModalDateDialog extends ModalView
+                             implements ActionListener{
 
     /**
      * 
@@ -27,13 +34,67 @@ public class ModalDateDialog extends ModalView {
             View.Viewer myViewType,
             ViewController myController, 
             DesktopView desktopView){
-        initComponents();
+        setMyController(myController);
+        setMyViewType(myViewType);
+        setDesktopView(desktopView);  
     }
     
+    public enum Actions{
+        DATE_DIALOG_CANCEL_REQUEST,
+        DATE_DIALOG_OK_REQUEST
+    }
+    
+    @Override
+    public void actionPerformed(ActionEvent e){
+        switch(Actions.valueOf(e.getActionCommand())){
+            case DATE_DIALOG_CANCEL_REQUEST ->{
+                getMyController().getDescriptor().getViewDescription().
+                            setProperty(SystemDefinition.Properties.DATE_TIME, null);
+                try{
+                    setClosed(true);
+                }
+                catch (PropertyVetoException ex){
+                    
+                }
+                break;
+            }
+            case DATE_DIALOG_OK_REQUEST ->{
+                if (datePicker.getDate()!=null){
+                    LocalDateTime dateTime = LocalDateTime.of(datePicker.getDate(),LocalTime.now());
+                    getMyController().getDescriptor().getViewDescription().
+                            setProperty(SystemDefinition.Properties.DATE_TIME, dateTime);
+                }     
+                //doActionEventFor(Actions.DATE_DIALOG_OK_REQUEST);
+                
+                try{
+                    setClosed(true);
+                }catch (PropertyVetoException ex){
+                    
+                }
+                break;
+            }
+        }
+    }
+    
+    @Override
     public void initialiseView(){
+        initComponents();
         setVisible(true);
+        setTitle((String)getMyController().getDescriptor().getControllerDescription().
+                getProperty(SystemDefinition.Properties.CAPTION));
+        this.btnCancel.setActionCommand(Actions.DATE_DIALOG_CANCEL_REQUEST.toString());
+        this.btnOK.setActionCommand(Actions.DATE_DIALOG_OK_REQUEST.toString());
+        btnCancel.addActionListener(this);
+        btnOK.addActionListener(this);
+        
     }
 
+    private void doActionEventFor(Actions action){
+        ActionEvent actionEvent = new ActionEvent(
+            this,ActionEvent.ACTION_PERFORMED,
+            action.toString());
+        this.getMyController().actionPerformed(actionEvent);
+    }
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
