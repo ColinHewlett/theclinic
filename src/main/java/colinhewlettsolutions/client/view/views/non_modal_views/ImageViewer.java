@@ -94,6 +94,7 @@ public class ImageViewer extends View implements ActionListener{
     private int index = 0;
     private void setImageIndex(int value){
         index = value;
+        lblPageNumber.setText("Page " + (index+1));
     }
     private int getImageIndex(){
         return index;
@@ -160,10 +161,14 @@ public class ImageViewer extends View implements ActionListener{
         pnlImageView = new javax.swing.JPanel();
         btnNext = new javax.swing.JButton();
         btnPrevious = new javax.swing.JButton();
+        lblPageNumber = new javax.swing.JLabel();
 
         btnNext.setText(">");
 
         btnPrevious.setText("<");
+
+        lblPageNumber.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        lblPageNumber.setText("jLabel1");
 
         javax.swing.GroupLayout pnlImageViewLayout = new javax.swing.GroupLayout(pnlImageView);
         pnlImageView.setLayout(pnlImageViewLayout);
@@ -172,7 +177,9 @@ public class ImageViewer extends View implements ActionListener{
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlImageViewLayout.createSequentialGroup()
                 .addGap(20, 20, 20)
                 .addComponent(btnPrevious)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 368, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 156, Short.MAX_VALUE)
+                .addComponent(lblPageNumber, javax.swing.GroupLayout.PREFERRED_SIZE, 58, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 156, Short.MAX_VALUE)
                 .addComponent(btnNext)
                 .addGap(20, 20, 20))
         );
@@ -182,7 +189,8 @@ public class ImageViewer extends View implements ActionListener{
                 .addGap(6, 6, 6)
                 .addGroup(pnlImageViewLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnNext)
-                    .addComponent(btnPrevious))
+                    .addComponent(btnPrevious)
+                    .addComponent(lblPageNumber))
                 .addGap(6, 6, 6))
         );
 
@@ -214,6 +222,7 @@ public class ImageViewer extends View implements ActionListener{
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnNext;
     private javax.swing.JButton btnPrevious;
+    private javax.swing.JLabel lblPageNumber;
     private javax.swing.JPanel pnlImageView;
     private javax.swing.JScrollPane scrImageView;
     // End of variables declaration//GEN-END:variables

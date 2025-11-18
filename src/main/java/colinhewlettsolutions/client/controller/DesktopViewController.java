@@ -5,11 +5,7 @@
  */
 package colinhewlettsolutions.client.controller;
 
-import static colinhewlettsolutions.client.controller.SystemDefinition.Properties;
 import static colinhewlettsolutions.client.controller.ViewController.displayErrorMessage;
-//import static colinhewlettsolutions.client.controller.ViewController.ControllerViewMode;
-import static colinhewlettsolutions.client.controller.ViewController.DesktopViewControllerPropertyChangeEvent.SET_DESKTOP_VIEW_MODE;
-import static colinhewlettsolutions.client.controller.ViewController.PatientViewControllerPropertyChangeEvent.PATIENT_VIEW_CHANGE_NOTIFICATION;
 import colinhewlettsolutions.client.model.non_entity.Credential;
 import colinhewlettsolutions.client.model.non_entity.JarFileFinder;
 import colinhewlettsolutions.client.controller.exceptions.TemplateReaderException;
@@ -21,22 +17,26 @@ import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.Font;
 import java.awt.Point;
-import java.awt.BorderLayout;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeSupport;
 import java.beans.PropertyChangeListener;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.HashMap;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.swing.JOptionPane;
 import javax.swing.SwingWorker;
 import javax.swing.UIManager;
 import colinhewlettsolutions.client.view.View;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Map;
 import javax.swing.JInternalFrame;
 import javax.swing.UnsupportedLookAndFeelException;
@@ -145,70 +145,114 @@ public class DesktopViewController extends ViewController{
         SET_DESKTOP_VIEW_MODE
     }
     
-    public DesktopViewController(String projectId){
-       String xmlFileName = "";
-        String xsdFileName = "";
-        //this.systemDefinition = systemDefinition;
-        //this.templateReader = templateReader;
+    public enum SystemExitCode{
+        NORMAL_EXIT,
+        MISSING_COMMAND_LINE_ARGUMENT,
+        MAIN_METHOD_EXCEPTION,
+        INVALID_DOCUMENT_STORE_FOLDER,
+        INVALID_PRINT_FOLDER
+    }
+    
+    public static void systemExitFor(SystemExitCode value, Exception ex){
+        int status = 0;
+        String message = "";
+        switch (value){
+            case NORMAL_EXIT ->{
+                break;
+            }
+            case MISSING_COMMAND_LINE_ARGUMENT ->{
+                message = "System exited with status '1': missing command line argument";
+                status = 1;
+                break;
+            }
+            case MAIN_METHOD_EXCEPTION ->{
+                if (ex!=null){
+                    message = "System exited with status '2': " + ex.getMessage();
+                    status=2;
+                }
+                break;
+            }
+            case INVALID_DOCUMENT_STORE_FOLDER ->{
+                message = "System exited with status '3': 'document_store' folder does not exist";
+                status=3;
+                break;
+            }
+            case INVALID_PRINT_FOLDER ->{
+                message = "System exited with status '4': 'print_folder' does not exist";
+                status=4;
+                break;
+            }
+        }
+        System.out.println(message);
+        System.exit(status);
+    }
+    
+    public DesktopViewController(String[] args){
+        String projectId = "";
+        String xmlFilename = "";
+        String xsdFilename = "";
         System.out.println(JarFileFinder.getPath());
         System.out.println("Compiler version = " + System.getProperty("java.version"));
         try{
             /**
              * -- the executed jar file and system definition files are located in a folder on the host system,
-             * -- the name of which is the same as the argument passed to the jar file on the command line
-             * -- the folder can be at any depth of the host file system
-             * -- the path to the folder can include one or more folders which have the same name as the project folder
-             * -- the last occurrence in the path returned by the JarFileFinder class is the project folder
-             * 
-             * -- the lastIndexOf(projectId + "/") returns the index in the path to the project folder returned by JarFileFinder.getPath() 
-             * 
-             * -- if constructor is run inside netbeans the path to the folder must be hard  wired in the code
-             * -- else if constructor is executed from the jar on the host system the JarFileFinder class returns the path to the folder on the host system 
              */
             String pathToProjectFolder = null;
             if(!JarFileFinder.getName().equals("")){
-                //xmlFileName = JarFileFinder.getPath() +
-                //String root = JarFileFinder.getPath().substring(0,1);
-                //root = root + ":/" + projectId;
-                xmlFileName = JarFileFinder.getPath().substring(0,JarFileFinder.getPath().lastIndexOf('/')) + "/SystemDefinition.xml";
-                xsdFileName = JarFileFinder.getPath().substring(0,JarFileFinder.getPath().lastIndexOf('/')) + "/SystemDefinition.xsd";
-                System.out.println("xmlFilename = " + xmlFileName);
-                /*
-                pathToProjectFolder = 
-                        JarFileFinder.getPath().substring(0,(JarFileFinder.getPath().lastIndexOf(projectId + "/") + projectId.length()));
-                System.out.println("pathToProjectFolder = " + JarFileFinder.getPath().substring(0,(JarFileFinder.getPath().lastIndexOf(projectId + "/") + projectId.length())));
-                if (pathToProjectFolder==null){
-                    systemDefinition.setSystemExitMessage("Unable to locate specified project folder; program exited");
-                    System.exit(2);
+                if (args.length==0){
+                    xmlFilename = JarFileFinder.getPath().substring(0,JarFileFinder.getPath().lastIndexOf('/') + 1) + "/SystemDefinition.xml";
+                    xsdFilename = JarFileFinder.getPath().substring(0,JarFileFinder.getPath().lastIndexOf('/') + 1) + "/SystemDefinition.xsd";
+                    projectId = JarFileFinder.getPath().substring(0,JarFileFinder.getPath().lastIndexOf('/') + 1);
+                    System.out.println("Stand alone jar execution with no command line argument calculates xmlFilename = " + xmlFilename);
                 }else{
-                    xmlFileName = pathToProjectFolder + "/SystemDefinition.xml";
-                    xsdFileName = pathToProjectFolder + "/SystemDefinition.xsd";
-                    System.out.println("xml file name = " + xmlFileName);
-                }*/
+                    projectId = args[0];
+                    xmlFilename = projectId + "/SystemDefinition.xml";
+                    xsdFilename = projectId + "/SystemDefinition.xsd";
+                    System.out.println("Stand alone jar execution with a command line argument calculates xmlFilename = " + xmlFilename);
+                }
+                System.out.println("xmlFilename = " + xmlFilename);
             }else {
-                switch(projectId){
+                /**
+                 * main method has already checked a command line argument must exist in the case where this is a Netbeans launch of the app
+                 */
+                projectId = args[0];
+                String the_projectId = projectId.substring(projectId.lastIndexOf('/') + 1);
+                switch(the_projectId){
                     case "Fractals" ->{
-                        xmlFileName = "c:/Fractals/SystemDefinition.xml";
-                        xsdFileName = "c:/Fractals/SystemDefinition.xsd";
+                        xmlFilename = projectId + "/SystemDefinition.xml";
+                        xsdFilename = projectId + "/SystemDefinition.xsd";
                         break;
                     }
                     case "_PMS" ->{
-                        xmlFileName = "c:/_PMS/SystemDefinition.xml";
-                        xsdFileName = "c:/_PMS/SystemDefinition.xsd";
+                        xmlFilename = projectId + "/SystemDefinition.xml";
+                        xsdFilename = projectId + "/SystemDefinition.xsd";
                         break;
                     }
                 }
+                System.out.println("Netbeans app execution with command line argument calculates xmlFilename = " + xmlFilename);
             }
             
-            System.out.println(xmlFileName);
-            templateReader = new TemplateReader();
-            if(!templateReader.validateXMLSchema(new File(xsdFileName), new File(xmlFileName))){
-                throw new TemplateReaderException(
-                        "Invalid XML document format encountered",TemplateReaderException.ExceptionType.SAX_EXCEPTION); 
-                
+            System.out.println(xmlFilename);
+            
+            String xml = Files.readString(new File(xmlFilename).toPath());
+            Pattern pattern = Pattern.compile("(<!ENTITY\\s+PROJECT_ID\\s+\")([^\"]*)(\">)");
+            Matcher matcher = pattern.matcher(xml);
+            if (matcher.find()) {
+                String updated = matcher.replaceFirst("$1" + projectId + "$3");
+                System.out.println("UPDATED " + updated);
+                Files.writeString(new File(xmlFilename).toPath(), updated);
+            } else {
+                throw new IOException("PROJECT_ID entity not found in DOCTYPE.");
             }
 
-            this.templateReader.setTemplateFile(new File(xmlFileName));
+            
+            templateReader = new TemplateReader();
+            if(!templateReader.validateXMLSchema(new File(xsdFilename), new File(xmlFilename))){
+                throw new TemplateReaderException(
+                        "Invalid XML document format encountered",TemplateReaderException.ExceptionType.SAX_EXCEPTION);     
+            }
+
+            this.templateReader.setTemplateFile(new File(xmlFilename));
             this.templateReader.setSectionId("SystemDefinition");;
             setDescriptor(new Descriptor());
             this.templateReader.setProjectId("UNIVERSAL");
@@ -228,7 +272,8 @@ public class DesktopViewController extends ViewController{
                 getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.SMTP_USER, "colin.hewlett.solutions@gmail.com");
             }
             
-            System.out.println((String)getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.DATABASE_URL));
+            doTemporaryFix();
+            System.out.println("Database url = " + (String)getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.DATABASE_URL));
             setUserFactorySettings();
             Repository repository = 
                     new Repository((String)getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.DATABASE_TYPE),
@@ -242,17 +287,20 @@ public class DesktopViewController extends ViewController{
                     UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
                 case "Windows" ->
                     UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+                    
             }
         }catch (ClassNotFoundException | 
                 UnsupportedLookAndFeelException |
                 InstantiationException |
                 IllegalAccessException |
+                IOException |
                 StoreException |
                 TemplateReaderException 
                 ex) {
                 displayErrorMessage(ex.getMessage(),"Desktop View Controller error",JOptionPane.WARNING_MESSAGE);
                 colinhewlettsolutions.client.controller.SystemDefinition.setSystemExitCode(2);
-                System.exit(2);
+                SystemDefinition.setSystemExitCode(2);
+                systemExitFor(SystemExitCode.MAIN_METHOD_EXCEPTION,ex);
         }
         desktopView = new DesktopView(this);
         desktopView.setLocationRelativeTo(null);
@@ -260,6 +308,88 @@ public class DesktopViewController extends ViewController{
         desktopView.initialiseView();
         desktopView.setVisible(true);
     }
+
+    private void doTemporaryFix(){
+        Path path = null;
+        Object object  = null;       
+        /**
+         * temporary fix to ensure integrity of DOCUMENT_STORE property
+         * -- ensures its a Path object
+         * -- if path does not exist system exited with appropriate status
+         */
+        object = getDescriptor().getControllerDescription().
+                getProperty(SystemDefinition.Properties.DOCUMENT_STORE);
+        if (object instanceof String){
+            path = Paths.get(object.toString());
+            getDescriptor().getControllerDescription().
+                setProperty(SystemDefinition.Properties.DOCUMENT_STORE,path);
+        }
+        path = (Path)getDescriptor().getControllerDescription().
+                getProperty(SystemDefinition.Properties.DOCUMENT_STORE);
+        
+        if (!Files.exists(path)){
+            systemExitFor(SystemExitCode.INVALID_DOCUMENT_STORE_FOLDER, null);
+        }
+        
+        /**
+         * temporary fix to ensure integrity of PRINT_FOLDER property
+         * -- ensures its a Path object
+         * -- if path does not exist system exited with appropriate status
+         */
+        object = getDescriptor().getControllerDescription().
+                getProperty(SystemDefinition.Properties.PRINT_FOLDER);
+        if (object instanceof String){
+            path = Paths.get(object.toString());
+            getDescriptor().getControllerDescription().
+                setProperty(SystemDefinition.Properties.PRINT_FOLDER,path);
+        }
+        path = (Path)getDescriptor().getControllerDescription().
+                getProperty(SystemDefinition.Properties.PRINT_FOLDER);
+        
+        if (!Files.exists(path)){
+            systemExitFor(SystemExitCode.INVALID_PRINT_FOLDER, null);
+        }
+        
+        /**
+         * temporary fix to ensure integrity of DATABASE_URL property
+         * -- ensures UNC reference replaces the mapped drive reference if the mapped drive is remote (e.g. z)
+         * -- the UNC reference is //LAPTOP-HOST/LAN_share 
+         * -- and this needs to replace the Z:/_PMS reference in the url
+         * -- given the URL -- jdbc:ucanaccess://Z:/_PMS/repository/95.accdb
+         * -- replacement url is jdbc:ucanaccess:////LAPTOP-HOST/LAN_share/repository/95.accdb
+         */
+        String unc = null;
+        String jdbcURL = (String)getDescriptor().getControllerDescription().
+                getProperty(SystemDefinition.Properties.DATABASE_URL);
+        unc = "jdbc:ucanaccess://///LAPTOP-HOST/pms2/repository/95.accdb";
+        getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.DATABASE_URL, unc);
+        try{
+            FileWriter fw = new FileWriter("Z:/_PMS/terstfile.txt");
+            fw.write("Hello");
+            
+        }catch (IOException ex){
+            displayErrorMessage(ex.getMessage(), "View Controller error", JOptionPane.WARNING_MESSAGE);
+        }
+        /*if (jdbcURL.contains("Z:/_PMS")){
+            unc = "jdbc:ucanaccess://Z:/_PMS/repository/95.accdb";
+            getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.DATABASE_URL, unc);
+            //unc = jdbcURL.replaceFirst("(?i)^Z:/_PMS", "//LAPTOP-HOST/LAN_share");
+            //System.out.println("unc = " + unc);
+            //System.exit(0);
+        }*/
+    }
+    public void updateProjectIdEntity(File xmlFile, String newValue) throws IOException {
+        String xml = Files.readString(xmlFile.toPath());
+        Pattern pattern = Pattern.compile("(<!ENTITY\\s+PROJECT_ID\\s+\")([^\"]*)(\">)");
+        Matcher matcher = pattern.matcher(xml);
+        if (matcher.find()) {
+            String updated = matcher.replaceFirst("$1" + newValue + "$3");
+            Files.writeString(xmlFile.toPath(), updated);
+        } else {
+            throw new IOException("PROJECT_ID entity not found in DOCTYPE.");
+        }
+    }
+
     
     private void setUserSettings(User user, HashMap<SystemDefinition.Properties,HashMap<Properties,Object>> settings){
         
@@ -897,7 +1027,9 @@ public class DesktopViewController extends ViewController{
                             }
                         }
                     }
-                }else System.exit(0);  
+                }else {
+                    System.exit(0);
+                }  
             }
         }
     }
@@ -2231,7 +2363,7 @@ public class DesktopViewController extends ViewController{
     }
     
     private void doRequestForViewNotification(){
-            System.exit(0);
+        System.exit(0);
     }
 
     /**
@@ -2996,35 +3128,32 @@ public class DesktopViewController extends ViewController{
         }
     }
     
+    
     /**
-     * One command line argument is expected which defines the project name that is being launched
-     * -- for example 'Fractals', 'PMS' ...
-     * this is passed to the DesktopViewController's constructor
-     * @param args the command line arguments
+     * this is a stand alone jar file execution or a Netbeans embedded jar file execution 
+     * if it a Netbeans embedded jar file execution and a command line argument is missing the execution halts with an error code of 1
+     * else the DesktopViewController constructor is invoked with the command line argument array
+     * @param args the command line arguments (if any)
      * 
      */
     //private static DesktopViewController me;
     public static void main(String[] args){
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            if (SystemDefinition.systemExitCode>0)
-                System.out.println(SystemDefinition.getSystemExitMessage());
-            else System.out.println(SystemDefinition.getSystemExitMessage());
-            System.out.println(SystemDefinition.getSystemExitCode());
+            
         }));
-        if (args.length >= 0){
-            javax.swing.SwingUtilities.invokeLater(new Runnable() {
-                @Override
-                public void run() {
-                    //new DesktopViewController(new TemplateReader(), new SystemDefinition(),args[0]);
-                    new DesktopViewController(args[0]);
-                }
-            });
-        }else {
-            SystemDefinition.setSystemExitCode(1);
-            SystemDefinition.setSystemExitMessage("Command line argument expected but none found; program exited");
-            System.exit(1);
+        if (JarFileFinder.getName().equals("")){
+            if(args.length==0){
+                SystemDefinition.setSystemExitCode(1);
+                systemExitFor(SystemExitCode.MISSING_COMMAND_LINE_ARGUMENT, null);
+            }
         }
-        
+        javax.swing.SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                //new DesktopViewController(new TemplateReader(), new SystemDefinition(),args[0]);
+                new DesktopViewController(args);
+            }
+        });  
     }
 
     private void doPatientViewControllerChangeNotification(PropertyChangeEvent e){

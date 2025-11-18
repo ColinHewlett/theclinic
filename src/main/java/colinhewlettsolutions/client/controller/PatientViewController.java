@@ -280,9 +280,8 @@ public class PatientViewController extends ViewController {
             case CLINICAL_NOTE_VIEW:
                 doClinicalNoteViewAction(e);
                 break;
-            case MODAL_DOCUMENT_STORE_VIEW:
+            case DOCUMENT_STORE_VIEW:
                 doModalDocumentStoreViewAction(e);
-                //doImageViewerRequest();
                 break;
             case MODAL_DATE_DIALOG:
                 doModalDateDialogAction(e);
@@ -338,20 +337,22 @@ public class PatientViewController extends ViewController {
     }
     
     private void doPatientDocumentStoreViewRequest(){
+        /**
+         * check 
+         */
         ViewController.ViewMode viewMode = (ViewController.ViewMode)getDescriptor().getViewDescription().
                 getProperty(Properties.VIEW_MODE);
         getDescriptor().getControllerDescription().setProperty(Properties.VIEW_MODE, viewMode);
-        setModalView((ModalView)new View().make(
-                View.Viewer.MODAL_DOCUMENT_STORE_VIEW,
+        setView(new View().make(View.Viewer.DOCUMENT_STORE_VIEW,
                 this,
-                this.getDesktopView()).getModalView());
+                this.getDesktopView()));
     }
     
     private void doUploadToPatientDocumentStoreRequest(){
         ArrayList<File> document = (ArrayList<File>)getDescriptor().getViewDescription().
                 getProperty(Properties.PATIENT_DOCUMENT);
-        LocalDateTime date = (LocalDateTime)getDescriptor().getViewDescription().
-                getProperty(Properties.DATE_TIME);
+        /*LocalDateTime date = (LocalDateTime)getDescriptor().getViewDescription().
+                getProperty(Properties.DATE_TIME);*/
         Patient patient = (Patient)getDescriptor().getControllerDescription().
                 getProperty(Properties.PATIENT);
         Path documentStoreFolder = (Path)getDescriptor().getControllerDescription().
@@ -387,7 +388,8 @@ public class PatientViewController extends ViewController {
                     this, 
                     this.getDesktopView()).getModalView());
 
-                
+                LocalDateTime date = (LocalDateTime)getDescriptor().getViewDescription().
+                        getProperty(Properties.DATE_TIME);
                 int count = 1;
                 for(File page : document){
                     String newFilename = date.format(DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss"));
@@ -444,9 +446,12 @@ public class PatientViewController extends ViewController {
     }  
     
     private void doImageViewerRequest(){
+        int count = this.getMyController().getDesktopView().getDeskTop().getAllFrames().length;
+        System.out.println("view count = " + this.getMyController().getDesktopView().getDeskTop().getAllFrames().length);
         getDescriptor().getControllerDescription().setProperty(Properties.PATIENT_DOCUMENT,
                 (ArrayList<File>)getDescriptor().getViewDescription().getProperty(Properties.PATIENT_DOCUMENT));
         setView(new View().make(View.Viewer.IMAGE_VIEWER, this, getDesktopView()));
+        getMyController().getDesktopView().cascadeInternalFrames(DesktopView.CascadeOrder.TOP_TO_FRONT);
     }
     
     private void doClinicalNoteViewRequest(){
@@ -1755,19 +1760,7 @@ public class PatientViewController extends ViewController {
         patient.setScope(Scope.ALL);
         patient.read();
         setDescriptor(myDescriptor);
-        
-        /**
-         * temporary fix to ensure property returned is a Path and not a String
-         */
-        Object object = myDescriptor.getControllerDescription().getProperty(Properties.DOCUMENT_STORE);
-        if (object instanceof String){
-            Path path = Paths.get(object.toString());
-            getDescriptor().getControllerDescription().
-                setProperty(Properties.DOCUMENT_STORE,path);
-        }
-        
-        
-        
+
         getDescriptor().getControllerDescription().setProperty(Properties.PATIENTS, patient.get());
         View.setViewer(View.Viewer.PATIENT_VIEW);
         setCurrentlySelectedPatient(new Patient());

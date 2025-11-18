@@ -42,6 +42,7 @@ import java.awt.event.MouseListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyVetoException;
+import java.nio.file.Path;
 import java.time.DayOfWeek;
 import java.time.format.DateTimeFormatter;
 import java.time.LocalTime;
@@ -1157,8 +1158,11 @@ public class ScheduleListView extends BookingView
     private void doPrintScheduleRequest(){
         getMyController().getDescriptor().getViewDescription().setProperty(SystemDefinition.Properties.SCHEDULE_DAY, dayDatePicker.getDate());
         doActionEventFor(ScheduleViewController.Actions.PRINT_SCHEDULE_REQUEST);
-        String printFolder = (String)getMyController().getDescriptor().getControllerDescription().getProperty(Properties.PRINT_FOLDER);
-        doOpenDocumentForPrinting(printFolder + SystemDefinition.FILENAME_FOR_SCHEDULE);
+        /*String printFolder = (String)getMyController().getDescriptor().getControllerDescription().
+                getProperty(Properties.PRINT_FOLDER);*/
+        String printFolder = ((Path)getMyController().getDescriptor().getControllerDescription().
+                getProperty(Properties.PRINT_FOLDER)).toString();
+        doOpenDocumentForPrinting(printFolder + "/" + SystemDefinition.FILENAME_FOR_SCHEDULE);
     }
     
     private boolean isViewSwitchPending = false;

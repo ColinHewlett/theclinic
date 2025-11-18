@@ -7,6 +7,7 @@ package colinhewlettsolutions.client.view;
 
 
 /*import view.views.modal_views.ModalPatientMedicalHistory1EditorView;*/
+import colinhewlettsolutions.client.view.views.non_modal_views.DocumentStoreView;
 import colinhewlettsolutions.client.view.views.modal_views.UserSystemWideSettingsView;
 import colinhewlettsolutions.client.view.views.modal_views.ModalUserScheduleListSettingsView;
 import colinhewlettsolutions.client.view.views.modal_views.ModalUserScheduleDiarySettingsView;
@@ -157,6 +158,9 @@ public class View extends JInternalFrame
             case CLINICAL_NOTE_VIEW:
                 setModalView(makeView(new ModalClinicalNoteView(viewer, controller, desktopView)));
                 break;
+            case DOCUMENT_STORE_VIEW:
+                setView(makeView(new DocumentStoreView(viewer, controller,desktopView)));
+                break;
             case EXPORT_PROGRESS_VIEW:
                 setView(makeView(new DataMigrationProgressView(viewer, controller,desktopView)));
                 break;
@@ -235,9 +239,6 @@ public class View extends JInternalFrame
                 break;    
             case MODAL_DATE_DIALOG:
                 setModalView(makeView(new ModalDateDialog(viewer, controller,desktopView)));
-                break;
-            case MODAL_DOCUMENT_STORE_VIEW:
-                setModalView(makeView(new ModalDocumentStoreView(viewer, controller,desktopView)));
                 break;
             case MODAL_PROGRESS_VIEW:
                 setModalView(makeView(new ModalProgressView(viewer, controller,desktopView)));
@@ -359,7 +360,7 @@ public class View extends JInternalFrame
         RECALL_PATIENTS_VIEW,
         MODAL_DATE_DIALOG,
         MODAL_PROGRESS_VIEW,
-        MODAL_DOCUMENT_STORE_VIEW,
+        DOCUMENT_STORE_VIEW,
         SCHEDULE_DIARY_VIEW,
         SCHEDULE_EDITOR_VIEW,
         SCHEDULE_LIST_VIEW,

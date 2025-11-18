@@ -28,6 +28,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -106,8 +107,9 @@ public class DesktopView extends javax.swing.JFrame
                 break;
             case REQUEST_PRINT_NEW_PATIENT_DETAILS_VIEW:
                 doActionEventRequest(DesktopViewController.Actions.PRINT_NEW_PATIENT_DETAILS_REQUEST);
-                String printFolder = (String)getMyController().getDescriptor().getControllerDescription().getProperty(Properties.PRINT_FOLDER);
-                doOpenDocumentForPrinting(printFolder + SystemDefinition.PATIENT_QUESTIONNAIRE_MEDICAL_HISTORY_FILENAME);
+                String printFolder = ((Path)getMyController().getDescriptor().getControllerDescription().
+                        getProperty(Properties.PRINT_FOLDER)).toString();
+                doOpenDocumentForPrinting(printFolder + "/" + SystemDefinition.PATIENT_QUESTIONNAIRE_MEDICAL_HISTORY_FILENAME);
                 break;
             case REQUEST_PRINT_SCHEDULE:
                 doPrintSchedule();
@@ -214,6 +216,8 @@ public class DesktopView extends javax.swing.JFrame
             doRequestUserToLogin();
             
         } 
+        
+        doSystemMenus();
         //doActionEventRequest(DesktopViewController.Actions.TO_DO_VIEW_CONTROLLER_REQUEST);
         //doActionEventRequest(DesktopViewController.Actions.SCHEDULE_LIST_VIEW_CONTROLLER_REQUEST);
     }
@@ -325,8 +329,27 @@ public class DesktopView extends javax.swing.JFrame
         setActiveMenu(mnuSelectView);//legacy feature to distinguish normal app behaviour from data migration
     }
     
-    private void doLogoutRequest(){
-        
+    private JMenuItem mniDocumentStore = null;
+    private JMenuItem mniPrintFolder = null;
+    private JMenuItem mniRepository = null;
+    private void doSystemMenus(){
+        Path documentStoreFolder = (Path)getMyController().getDescriptor().getControllerDescription().
+                getProperty(Properties.DOCUMENT_STORE);
+        Path printFolder = (Path)getMyController().getDescriptor().getControllerDescription().
+                getProperty(Properties.PRINT_FOLDER);
+        String repository = (String)getMyController().getDescriptor().getControllerDescription().
+                getProperty(Properties.DATABASE_URL);
+        Boolean isDebugMode = (Boolean)getMyController().getDescriptor().getControllerDescription().
+                getProperty(SystemDefinition.Properties.DEBUG_SMTP);
+        if (isDebugMode){
+            mniDocumentStore = new JMenuItem("Document store: " + documentStoreFolder.toString());
+            mniPrintFolder = new JMenuItem("Print folder: " + printFolder);
+            mniRepository = new JMenuItem("Repository: " + repository);
+            this.mnuSettings.add(mniDocumentStore);
+            this.mnuSettings.add(mniPrintFolder);
+            this.mnuSettings.add(mniRepository);
+        }
+             
     }
     
     /**
@@ -339,9 +362,9 @@ public class DesktopView extends javax.swing.JFrame
      */
     public static PatientView pvView = null;
     
-    enum CascadeOrder {TOP_TO_FRONT, SPECIFIC}
+    public enum CascadeOrder {TOP_TO_FRONT, SPECIFIC}
     
-    private void cascadeInternalFrames(CascadeOrder cascadeOrder) {
+    public void cascadeInternalFrames(CascadeOrder cascadeOrder) {
         ArrayList<PatientView> patientViews = new ArrayList<>();
         //ArrayList<PatientView> actualPatientViews = new ArrayList<>();
         ArrayList<BookingView> bookingViews = new ArrayList<>();
@@ -820,6 +843,7 @@ public class DesktopView extends javax.swing.JFrame
         mnuSettings.add(mniTreatmentsViewRequest);
         mnuSettings.add(jSeparator4);
 
+        mniPMSVersion.setText("Version:");
         mniPMSVersion.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusLost(java.awt.event.FocusEvent evt) {
                 mniPMSVersionFocusLost(evt);

@@ -21,6 +21,7 @@ public class JarFileFinder {
         if (codeSource != null) {
             URL jarUrl = codeSource.getLocation();
             result = jarUrl.getPath();
+            result = result.substring(1);
         }
         return result;
     }

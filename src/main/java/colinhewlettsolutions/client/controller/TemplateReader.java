@@ -13,7 +13,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import javax.swing.JOptionPane;
 import javax.xml.XMLConstants;
+import javax.xml.transform.dom.DOMSource;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -39,6 +41,7 @@ public class TemplateReader {
      * @return boolean; true if validated
      */
     
+    
     public TemplateReader()throws TemplateReaderException{
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
         factory = dbFactory;
@@ -51,6 +54,10 @@ public class TemplateReader {
 
             // Allow parameter entities if needed
             dbFactory.setFeature("http://xml.org/sax/features/external-parameter-entities", true);
+            
+            dbFactory.setNamespaceAware(true);
+            dbFactory.setExpandEntityReferences(true);
+            dbFactory.setValidating(false);
 
             //DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
         }catch(ParserConfigurationException ex){
@@ -71,6 +78,26 @@ public class TemplateReader {
         factory = value;
     }
     
+    public boolean validateXMLSchema(File xsd, File xml){
+        try{
+            DocumentBuilder dBuilder = getFactory().newDocumentBuilder();
+            Document doc = dBuilder.parse(xml);
+
+            SchemaFactory sFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+            Schema schema = sFactory.newSchema(xsd);
+            Validator validator = schema.newValidator();
+            validator.validate(new DOMSource(doc)); 
+            return true;
+        }catch(ParserConfigurationException |
+               SAXException |
+               IOException ex){
+            String message = ex.getMessage() + "\n";
+            ViewController.displayErrorMessage(message, "Template validation error", JOptionPane.WARNING_MESSAGE);
+            return false;
+        }
+        
+    }
+   /* 
     public boolean validateXMLSchema(File xsd, File xml) {
         try {
             SchemaFactory sFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
@@ -82,7 +109,7 @@ public class TemplateReader {
             System.out.println("Validation error: " + e.getMessage());
             return false;
         }
-    }
+    }*/
     
     private File templateFile = null;
     public void setTemplateFile(File file){
@@ -111,9 +138,6 @@ public class TemplateReader {
     public Element getRootElement()throws TemplateReaderException{
         Element result = null;
         try{
-            
-
-            
             //DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
             DocumentBuilder dBuilder = getFactory().newDocumentBuilder();
             Document doc = dBuilder.parse(getTemplateFile());

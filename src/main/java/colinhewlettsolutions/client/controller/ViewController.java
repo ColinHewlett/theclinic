@@ -43,7 +43,7 @@ import java.awt.Point;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
-import javax.swing.JInternalFrame;
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.LocalDateTime;
@@ -51,6 +51,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.Iterator;
+import javax.swing.JInternalFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.table.TableColumn;
@@ -1743,7 +1744,10 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
             populateAppointmentScheduleHeaderTable(document.getTableArray(0), day);
             populateAppointmentScheduleTable(document.getTableArray(1));
             
-            String printFolder = (String)getMyController().getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.PRINT_FOLDER);
+            /*String printFolder = (String)getMyController().getDescriptor().getControllerDescription().
+                    getProperty(SystemDefinition.Properties.PRINT_FOLDER);*/
+            String printFolder = ((Path)getMyController().getDescriptor().getControllerDescription().
+                    getProperty(SystemDefinition.Properties.PRINT_FOLDER)).toString();
             FileOutputStream out = new FileOutputStream(printFolder + "/AppointmentSchedule.docx");
             document.write(out);
             //document.close();
@@ -1829,11 +1833,13 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
             populate(TableName.PATIENT_CONTACT_DETAILS);
             populate(TableName.PATIENT_QUESTIONNAIRE);
             populate(TableName.PATIENT_MEDICAL_HISTORY);
+    
+            String fileToPrint = ((Path)getDescriptor().getControllerDescription().
+                    getProperty(SystemDefinition.Properties.PRINT_FOLDER)).toString() + "/PatientMedicalHistory.docx";
             
             
-            //FileOutputStream out = new FileOutputStream(SystemDefinition.Properties.getPMSPrintFolder() + "/PatientMedicalHistory.docx");
-            //FileOutputStream out = new FileOutputStream(SystemDefinition.Properties.PRINT_FOLDER + "/PatientMedicalHistory.docx");      
-            String fileToPrint = ((String)getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.PRINT_FOLDER)) + "/PatientMedicalHistory.docx";
+            
+            
             FileOutputStream out = new FileOutputStream(fileToPrint);
             document.write(out);
             out.flush();

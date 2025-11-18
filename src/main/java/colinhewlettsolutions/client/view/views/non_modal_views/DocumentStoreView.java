@@ -2,13 +2,16 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JInternalFrame.java to edit this template
  */
-package colinhewlettsolutions.client.view.views.modal_views;
+package colinhewlettsolutions.client.view.views.non_modal_views;
 
 import colinhewlettsolutions.client.controller.PatientViewController;
 import colinhewlettsolutions.client.controller.SystemDefinition;
 import colinhewlettsolutions.client.controller.ViewController;
 import colinhewlettsolutions.client.model.entity.Patient;
 import colinhewlettsolutions.client.view.View;
+import colinhewlettsolutions.client.view.views.modal_views.ModalView;
+import colinhewlettsolutions.client.view.views.modal_views.ModalView;
+import colinhewlettsolutions.client.view.views.non_modal_views.DesktopView;
 import colinhewlettsolutions.client.view.views.non_modal_views.DesktopView;
 import java.awt.Desktop;
 import java.awt.event.ActionListener;
@@ -34,7 +37,7 @@ import javax.swing.JPanel;
  *
  * @author colin
  */
-public class ModalDocumentStoreView extends ModalView 
+public class DocumentStoreView extends View 
         implements ActionListener, PropertyChangeListener {
     
     enum Actions {
@@ -48,7 +51,7 @@ public class ModalDocumentStoreView extends ModalView
      * @param myController
      * @param desktopView 
      */
-    public ModalDocumentStoreView(View.Viewer myViewType, 
+    public DocumentStoreView(View.Viewer myViewType, 
             ViewController myController,
             DesktopView desktopView) {
         setMyController(myController);
@@ -81,8 +84,20 @@ public class ModalDocumentStoreView extends ModalView
         
     }
 
+    @Override
     public void initialiseView(){
         initComponents();
+        setVisible(true);
+        switch(getViewMode()){
+            case DOCUMENT ->{
+                setTitle("Word documents for " + getPatient());
+                break;
+            }
+            case SCAN ->{
+                setTitle("Medical history scans for " + getPatient());
+                break;
+            }
+        }
         btnCloseView.setActionCommand(Actions.REQUEST_CLOSE_VIEW.toString());
         btnCloseView.addActionListener(this);
         btnDelete.setActionCommand(Actions.REQUEST_FILE_DELETE.toString());
@@ -196,11 +211,6 @@ public class ModalDocumentStoreView extends ModalView
                     getMyController().getDescriptor().getViewDescription().
                             setProperty(SystemDefinition.Properties.PATIENT_DOCUMENT, scans);
                     doActionEventFor(PatientViewController.Actions.IMAGE_VIEWER_REQUEST);
-                    try{
-                        setClosed(true);
-                    }catch(PropertyVetoException ex){
-
-                    }
                     break;
                 }
             }
@@ -319,13 +329,13 @@ public class ModalDocumentStoreView extends ModalView
     enum BorderTitles{ACTIONS,DOCUMENT_STORE_LIST}
     
     private void setViewTitledBorderSettings(){
-        setBorderTitles(ModalDocumentStoreView.BorderTitles.ACTIONS);
-        setBorderTitles(ModalDocumentStoreView.BorderTitles.DOCUMENT_STORE_LIST);
+        setBorderTitles(DocumentStoreView.BorderTitles.ACTIONS);
+        setBorderTitles(DocumentStoreView.BorderTitles.DOCUMENT_STORE_LIST);
     }
     
-    private void setBorderTitles(ModalDocumentStoreView.BorderTitles borderTitles){
-        ViewController.ViewMode viewMode = (ViewController.ViewMode)getMyController().getDescriptor().getControllerDescription().
-                getProperty(SystemDefinition.Properties.VIEW_MODE);
+    private void setBorderTitles(DocumentStoreView.BorderTitles borderTitles){
+        /*ViewController.ViewMode viewMode = (ViewController.ViewMode)getMyController().getDescriptor().getControllerDescription().
+                getProperty(SystemDefinition.Properties.VIEW_MODE);*/
         JPanel panel = null;
         String caption = null;
         boolean isPanelBackgroundDefault = false;
@@ -338,7 +348,7 @@ public class ModalDocumentStoreView extends ModalView
             }
             case DOCUMENT_STORE_LIST ->{
                 panel = this.pnlDocumentStoreFiles;
-                switch (viewMode){
+                switch (getViewMode()){
                     case DOCUMENT ->{
                         caption = "Documents";
                         break;

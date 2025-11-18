@@ -63,6 +63,7 @@ public class ModalDateDialog extends ModalView
                     LocalDateTime dateTime = LocalDateTime.of(datePicker.getDate(),LocalTime.now());
                     getMyController().getDescriptor().getViewDescription().
                             setProperty(SystemDefinition.Properties.DATE_TIME, dateTime);
+                    System.out.println("dateTime = " + getMyController().getDescriptor().getViewDescription().getProperty(SystemDefinition.Properties.DATE_TIME));
                 }     
                 //doActionEventFor(Actions.DATE_DIALOG_OK_REQUEST);
                 

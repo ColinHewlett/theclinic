@@ -51,6 +51,8 @@ public class SystemDefinition {
         return systemExitCode;
     }
     
+    
+    
     public static void getSettingsFor(View view, Properties propertyCategory){        
         HashMap<Properties, Object> settings = null;
         UserSettings userSettings = null;

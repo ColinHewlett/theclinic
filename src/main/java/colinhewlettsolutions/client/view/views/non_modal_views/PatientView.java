@@ -740,6 +740,7 @@ public class PatientView extends View
             case SCAN ->{
                 title = "Select first page of scan to upload";
                 allowedFileExtensions = new String[] {"jpg", "png", "gif"};
+                /*
                 ArrayList<Integer> items = new ArrayList<>();
                 items.add(1);
                 items.add(2);
@@ -750,34 +751,23 @@ public class PatientView extends View
                         "Composite scan file for patient",
                         "Select number of pages to upload").getDialogView();
                 if (getDialogView().getSelectedItem()!=null){
-                    int index = (Integer)getDialogView().getSelectedItem();
-                    for (index = 1;index <=items.size();index++){
-                        switch(index){
-                            case 1 ->{
-                                if (items.size()>1){
-                                    title = "Select first page of scan to upload";
-                                }else title = "Select file to upload";
-                                break;
-                            }
-                            case 2 ->{
-                                title = "Select second page of scan to upload";
-                                break;
-                            }
-                            case 3 ->{
-                                title = "Select third page of scan to upload";
-                                break;
-                            }
-                            case 4 ->{
-                                title = "Select fourth page of scan to upload"; 
-                                break;
-                            }
+                    int index = (Integer)getDialogView().getSelectedItem();*/
+                for (int index = 1;index <=2;index++){
+                    switch(index){
+                        case 1 ->{
+                            title = "Select first page of medical history to upload";
+                            break;
                         }
-                        selectedFile = NativeFileChooser.showOpenDialog(
-                            this, title, new File(System.getProperty("user.home")), allowedFileExtensions);
-                        if (selectedFile!=null){
-                            document.add(selectedFile);
-                        }    
+                        case 2 ->{
+                            title = "Select second page of medical history to upload";
+                            break;
+                        }
                     }
+                    selectedFile = NativeFileChooser.showOpenDialog(
+                        this, title, new File(System.getProperty("user.home")), allowedFileExtensions);
+                    if (selectedFile!=null){
+                        document.add(selectedFile);
+                    }    
                 }
                 break;
             }
