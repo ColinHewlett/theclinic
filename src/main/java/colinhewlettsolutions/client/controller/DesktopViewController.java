@@ -5,6 +5,7 @@
  */
 package colinhewlettsolutions.client.controller;
 
+import colinhewlettsolutions.client.controller.ViewController;
 import static colinhewlettsolutions.client.controller.ViewController.displayErrorMessage;
 import colinhewlettsolutions.client.model.non_entity.Credential;
 import colinhewlettsolutions.client.model.non_entity.JarFileFinder;
@@ -24,6 +25,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -56,9 +58,11 @@ public class DesktopViewController extends ViewController{
     private ArrayList<ClinicalNoteViewController> clinicalNoteViewControllers = new ArrayList<>();
     private ArrayList<LoginViewController> loginViewControllers = new ArrayList<>();
     private ArrayList<DataMigrationProgressViewController> importProgressViewControllers = new ArrayList<>();
+    private ArrayList<ImageViewerViewController> imageViewerViewControllers = new ArrayList<>();
     private ArrayList<MedicalConditionViewController> medicalConditionViewControllers = new ArrayList<>();
     private ArrayList<NotificationViewController> notificationViewControllers = new ArrayList<>();
     private ArrayList<PatientAppointmentDataViewController> patientAppointmentDataViewControllers = new ArrayList<>();
+    private ArrayList<PatientDocumentStoreViewController> patientDocumentStoreViewControllers = new ArrayList<>();
     private ArrayList<PatientInvoiceViewController> patientInvoiceViewControllers = new ArrayList<>();
     private ArrayList<PatientMedicalHistoryViewController> patientMedicalHistoryViewControllers = new ArrayList<>();
     private ArrayList<PatientQuestionnaireViewController> patientQuestionnaireViewControllers = new ArrayList<>();
@@ -84,6 +88,7 @@ public class DesktopViewController extends ViewController{
         viewControllers.add(medicalConditionViewControllers);
         viewControllers.add(notificationViewControllers);
         viewControllers.add(patientAppointmentDataViewControllers);
+        viewControllers.add(patientDocumentStoreViewControllers);
         viewControllers.add(patientInvoiceViewControllers);
         viewControllers.add(patientMedicalHistoryViewControllers);
         viewControllers.add(patientQuestionnaireViewControllers);
@@ -110,13 +115,16 @@ public class DesktopViewController extends ViewController{
         CLOSE_PATIENT_VIEW_WITH_SAME_PATIENT_REQUEST,
         CLOSE_SCHEDULE_VIEW_WITH_SAME_DATE_REQUEST,
         DESKTOP_VIEW_MODE_NOTIFICATION,
+        IMAGE_VIEWER_VIEW_CONTROLLER_REQUEST,
         INITIALISE_VIEW_CONTROLLER,
         LOGOUT_REQUEST,
         MODAL_VIEWER_ACTIVATED_NOTIFICATION,
         MODAL_VIEWER_CLOSED_NOTIFICATION,
         MEDICAL_CONDITION_VIEW_CONTROLLER_REQUEST,
         PATIENT_APPOINTMENT_DATA_VIEW_CONTROLLER_REQUEST,
+        PATIENT_DOCUMENT_STORE_VIEW_CONTROLLER_REQUEST,
         PATIENT_INVOICE_VIEW_CONTROLLER_REQUEST,
+        PRINT_PATIENT_MEDICAL_HISTORY_REQUEST,
         PATIENT_MEDICAL_HISTORY_VIEW_CONTROLLER_REQUEST,
         PATIENT_QUESTIONNAIRE_VIEW_CONTROLLER_REQUEST,
         PATIENT_RECALL_VIEW_CONTROLLER_REQUEST,
@@ -142,22 +150,32 @@ public class DesktopViewController extends ViewController{
     public enum Properties{
         CASCADE_DESKTOP_VIEWS,
         DESKTOP_VIEW_CHANGED_NOTIFICATION,
-        SET_DESKTOP_VIEW_MODE
+        SET_DESKTOP_VIEW_MODE,
+        VIEW_CHANGED_NOTIFICATION
     }
     
     public enum SystemExitCode{
+        INVALID_DOCUMENT_STORE_FOLDER,
+        INVALID_PRINT_FOLDER,
+        INVALID_SYSTEM_DEFINITION_XML_PATH,
+        INVALID_SYSTEM_DEFINITION_XSD_PATH,
         NORMAL_EXIT,
         MISSING_COMMAND_LINE_ARGUMENT,
-        MAIN_METHOD_EXCEPTION,
-        INVALID_DOCUMENT_STORE_FOLDER,
-        INVALID_PRINT_FOLDER
+        MAIN_METHOD_EXCEPTION
     }
     
     public static void systemExitFor(SystemExitCode value, Exception ex){
         int status = 0;
         String message = "";
         switch (value){
-            case NORMAL_EXIT ->{
+            case INVALID_DOCUMENT_STORE_FOLDER ->{
+                message = "System exited with status '3': 'document_store' folder does not exist";
+                status=3;
+                break;
+            }
+            case INVALID_PRINT_FOLDER ->{
+                message = "System exited with status '4': 'print_folder' does not exist";
+                status=4;
                 break;
             }
             case MISSING_COMMAND_LINE_ARGUMENT ->{
@@ -172,21 +190,27 @@ public class DesktopViewController extends ViewController{
                 }
                 break;
             }
-            case INVALID_DOCUMENT_STORE_FOLDER ->{
-                message = "System exited with status '3': 'document_store' folder does not exist";
-                status=3;
+            case NORMAL_EXIT ->{
                 break;
             }
-            case INVALID_PRINT_FOLDER ->{
-                message = "System exited with status '4': 'print_folder' does not exist";
-                status=4;
+            case INVALID_SYSTEM_DEFINITION_XML_PATH ->{
+                message = "System exited with status (5): SystemDefinition.xml cannot be located";
+                status = 5;
+                break;
+            }
+            case INVALID_SYSTEM_DEFINITION_XSD_PATH ->{
+                message = "System exited with status (6): SystemDefinition.xsd cannot be located";
+                status = 6;
                 break;
             }
         }
-        System.out.println(message);
         System.exit(status);
     }
     
+    /**
+     * On entry if the jar file executed is from within Netbeans a command line argument exists
+     * @param args 
+     */
     public DesktopViewController(String[] args){
         String projectId = "";
         String xmlFilename = "";
@@ -195,22 +219,21 @@ public class DesktopViewController extends ViewController{
         System.out.println("Compiler version = " + System.getProperty("java.version"));
         try{
             /**
-             * -- the executed jar file and system definition files are located in a folder on the host system,
+             * if currently executing jar file is stand alone and a command line does not exist
+             * -- derive system folder location from the jar file
+             * -- else derive system folder location from the command line argument
              */
-            String pathToProjectFolder = null;
             if(!JarFileFinder.getName().equals("")){
                 if (args.length==0){
                     xmlFilename = JarFileFinder.getPath().substring(0,JarFileFinder.getPath().lastIndexOf('/') + 1) + "/SystemDefinition.xml";
                     xsdFilename = JarFileFinder.getPath().substring(0,JarFileFinder.getPath().lastIndexOf('/') + 1) + "/SystemDefinition.xsd";
-                    projectId = JarFileFinder.getPath().substring(0,JarFileFinder.getPath().lastIndexOf('/') + 1);
-                    System.out.println("Stand alone jar execution with no command line argument calculates xmlFilename = " + xmlFilename);
+                    projectId = JarFileFinder.getPath().substring(0,JarFileFinder.getPath().lastIndexOf('/'));
+                    projectId = projectId.substring(projectId.lastIndexOf('/')+1);
                 }else{
                     projectId = args[0];
                     xmlFilename = projectId + "/SystemDefinition.xml";
                     xsdFilename = projectId + "/SystemDefinition.xsd";
-                    System.out.println("Stand alone jar execution with a command line argument calculates xmlFilename = " + xmlFilename);
                 }
-                System.out.println("xmlFilename = " + xmlFilename);
             }else {
                 /**
                  * main method has already checked a command line argument must exist in the case where this is a Netbeans launch of the app
@@ -228,24 +251,23 @@ public class DesktopViewController extends ViewController{
                         xsdFilename = projectId + "/SystemDefinition.xsd";
                         break;
                     }
+                    
                 }
-                System.out.println("Netbeans app execution with command line argument calculates xmlFilename = " + xmlFilename);
+                projectId = the_projectId;
             }
             
-            System.out.println(xmlFilename);
-            
-            String xml = Files.readString(new File(xmlFilename).toPath());
-            Pattern pattern = Pattern.compile("(<!ENTITY\\s+PROJECT_ID\\s+\")([^\"]*)(\">)");
-            Matcher matcher = pattern.matcher(xml);
-            if (matcher.find()) {
-                String updated = matcher.replaceFirst("$1" + projectId + "$3");
-                System.out.println("UPDATED " + updated);
-                Files.writeString(new File(xmlFilename).toPath(), updated);
-            } else {
-                throw new IOException("PROJECT_ID entity not found in DOCTYPE.");
+            /**
+             * check if derived xml and xsd filenames exist
+             * if either does not exit system with an error status
+             */
+            Path xmlPath = Path.of(xmlFilename);
+            if (!Files.exists(xmlPath)){
+                systemExitFor(SystemExitCode.INVALID_SYSTEM_DEFINITION_XML_PATH, null);
             }
-
-            
+            Path xsdPath = Path.of(xsdFilename);
+            if (!Files.exists(xsdPath)){
+                systemExitFor(SystemExitCode.INVALID_SYSTEM_DEFINITION_XSD_PATH, null);
+            }
             templateReader = new TemplateReader();
             if(!templateReader.validateXMLSchema(new File(xsdFilename), new File(xmlFilename))){
                 throw new TemplateReaderException(
@@ -253,7 +275,7 @@ public class DesktopViewController extends ViewController{
             }
 
             this.templateReader.setTemplateFile(new File(xmlFilename));
-            this.templateReader.setSectionId("SystemDefinition");;
+            this.templateReader.setSectionId("SystemDefinition");
             setDescriptor(new Descriptor());
             this.templateReader.setProjectId("UNIVERSAL");
             HashMap<String, Object> map1 = this.templateReader.extract(new HashMap<>());
@@ -293,7 +315,7 @@ public class DesktopViewController extends ViewController{
                 UnsupportedLookAndFeelException |
                 InstantiationException |
                 IllegalAccessException |
-                IOException |
+                //IOException |
                 StoreException |
                 TemplateReaderException 
                 ex) {
@@ -349,34 +371,6 @@ public class DesktopViewController extends ViewController{
         if (!Files.exists(path)){
             systemExitFor(SystemExitCode.INVALID_PRINT_FOLDER, null);
         }
-        
-        /**
-         * temporary fix to ensure integrity of DATABASE_URL property
-         * -- ensures UNC reference replaces the mapped drive reference if the mapped drive is remote (e.g. z)
-         * -- the UNC reference is //LAPTOP-HOST/LAN_share 
-         * -- and this needs to replace the Z:/_PMS reference in the url
-         * -- given the URL -- jdbc:ucanaccess://Z:/_PMS/repository/95.accdb
-         * -- replacement url is jdbc:ucanaccess:////LAPTOP-HOST/LAN_share/repository/95.accdb
-         */
-        String unc = null;
-        String jdbcURL = (String)getDescriptor().getControllerDescription().
-                getProperty(SystemDefinition.Properties.DATABASE_URL);
-        unc = "jdbc:ucanaccess://///LAPTOP-HOST/pms2/repository/95.accdb";
-        getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.DATABASE_URL, unc);
-        try{
-            FileWriter fw = new FileWriter("Z:/_PMS/terstfile.txt");
-            fw.write("Hello");
-            
-        }catch (IOException ex){
-            displayErrorMessage(ex.getMessage(), "View Controller error", JOptionPane.WARNING_MESSAGE);
-        }
-        /*if (jdbcURL.contains("Z:/_PMS")){
-            unc = "jdbc:ucanaccess://Z:/_PMS/repository/95.accdb";
-            getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.DATABASE_URL, unc);
-            //unc = jdbcURL.replaceFirst("(?i)^Z:/_PMS", "//LAPTOP-HOST/LAN_share");
-            //System.out.println("unc = " + unc);
-            //System.exit(0);
-        }*/
     }
     public void updateProjectIdEntity(File xmlFile, String newValue) throws IOException {
         String xml = Files.readString(xmlFile.toPath());
@@ -475,6 +469,88 @@ public class DesktopViewController extends ViewController{
     
     private boolean checkCredential(Credential credential){
         return credential.getIsPasswordValid() && credential.getIsUsernameValid();
+    }
+    
+    private void doActionForImageViewerViewController(ActionEvent e){
+        boolean hasFoundViewController = false;
+        ImageViewerViewController ivvc = (ImageViewerViewController)e.getSource();
+        DesktopViewController.Actions actionCommand = 
+                DesktopViewController.Actions.valueOf(e.getActionCommand());
+        switch(actionCommand){
+            case VIEW_CONTROLLER_CLOSE_NOTIFICATION ->{
+                hasFoundViewController = false;
+                for(ImageViewerViewController vc : imageViewerViewControllers){
+                    if (vc.equals(ivvc)){
+                        hasFoundViewController = true;
+                        break;
+                    }
+                }
+                if (hasFoundViewController){
+                    if (!imageViewerViewControllers.remove(ivvc)){
+                        String message = "Problem arose on attempt to remove an "
+                                + "ImageViewer view conroller";
+                        displayErrorMessage(
+                                message,"DesktopViewController error",
+                                JOptionPane.WARNING_MESSAGE);
+                    }
+                }else{
+                    String message = "Could not locate the ImageViewer view controller when trying to remove it";
+                    displayErrorMessage(
+                                message,"DesktopViewController error",
+                                JOptionPane.WARNING_MESSAGE);
+                }
+                break;
+            }
+            default ->{
+                String message = "Unexpected ImageViewer view controller action command encountered: " + actionCommand;
+                displayErrorMessage(
+                                message,"DesktopViewController error",
+                                JOptionPane.WARNING_MESSAGE);
+            }
+        }
+    }
+    
+    private void doActionEventForPatientDocumentStoreViewController(ActionEvent e){
+        boolean hasFoundViewConroller = false;
+        PatientDocumentStoreViewController pdsvc = (PatientDocumentStoreViewController)e.getSource();
+        DesktopViewController.Actions actionCommand = 
+                DesktopViewController.Actions.valueOf(e.getActionCommand());
+        switch(actionCommand){
+            case IMAGE_VIEWER_VIEW_CONTROLLER_REQUEST ->{
+                doRequestForImageViewerViewController(e);
+                break;
+            }
+            case VIEW_CONTROLLER_CLOSE_NOTIFICATION ->{
+                hasFoundViewConroller = false;
+                for(PatientDocumentStoreViewController vc : patientDocumentStoreViewControllers){
+                    if (vc.equals(pdsvc)){
+                        hasFoundViewConroller = true;
+                        break;
+                    }
+                }
+                if (hasFoundViewConroller){
+                    if (!patientDocumentStoreViewControllers.remove(pdsvc)){
+                        String message = "Problem arose on attempt to remove a "
+                                + "PatientDocumentStore view conroller";
+                        displayErrorMessage(
+                                message,"DesktopViewController error",
+                                JOptionPane.WARNING_MESSAGE);
+                    }
+                }else{
+                    String message = "Could not locate the PatientDocumentStore view controller when trying to remove it";
+                    displayErrorMessage(
+                                message,"DesktopViewController error",
+                                JOptionPane.WARNING_MESSAGE);
+                }
+                break;
+            }
+            default ->{
+                String message = "Unexpected PatientDocumentStore view controller action command encountered: " + actionCommand;
+                displayErrorMessage(
+                                message,"DesktopViewController error",
+                                JOptionPane.WARNING_MESSAGE);
+            }
+        }
     }
     
     private void doActionEventForClinicalNoteViewController(ActionEvent e){
@@ -1113,8 +1189,11 @@ public class DesktopViewController extends ViewController{
     private void doActionEventForPatientViewController(ActionEvent e){
         PatientViewController pvc = null;
         Iterator<ClinicalNoteViewController> clinicalNoteViewControllerIterator = null;
-        ViewController.DesktopViewControllerActionEvent actionCommand =
-                    ViewController.DesktopViewControllerActionEvent.valueOf(e.getActionCommand());
+        
+        /*ViewController.DesktopViewControllerActionEvent actionCommand =
+                    ViewController.DesktopViewControllerActionEvent.valueOf(e.getActionCommand());*/
+        
+        DesktopViewController.Actions actionCommand = DesktopViewController.Actions.valueOf(e.getActionCommand());
         switch(actionCommand){
             case VIEW_CONTROLLER_CHANGED_NOTIFICATION:
                 firePropertyChangeEvent(
@@ -1166,6 +1245,9 @@ public class DesktopViewController extends ViewController{
                     }
                 }
                 break;
+            case PATIENT_DOCUMENT_STORE_VIEW_CONTROLLER_REQUEST:
+                doRequestForPatientDocumentStoreViewController(e);
+                break;
             case PATIENT_INVOICE_VIEW_CONTROLLER_REQUEST:
                 doRequestForPatientInvoiceViewController(e);
                 break;
@@ -1191,6 +1273,9 @@ public class DesktopViewController extends ViewController{
                         setProperty(SystemDefinition.Properties.CONTROLLER_VIEW_MODE, ControllerViewMode.LIST);
                 
                 createNewAppointmentScheduleViewController(patientViewController.getDescriptor());
+                break;
+            case TO_DO_VIEW_CONTROLLER_REQUEST:
+                doRequestForToDoViewController();
                 break;
         }
     }
@@ -1288,6 +1373,7 @@ public class DesktopViewController extends ViewController{
                         null,
                         null
                 ); 
+                break;
             }
             case VIEW_CLOSE_REQUEST ->{
                 doRequestForViewClose();
@@ -1493,22 +1579,8 @@ public class DesktopViewController extends ViewController{
                 displayErrorMessage(ex.getMessage(),"DesktopViewController error",JOptionPane.WARNING_MESSAGE);
             } 
             avc.setDescriptor(ed);
-            /* 7/11/2025 issue - works ok in 1.52 but null pointer in 1.76
-            switch((ControllerViewMode)ed.getControllerDescription().getProperty(SystemDefinition.Properties.CONTROLLER_VIEW_MODE)){
-
-                case LIST ->{
-                    System.out.println("Desktop displayable after before ScheduleView created = " + getDesktopView().getDeskTop().isDisplayable());
-                    avc.setView(new View().make(View.Viewer.SCHEDULE_LIST_VIEW,avc,getDesktopView()));
-                    break;
-                }
-                case DIARY ->{
-                    avc.setView(new View().make(View.Viewer.SCHEDULE_DIARY_VIEW,avc,getDesktopView()));
-                    break;
-                }
-            }*/
             //assume only LIST format available
-            System.out.println("Desktop displayable after before ScheduleView created = " + getDesktopView().getDeskTop().isDisplayable());
-                    avc.setView(new View().make(View.Viewer.SCHEDULE_LIST_VIEW,avc,getDesktopView()));
+            avc.setView(new View().make(View.Viewer.SCHEDULE_LIST_VIEW,avc,getDesktopView()));
             ActionEvent actionEvent = new ActionEvent(
                     this,ActionEvent.ACTION_PERFORMED,
                     DesktopViewController.DesktopViewControllerActionEvent.INITIALISE_VIEW_CONTROLLER.toString());
@@ -1867,6 +1939,8 @@ public class DesktopViewController extends ViewController{
             }
         }
     }
+    
+    
     
     private void doRequestForPatientInvoiceViewController(ActionEvent e){
         boolean isPIVCForSamePatientActive = false;
@@ -2268,16 +2342,11 @@ public class DesktopViewController extends ViewController{
                     View.Viewer.PATIENT_VIEW,
                     pvc, 
                     getDesktopView()));
-                this.getDesktopView().add(pvc.getView());
-                /*
-                ActionEvent actionEvent = new ActionEvent(
-                    this,ActionEvent.ACTION_PERFORMED,
-                    DesktopViewController.DesktopViewControllerActionEvent.INITIALISE_VIEW_CONTROLLER.toString());
-                pvc.actionPerformed(actionEvent);*/
 
                 if (getDesktopViewMode().equals(DesktopViewMode.CLINIC_LOGO)){
                         doSetupDesktopViewMode();
                 } 
+                
                 
                 if (getDesktopView().getDeskTop().getAllFrames().length>1){
                     this.firePropertyChangeEvent(
@@ -2291,6 +2360,108 @@ public class DesktopViewController extends ViewController{
             }
             catch (StoreException ex){
                 displayErrorMessage(ex.getMessage(),"DesktopViewController error",JOptionPane.WARNING_MESSAGE);
+            }
+        }
+    }
+    
+    /**
+     * checks if request is for same patient and same document; and if yes place existing image viewwer on top of desktop
+     * @param e 
+     */
+    private void doRequestForImageViewerViewController(ActionEvent e){
+        ImageViewerViewController activeVCForSamePatientAndDocument = null;
+        ImageViewerViewController ivvc = null;
+        PatientDocumentStoreViewController pvc = (PatientDocumentStoreViewController)e.getSource();
+        ArrayList<File> documents = 
+                (ArrayList<File>)pvc.getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.PATIENT_DOCUMENT);
+        Patient patient = 
+                        (Patient)pvc.getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.PATIENT);
+        if (patient!=null){
+            for (ImageViewerViewController vc : imageViewerViewControllers){
+                if (vc.getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.PATIENT).equals(patient)){
+                    ArrayList<File> pd = (ArrayList<File>)vc.getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.PATIENT_DOCUMENT);
+                    if (pd.get(0).equals(documents.get(0))) activeVCForSamePatientAndDocument = vc;
+                    break;
+                }
+            }
+            if (activeVCForSamePatientAndDocument==null){
+                imageViewerViewControllers.add(
+                            new ImageViewerViewController(
+                            this,
+                            getNewTemplatedDescriptor(),
+                            getDesktopView()));
+                ivvc = imageViewerViewControllers.get(
+                        imageViewerViewControllers.size()-1);
+                ivvc.getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.PATIENT, patient);
+                ivvc.getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.PATIENT_DOCUMENT, documents);
+                setView(new View().make(View.Viewer.IMAGE_VIEWER,
+                                ivvc, 
+                                getDesktopView()));
+                if (getDesktopViewMode().equals(DesktopViewMode.CLINIC_LOGO)){
+                    doSetupDesktopViewMode();
+                }
+            }else {
+                activeVCForSamePatientAndDocument.getView().toFront();
+            }//do nothing because only one medical condition VC allowed
+            
+            if (getDesktopView().getDeskTop().getAllFrames().length>1){
+                this.firePropertyChangeEvent(
+                        ViewController.DesktopViewControllerPropertyChangeEvent.CASCADE_DESKTOP_VIEWS.toString(), 
+                        getDesktopView(),
+                        this, 
+                        null,
+                        null
+                );
+            }
+        }
+    }
+    
+    /**
+     * method checks that another PatientDocumentStoreViewController is not active which refers to the same patient already
+     * @param e 
+     */
+    private void doRequestForPatientDocumentStoreViewController(ActionEvent e){
+        PatientDocumentStoreViewController activeVCForSamePatient = null;
+        PatientDocumentStoreViewController pdsvc = null;
+        PatientViewController pvc = (PatientViewController)e.getSource();
+        ViewController.ViewMode viewMode = 
+                        (ViewController.ViewMode)pvc.getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.VIEW_MODE);
+        Patient patient = 
+                        (Patient)pvc.getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.PATIENT);
+        if (patient!=null){
+            for (PatientDocumentStoreViewController vc : patientDocumentStoreViewControllers){
+                if (vc.getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.PATIENT).equals(patient)){
+                    activeVCForSamePatient = vc;
+                    break;
+                }
+            }
+            if (activeVCForSamePatient==null){
+                patientDocumentStoreViewControllers.add(
+                            new PatientDocumentStoreViewController(
+                            this,
+                            getNewTemplatedDescriptor(),
+                            getDesktopView()));
+                pdsvc = patientDocumentStoreViewControllers.get(
+                        patientDocumentStoreViewControllers.size()-1);
+                pdsvc.getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.PATIENT, patient);
+                pdsvc.getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.VIEW_MODE, viewMode);
+                setView(new View().make(View.Viewer.DOCUMENT_STORE_VIEW,
+                                pdsvc, 
+                                getDesktopView()));
+                if (getDesktopViewMode().equals(DesktopViewMode.CLINIC_LOGO)){
+                    doSetupDesktopViewMode();
+                }
+            }else {
+                activeVCForSamePatient.getView().toFront();
+            }//do nothing because only one medical condition VC allowed
+            if (getDesktopView().getDeskTop().getAllFrames().length>1){
+                this.firePropertyChangeEvent(
+                        ViewController.DesktopViewControllerPropertyChangeEvent.CASCADE_DESKTOP_VIEWS.toString(), 
+                        getDesktopView(),
+                        this, 
+                        null,
+                        null
+                );
             }
         }
     }
@@ -2313,9 +2484,7 @@ public class DesktopViewController extends ViewController{
                                         new PatientViewController(this, getNewTemplatedDescriptor(), getDesktopView()));
                 PatientViewController pvc = patientViewControllers.get(patientViewControllers.size()-1);
                 pvc.getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.VIEW_MODE, ViewMode.CREATE); //signals patient not selected in new patient view
-                //System.out.println(String.valueOf((Boolean)getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.LOGIN_REQUIRED)).toCharArray());
                 getDesktopView().getDeskTop().setVisible(true);
-                System.out.println("Desktop displayable after before PatientView created = " + getDesktopView().getDeskTop().isDisplayable());
                 pvc.setView(new View().make(
                     View.Viewer.PATIENT_VIEW,
                     pvc, 
@@ -2339,26 +2508,6 @@ public class DesktopViewController extends ViewController{
             catch (StoreException ex){
                 displayErrorMessage(ex.getMessage(),"DesktopViewController error",JOptionPane.WARNING_MESSAGE);
             }  
-            /*
-            javax.swing.SwingUtilities.invokeLater(() -> {
-                PatientViewController pvc = this.patientViewControllers.get(patientViewControllers.size()-1);
-                Point location = pvc.getView().getLocation();
-                System.out.println("(1)Patient view location = " + String.valueOf(location.x) + ", " +String.valueOf(location.y) );
-                if (getDesktopView().getDeskTop().getAllFrames().length>1){
-                    this.firePropertyChangeEvent(
-                            ViewController.DesktopViewControllerPropertyChangeEvent.CASCADE_DESKTOP_VIEWS.toString(), 
-                            getDesktopView(),
-                            this, 
-                            null,
-                            null
-                    );
-                }
-                location = pvc.getView().getLocation();
-                System.out.println("(2)Patient view location = " + String.valueOf(location.x) + ", " +String.valueOf(location.y) );
-                if (getDesktopViewMode().equals(DesktopViewMode.CLINIC_LOGO)){
-                        doSetupDesktopViewMode();
-                } 
-            });*/
         }
     }
     
@@ -3083,6 +3232,10 @@ public class DesktopViewController extends ViewController{
                         doActionEventForLoginViewController(e);
                          break;
                     }
+                    case "ImageViewerViewController" ->{
+                        doActionForImageViewerViewController(e);
+                        break;
+                    }
                     case "MedicalConditionViewController" ->{
                         doActionEventForMedicalConditionViewController(e);
                         break;
@@ -3094,6 +3247,9 @@ public class DesktopViewController extends ViewController{
                     case "PatientAppointmentDataViewController" ->{
                         doActionEventForPatientAppointmentDataViewController(e);
                         break;  
+                    }
+                    case "PatientDocumentStoreViewController" ->{
+                        doActionEventForPatientDocumentStoreViewController(e);
                     }
                     case "PatientMedicalHistoryViewController" ->{
                         doActionEventForPatientMedicalHistoryViewController(e);
@@ -3130,23 +3286,17 @@ public class DesktopViewController extends ViewController{
     
     
     /**
-     * this is a stand alone jar file execution or a Netbeans embedded jar file execution 
-     * if it a Netbeans embedded jar file execution and a command line argument is missing the execution halts with an error code of 1
-     * else the DesktopViewController constructor is invoked with the command line argument array
-     * @param args the command line arguments (if any)
-     * 
+     * main() method checks on how the jar file has been launched
+     * DesktopViewController called only if
+     * -- IF the jar file is run from within Netbeans AND a command line argument exists
+     * -- OR the jar file is stand alone (run from outside Netbeans)
+     * Else the app exits with an error status
      */
-    //private static DesktopViewController me;
     public static void main(String[] args){
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             
         }));
-        if (JarFileFinder.getName().equals("")){
-            if(args.length==0){
-                SystemDefinition.setSystemExitCode(1);
-                systemExitFor(SystemExitCode.MISSING_COMMAND_LINE_ARGUMENT, null);
-            }
-        }
+        JarFileCheck(args);
         javax.swing.SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
@@ -3154,6 +3304,22 @@ public class DesktopViewController extends ViewController{
                 new DesktopViewController(args);
             }
         });  
+    }
+    
+    /**
+     * checks if app execution is from a standalone jar or from within Netbeans
+     * -- if from within Netbeans a further check determines if a command line argument exists
+     * -- -- if command line argument does not exist, system exits with an error status
+     * @param args 
+     */
+    private static void JarFileCheck(String[] args){
+        boolean result = false;
+        if (JarFileFinder.getName().equals("")){
+            if(args.length==0){
+                SystemDefinition.setSystemExitCode(1);
+                systemExitFor(SystemExitCode.MISSING_COMMAND_LINE_ARGUMENT, null);
+            }
+        }
     }
 
     private void doPatientViewControllerChangeNotification(PropertyChangeEvent e){
@@ -3220,9 +3386,6 @@ public class DesktopViewController extends ViewController{
     }
     
     private void doPatientAppointmentDataViewControllerChangeNotification(PropertyChangeEvent e){
-        //System.out.println("4 " + String.valueOf((Boolean)getMyController().getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.LOGIN_REQUIRED)));
-        //System.out.println("4 desktopView " + String.valueOf((Boolean)getDesktopView().getMyController().getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.LOGIN_REQUIRED)));
-        //setDescriptor((Descriptor)e.getNewValue());
         Descriptor pvcDescriptor = (Descriptor)e.getNewValue(); 
         for(PatientViewController pvc: this.patientViewControllers){
             if (pvc.getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.PATIENT)
@@ -3250,7 +3413,8 @@ public class DesktopViewController extends ViewController{
     }
     
     private void doScheduleViewControllerChangeNotification(PropertyChangeEvent e){
-        //setDescriptor((Descriptor)e.getNewValue());
+        Descriptor descriptor = (Descriptor)e.getNewValue();
+        Patient patient = (Patient)descriptor.getControllerDescription().getProperty(SystemDefinition.Properties.PATIENT);
         getDescriptor().getControllerDescription().
                 setProperty(SystemDefinition.Properties.DESCRIPTOR, (Descriptor)e.getNewValue());
         for(PatientViewController pvc: this.patientViewControllers){
@@ -3260,10 +3424,9 @@ public class DesktopViewController extends ViewController{
                     pvc,
                     this,
                     null,
-                    getDescriptor()       
+                    /*getDescriptor()*/ e.getNewValue()      
             ); 
         }
-        
         ScheduleViewController requestingSVC = 
                     (ScheduleViewController)e.getSource();
         for(ScheduleViewController svc: this.scheduleViewControllers){
@@ -3299,7 +3462,6 @@ public class DesktopViewController extends ViewController{
     } 
 
     public void propertyChange(PropertyChangeEvent e){
-        //System.out.println("5 " + String.valueOf((Boolean)getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.LOGIN_REQUIRED)));
         ViewController.DesktopViewControllerPropertyChangeEvent propertyName =
                 ViewController.DesktopViewControllerPropertyChangeEvent.valueOf(e.getPropertyName());
         switch(propertyName){

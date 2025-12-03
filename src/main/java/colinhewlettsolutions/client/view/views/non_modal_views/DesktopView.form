@@ -94,6 +94,11 @@
             <Property name="text" type="java.lang.String" value="Cascade views"/>
           </Properties>
         </Menu>
+        <Menu class="javax.swing.JMenu" name="mnuToDoListView">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="&apos;To Do&apos; list"/>
+          </Properties>
+        </Menu>
       </SubComponents>
     </Menu>
   </NonVisualComponents>

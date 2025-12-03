@@ -358,10 +358,6 @@ public class PatientAppointmentDataView extends View
         });
         
         javax.swing.SwingUtilities.invokeLater(() -> { 
-
-            //System.out.println(tblPatientAppointmentData.getTableHeader().isDisplayable());
-            //System.out.println(tblPatientAppointmentData.getTableHeader().getParent());
-            //System.out.println(tblPatientAppointmentData.getTableHeader().getParent().getClass());
             
             ColumnGroup actionRecallGroup = new ColumnGroup("Send recall to patient?");
             actionRecallGroup.add(cm.getColumn(0)); 
@@ -469,7 +465,6 @@ public class PatientAppointmentDataView extends View
     private int findColumnIndexByHeader(TableColumnModel columnModel, String headerName) {
         for (int i = 0; i < columnModel.getColumnCount(); i++) {
             TableColumn column = columnModel.getColumn(i);
-            //System.out.println(column.getHeaderValue() + "index = " + i);
             if (headerName.equals(column.getHeaderValue())) {
                 return i;
             }

@@ -139,20 +139,7 @@ public class DesktopView extends javax.swing.JFrame
                 cascadeInternalFrames(CascadeOrder.TOP_TO_FRONT);
                 break;
             case DESKTOP_VIEW_CHANGED_NOTIFICATION:
-                this.refreshDesktopFrameMenuItems(getActiveMenu());
-                /*
-                if (this.getDeskTop().getAllFrames().length > 0){
-                    int count = 0;
-                    for (JInternalFrame frame : this.getDeskTop().getAllFrames()){
-                        if (frame.isIcon()){
-                            count++;
-                        }
-                    }
-                    if (count == this.getDeskTop().getAllFrames().length){
-                        doSetClinicLogoViewMode();
-                    }
-                }*/
-                
+                this.refreshDesktopFrameMenuItems(getActiveMenu());               
                 break;
             case SET_DESKTOP_VIEW_MODE:
                 setViewDescriptor((Descriptor)e.getNewValue());
@@ -181,6 +168,7 @@ public class DesktopView extends javax.swing.JFrame
             this.mniSystemWideSettings = new javax.swing.JMenuItem("System wide settings");
             mnuSettings.insert(mniSystemWideSettings,lastIndex-1);
         }
+        this.mnuUtilities.setEnabled(false);
         addActionListenersToMenus();
         
         setSize(1800,950);
@@ -226,6 +214,7 @@ public class DesktopView extends javax.swing.JFrame
         this.mnuSelectView.setEnabled(false);
         this.mnuSettings.setEnabled(false);  
         this.mnuCascadeViews.setEnabled(false);
+        this.mnuToDoListView.setEnabled(false);
         mnuUserInfo.setEnabled(false);
     }
     
@@ -236,6 +225,7 @@ public class DesktopView extends javax.swing.JFrame
         this.mnuSelectView.setEnabled(true);
         this.mnuSettings.setEnabled(true);
         this.mnuCascadeViews.setEnabled(true);
+        this.mnuToDoListView.setEnabled(true);
         this.mnuUserInfo.setEnabled(true);
         
         String username = ((Credential)getMyController().getDescriptor().getControllerDescription().
@@ -264,6 +254,7 @@ public class DesktopView extends javax.swing.JFrame
         this.mnuSelectView.setEnabled(false);
         this.mnuSettings.setEnabled(false);
         this.mnuCascadeViews.setEnabled(false);
+        this.mnuToDoListView.setEnabled(false);
         this.mnuUserInfo.setEnabled(false);
         ActionEvent actionEvent = new ActionEvent(
                 this,ActionEvent.ACTION_PERFORMED,
@@ -323,6 +314,17 @@ public class DesktopView extends javax.swing.JFrame
             public void mouseClicked(MouseEvent e) {
                 // Perform the desired action
                 cascadeInternalFrames(CascadeOrder.TOP_TO_FRONT);
+            }
+        });
+        //Cascade view menu
+        mnuToDoListView.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                // Perform the desired action
+                ActionEvent actionEvent = new ActionEvent(this, 
+                    ActionEvent.ACTION_PERFORMED,
+                    Action.REQUEST_TO_DO_VIEW.toString());
+            DesktopView.this.actionPerformed(actionEvent);
             }
         });
 
@@ -796,6 +798,7 @@ public class DesktopView extends javax.swing.JFrame
         jSeparator4 = new javax.swing.JPopupMenu.Separator();
         mniPMSVersion = new javax.swing.JMenuItem();
         mnuCascadeViews = new javax.swing.JMenu();
+        mnuToDoListView = new javax.swing.JMenu();
 
         mnuSelectView.setText("View");
 
@@ -856,6 +859,9 @@ public class DesktopView extends javax.swing.JFrame
         mnuCascadeViews.setText("Cascade views");
         mnbDesktop.add(mnuCascadeViews);
 
+        mnuToDoListView.setText("'To Do' list");
+        mnbDesktop.add(mnuToDoListView);
+
         setJMenuBar(mnbDesktop);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -900,6 +906,7 @@ public class DesktopView extends javax.swing.JFrame
     private javax.swing.JMenu mnuCascadeViews;
     private javax.swing.JMenu mnuSelectView;
     private javax.swing.JMenu mnuSettings;
+    private javax.swing.JMenu mnuToDoListView;
     private javax.swing.JMenu mnuUtilities;
     // End of variables declaration//GEN-END:variables
 }

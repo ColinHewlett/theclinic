@@ -789,7 +789,7 @@ public class ScheduleViewController extends ViewController{
                 setScheduleDay((LocalDate)getDescriptor().getViewDescription().getProperty(SystemDefinition.Properties.SCHEDULE_DAY));
                 doAppointmentForDayRequest((LocalDate)getDescriptor().
                         getControllerDescription().getProperty(SystemDefinition.Properties.SCHEDULE_DAY));
-                getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.DESCRIPTOR,getDescriptor());
+                //getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.DESCRIPTOR,getDescriptor());
                 firePropertyChangeEvent(
                         ViewController.DesktopViewControllerPropertyChangeEvent.
                                 SCHEDULE_VIEW_CONTROLLER_CHANGE_NOTIFICATION.toString(),

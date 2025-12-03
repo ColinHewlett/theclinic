@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>colinhewlettsolutions</groupId>
     <artifactId>PMS</artifactId>
-    <version>1.76</version>
+    <version>1.77</version>
     <packaging>jar</packaging>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -191,6 +191,6 @@
                 <directory>src/my_resources</directory>
             </resource>
         </resources>-->
-    <name>PMS-1.76</name>
+    <name>PMS-1.77</name>
 
 </project>

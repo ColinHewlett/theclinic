@@ -70,7 +70,7 @@ public class PatientViewController extends ViewController {
         PATIENT_DOCTOR_DELETE_REQUEST,
         PATIENT_DOCTOR_EDITOR_VIEW_REQUEST,
         PATIENT_DOCTOR_UPDATE_REQUEST,
-        PATIENT_DOCUMENT_STORE_VIEW_REQUEST,
+        PATIENT_DOCUMENT_STORE_VIEW_CONTROLLER_REQUEST,
         PATIENT_GBT_RECALL_EDITOR_VIEW_REQUEST,
         PATIENT_GUARDIAN_EDITOR_VIEW_REQUEST,
         PATIENT_INVOICE_VIEW_CONTROLLER_REQUEST,
@@ -91,6 +91,7 @@ public class PatientViewController extends ViewController {
         RECOVER_PATIENT_REQUEST,
         SCHEDULE_LIST_VIEW_CONTROLLER_REQUEST,
         SETTINGS_TITLED_BORDER_REQUEST,
+        TO_DO_VIEW_CONTROLLER_REQUEST,
         UPLOAD_TO_PATIENT_DOCUMENT_STORE_REQUEST,
         VIEW_ACTIVATED_NOTIFICATION,
         VIEW_CHANGED_NOTIFICATION,
@@ -153,8 +154,8 @@ public class PatientViewController extends ViewController {
             case PATIENT_DOCTOR_EDITOR_VIEW_REQUEST:
                 doDoctorEditorViewRequest();
                 break;
-            case PATIENT_DOCUMENT_STORE_VIEW_REQUEST:
-                doPatientDocumentStoreViewRequest();
+            case PATIENT_DOCUMENT_STORE_VIEW_CONTROLLER_REQUEST:
+                doPatientDocumentStoreViewControllerRequest();
                 break;
             case PATIENT_INVOICE_VIEW_CONTROLLER_REQUEST:
                 doPatientInvoiceViewControllerRequest();
@@ -249,6 +250,12 @@ public class PatientViewController extends ViewController {
                 break;
             case SETTINGS_TITLED_BORDER_REQUEST:
                 break;
+            case TO_DO_VIEW_CONTROLLER_REQUEST:
+                actionEvent = new ActionEvent(
+                    this,ActionEvent.ACTION_PERFORMED,
+                    PatientViewController.Actions.TO_DO_VIEW_CONTROLLER_REQUEST.toString());
+                this.getMyController().actionPerformed(actionEvent);
+                break;
             case UPLOAD_TO_PATIENT_DOCUMENT_STORE_REQUEST:
                 doUploadToPatientDocumentStoreRequest();
                 break;
@@ -336,16 +343,14 @@ public class PatientViewController extends ViewController {
         }
     }
     
-    private void doPatientDocumentStoreViewRequest(){
-        /**
-         * check 
-         */
+    private void doPatientDocumentStoreViewControllerRequest(){
         ViewController.ViewMode viewMode = (ViewController.ViewMode)getDescriptor().getViewDescription().
                 getProperty(Properties.VIEW_MODE);
         getDescriptor().getControllerDescription().setProperty(Properties.VIEW_MODE, viewMode);
-        setView(new View().make(View.Viewer.DOCUMENT_STORE_VIEW,
-                this,
-                this.getDesktopView()));
+        ActionEvent actionEvent = new ActionEvent(
+                this,ActionEvent.ACTION_PERFORMED,
+                PatientViewController.Actions.PATIENT_DOCUMENT_STORE_VIEW_CONTROLLER_REQUEST.toString());
+        this.getMyController().actionPerformed(actionEvent);
     }
     
     private void doUploadToPatientDocumentStoreRequest(){
@@ -355,6 +360,9 @@ public class PatientViewController extends ViewController {
                 getProperty(Properties.DATE_TIME);*/
         Patient patient = (Patient)getDescriptor().getControllerDescription().
                 getProperty(Properties.PATIENT);
+        String patientNameString = patient.getName().getTitle() + " "
+                            + patient.getName().getForenames() + " "
+                            + patient.getName().getSurname();
         Path documentStoreFolder = (Path)getDescriptor().getControllerDescription().
                     getProperty(Properties.DOCUMENT_STORE);
         documentStoreFolder = documentStoreFolder.resolve(String.valueOf(patient.getKey()));
@@ -370,45 +378,70 @@ public class PatientViewController extends ViewController {
         
         switch(viewMode){
             case DOCUMENT ->{
-                Path source = document.get(0).toPath();
-                Path target = documentStoreFolder.resolve(source.getFileName().toString());
-                try{
-                    Files.copy(source, target);
-                }catch(FileAlreadyExistsException ex){
-                    System.err.println("File already exists");
-                }catch(Exception ex){
-                    ex.printStackTrace();
-                }
-                break;
-            }
-            case SCAN ->{
-                getDescriptor().getControllerDescription().setProperty(Properties.CAPTION, "Scanned image date");
-                setModalView((ModalView)new View().make(
-                    View.Viewer.MODAL_DATE_DIALOG,
-                    this, 
-                    this.getDesktopView()).getModalView());
-
-                LocalDateTime date = (LocalDateTime)getDescriptor().getViewDescription().
-                        getProperty(Properties.DATE_TIME);
-                int count = 1;
-                for(File page : document){
-                    String newFilename = date.format(DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss"));
-                    newFilename = newFilename + "_" + String.valueOf(count++);
-                    String oldFileName = page.toPath().toAbsolutePath().getFileName().toString();
-                    int dotIndex = oldFileName.lastIndexOf('.');
-                    String extension = (dotIndex == -1) ? "" : oldFileName.substring(dotIndex);
-                    Path target = documentStoreFolder.resolve(newFilename + extension);
+                
+                    Path source = document.get(0).toPath();
+                    Path target = documentStoreFolder.resolve(source.getFileName().toString());
                     try{
-                        Files.copy(page.toPath().toAbsolutePath(), target);
+                        Files.copy(source, target);
                     }catch(FileAlreadyExistsException ex){
                         System.err.println("File already exists");
                     }catch(Exception ex){
                         ex.printStackTrace();
                     }
-                }
+                break;
+            }
+            case SCAN ->{
+                LocalDateTime date = null;
+                if (document.size() == 2){
+                    while(date==null){
+                        getDescriptor().getControllerDescription().setProperty(Properties.CAPTION, 
+                                "Date stamp medical history for " + patientNameString);
 
-                //System.out.println((LocalDate)getDescriptor().getViewDescription().getProperty(Properties.DATE_TIME));
-                //System.out.println((String)getDescriptor().getViewDescription().getProperty(Properties.PATIENT_DOCUMENT));
+                        setModalView((ModalView)new View().make(
+                            View.Viewer.MODAL_DATE_DIALOG,
+                            this, 
+                            this.getDesktopView()).getModalView());
+
+                        date = (LocalDateTime)getDescriptor().getViewDescription().
+                                getProperty(Properties.DATE_TIME);
+                        if (date == null){
+                            JOptionPane.showInternalMessageDialog(this.getView(),"a valid date must be entered for the scanned image", "Data error",JOptionPane.INFORMATION_MESSAGE);
+                        }
+                        if (!date.equals(LocalDateTime.of(1,1,1,1,1))){ //has date dialog exited via use of 'Cancel' button
+                            int count = 1;
+                            for(File page : document){
+                                String newFilename = date.format(DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss"));
+                                String dateStampedFilename = date.format(DateTimeFormatter.ofPattern("dd/MM/yyyy (hh:MM:ss)"));
+                                newFilename = newFilename + "_" + String.valueOf(count++);
+                                String oldFileName = page.toPath().toAbsolutePath().getFileName().toString();
+                                int dotIndex = oldFileName.lastIndexOf('.');
+                                String extension = (dotIndex == -1) ? "" : oldFileName.substring(dotIndex);
+                                Path target = documentStoreFolder.resolve(newFilename + extension);
+                                try{
+                                    Files.copy(page.toPath().toAbsolutePath(), target);
+                                    JOptionPane.showInternalMessageDialog(getView(),"Medical history uploaded to " 
+                                            + patientNameString + "'s document store with date stamp '" + dateStampedFilename + "'");
+                                }catch(FileAlreadyExistsException ex){
+                                    System.err.println("File already exists");
+                                }catch(Exception ex){
+                                    ex.printStackTrace();
+                                }
+                            }
+                        }else{
+                            JOptionPane.showInternalMessageDialog(this.getView(),"Upload of queued medical history files to patient's document store has been cancelled because date stamp missing","Error on upload of " + patientNameString + "'s medical history",JOptionPane.INFORMATION_MESSAGE);
+                        }
+                    }
+                }else{
+                    String message = "both pages of the patient's medical history must be queued for upload before the complete medical history can be uploaded";
+                    getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.ERROR, message);
+                    this.firePropertyChangeEvent(
+                            ViewController.PatientViewControllerPropertyChangeEvent.PATIENT_VIEW_CONTROLLER_ERROR_RECEIVED.toString(), 
+                            this.getView(), 
+                            this,
+                            null,
+                            null
+                    );
+                }
                 break;
             }
         }
@@ -447,7 +480,6 @@ public class PatientViewController extends ViewController {
     
     private void doImageViewerRequest(){
         int count = this.getMyController().getDesktopView().getDeskTop().getAllFrames().length;
-        System.out.println("view count = " + this.getMyController().getDesktopView().getDeskTop().getAllFrames().length);
         getDescriptor().getControllerDescription().setProperty(Properties.PATIENT_DOCUMENT,
                 (ArrayList<File>)getDescriptor().getViewDescription().getProperty(Properties.PATIENT_DOCUMENT));
         setView(new View().make(View.Viewer.IMAGE_VIEWER, this, getDesktopView()));
@@ -470,10 +502,6 @@ public class PatientViewController extends ViewController {
         ModalDateDialog.Actions action = ModalDateDialog.Actions.valueOf(e.getActionCommand());
         switch(action){
             case DATE_DIALOG_OK_REQUEST ->{
-                //makeFileNameFromDateAndNow();
-                System.out.println(getDescriptor().getViewDescription().getProperty(Properties.PATIENT_DOCUMENT));
-                System.out.println(getDescriptor().getControllerDescription().getProperty(Properties.PATIENT));
-                System.out.println(getDescriptor().getControllerDescription().getProperty(Properties.DOCUMENT_STORE));
                 break;
             }
         }
@@ -1681,9 +1709,9 @@ public class PatientViewController extends ViewController {
     private void doPatientRequest(){
         //setEntityDescriptorFromView(((View)e.getSource()).getViewDescriptor());
         Patient patient = null;
-        if (getPatientSelectionMode().equals(PatientSelectionMode.PATIENT_SELECTION))
+        if (getPatientSelectionMode().equals(PatientSelectionMode.PATIENT_SELECTION)){
             patient = (Patient)getDescriptor().getViewDescription().getProperty(Properties.PATIENT);
-            
+        }    
         else
             patient = (Patient)getDescriptor().getControllerDescription().getProperty(Properties.PATIENT);
         //
@@ -1783,6 +1811,9 @@ public class PatientViewController extends ViewController {
                         getProperty(Properties.DESCRIPTOR);
         
         
+        descriptor = (Descriptor)e.getNewValue();
+        
+        
         Patient patient = null;
         ViewController.PatientViewControllerPropertyChangeEvent propertyName = 
                 ViewController.PatientViewControllerPropertyChangeEvent.
@@ -1828,16 +1859,20 @@ public class PatientViewController extends ViewController {
                                     break;
                                 }
                                 default ->{
-                                    doNullPatientRequest();
-                                    getDescriptor().getControllerDescription().setProperty(Properties.PATIENT, patient);
-                                    firePropertyChangeEvent(
-                                            ViewController.PatientViewControllerPropertyChangeEvent.
-                                                    PATIENT_RECEIVED.toString(),
-                                            getView(),
-                                            this,
-                                            null,
-                                            getDescriptor()
-                                    );
+                                    Patient selectedPatientInView = (Patient)getDescriptor().getControllerDescription().getProperty(Properties.PATIENT);
+                                    Patient patientFromAppointmentChange = (Patient)descriptor.getControllerDescription().getProperty(Properties.PATIENT);
+                                    if (selectedPatientInView.equals(patientFromAppointmentChange)){
+                                        doNullPatientRequest();
+                                        getDescriptor().getControllerDescription().setProperty(Properties.PATIENT, patient);
+                                        firePropertyChangeEvent(
+                                                ViewController.PatientViewControllerPropertyChangeEvent.
+                                                        PATIENT_RECEIVED.toString(),
+                                                getView(),
+                                                this,
+                                                null,
+                                                getDescriptor()
+                                        );
+                                    }
                                     break;   
                                 }
                             }
@@ -1873,7 +1908,7 @@ public class PatientViewController extends ViewController {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        //PropertyChangeListener[] pcls;
+
         if (e.getSource() instanceof DesktopViewController){
             doDesktopViewControllerActionRequest(e);
         }
@@ -1892,7 +1927,9 @@ public class PatientViewController extends ViewController {
         }
         
     }
-       
+     
+    
+    
     private void doOpenNoteTaker(){
         Condition condition = (Condition)getDescriptor().getViewDescription().getProperty(Properties.CONDITION);
         getDescriptor().getControllerDescription().setProperty(Properties.CONDITION, condition);

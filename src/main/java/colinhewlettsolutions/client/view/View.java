@@ -7,7 +7,7 @@ package colinhewlettsolutions.client.view;
 
 
 /*import view.views.modal_views.ModalPatientMedicalHistory1EditorView;*/
-import colinhewlettsolutions.client.view.views.non_modal_views.DocumentStoreView;
+import colinhewlettsolutions.client.view.views.non_modal_views.PatientDocumentStoreView;
 import colinhewlettsolutions.client.view.views.modal_views.UserSystemWideSettingsView;
 import colinhewlettsolutions.client.view.views.modal_views.ModalUserScheduleListSettingsView;
 import colinhewlettsolutions.client.view.views.modal_views.ModalUserScheduleDiarySettingsView;
@@ -159,7 +159,7 @@ public class View extends JInternalFrame
                 setModalView(makeView(new ModalClinicalNoteView(viewer, controller, desktopView)));
                 break;
             case DOCUMENT_STORE_VIEW:
-                setView(makeView(new DocumentStoreView(viewer, controller,desktopView)));
+                setView(makeView(new PatientDocumentStoreView(viewer, controller,desktopView)));
                 break;
             case EXPORT_PROGRESS_VIEW:
                 setView(makeView(new DataMigrationProgressView(viewer, controller,desktopView)));
@@ -432,12 +432,10 @@ public class View extends JInternalFrame
     
     //public abstract void startModal();
     
-    protected final View makeView(View view){
+    protected final View makeViewx(View view){
         /*view.getMyController().setView(view);
         view.getDesktopView().getDeskTop().add(view.getMyController().getView());
         view.getMyController().getView().initialiseView();
-        //System.out.println("PatientView size: " + getSize());
-        //System.out.println("PatientView preferred size: " + getPreferredSize());
         ViewController.centerInternalFrame(view.getDesktopView().getDeskTop(), view);
         setVisible(true);
         //view.toFront;
@@ -466,7 +464,11 @@ public class View extends JInternalFrame
     JDesktopPane desktop = view.getDesktopView().getDeskTop();
 
     // Add before setting visibility
-    desktop.add(view, JDesktopPane.DEFAULT_LAYER);
+    
+    /**
+     * code change; commented out the following because DVC will attempt to add the same view again to desktop
+     */
+    //desktop.add(view, JDesktopPane.DEFAULT_LAYER);
 
     // Initialise view *after* adding
     view.initialiseView();
@@ -477,22 +479,6 @@ public class View extends JInternalFrame
 
     // Center after sizing
     ViewController.centerInternalFrame(desktop, view);
-/*
-    // Defer visibility and selection until Swing has added the frame
-    SwingUtilities.invokeLater(() -> {
-        view.setVisible(true);       // trigger addNotify()
-        desktop.revalidate();
-        desktop.repaint();
-
-        try {
-            view.setSelected(true);  // activates frame
-        } catch (PropertyVetoException e) {
-            e.printStackTrace();
-        }
-
-        System.out.println("After invokeLater: isShowing=" + view.isShowing());
-    });
-*/
         // Wait until desktop is actually displayable before making frame visible
         /*
         Runnable showFrame = () -> {
@@ -504,7 +490,6 @@ public class View extends JInternalFrame
             }
             desktop.revalidate();
             desktop.repaint();
-            System.out.println(view.getTitle() + " now showing: " + view.isShowing());
         };
 
         if (desktop.isDisplayable()) {
@@ -521,7 +506,7 @@ public class View extends JInternalFrame
         return view;
     }
     
-    protected final View makeViewx(View view) {
+    protected final View makeView(View view) {
         view.getMyController().setView(view);
         var desktop = view.getDesktopView().getDeskTop();
 
@@ -541,7 +526,6 @@ public class View extends JInternalFrame
             desktop.repaint();
             view.setVisible(true);  // <- now safe, layout is valid
             try { view.setSelected(true); } catch (Exception ignore) {}
-            System.out.println(view.getTitle() + " isShowing()=" + view.isShowing());
         });
 
         return view;
@@ -575,7 +559,6 @@ public class View extends JInternalFrame
                 desktop.revalidate();
                 desktop.repaint();
                 view.moveToFront();
-                System.out.println(">>> " + view.getTitle() + " isShowing(): " + view.isShowing());
             });
         };
 

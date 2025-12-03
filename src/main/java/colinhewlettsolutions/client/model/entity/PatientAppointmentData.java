@@ -60,9 +60,6 @@ public class PatientAppointmentData extends Entity implements IEntityRepositoryA
                     if (pad!=null){
                         for(PatientAppointmentData _pad : pad.get()){
                             appointment = _pad.getAppointment();
-                            if (appointment.getKey() == 0){
-                                System.out.println("zero value appointment key");
-                            }
                             appointment.setPatient(_pad.getPatient());
                             appointment.setScope(Entity.Scope.SINGLE);
                             appointment = appointment.read();

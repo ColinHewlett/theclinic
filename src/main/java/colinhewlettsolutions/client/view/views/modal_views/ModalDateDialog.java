@@ -48,8 +48,11 @@ public class ModalDateDialog extends ModalView
     public void actionPerformed(ActionEvent e){
         switch(Actions.valueOf(e.getActionCommand())){
             case DATE_DIALOG_CANCEL_REQUEST ->{
+                /**
+                 * LocalDateTime = 0001-01-01 01:01 signals the dialog has been cancelled
+                 */
                 getMyController().getDescriptor().getViewDescription().
-                            setProperty(SystemDefinition.Properties.DATE_TIME, null);
+                            setProperty(SystemDefinition.Properties.DATE_TIME, LocalDateTime.of(1,1,1,1,1));
                 try{
                     setClosed(true);
                 }
@@ -111,8 +114,6 @@ public class ModalDateDialog extends ModalView
         btnOK = new javax.swing.JButton();
         btnCancel = new javax.swing.JButton();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-
         pnlSelectDate.setBorder(javax.swing.BorderFactory.createTitledBorder("Select date"));
 
         ImageIcon icon = new ImageIcon(this.getClass().getResource("/datepickerbutton1.png"));
@@ -129,14 +130,14 @@ public class ModalDateDialog extends ModalView
         pnlSelectDateLayout.setHorizontalGroup(
             pnlSelectDateLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlSelectDateLayout.createSequentialGroup()
-                .addGap(26, 26, 26)
+                .addGap(57, 57, 57)
                 .addComponent(datePicker, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(33, Short.MAX_VALUE))
+                .addContainerGap(63, Short.MAX_VALUE))
         );
         pnlSelectDateLayout.setVerticalGroup(
             pnlSelectDateLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlSelectDateLayout.createSequentialGroup()
-                .addGap(20, 20, 20)
+                .addGap(21, 21, 21)
                 .addComponent(datePicker, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );

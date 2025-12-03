@@ -79,7 +79,6 @@ public class DesktopViewScrollPane extends JScrollPane {
     }
 
     private void onComponentAdded(ContainerEvent event) {
-        int test;
         Component addedComponent = event.getChild();
         if (addedComponent instanceof JInternalFrame)
         {
@@ -95,7 +94,7 @@ public class DesktopViewScrollPane extends JScrollPane {
          * -- HOPE THIS SEQUENCE IS ALWAYS THE CASE
          */
         else if (addedComponent instanceof JDesktopIcon){
-            test = getAllFrames().length;
+            //test = getAllFrames().length;
             if (getAllFrames().length == 1){
                 desktopView.doSetDesktopViewMode();
             }

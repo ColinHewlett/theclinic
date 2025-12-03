@@ -6,22 +6,27 @@ package colinhewlettsolutions.client.view.views.non_modal_views;
 
 import colinhewlettsolutions.client.controller.SystemDefinition;
 import colinhewlettsolutions.client.controller.ViewController;
+import colinhewlettsolutions.client.controller.ImageViewerViewController;
 import colinhewlettsolutions.client.model.entity.Patient;
 import colinhewlettsolutions.client.view.View;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
+import java.beans.PropertyVetoException;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import javax.swing.event.InternalFrameAdapter;
+import javax.swing.event.InternalFrameEvent;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-import javax.swing.JScrollPane;
 
 /**
  *
@@ -29,8 +34,10 @@ import javax.swing.JScrollPane;
  */
 public class ImageViewer extends View implements ActionListener{
     enum Actions{
+        REQUEST_CLOSE_VIEW,
         REQUEST_NEXT_IMAGE,
-        REQUEST_PREVIOUS_IMAGE
+        REQUEST_PREVIOUS_IMAGE,
+        REQUEST_SWITCH_PAGES
     }
     /**
      * 
@@ -50,6 +57,14 @@ public class ImageViewer extends View implements ActionListener{
     public void actionPerformed(ActionEvent e){
         Actions action = Actions.valueOf(e.getActionCommand());
         switch (action){
+            case REQUEST_CLOSE_VIEW ->{
+                try{
+                    setClosed(true);
+                }catch(PropertyVetoException ex){
+                    
+                }
+                break;
+            }
             case REQUEST_NEXT_IMAGE ->{
                 setImageIndex(getImageIndex() + 1);
                 populateViewWithImage(getImagesForView().get(getImageIndex()));
@@ -58,6 +73,10 @@ public class ImageViewer extends View implements ActionListener{
             case REQUEST_PREVIOUS_IMAGE ->{
                 setImageIndex(getImageIndex() - 1);
                 populateViewWithImage(getImagesForView().get(getImageIndex()));
+                break;
+            }
+            case REQUEST_SWITCH_PAGES ->{
+                doSwitchPages();
                 break;
             }
         }
@@ -69,15 +88,64 @@ public class ImageViewer extends View implements ActionListener{
         setResizable(true);
         setClosable(true);
         setVisible(true);
-        setTitle("Scanned medical history for " + getPatient().toString());
+        
         this.setDefaultCloseOperation(JInternalFrame.DISPOSE_ON_CLOSE);
+        ArrayList<File> documents = 
+                (ArrayList<File>)getMyController().getDescriptor().
+                        getControllerDescription().getProperty(SystemDefinition.Properties.PATIENT_DOCUMENT);
+        setImagesForView(documents);
         setImageIndex(0);
         populateViewWithImage(getImagesForView().get(getImageIndex()));
+        
         this.btnNext.setActionCommand(Actions.REQUEST_NEXT_IMAGE.toString());
         this.btnPrevious.setActionCommand(Actions.REQUEST_PREVIOUS_IMAGE.toString());
         this.btnNext.addActionListener(this);
         this.btnPrevious.addActionListener(this);
+        this.mniCloseView.setActionCommand(Actions.REQUEST_CLOSE_VIEW.toString());
+        this.mniCloseView.addActionListener(this);
+        this.mniSwitchPages.setActionCommand(Actions.REQUEST_SWITCH_PAGES.toString());
+        this.mniSwitchPages.addActionListener(this);
+        addInternalFrameListener(); 
+        setTitle(getDateFromFilename().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) + 
+                " medical history and questionnaire for " + getPatient().toString());
+    }
+    
+    private LocalDate getDateFromFilename(){
+        LocalDate result = null;
+        File file = getImagesForView().get(0);
+        String filename = file.getName();
+        filename = filename.substring(0,10);
+        result = LocalDate.parse(filename, DateTimeFormatter.ofPattern("yyyy_MM_dd"));
+        return result;
+    }
+    
+    private void doSwitchPages(){
+        ArrayList<File> switchedDocuments = new ArrayList<>();
+        switchedDocuments.add(getImagesForView().get(1));
+        switchedDocuments.add(getImagesForView().get(0));
+        setImagesForView(switchedDocuments);
+        setImageIndex(0);
+        populateViewWithImage(getImagesForView().get(getImageIndex()));
         updateDisplayStatus();
+    }
+    
+    private InternalFrameAdapter internalFrameAdapter = null;
+    /**
+     * If user exits via the window 'X' click view controller is informed of the event
+     */
+    public void addInternalFrameListener(){
+        internalFrameAdapter = new InternalFrameAdapter(){
+            @Override  
+            public void internalFrameClosing(InternalFrameEvent e) {
+                ImageViewer.this.removeInternalFrameListener(internalFrameAdapter);
+                ActionEvent actionEvent = new ActionEvent(
+                        ImageViewer.this,ActionEvent.ACTION_PERFORMED,
+                        ImageViewerViewController.Actions.
+                                VIEW_CLOSE_NOTIFICATION.toString());
+                ImageViewer.this.getMyController().actionPerformed(actionEvent);   
+            }
+        };
+        this.addInternalFrameListener(internalFrameAdapter);
     }
     
     private void updateDisplayStatus(){
@@ -94,7 +162,16 @@ public class ImageViewer extends View implements ActionListener{
     private int index = 0;
     private void setImageIndex(int value){
         index = value;
-        lblPageNumber.setText("Page " + (index+1));
+        switch(index){
+            case 0 ->{
+                lblPageNumber.setText("Page 1 (medical questionnaire)");
+                break;
+            }
+            case 1 ->{
+                lblPageNumber.setText("Page 2 (medical history)");
+                break;
+            }   
+        }
     }
     private int getImageIndex(){
         return index;
@@ -108,10 +185,14 @@ public class ImageViewer extends View implements ActionListener{
         return getImageIndex() == getImagesForView().size()-1;
     }
     
+    private ArrayList<File> imagesForView;
     private ArrayList<File> getImagesForView(){
-        return (ArrayList<File>)getMyController().getDescriptor().getControllerDescription().
-                getProperty(SystemDefinition.Properties.PATIENT_DOCUMENT);
+        return imagesForView;
     }
+    private void setImagesForView(ArrayList<File> value){
+        imagesForView = value;
+    }
+          
     
     private Patient getPatient(){
         return (Patient)getMyController().getDescriptor().getControllerDescription().
@@ -139,6 +220,8 @@ public class ImageViewer extends View implements ActionListener{
             int width = Math.min(img.getWidth() + 20, 800);
             int height = Math.min(img.getHeight() + 40, 800);
             this.setSize(width+30, height+60);
+            
+            updateDisplayStatus();
 
         } catch (IOException e) {
             JOptionPane.showMessageDialog(this, "Error loading image:\n" + e.getMessage(),
@@ -162,6 +245,11 @@ public class ImageViewer extends View implements ActionListener{
         btnNext = new javax.swing.JButton();
         btnPrevious = new javax.swing.JButton();
         lblPageNumber = new javax.swing.JLabel();
+        jMenuBar1 = new javax.swing.JMenuBar();
+        mnuActions = new javax.swing.JMenu();
+        mniSwitchPages = new javax.swing.JMenuItem();
+        jSeparator1 = new javax.swing.JPopupMenu.Separator();
+        mniCloseView = new javax.swing.JMenuItem();
 
         btnNext.setText(">");
 
@@ -177,9 +265,9 @@ public class ImageViewer extends View implements ActionListener{
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlImageViewLayout.createSequentialGroup()
                 .addGap(20, 20, 20)
                 .addComponent(btnPrevious)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 156, Short.MAX_VALUE)
-                .addComponent(lblPageNumber, javax.swing.GroupLayout.PREFERRED_SIZE, 58, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 156, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 82, Short.MAX_VALUE)
+                .addComponent(lblPageNumber, javax.swing.GroupLayout.PREFERRED_SIZE, 177, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 111, Short.MAX_VALUE)
                 .addComponent(btnNext)
                 .addGap(20, 20, 20))
         );
@@ -193,6 +281,19 @@ public class ImageViewer extends View implements ActionListener{
                     .addComponent(lblPageNumber))
                 .addGap(6, 6, 6))
         );
+
+        mnuActions.setText("Actions");
+
+        mniSwitchPages.setText("Switch pages");
+        mnuActions.add(mniSwitchPages);
+        mnuActions.add(jSeparator1);
+
+        mniCloseView.setText("Close view");
+        mnuActions.add(mniCloseView);
+
+        jMenuBar1.add(mnuActions);
+
+        setJMenuBar(jMenuBar1);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -211,7 +312,7 @@ public class ImageViewer extends View implements ActionListener{
                 .addContainerGap()
                 .addComponent(pnlImageView, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(3, 3, 3)
-                .addComponent(scrImageView, javax.swing.GroupLayout.DEFAULT_SIZE, 338, Short.MAX_VALUE)
+                .addComponent(scrImageView, javax.swing.GroupLayout.DEFAULT_SIZE, 315, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -222,7 +323,12 @@ public class ImageViewer extends View implements ActionListener{
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnNext;
     private javax.swing.JButton btnPrevious;
+    private javax.swing.JMenuBar jMenuBar1;
+    private javax.swing.JPopupMenu.Separator jSeparator1;
     private javax.swing.JLabel lblPageNumber;
+    private javax.swing.JMenuItem mniCloseView;
+    private javax.swing.JMenuItem mniSwitchPages;
+    private javax.swing.JMenu mnuActions;
     private javax.swing.JPanel pnlImageView;
     private javax.swing.JScrollPane scrImageView;
     // End of variables declaration//GEN-END:variables

@@ -97,19 +97,6 @@ public class TemplateReader {
         }
         
     }
-   /* 
-    public boolean validateXMLSchema(File xsd, File xml) {
-        try {
-            SchemaFactory sFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-            Schema schema = sFactory.newSchema(xsd);
-            Validator validator = schema.newValidator();
-            validator.validate(new StreamSource(xml));
-            return true;
-        } catch (Exception e) {
-            System.out.println("Validation error: " + e.getMessage());
-            return false;
-        }
-    }*/
     
     private File templateFile = null;
     public void setTemplateFile(File file){

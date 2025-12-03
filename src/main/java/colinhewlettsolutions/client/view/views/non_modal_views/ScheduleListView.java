@@ -1082,8 +1082,18 @@ public class ScheduleListView extends BookingView
                                     (ScheduleListTableModel)tblAppointments.getModel();
                             Appointment appointment = model.getElementAt(selectedRow);
                             setScheduleSlotType(appointment);
+                            
+                            
+                            
+                            /**
+                             * following code change because doClinicNoteRequest returns a null for selected appointment
+                             */
+                            /*getMyController().getDescriptor()
+                                    .getViewDescription().setProperty(SystemDefinition.Properties.APPOINTMENT, slot);*/
                             getMyController().getDescriptor()
-                                    .getViewDescription().setProperty(SystemDefinition.Properties.APPOINTMENT, slot);
+                                    .getViewDescription().setProperty(SystemDefinition.Properties.APPOINTMENT, appointment);
+                            
+                            
                             tableValueChangedListenerActivated = true;
                             Patient patient = (Patient)tblAppointments.getModel().getValueAt(selectedRow, 1);
                             doScheduleTitleRefresh(patient);

@@ -4,15 +4,11 @@
  */
 package colinhewlettsolutions.client.view.views.non_modal_views;
 
-import colinhewlettsolutions.client.controller.PatientViewController;
+import colinhewlettsolutions.client.controller.PatientDocumentStoreViewController;
 import colinhewlettsolutions.client.controller.SystemDefinition;
 import colinhewlettsolutions.client.controller.ViewController;
 import colinhewlettsolutions.client.model.entity.Patient;
 import colinhewlettsolutions.client.view.View;
-import colinhewlettsolutions.client.view.views.modal_views.ModalView;
-import colinhewlettsolutions.client.view.views.modal_views.ModalView;
-import colinhewlettsolutions.client.view.views.non_modal_views.DesktopView;
-import colinhewlettsolutions.client.view.views.non_modal_views.DesktopView;
 import java.awt.Desktop;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
@@ -22,8 +18,8 @@ import java.beans.PropertyVetoException;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.format.DateTimeFormatter;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -37,7 +33,7 @@ import javax.swing.JPanel;
  *
  * @author colin
  */
-public class DocumentStoreView extends View 
+public class PatientDocumentStoreView extends View 
         implements ActionListener, PropertyChangeListener {
     
     enum Actions {
@@ -45,13 +41,17 @@ public class DocumentStoreView extends View
         REQUEST_FILE_DELETE,
         REQUEST_FILE_OPEN
     }
+    
+    enum Properties {
+        VIEW_CHANGED_NOTIFICATION
+    }
     /**
      * 
      * @param myViewType
      * @param myController
      * @param desktopView 
      */
-    public DocumentStoreView(View.Viewer myViewType, 
+    public PatientDocumentStoreView(View.Viewer myViewType, 
             ViewController myController,
             DesktopView desktopView) {
         setMyController(myController);
@@ -63,14 +63,11 @@ public class DocumentStoreView extends View
         Actions action = Actions.valueOf(e.getActionCommand());
         switch(action){
             case REQUEST_CLOSE_VIEW ->{
-                try{
-                    setClosed(true);
-                }catch(PropertyVetoException ex){
-                    
-                }
+                doCloseViewRequest();
                 break;
             }
             case REQUEST_FILE_DELETE ->{
+                doFileDeleteRequest();
                 break;
             }
             case REQUEST_FILE_OPEN ->{
@@ -81,7 +78,12 @@ public class DocumentStoreView extends View
     }
     
     public void propertyChange(PropertyChangeEvent e){
-        
+        Properties event = Properties.valueOf(e.getPropertyName());
+        switch(event){
+            case VIEW_CHANGED_NOTIFICATION ->{
+                populateDocumentStoreFileList();
+            }
+        }
     }
 
     @Override
@@ -105,7 +107,91 @@ public class DocumentStoreView extends View
         btnOpen.setActionCommand(Actions.REQUEST_FILE_OPEN.toString());
         btnOpen.addActionListener(this);
         setViewTitledBorderSettings();
-        populateDocumentStoreList();
+        populateDocumentStoreFileList();
+    }
+    
+    private void doCloseViewRequest(){
+        try{
+            setClosed(true);
+        }catch(PropertyVetoException ex){
+
+        }
+        doActionEventFor(PatientDocumentStoreViewController.Actions.VIEW_CLOSE_NOTIFICATION);
+    }
+    
+    private boolean confirmFileDeletion(String message){
+        boolean result = false;
+        int reply = JOptionPane.showInternalConfirmDialog(
+                    this,message,"Request to delete file from " + getPatientNameString() + "'s document store",JOptionPane.YES_NO_OPTION);
+        return reply==JOptionPane.YES_OPTION;
+    }
+    
+    private String getPatientNameString(){
+        String result = null;
+        String fornames = null;
+        String surname = null;
+        String title = null;        
+        if (getPatient()!=null){
+            result = getPatient().getName().getTitle();
+            result = result + " " + getPatient().getName().getForenames();
+            result = result + " " +getPatient().getName().getSurname();
+        }
+        return result;
+    }
+    
+    private void doFileDeleteRequest(){
+        String selectedFile = null;
+        String message = null;
+        ArrayList<File> files = new ArrayList<>();
+        //File[] the_files = null;
+        if (this.lstDocumentStore.getSelectedIndex()!=-1){
+            selectedFile = this.lstDocumentStore.getSelectedValue();
+            switch(getViewMode()){
+                case DOCUMENT ->{
+                    message = "are you sure you want to delete the Word file '" + selectedFile +"'";
+                    if (confirmFileDeletion(message)){
+                        files = new DocumentStore().getFileList();
+                        try{
+                            for (File file : files){
+                                if (file.getName().equals(selectedFile)){
+                                    Files.deleteIfExists(file.toPath());
+                                }
+                            }
+                        }catch(IOException |
+                                InvalidPathException ex){
+                            message = ex.getMessage() + "\n";
+                            message = message + "Raised in PatientDocumentStoreView::doFileDeleteRequest()";
+                            ViewController.displayErrorMessage(message, "View error", JOptionPane.WARNING_MESSAGE);
+                        }
+                    }
+                    break;
+                }
+                case SCAN ->{
+                    message = "are you sure you want to delete the medical history date stamped '" + selectedFile +"'";
+                    if (confirmFileDeletion(message)){
+                        LocalDateTime date = LocalDateTime.parse(selectedFile,DateTimeFormatter.ofPattern("dd/MM/yyyy (HH:mm:ss)"));
+                        files = new DocumentStore().getFilesWithDate(date);
+                        try{
+                            for (File file : files){
+                                Files.deleteIfExists(file.toPath());
+                            }
+                        }catch(IOException |
+                                InvalidPathException ex){
+                            message = ex.getMessage() + "\n";
+                            message = message + "Raised in PatientDocumentStoreView::doFileDeleteRequest()";
+                            ViewController.displayErrorMessage(message, "View error", JOptionPane.WARNING_MESSAGE);
+                        }
+                    }
+                    break;
+                }
+            }
+            this.populateDocumentStoreFileList();
+        }else{
+            JOptionPane.showInternalMessageDialog(this,
+                    "the file to delete from this patient's document store has not been selected yet",
+                    "Request to delete file from " + getPatientNameString() + "'s document store",
+                    JOptionPane.WARNING_MESSAGE);
+        }
     }
     
     private void doFileOpenRequest(){
@@ -113,7 +199,11 @@ public class DocumentStoreView extends View
         if (this.lstDocumentStore.getSelectedIndex()!=-1){
             selectedFile = this.lstDocumentStore.getSelectedValue();
             new DocumentStore().openFile(selectedFile);
-            //LocalDateTime.parse(selectedFile, DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss"));
+        }else{
+            JOptionPane.showInternalMessageDialog(this,
+                    "the file to open in this patient's document store has not been selected yet",
+                    "Request to open a file in " + getPatientNameString() + "'s document store",
+                    JOptionPane.WARNING_MESSAGE);
         }
     }
     
@@ -130,22 +220,20 @@ public class DocumentStoreView extends View
         return reformatted;
     }
     
-    private void populateDocumentStoreList(){
+    private void populateDocumentStoreFileList(){
         DefaultListModel<String> model = new DefaultListModel<>();
-        File[] files = new DocumentStore().getFiles();
+        ArrayList<File> files = new DocumentStore().getFileList();
+        //File[] files = new DocumentStore().getFiles();
         switch(getViewMode()){
             case DOCUMENT ->{
-
-                if (files!=null){
-                    for(File file : files){
-                        model.addElement(file.getName());
-                    }
+                for(File file : files){
+                    model.addElement(file.getName());
                 }
                 break;
             }
             case SCAN ->{
                 if(files!=null){
-                    ArrayList<LocalDateTime> scanDates = new DocumentStore().getScanDates(files);
+                    ArrayList<LocalDateTime> scanDates = new DocumentStore().getScanDatesList(files);
                     for(LocalDateTime localDateTime : scanDates){
                         model.addElement(localDateTime.
                                 format(DateTimeFormatter.ofPattern("dd/MM/yyyy (HH:mm:ss)")));
@@ -155,6 +243,13 @@ public class DocumentStoreView extends View
             }
         }      
         lstDocumentStore.setModel(model);
+        if (files.isEmpty()){
+            this.btnDelete.setEnabled(false);
+            this.btnOpen.setEnabled(false);
+        }else{
+            this.btnDelete.setEnabled(true);
+            this.btnOpen.setEnabled(true);
+        }
     }
     
     private ViewController.ViewMode viewMode = null;
@@ -173,7 +268,7 @@ public class DocumentStoreView extends View
                     getProperty(SystemDefinition.Properties.DOCUMENT_STORE);
     }
     
-    private void doActionEventFor(PatientViewController.Actions action){
+    private void doActionEventFor(PatientDocumentStoreViewController.Actions action){
         ActionEvent actionEvent = new ActionEvent(
             this,ActionEvent.ACTION_PERFORMED,
             action.toString());
@@ -210,12 +305,38 @@ public class DocumentStoreView extends View
                     ArrayList<File> scans = getFilesWithDate(dateTimeOfFile);
                     getMyController().getDescriptor().getViewDescription().
                             setProperty(SystemDefinition.Properties.PATIENT_DOCUMENT, scans);
-                    doActionEventFor(PatientViewController.Actions.IMAGE_VIEWER_REQUEST);
+                    doActionEventFor(PatientDocumentStoreViewController.Actions.IMAGE_VIEWER_REQUEST);
                     break;
                 }
             }
         }
         
+        ArrayList<File> getFileList(){
+            ArrayList<File> arrayListResult = new ArrayList<File>();
+            File[] result = null;
+            File directory = getDocumentStorePath().resolve(String.valueOf(getPatient().getKey())).toFile();
+            switch(getViewMode()){
+                case DOCUMENT ->{
+                    result = directory.listFiles((d, name) ->
+                        name.toLowerCase().endsWith(".docx"));
+                    break;
+                }
+                case SCAN ->{
+                    result = directory.listFiles((d, name) ->
+                        name.toLowerCase().endsWith(".png") || 
+                        name.toLowerCase().endsWith(".jpg") || 
+                        name.toLowerCase().endsWith(".jpeg"));
+                    break;
+                }
+            }
+            if (result!=null){
+                for(File file : result){
+                    arrayListResult.add(file);
+                }
+            }
+            return arrayListResult;
+        }
+
         File[] getFiles(){ 
             File[] result = null;
             File directory = getDocumentStorePath().resolve(String.valueOf(getPatient().getKey())).toFile();
@@ -233,6 +354,7 @@ public class DocumentStoreView extends View
                     break;
                 }
             }
+            
             return result;
         }
         
@@ -254,6 +376,19 @@ public class DocumentStoreView extends View
                 }    
             }
             return result;
+        }
+        
+        ArrayList<LocalDateTime> getScanDatesList(ArrayList<File> files){
+            HashSet<LocalDateTime> scanDates = new HashSet<>();
+            for (File file : files){
+                scanDates.add(getDateFromFile(file));
+            }
+            ArrayList<LocalDateTime> dateTimes = new ArrayList<>();
+            for (LocalDateTime localDateTime : scanDates){
+                dateTimes.add(localDateTime);
+            }
+            Collections.sort(dateTimes);
+            return dateTimes;
         }
         
         ArrayList<LocalDateTime> getScanDates(File[] files){
@@ -329,11 +464,11 @@ public class DocumentStoreView extends View
     enum BorderTitles{ACTIONS,DOCUMENT_STORE_LIST}
     
     private void setViewTitledBorderSettings(){
-        setBorderTitles(DocumentStoreView.BorderTitles.ACTIONS);
-        setBorderTitles(DocumentStoreView.BorderTitles.DOCUMENT_STORE_LIST);
+        setBorderTitles(PatientDocumentStoreView.BorderTitles.ACTIONS);
+        setBorderTitles(PatientDocumentStoreView.BorderTitles.DOCUMENT_STORE_LIST);
     }
     
-    private void setBorderTitles(DocumentStoreView.BorderTitles borderTitles){
+    private void setBorderTitles(PatientDocumentStoreView.BorderTitles borderTitles){
         /*ViewController.ViewMode viewMode = (ViewController.ViewMode)getMyController().getDescriptor().getControllerDescription().
                 getProperty(SystemDefinition.Properties.VIEW_MODE);*/
         JPanel panel = null;

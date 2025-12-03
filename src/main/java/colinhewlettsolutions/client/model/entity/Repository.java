@@ -5139,7 +5139,6 @@ public class Repository implements IStoreActions {
                         + "AND (a.patientKey = p.pid) "
                         + "WHERE p.isArchived = true "
                         + "ORDER BY p.surname, p.forenames ASC;";
-                System.out.println(sql);
                 result = doReadAll(sql, (PatientAppointmentData )entity);
                 break;
             case READ_PATIENT_APPOINTMENT_DATA_WITHOUT_APPOINTMENT:
