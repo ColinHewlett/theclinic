@@ -3412,6 +3412,11 @@ public class DesktopViewController extends ViewController{
         }
     }
     
+    /**
+     * method fires a property change event to each live patient vc
+     * -- the pc contains a newValue = the source schedule vc's descriptor
+     * @param e 
+     */
     private void doScheduleViewControllerChangeNotification(PropertyChangeEvent e){
         Descriptor descriptor = (Descriptor)e.getNewValue();
         Patient patient = (Patient)descriptor.getControllerDescription().getProperty(SystemDefinition.Properties.PATIENT);

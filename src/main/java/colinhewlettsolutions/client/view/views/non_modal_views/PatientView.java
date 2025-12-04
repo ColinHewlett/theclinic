@@ -511,6 +511,7 @@ public class PatientView extends View
     
     @Override
     public void propertyChange(PropertyChangeEvent e){
+        ActionEvent actionEvent = null;
         Patient patient = null;
         initialiseFromControllerViewMode();
         
@@ -571,31 +572,37 @@ public class PatientView extends View
                     
                     patient = (Patient)getMyController().getDescriptor().getControllerDescription().
                             getProperty(SystemDefinition.Properties.PATIENT);
-                    this.cmbPatientSelector.setSelectedItem(patient);
+                    System.out.println("[1] PATIENT_TO_SELECT pce = " + patient);
+                    if (!patient.getIsPatientMarkedUnbookable())
+                        this.cmbPatientSelector.setSelectedItem(patient);
                     break;
                 case PATIENT_RECEIVED:
-                    initialisePatientViewComponentFromED(); 
                     patient = (Patient)getMyController().getDescriptor().getControllerDescription()
-                            .getProperty(SystemDefinition.Properties.PATIENT);
-                    setViewTitle(patient);
+                                .getProperty(SystemDefinition.Properties.PATIENT);
+                    System.out.println("[2] PATIENT_RECEIVED pce = " + patient);
+                    if (!patient.getIsPatientMarkedUnbookable()){
+                        initialisePatientViewComponentFromED(); 
+                        
+                        setViewTitle(patient);
 
-                    this.mniCreateNewPatient.setEnabled(false);
-                    this.mniRecoverDeletedPatient.setEnabled(false);
-                    this.mniDeleteSelectedPatient.setEnabled(true);
-                    this.mniUpdateSelectedPatient.setEnabled(true);
+                        this.mniCreateNewPatient.setEnabled(false);
+                        this.mniRecoverDeletedPatient.setEnabled(false);
+                        this.mniDeleteSelectedPatient.setEnabled(true);
+                        this.mniUpdateSelectedPatient.setEnabled(true);
 
-                    this.btnFetchClinicalNotes.setEnabled(false);
-                    this.btnFetchScheduleForSelectedAppointment.setEnabled(false);
-                    
-                    setPatient(patient);
+                        this.btnFetchClinicalNotes.setEnabled(false);
+                        this.btnFetchScheduleForSelectedAppointment.setEnabled(false);
 
-                    setViewStatus(false);
+                        setPatient(patient);
 
-                    ActionEvent actionEvent = new ActionEvent(
-                    this,ActionEvent.ACTION_PERFORMED,
-                            PatientViewController.Actions.
-                                    VIEW_CHANGED_NOTIFICATION.toString());
-                    this.getMyController().actionPerformed(actionEvent);
+                        setViewStatus(false);
+
+                        actionEvent = new ActionEvent(
+                        this,ActionEvent.ACTION_PERFORMED,
+                                PatientViewController.Actions.
+                                        VIEW_CHANGED_NOTIFICATION.toString());
+                        this.getMyController().actionPerformed(actionEvent);
+                    }
                     break;
                 case NULL_PATIENT_RECEIVED:
                     initialisePatientViewComponentFromED();
@@ -1468,8 +1475,11 @@ public class PatientView extends View
         Patient patient = (Patient)getMyController().getDescriptor().
                 getControllerDescription().getProperty(SystemDefinition.Properties.PATIENT);
         if (patient!=null){
-            if (patient.getIsKeyDefined())
+            if (patient.getIsKeyDefined()){
+                this.cmbPatientSelector.removeActionListener(this);
                 this.cmbPatientSelector.setSelectedItem(patient);
+                this.cmbPatientSelector.addActionListener(this);
+            }
             this.setTitle(getSurname()); //Internal frame title
             setPatientTitle(patient.getName().getTitle());
             setForenames(patient.getName().getForenames());
