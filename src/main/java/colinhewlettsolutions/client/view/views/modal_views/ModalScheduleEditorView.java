@@ -5,6 +5,7 @@
 
 package colinhewlettsolutions.client.view.views.modal_views;
 
+import colinhewlettsolutions.client.controller.DesktopViewController;
 import colinhewlettsolutions.client.controller.SystemDefinition;
 import com.github.lgooddatepicker.components.DatePickerSettings;
 import colinhewlettsolutions.client.model.entity.Patient;

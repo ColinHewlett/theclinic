@@ -129,6 +129,7 @@ public class ScheduleViewController extends ViewController{
         setMyController(controller);
         setDesktopView(desktopView);
         pcSupport = new PropertyChangeSupport(this);
+        
     }
     
     @Override
@@ -156,7 +157,8 @@ public class ScheduleViewController extends ViewController{
 
     @Override
     public void actionPerformed(ActionEvent e){
-
+        DesktopViewController dvc = (DesktopViewController)getMyController();
+        
         if (e.getSource() instanceof DesktopViewController){
             doDesktopViewControllerAction(e);
         }
@@ -550,6 +552,7 @@ public class ScheduleViewController extends ViewController{
             if (!day.equals(lateEnd.toLocalDate()))
                 getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.LATE_BOOKING_END_TIME,null);
         }
+        
         Appointment appointment = new Appointment();
         appointment.setStart(day.atStartOfDay());
         
@@ -583,6 +586,7 @@ public class ScheduleViewController extends ViewController{
                     }
                 }
             }
+            
             /**
              * generate appointment note from treatments selected
              */
@@ -591,7 +595,6 @@ public class ScheduleViewController extends ViewController{
             getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.SCHEDULE_DAY, day);
             doAppointeeReminderCount(appointment.get());
             getUpdatedAppointmentSlotsForDay(appointment);
-            
             /**
              * 25/06/2024 07:42 update
              * -- separately determines if any emergency appointments on this day
@@ -729,8 +732,7 @@ public class ScheduleViewController extends ViewController{
         Appointment changedSlotRequest = 
                 (Appointment)getDescriptor().getViewDescription().getProperty(SystemDefinition.Properties.APPOINTMENT);
         ScheduleViewController.Actions actionCommand = ScheduleViewController.Actions.valueOf(e.getActionCommand());
-        /*ViewController.ScheduleViewControllerActionEvent actionCommand =
-               ViewController.ScheduleViewControllerActionEvent.valueOf(e.getActionCommand());*/
+        
         switch (actionCommand){
             case APPOINTMENT_CANCEL_REQUEST:
                 appointment = (Appointment)getDescriptor().getViewDescription().getProperty(SystemDefinition.Properties.APPOINTMENT);
@@ -787,9 +789,9 @@ public class ScheduleViewController extends ViewController{
                 break;
             case APPOINTMENTS_FOR_DAY_REQUEST:
                 setScheduleDay((LocalDate)getDescriptor().getViewDescription().getProperty(SystemDefinition.Properties.SCHEDULE_DAY));
+
                 doAppointmentForDayRequest((LocalDate)getDescriptor().
                         getControllerDescription().getProperty(SystemDefinition.Properties.SCHEDULE_DAY));
-                //getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.DESCRIPTOR,getDescriptor());
                 firePropertyChangeEvent(
                         ViewController.DesktopViewControllerPropertyChangeEvent.
                                 SCHEDULE_VIEW_CONTROLLER_CHANGE_NOTIFICATION.toString(),
@@ -817,6 +819,7 @@ public class ScheduleViewController extends ViewController{
                 }
                 break;
             case APPOINTMENT_UPDATE_VIEW_REQUEST:
+                
                 getDescriptor().getControllerDescription().
                     setViewMode(ViewController.ViewMode.UPDATE);
                 doAppointmentUpdateViewRequest();
@@ -2111,6 +2114,12 @@ public class ScheduleViewController extends ViewController{
                     //getControllerDescriptor().getControllerDescription().setAppointments(result.get());
                     getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.PATIENT, result.getPatient());
                     getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.DESCRIPTOR,getDescriptor());
+                    /**
+                     * code update 09/12/2025
+                     * -- ensures correct view mode setting when PVC property change event processed
+                     */
+                    getDescriptor().getControllerDescription().
+                            setProperty(SystemDefinition.Properties.VIEW_MODE,ViewController.ViewMode.CREATE);
                     firePropertyChangeEvent(
                             ViewController.DesktopViewControllerPropertyChangeEvent.
                                     SCHEDULE_VIEW_CONTROLLER_CHANGE_NOTIFICATION.toString(),
@@ -2147,9 +2156,14 @@ public class ScheduleViewController extends ViewController{
                     //doAppointmentForDayRequest(day);
                     mergeScheduleSlotsIfPossible((LocalDate)getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.SCHEDULE_DAY));
                     doAppointmentForDayRequest((LocalDate)getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.SCHEDULE_DAY));
-                    getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.PATIENT, result.getPatient());
-                    
+                    getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.PATIENT, result.getPatient()); 
                     getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.DESCRIPTOR,getDescriptor());
+                    /**
+                     * code update 09/12/2025
+                     * -- ensures correct view mode setting when PVC property change event processed
+                     */
+                    getDescriptor().getControllerDescription().
+                            setProperty(SystemDefinition.Properties.VIEW_MODE,ViewController.ViewMode.UPDATE);
                     firePropertyChangeEvent(
                             ViewController.DesktopViewControllerPropertyChangeEvent.
                                     SCHEDULE_VIEW_CONTROLLER_CHANGE_NOTIFICATION.toString(),
@@ -2550,6 +2564,7 @@ public class ScheduleViewController extends ViewController{
                 nextEmptySlotStartTime = LocalDateTime.of(day, 
                                         ViewController.FIRST_APPOINTMENT_SLOT);
             }
+            
         }else{
            nextEmptySlotStartTime = LocalDateTime.of(day, 
                                         ViewController.FIRST_APPOINTMENT_SLOT); 
@@ -2562,7 +2577,7 @@ public class ScheduleViewController extends ViewController{
         if (earlyStart!=null){
             nextEmptySlotStartTime = earlyStart;
         }
-
+        
         ArrayList<Appointment> apptsForDayIncludingEmptySlots = new ArrayList<>();      
         Iterator<Appointment> it = appointments.iterator();
         
@@ -2573,7 +2588,9 @@ public class ScheduleViewController extends ViewController{
         if (appointments.isEmpty()) {
             apptsForDayIncludingEmptySlots.add(createEmptyAppointmentSlot(
                                                 nextEmptySlotStartTime));
+            
         } 
+        
         /**
          * At least one appointment scheduled, calculate empty slot intervals
          * interleaved appropriately (time ordered) with scheduled
@@ -2593,6 +2610,7 @@ public class ScheduleViewController extends ViewController{
                     nextEmptySlotStartTime = 
                             appointment.getStart().plusMinutes(appointment.getDuration().toMinutes());
                     apptsForDayIncludingEmptySlots.add(appointment);
+                    
                 } 
                 /**
                  * If time exists between nextEmptySlotTime and the current 
@@ -2608,6 +2626,7 @@ public class ScheduleViewController extends ViewController{
                     apptsForDayIncludingEmptySlots.add(appointment);
                     nextEmptySlotStartTime =
                             appointment.getStart().plusMinutes(appointment.getDuration().toMinutes());
+                    
                 }
             }
         }

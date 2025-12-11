@@ -512,7 +512,9 @@ public class PatientView extends View
     @Override
     public void propertyChange(PropertyChangeEvent e){
         ActionEvent actionEvent = null;
-        Patient patient = null;
+        Patient patient = (Patient)getMyController().getDescriptor().getControllerDescription()
+                .getProperty(SystemDefinition.Properties.PATIENT);
+        
         initialiseFromControllerViewMode();
         
         if (e.getSource() instanceof DesktopViewController){
@@ -570,43 +572,53 @@ public class PatientView extends View
                     
                     
                     
-                    patient = (Patient)getMyController().getDescriptor().getControllerDescription().
-                            getProperty(SystemDefinition.Properties.PATIENT);
+                    /*patient = (Patient)getMyController().getDescriptor().getControllerDescription().
+                            getProperty(SystemDefinition.Properties.PATIENT);*/
                     System.out.println("[1] PATIENT_TO_SELECT pce = " + patient);
-                    if (!patient.getIsPatientMarkedUnbookable())
+                    //if (!patient.getIsPatientMarkedUnbookable())
                         this.cmbPatientSelector.setSelectedItem(patient);
                     break;
                 case PATIENT_RECEIVED:
-                    patient = (Patient)getMyController().getDescriptor().getControllerDescription()
-                                .getProperty(SystemDefinition.Properties.PATIENT);
-                    System.out.println("[2] PATIENT_RECEIVED pce = " + patient);
-                    if (!patient.getIsPatientMarkedUnbookable()){
-                        initialisePatientViewComponentFromED(); 
-                        
-                        setViewTitle(patient);
+                    /**
+                     * on receipt of PATIENT_RECEIVED property change event
+                     * -- 
+                     */
+                    try{
+                        if (patient.getIsKeyDefined()){
+                            if (!patient.getIsPatientMarkedUnbookable()){
+                                initialiseViewWithDetailsOf(patient); 
+                                setViewTitle(patient);
+                                this.mniCreateNewPatient.setEnabled(false);
+                                this.mniRecoverDeletedPatient.setEnabled(false);
+                                this.mniDeleteSelectedPatient.setEnabled(true);
+                                this.mniUpdateSelectedPatient.setEnabled(true);
+                                this.btnFetchClinicalNotes.setEnabled(false);
+                                this.btnFetchScheduleForSelectedAppointment.setEnabled(false);
+                                setPatient(patient);
+                                setViewStatus(false);
+                                actionEvent = new ActionEvent(
+                                this,ActionEvent.ACTION_PERFORMED,
+                                        PatientViewController.Actions.
+                                                VIEW_CHANGED_NOTIFICATION.toString());
+                                this.getMyController().actionPerformed(actionEvent);
+                            }else{
+                                message = "Unexpected occurrence: 'UNBOOKABLE SLOT' encountered for PATIENT_RECEIVED property change event";
+                                JOptionPane.showInternalMessageDialog(this, message, "Patient view error", JOptionPane.WARNING_MESSAGE);
+                            }
 
-                        this.mniCreateNewPatient.setEnabled(false);
-                        this.mniRecoverDeletedPatient.setEnabled(false);
-                        this.mniDeleteSelectedPatient.setEnabled(true);
-                        this.mniUpdateSelectedPatient.setEnabled(true);
-
-                        this.btnFetchClinicalNotes.setEnabled(false);
-                        this.btnFetchScheduleForSelectedAppointment.setEnabled(false);
-
-                        setPatient(patient);
-
-                        setViewStatus(false);
-
-                        actionEvent = new ActionEvent(
-                        this,ActionEvent.ACTION_PERFORMED,
-                                PatientViewController.Actions.
-                                        VIEW_CHANGED_NOTIFICATION.toString());
-                        this.getMyController().actionPerformed(actionEvent);
+                        }else{
+                            message = "Unexpected occurrence: undefined key encountered for PATIENT_RECEIVED property change event";
+                            JOptionPane.showInternalMessageDialog(this, message, "Patient view error", JOptionPane.WARNING_MESSAGE);
+                        }
+                    }catch(NullPointerException ex){
+                        message = "Unexpected occurrence: null value encountered for PATIENT_RECEIVED property change event";
+                        JOptionPane.showInternalMessageDialog(this, message, "Patient view error", JOptionPane.WARNING_MESSAGE);
                     }
                     break;
                 case NULL_PATIENT_RECEIVED:
-                    initialisePatientViewComponentFromED();
                     populatePatientSelector(this.cmbPatientSelector);
+                    clearViewOfPatientDetails();
+                    
                     this.setTitle("Patient view");
                     /**
                      * enable "Create new patient" menu item to allow creation of a new patient
@@ -1345,18 +1357,30 @@ public class PatientView extends View
         return !errorOnExit;
     }
     
+    
     private void populatePatientSelector(JComboBox<Patient> selector){
         DefaultComboBoxModel<Patient> model = 
                 new DefaultComboBoxModel<>();
         ArrayList<Patient> patients = 
                 (ArrayList<Patient>)getMyController().getDescriptor().getControllerDescription().
-                        getProperty(Properties.PATIENTS);        Iterator<Patient> it = patients.iterator();
+                        getProperty(Properties.PATIENTS);        
+        Iterator<Patient> it = patients.iterator();
         while (it.hasNext()){
             Patient patient = it.next();
             model.addElement(patient);
         }
         selector.setModel(model);
-        selector.setSelectedIndex(-1);
+        //selector.setSelectedIndex(-1);
+    }
+    
+    private void clearAppointmentsHistoryTable(){
+        PatientAppointmentHistoryTableModel tableModel = 
+                (PatientAppointmentHistoryTableModel)tblAppointmentHistory.getModel(); 
+        tableModel.removeAllElements();
+        
+        TitledBorder titledBorder =
+                    (TitledBorder)this.pnlAppointmentHistory.getBorder();
+        titledBorder.setTitle("Appointment history ");
     }
     
     private void populateAppointmentsHistoryTable(Patient patient){
@@ -1365,7 +1389,7 @@ public class PatientView extends View
                 .getControllerDescription().getProperty(Properties.APPOINTMENTS);
         /**
          * PATIENT VIEW TEST 24/04/2024 09:49
-         * -- just in case ensure null pointer exception generated
+         * -- just in case ensure null pointer exception not generated
          */
         if (appointments == null) appointments = new ArrayList<>();
         
@@ -1471,38 +1495,50 @@ public class PatientView extends View
         this.setDefaultCloseOperation(JInternalFrame.DISPOSE_ON_CLOSE);
     }
     
-    private void initialisePatientViewComponentFromED(){  
-        Patient patient = (Patient)getMyController().getDescriptor().
-                getControllerDescription().getProperty(SystemDefinition.Properties.PATIENT);
-        if (patient!=null){
-            if (patient.getIsKeyDefined()){
-                this.cmbPatientSelector.removeActionListener(this);
-                this.cmbPatientSelector.setSelectedItem(patient);
-                this.cmbPatientSelector.addActionListener(this);
+    private void clearViewOfPatientDetails(){
+        Patient patient = new Patient();
+        this.cmbPatientSelector.removeActionListener(this);
+        this.cmbPatientSelector.setSelectedIndex(-1);
+        this.cmbPatientSelector.addActionListener(this);
+        setPatientTitle(patient.getName().getTitle());
+        setForenames(patient.getName().getForenames());
+        setSurname(patient.getName().getSurname());
+        setLine1(patient.getAddress().getLine1());
+        setLine2(patient.getAddress().getLine2());
+        setTown(patient.getAddress().getTown());
+        setCounty(patient.getAddress().getCounty());
+        setPostcode(patient.getAddress().getPostcode());
+        setGender(patient.getGender());
+        setDOB(patient.getDOB());
+        clearAppointmentsHistoryTable();
+    }
+    
+    /**
+     * assumes on entry an actual patient has been defined
+     * @param Patient from which the view is initialised
+     * -- method checks the patient in not null and its key is defined and does not signify the UNBOOKABLE patient
+     */
+    private void initialiseViewWithDetailsOf(Patient patient){  
+        //this.cmbPatientSelector.removeActionListener(this);
+        this.cmbPatientSelector.setSelectedItem(patient);
+        //this.cmbPatientSelector.addActionListener(this);
+        this.setTitle(getSurname()); //Internal frame title
+        setPatientTitle(patient.getName().getTitle());
+        setForenames(patient.getName().getForenames());
+        setSurname(patient.getName().getSurname());
+        setLine1(patient.getAddress().getLine1());
+        setLine2(patient.getAddress().getLine2());
+        setTown(patient.getAddress().getTown());
+        setCounty(patient.getAddress().getCounty());
+        setPostcode(patient.getAddress().getPostcode());
+        setGender(patient.getGender());
+        setDOB(patient.getDOB());
+        javax.swing.SwingUtilities.invokeLater(new Runnable(){
+            @Override
+            public void run(){
+                populateAppointmentsHistoryTable(patient);
             }
-            this.setTitle(getSurname()); //Internal frame title
-            setPatientTitle(patient.getName().getTitle());
-            setForenames(patient.getName().getForenames());
-            setSurname(patient.getName().getSurname());
-            setLine1(patient.getAddress().getLine1());
-            setLine2(patient.getAddress().getLine2());
-            setTown(patient.getAddress().getTown());
-            setCounty(patient.getAddress().getCounty());
-            setPostcode(patient.getAddress().getPostcode());
-            setGender(patient.getGender());
-            //setNotes(patient.getNotes());
-            setDOB(patient.getDOB());
-            javax.swing.SwingUtilities.invokeLater(new Runnable(){
-                @Override
-                public void run(){
-                    populateAppointmentsHistoryTable(patient);
-                }
-            });
-        }else{
-            String message = "Unexpected occurrence: selected patient is null";
-            JOptionPane.showInternalMessageDialog(this, message, "View error", JOptionPane.WARNING_MESSAGE);
-        }
-        
+        });
     }
     
     private Patient initialisePatientFromView(Patient patient){

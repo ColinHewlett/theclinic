@@ -732,6 +732,7 @@ public class ScheduleListView extends BookingView
         this.setMyViewType(myViewType);
         setMyController(controller); 
         setDesktopView(desktopView);
+
     }
     
     @Override
@@ -1235,6 +1236,7 @@ public class ScheduleListView extends BookingView
     @Override
     public void initialiseView(){
         initComponents();
+        
         try{
             addInternalFrameListeners();
         

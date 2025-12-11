@@ -1800,10 +1800,19 @@ public class PatientViewController extends ViewController {
      */
     @Override
     public void propertyChange(PropertyChangeEvent e){
-        Patient scheduleViewPatient = null;
-        Descriptor descriptor = (Descriptor)e.getNewValue();
-        scheduleViewPatient = (Patient)descriptor.getControllerDescription().getProperty(Properties.PATIENT);
-        Patient patientViewPatient = (Patient)getDescriptor().getControllerDescription().getProperty(Properties.PATIENT);
+        Descriptor svcDescriptor = (Descriptor)e.getNewValue();
+        Descriptor pvcDescriptor = this.getDescriptor();
+        
+        Patient svcPatient = (Patient)svcDescriptor.getControllerDescription().
+                getProperty(Properties.PATIENT);
+        Patient pvcPatient = (Patient)pvcDescriptor.getControllerDescription().
+                getProperty(Properties.PATIENT);
+        
+        ArrayList<Appointment> svcAppointments = (ArrayList<Appointment>)svcDescriptor.getControllerDescription().
+                getProperty(Properties.APPOINTMENTS);      
+        ArrayList<Appointment> pvcAppointments = (ArrayList<Appointment>)pvcDescriptor.getControllerDescription().
+                getProperty(Properties.APPOINTMENTS);
+        
         ViewController.PatientViewControllerPropertyChangeEvent propertyName = 
                 ViewController.PatientViewControllerPropertyChangeEvent.
                         valueOf(e.getPropertyName());
@@ -1823,16 +1832,19 @@ public class PatientViewController extends ViewController {
                  * -- patient key is defined
                  * -- patient is not the UNBOOKABLE one
                  */
-                if (scheduleViewPatient!=null) {
-                    if (scheduleViewPatient.getIsKeyDefined()){
-                        if (!scheduleViewPatient.getIsPatientMarkedUnbookable()){
+            
+                if (svcPatient!=null) {
+                    if (svcPatient.getIsKeyDefined()){
+                        if (!svcPatient.getIsPatientMarkedUnbookable()){
                             try{
-                                if (descriptor.getControllerDescription().
+                                if (svcDescriptor.getControllerDescription().
                                         getProperty(Properties.VIEW_MODE)==null)
-                                    descriptor.getControllerDescription().
+                                    svcDescriptor.getControllerDescription().
                                             setProperty(Properties.VIEW_MODE, ViewController.ViewMode.NO_ACTION);
                                 /**
                                  * switch determines 2 cases of view mode
+                                 * -- CREATE
+                                 * -- -- a patient appointment has been created by the SVC; and Propety.PATIENT initialised
                                  * -- PATIENT_ARCHIVE
                                  * -- -- if selected patient in patient view = selected patient in schedule view
                                  * -- -- -- reads the selected patient from store
@@ -1843,18 +1855,34 @@ public class PatientViewController extends ViewController {
                                  * -- -- -- trigger a null patient request
                                  * -- -- -- re-initialse Patient VC control descriptor with the selected patient in patient view on entry to PATIENT_VIEW_CHANGE_NOTIFICATION pce
                                  * -- -- -- and fire a PATIENT_RECEIVED pce at the patient view
+                                 * -- UPDATE a patient appointment has been updated by the SVC; and Propety.PATIENT initialised
                                  * -- DEFAULT
                                  * -- -- -- if schedule view patient = patient view patient
                                  * -- -- -- trigger a null patient request (repopulate patient selection combobox)
                                  * -- -- -- re-initialse Patient VC control descriptor with the selected patient in patient view on entry to PATIENT_VIEW_CHANGE_NOTIFICATION pce
                                  * -- -- -- and fire a PATIENT_RECEIVED pce at the patient view
                                  */
-                                switch(descriptor.getControllerDescription().getProperty(Properties.VIEW_MODE)){
+                                ViewController.ViewMode viewMode = (ViewController.ViewMode)svcDescriptor.getControllerDescription().
+                                        getProperty(Properties.VIEW_MODE);
+                                switch(viewMode){
+                                    case ViewController.ViewMode.CREATE,
+                                         ViewController.ViewMode.UPDATE ->{
+                                        if (svcPatient.equals(pvcPatient)){
+                                            firePropertyChangeEvent(
+                                                    ViewController.PatientViewControllerPropertyChangeEvent.
+                                                            PATIENT_RECEIVED.toString(),
+                                                    getView(),
+                                                    this,
+                                                    null,
+                                                    null
+                                            );
+                                        }
+                                    }   
                                     case ViewController.ViewMode.PATIENT_ARCHIVE ->{
-                                        if(scheduleViewPatient.equals(patientViewPatient)){
-                                            scheduleViewPatient.setScope(Scope.SINGLE);
-                                            scheduleViewPatient = scheduleViewPatient.read();
-                                            if (scheduleViewPatient.getIsArchived()) doNullPatientRequest();
+                                        if(svcPatient.equals(pvcPatient)){
+                                            svcPatient.setScope(Scope.SINGLE);
+                                            svcPatient = svcPatient.read();
+                                            if (svcPatient.getIsArchived()) doNullPatientRequest();
                                         }else{
                                             doNullPatientRequest();
                                             firePropertyChangeEvent(
@@ -1863,39 +1891,40 @@ public class PatientViewController extends ViewController {
                                                     getView(),
                                                     this,
                                                     null,
-                                                    getDescriptor()
+                                                   pvcDescriptor
                                             );
                                         }
                                         break;
                                     }
                                     case ViewController.ViewMode.PATIENT_RESTORE ->{
                                         doNullPatientRequest();
-                                        getDescriptor().getControllerDescription().setProperty(Properties.PATIENT, patientViewPatient);
                                         firePropertyChangeEvent(
                                                 ViewController.PatientViewControllerPropertyChangeEvent.
                                                         PATIENT_RECEIVED.toString(),
                                                 getView(),
                                                 this,
                                                 null,
-                                                getDescriptor()
+                                                pvcDescriptor
                                         );
                                         break;
                                     }
+                                    /*
                                     default ->{
-                                        if (scheduleViewPatient.equals(patientViewPatient)){
+                                        if (svcPatient.equals(pvcPatient)){
                                             doNullPatientRequest();
-                                            getDescriptor().getControllerDescription().setProperty(Properties.PATIENT, patientViewPatient);
                                             firePropertyChangeEvent(
                                                     ViewController.PatientViewControllerPropertyChangeEvent.
                                                             PATIENT_RECEIVED.toString(),
                                                     getView(),
                                                     this,
                                                     null,
-                                                    getDescriptor()
+                                                    pvcDescriptor
                                             );
                                         }
                                         break;   
-                                    }
+                                    }*/
+
+
                                 }
                             }catch(StoreException ex){
                                 displayErrorMessage(ex.getMessage() + "\nRaised in propertyChange() method",

@@ -84,10 +84,25 @@ public class Entity implements IStoreClient{
     }
     void setKey(Integer value){
         this.key = value;
+        /**
+         * code update 6/12/2025
+         * -- key value is null or not zero (is never zero)
+         */
+        if (key == null) {
+            setIsKeyDefined(false);
+        }else{
+            if (key == 0) {
+                key = null;
+                setIsKeyDefined(false);
+            }else setIsKeyDefined(true);
+        }
+
+        /*
         if (key!=null)
             if (key!=0) setIsKeyDefined(true);
             else setIsKeyDefined(false);
         else setIsKeyDefined(false); 
+        */
     }
     
     private void resetAll(){

@@ -108,6 +108,29 @@ public class DesktopViewController extends ViewController{
 
     }
     
+    public ViewController getPVC(){
+        return this.patientViewControllers.get(0);
+    }
+    public ViewController getSVC(){
+        return this.scheduleViewControllers.get(0);
+    }
+    
+    public int getPVCSize(){
+        PatientViewController pvc = this.patientViewControllers.get(0);
+        ArrayList<Appointment> appointments = 
+                (ArrayList<Appointment>)pvc.getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.APPOINTMENTS);
+        return appointments.size();
+    }
+    
+    public int getSVCSize(){
+        ScheduleViewController svc = this.scheduleViewControllers.get(0);
+        ArrayList<Appointment> appointments = 
+                (ArrayList<Appointment>)svc.getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.APPOINTMENTS);
+        if (appointments==null){
+            return 0;
+        }else return appointments.size();
+    }
+    
     public enum Actions{
         ARCHIVED_PATIENTS_VIEW_CONTROLLER_REQUEST,
         CHANGE_USER_PASSWORD_REQUEST,
@@ -1263,16 +1286,23 @@ public class DesktopViewController extends ViewController{
             case SCHEDULE_LIST_VIEW_CONTROLLER_REQUEST:
                 /**
                  * VC receives a request for a new AppointmentVC from a PatientVC
-                 * -- the PatientVC view's EntityDescriptorFromView object defines an appointment for the selected patient
-                 * -- the appointment date is used in the construction of a new AppointmentVC and associated appointment schedule view which includes the selected patient's appointment
+                 * -- a default new descriptor is constructed
+                 * -- the pvc's descriptor's schedule day is included in the new descriptor
+                 * -- as is the SCHEDULE_REFERENCED_FROM_PATIENT_VIEW view mode which is used in the schedule view's initialisation
                  */
                 PatientViewController patientViewController = (PatientViewController)e.getSource();
-                patientViewController.getDescriptor().getControllerDescription().
-                        setProperty(SystemDefinition.Properties.VIEW_MODE,ViewController.ViewMode.SCHEDULE_REFERENCED_FROM_PATIENT_VIEW);
+                
                 patientViewController.getDescriptor().getControllerDescription().
                         setProperty(SystemDefinition.Properties.CONTROLLER_VIEW_MODE, ControllerViewMode.LIST);
                 
-                createNewAppointmentScheduleViewController(patientViewController.getDescriptor());
+                Descriptor descriptor = getNewTemplatedDescriptor();
+                descriptor.getControllerDescription().setProperty(SystemDefinition.Properties.SCHEDULE_DAY, 
+                        patientViewController.getDescriptor().getControllerDescription().
+                                getProperty(SystemDefinition.Properties.SCHEDULE_DAY));
+                descriptor.getControllerDescription().setProperty(SystemDefinition.Properties.VIEW_MODE, 
+                        ViewController.ViewMode.SCHEDULE_REFERENCED_FROM_PATIENT_VIEW);
+                
+                createNewAppointmentScheduleViewController(descriptor);
                 break;
             case TO_DO_VIEW_CONTROLLER_REQUEST:
                 doRequestForToDoViewController();
@@ -3146,7 +3176,7 @@ public class DesktopViewController extends ViewController{
     @Override
     public void actionPerformed(ActionEvent e){
         Actions actionCommand = Actions.valueOf(e.getActionCommand());
-        switch (actionCommand){
+         switch (actionCommand){
             case VIEW_ACTIVATED_NOTIFICATION ->{
                 if (getDesktopViewMode().equals(DesktopViewMode.CLINIC_LOGO))
                     doSetupDesktopViewMode();
@@ -3418,11 +3448,13 @@ public class DesktopViewController extends ViewController{
      * @param e 
      */
     private void doScheduleViewControllerChangeNotification(PropertyChangeEvent e){
-        Descriptor descriptor = (Descriptor)e.getNewValue();
+        /*Descriptor descriptor = (Descriptor)e.getNewValue();
         Patient patient = (Patient)descriptor.getControllerDescription().getProperty(SystemDefinition.Properties.PATIENT);
         getDescriptor().getControllerDescription().
-                setProperty(SystemDefinition.Properties.DESCRIPTOR, (Descriptor)e.getNewValue());
+                setProperty(SystemDefinition.Properties.DESCRIPTOR, (Descriptor)e.getNewValue());*/
         for(PatientViewController pvc: this.patientViewControllers){
+            ArrayList<Appointment> appointments = (ArrayList<Appointment>)pvc.getDescriptor().getControllerDescription().
+                    getProperty(SystemDefinition.Properties.APPOINTMENTS);      
             firePropertyChangeEvent(
                     ViewController.PatientViewControllerPropertyChangeEvent.
                             PATIENT_VIEW_CHANGE_NOTIFICATION.toString(),

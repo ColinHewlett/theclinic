@@ -727,7 +727,6 @@ public class Patient extends Entity implements IEntityRepositoryActions {
         String cappedLine2 = "";
         String cappedTown = "";
         String cappedCounty = "";
-        
         /**
          * 11/01/2023 10:05 update
          * -- replaces "M" and "F" gender values with "Male" and "Female"
