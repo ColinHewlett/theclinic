@@ -1786,10 +1786,8 @@ public class ScheduleViewController extends ViewController{
                 }
                 break;
             case APPOINTMENT_TREATMENT_COMMENT_UPDATE_REQUEST:
+                System.out.println("[1]svc.actionPerformed((APPOINTMENT_TREATMENT_COMMENT_UPDATE_REQUEST)");
                 try{
-                    /*AppointmentTreatment at = new AppointmentTreatment(
-                            appointment, tws.getTreatment());*/
-                    
                     appointmentTreatment.setComment(tws.getComment());
                     appointmentTreatment.update();
                 }catch(StoreException ex){
@@ -1908,6 +1906,7 @@ public class ScheduleViewController extends ViewController{
                 break;
         }
         if (!isError){
+            System.out.println("[2]svc.actionPerformed((APPOINTMENT_TREATMENT_COMMENT_UPDATE_REQUEST)");
             try{
                 TreatmentWithState treatmentWithState =
                         getTreatmentsWithState(appointment);
