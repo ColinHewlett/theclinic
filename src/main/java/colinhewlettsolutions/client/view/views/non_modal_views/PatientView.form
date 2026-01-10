@@ -30,14 +30,14 @@
             </MenuItem>
             <MenuItem class="javax.swing.JPopupMenu$Separator" name="jSeparator3">
             </MenuItem>
-            <MenuItem class="javax.swing.JMenuItem" name="mniDeleteSelectedPatient">
+            <MenuItem class="javax.swing.JMenuItem" name="mniArchiveSelectedPatient">
               <Properties>
-                <Property name="text" type="java.lang.String" value="Delete selected patient"/>
+                <Property name="text" type="java.lang.String" value="Archive selected patient"/>
               </Properties>
             </MenuItem>
-            <MenuItem class="javax.swing.JMenuItem" name="mniRecoverDeletedPatient">
+            <MenuItem class="javax.swing.JMenuItem" name="mniRestoreArchivedPatient">
               <Properties>
-                <Property name="text" type="java.lang.String" value="Recover deleted patient"/>
+                <Property name="text" type="java.lang.String" value="Restore archived patient"/>
               </Properties>
             </MenuItem>
             <MenuItem class="javax.swing.JPopupMenu$Separator" name="jSeparator2">

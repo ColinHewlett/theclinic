@@ -281,7 +281,6 @@
                   <Group type="102" alignment="0" attributes="0">
                       <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="1" max="-2" attributes="0">
-                          <Component id="btnSelectTreatmentRequest" alignment="0" max="32767" attributes="0"/>
                           <Component id="btnClinicalNotesForSelectedAppointment" alignment="0" max="32767" attributes="0"/>
                           <Component id="btnCreateUpdateCancelUnbookableSlotOrMoveBookingToAnotherDayOrFetchPatientDetails" alignment="0" max="32767" attributes="0"/>
                           <Component id="btnCancelSelectedAppointment" alignment="0" max="32767" attributes="0"/>
@@ -297,19 +296,17 @@
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" alignment="0" attributes="0">
                       <EmptySpace min="-2" pref="10" max="-2" attributes="0"/>
-                      <Component id="btnCreateUpdateAppointment" min="-2" pref="71" max="-2" attributes="0"/>
+                      <Component id="btnCreateUpdateAppointment" min="-2" pref="83" max="-2" attributes="0"/>
                       <EmptySpace min="-2" pref="10" max="-2" attributes="0"/>
-                      <Component id="btnMakeDeleteEmergencyAppointmentUndoSelection" min="-2" pref="71" max="-2" attributes="0"/>
+                      <Component id="btnMakeDeleteEmergencyAppointmentUndoSelection" min="-2" pref="83" max="-2" attributes="0"/>
                       <EmptySpace min="-2" pref="10" max="-2" attributes="0"/>
-                      <Component id="btnCancelSelectedAppointment" min="-2" pref="71" max="-2" attributes="0"/>
+                      <Component id="btnCancelSelectedAppointment" min="-2" pref="83" max="-2" attributes="0"/>
                       <EmptySpace min="-2" pref="10" max="-2" attributes="0"/>
-                      <Component id="btnCreateUpdateCancelUnbookableSlotOrMoveBookingToAnotherDayOrFetchPatientDetails" min="-2" pref="71" max="-2" attributes="0"/>
+                      <Component id="btnCreateUpdateCancelUnbookableSlotOrMoveBookingToAnotherDayOrFetchPatientDetails" min="-2" pref="83" max="-2" attributes="0"/>
                       <EmptySpace min="-2" pref="10" max="-2" attributes="0"/>
-                      <Component id="btnClinicalNotesForSelectedAppointment" min="-2" pref="71" max="-2" attributes="0"/>
+                      <Component id="btnClinicalNotesForSelectedAppointment" min="-2" pref="83" max="-2" attributes="0"/>
                       <EmptySpace min="-2" pref="10" max="-2" attributes="0"/>
-                      <Component id="btnSelectTreatmentRequest" min="-2" pref="71" max="-2" attributes="0"/>
-                      <EmptySpace max="-2" attributes="0"/>
-                      <Component id="btnCloseView" min="-2" pref="71" max="-2" attributes="0"/>
+                      <Component id="btnCloseView" min="-2" pref="83" max="-2" attributes="0"/>
                       <EmptySpace min="-2" pref="10" max="-2" attributes="0"/>
                   </Group>
               </Group>
@@ -357,16 +354,6 @@
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnClinicalNotesForSelectedAppointmentActionPerformed"/>
               </Events>
             </Component>
-            <Component class="javax.swing.JButton" name="btnSelectTreatmentRequest">
-              <Properties>
-                <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-                  <Connection code="Captions.ScheduleView.SELECT_TREATMENT._1()" type="code"/>
-                </Property>
-              </Properties>
-              <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnSelectTreatmentRequestActionPerformed"/>
-              </Events>
-            </Component>
             <Component class="javax.swing.JButton" name="btnCloseView">
               <Properties>
                 <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
@@ -399,8 +386,8 @@
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" alignment="0" attributes="0">
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="scrAppointmentsForDayTable" min="-2" pref="371" max="-2" attributes="0"/>
-                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="scrAppointmentsForDayTable" min="-2" pref="352" max="-2" attributes="0"/>
+                      <EmptySpace pref="12" max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>

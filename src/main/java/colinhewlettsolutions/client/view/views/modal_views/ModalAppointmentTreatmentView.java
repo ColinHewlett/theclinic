@@ -167,6 +167,7 @@ public class ModalAppointmentTreatmentView extends ModalView
         }
     }
     
+    @Override
     public void tableChanged(TableModelEvent e){
         ViewController.ScheduleViewControllerActionEvent actionCommand = null;
         if (e.getSource() instanceof TreatmentWithStateTableModel){
@@ -183,9 +184,9 @@ public class ModalAppointmentTreatmentView extends ModalView
             tblTreatmentWithState.clearSelection();
             if (treatmentWithState.getState())
                 actionCommand = ViewController.ScheduleViewControllerActionEvent
-                        .APPOINTMENT_TREATMENT_STATE_SET_REQUEST;
+                        .TREATMENT_STATE_SET_REQUEST;
             else actionCommand = ViewController.ScheduleViewControllerActionEvent
-                        .APPOINTMENT_TREATMENT_STATE_RESET_REQUEST;
+                        .TREATMENT_STATE_RESET_REQUEST;
             doSendActionEvent(actionCommand);
         }
     }

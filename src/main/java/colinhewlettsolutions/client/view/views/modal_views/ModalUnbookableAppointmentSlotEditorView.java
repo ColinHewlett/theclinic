@@ -220,7 +220,7 @@ public class ModalUnbookableAppointmentSlotEditorView extends ModalView
         Appointment appointment = (Appointment)getMyController().getDescriptor().getControllerDescription().
                 getProperty(SystemDefinition.Properties.APPOINTMENT);
         if (appointment.getNotes()!=null)
-            this.txtReasonForUnbookableSlot.setText(appointment.getNotes());
+            this.txtReasonForUnbookableSlot.setText(appointment.getComment());
         if (appointment.getPatient()==null){
             if (appointment.getStart()==null){
                 appointment.setStart(LocalDateTime.of(day, LocalTime.of(9,0)));
@@ -475,7 +475,7 @@ public class ModalUnbookableAppointmentSlotEditorView extends ModalView
         ((Appointment)getMyController().getDescriptor().getViewDescription().getProperty(SystemDefinition.Properties.APPOINTMENT)).
                 setDuration(getDurationFromView());
         ((Appointment)getMyController().getDescriptor().getViewDescription().getProperty(SystemDefinition.Properties.APPOINTMENT)).
-                setNotes(this.txtReasonForUnbookableSlot.getText());
+                setComment(this.txtReasonForUnbookableSlot.getText());
         /*
         if (getMyController()
                 .getDescriptor()

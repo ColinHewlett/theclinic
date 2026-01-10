@@ -513,6 +513,7 @@ public class SystemDefinition {
     public enum Properties{
         DATABASE_TYPE,
         DATABASE_URL,
+        DEBUG_PATIENT_UTILITIES,
         DEBUG_SMTP,
         DESKTOP_BACKGROUND,
         DESKTOP_ICON,

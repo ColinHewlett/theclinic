@@ -633,7 +633,7 @@ public class ScheduleListView extends BookingView
                 this.btnCreateUpdateCancelUnbookableSlotOrMoveBookingToAnotherDayOrFetchPatientDetails.setEnabled(false);
                 this.btnCreateUpdateCancelUnbookableSlotOrMoveBookingToAnotherDayOrFetchPatientDetails.setText(
                         Captions.ScheduleView.MARK_CANCEL_UNBOOKABLE_SLOT_OR_MOVE_TO_ANOTHER_DAY_OR_FETCH_PATIENT_DETAILS._3());
-                this.btnSelectTreatmentRequest.setEnabled(false);
+                //this.btnSelectTreatmentRequest.setEnabled(false);
                 break;
             case LIST:
                 if (tblAppointments!=null)tblAppointments.setModel(new ScheduleListTableModel() );
@@ -1026,7 +1026,11 @@ public class ScheduleListView extends BookingView
                     if (e.getSource() instanceof DesktopViewController){
                         String message = (String)getMyController().getDescriptor().getControllerDescription().
                                 getProperty(SystemDefinition.Properties.ERROR);
-                        JOptionPane.showInternalMessageDialog(this, message, "View error",JOptionPane.WARNING_MESSAGE);
+                        JOptionPane.showInternalMessageDialog(this, message, "View controller error",JOptionPane.WARNING_MESSAGE);
+                    }else{
+                        String message = (String)getMyController().getDescriptor().getControllerDescription().
+                                getProperty(SystemDefinition.Properties.ERROR);
+                        JOptionPane.showInternalMessageDialog(this, message, "View controller message",JOptionPane.INFORMATION_MESSAGE);
                     }
                     break;
                 }
@@ -1105,7 +1109,7 @@ public class ScheduleListView extends BookingView
                                     setEmergencySlotUndoMode(EmergencySlotUndoSelectionMode.NONE);
                                     btnCancelSelectedAppointment.setEnabled(false);
                                     btnClinicalNotesForSelectedAppointment.setEnabled(false);
-                                    btnSelectTreatmentRequest.setEnabled(false);
+                                    //btnSelectTreatmentRequest.setEnabled(false);
                                     break;
                                 case UNBOOKABLE_SCHEDULE_SLOT:
                                     setAppointmentMode(AppointmentMode.NONE);
@@ -1113,7 +1117,7 @@ public class ScheduleListView extends BookingView
                                     setEmergencySlotUndoMode(EmergencySlotUndoSelectionMode.NONE);
                                     btnCancelSelectedAppointment.setEnabled(false);
                                     btnClinicalNotesForSelectedAppointment.setEnabled(false);
-                                    btnSelectTreatmentRequest.setEnabled(false);
+                                    //btnSelectTreatmentRequest.setEnabled(false);
                                     break;
                                 case EMERGENCY_SCHEDULE_SLOT:
                                     setAppointmentMode(AppointmentMode.NONE);
@@ -1121,7 +1125,7 @@ public class ScheduleListView extends BookingView
                                     setUnbookableSlotOrMoveOrFetchPatientMode(UnbookableSlotOrMoveOrFetchPatientMode.NONE);
                                     btnCancelSelectedAppointment.setEnabled(false);
                                     btnClinicalNotesForSelectedAppointment.setEnabled(true);
-                                    btnSelectTreatmentRequest.setEnabled(false);
+                                    //btnSelectTreatmentRequest.setEnabled(false);
                                     break;
                                 case BOOKED_SCHEDULE_SLOT:
                                     setAppointmentMode(AppointmentMode.UPDATE);
@@ -1129,7 +1133,7 @@ public class ScheduleListView extends BookingView
                                     setUnbookableSlotOrMoveOrFetchPatientMode(UnbookableSlotOrMoveOrFetchPatientMode.FETCH_PATIENT);
                                     btnCancelSelectedAppointment.setEnabled(true);
                                     btnClinicalNotesForSelectedAppointment.setEnabled(true);
-                                    btnSelectTreatmentRequest.setEnabled(true);
+                                    //btnSelectTreatmentRequest.setEnabled(true);
                                     /*this.btnMarkCancelUnbookableSlotOrMoveBookingToAnotherDayOrFetchPatientDetails.setText(
                                             "<html><center>Move to</center><center>another</center><center>day</center></html>");*/
                                     //btnMarkCancelUnbookableSlotOrMoveBookingToAnotherDayOrFetchPatientDetails.setEnabled(true);
@@ -1141,7 +1145,7 @@ public class ScheduleListView extends BookingView
                             btnCreateUpdateCancelUnbookableSlotOrMoveBookingToAnotherDayOrFetchPatientDetails.setEnabled(false);
                             btnCancelSelectedAppointment.setEnabled(false);
                             btnClinicalNotesForSelectedAppointment.setEnabled(false);
-                            btnSelectTreatmentRequest.setEnabled(false);
+                            //btnSelectTreatmentRequest.setEnabled(false);
                             btnCloseView.setEnabled(true);
                             
                         }
@@ -1154,7 +1158,7 @@ public class ScheduleListView extends BookingView
                         btnCreateUpdateCancelUnbookableSlotOrMoveBookingToAnotherDayOrFetchPatientDetails.setEnabled(false);
                         btnCancelSelectedAppointment.setEnabled(false);
                         btnClinicalNotesForSelectedAppointment.setEnabled(false);
-                        btnSelectTreatmentRequest.setEnabled(false);
+                        //btnSelectTreatmentRequest.setEnabled(false);
                         btnMakeDeleteEmergencyAppointmentUndoSelection.setEnabled(false);
                     }
                     break;
@@ -1298,7 +1302,7 @@ public class ScheduleListView extends BookingView
         btnCreateUpdateCancelUnbookableSlotOrMoveBookingToAnotherDayOrFetchPatientDetails.setEnabled(false);
         btnCancelSelectedAppointment.setEnabled(false);
         btnClinicalNotesForSelectedAppointment.setEnabled(false);
-        btnSelectTreatmentRequest.setEnabled(false);
+        //btnSelectTreatmentRequest.setEnabled(false);
         btnCloseView.setEnabled(true);
 
         btnCancelSelectedAppointment.setText(Captions.ScheduleView.CANCEL_APPOINTMENT._1());
@@ -1311,7 +1315,7 @@ public class ScheduleListView extends BookingView
         btnNow.setText(Captions.ScheduleView.TODAY._1());
         btnPreviousDay.setText(Captions.ScheduleView.PREVIOUS_DAY._1());
         //btnSearchAvailableSlotsRequest.setText(ScheduleViewActionCaption.SEARCH_AVAILABLE_SLOTS._1());
-        btnSelectTreatmentRequest.setText(Captions.ScheduleView.SELECT_TREATMENT._1());
+        //btnSelectTreatmentRequest.setText(Captions.ScheduleView.SELECT_TREATMENT._1());
         
         
         btnCloseView.setActionCommand(Action.REQUEST_CLOSE_VIEW.toString());
@@ -1326,7 +1330,7 @@ public class ScheduleListView extends BookingView
         btnNow.setActionCommand(Action.REQUEST_NOW.toString());
         btnPreviousDay.setActionCommand(Action.REQUEST_PREVIOUS_DAY.toString());
         //btnSearchAvailableSlotsRequest.setActionCommand(Action.REQUEST_SEARCH_AVAILABLE_SLOTS.toString());
-        btnSelectTreatmentRequest.setActionCommand(Action.REQUEST_TREATMENT_VIEW.toString());
+        //btnSelectTreatmentRequest.setActionCommand(Action.REQUEST_TREATMENT_VIEW.toString());
         
         btnCancelSelectedAppointment.addActionListener(this);
         btnClinicalNotesForSelectedAppointment.addActionListener(this);
@@ -1338,7 +1342,7 @@ public class ScheduleListView extends BookingView
         btnNow.addActionListener(this);
         btnPreviousDay.addActionListener(this);
         //btnSearchAvailableSlotsRequest.addActionListener(this);
-        btnSelectTreatmentRequest.addActionListener(this); 
+        //btnSelectTreatmentRequest.addActionListener(this); 
         
         configureScheduleListView();
         
@@ -2032,7 +2036,7 @@ public class ScheduleListView extends BookingView
         this.btnCreateUpdateAppointment.setEnabled(false);
         this.btnMakeDeleteEmergencyAppointmentUndoSelection.setEnabled(false);
         this.btnCreateUpdateCancelUnbookableSlotOrMoveBookingToAnotherDayOrFetchPatientDetails.setEnabled(false);
-        this.btnSelectTreatmentRequest.setEnabled(false);
+        //this.btnSelectTreatmentRequest.setEnabled(false);
         //this.tblAppointments.clearSelection();
     }
     
@@ -2260,7 +2264,6 @@ public class ScheduleListView extends BookingView
         btnCancelSelectedAppointment = new javax.swing.JButton();
         btnCreateUpdateCancelUnbookableSlotOrMoveBookingToAnotherDayOrFetchPatientDetails = new javax.swing.JButton();
         btnClinicalNotesForSelectedAppointment = new javax.swing.JButton();
-        btnSelectTreatmentRequest = new javax.swing.JButton();
         btnCloseView = new javax.swing.JButton();
         pnlScheduleForDay = new javax.swing.JPanel();
         scrAppointmentsForDayTable = new javax.swing.JScrollPane();
@@ -2376,13 +2379,6 @@ public class ScheduleListView extends BookingView
             }
         });
 
-        btnSelectTreatmentRequest.setText(Captions.ScheduleView.SELECT_TREATMENT._1());
-        btnSelectTreatmentRequest.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnSelectTreatmentRequestActionPerformed(evt);
-            }
-        });
-
         btnCloseView.setText(Captions.CLOSE_VIEW);
 
         javax.swing.GroupLayout pnlScheduleOperationsLayout = new javax.swing.GroupLayout(pnlScheduleOperations);
@@ -2392,7 +2388,6 @@ public class ScheduleListView extends BookingView
             .addGroup(pnlScheduleOperationsLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(pnlScheduleOperationsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                    .addComponent(btnSelectTreatmentRequest, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(btnClinicalNotesForSelectedAppointment, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(btnCreateUpdateCancelUnbookableSlotOrMoveBookingToAnotherDayOrFetchPatientDetails, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(btnCancelSelectedAppointment, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -2405,19 +2400,17 @@ public class ScheduleListView extends BookingView
             pnlScheduleOperationsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlScheduleOperationsLayout.createSequentialGroup()
                 .addGap(10, 10, 10)
-                .addComponent(btnCreateUpdateAppointment, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(btnCreateUpdateAppointment, javax.swing.GroupLayout.PREFERRED_SIZE, 83, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(10, 10, 10)
-                .addComponent(btnMakeDeleteEmergencyAppointmentUndoSelection, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(btnMakeDeleteEmergencyAppointmentUndoSelection, javax.swing.GroupLayout.PREFERRED_SIZE, 83, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(10, 10, 10)
-                .addComponent(btnCancelSelectedAppointment, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(btnCancelSelectedAppointment, javax.swing.GroupLayout.PREFERRED_SIZE, 83, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(10, 10, 10)
-                .addComponent(btnCreateUpdateCancelUnbookableSlotOrMoveBookingToAnotherDayOrFetchPatientDetails, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(btnCreateUpdateCancelUnbookableSlotOrMoveBookingToAnotherDayOrFetchPatientDetails, javax.swing.GroupLayout.PREFERRED_SIZE, 83, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(10, 10, 10)
-                .addComponent(btnClinicalNotesForSelectedAppointment, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(btnClinicalNotesForSelectedAppointment, javax.swing.GroupLayout.PREFERRED_SIZE, 83, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(10, 10, 10)
-                .addComponent(btnSelectTreatmentRequest, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btnCloseView, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(btnCloseView, javax.swing.GroupLayout.PREFERRED_SIZE, 83, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(10, 10, 10))
         );
 
@@ -2440,8 +2433,8 @@ public class ScheduleListView extends BookingView
             pnlScheduleForDayLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlScheduleForDayLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(scrAppointmentsForDayTable, javax.swing.GroupLayout.PREFERRED_SIZE, 371, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
+                .addComponent(scrAppointmentsForDayTable, javax.swing.GroupLayout.PREFERRED_SIZE, 352, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(12, Short.MAX_VALUE))
         );
 
         pnlView.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1));
@@ -2545,10 +2538,6 @@ public class ScheduleListView extends BookingView
         // TODO add your handling code here:
     }//GEN-LAST:event_btnClinicalNotesForSelectedAppointmentActionPerformed
 
-    private void btnSelectTreatmentRequestActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSelectTreatmentRequestActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_btnSelectTreatmentRequestActionPerformed
-
     private void btnCreateUpdateAppointmentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCreateUpdateAppointmentActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_btnCreateUpdateAppointmentActionPerformed
@@ -2566,7 +2555,6 @@ public class ScheduleListView extends BookingView
     private javax.swing.JButton btnPreviousDay;
     private javax.swing.JButton btnRequestToDoLIst;
     private javax.swing.JButton btnSelectBookableSlotsScanner;
-    private javax.swing.JButton btnSelectTreatmentRequest;
     private javax.swing.JButton btnSelectUnbookableSlotsScanner;
     private com.github.lgooddatepicker.components.DatePicker dayDatePicker;
     private javax.swing.JMenuBar jMenuBar1;

@@ -137,6 +137,7 @@ public class DesktopViewController extends ViewController{
         CLINIC_LOGO_VIEW_MODE_NOTIFICATION,
         CLOSE_PATIENT_VIEW_WITH_SAME_PATIENT_REQUEST,
         CLOSE_SCHEDULE_VIEW_WITH_SAME_DATE_REQUEST,
+        COMMENT_MIGRATION_REQUEST,
         DESKTOP_VIEW_MODE_NOTIFICATION,
         IMAGE_VIEWER_VIEW_CONTROLLER_REQUEST,
         INITIALISE_VIEW_CONTROLLER,
@@ -3172,11 +3173,86 @@ public class DesktopViewController extends ViewController{
                     "Desktop view controller",JOptionPane.WARNING_MESSAGE);
         }
     }
+    
+    private String unbracketComment(String comment){
+        boolean firstCharacterBracket = false;
+        boolean lastCharacterBracket = false;
+        if (comment.substring(0).equals("(")) {
+            firstCharacterBracket = true;
+        }
+        if (comment.substring(comment.length()-1).equals(")")) {
+            lastCharacterBracket = true;
+        }
+        if (firstCharacterBracket && lastCharacterBracket) {
+            comment = comment.substring(1,comment.length()-2);
+        }
+        return comment;
+    }
+    
+    private void doMigrateCommentsFromAppointmentTreatmentToAppointmentx(){
+        Appointment appointment = new Appointment();
+        appointment.setScope(Entity.Scope.ALL);
+        try{
+            appointment.read();
+            for(Appointment _appointment : appointment.get()){
+//               if (_appointment.getKey().equals(int 31540)) {
+  //                      System.out.println(_appointment.getComment());
+ //               }
+                if (!_appointment.getComment().trim().isEmpty()){
+                    System.out.println("length of comment = " + _appointment.getComment().length());
+                    _appointment.setComment(unbracketComment(_appointment.getComment()));
+                    _appointment.update();
+                }
+            } 
+        }catch (StoreException ex){
+            String message = ex.getMessage() + "\n";
+            displayErrorMessage(message, "Desktop View Controller error", JOptionPane.WARNING_MESSAGE);
+        }
+
+    } 
+    
+    private void doMigrateCommentsFromAppointmentTreatmentToAppointment(){
+        int count = 0;
+        AppointmentTreatment at = new AppointmentTreatment();
+        at.setScope(Entity.Scope.ALL);
+        try{
+            at.read();
+            for(AppointmentTreatment _at : at.get()){
+                Appointment appointment = null;
+                if (count==97){
+                    int test = 0;
+                }
+                if (!_at.getComment().trim().isEmpty()){
+                    appointment = _at.getAppointment();
+                    appointment.setScope(Entity.Scope.SINGLE);
+                    appointment = appointment.read();
+                    if (appointment.getComment().trim().isEmpty()){
+                        appointment.setComment(unbracketComment(_at.getComment()));
+                    }else{
+                        appointment.setComment(appointment.getComment() + "; " + unbracketComment(_at.getComment()));
+                    }
+                    appointment.update();
+                    count++;
+                    
+                    
+                    //System.out.println("number of comment updates = " + count + "; appointment pid = " + appointment.getKey());
+                }
+            } 
+            //System.out.println("number of comment updates = " + count);
+        }catch (StoreException ex){
+            String message = ex.getMessage() + "\n";
+            displayErrorMessage(message, "Desktop View Controller error", JOptionPane.WARNING_MESSAGE);
+        }
+    }
 
     @Override
     public void actionPerformed(ActionEvent e){
         Actions actionCommand = Actions.valueOf(e.getActionCommand());
          switch (actionCommand){
+             case COMMENT_MIGRATION_REQUEST ->{
+                 doMigrateCommentsFromAppointmentTreatmentToAppointment();
+                 break;
+             }
             case VIEW_ACTIVATED_NOTIFICATION ->{
                 if (getDesktopViewMode().equals(DesktopViewMode.CLINIC_LOGO))
                     doSetupDesktopViewMode();

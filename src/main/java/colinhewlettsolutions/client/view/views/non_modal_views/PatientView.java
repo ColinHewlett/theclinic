@@ -138,11 +138,11 @@ public class PatientView extends View
         REQUEST_NEW_INVOICE,
         REQUEST_NULL_PATIENT,
         REQUEST_PATIENT,
-        REQUEST_PATIENT_DELETE,
+        REQUEST_PATIENT_ARCHIVE,
         REQUEST_PATIENT_DOCUMENT,
         REQUEST_PATIENT_QUESTIONNAIRE,
         REQUEST_PATIENT_RECALLS,
-        REQUEST_PATIENT_RECOVER,
+        REQUEST_PATIENT_RESTORE_VIEW,
         REQUEST_PATIENT_SCAN,
         REQUEST_PHONE_EMAIL_EDITOR_VIEW,
         REQUEST_PRINT_PATIENT_MEDICAL_HISTORY,
@@ -388,16 +388,16 @@ public class PatientView extends View
         
         this.mniCloseView.setActionCommand(Action.REQUEST_CLOSE_VIEW.toString());
         this.mniCreateNewPatient.setActionCommand(Action.REQUEST_CREATE_RECOVER_PATIENT.toString());
-        this.mniDeleteSelectedPatient.setActionCommand(Action.REQUEST_PATIENT_DELETE.toString());
+        this.mniArchiveSelectedPatient.setActionCommand(Action.REQUEST_PATIENT_ARCHIVE.toString());
         this.mniUpdateSelectedPatient.setActionCommand(Action.REQUEST_UPDATE_RECOVER_PATIENT.toString());
         this.mniPatientRecallsRequest.setActionCommand(Action.REQUEST_PATIENT_RECALLS.toString());
-        this.mniRecoverDeletedPatient.setActionCommand(Action.REQUEST_PATIENT_RECOVER.toString());
+        this.mniRestoreArchivedPatient.setActionCommand(Action.REQUEST_PATIENT_RESTORE_VIEW.toString());
         this.mniCloseView.addActionListener(this);
         this.mniCreateNewPatient.addActionListener(this);
-        this.mniDeleteSelectedPatient.addActionListener(this);
+        this.mniArchiveSelectedPatient.addActionListener(this);
         this.mniUpdateSelectedPatient.addActionListener(this);
         this.mniPatientRecallsRequest.addActionListener(this);
-        this.mniRecoverDeletedPatient.addActionListener(this);
+        this.mniRestoreArchivedPatient.addActionListener(this);
         
         
 
@@ -561,36 +561,17 @@ public class PatientView extends View
                             JOptionPane.WARNING_MESSAGE);
                     break;
                 case PATIENT_TO_SELECT_RECEIVED:
-                    
-                    /**
-                     * code change because new mvc with a selected patient dont work
-                     */
-                    /*initialisePatientViewComponentFromED();
-                    patient = (Patient)getMyController().getDescriptor().getControllerDescription().
-                            getProperty(SystemDefinition.Properties.PATIENT);
-                    this.cmbPatientSelector.setSelectedItem(patient);*/
-                    
-                    
-                    
-                    /*patient = (Patient)getMyController().getDescriptor().getControllerDescription().
-                            getProperty(SystemDefinition.Properties.PATIENT);*/
-                    System.out.println("[1] PATIENT_TO_SELECT pce = " + patient);
-                    //if (!patient.getIsPatientMarkedUnbookable())
-                        this.cmbPatientSelector.setSelectedItem(patient);
+                    this.cmbPatientSelector.setSelectedItem(patient);
                     break;
                 case PATIENT_RECEIVED:
-                    /**
-                     * on receipt of PATIENT_RECEIVED property change event
-                     * -- 
-                     */
                     try{
                         if (patient.getIsKeyDefined()){
                             if (!patient.getIsPatientMarkedUnbookable()){
                                 initialiseViewWithDetailsOf(patient); 
                                 setViewTitle(patient);
                                 this.mniCreateNewPatient.setEnabled(false);
-                                this.mniRecoverDeletedPatient.setEnabled(false);
-                                this.mniDeleteSelectedPatient.setEnabled(true);
+                                this.mniRestoreArchivedPatient.setEnabled(false);
+                                this.mniArchiveSelectedPatient.setEnabled(true);
                                 this.mniUpdateSelectedPatient.setEnabled(true);
                                 this.btnFetchClinicalNotes.setEnabled(false);
                                 this.btnFetchScheduleForSelectedAppointment.setEnabled(false);
@@ -624,8 +605,8 @@ public class PatientView extends View
                      * enable "Create new patient" menu item to allow creation of a new patient
                      */
                     this.mniCreateNewPatient.setEnabled(true);
-                    this.mniRecoverDeletedPatient.setEnabled(true);
-                    this.mniDeleteSelectedPatient.setEnabled(false);
+                    this.mniRestoreArchivedPatient.setEnabled(true);
+                    this.mniArchiveSelectedPatient.setEnabled(false);
                     this.mniUpdateSelectedPatient.setEnabled(false);
 
                     this.btnFetchClinicalNotes.setEnabled(false);
@@ -719,8 +700,8 @@ public class PatientView extends View
             case REQUEST_PATIENT:
                 doPatientRequest();
                 break;
-            case REQUEST_PATIENT_DELETE:
-                doPatientDeleteRequest();
+            case REQUEST_PATIENT_ARCHIVE:
+                doPatientArchiveRequest();
                 break;
             case REQUEST_PATIENT_DOCUMENT:
                 doPatientDocumentRequest();
@@ -733,8 +714,8 @@ public class PatientView extends View
             case REQUEST_PATIENT_RECALLS:
                 getMyController().sendNoOpMessage(this);
                 break;
-            case REQUEST_PATIENT_RECOVER:
-                doPatientRecoverRequest();
+            case REQUEST_PATIENT_RESTORE_VIEW:
+                doPatientRestoreViewRequest();
                 break;
             case REQUEST_PATIENT_SCAN:
                 doPatientScanRequest();
@@ -780,6 +761,7 @@ public class PatientView extends View
     
     
     private void doFileChooserDialog(ViewController.ViewMode viewMode){
+        boolean repeatUploadRequest = false;
         DialogView dialog = null;
         String title = null;
         File selectedFile = null;
@@ -789,14 +771,23 @@ public class PatientView extends View
             case DOCUMENT ->{
                 title = "Select Word file to upload";
                 allowedFileExtensions = new String[] {"docx"};
-                selectedFile = NativeFileChooser.showOpenDialog(
-                    this, title, new File(System.getProperty("user.home")), allowedFileExtensions);
-                if (selectedFile!=null) {
-                    String message = selectedFile.getName() + " has been uploaded to " + getPatientNameString() + "'s document store";
-                    document.add(selectedFile);
-                    JOptionPane.showInternalMessageDialog(this,message, 
-                                    "File uploaded", JOptionPane.INFORMATION_MESSAGE);
-                }
+                do{
+                    selectedFile = NativeFileChooser.showOpenDialog(
+                        this, title, new File(System.getProperty("user.home")), allowedFileExtensions);
+                    repeatUploadRequest = false;
+                    if (selectedFile!=null) {                      
+                        if (isWordFile(selectedFile)){
+                                String message = selectedFile.getName() + " has been uploaded to " + getPatientNameString() + "'s document store";
+                                document.add(selectedFile);
+                                JOptionPane.showInternalMessageDialog(this,message, 
+                                                "File uploaded", JOptionPane.INFORMATION_MESSAGE);
+                        }else{
+                            repeatUploadRequest = true;
+                            JOptionPane.showInternalMessageDialog(this,"attempt to upload a non Word file has been aborted; retry uploading a Word documenrt", 
+                                                "Error uploading " + getPatientNameString() + "'s document", JOptionPane.WARNING_MESSAGE);
+                        }
+                    }
+                }while(repeatUploadRequest);    
                 break;
             }
             case SCAN ->{
@@ -813,7 +804,7 @@ public class PatientView extends View
                             break;
                         }
                     }
-                    boolean repeatUploadRequest;
+                    
                     do{
                         selectedFile = NativeFileChooser.showOpenDialog(
                             this, title, new File(System.getProperty("user.home")), allowedFileExtensions);
@@ -833,31 +824,28 @@ public class PatientView extends View
                         }else break;
                     }while (repeatUploadRequest);   
                 }
-                /*
-                if (document.size()==2){
-                    getMyController().getDescriptor().getViewDescription().
-                            setProperty(Properties.PATIENT_DOCUMENT, document);
-                    getMyController().getDescriptor().getViewDescription().
-                            setProperty(Properties.VIEW_MODE, viewMode);
-                    doActionEventFor(PatientViewController.Actions.UPLOAD_TO_PATIENT_DOCUMENT_STORE_REQUEST);
-                }else {
-                    JOptionPane.showInternalMessageDialog(this,"both pages of the patient's medical history must be queued for upload before the complete medical history can be uploaded", 
-                                                    "Error uploading " + getPatientNameString() + "'s medical history", JOptionPane.WARNING_MESSAGE);
-                }*/
                 break;
             }
         }
-        getMyController().getDescriptor().getViewDescription().
-                setProperty(Properties.PATIENT_DOCUMENT, document);
-        getMyController().getDescriptor().getViewDescription().
-                setProperty(Properties.VIEW_MODE, viewMode);
-        doActionEventFor(PatientViewController.Actions.UPLOAD_TO_PATIENT_DOCUMENT_STORE_REQUEST);
+        if (!document.isEmpty()){
+            getMyController().getDescriptor().getViewDescription().
+                    setProperty(Properties.PATIENT_DOCUMENT, document);
+            getMyController().getDescriptor().getViewDescription().
+                    setProperty(Properties.VIEW_MODE, viewMode);
+            doActionEventFor(PatientViewController.Actions.UPLOAD_TO_PATIENT_DOCUMENT_STORE_REQUEST);
+        }
     }
     
     private boolean isImageFile(File file){
         String filename = file.getName();
         filename = filename.substring(filename.lastIndexOf(".")+1);
         return (filename.equalsIgnoreCase("jpg") || filename.equalsIgnoreCase("jpeg") ||  filename.equalsIgnoreCase("png")) || filename.equalsIgnoreCase("gif");
+    }
+    
+    private boolean isWordFile(File file){
+        String filename = file.getName();
+        filename = filename.substring(filename.lastIndexOf(".")+1);
+        return (filename.equalsIgnoreCase("docx") || filename.equalsIgnoreCase("doc"));
     }
     
     private void doCloseViewRequest(){
@@ -1156,17 +1144,17 @@ public class PatientView extends View
                     .NULL_PATIENT_REQUEST.toString());
         this.getMyController().actionPerformed(actionEvent);
     }
-    private void doPatientDeleteRequest(){
+    private void doPatientArchiveRequest(){
         int response;
         Patient patient = (Patient)getMyController().getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.PATIENT);
         getMyController().getDescriptor().getViewDescription().setProperty(SystemDefinition.Properties.PATIENT,patient);
         if (patient.getIsKeyDefined()){
-            String message ="Are you sure you want to delete patient " + patient.toString() + "'s details?";
-            response = JOptionPane.showConfirmDialog(this,message, "Action selected patient notifications", JOptionPane.YES_NO_OPTION);
+            String message ="Are you sure you want to archive patient " + patient.toString() + "'s details?";
+            response = JOptionPane.showConfirmDialog(this,message, "Patient archiver", JOptionPane.YES_NO_OPTION);
             if (response==JOptionPane.YES_OPTION){
                 ActionEvent actionEvent = new ActionEvent(
                     this,ActionEvent.ACTION_PERFORMED,
-                    PatientViewController.Actions.PATIENT_DELETE_REQUEST.toString());
+                    PatientViewController.Actions.PATIENT_ARCHIVE_REQUEST.toString());
                 this.getMyController().actionPerformed(actionEvent);
             }
         }
@@ -1174,13 +1162,13 @@ public class PatientView extends View
             JOptionPane.showMessageDialog(this, "A patient has not yet been selected for deletion\n"
                     + "Click the 'Select/clear patient details' from the menu options to select a patient");
     }
-    private void doPatientRecoverRequest(){
-        setPatientSelectionMode(PatientSelectionMode.PATIENT_RECOVERY);
+    private void doPatientRestoreViewRequest(){
+        //setPatientSelectionMode(PatientSelectionMode.PATIENT_RECOVERY);
         ActionEvent actionEvent = new ActionEvent(
             this,ActionEvent.ACTION_PERFORMED,
-            PatientViewController.Actions.PATIENT_RECOVER_REQUEST.toString());
+            PatientViewController.Actions.PATIENT_RESTORE_VIEW_REQUEST.toString());
         this.getMyController().actionPerformed(actionEvent);
-        mniRecoverDeletedPatient.setEnabled(false);
+        mniRestoreArchivedPatient.setEnabled(false);
         mniCreateNewPatient.setEnabled(false);
         this.btnUpdateRecoverPatient.setEnabled(true);
     }
@@ -1519,9 +1507,9 @@ public class PatientView extends View
      * -- method checks the patient in not null and its key is defined and does not signify the UNBOOKABLE patient
      */
     private void initialiseViewWithDetailsOf(Patient patient){  
-        //this.cmbPatientSelector.removeActionListener(this);
+        this.cmbPatientSelector.removeActionListener(this);
         this.cmbPatientSelector.setSelectedItem(patient);
-        //this.cmbPatientSelector.addActionListener(this);
+        this.cmbPatientSelector.addActionListener(this);
         this.setTitle(getSurname()); //Internal frame title
         setPatientTitle(patient.getName().getTitle());
         setForenames(patient.getName().getForenames());
@@ -1809,8 +1797,8 @@ public class PatientView extends View
         jSeparator1 = new javax.swing.JPopupMenu.Separator();
         mniPatientRecallsRequest = new javax.swing.JMenuItem();
         jSeparator3 = new javax.swing.JPopupMenu.Separator();
-        mniDeleteSelectedPatient = new javax.swing.JMenuItem();
-        mniRecoverDeletedPatient = new javax.swing.JMenuItem();
+        mniArchiveSelectedPatient = new javax.swing.JMenuItem();
+        mniRestoreArchivedPatient = new javax.swing.JMenuItem();
         jSeparator2 = new javax.swing.JPopupMenu.Separator();
         mniCloseView = new javax.swing.JMenuItem();
         mnuToDoListView = new javax.swing.JMenu();
@@ -2189,11 +2177,11 @@ public class PatientView extends View
         mnuActions.add(mniPatientRecallsRequest);
         mnuActions.add(jSeparator3);
 
-        mniDeleteSelectedPatient.setText("Delete selected patient");
-        mnuActions.add(mniDeleteSelectedPatient);
+        mniArchiveSelectedPatient.setText("Archive selected patient");
+        mnuActions.add(mniArchiveSelectedPatient);
 
-        mniRecoverDeletedPatient.setText("Recover deleted patient");
-        mnuActions.add(mniRecoverDeletedPatient);
+        mniRestoreArchivedPatient.setText("Restore archived patient");
+        mnuActions.add(mniRestoreArchivedPatient);
         mnuActions.add(jSeparator2);
 
         mniCloseView.setText("Close view");
@@ -2294,11 +2282,11 @@ public class PatientView extends View
     private javax.swing.JLabel lblNameSurname;
     private javax.swing.JLabel lblNameTitle;
     private javax.swing.JMenuBar mbaPatientView;
+    private javax.swing.JMenuItem mniArchiveSelectedPatient;
     private javax.swing.JMenuItem mniCloseView;
     private javax.swing.JMenuItem mniCreateNewPatient;
-    private javax.swing.JMenuItem mniDeleteSelectedPatient;
     private javax.swing.JMenuItem mniPatientRecallsRequest;
-    private javax.swing.JMenuItem mniRecoverDeletedPatient;
+    private javax.swing.JMenuItem mniRestoreArchivedPatient;
     private javax.swing.JMenuItem mniUpdateSelectedPatient;
     private javax.swing.JMenu mnuActions;
     private javax.swing.JMenu mnuToDoListView;

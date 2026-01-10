@@ -82,6 +82,9 @@ public class DesktopView extends javax.swing.JFrame
             case REQUEST_CLOSE_VIEW:
                 doActionEventRequest(DesktopViewController.Actions.VIEW_CLOSE_REQUEST);
                 break;
+            case REQUEST_COMMENT_MIGRATION:
+                doActionEventRequest(DesktopViewController.Actions.COMMENT_MIGRATION_REQUEST);
+                break;
             case REQUEST_LOGOUT: {
                 if (this.getDeskTop().getAllFrames().length > 0)
                     JOptionPane.showMessageDialog(this,"Cannot logout while a view is open on the desktop","Log out request", JOptionPane.INFORMATION_MESSAGE);
@@ -168,7 +171,9 @@ public class DesktopView extends javax.swing.JFrame
             this.mniSystemWideSettings = new javax.swing.JMenuItem("System wide settings");
             mnuSettings.insert(mniSystemWideSettings,lastIndex-1);
         }
-        this.mnuUtilities.setEnabled(false);
+        this.mnuUtilities.setEnabled(
+                (Boolean)getMyController().getDescriptor().getControllerDescription().
+                        getProperty(Properties.DEBUG_PATIENT_UTILITIES));
         addActionListenersToMenus();
         
         setSize(1800,950);
@@ -286,6 +291,9 @@ public class DesktopView extends javax.swing.JFrame
         mniArchivedPatientsViewRequest.addActionListener(this);
         //mniPatientNotificationViewRequest.addActionListener(this);
         mniPatientAppointmentDataViewRequest.addActionListener(this);
+        mniPatientInvoices.setText("Comment migrator");
+        mniPatientInvoices.setActionCommand(Action.REQUEST_COMMENT_MIGRATION.toString());
+        mniPatientInvoices.addActionListener(this);
         //mniToDoViewRequest.addActionListener(this);
         
         
@@ -341,17 +349,12 @@ public class DesktopView extends javax.swing.JFrame
                 getProperty(Properties.PRINT_FOLDER);
         String repository = (String)getMyController().getDescriptor().getControllerDescription().
                 getProperty(Properties.DATABASE_URL);
-        Boolean isDebugMode = (Boolean)getMyController().getDescriptor().getControllerDescription().
-                getProperty(SystemDefinition.Properties.DEBUG_SMTP);
-        if (isDebugMode){
-            mniDocumentStore = new JMenuItem("Document store: " + documentStoreFolder.toString());
-            mniPrintFolder = new JMenuItem("Print folder: " + printFolder);
-            mniRepository = new JMenuItem("Repository: " + repository);
-            this.mnuSettings.add(mniDocumentStore);
-            this.mnuSettings.add(mniPrintFolder);
-            this.mnuSettings.add(mniRepository);
-        }
-             
+        mniDocumentStore = new JMenuItem("Document store: " + documentStoreFolder.toString());
+        mniPrintFolder = new JMenuItem("Print folder: " + printFolder);
+        mniRepository = new JMenuItem("Repository: " + repository);
+        this.mnuSystemInformation.add(mniDocumentStore);
+        this.mnuSystemInformation.add(mniPrintFolder);
+        this.mnuSystemInformation.add(mniRepository);    
     }
     
     /**
@@ -756,6 +759,7 @@ public class DesktopView extends javax.swing.JFrame
         REQUEST_CASCADE_VIEWS,
         REQUEST_CHANGE_USER_PASSWORD,
         REQUEST_CLOSE_VIEW,
+        REQUEST_COMMENT_MIGRATION,
         REQUEST_LOGOUT,
         REQUEST_MEDICAL_CONDITION_VIEW,
         REQUEST_NOTIFICATION_VIEW,
@@ -796,6 +800,7 @@ public class DesktopView extends javax.swing.JFrame
         mniMedicalConditionViewRequest = new javax.swing.JMenuItem();
         mniTreatmentsViewRequest = new javax.swing.JMenuItem();
         jSeparator4 = new javax.swing.JPopupMenu.Separator();
+        mnuSystemInformation = new javax.swing.JMenu();
         mniPMSVersion = new javax.swing.JMenuItem();
         mnuCascadeViews = new javax.swing.JMenu();
         mnuToDoListView = new javax.swing.JMenu();
@@ -846,13 +851,17 @@ public class DesktopView extends javax.swing.JFrame
         mnuSettings.add(mniTreatmentsViewRequest);
         mnuSettings.add(jSeparator4);
 
+        mnuSystemInformation.setText("System Information");
+
         mniPMSVersion.setText("Version:");
         mniPMSVersion.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusLost(java.awt.event.FocusEvent evt) {
                 mniPMSVersionFocusLost(evt);
             }
         });
-        mnuSettings.add(mniPMSVersion);
+        mnuSystemInformation.add(mniPMSVersion);
+
+        mnuSettings.add(mnuSystemInformation);
 
         mnbDesktop.add(mnuSettings);
 
@@ -906,6 +915,7 @@ public class DesktopView extends javax.swing.JFrame
     private javax.swing.JMenu mnuCascadeViews;
     private javax.swing.JMenu mnuSelectView;
     private javax.swing.JMenu mnuSettings;
+    private javax.swing.JMenu mnuSystemInformation;
     private javax.swing.JMenu mnuToDoListView;
     private javax.swing.JMenu mnuUtilities;
     // End of variables declaration//GEN-END:variables

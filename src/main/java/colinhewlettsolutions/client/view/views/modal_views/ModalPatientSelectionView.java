@@ -40,9 +40,11 @@ import javax.swing.border.TitledBorder;
  *
  * @author colin
  */
-public class ModalPatientSelectionView extends ModalView{
+public class ModalPatientSelectionView extends  ModalView
+                                       implements ActionListener {
     
-    public ModalPatientSelectionView(
+    public ModalPatientSelectionView
+        (
             View.Viewer myViewType,
             ViewController myController, 
             DesktopView desktopView){ 
@@ -52,6 +54,21 @@ public class ModalPatientSelectionView extends ModalView{
         setDesktopView(desktopView);
     }
 
+    @Override
+    public void actionPerformed(ActionEvent e){
+        
+    }
+    
+    @Override
+    public void propertyChange(PropertyChangeEvent e){
+        if (e.getPropertyName().equals(
+            ViewController.ScheduleViewControllerPropertyChangeEvent.APPOINTMENT_SCHEDULE_ERROR_RECEIVED.toString())){
+            Descriptor ed = (Descriptor)e.getNewValue();
+            ViewController.displayErrorMessage((String)ed.getControllerDescription().getProperty(SystemDefinition.Properties.ERROR),
+                                               "Appointment editor dialog error",
+                                               JOptionPane.ERROR_MESSAGE);
+        }
+    }
     
     private void populatePatientSelector(){
         DefaultComboBoxModel<Patient> model = 
@@ -76,19 +93,9 @@ public class ModalPatientSelectionView extends ModalView{
     }
     
     @Override
-    public void propertyChange(PropertyChangeEvent e){
-        if (e.getPropertyName().equals(
-            ViewController.ScheduleViewControllerPropertyChangeEvent.APPOINTMENT_SCHEDULE_ERROR_RECEIVED.toString())){
-            Descriptor ed = (Descriptor)e.getNewValue();
-            ViewController.displayErrorMessage((String)ed.getControllerDescription().getProperty(SystemDefinition.Properties.ERROR),
-                                               "Appointment editor dialog error",
-                                               JOptionPane.ERROR_MESSAGE);
-        }
-    }
-    
-    @Override
     public void initialiseView(){
         initComponents(); 
+        /*
         TitledBorder titledBorder = (TitledBorder)pnlPatientSelection.getBorder();
         switch (getMyViewType()){
             case PATIENT_SELECTION_VIEW:
@@ -99,7 +106,7 @@ public class ModalPatientSelectionView extends ModalView{
                 titledBorder.setTitle("Select patient to recover");
                 this.setTitle("Patient recovery selection view");
                 break;
-        }
+        }*/
         
         populatePatientSelector();
         this.setVisible(true);
@@ -109,7 +116,7 @@ public class ModalPatientSelectionView extends ModalView{
 
         pnlPatientSelection = new javax.swing.JPanel();
         btnClearSelection = new javax.swing.JButton("Clear selection");
-        cmbPatientSelector = new javax.swing.JComboBox<Patient>();
+        cmbPatientSelector = new javax.swing.JComboBox<>();
         pnlPatientSelection.setBorder(javax.swing.BorderFactory.createTitledBorder("Select patient"));
         DefaultComboBoxModel<Patient> model = 
                 new DefaultComboBoxModel<>();

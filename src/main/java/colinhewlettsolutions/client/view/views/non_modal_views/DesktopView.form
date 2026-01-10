@@ -79,14 +79,21 @@
             </MenuItem>
             <MenuItem class="javax.swing.JPopupMenu$Separator" name="jSeparator4">
             </MenuItem>
-            <MenuItem class="javax.swing.JMenuItem" name="mniPMSVersion">
+            <Menu class="javax.swing.JMenu" name="mnuSystemInformation">
               <Properties>
-                <Property name="text" type="java.lang.String" value="Version:"/>
+                <Property name="text" type="java.lang.String" value="System Information"/>
               </Properties>
-              <Events>
-                <EventHandler event="focusLost" listener="java.awt.event.FocusListener" parameters="java.awt.event.FocusEvent" handler="mniPMSVersionFocusLost"/>
-              </Events>
-            </MenuItem>
+              <SubComponents>
+                <MenuItem class="javax.swing.JMenuItem" name="mniPMSVersion">
+                  <Properties>
+                    <Property name="text" type="java.lang.String" value="Version:"/>
+                  </Properties>
+                  <Events>
+                    <EventHandler event="focusLost" listener="java.awt.event.FocusListener" parameters="java.awt.event.FocusEvent" handler="mniPMSVersionFocusLost"/>
+                  </Events>
+                </MenuItem>
+              </SubComponents>
+            </Menu>
           </SubComponents>
         </Menu>
         <Menu class="javax.swing.JMenu" name="mnuCascadeViews">

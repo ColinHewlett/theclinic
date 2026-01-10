@@ -181,6 +181,7 @@ public class Appointment extends Entity implements IEntityRepositoryActions{
      * @return 
      */
     public String getNotes() {
+        if (notes == null) notes = new String();
         return notes;
     }
     
@@ -770,8 +771,16 @@ public class Appointment extends Entity implements IEntityRepositoryActions{
         appointment.setStart(start);
         appointment.setDuration(duration);
         appointment.setNotes(notes);
-        
         return appointment;
+    }
+    
+    private String comment = null;
+    public void setComment(String value){
+        comment = value;
+    }
+    public String getComment(){
+        if (comment == null) comment = new String();
+        return comment;
     }
     
     private Integer getPatientKey(String s)throws StoreException{

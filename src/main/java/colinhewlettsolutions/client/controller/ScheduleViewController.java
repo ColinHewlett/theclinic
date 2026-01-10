@@ -78,6 +78,9 @@ public class ScheduleViewController extends ViewController{
         SWITCH_VIEW_REQUEST,
         SURGERY_DAYS_EDITOR_VIEW_REQUEST,
         TO_DO_LIST_VIEW_REQUEST,
+        TREATMENT_STATE_RESET_REQUEST,
+        TREATMENT_STATE_SET_REQUEST,
+        TREATMENTS_READ_REQUEST,
         UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_CANCEL_REQUEST,
         UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_CREATE_REQUEST,
         UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_VIEW_REQUEST,
@@ -90,8 +93,10 @@ public class ScheduleViewController extends ViewController{
         USER_SCHEDULE_LIST_SETTINGS_REQUEST,
         VIEW_ACTIVATED_NOTIFICATION,
         VIEW_CHANGED_NOTIFICATION,
-        VIEW_CLOSE_NOTIFICATION
-                
+        VIEW_CLOSE_NOTIFICATION      
+    }
+    public enum Properties{
+        APPOINTMENT_SCHEDULE_ERROR_RECEIVED
     }
 
     private enum RequestedAppointmentState{ 
@@ -345,6 +350,11 @@ public class ScheduleViewController extends ViewController{
                     getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.APPOINTMENT, a);
                     break;
             }
+            /**
+             * fetch all possible treatment with state uninitialised objects, one for each Treatment on the system
+             */
+            TreatmentWithState tws = getAllPossibleTreatmentsWithState();
+            getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.TREATMENT_WITH_STATE, tws);
             getDescriptor().getControllerDescription().setViewMode(ViewMode.CREATE);
             if (((Appointment)getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.APPOINTMENT)).getPatient()==null){
                 setModalView((ModalView)new View().make(View.Viewer.SCHEDULE_EDITOR_VIEW,
@@ -483,6 +493,30 @@ public class ScheduleViewController extends ViewController{
         }
     }
     
+    private TreatmentWithState getAllPossibleTreatmentsWithState(){
+        TreatmentWithState tws = null;
+        ArrayList<TreatmentWithState> treatmentsWithState = new ArrayList<>();
+        Treatment treatment = new Treatment();
+        treatment.setScope(Entity.Scope.ALL);
+        try{
+            treatment = treatment.read();
+            for (Treatment _treatment : treatment.get()){
+                tws = new TreatmentWithState(_treatment);
+                treatmentsWithState.add(tws);
+            }
+            tws = new TreatmentWithState();
+            tws.set(treatmentsWithState);
+            
+        }catch(StoreException ex){
+            String message = ex.getMessage() + "\nHandled in "
+                    + "ScheduleViewController::getAllPossibleTreatmentsWithState() method";
+            displayErrorMessage(message, 
+                    "Schedule view controller error", 
+                    JOptionPane.WARNING_MESSAGE);   
+        }
+        return tws;
+    }
+    
     private void doAppointmentUpdateViewRequest(){
         /**
          * on receipt of APPOINTMENT_UPDATE_VIEW_REQUEST
@@ -502,10 +536,17 @@ public class ScheduleViewController extends ViewController{
                 patient = new Patient();
                 patient.setScope(Scope.ALL);
                 patient.read();
-                //initialiseNewEntityDescriptor();
+                
                 getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.APPOINTMENT, appointment);
                 getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.PATIENTS, patient.get());
                 getDescriptor().getControllerDescription().setViewMode(ViewMode.UPDATE);
+                getDescriptor().getControllerDescription().
+                        setProperty(SystemDefinition.Properties.TREATMENT_WITH_STATE, getTreatmentWithStateForAppointment(appointment));
+                /**
+                 * fetch complete list of unselected TreatmentWithState objects, one for each Treatment object
+                 */
+                
+                
                 setModalView((ModalView)new View().make(View.Viewer.SCHEDULE_EDITOR_VIEW,
                     this, 
                     this.getDesktopView()).getModalView());
@@ -873,9 +914,30 @@ public class ScheduleViewController extends ViewController{
                 doNonSurgeryDayScheduleViewRequest();
                 break;
             case PATIENT_VIEW_REQUEST:
-                getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.PATIENT,
-                        (Patient)getDescriptor().getViewDescription().getProperty(SystemDefinition.Properties.PATIENT));
-                doActionEventFor(DesktopViewController.Actions.PATIENT_VIEW_CONTROLLER_REQUEST);
+                Patient patient = (Patient)getDescriptor().getViewDescription().getProperty(SystemDefinition.Properties.PATIENT);
+                patient.setScope(Entity.Scope.SINGLE);
+                try{
+                    patient = patient.read();
+                    if (!patient.getIsArchived()){
+                        getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.PATIENT,patient);
+                        doActionEventFor(DesktopViewController.Actions.PATIENT_VIEW_CONTROLLER_REQUEST);
+                    }else{
+                        String message = "The patient for the selected appointment has been archived";
+                        getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.ERROR, message);
+                        this.firePropertyChangeEvent(
+                                Properties.APPOINTMENT_SCHEDULE_ERROR_RECEIVED.toString(),
+                                getView(), 
+                                this,
+                                null,
+                                null
+                        );
+                    }
+                }catch(StoreException ex){
+                    String message = ex.getMessage() + "\n";
+                    message = "Exception handled in ScheduleViewController::actionPerformed("
+                            + " " + actionCommand.toString() + " )" + message;
+                    displayErrorMessage(message,"View controller message",JOptionPane.INFORMATION_MESSAGE);
+                }
                 break;
             case PRINT_SCHEDULE_REQUEST:
                 doPrintAppointmentScheduleForDay(
@@ -896,6 +958,38 @@ public class ScheduleViewController extends ViewController{
             case SWITCH_VIEW_REQUEST:
                 doSwitchView();
                 break;
+            case TREATMENTS_READ_REQUEST:
+                    ArrayList<TreatmentWithState> treatmentsWithState = new ArrayList<>();
+                    Treatment treatment = new Treatment();
+                    treatment.setScope(Entity.Scope.ALL);
+                    try{
+                        treatment = treatment.read();
+                        for (Treatment _treatment : treatment.get()){
+                            TreatmentWithState tws = new TreatmentWithState(_treatment);
+                            treatmentsWithState.add(tws);
+                        }
+                        TreatmentWithState tws = new TreatmentWithState();
+                        tws.set(treatmentsWithState);
+                        getDescriptor().getControllerDescription()
+                                .setProperty(SystemDefinition.Properties.TREATMENT_WITH_STATE, treatment);
+
+                        firePropertyChangeEvent(
+                                ViewController.ScheduleViewControllerPropertyChangeEvent.
+                                        APPOINTMENT_TREATMENT_WITH_STATE_RECEIVED.toString(),
+                                (DesktopViewController)getMyController(),
+                                this,
+                                null,
+                                getDescriptor()
+                        );
+                    }catch(StoreException ex){
+                        String message = ex.getMessage() + "\nHandled in "
+                                + "TreatmentViewController::actionPerformed("
+                                + actionCommand + ")";
+                        displayErrorMessage(message, 
+                                "Treatment view controller error", 
+                                JOptionPane.WARNING_MESSAGE);   
+                    }     
+                    break;
             case UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_VIEW_REQUEST:
                 doUnbookableAppointmentSlotEditorViewRequest();
                 break;
@@ -1876,7 +1970,7 @@ public class ScheduleViewController extends ViewController{
                 }
                 break;
                 
-            case APPOINTMENT_TREATMENT_STATE_SET_REQUEST:
+            case TREATMENT_STATE_SET_REQUEST:
                 try{
                     appointmentTreatment.insert();
                 }catch(StoreException ex){
@@ -1890,7 +1984,7 @@ public class ScheduleViewController extends ViewController{
                     isError = true;
                 }
                 break;
-            case APPOINTMENT_TREATMENT_STATE_RESET_REQUEST:
+            case TREATMENT_STATE_RESET_REQUEST:
                 try{
                     appointmentTreatment.delete();
                 }catch(StoreException ex){
@@ -1939,6 +2033,59 @@ public class ScheduleViewController extends ViewController{
                             JOptionPane.WARNING_MESSAGE);
             }
         }
+    }
+    
+    private TreatmentWithState getTreatmentWithStateForAppointment(Appointment appointment){
+        //TreatmentWithState _tws = null;
+        TreatmentWithState result = new TreatmentWithState();
+        ArrayList<TreatmentWithState> treatmentsWithState = new ArrayList<>();
+        TreatmentWithState treatmentWithState = null;
+        Treatment treatment = new Treatment();
+        treatment.setScope(Entity.Scope.ALL);
+        
+        try{
+            treatment = treatment.read();
+            treatmentWithState =
+                    getTreatmentsWithState(appointment);
+ 
+            for(Treatment t : treatment.get()){
+                TreatmentWithState _tws = new TreatmentWithState(t);
+                for(TreatmentWithState tws : treatmentWithState.get()){
+                    if(tws.getTreatment().equals(t)){ 
+                        _tws.setState(true);
+                        break;
+                    }
+                }
+                treatmentsWithState.add(_tws);
+            }
+        }catch(StoreException ex){
+            String message = ex.getMessage() + "\n"
+                        + "StoreException handled in "
+                        + "ScheduleViewController::getTreatmentWithStateForAppointment()";
+                displayErrorMessage(message, 
+                        "Schedule view controller error",
+                        JOptionPane.WARNING_MESSAGE);
+        }
+        result.set(treatmentsWithState);
+        return result;
+    }
+    
+    
+    private TreatmentWithState getTreatmentWithStateForAppointmentx(Appointment appointment){
+        TreatmentWithState treatmentWithState = null;
+        try{
+            treatmentWithState =
+                    getTreatmentsWithState(appointment);
+            
+        }catch(StoreException ex){
+            String message = ex.getMessage() + "\n"
+                        + "StoreException handled in "
+                        + "ScheduleViewController::getTreatmentWithStateForAppointment()";
+                displayErrorMessage(message, 
+                        "Schedule view controller error",
+                        JOptionPane.WARNING_MESSAGE);
+        }
+        return treatmentWithState;
     }
     
     private void doUnBookableSlotScannerViewAction(ActionEvent e){
@@ -2086,10 +2233,16 @@ public class ScheduleViewController extends ViewController{
      * @param e 
      */
     private void doScheduleEditorViewAction(ActionEvent e){
+        boolean isError = false;
         Appointment result;
         Appointment changedSlotRequest = 
                 (Appointment)getDescriptor().getViewDescription().getProperty(SystemDefinition.Properties.APPOINTMENT);
         LocalDate day = changedSlotRequest.getStart().toLocalDate();
+        
+        TreatmentWithState tws = (TreatmentWithState)getDescriptor().getViewDescription().
+                getProperty(SystemDefinition.Properties.TREATMENT_WITH_STATE);
+        
+        
         ViewController.ScheduleViewControllerActionEvent actionCommand =
                ViewController.ScheduleViewControllerActionEvent.valueOf(e.getActionCommand());        
         switch (actionCommand){
@@ -2107,6 +2260,23 @@ public class ScheduleViewController extends ViewController{
                     }
                     catch (PropertyVetoException ex){
                     }
+                    /**
+                     * insert a new AppointmentTreatment for selected appointment
+                     * -- for each selected treatment
+                     */
+                    for (TreatmentWithState _tws : tws.get()){
+                        AppointmentTreatment appointmentTreatment = new AppointmentTreatment(result, _tws.getTreatment());
+                        try{
+                            appointmentTreatment.insert();
+                        }catch(StoreException ex){
+                            String message = ex.getMessage() + "\n";
+                            message = message + "StoreException handled in doScheduleEditorViewAction(" + actionCommand.toString() + ")";
+                            displayErrorMessage(message, 
+                                "Schedule view controller error", 
+                                JOptionPane.WARNING_MESSAGE);
+                        }
+                    }
+                    
                     mergeScheduleSlotsIfPossible(day);
                     doAppointmentForDayRequest(day);
                     //getControllerDescriptor().getControllerDescription().setAppointment(result);
@@ -2150,6 +2320,41 @@ public class ScheduleViewController extends ViewController{
                         getModalView().setClosed(true);
                     }
                     catch (PropertyVetoException ex){
+                    }
+                    
+                    /**
+                     * delete all AppointmentTreatments for the specified appointment
+                     */
+                    AppointmentTreatment appointmentTreatment = new AppointmentTreatment(result);
+                    appointmentTreatment.setScope(Scope.FOR_APPOINTMENT);
+                    try{
+                        appointmentTreatment.delete();
+                    }catch(StoreException ex){
+                        isError = true;
+                        String message = ex.getMessage() + "\n";
+                            message = message + "StoreException handled in doScheduleEditorViewAction(" + actionCommand.toString() + ")";
+                            displayErrorMessage(message, 
+                                "Schedule view controller error", 
+                                JOptionPane.WARNING_MESSAGE);
+                    }
+                    
+                    if(!isError){
+                        /**
+                         * insert a new AppointmentTreatment for selected appointment
+                         * -- for each selected treatment
+                         */
+                       for (TreatmentWithState _tws : tws.get()){
+                           appointmentTreatment = new AppointmentTreatment(result, _tws.getTreatment());
+                           try{
+                               appointmentTreatment.insert();
+                           }catch(StoreException ex){
+                               String message = ex.getMessage() + "\n";
+                               message = message + "StoreException handled in doScheduleEditorViewAction(" + actionCommand.toString() + ")";
+                               displayErrorMessage(message, 
+                                   "Schedule view controller error", 
+                                   JOptionPane.WARNING_MESSAGE);
+                           }
+                       }
                     }
                     //mergeScheduleSlotsIfPossible(day);
                     //doAppointmentForDayRequest(day);

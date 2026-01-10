@@ -65,7 +65,7 @@ public class PatientViewController extends ViewController {
         NULL_PATIENT_REQUEST,
         PATIENT_ADDITIONAL_NOTES_VIEW_REQUEST,
         PATIENT_CREATE_REQUEST,
-        PATIENT_DELETE_REQUEST,
+        PATIENT_ARCHIVE_REQUEST,
         PATIENT_DOCTOR_CREATE_REQUEST,
         PATIENT_DOCTOR_DELETE_REQUEST,
         PATIENT_DOCTOR_EDITOR_VIEW_REQUEST,
@@ -84,7 +84,8 @@ public class PatientViewController extends ViewController {
         PATIENT_PHONE_EMAIL_EDITOR_VIEW_REQUEST,
         PATIENT_QUESTIONNAIRE_VIEW_CONTROLLER_REQUEST,
         PATIENT_RECALL_EDITOR_VIEW_REQUEST,
-        PATIENT_RECOVER_REQUEST,
+        PATIENT_RESTORE_REQUEST,
+        PATIENT_RESTORE_VIEW_REQUEST,
         PATIENT_REQUEST,
         PATIENT_SELECTION_VIEW_REQUEST,
         PATIENT_UPDATE_REQUEST,
@@ -148,7 +149,7 @@ public class PatientViewController extends ViewController {
             case PATIENT_CREATE_REQUEST:
                 doPatientCreateRequest();
                 break;
-            case PATIENT_DELETE_REQUEST:
+            case PATIENT_ARCHIVE_REQUEST:
                 doPatientDeleteRequest();
                 break;
             case PATIENT_DOCTOR_EDITOR_VIEW_REQUEST:
@@ -206,12 +207,40 @@ public class PatientViewController extends ViewController {
             case PATIENT_GBT_RECALL_EDITOR_VIEW_REQUEST:
                 doPatientEditorViewRequest(actionCommand);
                 break;
-            case PATIENT_RECOVER_REQUEST:
+            case PATIENT_RESTORE_VIEW_REQUEST:
                 //06/12/2023 19:02
                 //private void doPatientRequest(ActionEvent e){
-                setPatientSelectionMode(PatientSelectionMode.PATIENT_RECOVERY);
-                doPatientRecoverySelectionRequest(e);
-                setPatientSelectionMode(PatientSelectionMode.PATIENT_SELECTION);
+                
+                Patient patient = null;
+                ArrayList<Patient> patients = null;
+                try{
+                    patient = new Patient();
+                    patient.setScope(Scope.ARCHIVED);
+                    patient.read();
+                    getDescriptor().getControllerDescription().setProperty(Properties.PATIENTS, patient.get());
+                    View.setViewer(View.Viewer.PATIENT_SELECTION_VIEW);
+                    //this.view2 = View.factory(this, getDescriptor(), this.desktopView);
+                    setModalView((ModalView)new View().make(
+                            View.Viewer.PATIENT_SELECTION_VIEW,
+                            this,
+                            this.getDesktopView()).getModalView());
+                    
+                    actionEvent = new ActionEvent(
+                            this,ActionEvent.ACTION_PERFORMED,
+                            DesktopViewController.Actions.MODAL_VIEWER_CLOSED_NOTIFICATION.toString());
+                    this.getMyController().actionPerformed(actionEvent);
+                    
+
+                }
+                catch (StoreException ex){
+                    String message = ex.getMessage();
+                    displayErrorMessage(message,"AppointmentViewController error",JOptionPane.WARNING_MESSAGE);
+                }
+                
+                
+                //setPatientSelectionMode(PatientSelectionMode.PATIENT_RECOVERY);
+                //doPatientRecoverySelectionRequest(e);
+                //setPatientSelectionMode(PatientSelectionMode.PATIENT_SELECTION);
                 break;
             case PATIENT_REQUEST:
                 //06/12/2023 19:02
@@ -220,7 +249,8 @@ public class PatientViewController extends ViewController {
                 doPatientRequest();
                 break;
             case PATIENT_SELECTION_VIEW_REQUEST:
-                Patient patient = null;
+                /*
+                patient = null;
                 ArrayList<Patient> patients = null;
                 try{
                     patient = new Patient();
@@ -237,7 +267,7 @@ public class PatientViewController extends ViewController {
                 catch (StoreException ex){
                     String message = ex.getMessage();
                     displayErrorMessage(message,"AppointmentViewController error",JOptionPane.WARNING_MESSAGE);
-                }
+                }*/
                 break;
             case PATIENT_UPDATE_REQUEST:
                 doPatientUpdateRequest();
@@ -332,14 +362,45 @@ public class PatientViewController extends ViewController {
                 //doPatientRequest(e);
                 doPatientRequest();
                 break;
-            /*
-            case PATIENT_RECOVER_REQUEST:
-                doPatientRecoverRequest(e);
+            case PATIENT_RESTORE_REQUEST:
+                doPatientRestoreRequest(e);
                 break;
-            */
             case NULL_PATIENT_REQUEST:
                 doNullPatientRequest();
                 break;
+        }
+    }
+    
+    private void doPatientRestoreRequest(ActionEvent e){
+        Patient patient = (Patient)getDescriptor().getViewDescription().getProperty(Properties.PATIENT);
+        getDescriptor().getControllerDescription().setProperty(Properties.PATIENT, patient);
+        try{
+            patient.setIsArchived(false);
+            patient.update();
+            patient.setScope(Entity.Scope.ALL);
+            patient.read(); 
+            getDescriptor().getControllerDescription().setProperty(Properties.PATIENTS, patient.get());
+            
+            firePropertyChangeEvent(
+                    ViewController.PatientViewControllerPropertyChangeEvent.
+                        PATIENTS_RECEIVED.toString(),
+                    getView(),
+                    this,
+                    null,
+                    null
+            );
+            firePropertyChangeEvent(
+                    ViewController.PatientViewControllerPropertyChangeEvent.
+                        PATIENT_RECEIVED.toString(),
+                    getView(),
+                    this,
+                    null,
+                    null
+            );
+        }catch(StoreException ex){
+            String message = ex.getMessage() +"\n";
+            message = message + "Exception handled in PatientViewController::doPatientRestoreRequest()";
+            displayErrorMessage(message,"View controller error", JOptionPane.WARNING_MESSAGE);
         }
     }
     
@@ -1721,7 +1782,9 @@ public class PatientViewController extends ViewController {
                 Patient p = patient.read();
                 setCurrentlySelectedPatient(p);
                 getDescriptor().getControllerDescription().setProperty(Properties.PATIENT, p);
-                doConvertAppointmentNoteToTreatment(p);
+                //doConvertAppointmentNoteToTreatment(p);
+                ArrayList<Appointment> appointments = doFormatAppointmentTreatmentNote(p.getAppointmentHistory());
+                getDescriptor().getControllerDescription().setProperty(Properties.APPOINTMENTS, appointments);
                 firePropertyChangeEvent(
                        ViewController.PatientViewControllerPropertyChangeEvent.
                         PATIENT_RECEIVED.toString(),
@@ -1868,6 +1931,7 @@ public class PatientViewController extends ViewController {
                                     case ViewController.ViewMode.CREATE,
                                          ViewController.ViewMode.UPDATE ->{
                                         if (svcPatient.equals(pvcPatient)){
+                                            /*
                                             firePropertyChangeEvent(
                                                     ViewController.PatientViewControllerPropertyChangeEvent.
                                                             PATIENT_RECEIVED.toString(),
@@ -1875,7 +1939,11 @@ public class PatientViewController extends ViewController {
                                                     this,
                                                     null,
                                                     null
-                                            );
+                                            );*/
+                                            doNullPatientRequest();
+                                            getDescriptor().getControllerDescription().setProperty(Properties.PATIENT, pvcPatient);
+                                            setPatientSelectionMode(PatientSelectionMode.PATIENT_RECOVERY);
+                                            doPatientRequest();
                                         }
                                     }   
                                     case ViewController.ViewMode.PATIENT_ARCHIVE ->{
@@ -1908,21 +1976,16 @@ public class PatientViewController extends ViewController {
                                         );
                                         break;
                                     }
-                                    /*
+                                    
                                     default ->{
                                         if (svcPatient.equals(pvcPatient)){
                                             doNullPatientRequest();
-                                            firePropertyChangeEvent(
-                                                    ViewController.PatientViewControllerPropertyChangeEvent.
-                                                            PATIENT_RECEIVED.toString(),
-                                                    getView(),
-                                                    this,
-                                                    null,
-                                                    pvcDescriptor
-                                            );
+                                            getDescriptor().getControllerDescription().setProperty(Properties.PATIENT, pvcPatient);
+                                            setPatientSelectionMode(PatientSelectionMode.PATIENT_RECOVERY);
+                                            doPatientRequest();
                                         }
                                         break;   
-                                    }*/
+                                    }
 
 
                                 }

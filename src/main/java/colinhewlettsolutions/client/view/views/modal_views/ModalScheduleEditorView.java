@@ -157,7 +157,7 @@ public class ModalScheduleEditorView extends ModalView implements ActionListener
                     "View error",JOptionPane.WARNING_MESSAGE);
         }
     }
-    
+
     private void mniLastAppointmentStartTimeActionPerformed(){
         
     }

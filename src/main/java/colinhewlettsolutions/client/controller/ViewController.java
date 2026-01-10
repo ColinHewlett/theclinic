@@ -626,8 +626,8 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         APPOINTMENT_TREATMENT_CREATE_REQUEST,
         APPOINTMENT_TREATMENT_NAME_UPDATE_REQUEST,
         APPOINTMENT_TREATMENT_DELETE_REQUEST,
-        APPOINTMENT_TREATMENT_STATE_SET_REQUEST,
-        APPOINTMENT_TREATMENT_STATE_RESET_REQUEST,
+        TREATMENT_STATE_SET_REQUEST,
+        TREATMENT_STATE_RESET_REQUEST,
         CLINICAL_NOTE_FOR_APPOINTMENT_REQUEST,
         CLINICAL_NOTE_DELETE_REQUEST,
         CLINICAL_NOTE_CREATE_REQUEST,
@@ -1656,7 +1656,36 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         }//do noithinfg if this primary condition has no child secondaries
     }
     
+    /**
+     * 
+     * @param appointment; defines entries in the AppointmentTreatment table for this appointment
+     * @return; returns a collection defining treatments for this appointment (if any)
+     * @throws StoreException 
+     */
+    
     protected TreatmentWithState getTreatmentsWithState(
+            Appointment appointment)throws StoreException{
+        TreatmentWithState theTreatmentWithState = new TreatmentWithState();
+        Treatment treatment = new Treatment();
+        treatment.setScope(Entity.Scope.ALL);
+        treatment = treatment.read();
+        AppointmentTreatment appointmentTreatment = new AppointmentTreatment(appointment);
+        appointmentTreatment.setScope(Entity.Scope.FOR_APPOINTMENT);
+        appointmentTreatment = appointmentTreatment.read();
+        for(AppointmentTreatment at : appointmentTreatment.get()){
+            for(Treatment t : treatment.get()){ 
+                TreatmentWithState treatmentWithState = new TreatmentWithState(t);
+                if(t.equals(at.getTreatment())){
+                    treatmentWithState.setState(true); 
+                    //treatmentWithState.setComment(at.getComment());//08/04/2024 07:41
+                    theTreatmentWithState.get().add(treatmentWithState);
+                }
+            }
+        }
+        return theTreatmentWithState;
+    }
+    
+    protected TreatmentWithState getTreatmentsWithStatex(
             Appointment appointment)throws StoreException{
         TreatmentWithState theTreatmentWithState = new TreatmentWithState();
         Treatment treatment = new Treatment();
@@ -1685,7 +1714,87 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
                 view, message,"View controller",JOptionPane.INFORMATION_MESSAGE);
     }
     
-    protected void doFormatAppointmentTreatmentNote(ArrayList<Appointment> appointments)throws StoreException{
+    protected ArrayList<Appointment> doFormatAppointmentTreatmentNote(ArrayList<Appointment> appointments)throws StoreException{
+        /**
+         * for each appointment in schedule
+         */
+        for (Appointment a : appointments){
+            String note = new String();
+            if(a.getPatient()!=null){
+                if(!a.getPatient().toString().equals(SystemDefinition.ScheduleSlotType.UNBOOKABLE_SCHEDULE_SLOT.mark())){
+                     TreatmentWithState treatmentWithState = getTreatmentsWithState(a);
+                     for(TreatmentWithState tws : treatmentWithState.get()){
+                         if (tws.getState()) {
+                             note = note + " " + tws.getTreatment().getDescription();
+                             note = note + " /";
+                         }  
+                     }
+                    /**
+                     * get rid of trailing '/' from note if necessary
+                     * and if a.comment exists 
+                     * -- add it with "; " prefix to note if it already contains a treatment(s)
+                     * -- else make note = to a.comment 
+                     */
+                    if(!note.trim().isEmpty()){
+                        if (note.substring(note.length()-1).equals("/")){
+                            note = note.substring(0, note.length() - 2);
+                        }
+                        if (!a.getComment().trim().isEmpty()){
+                            note = note + "; " + a.getComment();
+                        }
+                    }else{
+                        if (!a.getComment().trim().isEmpty()){
+                            note = a.getComment();
+                        }
+                    }
+      
+                }else{
+                    /**
+                     * an UNBOOKABLE SLOT, copy a.comment to note
+                     */
+                    note = a.getComment();
+                }
+                a.setNotes(note);
+            }
+        }
+        return appointments;
+    }
+    
+    protected ArrayList<Appointment> doFormatAppointmentTreatmentNotexx(ArrayList<Appointment> appointments)throws StoreException{
+        for (Appointment a : appointments){
+            if(a.getPatient()!=null){
+                if(!a.getPatient().toString().equals(SystemDefinition.ScheduleSlotType.UNBOOKABLE_SCHEDULE_SLOT.mark())){
+                     TreatmentWithState treatmentWithState = getTreatmentsWithState(a);
+                     String note = new String();
+                     for(TreatmentWithState tws : treatmentWithState.get()){
+                         if (tws.getState()) {
+                             note = note + " " + tws.getTreatment().getDescription();
+                             note = note + " /";
+                             a.setNotes(note);
+                         }  
+                     }
+                     note = a.getNotes();
+
+                     if (note!=null){
+                         if(!note.trim().isEmpty()){
+                             if (note.substring(note.length()-1).equals("/")){
+                                 note = note.substring(0, note.length() - 2);
+                                 a.setNotes(note);
+                             }
+                         }
+                     }
+                    if (a.getKey() >= 30378){
+                        a.setNotes(a.getNotes() + "; " + a.getComment());
+                    }      
+                }else{
+                    a.setNotes(a.getComment());
+                }
+            }
+        }
+        return appointments;
+    }
+    
+    protected void doFormatAppointmentTreatmentNotex(ArrayList<Appointment> appointments)throws StoreException{
         for (Appointment a : appointments){
             if ((a.getPatient()!=null) ||
                     (!a.getPatient().toString().equals(SystemDefinition.ScheduleSlotType.UNBOOKABLE_SCHEDULE_SLOT.mark()))){
@@ -1713,6 +1822,52 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
                         }
                     }
                 }
+            }
+        }
+    }
+    
+    protected void doFormatAppointmentTreatmentNotez(ArrayList<Appointment> appointments)throws StoreException{
+        for (Appointment a : appointments){
+            if ((a.getPatient()!=null) ||
+                    (!a.getPatient().toString().equals(SystemDefinition.ScheduleSlotType.UNBOOKABLE_SCHEDULE_SLOT.mark()))){
+                TreatmentWithState treatmentWithState = getTreatmentsWithState(a);
+                String patientTreatmentString = new String();
+                int count = 0;
+                String oldStyleCommentInTreatment = new String();
+                boolean oldStyleCommentExists = false;
+                
+                
+                for(TreatmentWithState tws : treatmentWithState.get()){ 
+                    if (tws.getState()) {
+                        if (count > 0){
+                            patientTreatmentString = patientTreatmentString + "/" + tws.getTreatment().getDescription();
+                        }else{
+                            patientTreatmentString = patientTreatmentString + tws.getTreatment().getDescription();
+                            count++;
+                        }
+                        if (oldStyleCommentExists){
+                            if (tws.getComment()!=null){
+                                if (!tws.getComment().trim().isEmpty()){
+                                    oldStyleCommentInTreatment = tws.getComment();
+                                    oldStyleCommentExists = true;
+                                }
+                            }
+                        }
+                    }       
+                }
+                
+                if (oldStyleCommentExists){
+                    if (patientTreatmentString.isEmpty()){
+                        patientTreatmentString = "(" + oldStyleCommentInTreatment + ")";
+                    }
+                }else {
+                    if (!a.getNotes().trim().isEmpty()){
+                        patientTreatmentString = "(" + a.getNotes() + ")";
+                    }else {
+                        patientTreatmentString = patientTreatmentString + "(" + a.getNotes() + ")";
+                    }          
+                }
+                a.setNotes(patientTreatmentString);
             }
         }
     }

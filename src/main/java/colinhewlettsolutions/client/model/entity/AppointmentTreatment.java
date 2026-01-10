@@ -57,6 +57,7 @@ public class AppointmentTreatment extends Entity implements IEntityRepositoryAct
     
     private String comment = null;
     public String getComment(){
+        if (comment==null) comment = new String();
         return comment;
     }
     public void setComment(String value){

@@ -229,7 +229,7 @@ public class View extends JInternalFrame
                 setModalView(makeView(new ModalPatientSelectionView(viewer, controller, desktopView)));
                 break;
             case PATIENT_SELECTION_VIEW:
-                setModalView(makeView(new ModalPatientSelectionView(viewer, controller,desktopView)));
+                setModalView(makeView(new ModalPatientSelectorView(viewer, controller,desktopView)));
                 break; 
             case PATIENT_VIEW:
                 setView(makeView(new PatientView(viewer, controller,desktopView)));
@@ -247,7 +247,7 @@ public class View extends JInternalFrame
                 setView(makeView(new ScheduleDiaryView(viewer, controller, desktopView)));
                 break;
             case SCHEDULE_EDITOR_VIEW:
-                setModalView(makeView(new ModalScheduleEditorView(viewer, controller, desktopView)));
+                setModalView(makeView(new ModalScheduleAndTreatmentEditorView(viewer, controller, desktopView)));
                 break;
             case SCHEDULE_LIST_VIEW:
                 setView(makeView(new ScheduleListView(viewer, controller, desktopView)));

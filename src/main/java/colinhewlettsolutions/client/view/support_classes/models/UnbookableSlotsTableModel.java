@@ -91,7 +91,7 @@ public class UnbookableSlotsTableModel extends AbstractTableModel{
                     slot.getDuration(), slot.getStart().toLocalDate());   
                 break; 
             case 2:
-                result = (slot.getStart()!=null) ? slot.getNotes() : "";
+                result = (slot.getStart()!=null) ? slot.getComment() : "";
                 break;
         }
         return (String)result;
