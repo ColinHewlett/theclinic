@@ -421,7 +421,7 @@ public class PatientViewController extends ViewController {
     
     private void doUploadToPatientDocumentStoreRequest(){
         Path documentStoreFolder = null;
-        Path documentStoreFolderPatientKey = null;
+        Path documentStoreFolderPatientKeyFolder = null;
         Path documentStoreFolderDocument = null;
         Path documentStoreFolderMedicalHistory = null;
         File document = (File)getDescriptor().getViewDescription().
@@ -433,8 +433,8 @@ public class PatientViewController extends ViewController {
                             + patient.getName().getSurname();
         documentStoreFolder = (Path)getDescriptor().getControllerDescription().
                     getProperty(Properties.DOCUMENT_STORE);
-        documentStoreFolderPatientKey= documentStoreFolder.resolve(String.valueOf(patient.getKey()));
-        if (Files.notExists(documentStoreFolder)){
+        documentStoreFolderPatientKeyFolder= documentStoreFolder.resolve(String.valueOf(patient.getKey()));
+        if (Files.notExists(documentStoreFolderPatientKeyFolder)){
             /**
              * top level folder named after this patient's pid does not exist
              * -- create top level folder named after patient's pid 
@@ -442,15 +442,15 @@ public class PatientViewController extends ViewController {
              * -- create another folder inside patient's pid folder called 'medical_history'
              */
             try{
-                Files.createDirectory(documentStoreFolderPatientKey);
-                Files.createDirectory(documentStoreFolderPatientKey.resolve("document"));
-                Files.createDirectory(documentStoreFolderPatientKey.resolve("medical_history"));
+                Files.createDirectory(documentStoreFolderPatientKeyFolder);
+                Files.createDirectory(documentStoreFolderPatientKeyFolder.resolve("document"));
+                Files.createDirectory(documentStoreFolderPatientKeyFolder.resolve("medical_history"));
             }catch(IOException ex){
                 ex.printStackTrace();
             }
         }
-        documentStoreFolderDocument = documentStoreFolderPatientKey.resolve("document");
-        documentStoreFolderMedicalHistory = documentStoreFolderPatientKey.resolve("medical_history");
+        documentStoreFolderDocument = documentStoreFolderPatientKeyFolder.resolve("document");
+        documentStoreFolderMedicalHistory = documentStoreFolderPatientKeyFolder.resolve("medical_history");
         ViewController.ViewMode viewMode = (ViewController.ViewMode)getDescriptor().getViewDescription().
                 getProperty(Properties.VIEW_MODE);
         if(document!=null){
@@ -466,7 +466,9 @@ public class PatientViewController extends ViewController {
                         /*JOptionPane.showInternalMessageDialog(getView(),target.getFileName() + " uploaded to " 
                                 + patientNameString + "'s document store", "View controller", JOptionPane.INFORMATION_MESSAGE);*/
                     }catch(FileAlreadyExistsException ex){
-                        System.err.println("File already exists");
+                        JOptionPane.showInternalMessageDialog(getView(),
+                                " File '" + document.getName() + "' already exists", 
+                                "View controller error", JOptionPane.WARNING_MESSAGE);
                     }catch(IOException ex){
                         System.err.println(ex.getMessage() + 
                                 "\nIOException raised in PatientViewController::doUploadToPatientDococumentStoreRequest( "
@@ -495,9 +497,9 @@ public class PatientViewController extends ViewController {
                             Path source = document.toPath();
                             try{
                                     Files.copy(source, target);
-                                    JOptionPane.showInternalMessageDialog(getView(),"Medical history uploaded to " 
+                                    /*JOptionPane.showInternalMessageDialog(getView(),"Medical history uploaded to " 
                                             + patientNameString + "'s document store with date stamp '" 
-                                            + dateStampedFilename + "'", "View controller",JOptionPane.INFORMATION_MESSAGE);
+                                            + dateStampedFilename + "'", "View controller",JOptionPane.INFORMATION_MESSAGE);*/
                                 }catch(FileAlreadyExistsException ex){
                                     System.err.println("File already exists");
                                 }catch(IOException ex){

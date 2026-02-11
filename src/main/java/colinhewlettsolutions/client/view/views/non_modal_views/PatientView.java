@@ -353,6 +353,8 @@ public class PatientView extends View
         rdbRequestModalGBTRecallEditorView.addActionListener(this);
         rdbRequestOpenDocumentStorePopup.addActionListener(this);
         
+        rdbRequestModalMedicalProfilePopup.setEnabled(false); /* ver1.81 */
+        
         cmbPatientSelector.setActionCommand(Action.REQUEST_PATIENT.toString());
         cmbPatientSelector.addActionListener(this);
         
@@ -750,6 +752,7 @@ public class PatientView extends View
                 break;
             case REQUEST_UPLOAD_SCAN_TO_PATIENT_DOCUMENT_STORE:
                 doFileChooserDialog(ViewController.ViewMode.MEDICAL_HISTORY);
+                doPatientScanRequest();
                 rdbGroup.clearSelection();
                 break;
             case REQUEST_UNTITLED_NAME:
@@ -978,16 +981,6 @@ public class PatientView extends View
         
         popup.setVisible(true);
         
-        
-        menuItem = popup.add("Get document from store");
-        menuItem.setActionCommand(Action.REQUEST_PATIENT_DOCUMENT.toString());
-        menuItem.addActionListener(this);
-        
-        menuItem = popup.add("Get medical history from store");
-        menuItem.setActionCommand(Action.REQUEST_PATIENT_SCAN.toString());
-        menuItem.addActionListener(this);
-        
-        popup.addSeparator();
         menuItem = popup.add("Upload document to store");
         menuItem.setActionCommand(Action.REQUEST_UPLOAD_FILE_TO_PATIENT_DOCUMENT_STORE.toString());
         menuItem.addActionListener(this);
@@ -995,6 +988,17 @@ public class PatientView extends View
         menuItem = popup.add("Upload medical history to store");
         menuItem.setActionCommand(Action.REQUEST_UPLOAD_SCAN_TO_PATIENT_DOCUMENT_STORE.toString());
         menuItem.addActionListener(this);
+
+        popup.addSeparator();
+        
+        menuItem = popup.add("Fetch document from store");
+        menuItem.setActionCommand(Action.REQUEST_PATIENT_DOCUMENT.toString());
+        menuItem.addActionListener(this);
+        
+        menuItem = popup.add("Fetch medical history from store");
+        menuItem.setActionCommand(Action.REQUEST_PATIENT_SCAN.toString());
+        menuItem.addActionListener(this);
+
         popup.show(this.rdbRequestOpenDocumentStorePopup, 
                 7,14);
     }
