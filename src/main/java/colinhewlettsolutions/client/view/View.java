@@ -7,6 +7,7 @@ package colinhewlettsolutions.client.view;
 
 
 /*import view.views.modal_views.ModalPatientMedicalHistory1EditorView;*/
+import colinhewlettsolutions.client.view.views.non_modal_views.ProgressMonitorView;
 import colinhewlettsolutions.client.view.views.non_modal_views.PatientDocumentStoreView;
 import colinhewlettsolutions.client.view.views.modal_views.UserSystemWideSettingsView;
 import colinhewlettsolutions.client.view.views.modal_views.ModalUserScheduleListSettingsView;
@@ -158,7 +159,7 @@ public class View extends JInternalFrame
             case CLINICAL_NOTE_VIEW:
                 setModalView(makeView(new ModalClinicalNoteView(viewer, controller, desktopView)));
                 break;
-            case DOCUMENT_STORE_VIEW:
+            case PATIENT_DOCUMENT_STORE_VIEW:
                 setView(makeView(new PatientDocumentStoreView(viewer, controller,desktopView)));
                 break;
             case EXPORT_PROGRESS_VIEW:
@@ -236,7 +237,10 @@ public class View extends JInternalFrame
                 break;
             case PATIENT_VIEW_TEST:
                 setView(makeView(new PatientViewTest(viewer, controller,desktopView)));
-                break;    
+                break; 
+            case PROGRESS_MONITOR_VIEW:
+                setView(makeView(new ProgressMonitorView(viewer, controller,desktopView)));
+                break;
             case MODAL_DATE_DIALOG:
                 setModalView(makeView(new ModalDateDialog(viewer, controller,desktopView)));
                 break;
@@ -250,7 +254,7 @@ public class View extends JInternalFrame
                 setModalView(makeView(new ModalScheduleAndTreatmentEditorView(viewer, controller, desktopView)));
                 break;
             case SCHEDULE_LIST_VIEW:
-                setView(makeView(new ScheduleListView(viewer, controller, desktopView)));
+                setView(makeView(new ScheduleView(viewer, controller, desktopView)));
                 break;
             case SURGERY_DAY_EDITOR_VIEW:
                 setModalView(makeView(new ModalSurgeryDaysEditorView(viewer,controller,desktopView)));
@@ -357,10 +361,11 @@ public class View extends JInternalFrame
         PATIENT_SELECTION_VIEW,
         PATIENT_VIEW,
         PATIENT_VIEW_TEST,
+        PROGRESS_MONITOR_VIEW,
         RECALL_PATIENTS_VIEW,
         MODAL_DATE_DIALOG,
         MODAL_PROGRESS_VIEW,
-        DOCUMENT_STORE_VIEW,
+        PATIENT_DOCUMENT_STORE_VIEW,
         SCHEDULE_DIARY_VIEW,
         SCHEDULE_EDITOR_VIEW,
         SCHEDULE_LIST_VIEW,

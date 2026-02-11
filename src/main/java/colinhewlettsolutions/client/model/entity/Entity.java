@@ -140,7 +140,15 @@ public class Entity implements IStoreClient{
     public enum Scope { ALL,
                         APPOINTEE_REMINDERS,    //all entities
                         ARCHIVED,
+                        APPOINTMENTS_WITH_TREATMENTS_COUNT, //used on comment migration
+                        CONSULTATION_NOT_PAID,   //used on comment migration
+                        PAID_195_POUNDS,        //used on comment migration
+                        TRAINING_TO_UNBOOKABLE, //used on comment migration
+                        ADMIN_TO_UNBOOKABLE,    //used on comment migration
+                        BANK_HOLIDAY_TO_UNBOOKABLE, //used on comment migration
+                        BLANK_COMMENT,          //used on comment migration
                         CANCELLED,              //cancelled appointments
+                        COPY_NOTES_TO_COMMENT,  //used on comment migration
                         EMERGENCY,              //on an appointment deletion to make deletion permanent
                         PENDING,                //all pending transmission requests
                         PENDING_FOR_PATIENT,    //pending transmission for patient

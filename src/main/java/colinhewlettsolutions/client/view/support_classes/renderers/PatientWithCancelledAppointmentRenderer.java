@@ -20,10 +20,10 @@ import java.awt.Font;
  *
  * @author colin
  */
-public class PatientAppointmentDataTablePatientRenderer extends JLabel implements TableCellRenderer{
+public class PatientWithCancelledAppointmentRenderer extends JLabel implements TableCellRenderer{
     private PatientAppointmentDataTableModel model = null;
     
-    public PatientAppointmentDataTablePatientRenderer()
+    public PatientWithCancelledAppointmentRenderer()
     {
         //Font f = super.getFont();
         // bold

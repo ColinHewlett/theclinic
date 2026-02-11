@@ -128,7 +128,7 @@ public interface IStoreActions {
     public User read(User _user)throws StoreException, LoginException;
     public UserSettings read(UserSettings userSettings)throws StoreException;
 
-    public void update(Appointment a, Integer key, Integer appointeeKee/*28/03/2024, Integer patientNoteKey*/) throws StoreException;
+    public void update(Appointment a) throws StoreException;
     public void update(AppointmentTreatment appointmentTreatment)throws StoreException;
     public void update(ClinicalNote clinicNote)throws StoreException;
     public void update(Doctor doctor)throws StoreException;

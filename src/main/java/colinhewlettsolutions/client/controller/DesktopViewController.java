@@ -28,6 +28,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.HashMap;
@@ -156,6 +158,7 @@ public class DesktopViewController extends ViewController{
         PRINT_NEW_PATIENT_DETAILS_REQUEST,
         PRINT_SCHEDULE_REQUEST,
         REFRESH_DISPLAY_REQUEST,
+        REFRESH_TO_DO_DISPLAY_REQUEST,
         SCHEDULE_LIST_VIEW_CONTROLLER_REQUEST,
         TO_DO_VIEW_CONTROLLER_REQUEST,
         TREATMENT_VIEW_CONTROLLER_REQUEST,
@@ -172,9 +175,17 @@ public class DesktopViewController extends ViewController{
     }
     
     public enum Properties{
+        ARCHIVED_PATIENTS_VIEW_CONTROLLER_CHANGE_NOTIFICATION,
         CASCADE_DESKTOP_VIEWS,
         DESKTOP_VIEW_CHANGED_NOTIFICATION,
+        PATIENT_APPOINTMENT_DATA_VIEW_CONTROLLER_CHANGE_NOTIFICATION,
+        PATIENT_MEDICAL_HISTORY_VIEW_CONTROLLER_CHANGE_NOTIFICATION,
+        PATIENT_VIEW_CONTROLLER_CHANGE_NOTIFICATION,
+        PROGRESS_MONITOR_SETUP_NOTIFICATION_RECEIVED,
         SET_DESKTOP_VIEW_MODE,
+        SCHEDULE_VIEW_CONTROLLER_CHANGE_NOTIFICATION,
+        TO_DO_VIEW_CONTROLLER_CHANGE_NOTIFICATION,
+        TREATMENT_VIEW_CONTROLLER_CHANGE_NOTIFICATION,
         VIEW_CHANGED_NOTIFICATION
     }
     
@@ -1293,8 +1304,8 @@ public class DesktopViewController extends ViewController{
                  */
                 PatientViewController patientViewController = (PatientViewController)e.getSource();
                 
-                patientViewController.getDescriptor().getControllerDescription().
-                        setProperty(SystemDefinition.Properties.CONTROLLER_VIEW_MODE, ControllerViewMode.LIST);
+                /*patientViewController.getDescriptor().getControllerDescription().
+                        setProperty(SystemDefinition.Properties.CONTROLLER_VIEW_MODE, ControllerViewMode.LIST);*/
                 
                 Descriptor descriptor = getNewTemplatedDescriptor();
                 descriptor.getControllerDescription().setProperty(SystemDefinition.Properties.SCHEDULE_DAY, 
@@ -1717,18 +1728,13 @@ public class DesktopViewController extends ViewController{
                     null
             );
         }
-        
-        
-        
         Descriptor descriptor = getNewTemplatedDescriptor();
-        
-        /*descriptor.getControllerDescription().setViewMode(ViewController.ViewMode.SCHEDULE_REFERENCED_DESKTOP_VIEW);*/
         descriptor.getControllerDescription().
                 setProperty(SystemDefinition.Properties.VIEW_MODE,
                         ViewController.ViewMode.SCHEDULE_REQUESTED_FROM_DESKTOP_VIEW);
         
-        descriptor.getControllerDescription().
-                setProperty(SystemDefinition.Properties.CONTROLLER_VIEW_MODE, ControllerViewMode.LIST);
+        /*descriptor.getControllerDescription().
+                setProperty(SystemDefinition.Properties.CONTROLLER_VIEW_MODE, ControllerViewMode.LIST);*/
         descriptor.getControllerDescription().
                 setProperty(SystemDefinition.Properties.SCHEDULE_DAY, LocalDate.now());
         createNewAppointmentScheduleViewController(descriptor);
@@ -2195,9 +2201,9 @@ public class DesktopViewController extends ViewController{
     private void doRequestForUserSystemWideSettingsViewController(ActionEvent e){
         UserSystemWideSettingsViewController anotherViewControllerWithSameControllerViewMode = null;
         ControllerViewMode  controllerViewMode = null;
-        switch(e.getSource().getClass().getSimpleName()){
+        /*switch(e.getSource().getClass().getSimpleName()){
             case "DesktopView" ->{
-                //this.getDescriptor().getControllerDescription().setProperty(Properties.SCHEDULE_VIEW_MODE,ControllerViewMode.SYSTEM);
+                this.getDescriptor().getControllerDescription().setProperty(Properties.SCHEDULE_VIEW_MODE,ControllerViewMode.SYSTEM);
                 controllerViewMode = ControllerViewMode.SYSTEM;
                 break;
             }
@@ -2206,7 +2212,7 @@ public class DesktopViewController extends ViewController{
                         getControllerDescription().getProperty(SystemDefinition.Properties.CONTROLLER_VIEW_MODE);
                 break;
             }
-        }
+        }*/
         UserSystemWideSettingsViewController usvc = null;
         if(userSystemWideSettingsViewControllers.isEmpty()){
             
@@ -2476,7 +2482,7 @@ public class DesktopViewController extends ViewController{
                         patientDocumentStoreViewControllers.size()-1);
                 pdsvc.getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.PATIENT, patient);
                 pdsvc.getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.VIEW_MODE, viewMode);
-                setView(new View().make(View.Viewer.DOCUMENT_STORE_VIEW,
+                setView(new View().make(View.Viewer.PATIENT_DOCUMENT_STORE_VIEW,
                                 pdsvc, 
                                 getDesktopView()));
                 if (getDesktopViewMode().equals(DesktopViewMode.CLINIC_LOGO)){
@@ -2544,6 +2550,161 @@ public class DesktopViewController extends ViewController{
     
     private void doRequestForViewNotification(){
         System.exit(0);
+    }
+
+    private void startBackgroundAppointmentTreatmentProcess(){
+        SwingWorker swingWorker = new SwingWorker(){
+            @Override
+            protected String doInBackground(){
+                String result = null;
+                int countForAppointmentPidGreaterThan30377 = 0;
+                Patient patient = null;
+                Appointment appointment = null;
+                AppointmentTreatment appointmentTreatment = null;
+                try{
+                    /**
+                     * if patient.isDeleted is true set isArchived true and reset isDeleted to false
+                     */
+                    this.firePropertyChange("operation", null, "Patient table update");
+                    patient = new Patient();
+                    patient.setScope(Entity.Scope.DELETED);
+                    patient.update();  
+                    /**
+                     * initialise all appointment::comment to blank
+                     */
+                    Thread.sleep(2000);
+                    this.firePropertyChange("operation", null, "Clearing appointment comments");
+                    appointment = new Appointment();
+                    appointment.setScope(Entity.Scope.BLANK_COMMENT);
+                    appointment.update();
+                    /**
+                     * fetch total number of appointment treatment records
+                     */
+                    Thread.sleep(2000);
+                    this.firePropertyChange("operation", null, "Counting appointment treatments");
+                    appointmentTreatment = new AppointmentTreatment();
+                    int total = appointmentTreatment.count().x;
+
+
+                    /**
+                     * copy AppointmentTreatment comments to referenced appointment::comment column
+                     * -- note this includes all appointments with a pid greater or equal to 30378
+                     */
+                    Thread.sleep(2000);
+                    this.firePropertyChange("operation", null, "Copy over treatment comments to appointment comments");
+                    appointmentTreatment.setScope(Entity.Scope.ALL);
+                    appointmentTreatment.read();
+                    appointmentTreatment = new AppointmentTreatment();
+                    appointmentTreatment.setScope(Entity.Scope.ALL);
+                    appointmentTreatment.read();
+                    for(AppointmentTreatment _at : appointmentTreatment.get()){
+                        
+                        if (!_at.getComment().trim().isEmpty()){/*copy at.comment if not empty*/
+                            appointment = _at.getAppointment();
+                            appointment.setScope(Entity.Scope.SINGLE);
+                            appointment = appointment.read();
+                            appointment.setComment(unbracketComment(_at.getComment()));
+                            appointment.update();                           
+                        }
+                        Integer percentage = countForAppointmentPidGreaterThan30377++ * 100/total;
+                        System.out.println(percentage);
+                        setProgress(percentage);
+                    }
+
+                    /**
+                     * copy all Appointment notes to appointment comments if pid < 30377
+                     */
+                    Thread.sleep(2000);
+                    this.firePropertyChange("operation", null, "Copy notes to comments in old appointments");
+                    appointment.setScope(Entity.Scope.COPY_NOTES_TO_COMMENT);
+                    appointment.update();
+
+                    /**
+                     * change appointment references to patient BANK, HOLIDAY to UNBOOKABLE SLOTS
+                     * -- archive patient BANK, HOLIDAY (pid 21367)
+                     * -- delete from AppointmentTreatment where treatmentKey = 47
+                     * -- delete from Treatment where pid = 47 ("BANK HOLIDAY"
+                     */
+                    Thread.sleep(2000);
+                    this.firePropertyChange("operation", null, "Make UNBOOKABLE 'Holidays', 'ADMIN', 'TRAINING' treatments");
+                    appointment.setPatient(new Patient(21367));
+                    appointment.setScope(Entity.Scope.BANK_HOLIDAY_TO_UNBOOKABLE);
+                    appointment.update();
+
+                    /**
+                     * archive patient 21367
+                     */
+                    patient = new Patient(21367);
+                    patient.setScope(Entity.Scope.SINGLE);
+                    patient.delete();
+
+                    //archive references to treatment (47 = bank holiday)
+                    removeTreatmentReferences(47);
+
+                    /**
+                     * update appointments to UNBOOKABLE for pids 32312 and 32438 (ADMIN treatments referencing Janine 19775
+                     */
+                    Thread.sleep(2000);
+                    appointment.setScope(Entity.Scope.ADMIN_TO_UNBOOKABLE);
+                    appointment.update();
+                    //archive references to treatment (57 = ADMIN)
+                    removeTreatmentReferences(57);
+
+                    /**
+                     * update appointments to UNBOOKABLE for patientKey = 13814 and appointment.pid = 31828 (TRAINING treatments)
+                     */
+                    appointment.setScope(Entity.Scope.TRAINING_TO_UNBOOKABLE);
+                    appointment.update();
+                    //archive references to treatment (53 = TRAINING)
+                    removeTreatmentReferences(53);
+
+                    /**
+                     * update appointments where 'N/P consultation/Not paid'; treatment key = 14
+                     */
+                    Thread.sleep(2000);
+                    this.firePropertyChange("operation", null, "Change 'paid/notpaid' treatments to appointment comments");
+                    appointment.setScope(Entity.Scope.CONSULTATION_NOT_PAID);
+                    appointment.update();
+                    removeTreatmentReferences(14);
+                    /**
+                     * update appointments where 'N/P paid £195' is added to comment field in associated appointment
+                     */
+                    appointment.setScope(Entity.Scope.PAID_195_POUNDS);
+                    appointment.update();
+                    //archive references to treatment (29 = N/P paid £195)
+                    removeTreatmentReferences(29);
+
+                }catch (StoreException ex){
+                    String message = ex.getMessage() + "\n";
+                    displayErrorMessage(message, "Desktop View Controller error", JOptionPane.WARNING_MESSAGE);
+                } catch(NullPointerException ex){
+                    String message = ex.getMessage() + "\n";
+                    displayErrorMessage(message, "Desktop View Controller error", JOptionPane.WARNING_MESSAGE);
+                }catch (InterruptedException ex){
+                    String message = ex.getMessage() + "\n";
+                    displayErrorMessage(message, "Desktop View Controller error", JOptionPane.WARNING_MESSAGE);
+                }
+                return result;
+            }
+            /**
+             * Invoked when the doInBackground() method completes
+             * -- used to send propertyChangeEvent to the DeskView requesting removal of progress bar from view
+             */
+            @Override
+            protected void done(){
+                try{
+                    get();
+                }catch (InterruptedException |
+                        ExecutionException ex){
+                     displayErrorMessage(ex.getMessage() + 
+                             "\nRaised in SwingWorker.done() method",
+                             "View controller error", JOptionPane.WARNING_MESSAGE);
+                }
+                
+            }
+        };
+        swingWorker.addPropertyChangeListener(getDesktopView());
+        swingWorker.execute();
     }
 
     /**
@@ -2615,23 +2776,7 @@ public class DesktopViewController extends ViewController{
                             Integer percentage = recordCount*100/count;
                             setProgress(percentage);
                         }
-                        
-                    /*}else if (entity.getIsPrimaryCondition()){
-
-                        PrimaryCondition pc = (PrimaryCondition)entity;
-                        Patient patient = new Patient(1);
-                        count = 1;
-                        recordCount = 0;
-                        for(Condition condition : pc.get()){
-                            PrimaryCondition pCondition = (PrimaryCondition)condition;
-                            pCondition.setPatient(patient);
-                            pCondition.insert();
-                        }
-                        recordCount++;
-                        if (recordCount <= count){
-                            Integer percentage = recordCount*100/count;
-                            setProgress(percentage);
-                        }*/
+                   
                     }else if (entity.getIsAppointment()){
                         /**
                          * first thing create a single Invoice record with key 1066 (equals the zero invoice) to maintain RI
@@ -2662,50 +2807,7 @@ public class DesktopViewController extends ViewController{
                         }//end of dbfRecords iteration
                         dbfRecords.clear();
                     }
-                    /*28/03/2024
-                    else if(entity.getIsPatientNote()){
-                        recordCount = 0;
-                        Appointment appointment = new Appointment();
-                        appointment.setScope(Entity.Scope.ALL);
-                        appointment.read();
-                        setCount(appointment.count().x);
-                        Iterator<Appointment> it = ((Appointment)appointment).get().iterator();
-                        while (it.hasNext()){
-                            Appointment a = it.next();
-                            new PatientNote().createPatientNoteFromAppointment(a);
-                            recordCount++;
-                            if (recordCount <= getCount()){
-                                Integer percentage = recordCount*100/getCount();
-                                setProgress(percentage);
-                            }
-                        }
-                    }else if (entity.getIsSecondaryCondition()){
-
-                        SecondaryCondition sc = (SecondaryCondition)entity;
-                        PrimaryCondition pc = sc.getPrimaryCondition();
-                        PrimaryCondition pConditionFromStore = null;
-                        Patient patient = new Patient(1);
-                        count = 1;
-                        recordCount = 0;
-                        for(Condition primaryCondition : pc.get()){
-                            PrimaryCondition pCondition = (PrimaryCondition)primaryCondition;
-                            pCondition.setPatient(patient);
-                            pCondition.setScope(Entity.Scope.SINGLE);
-                            pConditionFromStore = pCondition.read();
-
-                            for(Condition secondaryCondition : 
-                                    pCondition.getSecondaryCondition().get()){
-                                SecondaryCondition sCondition = (SecondaryCondition)secondaryCondition;
-                                sCondition.setPrimaryCondition(pConditionFromStore);
-                                sCondition.insert();
-                            }
-                        }
-                        recordCount++;
-                        if (recordCount <= count){
-                            Integer percentage = recordCount*100/count;
-                            setProgress(percentage);
-                        }
-                    }*/
+                    
                 }catch (StoreException ex){
                     displayErrorMessage(ex.getMessage(), "Desktop view controller error",
                             JOptionPane.WARNING_MESSAGE);
@@ -2721,15 +2823,6 @@ public class DesktopViewController extends ViewController{
                 for(Appointment appointment : appointments){
                     appointment.insert();
                     appointmentRecordCount = appointmentRecordCount + 1;
-                    /*
-                    if (getRecordCount() <= getCount()){
-                        Integer percentage = getRecordCount()*100/getCount();
-                        setProgress(percentage);
-                    }
-                    else {
-                        break;
-                    }
-                    */
                 }
             }
             
@@ -3189,27 +3282,133 @@ public class DesktopViewController extends ViewController{
         return comment;
     }
     
-    private void doMigrateCommentsFromAppointmentTreatmentToAppointmentx(){
-        Appointment appointment = new Appointment();
-        appointment.setScope(Entity.Scope.ALL);
+    /** Ensures in Patient table any Patient.isDeleted(true), the Patient.isArchived is set to true and isDeleted set to false
+     *  initialises new Appointment::comment (makes blank before initialisation so on entry new appointment.comment is blank)
+     *  -- from AppointmentTreatment.comment if appointment.pid > 30378; else appointment.comment copied from appointment.notes
+     */
+    private void doMigrateCommentsFromNewAppointmentTreatmentCommentAndFromOldAppointmentNotesToNewAppointmentComment(){
+        int countForAppointmentPidGreaterThan30377 = 0;
+        int countForAppointmentPidLessThan30378 = 0;
+        Patient patient = null;
+        Appointment appointment = null;
+        patient = new Patient();
+        patient.setScope(Entity.Scope.DELETED);
+        startBackgroundAppointmentTreatmentProcess();
         try{
-            appointment.read();
-            for(Appointment _appointment : appointment.get()){
-//               if (_appointment.getKey().equals(int 31540)) {
-  //                      System.out.println(_appointment.getComment());
- //               }
-                if (!_appointment.getComment().trim().isEmpty()){
-                    System.out.println("length of comment = " + _appointment.getComment().length());
-                    _appointment.setComment(unbracketComment(_appointment.getComment()));
-                    _appointment.update();
+            /**
+             * if patient.isDeleted is true set isArchived true and reset isDeleted to false
+             */
+            patient.update();  
+
+            /**
+             * initialise all appointment::comment to blank
+             */
+            appointment = new Appointment();
+            appointment.setScope(Entity.Scope.BLANK_COMMENT);
+            appointment.update();
+            
+            /*appointment.setScope(Entity.Scope.ALL);
+            int total = appointment.getValue().x;*/
+            
+            /**
+             * copy AppointmentTreatment comments to referenced appointment::comment column
+             * -- note this includes all appointments with a pid greater or equal to 30378
+             */
+            AppointmentTreatment at = new AppointmentTreatment();
+            at.setScope(Entity.Scope.ALL);
+            at.read();
+            for(AppointmentTreatment _at : at.get()){
+                if (!_at.getComment().trim().isEmpty()){/*copy at.comment if not empty*/
+                    appointment = _at.getAppointment();
+                    appointment.setScope(Entity.Scope.SINGLE);
+                    appointment = appointment.read();
+                    appointment.setComment(unbracketComment(_at.getComment()));
+                    appointment.update();
+                    countForAppointmentPidGreaterThan30377++;
                 }
-            } 
+            }
+
+            /**
+             * copy all Appointment notes to appointment comments if pid < 30377
+             */
+            appointment.setScope(Entity.Scope.COPY_NOTES_TO_COMMENT);
+            appointment.update();
+            
+            /**
+             * change appointment references to patient BANK, HOLIDAY to UNBOOKABLE SLOTS
+             * -- archive patient BANK, HOLIDAY (pid 21367)
+             * -- delete from AppointmentTreatment where treatmentKey = 47
+             * -- delete from Treatment where pid = 47 ("BANK HOLIDAY"
+             */
+            appointment.setPatient(new Patient(21367));
+            appointment.setScope(Entity.Scope.BANK_HOLIDAY_TO_UNBOOKABLE);
+            appointment.update();
+            
+            /**
+             * archive patient 21367
+             */
+            patient = new Patient(21367);
+            patient.setScope(Entity.Scope.SINGLE);
+            patient.delete();
+            
+            //archive references to treatment (47 = bank holiday)
+            removeTreatmentReferences(47);
+            
+            /**
+             * update appointments to UNBOOKABLE for pids 32312 and 32438 (ADMIN treatments referencing Janine 19775
+             */
+            appointment.setScope(Entity.Scope.ADMIN_TO_UNBOOKABLE);
+            appointment.update();
+            //archive references to treatment (57 = ADMIN)
+            removeTreatmentReferences(57);
+            
+            /**
+             * update appointments to UNBOOKABLE for patientKey = 13814 and appointment.pid = 31828 (TRAINING treatments)
+             */
+            appointment.setScope(Entity.Scope.TRAINING_TO_UNBOOKABLE);
+            appointment.update();
+            //archive references to treatment (53 = TRAINING)
+            removeTreatmentReferences(53);
+            
+            /**
+             * update appointments where 'N/P consultation/Not paid'; treatment key = 14
+             */
+            appointment.setScope(Entity.Scope.CONSULTATION_NOT_PAID);
+            appointment.update();
+            removeTreatmentReferences(14);
+            /**
+             * update appointments where 'N/P paid £195' is added to comment field in associated appointment
+             */
+            appointment.setScope(Entity.Scope.PAID_195_POUNDS);
+            appointment.update();
+            //archive references to treatment (29 = N/P paid £195)
+            removeTreatmentReferences(29);
+            
         }catch (StoreException ex){
             String message = ex.getMessage() + "\n";
             displayErrorMessage(message, "Desktop View Controller error", JOptionPane.WARNING_MESSAGE);
+        } catch(NullPointerException ex){
+            String message = ex.getMessage() + "\n";
+            displayErrorMessage(message, "Desktop View Controller error", JOptionPane.WARNING_MESSAGE);
         }
-
-    } 
+    }
+    
+    private void removeTreatmentReferences (Integer key)throws StoreException{
+        /**
+             * archive appointment treatments for treatment key
+             */
+            AppointmentTreatment appointmentTreatment = new AppointmentTreatment();
+            appointmentTreatment.setScope(Entity.Scope.FOR_TREATMENT);
+            appointmentTreatment.setTreatment(new Treatment(key));
+            appointmentTreatment.delete();
+            
+            /**
+             * archive Treatment for key
+             */
+            Treatment treatment = new Treatment(key);
+            treatment.setScope(Entity.Scope.SINGLE);
+            treatment.delete();
+    }
     
     private void doMigrateCommentsFromAppointmentTreatmentToAppointment(){
         int count = 0;
@@ -3250,7 +3449,8 @@ public class DesktopViewController extends ViewController{
         Actions actionCommand = Actions.valueOf(e.getActionCommand());
          switch (actionCommand){
              case COMMENT_MIGRATION_REQUEST ->{
-                 doMigrateCommentsFromAppointmentTreatmentToAppointment();
+                 //this.doMigrateCommentsFromNewAppointmentTreatmentCommentAndFromOldAppointmentNotesToNewAppointmentComment();
+                 startBackgroundAppointmentTreatmentProcess();
                  break;
              }
             case VIEW_ACTIVATED_NOTIFICATION ->{
@@ -3427,14 +3627,31 @@ public class DesktopViewController extends ViewController{
             }
         }
     }
+    
+    private void doToDoViewControllerChangeNotification(PropertyChangeEvent e){
+        if (e.getSource() instanceof ToDoViewController){/*if ToDoViewController has changed let all active Schedule VCs to do views be refreshed */
+            for (ScheduleViewController svc : this.scheduleViewControllers){
+                ActionEvent actionEvent = new ActionEvent(
+                        this,ActionEvent.ACTION_PERFORMED,DesktopViewController.Actions.
+                                REFRESH_TO_DO_DISPLAY_REQUEST.toString());
+                svc.actionPerformed(actionEvent);
+            } 
+        }else if (e.getSource() instanceof ScheduleViewController){/* if to do view embedded in calling Schedule VC */
+            ScheduleViewController svc = (ScheduleViewController)e.getSource();
+            if (!this.toDoViewControllers.isEmpty()){/* refresh ToDo VC's view display*/
+                ActionEvent actionEvent = new ActionEvent(
+                        this,ActionEvent.ACTION_PERFORMED,DesktopViewController.Actions.
+                                REFRESH_DISPLAY_REQUEST.toString());
+                toDoViewControllers.get(0).actionPerformed(actionEvent);
+            }
+            
+            
+        }
+    }
 
     private void doPatientViewControllerChangeNotification(PropertyChangeEvent e){
         for(ScheduleViewController asvc: this.scheduleViewControllers){
-            ActionEvent actionEvent = new ActionEvent(
-                    this,ActionEvent.ACTION_PERFORMED,
-                    ViewController.DesktopViewControllerActionEvent.
-                            REFRESH_DISPLAY_REQUEST.toString());
-            asvc.actionPerformed(actionEvent); 
+             
         }
         
         PatientViewController requestingPVC = 
@@ -3574,9 +3791,10 @@ public class DesktopViewController extends ViewController{
         }
     } 
 
+    @Override
     public void propertyChange(PropertyChangeEvent e){
-        ViewController.DesktopViewControllerPropertyChangeEvent propertyName =
-                ViewController.DesktopViewControllerPropertyChangeEvent.valueOf(e.getPropertyName());
+        DesktopViewController.Properties propertyName =
+                DesktopViewController.Properties.valueOf(e.getPropertyName());
         switch(propertyName){
             case ARCHIVED_PATIENTS_VIEW_CONTROLLER_CHANGE_NOTIFICATION:
                 doArchivedPatientsViewControllerChangeNotification(e);
@@ -3589,6 +3807,9 @@ public class DesktopViewController extends ViewController{
                 break;
             case SCHEDULE_VIEW_CONTROLLER_CHANGE_NOTIFICATION:
                 doScheduleViewControllerChangeNotification(e);
+                break;
+            case TO_DO_VIEW_CONTROLLER_CHANGE_NOTIFICATION:
+                doToDoViewControllerChangeNotification(e);
                 break;
             case TREATMENT_VIEW_CONTROLLER_CHANGE_NOTIFICATION:
                 doTreatmentViewControllerChangeNotification(e);

@@ -94,31 +94,6 @@ public class TreatmentView extends View
                     actionCommand = ViewController.TreatmentViewControllerActionEvent
                         .TREATMENT_CREATE_REQUEST;
                     doSendActionEvent(actionCommand);
-                    /*
-                    if (!getIsErrorMessageReceived()){
-                        String message = "Treatment '" 
-                                + tws.getDescription() +"' has been created";
-                        JOptionPane.showInternalMessageDialog(this, message );
-
-                        try{
-                            this.setClosed(true);   
-                        }catch (PropertyVetoException ex){
-
-                        }
-                        actionCommand = ViewController.TreatmentViewControllerActionEvent
-                                .VIEW_CLOSE_NOTIFICATION;
-                            doSendActionEvent(actionCommand);
-                    }else{
-                        String error = getMyController().getDescriptor()
-                                .getControllerDescription().getError();
-                        if (error!=null){
-                            JOptionPane.showInternalMessageDialog(this,
-                                    error, "Treatment conroller error",
-                                    JOptionPane.WARNING_MESSAGE);
-                        }
-
-                    }
-                    */
                 }
                 break;
             case REQUEST_TREATMENT_DELETE:

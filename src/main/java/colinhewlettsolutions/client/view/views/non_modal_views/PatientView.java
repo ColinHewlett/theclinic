@@ -15,6 +15,7 @@ import colinhewlettsolutions.client.view.dialogs.CreateInternalDialog;
 import colinhewlettsolutions.client.view.support_classes.models.PatientAppointmentHistoryTableModel;
 import colinhewlettsolutions.client.view.support_classes.renderers.PatientAppointmentHistoryTableInvoiceRenderer;
 import colinhewlettsolutions.client.view.support_classes.renderers.AppointmentHistoryTableLocalDateTimeRenderer;
+import colinhewlettsolutions.client.view.support_classes.renderers.LocalDateTimeRenderer;
 import colinhewlettsolutions.client.view.support_classes.renderers.AppointmentHistoryTableDurationRenderer;
 import colinhewlettsolutions.client.controller.Descriptor;
 import colinhewlettsolutions.client.controller.ViewController;
@@ -468,7 +469,7 @@ public class PatientView extends View
     
     private void adjustColumnWidthsAndViewPosition(JTable table){
         javax.swing.SwingUtilities.invokeLater(() -> {
-            ViewController.setRelativeColumnWidths(table, new double[]{0.07,0.1,0.15,0.68});
+            ViewController.setRelativeColumnWidths(table, new double[]{0.05,0.175,0.175,0.6});
             //ViewController.centerInternalFrame(getDesktopView().getDeskTop(), this);
         });
     }
@@ -744,10 +745,11 @@ public class PatientView extends View
             
             case REQUEST_UPLOAD_FILE_TO_PATIENT_DOCUMENT_STORE:
                 doFileChooserDialog(ViewController.ViewMode.DOCUMENT);
+                doPatientDocumentRequest();
                 rdbGroup.clearSelection();
                 break;
             case REQUEST_UPLOAD_SCAN_TO_PATIENT_DOCUMENT_STORE:
-                doFileChooserDialog(ViewController.ViewMode.SCAN);
+                doFileChooserDialog(ViewController.ViewMode.MEDICAL_HISTORY);
                 rdbGroup.clearSelection();
                 break;
             case REQUEST_UNTITLED_NAME:
@@ -759,81 +761,57 @@ public class PatientView extends View
         }
     }
     
+    private File fetchFileToUpload(){
+        String[] allowedFileExtensions = null;
+        allowedFileExtensions = new String[] {"doc", "docx", "pdf"};
+        File selectedFile = NativeFileChooser.showOpenDialog(
+                this, "Select Word or PDF file to upload", new File(System.getProperty("user.home")), allowedFileExtensions);
+        return selectedFile;
+    }
+    
     
     private void doFileChooserDialog(ViewController.ViewMode viewMode){
-        boolean repeatUploadRequest = false;
-        DialogView dialog = null;
-        String title = null;
+        String message = new String();
         File selectedFile = null;
-        String[] allowedFileExtensions = null;
-        ArrayList<File> document = new ArrayList<>();
-        switch(viewMode){
-            case DOCUMENT ->{
-                title = "Select Word file to upload";
-                allowedFileExtensions = new String[] {"docx"};
-                do{
-                    selectedFile = NativeFileChooser.showOpenDialog(
-                        this, title, new File(System.getProperty("user.home")), allowedFileExtensions);
-                    repeatUploadRequest = false;
-                    if (selectedFile!=null) {                      
-                        if (isWordFile(selectedFile)){
-                                String message = selectedFile.getName() + " has been uploaded to " + getPatientNameString() + "'s document store";
-                                document.add(selectedFile);
-                                JOptionPane.showInternalMessageDialog(this,message, 
-                                                "File uploaded", JOptionPane.INFORMATION_MESSAGE);
-                        }else{
-                            repeatUploadRequest = true;
-                            JOptionPane.showInternalMessageDialog(this,"attempt to upload a non Word file has been aborted; retry uploading a Word documenrt", 
-                                                "Error uploading " + getPatientNameString() + "'s document", JOptionPane.WARNING_MESSAGE);
-                        }
+        File document = null;
+        selectedFile = fetchFileToUpload();
+        if (selectedFile!=null){
+            if (isWordOrPDFFile(selectedFile)){
+                switch(viewMode){
+                    case DOCUMENT ->{
+                        message = selectedFile.getName() + " has been uploaded to " + getPatientNameString() + "'s document store";
+                        document = selectedFile;
+                        /*JOptionPane.showInternalMessageDialog(this,message, 
+                                "File uploaded", JOptionPane.INFORMATION_MESSAGE); */
+                        break;
                     }
-                }while(repeatUploadRequest);    
-                break;
-            }
-            case SCAN ->{
-                title = "Select first page of scan to upload";
-                allowedFileExtensions = new String[] {"jpg", "png", "gif"};
-                for (int index = 1;index <=2; index++){
-                    switch(index){
-                        case 1 ->{
-                            title = "UPLOAD FIRST PAGE OF PATIENT MEDICAL HISTORY";
-                            break;
-                        }
-                        case 2 ->{
-                            title = "UPLOAD SECOND PAGE OF PATIENT MEDICAL HISTORY";
-                            break;
-                        }
+                    case MEDICAL_HISTORY ->{
+                        message = selectedFile.getName() + " has been uploaded to " + getPatientNameString() + "'s medical history store";
+                        document = selectedFile;
+                        /*JOptionPane.showInternalMessageDialog(this,message, 
+                                "File uploaded", JOptionPane.INFORMATION_MESSAGE); */
+                        break;
                     }
-                    
-                    do{
-                        selectedFile = NativeFileChooser.showOpenDialog(
-                            this, title, new File(System.getProperty("user.home")), allowedFileExtensions);
-                        if (selectedFile!=null){
-                           repeatUploadRequest =false;
-                            if (isImageFile(selectedFile)){
-                                document.add(selectedFile);
-                                String message = "Page " + String.valueOf(index) + " of medical history" +
-                                        " ('" + selectedFile.getName() + "') has been queued for upload to " + getPatientNameString() + "'s document store";
-                                JOptionPane.showInternalMessageDialog(this,message, 
-                                            "File uploaded", JOptionPane.INFORMATION_MESSAGE);
-                            }else{
-                                JOptionPane.showInternalMessageDialog(this,"attempt to upload a non-image file has been aborted; retry uploading an image file", 
-                                            "Error uploading " + getPatientNameString() + "'s medical history", JOptionPane.WARNING_MESSAGE);
-                                repeatUploadRequest = true;
-                            }
-                        }else break;
-                    }while (repeatUploadRequest);   
                 }
-                break;
+                getMyController().getDescriptor().getViewDescription().
+                        setProperty(Properties.PATIENT_DOCUMENT, document);
+                getMyController().getDescriptor().getViewDescription().
+                        setProperty(Properties.VIEW_MODE, viewMode);
+                doActionEventFor(PatientViewController.Actions.UPLOAD_TO_PATIENT_DOCUMENT_STORE_REQUEST);
+                /*JOptionPane.showInternalMessageDialog(this,message, 
+                                "File uploaded", JOptionPane.INFORMATION_MESSAGE);*/ 
+            }else{
+                message = "Attempt to upload a file wich is nort a Word or PDF document has been aborted";
+                JOptionPane.showInternalMessageDialog(this,message, 
+                        "Upload error", JOptionPane.WARNING_MESSAGE);
             }
-        }
-        if (!document.isEmpty()){
-            getMyController().getDescriptor().getViewDescription().
-                    setProperty(Properties.PATIENT_DOCUMENT, document);
-            getMyController().getDescriptor().getViewDescription().
-                    setProperty(Properties.VIEW_MODE, viewMode);
-            doActionEventFor(PatientViewController.Actions.UPLOAD_TO_PATIENT_DOCUMENT_STORE_REQUEST);
-        }
+            
+        }/*else{
+           message = "A file to upload has not been specified";
+                JOptionPane.showInternalMessageDialog(this,message, 
+                        "Upload aborted", JOptionPane.INFORMATION_MESSAGE); 
+        }*/
+
     }
     
     private boolean isImageFile(File file){
@@ -842,10 +820,10 @@ public class PatientView extends View
         return (filename.equalsIgnoreCase("jpg") || filename.equalsIgnoreCase("jpeg") ||  filename.equalsIgnoreCase("png")) || filename.equalsIgnoreCase("gif");
     }
     
-    private boolean isWordFile(File file){
+    private boolean isWordOrPDFFile(File file){
         String filename = file.getName();
         filename = filename.substring(filename.lastIndexOf(".")+1);
-        return (filename.equalsIgnoreCase("docx") || filename.equalsIgnoreCase("doc"));
+        return (filename.equalsIgnoreCase("docx") || filename.equalsIgnoreCase("doc") || filename.equalsIgnoreCase("pdf"));
     }
     
     private void doCloseViewRequest(){
@@ -956,7 +934,7 @@ public class PatientView extends View
     }
     
     private void doPatientScanRequest(){
-        getMyController().getDescriptor().getViewDescription().setProperty(Properties.VIEW_MODE, ViewController.ViewMode.SCAN);
+        getMyController().getDescriptor().getViewDescription().setProperty(Properties.VIEW_MODE, ViewController.ViewMode.MEDICAL_HISTORY);
         doActionEventFor(PatientViewController.Actions.PATIENT_DOCUMENT_STORE_VIEW_CONTROLLER_REQUEST);
     }
     
@@ -1001,7 +979,7 @@ public class PatientView extends View
         popup.setVisible(true);
         
         
-        menuItem = popup.add("Get Word document from store");
+        menuItem = popup.add("Get document from store");
         menuItem.setActionCommand(Action.REQUEST_PATIENT_DOCUMENT.toString());
         menuItem.addActionListener(this);
         
@@ -1375,6 +1353,7 @@ public class PatientView extends View
         int appointmentHistoryCount = 0;
         ArrayList<Appointment> appointments = (ArrayList<Appointment>)getMyController().getDescriptor()
                 .getControllerDescription().getProperty(Properties.APPOINTMENTS);
+
         /**
          * PATIENT VIEW TEST 24/04/2024 09:49
          * -- just in case ensure null pointer exception not generated
@@ -1401,7 +1380,8 @@ public class PatientView extends View
             }
             this.tblAppointmentHistory.setDefaultRenderer(Invoice.class, new PatientAppointmentHistoryTableInvoiceRenderer());
             this.tblAppointmentHistory.setDefaultRenderer(Duration.class, new AppointmentHistoryTableDurationRenderer());
-            this.tblAppointmentHistory.setDefaultRenderer(LocalDateTime.class, new AppointmentHistoryTableLocalDateTimeRenderer());
+            this.tblAppointmentHistory.setDefaultRenderer(LocalDateTime.class, new LocalDateTimeRenderer());
+            //this.tblAppointmentHistory.setDefaultRenderer(LocalDateTime.class, new AppointmentHistoryTableLocalDateTimeRenderer());
             
             TableColumnModel columnModel = this.tblAppointmentHistory.getColumnModel();
             columnModel.getColumn(3).setCellRenderer(new ScheduleTableCellRenderer());
@@ -1706,25 +1686,6 @@ public class PatientView extends View
     private int getAge(LocalDate dob){
         return Period.between(dob, LocalDate.now()).getYears();
     }
-    
-    /*
-    private void doOpenDocumentForPrinting(String filepath){
-        File file = new File(filepath);
-        
-        if (!Desktop.isDesktopSupported()) {
-            System.out.println("Desktop API is not supported on this system.");
-            return;
-        }
-
-        // Get the Desktop instance
-        Desktop desktop = Desktop.getDesktop();
-        try {
-            // Open the document with the default application
-            desktop.open(file);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }*/
 
     /**
      * This method is called from within the constructor to initialize the form.

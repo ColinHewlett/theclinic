@@ -27,6 +27,12 @@ import colinhewlettsolutions.client.view.views.non_modal_views.DesktopView;
 public class ToDoViewController extends ViewController{
     
     private ToDoViewListState viewListState = null;
+    
+    public enum Actions{}
+    
+    public enum Properties{
+        TO_DO_VIEW_CHANGE_NOTIFICATION
+    }
 
     enum ToDoViewListState {ALL_TO_DO_STATE, UNACTIONED_TO_DO_STATE};
     
@@ -40,7 +46,19 @@ public class ToDoViewController extends ViewController{
 
     @Override
     public void propertyChange(PropertyChangeEvent e){
-        
+        Properties propertyName = Properties.valueOf(e.getPropertyName());
+        switch (propertyName){
+            case TO_DO_VIEW_CHANGE_NOTIFICATION ->{
+                switch(getViewListState()){
+                    case ALL_TO_DO_STATE ->{
+                        break;
+                    }
+                    case UNACTIONED_TO_DO_STATE ->{
+                        break;
+                    }
+                }
+            }
+        }
     }
     
     @Override
@@ -72,8 +90,8 @@ public class ToDoViewController extends ViewController{
     }
     
     private void doDesktopViewControllerActionRequest(ActionEvent e){
-        ViewController.DesktopViewControllerActionEvent actionCommand =
-               ViewController.DesktopViewControllerActionEvent.valueOf(e.getActionCommand());
+        DesktopViewController.Actions actionCommand =
+               DesktopViewController.Actions.valueOf(e.getActionCommand());
         try{
             switch(actionCommand){
                 case REFRESH_DISPLAY_REQUEST:
@@ -126,6 +144,14 @@ public class ToDoViewController extends ViewController{
                 case UNACTIONED_TO_DO_REQUEST:
                     doUnactionedToDosRequest();
                     setViewListState(ToDoViewListState.UNACTIONED_TO_DO_STATE);
+                    firePropertyChangeEvent(
+                            DesktopViewController.Properties.
+                                    TO_DO_VIEW_CONTROLLER_CHANGE_NOTIFICATION.toString(),
+                            (DesktopViewController)getMyController(),
+                            this,
+                            null,
+                            null
+                    );
                     break;
                 case TO_DOs_REQUEST:
                     doToDosRequest();
@@ -134,6 +160,14 @@ public class ToDoViewController extends ViewController{
                 case ACTION_TO_DO_REQUEST:
                     doActionToDoRequest();
                     sendPrimaryViewToDos(Entity.Scope.UNACTIONED);
+                    firePropertyChangeEvent(
+                            DesktopViewController.Properties.
+                                    TO_DO_VIEW_CONTROLLER_CHANGE_NOTIFICATION.toString(),
+                            (DesktopViewController)getMyController(),
+                            this,
+                            null,
+                            null
+                    );
                     break;
                 case CREATE_TO_DO_REQUEST:
                     doCreateToDoRequest();
@@ -143,6 +177,14 @@ public class ToDoViewController extends ViewController{
                         break;
                 case UPDATE_TO_DO_REQUEST:
                     doUpdateToDoRequest();
+                    firePropertyChangeEvent(
+                            DesktopViewController.Properties.
+                                    TO_DO_VIEW_CONTROLLER_CHANGE_NOTIFICATION.toString(),
+                            (DesktopViewController)getMyController(),
+                            this,
+                            null,
+                            null
+                    );
                     break;
             }
         }catch(StoreException ex){
@@ -212,6 +254,7 @@ public class ToDoViewController extends ViewController{
         try{
             toDo.update();
             doUnactionedToDosRequest();
+            
         }catch (StoreException ex){
             String message = ex.getMessage() +  "\n"
                     + "Hasndle in NotificationViewController::doActionToDoRequest()";

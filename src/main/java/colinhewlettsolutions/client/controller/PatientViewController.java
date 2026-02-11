@@ -317,7 +317,7 @@ public class PatientViewController extends ViewController {
             case CLINICAL_NOTE_VIEW:
                 doClinicalNoteViewAction(e);
                 break;
-            case DOCUMENT_STORE_VIEW:
+            case PATIENT_DOCUMENT_STORE_VIEW:
                 doModalDocumentStoreViewAction(e);
                 break;
             case MODAL_DATE_DIALOG:
@@ -372,14 +372,18 @@ public class PatientViewController extends ViewController {
     }
     
     private void doPatientRestoreRequest(ActionEvent e){
+        ArrayList<Appointment> appointments = new ArrayList<>();
         Patient patient = (Patient)getDescriptor().getViewDescription().getProperty(Properties.PATIENT);
-        getDescriptor().getControllerDescription().setProperty(Properties.PATIENT, patient);
+        //getDescriptor().getControllerDescription().setProperty(Properties.PATIENT, patient);
         try{
             patient.setIsArchived(false);
             patient.update();
+            appointments = patient.getAppointmentHistory();
             patient.setScope(Entity.Scope.ALL);
-            patient.read(); 
+            patient.read();
             getDescriptor().getControllerDescription().setProperty(Properties.PATIENTS, patient.get());
+            getDescriptor().getControllerDescription().setProperty(Properties.APPOINTMENTS, appointments);
+            getDescriptor().getControllerDescription().setProperty(Properties.PATIENT, patient);
             
             firePropertyChangeEvent(
                     ViewController.PatientViewControllerPropertyChangeEvent.
@@ -388,7 +392,8 @@ public class PatientViewController extends ViewController {
                     this,
                     null,
                     null
-            );
+            ); 
+            
             firePropertyChangeEvent(
                     ViewController.PatientViewControllerPropertyChangeEvent.
                         PATIENT_RECEIVED.toString(),
@@ -415,96 +420,105 @@ public class PatientViewController extends ViewController {
     }
     
     private void doUploadToPatientDocumentStoreRequest(){
-        ArrayList<File> document = (ArrayList<File>)getDescriptor().getViewDescription().
+        Path documentStoreFolder = null;
+        Path documentStoreFolderPatientKey = null;
+        Path documentStoreFolderDocument = null;
+        Path documentStoreFolderMedicalHistory = null;
+        File document = (File)getDescriptor().getViewDescription().
                 getProperty(Properties.PATIENT_DOCUMENT);
-        /*LocalDateTime date = (LocalDateTime)getDescriptor().getViewDescription().
-                getProperty(Properties.DATE_TIME);*/
         Patient patient = (Patient)getDescriptor().getControllerDescription().
                 getProperty(Properties.PATIENT);
         String patientNameString = patient.getName().getTitle() + " "
                             + patient.getName().getForenames() + " "
                             + patient.getName().getSurname();
-        Path documentStoreFolder = (Path)getDescriptor().getControllerDescription().
+        documentStoreFolder = (Path)getDescriptor().getControllerDescription().
                     getProperty(Properties.DOCUMENT_STORE);
-        documentStoreFolder = documentStoreFolder.resolve(String.valueOf(patient.getKey()));
+        documentStoreFolderPatientKey= documentStoreFolder.resolve(String.valueOf(patient.getKey()));
         if (Files.notExists(documentStoreFolder)){
+            /**
+             * top level folder named after this patient's pid does not exist
+             * -- create top level folder named after patient's pid 
+             * -- create a folder inside this called 'document'
+             * -- create another folder inside patient's pid folder called 'medical_history'
+             */
             try{
-                Files.createDirectory(documentStoreFolder);
+                Files.createDirectory(documentStoreFolderPatientKey);
+                Files.createDirectory(documentStoreFolderPatientKey.resolve("document"));
+                Files.createDirectory(documentStoreFolderPatientKey.resolve("medical_history"));
             }catch(IOException ex){
                 ex.printStackTrace();
             }
         }
+        documentStoreFolderDocument = documentStoreFolderPatientKey.resolve("document");
+        documentStoreFolderMedicalHistory = documentStoreFolderPatientKey.resolve("medical_history");
         ViewController.ViewMode viewMode = (ViewController.ViewMode)getDescriptor().getViewDescription().
                 getProperty(Properties.VIEW_MODE);
-        
-        switch(viewMode){
-            case DOCUMENT ->{
-                
-                    Path source = document.get(0).toPath();
-                    Path target = documentStoreFolder.resolve(source.getFileName().toString());
+        if(document!=null){
+            switch(viewMode){
+                case DOCUMENT ->{
+                    /*documentStoreFolder = (Path)getDescriptor().getControllerDescription().
+                            getProperty(Properties.DOCUMENT_STORE);
+                    documentStoreFolderPatientKey = documentStoreFolder.resolve(String.valueOf(patient.getKey()));*/
+                    Path source = document.toPath();
+                    Path target = documentStoreFolderDocument.resolve(source.getFileName().toString());
                     try{
                         Files.copy(source, target);
+                        /*JOptionPane.showInternalMessageDialog(getView(),target.getFileName() + " uploaded to " 
+                                + patientNameString + "'s document store", "View controller", JOptionPane.INFORMATION_MESSAGE);*/
                     }catch(FileAlreadyExistsException ex){
                         System.err.println("File already exists");
-                    }catch(Exception ex){
-                        ex.printStackTrace();
+                    }catch(IOException ex){
+                        System.err.println(ex.getMessage() + 
+                                "\nIOException raised in PatientViewController::doUploadToPatientDococumentStoreRequest( "
+                                + viewMode.toString() + " )");
                     }
-                break;
-            }
-            case SCAN ->{
-                LocalDateTime date = null;
-                if (document.size() == 2){
-                    while(date==null){
-                        getDescriptor().getControllerDescription().setProperty(Properties.CAPTION, 
-                                "Date stamp medical history for " + patientNameString);
-
-                        setModalView((ModalView)new View().make(
-                            View.Viewer.MODAL_DATE_DIALOG,
-                            this, 
-                            this.getDesktopView()).getModalView());
-
-                        date = (LocalDateTime)getDescriptor().getViewDescription().
-                                getProperty(Properties.DATE_TIME);
-                        if (date == null){
-                            JOptionPane.showInternalMessageDialog(this.getView(),"a valid date must be entered for the scanned image", "Data error",JOptionPane.INFORMATION_MESSAGE);
-                        }
+                    break;
+                }
+                case MEDICAL_HISTORY ->{
+                    LocalDateTime date = null;
+                    setModalView((ModalView)new View().make(
+                        View.Viewer.MODAL_DATE_DIALOG,
+                        this, 
+                        this.getDesktopView()).getModalView());
+                    date = (LocalDateTime)getDescriptor().getViewDescription().
+                            getProperty(Properties.DATE_TIME);
+                    if (date == null){
+                        JOptionPane.showInternalMessageDialog(this.getView(),"a valid date must be entered for the scanned image", "Data error",JOptionPane.INFORMATION_MESSAGE);
+                    }else{
                         if (!date.equals(LocalDateTime.of(1,1,1,1,1))){ //has date dialog exited via use of 'Cancel' button
-                            int count = 1;
-                            for(File page : document){
-                                String newFilename = date.format(DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss"));
-                                String dateStampedFilename = date.format(DateTimeFormatter.ofPattern("dd/MM/yyyy (hh:MM:ss)"));
-                                newFilename = newFilename + "_" + String.valueOf(count++);
-                                String oldFileName = page.toPath().toAbsolutePath().getFileName().toString();
-                                int dotIndex = oldFileName.lastIndexOf('.');
-                                String extension = (dotIndex == -1) ? "" : oldFileName.substring(dotIndex);
-                                Path target = documentStoreFolder.resolve(newFilename + extension);
-                                try{
-                                    Files.copy(page.toPath().toAbsolutePath(), target);
+                            String dateStampedFilename = date.format(DateTimeFormatter.ofPattern("dd/MM/yyyy (hh:MM:ss)"));
+                            String newFilename = date.format(DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss")); 
+                            String oldFilename = document.toPath().toAbsolutePath().getFileName().toString();
+                            int dotIndex = oldFilename.lastIndexOf('.');
+                            String extension = (dotIndex == -1) ? "" : oldFilename.substring(dotIndex);
+                            Path target = documentStoreFolderMedicalHistory.resolve(newFilename + extension);
+                            Path source = document.toPath();
+                            try{
+                                    Files.copy(source, target);
                                     JOptionPane.showInternalMessageDialog(getView(),"Medical history uploaded to " 
-                                            + patientNameString + "'s document store with date stamp '" + dateStampedFilename + "'");
+                                            + patientNameString + "'s document store with date stamp '" 
+                                            + dateStampedFilename + "'", "View controller",JOptionPane.INFORMATION_MESSAGE);
                                 }catch(FileAlreadyExistsException ex){
                                     System.err.println("File already exists");
-                                }catch(Exception ex){
-                                    ex.printStackTrace();
+                                }catch(IOException ex){
+                                    System.err.println(ex.getMessage() + 
+                                            "\nIOException raised in PatientViewController::doUploadToPatientDococumentStoreRequest( "
+                                            + viewMode.toString() + " )");
                                 }
-                            }
                         }else{
-                            JOptionPane.showInternalMessageDialog(this.getView(),"Upload of queued medical history files to patient's document store has been cancelled because date stamp missing","Error on upload of " + patientNameString + "'s medical history",JOptionPane.INFORMATION_MESSAGE);
+                            JOptionPane.showInternalMessageDialog(this.getView(),
+                                    "Upload of queued medical history files to patient's document store has been cancelled because date stamp missing",
+                                    "Error on upload of " + patientNameString + "'s medical history",JOptionPane.INFORMATION_MESSAGE);
                         }
                     }
-                }else{
-                    String message = "both pages of the patient's medical history must be queued for upload before the complete medical history can be uploaded";
-                    getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.ERROR, message);
-                    this.firePropertyChangeEvent(
-                            ViewController.PatientViewControllerPropertyChangeEvent.PATIENT_VIEW_CONTROLLER_ERROR_RECEIVED.toString(), 
-                            this.getView(), 
-                            this,
-                            null,
-                            null
-                    );
+           
+                    break;
                 }
-                break;
             }
+        }else{
+             JOptionPane.showInternalMessageDialog(this.getView(),
+                     "A document has not been specified",
+                     "Error on upload of " + patientNameString + "'s medical history",JOptionPane.INFORMATION_MESSAGE);   
         }
     }
     

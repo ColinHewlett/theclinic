@@ -9,6 +9,7 @@ import colinhewlettsolutions.client.controller.SystemDefinition;
 import colinhewlettsolutions.client.controller.ViewController;
 import colinhewlettsolutions.client.model.entity.Patient;
 import colinhewlettsolutions.client.view.View;
+import org.apache.commons.io.FilenameUtils;
 import java.awt.Desktop;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
@@ -92,10 +93,10 @@ public class PatientDocumentStoreView extends View
         setVisible(true);
         switch(getViewMode()){
             case DOCUMENT ->{
-                setTitle("Word documents for " + getPatient());
+                setTitle("Documents for " + getPatient());
                 break;
             }
-            case SCAN ->{
+            case MEDICAL_HISTORY ->{
                 setTitle("Medical history scans for " + getPatient());
                 break;
             }
@@ -148,7 +149,7 @@ public class PatientDocumentStoreView extends View
             selectedFile = this.lstDocumentStore.getSelectedValue();
             switch(getViewMode()){
                 case DOCUMENT ->{
-                    message = "are you sure you want to delete the Word file '" + selectedFile +"'";
+                    message = "are you sure you want to delete the document '" + selectedFile +"' from the document store";
                     if (confirmFileDeletion(message)){
                         files = new DocumentStore().getFileList();
                         try{
@@ -166,14 +167,20 @@ public class PatientDocumentStoreView extends View
                     }
                     break;
                 }
-                case SCAN ->{
+                case MEDICAL_HISTORY ->{
+                    File file = null;
                     message = "are you sure you want to delete the medical history date stamped '" + selectedFile +"'";
                     if (confirmFileDeletion(message)){
+                        int dotIndex = selectedFile.lastIndexOf('.');
+                        selectedFile = selectedFile.substring(0,dotIndex); 
                         LocalDateTime date = LocalDateTime.parse(selectedFile,DateTimeFormatter.ofPattern("dd/MM/yyyy (HH:mm:ss)"));
-                        files = new DocumentStore().getFilesWithDate(date);
+                        file = new DocumentStore().getFileWithDate(date);
                         try{
-                            for (File file : files){
+                            if (file!=null){
                                 Files.deleteIfExists(file.toPath());
+                            }else{
+                                message = "Selected file cannot be located";
+                                ViewController.displayErrorMessage(message, "View error", JOptionPane.WARNING_MESSAGE);
                             }
                         }catch(IOException |
                                 InvalidPathException ex){
@@ -223,7 +230,7 @@ public class PatientDocumentStoreView extends View
     private void populateDocumentStoreFileList(){
         DefaultListModel<String> model = new DefaultListModel<>();
         ArrayList<File> files = new DocumentStore().getFileList();
-        //File[] files = new DocumentStore().getFiles();
+        Collections.sort(files);
         switch(getViewMode()){
             case DOCUMENT ->{
                 for(File file : files){
@@ -231,12 +238,16 @@ public class PatientDocumentStoreView extends View
                 }
                 break;
             }
-            case SCAN ->{
+            case MEDICAL_HISTORY ->{
                 if(files!=null){
-                    ArrayList<LocalDateTime> scanDates = new DocumentStore().getScanDatesList(files);
-                    for(LocalDateTime localDateTime : scanDates){
-                        model.addElement(localDateTime.
-                                format(DateTimeFormatter.ofPattern("dd/MM/yyyy (HH:mm:ss)")));
+                    for(File file: files){
+                        String dateTimeStamp = file.getName();
+                        String extension = FilenameUtils.getExtension(dateTimeStamp);
+                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss");
+                        LocalDateTime ltdDateTimeStamp = LocalDateTime.parse(FilenameUtils.getBaseName(dateTimeStamp), formatter); 
+                        dateTimeStamp = ltdDateTimeStamp.format(DateTimeFormatter.ofPattern("dd/MM/yyyy (HH:mm:ss)"));
+                        dateTimeStamp = dateTimeStamp + "." + extension;
+                        model.addElement(dateTimeStamp);
                     }
                 }
                 break;
@@ -282,7 +293,9 @@ public class PatientDocumentStoreView extends View
                 case DOCUMENT ->{
                     int dotIndex = theFile.lastIndexOf('.');
                     String ext = theFile.substring(dotIndex);
-                    if (ext.equals(".docx")){
+                    if (ext.equals(".docx") ||
+                        ext.equals(".doc") ||
+                        ext.equals(".pdf")){
                         File[] files = getFiles();
                         for (File file : files){
                             if (file.getName().equals(theFile)){
@@ -299,13 +312,17 @@ public class PatientDocumentStoreView extends View
                     }
                     break;
                 }
-                case SCAN ->{
+                case MEDICAL_HISTORY ->{
+                    int dotIndex = theFile.lastIndexOf('.');
+                    theFile = theFile.substring(0,dotIndex);
                     LocalDateTime dateTimeOfFile = 
                             LocalDateTime.parse(theFile, DateTimeFormatter.ofPattern("dd/MM/yyyy (HH:mm:ss)"));
-                    ArrayList<File> scans = getFilesWithDate(dateTimeOfFile);
-                    getMyController().getDescriptor().getViewDescription().
-                            setProperty(SystemDefinition.Properties.PATIENT_DOCUMENT, scans);
-                    doActionEventFor(PatientDocumentStoreViewController.Actions.IMAGE_VIEWER_REQUEST);
+                    File file = getFileWithDate(dateTimeOfFile);
+                    try{
+                        Desktop.getDesktop().open(file);
+                    }catch(IOException ex){
+
+                    }
                     break;
                 }
             }
@@ -313,19 +330,25 @@ public class PatientDocumentStoreView extends View
         
         ArrayList<File> getFileList(){
             ArrayList<File> arrayListResult = new ArrayList<File>();
+            File directory = null;
             File[] result = null;
-            File directory = getDocumentStorePath().resolve(String.valueOf(getPatient().getKey())).toFile();
+            //File directory = getDocumentStorePath().resolve(String.valueOf(getPatient().getKey())).toFile();
+            Path path = getDocumentStorePath().resolve(String.valueOf(getPatient().getKey()));
             switch(getViewMode()){
                 case DOCUMENT ->{
+                    directory = path.resolve("document").toFile();
                     result = directory.listFiles((d, name) ->
-                        name.toLowerCase().endsWith(".docx"));
+                        name.toLowerCase().endsWith(".pdf") ||
+                        name.toLowerCase().endsWith(".docx") ||
+                        name.toLowerCase().endsWith(".doc"));
                     break;
                 }
-                case SCAN ->{
+                case MEDICAL_HISTORY ->{
+                    directory = path.resolve("medical_history").toFile();
                     result = directory.listFiles((d, name) ->
-                        name.toLowerCase().endsWith(".png") || 
-                        name.toLowerCase().endsWith(".jpg") || 
-                        name.toLowerCase().endsWith(".jpeg"));
+                        name.toLowerCase().endsWith(".pdf") ||
+                        name.toLowerCase().endsWith(".docx") ||
+                        name.toLowerCase().endsWith(".doc"));
                     break;
                 }
             }
@@ -338,19 +361,25 @@ public class PatientDocumentStoreView extends View
         }
 
         File[] getFiles(){ 
+            File directory = null;
             File[] result = null;
-            File directory = getDocumentStorePath().resolve(String.valueOf(getPatient().getKey())).toFile();
+            //File directory = getDocumentStorePath().resolve(String.valueOf(getPatient().getKey())).toFile();
+            Path path = getDocumentStorePath().resolve(String.valueOf(getPatient().getKey()));
             switch(getViewMode()){
                 case DOCUMENT ->{
+                    directory = path.resolve("document").toFile();
                     result = directory.listFiles((d, name) ->
-                        name.toLowerCase().endsWith(".docx"));
+                        name.toLowerCase().endsWith(".pdf") ||
+                        name.toLowerCase().endsWith(".docx") ||
+                        name.toLowerCase().endsWith(".doc"));
                     break;
                 }
-                case SCAN ->{
+                case MEDICAL_HISTORY ->{
+                    directory = path.resolve("medical_history").toFile();
                     result = directory.listFiles((d, name) ->
-                        name.toLowerCase().endsWith(".png") || 
-                        name.toLowerCase().endsWith(".jpg") || 
-                        name.toLowerCase().endsWith(".jpeg"));
+                        name.toLowerCase().endsWith(".pdf") ||
+                        name.toLowerCase().endsWith(".docx") ||
+                        name.toLowerCase().endsWith(".doc"));
                     break;
                 }
             }
@@ -358,22 +387,41 @@ public class PatientDocumentStoreView extends View
             return result;
         }
         
-        ArrayList<File> getFilesWithDate(LocalDateTime localDateTime){
-            ArrayList<File> result = new ArrayList<>();
+        File getFileWithDate(LocalDateTime localDateTime){
+            File result = null;
+            String filename = null;
+            String filenameDatePortion = null;
+            filenameDatePortion = localDateTime.format(DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss"));
+            File[] files = getFiles();
+            if(getFiles()!=null){ 
+                for(File file : files){
+                    filename = FilenameUtils.getBaseName(file.getName());
+                    if (filename.equals(filenameDatePortion)){
+                        result = file; 
+                        break;
+                    }
+                }
+            }
+            return result;
+        }
+        
+        /**
+         * fetches a file from medical history folder namwed with specified datetime stamp
+         * @param localDateTime
+         * @return File
+         */
+        File getFilesWithDate(LocalDateTime localDateTime){
+            //ArrayList<File> result = new ArrayList<>();
+            File result = null;
             String filename = null;
             String filenameDatePortion = null;
             File[] files = getFiles();
-            //fetch date portion of filename to find
             filenameDatePortion = localDateTime.format(DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss"));
             for(File file : files){
                 filename = file.getName();
-                //remove file extension and index from filename
-                int fileIndex = filename.lastIndexOf('_');
-                filename = filename.substring(0, fileIndex);
                 if (filename.equals(filenameDatePortion)){
-                    result.add(file);
-                    Collections.sort(result);
-                }    
+                    result = file;  
+                }
             }
             return result;
         }
@@ -488,7 +536,7 @@ public class PatientDocumentStoreView extends View
                         caption = "Documents";
                         break;
                     }
-                    case SCAN ->{
+                    case MEDICAL_HISTORY ->{
                         caption = "Date of medical history (time uploaded)";
                         break;
                     }

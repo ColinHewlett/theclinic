@@ -62,7 +62,7 @@ import colinhewlettsolutions.client.view.support_classes.renderers.TableLocalDat
 import colinhewlettsolutions.client.view.support_classes.renderers.TableLocalDateTimeToLocalDateAndCentredRenderer;
 import colinhewlettsolutions.client.view.support_classes.renderers.TableIntegerCenteredRenderer;
 //import colinhewlettsolutions.client.view.support_classes.renderers.TablePatientEmboldenedRenderer;
-import colinhewlettsolutions.client.view.support_classes.renderers.PatientAppointmentDataTablePatientRenderer;
+import colinhewlettsolutions.client.view.support_classes.renderers.PatientWithCancelledAppointmentRenderer;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.event.TableModelEvent;
@@ -82,6 +82,7 @@ public class PatientAppointmentDataView extends View
         REQUEST_CLOSE_VIEW,
         REQUEST_ARCHIVE_PATIENTS,
         //REQUEST_MODAL_PROGRESS_VIEW,
+        REQUEST_PATIENT_RECALLER_VIEW,
         REQUEST_PATIENTS_WITH_APPOINTMENTS,
         REQUEST_PATIENT_WITHOUT_APPOINTMENT,
         REQUEST_SET_TIME_FRAME,
@@ -131,6 +132,12 @@ public class PatientAppointmentDataView extends View
                 }catch (PropertyVetoException ex){
 
                 }
+                break;
+            }
+            case REQUEST_PATIENT_RECALLER_VIEW ->{
+                String message = "Patient recaller facility not yet implemented; \n"
+                        + "awaiting requirement spec. from the Clinic";
+                JOptionPane.showInternalMessageDialog(this, message, "Status message",JOptionPane.INFORMATION_MESSAGE);
                 break;
             }
             case REQUEST_PATIENT_WITHOUT_APPOINTMENT ->{
@@ -231,9 +238,6 @@ public class PatientAppointmentDataView extends View
 
     @Override
     public void initialiseView(){
-        //SpinnerNumberModel yearModel = new SpinnerNumberModel(2024, 1992, 2030, 1);
-        //spnFromYear = new JSpinner(yearModel);
-        //spnToYear = new JSpinner(yearModel);
         Descriptor descriptor = getMyController().getMyController().getDescriptor();
         System.out.println(String.valueOf((Boolean)descriptor.getControllerDescription().getProperty(SystemDefinition.Properties.LOGIN_REQUIRED)));
         initComponents();
@@ -241,43 +245,7 @@ public class PatientAppointmentDataView extends View
         setVisible(true);
         addInternalFrameListeners();
         setScheduleTitledBorderSettings();
-      
-        /*this.pnlPatientAppointmentData.setBorder(javax.swing.BorderFactory.createTitledBorder(
-        javax.swing.BorderFactory.createEtchedBorder(), 
-        "Last appointment for each patient", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, 
-        javax.swing.border.TitledBorder.DEFAULT_POSITION, 
-        (java.awt.Font)getMyController().getDescriptor().getControllerDescription().
-                        getProperty(SystemDefinition.Properties.TITLED_BORDER_FONT),
-                (java.awt.Color)getMyController().getDescriptor().getControllerDescription().
-                        getProperty(SystemDefinition.Properties.TITLED_BORDER_COLOR)));
-        
-        this.pnlActions.setBorder(javax.swing.BorderFactory.createTitledBorder(
-        javax.swing.BorderFactory.createEtchedBorder(), 
-        "Actions", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, 
-        javax.swing.border.TitledBorder.DEFAULT_POSITION, 
-        (java.awt.Font)getMyController().getDescriptor().getControllerDescription().
-                        getProperty(SystemDefinition.Properties.TITLED_BORDER_FONT),
-                (java.awt.Color)getMyController().getDescriptor().getControllerDescription().
-                        getProperty(SystemDefinition.Properties.TITLED_BORDER_COLOR)));
-        
-        this.pnlTimeFrame.setBorder(javax.swing.BorderFactory.createTitledBorder(
-        javax.swing.BorderFactory.createEtchedBorder(), 
-        "Set time frame", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, 
-        javax.swing.border.TitledBorder.DEFAULT_POSITION, 
-        (java.awt.Font)getMyController().getDescriptor().getControllerDescription().
-                        getProperty(SystemDefinition.Properties.TITLED_BORDER_FONT),
-                (java.awt.Color)getMyController().getDescriptor().getControllerDescription().
-                        getProperty(SystemDefinition.Properties.TITLED_BORDER_COLOR)));
-        
-        this.pnlPatientActivity.setBorder(javax.swing.BorderFactory.createTitledBorder(
-        javax.swing.BorderFactory.createEtchedBorder(), 
-        "Patient activity", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, 
-        javax.swing.border.TitledBorder.DEFAULT_POSITION, 
-        (java.awt.Font)getMyController().getDescriptor().getControllerDescription().
-                        getProperty(SystemDefinition.Properties.TITLED_BORDER_FONT),
-                (java.awt.Color)getMyController().getDescriptor().getControllerDescription().
-                        getProperty(SystemDefinition.Properties.TITLED_BORDER_COLOR)));*/
-        
+
         // Set a NumberEditor without commas
         JSpinner.NumberEditor editor1 = new JSpinner.NumberEditor(spnFromYear, "#");
         JSpinner.NumberEditor editor2 = new JSpinner.NumberEditor(spnToYear, "#");
@@ -287,7 +255,7 @@ public class PatientAppointmentDataView extends View
         format.setGroupingUsed(false);  // Disable grouping (no commas)
         spnFromYear.setEditor(editor1);
         spnToYear.setEditor(editor2);
-        
+
         this.rdbNoAppointments.setActionCommand(Actions.REQUEST_PATIENT_WITHOUT_APPOINTMENT.toString());
         this.rdbSomeAppointments.setActionCommand(Actions.REQUEST_PATIENTS_WITH_APPOINTMENTS.toString());
         this.rdbNoAppointments.addActionListener(this);
@@ -315,7 +283,7 @@ public class PatientAppointmentDataView extends View
         this.tblPatientAppointmentData.setDefaultRenderer(LocalDate.class, new TableLocalDateCentredRenderer());
         this.tblPatientAppointmentData.setDefaultRenderer(LocalDateTime.class, new TableLocalDateTimeToLocalDateAndCentredRenderer());
         //this.tblPatientAppointmentData.setDefaultRenderer(Integer.class, new TableIntegerCenteredRenderer());
-        this.tblPatientAppointmentData.setDefaultRenderer(Patient.class, new PatientAppointmentDataTablePatientRenderer());
+        this.tblPatientAppointmentData.setDefaultRenderer(Patient.class, new PatientWithCancelledAppointmentRenderer());
         ViewController.setJTableColumnProperties(tblPatientAppointmentData, this.scrPatientAppointmentDataTable.getPreferredSize().width, 5,5,15,6,10,18,10,6,6,6,6);
         
         tblPatientAppointmentData.getModel().addTableModelListener(this);
@@ -379,16 +347,7 @@ public class PatientAppointmentDataView extends View
             header.repaint();
                 
         });
-                
-
-                // ✅ Force header to repaint itself with new groups
-                
-                //tblPatientAppointmentData.revalidate();
-                //tblPatientAppointmentData.repaint();
-                //header.revalidate();
-                //header.repaint();
-
-
+        
         PatientAppointmentData pad  = new PatientAppointmentData();        
         pad.setFromYear(1992);
         pad.setToYear(LocalDate.now().getYear() + 1);
@@ -397,6 +356,15 @@ public class PatientAppointmentDataView extends View
 
         this.rdbSomeAppointments.setSelected(true);
         doSendActionEvent(PatientAppointmentDataViewController.Actions.PATIENT_APPOINTMENT_DATA_REQUEST);
+        
+        this.pnlRecallCriteria.setEnabled(false);
+        this.btnArchiveSelectedPatient.setEnabled(false);
+        this.dobDatePicker.setEnabled(false);
+        this.rdbSelectGBTRecalls.setEnabled(false);
+        this.rdbSelectNonGBTRecalls.setEnabled(false);
+        
+        this.btnFetchPatientRecaller.setActionCommand(Actions.REQUEST_PATIENT_RECALLER_VIEW.toString());
+        this.btnFetchPatientRecaller.addActionListener(this);
         
     }
     

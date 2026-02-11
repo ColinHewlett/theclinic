@@ -7,8 +7,6 @@ package colinhewlettsolutions.client.view.views.non_modal_views;
 import colinhewlettsolutions.client.controller.SystemDefinition;
 import colinhewlettsolutions.client.controller.Descriptor;
 import colinhewlettsolutions.client.controller.ViewController;
-import static colinhewlettsolutions.client.controller.ViewController.NotificationViewControllerPropertyChangeEvent.RECEIVED_PATIENT_NOTIFICATIONS;
-import static colinhewlettsolutions.client.controller.ViewController.NotificationViewControllerPropertyChangeEvent.RECEIVED_UNACTIONED_NOTIFICATIONS;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -37,7 +35,9 @@ import colinhewlettsolutions.client.model.entity.ToDo;
 import colinhewlettsolutions.client.controller.SystemDefinition;
 import colinhewlettsolutions.client.view.View;
 import colinhewlettsolutions.client.view.support_classes.models.ToDoViewTableModel;
+import colinhewlettsolutions.client.view.support_classes.renderers.LocalDateRenderer;
 import colinhewlettsolutions.client.view.support_classes.renderers.PatientNotificationTableLocalDateRenderer;
+import javax.swing.table.TableColumn;
 
 /**
  *
@@ -86,13 +86,6 @@ public class ToDoView extends View implements ActionListener,
                 break;
             case CLOSE_VIEW:
                 doCloseView();
-                /*
-                try{
-                    this.setIcon(true);
-                }catch (PropertyVetoException ex){
-                    String message = ex.getMessage()  + "\n";
-                    JOptionPane.showMessageDialog(this, message + "Exception raised in ToDoView::actionPerformed( " + e.getActionCommand() + " )");
-                }*/
                 break;
             case REQUEST_UNACTIONED_TO_DO:
                 this.doReadUnactionedToDos();
@@ -137,6 +130,7 @@ public class ToDoView extends View implements ActionListener,
                                 getProperty(SystemDefinition.Properties.TO_DOS));
                 setTitle(UI_ALL_TO_DOS_TITLE);
                 this.tblToDo.clearSelection();
+                this.rdbDisplayAllOptions.setSelected(true);
                 break;
             case RECEIVED_UNACTIONED_TO_DOs:
                 populateToDoTable(
@@ -176,12 +170,7 @@ public class ToDoView extends View implements ActionListener,
     public void initialiseView(){
         //javax.swing.SwingUtilities.invokeLater(() -> {
             initComponents();
-            /*
-            try{
-                this.setIcon(true);
-            }catch (PropertyVetoException ex){
-                
-            }*/
+
             setClosable(true);
             buttonGroup1.add(this.rdbDisplayAllOptions);
             buttonGroup1.add(this.rdbDisplayUnactionedToDo);
@@ -200,7 +189,7 @@ public class ToDoView extends View implements ActionListener,
                 setIconifiable(true);
                 setResizable(false);
                 setSelected(true);
-                setSize(1020,455);
+                setSize(1078,455);
 
             }
             catch (PropertyVetoException ex){
@@ -244,12 +233,12 @@ public class ToDoView extends View implements ActionListener,
             setToDoTableListener();
             
             // Add a component listener to adjust column widths after it is displayed
-            tblToDo.addComponentListener(new ComponentAdapter() {
+            /*tblToDo.addComponentListener(new ComponentAdapter() {
                 @Override
                 public void componentResized(ComponentEvent e) {
                     adjustColumnWidthsAndViewPosition(tblToDo);
                 }
-            });
+            });*/
             
             ActionEvent actionEvent = new ActionEvent(
                 this,ActionEvent.ACTION_PERFORMED,
@@ -350,6 +339,15 @@ public class ToDoView extends View implements ActionListener,
         while (it.hasNext()){
             ((ToDoViewTableModel)this.tblToDo.getModel()).addElement(it.next());
         }
+        TableColumn column = tblToDo.getColumnModel().getColumn(0);
+        column.setPreferredWidth(96);
+        column = tblToDo.getColumnModel().getColumn(1);
+        column.setPreferredWidth(96);
+        column = tblToDo.getColumnModel().getColumn(2);
+        column.setPreferredWidth(771);
+        tblToDo.setDefaultRenderer(LocalDate.class, new LocalDateRenderer());
+        tblToDo.revalidate();
+        tblToDo.repaint();
     }
     
     
@@ -434,25 +432,25 @@ public class ToDoView extends View implements ActionListener,
                     ViewController.ToDoViewControllerActionEvent.UPDATE_TO_DO_REQUEST.toString());
             this.getMyController().actionPerformed(actionEvent);
             this.tblToDo.clearSelection();
-            ViewController.setRelativeColumnWidths(this.tblToDo, 794, new double[]{0.1,0.15,0.75});
+            //ViewController.setJTableColumnProperties(tblToDo, 964, 10,10,80);
+            //ViewController.setRelativeColumnWidths(this.tblToDo, 964, new double[]{0.1,0.1,0.85});
             //adjustColumnWidthsAndViewPosition(tblToDo);
         }
     }
     
     private void createToDoTable(){
         this.tblToDo = null;
-        this.tblToDo = new JTable(new ToDoViewTableModel());
+        this.tblToDo = new JTable(new ToDoViewTableModel(ToDoViewTableModel.ViewMode.WITH_DATE));
         ToDoViewTableModel model = (ToDoViewTableModel)tblToDo.getModel();
         model.addTableModelListener(this);
         this.tblToDo.setDefaultRenderer(LocalDate.class, new PatientNotificationTableLocalDateRenderer());
         setToDoTableDefaultRenderer(this.tblToDo.getDefaultRenderer(LocalDate.class));
-        
         scrToDoTable.setViewportView(this.tblToDo);
-
+        //ViewController.setJTableColumnProperties(tblToDo, 964, 10,10,80);
         this.tblToDo.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         ListSelectionModel lsm = this.tblToDo.getSelectionModel();
         lsm.addListSelectionListener(this);
-        adjustColumnWidths(tblToDo);
+        //adjustColumnWidths(tblToDo);
     }
     
     private TableCellRenderer patientToDoTableDefaultRenderer = null;
@@ -494,18 +492,9 @@ public class ToDoView extends View implements ActionListener,
 
         pnlToDo.setBorder(javax.swing.BorderFactory.createTitledBorder("To do list"));
 
-        tblToDo.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null}
-            },
-            new String [] {
-                "Title 1", "Title 2", "Title 3", "Title 4"
-            }
-        ));
+        tblToDo.setModel(new ToDoViewTableModel(ToDoViewTableModel.ViewMode.WITH_DATE));
         scrToDoTable.setViewportView(tblToDo);
+        //ViewController.setJTableColumnProperties(tblToDo, 964, 10,5,85);
 
         javax.swing.GroupLayout pnlToDoLayout = new javax.swing.GroupLayout(pnlToDo);
         pnlToDo.setLayout(pnlToDoLayout);
@@ -533,7 +522,7 @@ public class ToDoView extends View implements ActionListener,
         jPanel3Layout.setHorizontalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
-                .addContainerGap(157, Short.MAX_VALUE)
+                .addContainerGap(327, Short.MAX_VALUE)
                 .addComponent(rdbDisplayUnactionedToDo, javax.swing.GroupLayout.PREFERRED_SIZE, 232, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(113, 113, 113)
                 .addComponent(rdbDisplayAllOptions, javax.swing.GroupLayout.PREFERRED_SIZE, 191, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -594,11 +583,11 @@ public class ToDoView extends View implements ActionListener,
             .addGroup(layout.createSequentialGroup()
                 .addGap(17, 17, 17)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(pnlToDo, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(pnlToDo, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(pnlActions, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(23, 23, 23))
+                .addGap(12, 12, 12))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)

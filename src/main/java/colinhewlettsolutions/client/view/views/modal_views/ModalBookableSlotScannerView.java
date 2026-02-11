@@ -260,16 +260,8 @@ public class ModalBookableSlotScannerView extends ModalView implements ActionLis
         Appointment appointment = 
                 ((EmptySlotAvailability2ColumnTableModel)this.tblSlotAvailability.getModel()).getElementAt(row);
         LocalDate start = appointment.getStart().toLocalDate();
-        
-        /*
-        DatePickerSettings dps = dayDatePicker.getSettings();
-        if (!dps.getVetoPolicy().isDateAllowed(start)){
-            temporarilySuspendDatePickerDateVetoPolicy(appointment.getStart().toLocalDate());
-        }
-        dayDatePicker.setDate(start);   
-        */
-        
         getMyController().getDescriptor().getViewDescription().setProperty(SystemDefinition.Properties.SCHEDULE_DAY, start);
+        /*
         switch((ViewController.ControllerViewMode)getMyController().getDescriptor().getControllerDescription().
                 getProperty(SystemDefinition.Properties.CONTROLLER_VIEW_MODE)){
             case DIARY:
@@ -278,7 +270,8 @@ public class ModalBookableSlotScannerView extends ModalView implements ActionLis
             case LIST:
                 actionCommand = ViewController.ScheduleViewControllerActionEvent.SCHEDULE_LIST_VIEW_CONTROLLER_REQUEST.toString();
                 break;
-        }
+        }*/
+        actionCommand = ViewController.ScheduleViewControllerActionEvent.SCHEDULE_LIST_VIEW_CONTROLLER_REQUEST.toString();
         actionEvent = new ActionEvent(
                 this,ActionEvent.ACTION_PERFORMED,actionCommand);
         this.getMyController().actionPerformed(actionEvent);

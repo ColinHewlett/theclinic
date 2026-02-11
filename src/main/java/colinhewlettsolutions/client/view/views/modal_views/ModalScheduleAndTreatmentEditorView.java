@@ -482,6 +482,7 @@ public class ModalScheduleAndTreatmentEditorView extends ModalView
         String comment = ((Appointment)getMyController().getDescriptor()
                     .getControllerDescription().getProperty(SystemDefinition.Properties.APPOINTMENT)).getComment();
         txaBookingComment.setText(comment);
+        txaBookingComment.setWrapStyleWord(true);
         
         ImageIcon icon = new ImageIcon(this.getClass().getResource("/datepickerbutton1.png"));
         JButton datePickerButton = dayDatePicker.getComponentToggleCalendarButton();
@@ -506,8 +507,6 @@ public class ModalScheduleAndTreatmentEditorView extends ModalView
         this.cmbSelectPatient.setSelectedItem(((Appointment)getMyController().getDescriptor()
             .getControllerDescription().getProperty(SystemDefinition.Properties.APPOINTMENT)).getPatient());  
         
-        this.txaBookingComment.setText(comment);
-        
         this.tblTreatmentWithState.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -522,6 +521,7 @@ public class ModalScheduleAndTreatmentEditorView extends ModalView
         //this.doSendActionEvent(ScheduleViewController.Actions.TREATMENTS_READ_REQUEST);
         populateTreatmentTable();
         this.setLayer(JLayeredPane.MODAL_LAYER);
+        this.txaBookingComment.setLineWrap(true);
     }
     
     private void setAppointment(){
@@ -800,6 +800,7 @@ public class ModalScheduleAndTreatmentEditorView extends ModalView
 
         txaBookingComment.setColumns(20);
         txaBookingComment.setRows(5);
+        txaBookingComment.setWrapStyleWord(true);
         jScrollPane1.setViewportView(txaBookingComment);
 
         javax.swing.GroupLayout pnlBookingCommentLayout = new javax.swing.GroupLayout(pnlBookingComment);

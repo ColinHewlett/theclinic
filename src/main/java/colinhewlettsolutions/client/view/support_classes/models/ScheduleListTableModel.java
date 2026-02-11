@@ -4,6 +4,7 @@
  */
 package colinhewlettsolutions.client.view.support_classes.models;
 
+import colinhewlettsolutions.client.view.views.non_modal_views.ScheduleView;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -33,7 +34,7 @@ public class ScheduleListTableModel extends DefaultTableModel{
         data = new ArrayList<>();
         
     }
-    
+
     public ArrayList<Appointment> getAppointments(){
         return this.data;
     }

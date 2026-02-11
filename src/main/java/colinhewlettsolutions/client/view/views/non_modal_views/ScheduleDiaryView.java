@@ -128,7 +128,7 @@ public class ScheduleDiaryView extends BookingView
         mniEarlyBookingOption.addActionListener(this);
         mniLateBookingOption.setActionCommand(Action.REQUEST_LATE_BOOKING_END_TIME.toString());
         mniLateBookingOption.addActionListener(this);
-        this.mniCloseView.setActionCommand(ScheduleListView.Action.REQUEST_CLOSE_VIEW.toString());
+        this.mniCloseView.setActionCommand(ScheduleView.Action.REQUEST_CLOSE_VIEW.toString());
         this.mniCloseView.addActionListener(this);
         
         if ((Boolean)getMyController().getDescriptor().getControllerDescription().getProperty(Properties.LOGIN_REQUIRED)){
@@ -142,14 +142,14 @@ public class ScheduleDiaryView extends BookingView
             mnuOptions.add(mniCloseView);
         }
         
-        this.btnSwitchView.setActionCommand(ScheduleListView.Action.REQUEST_SWITCH_VIEW.toString());
+        this.btnSwitchView.setActionCommand(ScheduleView.Action.REQUEST_SWITCH_VIEW.toString());
         this.btnSwitchView.addActionListener(this);
         
         this.btnSelectBookableSlotsScanner.setEnabled(true);
-        this.btnSelectBookableSlotsScanner.setActionCommand(ScheduleListView.Action.REQUEST_BOOKABLE_SLOT_SCANNER_VIEW.toString());
+        this.btnSelectBookableSlotsScanner.setActionCommand(ScheduleView.Action.REQUEST_BOOKABLE_SLOT_SCANNER_VIEW.toString());
         this.btnSelectBookableSlotsScanner.addActionListener(this);
         
-        this.btnSelectUnbookableSlotsScanner.setActionCommand(ScheduleListView.Action.REQUEST_UNBOOKABLE_SLOT_SCANNER_VIEW.toString());
+        this.btnSelectUnbookableSlotsScanner.setActionCommand(ScheduleView.Action.REQUEST_UNBOOKABLE_SLOT_SCANNER_VIEW.toString());
         this.btnSelectUnbookableSlotsScanner.addActionListener(this);
         
         this.btnUndoCurrentSelectionRequest.setActionCommand(Action.REQUEST_UNDO_CURRENT_SELECTION.toString());
@@ -172,7 +172,7 @@ public class ScheduleDiaryView extends BookingView
         btnNow.setText(Captions.ScheduleView.TODAY._1());
         btnPreviousDay.setText(Captions.ScheduleView.PREVIOUS_DAY._1());
 
-        btnCloseView.setActionCommand(ScheduleListView.Action.REQUEST_CLOSE_VIEW.toString());
+        btnCloseView.setActionCommand(ScheduleView.Action.REQUEST_CLOSE_VIEW.toString());
         
         btnCancelAppointmentRequest.setActionCommand(Action.REQUEST_CANCEL_APPOINTMENT.toString());
         btnClinicalNotesForAppointmentRequest.setActionCommand(Action.REQUEST_CLINICAL_NOTE_VIEW.toString());

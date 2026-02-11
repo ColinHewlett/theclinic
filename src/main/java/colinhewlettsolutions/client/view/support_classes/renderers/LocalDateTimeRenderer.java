@@ -16,10 +16,10 @@ import javax.swing.table.TableCellRenderer;
  *
  * @author colin
  */
-public class ArchivedPatientsTableLocalDateRenderer extends JLabel implements TableCellRenderer{
-    private DateTimeFormatter dateOnlyFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+public class LocalDateTimeRenderer extends JLabel implements TableCellRenderer {
+    private DateTimeFormatter dateOnlyFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
     
-    public ArchivedPatientsTableLocalDateRenderer(){
+    public LocalDateTimeRenderer(){
         Font f = super.getFont();
         this.setFont(f.deriveFont(f.getStyle() | ~Font.PLAIN));
     }

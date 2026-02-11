@@ -605,7 +605,7 @@ public class SystemDefinition {
         USER_SCHEDULE_DIARY_SETTINGS,
         USER_SCHEDULE_LIST_SETTINGS,
         USER_SYSTEM_WIDE_SETTINGS,
-        VIEW_MODE, CONTROLLER_VIEW_MODE
+        VIEW_MODE/*, CONTROLLER_VIEW_MODE*/
     }
     
     public enum ViewControllers{

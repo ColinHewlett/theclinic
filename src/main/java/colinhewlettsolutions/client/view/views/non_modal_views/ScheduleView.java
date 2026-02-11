@@ -21,6 +21,7 @@ import colinhewlettsolutions.client.model.entity.Appointment;
 import colinhewlettsolutions.client.model.entity.Patient;
 import colinhewlettsolutions.client.controller.ViewController;
 import colinhewlettsolutions.client.controller.DesktopViewController;
+import static colinhewlettsolutions.client.controller.ScheduleViewController.Actions.TO_DO_UPDATE_REQUEST;
 import colinhewlettsolutions.client.view.support_classes.AppointmentDateVetoPolicy;
 import colinhewlettsolutions.client.view.View;
 import com.github.lgooddatepicker.components.DatePickerSettings;
@@ -28,9 +29,6 @@ import com.github.lgooddatepicker.optionalusertools.DateChangeListener;
 import com.github.lgooddatepicker.optionalusertools.DateHighlightPolicy;
 import com.github.lgooddatepicker.zinternaltools.DateChangeEvent;
 import com.github.lgooddatepicker.zinternaltools.HighlightInformation;
-import colinhewlettsolutions.client.controller.Descriptor;
-import static colinhewlettsolutions.client.controller.ViewController.ScheduleViewControllerPropertyChangeEvent.APPOINTMENTS_FOR_DAY_RECEIVED;
-import static colinhewlettsolutions.client.controller.ViewController.ScheduleViewControllerPropertyChangeEvent.APPOINTMENT_SCHEDULE_ERROR_RECEIVED;
 import static colinhewlettsolutions.client.controller.ViewController.ViewMode.SCHEDULE_REFERENCED_FROM_PATIENT_VIEW;
 import java.awt.Color;
 import java.awt.Rectangle;
@@ -49,11 +47,11 @@ import java.time.LocalTime;
 import java.util.HashMap;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
-import javax.swing.JDesktopPane;
 import javax.swing.JOptionPane;
 import javax.swing.JColorChooser;
 import javax.swing.JButton; 
 import javax.swing.JTable;
+import javax.swing.table.TableColumn;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -73,12 +71,16 @@ import javax.swing.event.TableModelListener;
 import colinhewlettsolutions.client.model.non_entity.Captions;
 import colinhewlettsolutions.client.view.views.dialog_views.DialogView;
 import static colinhewlettsolutions.client.controller.ViewController.ViewMode.SCHEDULE_REQUESTED_FROM_DESKTOP_VIEW;
+import colinhewlettsolutions.client.model.entity.ToDo;
+import colinhewlettsolutions.client.view.support_classes.models.ToDoViewTableModel;
+import colinhewlettsolutions.client.view.support_classes.renderers.PatientNotificationTableLocalDateRenderer;
+import javax.swing.table.DefaultTableModel;
 
 /**
  *
  * @author colin
  */
-public class ScheduleListView extends BookingView 
+public class ScheduleView extends BookingView 
                           implements ActionListener, 
                                      ColorListener,
                                      DateChangeListener,
@@ -98,6 +100,7 @@ public class ScheduleListView extends BookingView
     
     enum Action{
         NONE,
+        REQUEST_TO_DO_TASK_VIEW_MODE_CHANGE,
         REQUEST_BOOKABLE_SLOT_SCANNER_VIEW,
         REQUEST_CANCEL_APPOINTMENT,
         REQUEST_CANCELLED_APPOINTMENT_VIEW,
@@ -117,11 +120,18 @@ public class ScheduleListView extends BookingView
         REQUEST_SEARCH_AVAILABLE_SLOTS,
         REQUEST_SURGERY_DAY_EDITOR,
         REQUEST_SWITCH_VIEW,            //SVC know which view tro switch to because the ActionEvent source the type (List/Diary) the caller is
+        REQUEST_TO_DO_LIST_FOR_DAY,
         REQUEST_TO_DO_LIST_VIEW,
         REQUEST_TREATMENT_VIEW,
         REQUEST_UNBOOKABLE_SLOT_SCANNER_VIEW,
         REQUEST_USER_SCHEDULE_LIST_COLOR_SETTINGS_VIEW
     }
+    
+    enum ToDoButtonViewMode{
+        SHOW_ONLY_UNACTIONED_TASKS_FOR_DAY_REQUEST,
+        SHOW_ALL_TASKS_FOR_DAY_REQUEST,
+        NO_TASKS_FOR_DAY
+    } 
     
     enum ScheduleViewMode{
         LIST,
@@ -636,7 +646,7 @@ public class ScheduleListView extends BookingView
                 //this.btnSelectTreatmentRequest.setEnabled(false);
                 break;
             case LIST:
-                if (tblAppointments!=null)tblAppointments.setModel(new ScheduleListTableModel() );
+                //if (tblAppointments!=null)tblAppointments.setModel(new ScheduleListTableModel() );
                 this.disableAllScheduleOperationControls();
                 this.btnCloseView.setEnabled(true);
                 this.setEmergencySlotUndoMode(EmergencySlotUndoSelectionMode.MAKE);
@@ -725,7 +735,7 @@ public class ScheduleListView extends BookingView
      * @param controller
      * @param desktopView 
      */
-    public ScheduleListView(View.Viewer myViewType, 
+    public ScheduleView(View.Viewer myViewType, 
             ViewController controller, 
             DesktopView desktopView) {
         setTitle("Appointment schedule");
@@ -746,6 +756,9 @@ public class ScheduleListView extends BookingView
         Patient patient = null;
         Action actionCommand = Action.valueOf(e.getActionCommand());
         switch (actionCommand){
+            case REQUEST_TO_DO_TASK_VIEW_MODE_CHANGE:
+                doToDoTaskViewModeChangeRequest();
+                break;
             case REQUEST_BOOKABLE_SLOT_SCANNER_VIEW:
                 doActionEventFor(ScheduleViewController.Actions.BOOKABLE_SLOT_SCANNER_VIEW_REQUEST);
                 break;
@@ -905,6 +918,10 @@ public class ScheduleListView extends BookingView
                 setIsViewSwitchPending(true);
                 doActionEventFor(ScheduleViewController.Actions.SWITCH_VIEW_REQUEST);
                 break;
+            case REQUEST_TO_DO_LIST_FOR_DAY:
+                setToDoViewMode(ToDoButtonViewMode.SHOW_ALL_TASKS_FOR_DAY_REQUEST);
+                doActionEventFor(ScheduleViewController.Actions.TO_DO_LIST_FOR_DAY_REQUEST);
+                break;
             case REQUEST_TO_DO_LIST_VIEW:
                 doActionEventFor(ScheduleViewController.Actions.TO_DO_LIST_VIEW_REQUEST);
                 break;
@@ -997,8 +1014,8 @@ public class ScheduleListView extends BookingView
                 }
             }
         }else{
-            ViewController.ScheduleViewControllerPropertyChangeEvent propertyName = 
-                    ViewController.ScheduleViewControllerPropertyChangeEvent.valueOf(e.getPropertyName());
+            ScheduleViewController.Properties propertyName = 
+                    ScheduleViewController.Properties.valueOf(e.getPropertyName());
             //setViewDescriptor((Descriptor)e.getNewValue());
             switch (propertyName){
                 case CLOSE_VIEW_REQUEST_RECEIVED ->{
@@ -1007,7 +1024,9 @@ public class ScheduleListView extends BookingView
                     break;
                 }
                 case APPOINTMENTS_FOR_DAY_RECEIVED ->{
-                    switch (getScheduleViewMode()){
+                    populateScheduleListView();
+                    tblAppointments.clearSelection();
+                    /*switch (getScheduleViewMode()){
                         case LIST ->{
                             //javax.swing.SwingUtilities.invokeLater(new Runnable(){
                                 //@Override
@@ -1020,7 +1039,7 @@ public class ScheduleListView extends BookingView
                             break;
                         }
                     }
-                    break;
+                    break;*/
                 }
                 case APPOINTMENT_SCHEDULE_ERROR_RECEIVED ->{
                     if (e.getSource() instanceof DesktopViewController){
@@ -1034,6 +1053,10 @@ public class ScheduleListView extends BookingView
                     }
                     break;
                 }
+                case TO_DO_LIST_RECEIVED ->{
+                    this.populateToDoTable();
+                    break;
+                }
                 case USER_SCHEDULE_SETTINGS_RECEIVED ->{
                     populateScheduleListView();
                     break;
@@ -1044,26 +1067,128 @@ public class ScheduleListView extends BookingView
     
     @Override
     public void tableChanged(TableModelEvent e){
-        if (e.getType() == TableModelEvent.UPDATE) {
-            if (e.getColumn() == 0) {
+        if (e.getSource() instanceof ToDoViewTableModel){
+            if (this.tblToDo.isEditing()){//prevents the double entry to the tableChanged() method
                 int row = e.getFirstRow();
                 int column = e.getColumn();
-                ScheduleListTableModel model =  
-                        (ScheduleListTableModel)e.getSource();
-                Boolean value = (Boolean)model.getValueAt(row, column);
-                Appointment appointment = model.getElementAt(row);
-                appointment.setHasPatientBeenContacted(value);
-                getMyController().getDescriptor().getViewDescription().setProperty(SystemDefinition.Properties.APPOINTMENT, value);
-                //tblAppointments.clearSelection();
-                doActionEventFor(ScheduleViewController.Actions.APPOINTMENT_REMINDED_STATUS_UPDATE_REQUEST);
-                tblAppointments.clearSelection();
+                if(column!=-1){
+                    ToDoViewTableModel model =  
+                            (ToDoViewTableModel)e.getSource();
+                    Boolean value = (Boolean)model.getValueAt(row, column);
+                    ToDo toDo = model.getElementAt(row);
+                    toDo.setIsActioned(value);
+                    getMyController().getDescriptor().getViewDescription().setProperty(SystemDefinition.Properties.TO_DO, toDo);
+
+                    ActionEvent actionEvent = new ActionEvent(
+                        this,ActionEvent.ACTION_PERFORMED,
+                            ScheduleViewController.Actions.TO_DO_UPDATE_REQUEST.toString());
+                    getMyController().actionPerformed(actionEvent);
+                    this.tblToDo.clearSelection();
+                    actionEvent = new ActionEvent(
+                        this,ActionEvent.ACTION_PERFORMED,
+                            ScheduleViewController.Actions.TO_DO_LIST_FOR_DAY_REQUEST.toString());
+                    getMyController().actionPerformed(actionEvent);
+                    this.tblToDo.clearSelection();
+                }
             }
+        }else{ 
+            if (this.tblAppointments.isEditing()){//prevents the double entry to the tableChanged() method
+            //if (e.getType() == TableModelEvent.UPDATE) {
+                int row = e.getFirstRow();
+                int column = e.getColumn();
+                if(column!=-1){
+                    ScheduleListTableModel model =  
+                            (ScheduleListTableModel)e.getSource();
+                    Boolean value = (Boolean)model.getValueAt(row, column);
+                    Appointment appointment = model.getElementAt(row);
+                    appointment.setHasPatientBeenContacted(value);
+                    getMyController().getDescriptor().getViewDescription().setProperty(SystemDefinition.Properties.APPOINTMENT, appointment);
+                    //tblAppointments.clearSelection();
+                    doActionEventFor(ScheduleViewController.Actions.APPOINTMENT_REMINDED_STATUS_UPDATE_REQUEST);
+                    tblAppointments.clearSelection();
+                }
+            }
+            //}
         }
     }
     
     @Override
     public void colorChanged(ColorModel colorModel){
 
+    }
+    
+    private void populateToDoTable(ToDoButtonViewMode viewMode){
+        TableColumn column = null;
+        ToDo toDo = (ToDo)getMyController().getDescriptor().
+                getControllerDescription().getProperty(Properties.TO_DO);
+        ToDoViewTableModel model = 
+                (ToDoViewTableModel)this.tblToDo.getModel();
+        model.removeAllElements();
+        /*
+        int count = 0;
+        for(ToDo _toDo : toDo.get()){
+            if(_toDo.getIsActioned()) count++;
+        }
+        if (count==0) {
+            this.setToDoButtonViewMode(ToDoButtonViewMode.NO_TASKS_FOR_DAY);
+        }
+        //else setToDoButtonViewMode(viewMode);*/
+        for(ToDo _toDo : toDo.get()){
+            switch(this.getToDoViewMode()){
+                case SHOW_ALL_TASKS_FOR_DAY_REQUEST ->{/* currently only shows unactioned tasks*/
+                    if(!_toDo.getIsActioned()) ((ToDoViewTableModel)this.tblToDo.getModel()).addElement(_toDo);
+                    //else ((ToDoViewTableModel)this.tblToDo.getModel()).addElement(_toDo);
+                    break;
+                }
+                case SHOW_ONLY_UNACTIONED_TASKS_FOR_DAY_REQUEST ->{/*currently shows all tasks*/
+                    ((ToDoViewTableModel)this.tblToDo.getModel()).addElement(_toDo);
+                    break;
+                }
+            }
+            //((ToDoViewTableModel)this.tblToDo.getModel()).addElement(_toDo);
+        }
+        column = tblToDo.getColumnModel().getColumn(0);
+        column.setPreferredWidth(849*10/100);
+        column = tblToDo.getColumnModel().getColumn(1);
+        column.setPreferredWidth(849*90/100);
+        tblToDo.revalidate();
+        tblToDo.repaint();
+    }
+    
+    private void populateToDoTable(){
+        TableColumn column = null;
+        ToDo toDo = (ToDo)getMyController().getDescriptor().
+                getControllerDescription().getProperty(Properties.TO_DO);
+        ToDoViewTableModel model = 
+                (ToDoViewTableModel)this.tblToDo.getModel();
+        model.removeAllElements();
+        int count = 0;
+        for(ToDo _toDo : toDo.get()){
+            count++;
+        }
+        if (count==0) {
+            this.setToDoViewMode(ToDoButtonViewMode.NO_TASKS_FOR_DAY);
+        }else this.setToDoViewMode(ToDoButtonViewMode.SHOW_ALL_TASKS_FOR_DAY_REQUEST);
+
+        for(ToDo _toDo : toDo.get()){
+            switch(this.getToDoViewMode()){
+                case SHOW_ONLY_UNACTIONED_TASKS_FOR_DAY_REQUEST ->{/*currently shows all tasks*/
+                    ((ToDoViewTableModel)this.tblToDo.getModel()).addElement(_toDo);
+                    break;
+                }
+                case SHOW_ALL_TASKS_FOR_DAY_REQUEST ->{/*currenly shows only unactioned tasks*/
+                    if(!_toDo.getIsActioned()) ((ToDoViewTableModel)this.tblToDo.getModel()).addElement(_toDo);
+                    break;
+                }
+            }
+            //((ToDoViewTableModel)this.tblToDo.getModel()).addElement(_toDo);
+        }
+        column = tblToDo.getColumnModel().getColumn(0);
+        column.setPreferredWidth(849*10/100);
+        column = tblToDo.getColumnModel().getColumn(1);
+        column.setPreferredWidth(849*90/100);
+        tblToDo.revalidate();
+        tblToDo.repaint();
     }
     
     private void doActionEventFor(ScheduleViewController.Actions action){
@@ -1133,10 +1258,6 @@ public class ScheduleListView extends BookingView
                                     setUnbookableSlotOrMoveOrFetchPatientMode(UnbookableSlotOrMoveOrFetchPatientMode.FETCH_PATIENT);
                                     btnCancelSelectedAppointment.setEnabled(true);
                                     btnClinicalNotesForSelectedAppointment.setEnabled(true);
-                                    //btnSelectTreatmentRequest.setEnabled(true);
-                                    /*this.btnMarkCancelUnbookableSlotOrMoveBookingToAnotherDayOrFetchPatientDetails.setText(
-                                            "<html><center>Move to</center><center>another</center><center>day</center></html>");*/
-                                    //btnMarkCancelUnbookableSlotOrMoveBookingToAnotherDayOrFetchPatientDetails.setEnabled(true);
                                     break;
                             }
                         }else{//no row is selected; so disable all buttons apart from 'close view'
@@ -1212,29 +1333,71 @@ public class ScheduleListView extends BookingView
         internalFrameAdapter = new InternalFrameAdapter(){
             @Override  
             public void internalFrameClosing(InternalFrameEvent e) {
-                ScheduleListView.this.removeInternalFrameListener(internalFrameAdapter);
+                ScheduleView.this.removeInternalFrameListener(internalFrameAdapter);
                 //doActionEventFor(ScheduleViewController.Actions.VIEW_CLOSE_NOTIFICATION);
                 //doActionEventFor(ScheduleViewController.Actions.VIEW_CLOSE_NOTIFICATION);
                 ActionEvent actionEvent = new ActionEvent(
-                        ScheduleListView.this,ActionEvent.ACTION_PERFORMED,
+                        ScheduleView.this,ActionEvent.ACTION_PERFORMED,
                         ViewController.ScheduleViewControllerActionEvent.
                                 VIEW_CLOSE_NOTIFICATION.toString());
-                ScheduleListView.this.getMyController().actionPerformed(actionEvent);
+                ScheduleView.this.getMyController().actionPerformed(actionEvent);
                 
             }
             
             @Override
             public void internalFrameActivated(InternalFrameEvent e){
                 ActionEvent actionEvent = new ActionEvent(
-                        ScheduleListView.this,ActionEvent.ACTION_PERFORMED,
+                        ScheduleView.this,ActionEvent.ACTION_PERFORMED,
                         ViewController.ScheduleViewControllerActionEvent.
                                 VIEW_ACTIVATED_NOTIFICATION.toString());
-                ScheduleListView.this.getMyController().actionPerformed(actionEvent);
+                ScheduleView.this.getMyController().actionPerformed(actionEvent);
             }
         };
         this.addInternalFrameListener(internalFrameAdapter);
     }
     
+    private ToDoButtonViewMode toDoButtonViewMode = null;
+    private void setToDoViewMode(ToDoButtonViewMode value){
+        toDoButtonViewMode = value;
+        switch(getToDoViewMode()){
+            case SHOW_ONLY_UNACTIONED_TASKS_FOR_DAY_REQUEST ->{
+                btnRequestToDoListAction.setText("<html><center>Show</center><center>unactioned tasks only</center><center>for today</center></html>");
+                btnRequestToDoListAction.setEnabled(true);
+                break;
+            }
+            case SHOW_ALL_TASKS_FOR_DAY_REQUEST ->{
+                btnRequestToDoListAction.setText("<html><center>Show</center><center>all tasks</center><center>for today</center></html>");
+                btnRequestToDoListAction.setEnabled(true);
+                break;
+            }
+            case NO_TASKS_FOR_DAY ->{
+                btnRequestToDoListAction.setEnabled(false);
+                break;
+            }
+        }
+    }
+    private ToDoButtonViewMode getToDoViewMode(){
+        return toDoButtonViewMode;
+    }
+    
+    private void doToDoTaskViewModeChangeRequest(){
+        switch(this.getToDoViewMode()){
+
+            case SHOW_ONLY_UNACTIONED_TASKS_FOR_DAY_REQUEST ->{
+                this.setToDoViewMode(ToDoButtonViewMode.SHOW_ALL_TASKS_FOR_DAY_REQUEST);
+                System.out.println("doActionedToDoTaskDisplayStatusChangeRequest, view mode = ACTIONED_TASKS_EXIST_FOR_DAY_AND_DISPLAYED");
+
+                break;
+            }
+            case SHOW_ALL_TASKS_FOR_DAY_REQUEST ->{
+                this.setToDoViewMode(ToDoButtonViewMode.SHOW_ONLY_UNACTIONED_TASKS_FOR_DAY_REQUEST);
+                System.out.println("doActionedToDoTaskDisplayStatusChangeRequest, view mode = ACTIONED_TASKS_EXIST_FOR_DAY_AND_UNDISPLAYED");
+                
+                break;
+            }   
+        }
+        populateToDoTable(getToDoViewMode());
+    }
     
     private javax.swing.JMenuItem  mniColorPicker = null;
     @Override
@@ -1251,9 +1414,7 @@ public class ScheduleListView extends BookingView
             setIconifiable(true);
             setResizable(true);
             setSelected(true);
-            /*setSize(1090
-                    ,685
-            );*/
+            setSize(1250,710);
             toFront();
         }catch (PropertyVetoException ex){
             
@@ -1263,8 +1424,9 @@ public class ScheduleListView extends BookingView
             ViewController.displayErrorMessage(message, 
                     "Schedule view controller error", JOptionPane.WARNING_MESSAGE);
         }
-        //setEmptySlotAvailabilityTableListener();
         
+        this.btnRequestToDoListAction.setActionCommand(Action.REQUEST_TO_DO_TASK_VIEW_MODE_CHANGE.toString());
+        this.btnRequestToDoListAction.addActionListener(this);
         mniPrintSchedule.setActionCommand(Action.REQUEST_PRINT_SCHEDULE.toString());
         mniPrintSchedule.addActionListener(this);
         this.mniCloseView.setActionCommand(Action.REQUEST_CLOSE_VIEW.toString());
@@ -1273,13 +1435,11 @@ public class ScheduleListView extends BookingView
         this.mniEarlyBookingStartTime.addActionListener(this);
         this.mniLateBookingEndTime.setActionCommand(Action.REQUEST_LATE_BOOKING_END_TIME.toString());
         this.mniLateBookingEndTime.addActionListener(this);
-        //this.mniColorPicker.setActionCommand(Action.REQUEST_COLOUR_PICKER.toString());
-        //this.mniColorPicker.addActionListener(this);
         
         if ((Boolean)getMyController().getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.LOGIN_REQUIRED)){
             this.mniColorPicker = new javax.swing.JMenuItem();
             mniColorPicker.setText("Colour settings");
-            mniColorPicker.setActionCommand(ScheduleListView.Action.REQUEST_USER_SCHEDULE_LIST_COLOR_SETTINGS_VIEW.toString());
+            mniColorPicker.setActionCommand(ScheduleView.Action.REQUEST_USER_SCHEDULE_LIST_COLOR_SETTINGS_VIEW.toString());
             mniColorPicker.addActionListener(this);
             mnuOptions.remove(mniCloseView);
             mnuOptions.add(mniColorPicker);
@@ -1287,8 +1447,8 @@ public class ScheduleListView extends BookingView
             mnuOptions.add(mniCloseView);
         }
         
-        this.btnRequestToDoLIst.setActionCommand(Action.REQUEST_TO_DO_LIST_VIEW.toString());
-        this.btnRequestToDoLIst.addActionListener(this);
+        //this.btnRequestToDoListAction.setActionCommand(Action.REQUEST_TO_DO_LIST_VIEW.toString());
+        //this.btnRequestToDoListAction.addActionListener(this);
         
         this.btnSelectBookableSlotsScanner.setEnabled(true);
         this.btnSelectBookableSlotsScanner.setActionCommand(Action.REQUEST_BOOKABLE_SLOT_SCANNER_VIEW.toString());
@@ -1296,6 +1456,9 @@ public class ScheduleListView extends BookingView
         
         this.btnSelectUnbookableSlotsScanner.setActionCommand(Action.REQUEST_UNBOOKABLE_SLOT_SCANNER_VIEW.toString());
         this.btnSelectUnbookableSlotsScanner.addActionListener(this);
+        
+        this.btnRefreshToDoList.setActionCommand(Action.REQUEST_TO_DO_LIST_FOR_DAY.toString());
+        this.btnRefreshToDoList.addActionListener((this));
         
         btnCreateUpdateAppointment.setEnabled(false);
         btnMakeDeleteEmergencyAppointmentUndoSelection.setEnabled(false);
@@ -1314,12 +1477,7 @@ public class ScheduleListView extends BookingView
         btnNextDay.setText(Captions.ScheduleView.NEXT_DAY._1());
         btnNow.setText(Captions.ScheduleView.TODAY._1());
         btnPreviousDay.setText(Captions.ScheduleView.PREVIOUS_DAY._1());
-        //btnSearchAvailableSlotsRequest.setText(ScheduleViewActionCaption.SEARCH_AVAILABLE_SLOTS._1());
-        //btnSelectTreatmentRequest.setText(Captions.ScheduleView.SELECT_TREATMENT._1());
-        
-        
         btnCloseView.setActionCommand(Action.REQUEST_CLOSE_VIEW.toString());
-        
         btnCancelSelectedAppointment.setActionCommand(Action.REQUEST_CANCEL_APPOINTMENT.toString());
         btnClinicalNotesForSelectedAppointment.setActionCommand(Action.REQUEST_CLINICAL_NOTE_VIEW.toString());
         btnCloseView.setActionCommand(Action.REQUEST_CLOSE_VIEW.toString());
@@ -1329,9 +1487,6 @@ public class ScheduleListView extends BookingView
         btnNextDay.setActionCommand(Action.REQUEST_NEXT_DAY.toString());
         btnNow.setActionCommand(Action.REQUEST_NOW.toString());
         btnPreviousDay.setActionCommand(Action.REQUEST_PREVIOUS_DAY.toString());
-        //btnSearchAvailableSlotsRequest.setActionCommand(Action.REQUEST_SEARCH_AVAILABLE_SLOTS.toString());
-        //btnSelectTreatmentRequest.setActionCommand(Action.REQUEST_TREATMENT_VIEW.toString());
-        
         btnCancelSelectedAppointment.addActionListener(this);
         btnClinicalNotesForSelectedAppointment.addActionListener(this);
         btnCloseView.addActionListener(this);
@@ -1341,28 +1496,13 @@ public class ScheduleListView extends BookingView
         btnNextDay.addActionListener(this);
         btnNow.addActionListener(this);
         btnPreviousDay.addActionListener(this);
-        //btnSearchAvailableSlotsRequest.addActionListener(this);
-        //btnSelectTreatmentRequest.addActionListener(this); 
-        
         configureScheduleListView();
+        createToDoTable();
         
         setScheduleViewMode(ScheduleViewMode.LIST);
         
         
         dayDatePicker.addDateChangeListener(this);
-        
-        /**
-         * Check to see if user login enabled
-         * -- yes; send request to controller to fetch settings from store
-         * -- no; fetch default settings for titled border settings
-         */
-
-/*        ActionEvent actionEvent = null;
-        if ((Boolean)getMyController().getDescriptor().getControllerDescription().getProperty(Properties.LOGIN_REQUIRED)){
-            doActionEventFor(ScheduleViewController.Actions.USER_SETTINGS_LIST_SETTINGS_REQUEST);
-            doActionEventFor(ScheduleViewController.Actions.USER_SYSTEM_WIDE_SETTINGS_REQUEST);
-        }
-        setScheduleTitledBorderSettings();*/
 
         this.vetoPolicy = new AppointmentDateVetoPolicy((HashMap<DayOfWeek,Boolean>)getMyController().getDescriptor().
                 getControllerDescription().getProperty(SystemDefinition.Properties.SURGERY_DAYS_ASSIGNMENT));
@@ -1373,10 +1513,6 @@ public class ScheduleListView extends BookingView
         LocalDate day = (LocalDate)getMyController().getDescriptor().getControllerDescription().
                 getProperty(SystemDefinition.Properties.SCHEDULE_DAY);
         if (!vetoPolicy.isDateAllowed(day)){
-            /*switch(getMyController().
-                    getDescriptor().
-                    getControllerDescription().
-                    getViewMode()){*/
             switch(getMyController().
                     getDescriptor().getControllerDescription().
                     getProperty(SystemDefinition.Properties.VIEW_MODE)){
@@ -1395,7 +1531,6 @@ public class ScheduleListView extends BookingView
                     allDaysSurgeryDays.put(DayOfWeek.SUNDAY, true);
                     dps.setVetoPolicy(new AppointmentDateVetoPolicy(allDaysSurgeryDays));
                     dayDatePicker.setDate(day);
-                    //refreshAppointmentTableWithCurrentlySelectedDate();
                     dps.setVetoPolicy(vetoPolicy);
                     break;
                 }
@@ -1409,40 +1544,14 @@ public class ScheduleListView extends BookingView
         JButton datePickerButton = dayDatePicker.getComponentToggleCalendarButton();
         datePickerButton.setText("");
         datePickerButton.setIcon(icon);
-        
-        //configureScheduleListView(0);
-        
-        
+
         getMyController().getDescriptor().getViewDescription().setProperty(SystemDefinition.Properties.SCHEDULE_DAY, 
                 getMyController().getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.SCHEDULE_DAY));
         
+        setScheduleTitledBorderSettings();
+        
         refreshAppointmentTableWithCurrentlySelectedDate();
-        /*
-        // Add a component listener to adjust column widths after it is displayed
-        this.tblAppointments.addComponentListener(new ComponentAdapter() {
-            @Override
-            public void componentResized(ComponentEvent e) {
-                adjustColumnWidthsAndViewPosition(tblAppointments);
-            }
-        });*/
-    }
-    /*
-    private void adjustColumnWidthsAndViewPosition(JTable table){
-        javax.swing.SwingUtilities.invokeLater(() -> {
-            ViewController.setRelativeColumnWidths(table, new double[]{0.1,0.2,0.05,0.05,0.15,0.45});
-            ViewController.centerInternalFrame(getDesktopView().getDeskTop(), this);
-        });
-    }*/
-    
-    /**
-     * method called on receipt of USER_SYSTEM_WIDE_SETTINGS_RECEIVED property change event 
-     */
-    private void setScheduleTitledBorderSettings(){
-        setBorderTitles(BorderTitles.ACTION);
-        setBorderTitles(BorderTitles.SCHEDULE_DATE_SELECTION);
-        setBorderTitles(BorderTitles.SCHEDULE_FOR_DAY);
-        setBorderTitles(BorderTitles.SLOT_SCANNER);
-        //setBorderTitles(BorderTitles.VIEW_FORMAT);
+        
     }
     
     /**
@@ -1474,6 +1583,18 @@ public class ScheduleListView extends BookingView
         }
     }
     
+    /**
+     * method called on receipt of USER_SYSTEM_WIDE_SETTINGS_RECEIVED property change event 
+     */
+    private void setScheduleTitledBorderSettings(){
+        setBorderTitles(BorderTitles.ACTION);
+        setBorderTitles(BorderTitles.SCHEDULE_DATE_SELECTION);
+        setBorderTitles(BorderTitles.SCHEDULE_FOR_DAY);
+        setBorderTitles(BorderTitles.SLOT_SCANNER);
+        setBorderTitles(BorderTitles.TO_DO_TASKS);
+        setBorderTitles(BorderTitles.TO_DO_TASK_MANAGEMENT);
+    }
+    
     private void setBorderTitles(BorderTitles borderTitles){
         javax.swing.JPanel panel = null;
         String caption = null;
@@ -1488,7 +1609,7 @@ public class ScheduleListView extends BookingView
             case SCHEDULE_DATE_SELECTION ->{
                 panel = pnlAppointmentDaySelector;
                 caption = "Schedule date selection";
-                isPanelBackgroundDefault = true;
+                isPanelBackgroundDefault = false;
                 break;
             }
             case SCHEDULE_FOR_DAY ->{
@@ -1500,13 +1621,19 @@ public class ScheduleListView extends BookingView
             case SLOT_SCANNER ->{
                 panel = pnlSlotScanner;
                 caption = "Slot scanner";
+                isPanelBackgroundDefault = false;
+                break;
+            }
+            case TO_DO_TASKS ->{
+                panel = this.pnlToDoList;
+                caption = "'To Do' tasks for the day";
                 isPanelBackgroundDefault = true;
                 break;
             }
-            case VIEW_FORMAT ->{
-                panel = pnlView;
-                caption = "View format";
-                isPanelBackgroundDefault = true;
+            case TO_DO_TASK_MANAGEMENT ->{
+                panel = this.pnlView;
+                caption = "'To Do' task display management";
+                isPanelBackgroundDefault = false;
                 break;
             }
         }
@@ -1535,7 +1662,8 @@ public class ScheduleListView extends BookingView
         SCHEDULE_FOR_DAY,
         SCHEDULE_DATE_SELECTION,
         SLOT_SCANNER,
-        VIEW_FORMAT   
+        TO_DO_TASKS,
+        TO_DO_TASK_MANAGEMENT
     }
     
     private void doCreateAppointmentAction() {  
@@ -2044,6 +2172,7 @@ public class ScheduleListView extends BookingView
         ScheduleListTableModel model = 
                 (ScheduleListTableModel)tblAppointments.getModel();
         model.removeAllElements();
+        Object[] listeners = model.getTableModelListeners();
         ArrayList<Appointment> schedule = makeEmergencyAppointmentsFirst(
                 (ArrayList<Appointment>)getMyController().getDescriptor()
                         .getControllerDescription().getProperty(SystemDefinition.Properties.APPOINTMENT_SLOTS_FOR_DAY_IN_LIST_FORMAT));
@@ -2055,6 +2184,29 @@ public class ScheduleListView extends BookingView
                 format(DateTimeFormatter.ofPattern("dd/MM/yy")) + " Appointment schedule");
         doActionEventFor(ScheduleViewController.Actions.VIEW_CHANGED_NOTIFICATION);
         ViewController.setJTableColumnProperties(tblAppointments, scrAppointmentsForDayTable.getPreferredSize().width, 10,20,5,5,15,45);
+        TableColumn column = tblAppointments.getColumnModel().getColumn(0);
+        column.setPreferredWidth(937 * 10/100);
+        column = tblAppointments.getColumnModel().getColumn(1);
+        column.setPreferredWidth(937 * 20/100);
+        column = tblAppointments.getColumnModel().getColumn(2);
+        column.setPreferredWidth(937 * 5/100);
+        column = tblAppointments.getColumnModel().getColumn(3);
+        column.setPreferredWidth(937 * 5/100);
+        column = tblAppointments.getColumnModel().getColumn(4);
+        column.setPreferredWidth(937 * 15/100);
+        column = tblAppointments.getColumnModel().getColumn(5);
+        column.setPreferredWidth(937 * 45/100);
+        tblAppointments.revalidate();
+        tblAppointments.repaint();
+        doActionEventFor(ScheduleViewController.Actions.TO_DO_LIST_FOR_DAY_REQUEST);
+    }
+    
+    private void createToDoTable(){
+        System.out.println("CreateToDoTable() entered");
+        this.tblToDo.setModel(new ToDoViewTableModel(ToDoViewTableModel.ViewMode.WITHOUT_DATE));
+        this.tblToDo.setDefaultRenderer(LocalDate.class, new PatientNotificationTableLocalDateRenderer());
+        ToDoViewTableModel model = (ToDoViewTableModel)tblToDo.getModel();
+        model.addTableModelListener(this);
     }
     
     private JTable tblAppointments = null;
@@ -2065,6 +2217,11 @@ public class ScheduleListView extends BookingView
         model.addTableModelListener(this);
         setAppointmentTableListener();
         
+        /*this.tblToDo.setModel(new ToDoViewTableModel(ToDoViewTableModel.ViewMode.WITHOUT_DATE));
+        this.tblToDo.setDefaultRenderer(LocalDate.class, new PatientNotificationTableLocalDateRenderer());
+        ToDoViewTableModel modelForToDo = (ToDoViewTableModel)tblToDo.getModel();
+        modelForToDo.addTableModelListener(this);*/
+        
         this.tblAppointments.setDefaultRenderer(Duration.class, new AppointmentsTableDurationRenderer());
         this.tblAppointments.setDefaultRenderer(LocalTime.class, new TableLocalTime24HourFormatCentredRenderer());
         this.tblAppointments.setDefaultRenderer(Patient.class, new ScheduleListTablePatientRenderer(this));
@@ -2072,6 +2229,7 @@ public class ScheduleListView extends BookingView
         tableHeader.setBackground(new Color(220,220,220));
         tableHeader.setOpaque(true); 
         ViewController.setJTableColumnProperties(tblAppointments, scrAppointmentsForDayTable.getPreferredSize().width, 10,20,5,5,15,45);
+        
     }
 
     private int doAppointmentCancelConfirmation(){
@@ -2268,7 +2426,11 @@ public class ScheduleListView extends BookingView
         pnlScheduleForDay = new javax.swing.JPanel();
         scrAppointmentsForDayTable = new javax.swing.JScrollPane();
         pnlView = new javax.swing.JPanel();
-        btnRequestToDoLIst = new javax.swing.JButton();
+        btnRequestToDoListAction = new javax.swing.JButton();
+        btnRefreshToDoList = new javax.swing.JButton();
+        pnlToDoList = new javax.swing.JPanel();
+        scrToDoTable = new javax.swing.JScrollPane();
+        tblToDo = new javax.swing.JTable();
         jMenuBar1 = new javax.swing.JMenuBar();
         mnuOptions = new javax.swing.JMenu();
         mniPrintSchedule = new javax.swing.JMenuItem();
@@ -2301,15 +2463,14 @@ public class ScheduleListView extends BookingView
         pnlAppointmentDaySelectorLayout.setHorizontalGroup(
             pnlAppointmentDaySelectorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlAppointmentDaySelectorLayout.createSequentialGroup()
-                .addGap(151, 151, 151)
-                .addComponent(dayDatePicker, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlAppointmentDaySelectorLayout.createSequentialGroup()
                 .addGap(28, 28, 28)
-                .addComponent(btnPreviousDay, javax.swing.GroupLayout.PREFERRED_SIZE, 94, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 47, Short.MAX_VALUE)
-                .addComponent(btnNow, javax.swing.GroupLayout.PREFERRED_SIZE, 94, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(45, 45, 45)
+                .addGroup(pnlAppointmentDaySelectorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(pnlAppointmentDaySelectorLayout.createSequentialGroup()
+                        .addComponent(btnPreviousDay, javax.swing.GroupLayout.PREFERRED_SIZE, 94, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(75, 75, 75)
+                        .addComponent(btnNow, javax.swing.GroupLayout.PREFERRED_SIZE, 94, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(dayDatePicker, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 69, Short.MAX_VALUE)
                 .addComponent(btnNextDay, javax.swing.GroupLayout.PREFERRED_SIZE, 94, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(37, 37, 37))
         );
@@ -2360,6 +2521,9 @@ public class ScheduleListView extends BookingView
         pnlScheduleOperations.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Action", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Segoe UI", 1, 12))); // NOI18N
 
         btnCreateUpdateAppointment.setText(Captions.ScheduleView.CREATE_UPDATE_APPOINTMENT._1());
+        btnCreateUpdateAppointment.setMaximumSize(new java.awt.Dimension(125, 23));
+        btnCreateUpdateAppointment.setMinimumSize(new java.awt.Dimension(125, 23));
+        btnCreateUpdateAppointment.setPreferredSize(new java.awt.Dimension(125, 23));
         btnCreateUpdateAppointment.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnCreateUpdateAppointmentActionPerformed(evt);
@@ -2386,32 +2550,32 @@ public class ScheduleListView extends BookingView
         pnlScheduleOperationsLayout.setHorizontalGroup(
             pnlScheduleOperationsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlScheduleOperationsLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(pnlScheduleOperationsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                    .addComponent(btnClinicalNotesForSelectedAppointment, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(btnCreateUpdateCancelUnbookableSlotOrMoveBookingToAnotherDayOrFetchPatientDetails, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(btnCancelSelectedAppointment, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(btnMakeDeleteEmergencyAppointmentUndoSelection, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGap(12, 12, 12)
+                .addGroup(pnlScheduleOperationsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(btnMakeDeleteEmergencyAppointmentUndoSelection, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(btnCancelSelectedAppointment, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(btnCreateUpdateCancelUnbookableSlotOrMoveBookingToAnotherDayOrFetchPatientDetails, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(btnClinicalNotesForSelectedAppointment, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(btnCloseView, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(btnCreateUpdateAppointment, javax.swing.GroupLayout.Alignment.LEADING))
-                .addGap(10, 10, 10))
+                    .addComponent(btnCreateUpdateAppointment, javax.swing.GroupLayout.PREFERRED_SIZE, 125, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(12, 12, 12))
         );
         pnlScheduleOperationsLayout.setVerticalGroup(
             pnlScheduleOperationsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlScheduleOperationsLayout.createSequentialGroup()
                 .addGap(10, 10, 10)
                 .addComponent(btnCreateUpdateAppointment, javax.swing.GroupLayout.PREFERRED_SIZE, 83, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(10, 10, 10)
+                .addGap(15, 15, 15)
                 .addComponent(btnMakeDeleteEmergencyAppointmentUndoSelection, javax.swing.GroupLayout.PREFERRED_SIZE, 83, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(10, 10, 10)
+                .addGap(15, 15, 15)
                 .addComponent(btnCancelSelectedAppointment, javax.swing.GroupLayout.PREFERRED_SIZE, 83, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(10, 10, 10)
+                .addGap(15, 15, 15)
                 .addComponent(btnCreateUpdateCancelUnbookableSlotOrMoveBookingToAnotherDayOrFetchPatientDetails, javax.swing.GroupLayout.PREFERRED_SIZE, 83, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(10, 10, 10)
+                .addGap(15, 15, 15)
                 .addComponent(btnClinicalNotesForSelectedAppointment, javax.swing.GroupLayout.PREFERRED_SIZE, 83, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(10, 10, 10)
+                .addGap(15, 15, 15)
                 .addComponent(btnCloseView, javax.swing.GroupLayout.PREFERRED_SIZE, 83, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(10, 10, 10))
+                .addGap(11, 11, 11))
         );
 
         pnlScheduleForDay.setBorder(javax.swing.BorderFactory.createTitledBorder("Appointment schedule for"));
@@ -2426,20 +2590,22 @@ public class ScheduleListView extends BookingView
             pnlScheduleForDayLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlScheduleForDayLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(scrAppointmentsForDayTable, javax.swing.GroupLayout.PREFERRED_SIZE, 849, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(scrAppointmentsForDayTable, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
         );
         pnlScheduleForDayLayout.setVerticalGroup(
             pnlScheduleForDayLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlScheduleForDayLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(scrAppointmentsForDayTable, javax.swing.GroupLayout.PREFERRED_SIZE, 352, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(12, Short.MAX_VALUE))
+                .addComponent(scrAppointmentsForDayTable, javax.swing.GroupLayout.PREFERRED_SIZE, 218, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        pnlView.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1));
+        pnlView.setBorder(javax.swing.BorderFactory.createTitledBorder("Manage 'to do' task display"));
 
-        btnRequestToDoLIst.setText("<html><center>Show</center><center>'To Do'</center><center>list</center></html>");
+        btnRequestToDoListAction.setText("<html><center>Display only</center><center>unactioned tasks</center><center>for today</center></html>");
+
+        btnRefreshToDoList.setText("<html><center>Refresh</center><center>'to do' task list</center></html>");
 
         javax.swing.GroupLayout pnlViewLayout = new javax.swing.GroupLayout(pnlView);
         pnlView.setLayout(pnlViewLayout);
@@ -2447,15 +2613,51 @@ public class ScheduleListView extends BookingView
             pnlViewLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlViewLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(btnRequestToDoLIst, javax.swing.GroupLayout.DEFAULT_SIZE, 87, Short.MAX_VALUE)
+                .addGroup(pnlViewLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(btnRequestToDoListAction, javax.swing.GroupLayout.PREFERRED_SIZE, 161, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnRefreshToDoList, javax.swing.GroupLayout.PREFERRED_SIZE, 161, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap())
         );
         pnlViewLayout.setVerticalGroup(
             pnlViewLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlViewLayout.createSequentialGroup()
-                .addGap(25, 25, 25)
-                .addComponent(btnRequestToDoLIst, javax.swing.GroupLayout.PREFERRED_SIZE, 111, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(21, 21, 21))
+                .addGap(15, 15, 15)
+                .addComponent(btnRequestToDoListAction, javax.swing.GroupLayout.PREFERRED_SIZE, 62, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(btnRefreshToDoList, javax.swing.GroupLayout.PREFERRED_SIZE, 62, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(12, 12, 12))
+        );
+
+        pnlToDoList.setBorder(javax.swing.BorderFactory.createTitledBorder("Today's 'to do' list of tasks"));
+
+        tblToDo.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null}
+            },
+            new String [] {
+                "Title 1", "Title 2", "Title 3", "Title 4"
+            }
+        ));
+        scrToDoTable.setViewportView(tblToDo);
+
+        javax.swing.GroupLayout pnlToDoListLayout = new javax.swing.GroupLayout(pnlToDoList);
+        pnlToDoList.setLayout(pnlToDoListLayout);
+        pnlToDoListLayout.setHorizontalGroup(
+            pnlToDoListLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlToDoListLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(scrToDoTable)
+                .addContainerGap())
+        );
+        pnlToDoListLayout.setVerticalGroup(
+            pnlToDoListLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlToDoListLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(scrToDoTable, javax.swing.GroupLayout.DEFAULT_SIZE, 116, Short.MAX_VALUE)
+                .addContainerGap())
         );
 
         javax.swing.GroupLayout pnlScheduleDaySelectionLayout = new javax.swing.GroupLayout(pnlScheduleDaySelection);
@@ -2463,36 +2665,40 @@ public class ScheduleListView extends BookingView
         pnlScheduleDaySelectionLayout.setHorizontalGroup(
             pnlScheduleDaySelectionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlScheduleDaySelectionLayout.createSequentialGroup()
-                .addGap(18, 18, 18)
+                .addGap(12, 12, 12)
                 .addGroup(pnlScheduleDaySelectionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(pnlScheduleDaySelectionLayout.createSequentialGroup()
-                        .addComponent(pnlView, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(pnlView, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(pnlAppointmentDaySelector, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(pnlAppointmentDaySelector, javax.swing.GroupLayout.PREFERRED_SIZE, 501, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(pnlSlotScanner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(pnlScheduleForDay, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(pnlScheduleForDay, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(pnlToDoList, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addGap(12, 12, 12)
                 .addComponent(pnlScheduleOperations, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(12, 12, 12))
+                .addContainerGap())
         );
         pnlScheduleDaySelectionLayout.setVerticalGroup(
             pnlScheduleDaySelectionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlScheduleDaySelectionLayout.createSequentialGroup()
                 .addGap(10, 10, 10)
                 .addGroup(pnlScheduleDaySelectionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(pnlScheduleOperations, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(pnlScheduleDaySelectionLayout.createSequentialGroup()
+                        .addComponent(pnlScheduleOperations, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addContainerGap())
                     .addGroup(pnlScheduleDaySelectionLayout.createSequentialGroup()
                         .addGroup(pnlScheduleDaySelectionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(pnlSlotScanner, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addGroup(pnlScheduleDaySelectionLayout.createSequentialGroup()
-                                .addGroup(pnlScheduleDaySelectionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(pnlAppointmentDaySelector, javax.swing.GroupLayout.PREFERRED_SIZE, 184, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(pnlView, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addGap(0, 0, Short.MAX_VALUE)))
+                                .addGap(0, 0, Short.MAX_VALUE)
+                                .addComponent(pnlAppointmentDaySelector, javax.swing.GroupLayout.PREFERRED_SIZE, 184, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(pnlView, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addGap(18, 18, 18)
-                        .addComponent(pnlScheduleForDay, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addGap(3, 3, 3))
+                        .addComponent(pnlScheduleForDay, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(pnlToDoList, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(9, 9, 9))))
         );
 
         mnuOptions.setText("Actions");
@@ -2553,7 +2759,8 @@ public class ScheduleListView extends BookingView
     private javax.swing.JButton btnNextDay;
     private javax.swing.JButton btnNow;
     private javax.swing.JButton btnPreviousDay;
-    private javax.swing.JButton btnRequestToDoLIst;
+    private javax.swing.JButton btnRefreshToDoList;
+    private javax.swing.JButton btnRequestToDoListAction;
     private javax.swing.JButton btnSelectBookableSlotsScanner;
     private javax.swing.JButton btnSelectUnbookableSlotsScanner;
     private com.github.lgooddatepicker.components.DatePicker dayDatePicker;
@@ -2570,7 +2777,10 @@ public class ScheduleListView extends BookingView
     private javax.swing.JPanel pnlScheduleForDay;
     private javax.swing.JPanel pnlScheduleOperations;
     private javax.swing.JPanel pnlSlotScanner;
+    private javax.swing.JPanel pnlToDoList;
     private javax.swing.JPanel pnlView;
     private javax.swing.JScrollPane scrAppointmentsForDayTable;
+    private javax.swing.JScrollPane scrToDoTable;
+    private javax.swing.JTable tblToDo;
     // End of variables declaration//GEN-END:variables
 }

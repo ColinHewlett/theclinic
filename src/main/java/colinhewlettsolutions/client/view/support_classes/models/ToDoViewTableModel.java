@@ -15,15 +15,29 @@ import colinhewlettsolutions.client.model.entity.ToDo;
  * @author colin
  */
 public class ToDoViewTableModel extends DefaultTableModel{
+    public enum ViewMode{
+        WITH_DATE,
+        WITHOUT_DATE
+    }
     private DateTimeFormatter ddmmyy = DateTimeFormatter.ofPattern("dd/MM/yy");
+    private ViewMode viewMode = null;
     private ArrayList<ToDo> toDoActions = null;
-    private enum COLUMN{Actioned, Date, Description};
-    private final Class[] columnClass = new Class[] {
+    private enum COLUMN_WITH_DATE{Actioned, Date, Description};
+    private enum COLUMN_WITHOUT_DATE{Actioned, Description};
+    private final Class[] withDateColumnClass = new Class[] {
         Boolean.class,
         LocalDate.class,
         String.class};
-    
+    private final Class[] withoutDateColumnClass = new Class[] {
+        Boolean.class,
+        String.class};
+
     public ToDoViewTableModel(){
+        toDoActions = new ArrayList<>();
+    }
+    
+    public ToDoViewTableModel(ViewMode value){
+        viewMode = value;
         toDoActions = new ArrayList<>();
     }
         
@@ -54,31 +68,73 @@ public class ToDoViewTableModel extends DefaultTableModel{
 
     @Override
     public int getColumnCount(){
-        return COLUMN.values().length;
-    }
-    @Override
-    public String getColumnName(int columnIndex){
-        String result = null;
-        for (COLUMN column: COLUMN.values()){
-            if (column.ordinal() == columnIndex){
-                result = column.toString();
-                if (result.equals("Actioned"))
-                    result = result + "?";
+        int result = 0;
+        switch (viewMode){
+            case WITH_DATE ->{
+                result = COLUMN_WITH_DATE.values().length;
+                break;
+            }
+            case WITHOUT_DATE ->{
+                result = COLUMN_WITHOUT_DATE.values().length;
                 break;
             }
         }
         return result;
     }
+    
+    @Override
+    public String getColumnName(int columnIndex){
+        String result = null;
+        switch(viewMode){
+            case WITH_DATE ->{
+                for (COLUMN_WITH_DATE column: COLUMN_WITH_DATE.values()){
+                    if (column.ordinal() == columnIndex){
+                        result = column.toString();
+                        if (result.equals("Actioned"))
+                            result = result + "?";
+                    }
+                }
+                break;
+            }
+            case WITHOUT_DATE ->{
+                for (COLUMN_WITHOUT_DATE column: COLUMN_WITHOUT_DATE.values()){
+                    if (column.ordinal() == columnIndex){
+                        result = column.toString();
+                        if (result.equals("Actioned"))
+                            result = result + "?";  
+                    }
+                }
+                break;
+            }
+        }
+        return result;
+    }
+            
     @Override
     public Class<?> getColumnClass(int columnIndex){
-        return columnClass[columnIndex];
+        Class<?> result = null;
+        switch(viewMode){
+            case WITH_DATE ->{
+                result = withDateColumnClass[columnIndex];
+                break;
+            }
+            case WITHOUT_DATE ->{
+                result = withoutDateColumnClass[columnIndex];
+                break;
+            }
+        }
+        return result;
     }
     
     @Override
     public void setValueAt(Object value, int row, int col) {
         if (col==0){
-            if ((Boolean)value)toDoActions.get(row).setIsActioned(Boolean.TRUE);
-            else toDoActions.get(row).setIsActioned(Boolean.FALSE);
+            if ((Boolean)value){
+                toDoActions.get(row).setIsActioned(Boolean.TRUE);
+            }
+            else {
+                toDoActions.get(row).setIsActioned(Boolean.FALSE);
+            }
             fireTableCellUpdated(row, col);
         }   
     }
@@ -86,28 +142,55 @@ public class ToDoViewTableModel extends DefaultTableModel{
     @Override
     public Object getValueAt(int row, int columnIndex){
         Object result = null;
+        LocalDate date = null;
+        String description = null;
+        Boolean actionedStatus = null;
         ToDo toDo = (ToDo)getToDo().get(row);
-        for (COLUMN column: COLUMN.values()){
-            if (column.ordinal() == columnIndex){
-                if (toDo == null){
-                    return null;
+        if (toDo == null){
+            result = null;
+        }
+        else{
+            date = toDo.getDate();
+            description = toDo.getDescription();
+            actionedStatus = toDo.getIsActioned();
+        }
+        if (toDo!=null){
+            switch(viewMode){
+                case WITH_DATE ->{
+                    for (COLUMN_WITH_DATE column: COLUMN_WITH_DATE.values()){
+                        if (column.ordinal() == columnIndex){ 
+                            switch (column){
+                                case Actioned ->{
+                                    result = actionedStatus;
+                                    break;
+                                }
+                                case Date ->{
+                                    result = date;
+                                    break;
+                                }
+                                case Description ->{
+                                    result = description;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    break;
                 }
-                else{
-                    LocalDate date = toDo.getDate();
-                    String description = toDo.getDescription();
-                    Boolean actionedStatus = toDo.getIsActioned();
-                    
-                    switch (column){
-                        case Actioned:
-                            result = actionedStatus;
-                            break;
-                        case Date:
-                            //result = date.format(ddmmyy);
-                            result = date;
-                            break;
-                        case Description:
-                            result = description;
-                            break;
+                case WITHOUT_DATE ->{
+                    for (COLUMN_WITHOUT_DATE column: COLUMN_WITHOUT_DATE.values()){
+                        if (column.ordinal() == columnIndex){ 
+                            switch (column){
+                                case Actioned ->{
+                                    result = actionedStatus;
+                                    break;
+                                }
+                                case Description ->{
+                                    result = description;
+                                    break;
+                                }
+                            }
+                        }
                     }
                     break;
                 }

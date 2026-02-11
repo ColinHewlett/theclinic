@@ -745,8 +745,8 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
     
     
     public enum ControllerViewMode{
-        DIARY,
-        LIST,
+        /*DIARY,
+        LIST,*/
         SYSTEM,
         NONE
     }
@@ -760,7 +760,7 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
         NO_ACTION,
         PATIENT_ARCHIVE,
         PATIENT_RESTORE,
-        SCAN,
+        MEDICAL_HISTORY,
         SCHEDULE_REFERENCED_FROM_PATIENT_VIEW,
         SCHEDULE_REQUESTED_FROM_DESKTOP_VIEW,
         SLOT_SELECTED,
@@ -834,13 +834,15 @@ public abstract class ViewController implements ActionListener, PropertyChangeLi
             TableColumn column = table.getColumnModel().getColumn(i);
             double test = tablePreferredWidth * (percentages[i] / total);
             if (i>0){
-                column.setPreferredWidth((int)
+                column.setWidth((int)
+                    (tablePreferredWidth * (percentages[i] / total)));
+                column.setWidth((int)
                     (tablePreferredWidth * (percentages[i] / total)));
             }
             else{
-                column.setMinWidth((int)
+                column./*setMinWidth*/setWidth((int)
                         (tablePreferredWidth * (percentages[i] / total)));
-                column.setMaxWidth((int)
+                column./*setMaxWidth*/setWidth((int)
                         (tablePreferredWidth * (percentages[i] / total)));
             }
         }

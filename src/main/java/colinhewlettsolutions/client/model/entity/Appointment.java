@@ -353,6 +353,7 @@ public class Appointment extends Entity implements IEntityRepositoryActions{
     @Override
     public Appointment read() throws StoreException{
         /*28/03/2024PatientNote patientNote = null;*/
+        Appointment appointment = null;
         Patient patient = null;
         Appointment result = null;
         ArrayList<Appointment> appointments = null;
@@ -371,14 +372,14 @@ public class Appointment extends Entity implements IEntityRepositoryActions{
                             patient.setScope(Scope.SINGLE);
                             a.setPatient(patient.read());
                         }else{
-                            String message = "A key has not been defined for the appointee object in the read Appointment, "
+                            String message = "[1]A key has not been defined for the appointee object in the read Appointment, "
                                     + "raised in Appointment::Read(scope = " + this.getScope().toString() + ")";
                             throw new StoreException(message, StoreException.ExceptionType.NULL_KEY_EXCEPTION);
                         }
                     }
                     result = this;
                 }catch(NullPointerException ex){
-                    String message = "The patient object in an appointment "
+                    String message = "[2]The patient object in an appointment "
                             + "object fetched from store is null, which should "
                             + "never be the case. Raised in Appointment::Read(scope = " + this.getScope().toString() + ")";
                     throw new StoreException(message, StoreException.ExceptionType.KEY_NOT_FOUND_EXCEPTION);
@@ -404,24 +405,26 @@ public class Appointment extends Entity implements IEntityRepositoryActions{
                     }
                     result = this;
                 }catch(NullPointerException ex){
-                    String message = "The patient object in an appointment "
+                    String message = "[3]The patient object in an appointment "
                             + "object fetched from store is null, which should "
-                            + "never be the case. Raised in Appointment::Read(scope = " + this.getScope().toString() + ")";
+                            + "never be the case. Raised in Appointment::Read(scope = " + this.getScope().toString() + ") ";
                     throw new StoreException(message, StoreException.ExceptionType.KEY_NOT_FOUND_EXCEPTION);
                 }
                 break;
             case SINGLE:
+                appointment = null;
                 try{
                     /*28/03/2024 code update*/
                     result = (Appointment)getRepository().read(this,getKey());
-                        
+                    appointment = result;
+   
                     if (result.getPatient().getIsKeyDefined()){
                         patient = new Patient(result.getPatient().getKey());
                         patient.setScope(Scope.SINGLE);
                         result.setPatient(patient.read()); 
                     }else{
                         String message = "A key has not been defined for the appointee object in the read Appointment, "
-                                + "raised in Appointment::Read(case SINGLE read)";
+                                + "raised in Appointment::Read(case SINGLE read) appointment key = " /*+ result.getKey()*/;
                         throw new StoreException(message, StoreException.ExceptionType.KEY_NOT_FOUND_EXCEPTION);
                     }
                     /**
@@ -436,9 +439,9 @@ public class Appointment extends Entity implements IEntityRepositoryActions{
                     */
 
                 }catch(NullPointerException ex){
-                    String message = "The patient object in an appointment "
+                    String message = "[4]The patient object in an appointment "
                             + "object fetched from store is null, which should "
-                            + "never be the case. Raised in Appointment::Read(case SINGLE read)";
+                            + "never be the case. Raised in Appointment::Read(case SINGLE read) appointment key = " + appointment.getKey();
                     throw new StoreException(message, StoreException.ExceptionType.KEY_NOT_FOUND_EXCEPTION);
                 }
                 break;
@@ -481,11 +484,13 @@ public class Appointment extends Entity implements IEntityRepositoryActions{
                 result = this;
                 break;
             default:
+                appointment = null;
                 try{
                     /*28/03/2024set(getRepository().read(this, key).get());*/
                     set(((Appointment)getRepository().read(this, getKey())).get());
                     appointments = this.get();
                     for(Appointment a : this.get()){
+                        appointment = a;
                         if (a.getPatient().getIsKeyDefined()){
                             patient = new Patient(a.getPatient().getKey());
                             patient.setScope(Scope.SINGLE);
@@ -517,7 +522,7 @@ public class Appointment extends Entity implements IEntityRepositoryActions{
                 }catch(NullPointerException ex){
                     String message = "The patient object in an appointment "
                             + "object fetched from store is null, which should "
-                            + "never be the case. Raised in Appointment::Read(default read)";
+                            + "never be the case. Raised in Appointment::Read(default read) appointment pid = " + appointment.getKey();
                     throw new StoreException(message, StoreException.ExceptionType.KEY_NOT_FOUND_EXCEPTION);
                 }
                 break;
@@ -582,7 +587,7 @@ public class Appointment extends Entity implements IEntityRepositoryActions{
          * 29/03/2024  code logic update
          */
         /*this.getPatientNote().update();*/
-        getRepository().update(this, getKey(), getPatient().getKey()/*28/03/2024, getPatientNote().getKey()*/);
+        getRepository().update(this);
     }//</editor-fold>   
     
 //<editor-fold defaultstate="collapsed" desc="Object level methods overridden in Class">

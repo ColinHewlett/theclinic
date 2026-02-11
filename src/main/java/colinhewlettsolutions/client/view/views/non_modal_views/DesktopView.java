@@ -44,7 +44,9 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
+import javax.swing.SwingWorker;
 import colinhewlettsolutions.client.model.non_entity.JarFileFinder;
+import colinhewlettsolutions.client.view.View;
 import colinhewlettsolutions.client.view.views.modal_views.ModalView;
 import javax.swing.JOptionPane;
 
@@ -64,7 +66,7 @@ public class DesktopView extends javax.swing.JFrame
         controller = myController;
         
     }
-    
+
     public void actionPerformed(ActionEvent e){
         ActionEvent actionEvent = null;
         switch (Action.valueOf(e.getActionCommand())){
@@ -83,6 +85,11 @@ public class DesktopView extends javax.swing.JFrame
                 doActionEventRequest(DesktopViewController.Actions.VIEW_CLOSE_REQUEST);
                 break;
             case REQUEST_COMMENT_MIGRATION:
+                this.setupProgressMonitorView();
+                do {
+                    
+                }while(getMyController().getView() == null);
+                doSetDesktopViewMode();
                 doActionEventRequest(DesktopViewController.Actions.COMMENT_MIGRATION_REQUEST);
                 break;
             case REQUEST_LOGOUT: {
@@ -132,25 +139,80 @@ public class DesktopView extends javax.swing.JFrame
         }
     }
     
+    /**
+     * e.propertyName is checked for "state" or "progress" values
+     * -- on "state" if SwingWorker.StateValue.DONE; sends doCloseView() message to PROGRESS_MONITOR_VIEW
+     * -- on "progress" sends Integer from e.newValue() to PROGRESS_MONITOR_VIEW
+     * -- if neither "state" or "progress" assumes e.propertyName is the string value of a DesktopViewController.Properties enum
+     * @param e 
+     */
     @Override
     public void propertyChange(PropertyChangeEvent e){
-        String propertyName = e.getPropertyName();
-        ViewController.DesktopViewControllerPropertyChangeEvent propertyType = 
-                ViewController.DesktopViewControllerPropertyChangeEvent.valueOf(e.getPropertyName());
-        switch (propertyType){ 
-            case CASCADE_DESKTOP_VIEWS:
-                cascadeInternalFrames(CascadeOrder.TOP_TO_FRONT);
+        switch(e.getPropertyName()){
+            case "progress" ->{
+                System.out.println("case progress entered");
+                getProgressMonitorView().progress((Integer)e.getNewValue());
                 break;
-            case DESKTOP_VIEW_CHANGED_NOTIFICATION:
-                this.refreshDesktopFrameMenuItems(getActiveMenu());               
+            }
+            case "state" ->{
+                switch((SwingWorker.StateValue)e.getNewValue()){
+                    case DONE ->{
+                        getProgressMonitorView().close();
+                        break;
+                    }
+                    case PENDING ->{
+                        break;
+                    }
+                    case STARTED ->{
+                        getProgressMonitorView().start();
+                        break;
+                    }
+                }
                 break;
-            case SET_DESKTOP_VIEW_MODE:
-                setViewDescriptor((Descriptor)e.getNewValue());
-                this.doSetDesktopViewMode();
+            }
+            case "operation" ->{
+                getProgressMonitorView().title((String)e.getNewValue());
                 break;
-        }
+            }
+            default ->{
+                DesktopViewController.Properties propertyName = 
+                DesktopViewController.Properties.valueOf(e.getPropertyName());
+                switch (propertyName){ 
+                    case CASCADE_DESKTOP_VIEWS ->{
+                        cascadeInternalFrames(CascadeOrder.TOP_TO_FRONT);
+                        break;
+                    }
+                    case DESKTOP_VIEW_CHANGED_NOTIFICATION ->{
+                        this.refreshDesktopFrameMenuItems(getActiveMenu());               
+                        break;
+                    }
+                    case PROGRESS_MONITOR_SETUP_NOTIFICATION_RECEIVED ->{
+                        this.setupProgressMonitorView();
+                        break;
+                    }
+                    case SET_DESKTOP_VIEW_MODE ->{
+                        setViewDescriptor((Descriptor)e.getNewValue());
+                        this.doSetDesktopViewMode();
+                        break;
+                    }
+                }
+            }
+        }   
     }
 
+    private ProgressMonitorView progressMonitorView = null;
+    private void setupProgressMonitorView(){
+        /*getMyController().setModalView((ModalView)new View().make(
+                View.Viewer.PROGRESS_MONITOR_VIEW,getMyController(), this));*/
+        getMyController().setView((new View().make(
+                View.Viewer.PROGRESS_MONITOR_VIEW,getMyController(), this)));
+        progressMonitorView = (ProgressMonitorView)getMyController().getView();
+        progressMonitorView.title("Comment migration progress monitor");
+    }
+    private ProgressMonitorView getProgressMonitorView(){
+        return progressMonitorView;
+    }
+    
     private JMenuItem mniSystemWideSettings = null;
     private JDesktopPane desktop;
     private DesktopViewScrollPane desktopScrollPane;
