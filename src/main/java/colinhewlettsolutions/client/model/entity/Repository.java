@@ -109,6 +109,9 @@ public class Repository implements IStoreActions {
                                 UPDATE_TRAINING_TO_UNBOOKABLE,
                                 UPDATE_PAID_195_POUNDS,
                                 UPDATE_CONSULTATION_NOT_PAID,
+                                UPDATE_LABWORK_CHECK,
+                                UPDATE_LABWORK_RECEIVED,
+                                UPDATE_CHECK_FOR_LABWORK,
                                 
                                 //COUNT_PATIENT_APPOINTMENT_DATA,
                                 //CREATE_PATIENT_APPOINTMENT_DATA_TABLE,
@@ -168,6 +171,7 @@ public class Repository implements IStoreActions {
                                 RECOVER_PATIENT_NOTE,
                                 UPDATE_PATIENT_NOTE,
                                 UPDATE_DELETED_STATUS_TO_ARCHIVED,
+                                
                                 
                                 CREATE_CLINICAL_NOTE_TABLE,
                                 COUNT_CLINICAL_NOTE,
@@ -5183,6 +5187,27 @@ public class Repository implements IStoreActions {
                         + "WHERE pid = appointmentkey AND treatmentkey = 14);";
                 doUpdateAppointmentForMigration(sql);
                 break;
+            case UPDATE_LABWORK_CHECK:
+                sql ="Update Appointment "
+                        + "SET comment = comment + '; Lab work check' "
+                        + "WHERE pid IN (SELECT pid FROM Appointment, AppointmentTreatment "
+                        + "WHERE pid = appointmentkey AND treatmentkey = 65);";
+                doUpdateAppointmentForMigration(sql);
+                break;
+            case UPDATE_LABWORK_RECEIVED:
+                sql ="Update Appointment "
+                        + "SET comment = comment + '; Lab work received' "
+                        + "WHERE pid IN (SELECT pid FROM Appointment, AppointmentTreatment "
+                        + "WHERE pid = appointmentkey AND treatmentkey = 64);";
+                doUpdateAppointmentForMigration(sql);
+                break;
+            case UPDATE_CHECK_FOR_LABWORK:
+                sql ="Update Appointment "
+                        + "SET comment = comment + '; Check for lab work' "
+                        + "WHERE pid IN (SELECT pid FROM Appointment, AppointmentTreatment "
+                        + "WHERE pid = appointmentkey AND treatmentkey = 63);";
+                doUpdateAppointmentForMigration(sql);
+                break;
         }
         return result;
     }
@@ -5226,8 +5251,8 @@ public class Repository implements IStoreActions {
                         + "isArchived YesNo), "
                         + "isRequestToSendPatientGBTRecallPending YesNo, "
                         + "isRequestToSendPatientNonGBTRecallPending YesNo, "
-                        + "lastGBTRecallSendDate DateTime, "
-                        + "lastNonGBTRecallSendDate;";
+                        + "lastGBTRecallSentDate DateTime, "
+                        + "lastNonGBTRecallSentDate;";
                 doCreateTable(sql);
                 break;
             case DELETE_PATIENT:
@@ -5248,8 +5273,8 @@ public class Repository implements IStoreActions {
                     + "(title, forenames, surname, line1, line2,"
                     + "town, county, postcode,phone1, phone2, gender, dob,"
                     + "isGuardianAPatient,recallFrequency, recallDate, notes,pid, guardianKey, email, recallFrequencyGBT, recallDateGBT, "
-                        + "isArchived, isRequestToSendPatientGBTRecallPending, isRequestToSendPatientNonGBTRecallPending, lastGBTRecallSendDate, "
-                        + "lastNonGBTRecallSendDate) "
+                        + "isArchived, isRequestToSendPatientGBTRecallPending, isRequestToSendPatientNonGBTRecallPending, lastGBTRecallSentDate, "
+                        + "lastNonGBTRecallSentDate) "
                     + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
                 doInsertPatient(sql, entity);
                 break;
@@ -9526,6 +9551,18 @@ public class Repository implements IStoreActions {
                 }
                 case CONSULTATION_NOT_PAID ->{
                     runSQL(Repository.EntityType.APPOINTMENT, Repository.PMSSQL.UPDATE_CONSULTATION_NOT_PAID, appointment);
+                    break;
+                }
+                case LABWORK_CHECK ->{
+                    runSQL(Repository.EntityType.APPOINTMENT, Repository.PMSSQL.UPDATE_LABWORK_CHECK, appointment);
+                    break;
+                }
+                case LABWORK_RECEIVED ->{
+                    runSQL(Repository.EntityType.APPOINTMENT, Repository.PMSSQL.UPDATE_LABWORK_RECEIVED, appointment);
+                    break;
+                }
+                case CHECK_FOR_LABWORK ->{
+                    runSQL(Repository.EntityType.APPOINTMENT, Repository.PMSSQL.UPDATE_CHECK_FOR_LABWORK, appointment);
                     break;
                 }
                 default ->{

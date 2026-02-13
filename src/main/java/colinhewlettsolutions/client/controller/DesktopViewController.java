@@ -3282,6 +3282,26 @@ public class DesktopViewController extends ViewController{
         return comment;
     }
     
+    private void doExtraConvertTreatmentToCommentAction(){
+        System.out.println("doExtraConvertTreatmentToCommentAction() entered");
+        Appointment appointment = new Appointment();
+        //this.firePropertyChange("operation", null, "Change 'paid/notpaid' treatments to appointment comments");
+        
+        try{
+            appointment.setScope(Entity.Scope.LABWORK_CHECK);
+            appointment.update();
+            removeTreatmentReferences(65);
+            appointment.setScope(Entity.Scope.LABWORK_RECEIVED);
+            appointment.update();
+            removeTreatmentReferences(64);
+            appointment.setScope(Entity.Scope.CHECK_FOR_LABWORK);
+            appointment.update();
+            removeTreatmentReferences(63);
+        }catch(StoreException ex){
+            
+        }
+    }
+    
     /** Ensures in Patient table any Patient.isDeleted(true), the Patient.isArchived is set to true and isDeleted set to false
      *  initialises new Appointment::comment (makes blank before initialisation so on entry new appointment.comment is blank)
      *  -- from AppointmentTreatment.comment if appointment.pid > 30378; else appointment.comment copied from appointment.notes
@@ -3450,7 +3470,8 @@ public class DesktopViewController extends ViewController{
          switch (actionCommand){
              case COMMENT_MIGRATION_REQUEST ->{
                  //this.doMigrateCommentsFromNewAppointmentTreatmentCommentAndFromOldAppointmentNotesToNewAppointmentComment();
-                 startBackgroundAppointmentTreatmentProcess();
+                 //startBackgroundAppointmentTreatmentProcess();
+                 doExtraConvertTreatmentToCommentAction();
                  break;
              }
             case VIEW_ACTIVATED_NOTIFICATION ->{

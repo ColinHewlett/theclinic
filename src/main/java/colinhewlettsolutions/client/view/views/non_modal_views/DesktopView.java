@@ -353,9 +353,9 @@ public class DesktopView extends javax.swing.JFrame
         mniArchivedPatientsViewRequest.addActionListener(this);
         //mniPatientNotificationViewRequest.addActionListener(this);
         mniPatientAppointmentDataViewRequest.addActionListener(this);
-        mniPatientInvoices.setText("Comment migrator");
-        mniPatientInvoices.setActionCommand(Action.REQUEST_COMMENT_MIGRATION.toString());
-        mniPatientInvoices.addActionListener(this);
+        mniPatientInvoices.setText("Invoices");
+        //mniPatientInvoices.setActionCommand(Action.REQUEST_COMMENT_MIGRATION.toString());
+        //mniPatientInvoices.addActionListener(this);
         //mniToDoViewRequest.addActionListener(this);
         
         
@@ -878,7 +878,7 @@ public class DesktopView extends javax.swing.JFrame
 
         mnuUtilities.setText("Patient utilities");
 
-        mniPatientAppointmentDataViewRequest.setText("Latest appointment and recall data for each patient");
+        mniPatientAppointmentDataViewRequest.setText("Last appointment and recall data for each patient");
         mnuUtilities.add(mniPatientAppointmentDataViewRequest);
 
         mniArchivedPatientsViewRequest.setText("Patient archive");

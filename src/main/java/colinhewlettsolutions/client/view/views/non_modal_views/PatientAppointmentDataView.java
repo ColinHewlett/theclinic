@@ -497,17 +497,18 @@ public class PatientAppointmentDataView extends View
         model.setData(pad.get());
         switch (pad.getScope()){
             case PATIENT_APPOINTMENT_DATA_WITHOUT_APPOINTMENT ->{
-                setTableTitle("Inactive patients, had no appointments yet");
+                setTableTitle("inactive patients (had no appointments yet)");
                 break;
             }
             default ->{
-                setTableTitle("Active patients, had at least one appopintment");
+                setTableTitle("active patients (red signifies last appointment was cancelled ");
                 break;
             }
 
         }
         titledBorder = (TitledBorder)pnlPatientAppointmentData.getBorder();
-        titledBorder.setTitle(getTableTitle() + " (" + pad.get().size() + ")");
+        titledBorder.setTitle(pad.get().size() + " " + getTableTitle());
+        //titledBorder.setTitle(getTableTitle() + " (" + pad.get().size() + ")");
         pnlPatientAppointmentData.repaint();
     }
 
@@ -588,7 +589,7 @@ public class PatientAppointmentDataView extends View
         rdbGroup.add(rdbSomeAppointments);
         rdbGroup.add(rdbNoAppointments);
 
-        setTitle("Latest appointment and recall data for each patient");
+        setTitle("Last appointment and recall data for each patient");
 
         pnlPatientAppointmentData.setBorder(javax.swing.BorderFactory.createTitledBorder(getTableTitle()));
 
@@ -810,17 +811,14 @@ public class PatientAppointmentDataView extends View
     private javax.swing.JLabel jLabel2;
     private javax.swing.JPanel pnlActions;
     private javax.swing.JPanel pnlPatientActivity;
-    private javax.swing.JPanel pnlPatientActivity1;
     private javax.swing.JPanel pnlPatientAppointmentData;
     private javax.swing.JPanel pnlRecallCriteria;
     private javax.swing.JPanel pnlTimeFrame;
     private javax.swing.ButtonGroup rdbGroup;
     private javax.swing.JRadioButton rdbNoAppointments;
-    private javax.swing.JRadioButton rdbNoAppointments1;
     private javax.swing.JRadioButton rdbSelectGBTRecalls;
     private javax.swing.JRadioButton rdbSelectNonGBTRecalls;
     private javax.swing.JRadioButton rdbSomeAppointments;
-    private javax.swing.JRadioButton rdbSomeAppointments1;
     private javax.swing.JScrollPane scrPatientAppointmentDataTable;
     private javax.swing.JSpinner spnFromYear;
     private javax.swing.JSpinner spnToYear;

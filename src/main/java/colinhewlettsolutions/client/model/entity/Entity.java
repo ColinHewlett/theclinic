@@ -145,6 +145,9 @@ public class Entity implements IStoreClient{
                         PAID_195_POUNDS,        //used on comment migration
                         TRAINING_TO_UNBOOKABLE, //used on comment migration
                         ADMIN_TO_UNBOOKABLE,    //used on comment migration
+                        LABWORK_CHECK,          //used on comment migration
+                        LABWORK_RECEIVED,       //used on comment migration
+                        CHECK_FOR_LABWORK,       //used on comment migration
                         BANK_HOLIDAY_TO_UNBOOKABLE, //used on comment migration
                         BLANK_COMMENT,          //used on comment migration
                         CANCELLED,              //cancelled appointments

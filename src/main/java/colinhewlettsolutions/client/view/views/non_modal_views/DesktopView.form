@@ -28,7 +28,7 @@
               <SubComponents>
                 <MenuItem class="javax.swing.JMenuItem" name="mniPatientAppointmentDataViewRequest">
                   <Properties>
-                    <Property name="text" type="java.lang.String" value="Latest appointment and recall data for each patient"/>
+                    <Property name="text" type="java.lang.String" value="Last appointment and recall data for each patient"/>
                   </Properties>
                 </MenuItem>
                 <MenuItem class="javax.swing.JMenuItem" name="mniArchivedPatientsViewRequest">
