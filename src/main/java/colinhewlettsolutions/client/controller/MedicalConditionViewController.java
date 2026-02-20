@@ -25,6 +25,25 @@ import colinhewlettsolutions.client.view.views.non_modal_views.DesktopView;
  */
 public class MedicalConditionViewController extends ViewController{
     
+    public enum Actions{
+        PRIMARY_CONDITION_CREATE_REQUEST,
+        PRIMARY_CONDITION_DELETE_REQUEST,
+        PRIMARY_CONDITION_READ_REQUEST,
+        PRIMARY_CONDITION_RENAME_REQUEST,
+        PRINT_NEW_PATIENT_DETAILS_REQUEST,
+        SECONDARY_CONDITION_CREATE_REQUEST,
+        SECONDARY_CONDITION_DELETE_REQUEST,
+        SECONDARY_CONDITION_READ_REQUEST,
+        SECONDARY_CONDITION_RENAME_REQUEST,
+        VIEW_CLOSE_NOTIFICATION
+    }
+    
+    public enum Properties{
+        MEDICAL_CONDITION_VIEW_CONTROLLER_ERROR_RECEIVED,
+        PRIMARY_CONDITION_RECEIVED,
+        CONDITION_ERROR_RECEIVED
+    }
+    
     public MedicalConditionViewController(DesktopViewController controller,
                                Descriptor descriptor, DesktopView desktopView){
         setMyController(controller);
@@ -45,9 +64,8 @@ public class MedicalConditionViewController extends ViewController{
             //doDesktopViewControllerActionRequest(e);
         }
         else{ */ 
-        ViewController.MedicalConditionViewControllerActionEvent actionCommand =
-            ViewController.MedicalConditionViewControllerActionEvent
-                    .valueOf(e.getActionCommand());
+        MedicalConditionViewController.Actions actionCommand =
+            MedicalConditionViewController.Actions.valueOf(e.getActionCommand());
         switch (actionCommand){
             case PRINT_NEW_PATIENT_DETAILS_REQUEST:
                 try{
@@ -65,7 +83,7 @@ public class MedicalConditionViewController extends ViewController{
             case VIEW_CLOSE_NOTIFICATION:
                 ActionEvent actionEvent = new ActionEvent(
                     this,ActionEvent.ACTION_PERFORMED,
-                    ViewController.DesktopViewControllerActionEvent.
+                    DesktopViewController.Actions.
                             VIEW_CONTROLLER_CLOSE_NOTIFICATION.toString());
                 getMyController().actionPerformed(actionEvent);
                 break;
@@ -204,7 +222,7 @@ public class MedicalConditionViewController extends ViewController{
                     getDescriptor().getControllerDescription()
                             .setProperty(SystemDefinition.Properties.PRIMARY_CONDITION, primaryCondition);
                     firePropertyChangeEvent(
-                        ViewController.MedicalConditionViewControllerPropertyChangeEvent.
+                        MedicalConditionViewController.Properties.
                                 PRIMARY_CONDITION_RECEIVED.toString(),
                         (View)e.getSource(),
                         this,
@@ -235,7 +253,7 @@ public class MedicalConditionViewController extends ViewController{
                     isError = true;
                 }
                 firePropertyChangeEvent(
-                    ViewController.DesktopViewControllerPropertyChangeEvent.
+                    DesktopViewController.Properties.
                             MEDICAL_CONDITION_VIEW_CONTROLLER_CHANGE_NOTIFICATION.toString(),
                     (DesktopViewController)getMyController(),
                     this,
@@ -249,7 +267,7 @@ public class MedicalConditionViewController extends ViewController{
                     secondaryCondition.update();
                     getAllSecondaryConditionsFor(e,primaryCondition);
                     firePropertyChangeEvent(
-                        ViewController.DesktopViewControllerPropertyChangeEvent.
+                        DesktopViewController.Properties.
                                 MEDICAL_CONDITION_VIEW_CONTROLLER_CHANGE_NOTIFICATION.toString(),
                         (DesktopViewController)getMyController(),
                         this,
@@ -272,8 +290,7 @@ public class MedicalConditionViewController extends ViewController{
             if (error!=null){
                 getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.ERROR, error);
                 firePropertyChangeEvent(
-                    ViewController.MedicalConditionViewControllerPropertyChangeEvent
-                            .MEDICAL_CONDITION_VIEW_CONTROLLER_ERROR_RECEIVED
+                    MedicalConditionViewController.Properties.MEDICAL_CONDITION_VIEW_CONTROLLER_ERROR_RECEIVED
                             .toString(),
                     (View)e.getSource(),
                     this,
@@ -305,8 +322,7 @@ public class MedicalConditionViewController extends ViewController{
         getDescriptor().getControllerDescription()
                 .setProperty(SystemDefinition.Properties.PRIMARY_CONDITION, primaryCondition);
         firePropertyChangeEvent(
-            ViewController.MedicalConditionViewControllerPropertyChangeEvent.
-                    PRIMARY_CONDITION_RECEIVED.toString(),
+            MedicalConditionViewController.Properties.PRIMARY_CONDITION_RECEIVED.toString(),
             (View)e.getSource(),
             this,
             null,
@@ -323,7 +339,7 @@ public class MedicalConditionViewController extends ViewController{
         getDescriptor().getControllerDescription()
                 .setProperty(SystemDefinition.Properties.PRIMARY_CONDITION, pc);
         firePropertyChangeEvent(
-            ViewController.MedicalConditionViewControllerPropertyChangeEvent.
+            MedicalConditionViewController.Properties.
                     PRIMARY_CONDITION_RECEIVED.toString(),
             (View)e.getSource(),
             this,

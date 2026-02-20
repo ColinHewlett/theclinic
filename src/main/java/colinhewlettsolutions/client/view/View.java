@@ -11,11 +11,9 @@ import colinhewlettsolutions.client.view.views.non_modal_views.ProgressMonitorVi
 import colinhewlettsolutions.client.view.views.non_modal_views.PatientDocumentStoreView;
 import colinhewlettsolutions.client.view.views.modal_views.UserSystemWideSettingsView;
 import colinhewlettsolutions.client.view.views.modal_views.ModalUserScheduleListSettingsView;
-import colinhewlettsolutions.client.view.views.modal_views.ModalUserScheduleDiarySettingsView;
 import colinhewlettsolutions.client.view.views.non_modal_views.LoginNewPasswordEditorView;
 import colinhewlettsolutions.client.view.views.non_modal_views.LoginOldPasswordCheckView;
 import colinhewlettsolutions.client.view.views.non_modal_views.UserLoginView;
-import colinhewlettsolutions.client.controller.SystemDefinition;
 import colinhewlettsolutions.client.view.views.non_modal_views.*;
 import colinhewlettsolutions.client.view.views.modal_views.*;
 import colinhewlettsolutions.client.view.views.dialog_views.*;
@@ -141,9 +139,9 @@ public class View extends JInternalFrame
         setView(null);
         setModalView(null);
         switch(viewer){
-            case APPOINTMENTS_CANCELLED_VIEW:
+            /*case APPOINTMENTS_CANCELLED_VIEW:
                 setModalView(makeView(new ModalCancelledAppointmentsView(viewer, controller, desktopView)));
-                break;
+                break;*/
             case APPOINTMENT_EMPTY_SLOT_SCAN_CONFIGURATION_VIEW:
                 setModalView(makeView(new ModalEmptySlotScanConfigurationView(viewer, controller, desktopView)));
                 break;
@@ -162,9 +160,6 @@ public class View extends JInternalFrame
             case PATIENT_DOCUMENT_STORE_VIEW:
                 setView(makeView(new PatientDocumentStoreView(viewer, controller,desktopView)));
                 break;
-            case EXPORT_PROGRESS_VIEW:
-                setView(makeView(new DataMigrationProgressView(viewer, controller,desktopView)));
-                break;
             case IMAGE_VIEWER:
                 setView(makeView(new ImageViewer(viewer, controller, desktopView)));
                 break;
@@ -180,17 +175,8 @@ public class View extends JInternalFrame
             case MEDICAL_CONDITION_VIEW:
                 setView(makeView(new MedicalConditionView(viewer, controller, desktopView)));
                 break;
-            case MIGRATION_MANAGER_VIEW:
-                setView(makeView(new DataMigrationProgressView(viewer, controller, desktopView)));
-                break;
             case NON_SURGERY_DAY_EDITOR_VIEW:
                 setModalView(makeView(new ModalNonSurgeryDayEditorView(viewer, controller, desktopView)));
-                break;
-            case NOTIFICATION_EDITOR_VIEW:
-                setModalView(makeView(new ModalNotificationEditorView(viewer, controller, desktopView)));
-                break;
-            case NOTIFICATION_VIEW:
-                setView(makeView(new PatientNotificationView(viewer, controller, desktopView)));
                 break;
             case RECALL_PATIENTS_VIEW:
                 setView(makeView(new RecallPatientsView(viewer, controller, desktopView)));
@@ -247,9 +233,6 @@ public class View extends JInternalFrame
             case MODAL_PROGRESS_VIEW:
                 setModalView(makeView(new ModalProgressView(viewer, controller,desktopView)));
                 break;
-            case SCHEDULE_DIARY_VIEW:
-                setView(makeView(new ScheduleDiaryView(viewer, controller, desktopView)));
-                break;
             case SCHEDULE_EDITOR_VIEW:
                 setModalView(makeView(new ModalScheduleAndTreatmentEditorView(viewer, controller, desktopView)));
                 break;
@@ -274,9 +257,9 @@ public class View extends JInternalFrame
             case UNBOOKABLE_SLOT_SCANNER_VIEW:
                 setModalView(makeView(new ModalUnbookableSlotScannerView(viewer, controller,desktopView)));
                 break;
-            case USER_SCHEDULE_DIARY_SETTINGS_VIEW:
+            /*case USER_SCHEDULE_DIARY_SETTINGS_VIEW:
                 setModalView(makeView(new ModalUserScheduleDiarySettingsView(viewer, controller, desktopView)));
-                break;
+                break;*/
             case USER_SCHEDULE_LIST_SETTINGS_VIEW:
                 setModalView(makeView(new ModalUserScheduleListSettingsView(viewer, controller, desktopView)));
                 break;
@@ -366,7 +349,6 @@ public class View extends JInternalFrame
         MODAL_DATE_DIALOG,
         MODAL_PROGRESS_VIEW,
         PATIENT_DOCUMENT_STORE_VIEW,
-        SCHEDULE_DIARY_VIEW,
         SCHEDULE_EDITOR_VIEW,
         SCHEDULE_LIST_VIEW,
         SURGERY_DAY_EDITOR_VIEW,

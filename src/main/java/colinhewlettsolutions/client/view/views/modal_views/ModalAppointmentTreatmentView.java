@@ -5,7 +5,7 @@
 package colinhewlettsolutions.client.view.views.modal_views;
 
 import colinhewlettsolutions.client.controller.SystemDefinition;
-import colinhewlettsolutions.client.controller.Descriptor;
+import colinhewlettsolutions.client.controller.ScheduleViewController;
 import colinhewlettsolutions.client.controller.ViewController;
 import colinhewlettsolutions.client.model.entity.Treatment;
 import colinhewlettsolutions.client.model.entity.Appointment;
@@ -102,8 +102,7 @@ public class ModalAppointmentTreatmentView extends ModalView
     public void actionPerformed(ActionEvent e){
         int row = 0;
         TreatmentWithState tws = null;
-        ViewController.ScheduleViewControllerActionEvent
-                actionCommand = null;
+        ScheduleViewController.Actions actionCommand = null;
         switch (Action.valueOf(e.getActionCommand())){
             case REQUEST_CLOSE_VIEW:
                 try{
@@ -117,7 +116,7 @@ public class ModalAppointmentTreatmentView extends ModalView
                 if (tws!=null){
                     getMyController().getDescriptor().getViewDescription().
                             setProperty(SystemDefinition.Properties.TREATMENT_WITH_STATE, tws);
-                    actionCommand = ViewController.ScheduleViewControllerActionEvent
+                    actionCommand = ScheduleViewController.Actions
                         .APPOINTMENT_TREATMENT_COMMENT_UPDATE_REQUEST;
                     doSendActionEvent(actionCommand);
                     row = this.tblTreatmentWithState.getSelectedRow();
@@ -130,7 +129,7 @@ public class ModalAppointmentTreatmentView extends ModalView
                     tws.setComment("");
                     getMyController().getDescriptor().getViewDescription().
                             setProperty(SystemDefinition.Properties.TREATMENT_WITH_STATE, tws);
-                    actionCommand = ViewController.ScheduleViewControllerActionEvent
+                    actionCommand = ScheduleViewController.Actions
                         .APPOINTMENT_TREATMENT_COMMENT_UPDATE_REQUEST;
                     doSendActionEvent(actionCommand);
                     //this.tblTreatmentWithState.setRowSelectionInterval(row,row);
@@ -141,7 +140,7 @@ public class ModalAppointmentTreatmentView extends ModalView
                 if (tws!=null){
                     getMyController().getDescriptor().getViewDescription().
                             setProperty(SystemDefinition.Properties.TREATMENT_WITH_STATE, tws);
-                    actionCommand = ViewController.ScheduleViewControllerActionEvent
+                    actionCommand = ScheduleViewController.Actions
                         .APPOINTMENT_TREATMENT_COMMENT_UPDATE_REQUEST;
                     doSendActionEvent(actionCommand);
                     //row = this.tblTreatmentWithState.getSelectedRow();
@@ -155,8 +154,8 @@ public class ModalAppointmentTreatmentView extends ModalView
     
     @Override 
     public void propertyChange(PropertyChangeEvent e){
-        ViewController.ScheduleViewControllerPropertyChangeEvent propertyName =
-                ViewController.ScheduleViewControllerPropertyChangeEvent.valueOf(e.getPropertyName());
+        ScheduleViewController.Properties propertyName =
+                ScheduleViewController.Properties.valueOf(e.getPropertyName());
         switch (propertyName){
             case APPOINTMENT_SCHEDULE_ERROR_RECEIVED:
                 setIsErrorMessageReceived(true);
@@ -169,7 +168,7 @@ public class ModalAppointmentTreatmentView extends ModalView
     
     @Override
     public void tableChanged(TableModelEvent e){
-        ViewController.ScheduleViewControllerActionEvent actionCommand = null;
+        ScheduleViewController.Actions actionCommand = null;
         if (e.getSource() instanceof TreatmentWithStateTableModel){
             TreatmentWithState treatmentWithState = null;
             int row = e.getFirstRow();
@@ -183,9 +182,9 @@ public class ModalAppointmentTreatmentView extends ModalView
                     setProperty(SystemDefinition.Properties.TREATMENT_WITH_STATE, treatmentWithState);
             tblTreatmentWithState.clearSelection();
             if (treatmentWithState.getState())
-                actionCommand = ViewController.ScheduleViewControllerActionEvent
+                actionCommand = ScheduleViewController.Actions
                         .TREATMENT_STATE_SET_REQUEST;
-            else actionCommand = ViewController.ScheduleViewControllerActionEvent
+            else actionCommand = ScheduleViewController.Actions
                         .TREATMENT_STATE_RESET_REQUEST;
             doSendActionEvent(actionCommand);
         }
@@ -380,7 +379,7 @@ public class ModalAppointmentTreatmentView extends ModalView
     }
     
     private void doSendActionEvent(
-            ViewController.ScheduleViewControllerActionEvent actionCommand){
+            ScheduleViewController.Actions actionCommand){
         ActionEvent actionEvent = new ActionEvent(
             this,ActionEvent.ACTION_PERFORMED,
             actionCommand.toString());

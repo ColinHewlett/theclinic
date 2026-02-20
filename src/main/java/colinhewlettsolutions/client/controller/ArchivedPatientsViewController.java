@@ -65,7 +65,7 @@ public class ArchivedPatientsViewController extends ViewController {
     public void actionPerformed(ActionEvent e){
         Patient patient = null;
         if (e.getSource() instanceof DesktopViewController){
-            ViewController.DesktopViewControllerActionEvent actionCommand = ViewController.DesktopViewControllerActionEvent.valueOf(e.getActionCommand());
+            DesktopViewController.Actions actionCommand = DesktopViewController.Actions.valueOf(e.getActionCommand());
             switch (actionCommand){
                 case INITIALISE_VIEW_CONTROLLER:
                     try{
@@ -93,8 +93,8 @@ public class ArchivedPatientsViewController extends ViewController {
     
     @Override
     public void propertyChange(PropertyChangeEvent e){
-        ArchivedPatientsViewControllerPropertyChangeEvent event = 
-                ArchivedPatientsViewControllerPropertyChangeEvent.valueOf(e.getPropertyName());
+        ArchivedPatientsViewController.Properties event = 
+                ArchivedPatientsViewController.Properties.valueOf(e.getPropertyName());
         switch(event){
             case VIEW_CHANGE_NOTIFICATION ->{
                 try{
@@ -167,7 +167,7 @@ public class ArchivedPatientsViewController extends ViewController {
             case VIEW_CLOSE_NOTIFICATION ->{
                 actionEvent = new ActionEvent(
                     this,ActionEvent.ACTION_PERFORMED,
-                    ViewController.DesktopViewControllerActionEvent.
+                    DesktopViewController.Actions.
                             VIEW_CONTROLLER_CLOSE_NOTIFICATION.toString());
                 getMyController().actionPerformed(actionEvent);
                 break;
@@ -175,7 +175,7 @@ public class ArchivedPatientsViewController extends ViewController {
             case VIEW_ACTIVATED_NOTIFICATION ->{
                 actionEvent = new ActionEvent(
                         this,ActionEvent.ACTION_PERFORMED,
-                        ViewController.DesktopViewControllerActionEvent.
+                        DesktopViewController.Actions.
                                 VIEW_CONTROLLER_ACTIVATED_NOTIFICATION.toString());
                  this.getMyController().actionPerformed(actionEvent);
                  break;
@@ -183,7 +183,7 @@ public class ArchivedPatientsViewController extends ViewController {
             case VIEW_CHANGED_NOTIFICATION ->{
                  actionEvent = new ActionEvent(
                         this,ActionEvent.ACTION_PERFORMED,
-                        ViewController.DesktopViewControllerActionEvent.
+                        DesktopViewController.Actions.
                                 VIEW_CONTROLLER_CHANGED_NOTIFICATION.toString());
                  this.getMyController().actionPerformed(actionEvent);
                  break;

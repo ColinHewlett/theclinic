@@ -4,8 +4,8 @@
  */
 package colinhewlettsolutions.client.view.views.modal_views;
 
+import colinhewlettsolutions.client.controller.PatientViewController;
 import colinhewlettsolutions.client.controller.SystemDefinition;
-import colinhewlettsolutions.client.controller.Descriptor;
 import colinhewlettsolutions.client.model.entity.Patient;
 import colinhewlettsolutions.client.model.entity.Medication;
 import colinhewlettsolutions.client.model.entity.Entity;
@@ -17,19 +17,15 @@ import java.beans.PropertyVetoException;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
 import javax.swing.JOptionPane;
-import javax.swing.event.TableModelEvent;
-import javax.swing.event.TableModelListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.ListSelectionModel;
-import java.awt.event.MouseListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseAdapter;
 import java.util.Iterator;
 import javax.swing.JTable;
 import colinhewlettsolutions.client.view.View;
 import colinhewlettsolutions.client.view.views.non_modal_views.DesktopView;
-import colinhewlettsolutions.client.view.support_classes.models.MedicalHistoryTableModel;
 
 /**
  *
@@ -106,8 +102,8 @@ public class ModalPatientMedicationEditorView extends ModalView
     
     @Override
     public void propertyChange(PropertyChangeEvent e){
-        ViewController.PatientViewControllerPropertyChangeEvent propertyName =
-                ViewController.PatientViewControllerPropertyChangeEvent.valueOf(e.getPropertyName());
+        PatientViewController.Properties propertyName =
+                PatientViewController.Properties.valueOf(e.getPropertyName());
         switch(propertyName){
             
             case CLOSE_VIEW_REQUEST_RECEIVED:
@@ -167,7 +163,7 @@ public class ModalPatientMedicationEditorView extends ModalView
                                         getViewDescription().setProperty(SystemDefinition.Properties.MEDICATION, medication);
                         actionEvent = new ActionEvent(
                                     this,ActionEvent.ACTION_PERFORMED,
-                                    ViewController.PatientViewControllerActionEvent.
+                                    PatientViewController.Actions.
                                             PATIENT_MEDICATION_CREATE_REQUEST.toString());
                                 this.getMyController().actionPerformed(actionEvent);
                         break;
@@ -179,7 +175,7 @@ public class ModalPatientMedicationEditorView extends ModalView
                                         getViewDescription().setProperty(SystemDefinition.Properties.MEDICATION, medication);
                             actionEvent = new ActionEvent(
                                     this,ActionEvent.ACTION_PERFORMED,
-                                    ViewController.PatientViewControllerActionEvent.
+                                    PatientViewController.Actions.
                                             PATIENT_MEDICATION_UPDATE_REQUEST.toString());
                                 this.getMyController().actionPerformed(actionEvent);
                         }else{
@@ -199,7 +195,7 @@ public class ModalPatientMedicationEditorView extends ModalView
                     getMyController().getDescriptor().getViewDescription().setProperty(SystemDefinition.Properties.MEDICATION, medication);
                     actionEvent = new ActionEvent(
                         this,ActionEvent.ACTION_PERFORMED,
-                        ViewController.PatientViewControllerActionEvent.
+                        PatientViewController.Actions.
                                 PATIENT_MEDICATION_DELETE_REQUEST.toString());
                     this.getMyController().actionPerformed(actionEvent);
                 }

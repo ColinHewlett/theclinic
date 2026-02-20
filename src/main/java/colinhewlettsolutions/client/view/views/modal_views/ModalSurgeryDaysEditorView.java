@@ -7,6 +7,7 @@ package colinhewlettsolutions.client.view.views.modal_views;
 
 import colinhewlettsolutions.client.controller.SystemDefinition;
 import colinhewlettsolutions.client.controller.Descriptor;
+import colinhewlettsolutions.client.controller.ScheduleViewController;
 import colinhewlettsolutions.client.controller.ViewController;
 import colinhewlettsolutions.client.view.View;
 import colinhewlettsolutions.client.view.views.non_modal_views.DesktopView;
@@ -83,7 +84,7 @@ public class ModalSurgeryDaysEditorView extends ModalView {
         //setViewDescriptor((Descriptor)e.getNewValue());
  
         if (e.getPropertyName().equals(
-            ViewController.ScheduleViewControllerPropertyChangeEvent.APPOINTMENT_SCHEDULE_ERROR_RECEIVED.toString())){
+            ScheduleViewController.Properties.APPOINTMENT_SCHEDULE_ERROR_RECEIVED.toString())){
             ViewController.displayErrorMessage((String)getMyController().getDescriptor().
                     getControllerDescription().getProperty(SystemDefinition.Properties.ERROR),
                                                "Appointment editor dialog error",
@@ -222,7 +223,7 @@ public class ModalSurgeryDaysEditorView extends ModalView {
         
         ActionEvent actionEvent = new ActionEvent(this, 
                 ActionEvent.ACTION_PERFORMED,
-                ViewController.ScheduleViewControllerActionEvent.SURGERY_DAYS_EDIT_REQUEST.toString());
+                ScheduleViewController.Actions.SURGERY_DAYS_EDIT_REQUEST.toString());
         this.getMyController().actionPerformed(actionEvent);
     }//GEN-LAST:event_btnSaveActionPerformed
 

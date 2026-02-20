@@ -5,10 +5,10 @@
 package colinhewlettsolutions.client.view.views.modal_views;
 
 import colinhewlettsolutions.client.controller.Descriptor;
+import colinhewlettsolutions.client.controller.ScheduleViewController;
 import colinhewlettsolutions.client.controller.SystemDefinition;
 import colinhewlettsolutions.client.controller.ViewController;
 import colinhewlettsolutions.client.view.View;
-import colinhewlettsolutions.client.view.views.modal_views.ModalView;
 import colinhewlettsolutions.client.view.views.non_modal_views.DesktopView;
 import com.bric.colorpicker.ColorPickerDialog;
 import java.awt.Color;
@@ -56,13 +56,13 @@ public class ModalUserScheduleListSettingsView extends ModalView
             }
             case REQUEST_USER_SCHEDULE_LIST_FACTORY_SETTINGS ->{
                 sendActionRequestToController(
-                        ViewController.ScheduleViewControllerActionEvent.USER_SCHEDULE_LIST_FACTORY_SETTINGS_REQUEST);
+                        ScheduleViewController.Actions.USER_SCHEDULE_LIST_FACTORY_SETTINGS_REQUEST);
                 break;
             }
             case REQUEST_USER_SCHEDULE_LIST_SETTINGS_UPDATE ->{
                 copySettingsFromViewSettingsToViewDescription();
                 sendActionRequestToController(
-                        ViewController.ScheduleViewControllerActionEvent.USER_SCHEDULE_LIST_SETTINGS_UPDATE_REQUEST);
+                        ScheduleViewController.Actions.USER_SCHEDULE_LIST_SETTINGS_UPDATE_REQUEST);
                 break;
             }
             case REQUEST_LIST_BOOKABLE_SLOT_BACKGROUND_CHANGE,
@@ -112,7 +112,7 @@ public class ModalUserScheduleListSettingsView extends ModalView
     }
     
     private void sendActionRequestToController(
-            ViewController.ScheduleViewControllerActionEvent request){
+            ScheduleViewController.Actions request){
         ActionEvent actionEvent = new ActionEvent(
             this,ActionEvent.ACTION_PERFORMED,
             request.toString());

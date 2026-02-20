@@ -4,23 +4,15 @@
  */
 package colinhewlettsolutions.client.view.views.modal_views;
 
-import colinhewlettsolutions.client.controller.SystemDefinition;
 import colinhewlettsolutions.client.controller.ViewController;
 import com.github.lgooddatepicker.components.DatePickerSettings;
-import colinhewlettsolutions.client.controller.Descriptor;
-import static colinhewlettsolutions.client.controller.ViewController.NotificationViewControllerPropertyChangeEvent.RECEIVED_PATIENT_NOTIFICATION;
-import static colinhewlettsolutions.client.controller.ViewController.NotificationViewControllerPropertyChangeEvent.RECEIVED_PATIENT_NOTIFICATIONS;
-import static colinhewlettsolutions.client.controller.ViewController.ViewMode.CREATE;
-import static colinhewlettsolutions.client.controller.ViewController.ViewMode.Create;
-import static colinhewlettsolutions.client.controller.ViewController.ViewMode.UPDATE;
-import static colinhewlettsolutions.client.controller.ViewController.ViewMode.Update;
 import java.time.LocalDate;
 import javax.swing.ImageIcon; 
 import colinhewlettsolutions.client.controller.SystemDefinition;
+import colinhewlettsolutions.client.controller.ToDoViewController;
 import colinhewlettsolutions.client.model.entity.ToDo;
 import colinhewlettsolutions.client.view.View;
 import colinhewlettsolutions.client.view.views.non_modal_views.DesktopView;
-//import view.views.view_support_classes.renderers.NotificationEditorTableLocalDateRenderer;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
@@ -80,8 +72,8 @@ public class ModalToDoEditorView extends ModalView implements ActionListener{
     @Override
     public void propertyChange(PropertyChangeEvent e){
         //setViewDescriptor((Descriptor)e.getNewValue());
-        ViewController.ToDoViewControllerPropertyChangeEvent propertyName =
-                ViewController.ToDoViewControllerPropertyChangeEvent.valueOf(e.getPropertyName());
+        ToDoViewController.Properties propertyName =
+                ToDoViewController.Properties.valueOf(e.getPropertyName());
         switch (propertyName){
             case RECEIVED_TO_DO:
                 doReceivedToDo();
@@ -189,7 +181,7 @@ public class ModalToDoEditorView extends ModalView implements ActionListener{
     private void doCloseView(){
         ActionEvent actionEvent = new ActionEvent(
             this,ActionEvent.ACTION_PERFORMED,
-            ViewController.NotificationViewControllerActionEvent.MODAL_VIEWER_DEACTIVATED.toString());
+            ToDoViewController.Actions.MODAL_VIEWER_DEACTIVATED.toString());
         this.getMyController().actionPerformed(actionEvent);
     }
     
@@ -197,7 +189,7 @@ public class ModalToDoEditorView extends ModalView implements ActionListener{
         if (this.doValidateToDoRequest()){
             ActionEvent actionEvent = new ActionEvent(
                 this,ActionEvent.ACTION_PERFORMED,
-                ViewController.ToDoViewControllerActionEvent.TO_DO_EDITOR_CREATE_TO_DO_REQUEST.toString());
+                ToDoViewController.Actions.TO_DO_EDITOR_CREATE_TO_DO_REQUEST.toString());
             this.getMyController().actionPerformed(actionEvent);
         }       
     }
@@ -206,8 +198,7 @@ public class ModalToDoEditorView extends ModalView implements ActionListener{
         if (doValidateToDoRequest()){
             ActionEvent actionEvent = new ActionEvent(
                 this,ActionEvent.ACTION_PERFORMED,
-                ViewController.ToDoViewControllerActionEvent.
-                        TO_DO_EDITOR_UPDATE_TO_DO_REQUEST.toString());
+                ToDoViewController.Actions.TO_DO_EDITOR_UPDATE_TO_DO_REQUEST.toString());
             this.getMyController().actionPerformed(actionEvent);
         }
     }

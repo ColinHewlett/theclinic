@@ -4,8 +4,8 @@
  */
 package colinhewlettsolutions.client.view.views.modal_views;
 
+import colinhewlettsolutions.client.controller.PatientViewController;
 import colinhewlettsolutions.client.controller.SystemDefinition;
-import colinhewlettsolutions.client.controller.Descriptor;
 import colinhewlettsolutions.client.model.entity.Patient;
 import colinhewlettsolutions.client.controller.ViewController;
 import java.awt.event.ActionEvent;
@@ -13,11 +13,9 @@ import colinhewlettsolutions.client.view.views.non_modal_views.PatientView;
 import java.beans.PropertyVetoException;
 import colinhewlettsolutions.client.view.View;
 import colinhewlettsolutions.client.view.views.non_modal_views.DesktopView;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Iterator;
 import javax.swing.DefaultComboBoxModel;
-import javax.swing.JComboBox;
 
 /**
  *
@@ -188,9 +186,7 @@ public class ModalPatientGuardianEditorView extends ModalView{
             .setProperty(SystemDefinition.Properties.PATIENT, getCurrentlySelectedPatient());
         ActionEvent actionEvent = new ActionEvent(
             ModalPatientGuardianEditorView.this,ActionEvent.ACTION_PERFORMED, 
-            ViewController
-                    .PatientViewControllerActionEvent
-                    .PATIENT_EDITOR_VIEW_CHANGE
+            PatientViewController.Actions.PATIENT_EDITOR_VIEW_CHANGE
                     .toString());
         getMyController().actionPerformed(actionEvent);
     }

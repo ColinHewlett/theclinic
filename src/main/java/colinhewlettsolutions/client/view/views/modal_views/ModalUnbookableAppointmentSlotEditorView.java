@@ -84,8 +84,8 @@ public class ModalUnbookableAppointmentSlotEditorView extends ModalView
     
     @Override
     public void propertyChange(PropertyChangeEvent e){
-        ViewController.ScheduleViewControllerPropertyChangeEvent propertyName = 
-                ViewController.ScheduleViewControllerPropertyChangeEvent.valueOf(e.getPropertyName());
+        ScheduleViewController.Properties propertyName = 
+                ScheduleViewController.Properties.valueOf(e.getPropertyName());
         switch(propertyName){
             case APPOINTMENT_SCHEDULE_ERROR_RECEIVED:
                 String error = (String)getMyController().getDescriptor()

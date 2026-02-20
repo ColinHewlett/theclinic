@@ -132,8 +132,8 @@ public class ModalScheduleAndTreatmentEditorView extends ModalView
     
     @Override
     public void propertyChange(PropertyChangeEvent e){
-        ViewController.ScheduleViewControllerPropertyChangeEvent propertyName =
-                ViewController.ScheduleViewControllerPropertyChangeEvent.valueOf(e.getPropertyName());
+        ScheduleViewController.Properties propertyName =
+                ScheduleViewController.Properties.valueOf(e.getPropertyName());
         switch(propertyName){
             case APPOINTMENT_SCHEDULE_ERROR_RECEIVED:
                 String error = (String)getMyController().getDescriptor().
@@ -333,7 +333,7 @@ public class ModalScheduleAndTreatmentEditorView extends ModalView
                     getProperty(SystemDefinition.Properties.APPOINTMENT)).getDuration().isZero()){
                 actionEvent = new ActionEvent(
                         this, ActionEvent.ACTION_PERFORMED,
-                        ViewController.ScheduleViewControllerActionEvent
+                        ScheduleViewController.Actions
                                 .APPOINTMENTS_FOR_DAY_REQUEST.toString());
                 getMyController().actionPerformed(actionEvent); 
                 JOptionPane.showInternalMessageDialog(this, 
@@ -361,7 +361,7 @@ public class ModalScheduleAndTreatmentEditorView extends ModalView
                 setProperty(SystemDefinition.Properties.TREATMENT_WITH_STATE, tws);
             actionEvent = new ActionEvent(
                     this, ActionEvent.ACTION_PERFORMED,
-                    ViewController.ScheduleViewControllerActionEvent.
+                    ScheduleViewController.Actions.
                             SCHEDULE_EDITOR_CREATE_APPOINTMENT_REQUEST.toString());
             getMyController().actionPerformed(actionEvent);
         }
@@ -373,7 +373,7 @@ public class ModalScheduleAndTreatmentEditorView extends ModalView
                 setProperty(SystemDefinition.Properties.TREATMENT_WITH_STATE, tws);
         actionEvent = new ActionEvent(
                 this, ActionEvent.ACTION_PERFORMED,
-                ViewController.ScheduleViewControllerActionEvent.
+                ScheduleViewController.Actions.
                         SCHEDULE_EDITOR_UPDATE_APPOINTMENT_REQUEST.toString());
         getMyController().actionPerformed(actionEvent);
     }
@@ -381,7 +381,7 @@ public class ModalScheduleAndTreatmentEditorView extends ModalView
     private void doEmergencyAppointmentRequest(){
         actionEvent = new ActionEvent(
                 this, ActionEvent.ACTION_PERFORMED,
-                ViewController.ScheduleViewControllerActionEvent.
+                ScheduleViewController.Actions.
                         SCHEDULE_EDITOR_MAKE_EMERGENCY_APPOINTMENT_REQUEST.toString());
         getMyController().actionPerformed(actionEvent);
     }

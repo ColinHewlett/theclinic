@@ -6,10 +6,10 @@ package colinhewlettsolutions.client.view.views.non_modal_views;
 
 import colinhewlettsolutions.client.controller.SystemDefinition.Properties;
 import colinhewlettsolutions.client.controller.ViewController;
+import colinhewlettsolutions.client.controller.PatientViewController;
+import colinhewlettsolutions.client.controller.LoginViewController;
 import colinhewlettsolutions.client.model.non_entity.Credential;
 import colinhewlettsolutions.client.view.View;
-import colinhewlettsolutions.client.view.views.modal_views.ModalView;
-import colinhewlettsolutions.client.view.views.non_modal_views.DesktopView;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
@@ -61,7 +61,7 @@ public class UserLoginView extends View
                         setProperty(Properties.LOGIN_CREDENTIAL, credential);
                 ActionEvent actionEvent = new ActionEvent(
                         this,ActionEvent.ACTION_PERFORMED,
-                        ViewController.LoginViewControllerActionEvent.LOGIN_REQUEST.toString());
+                        LoginViewController.Actions.LOGIN_REQUEST.toString());
                 getMyController().actionPerformed(actionEvent);
                 break;
             }
@@ -71,8 +71,8 @@ public class UserLoginView extends View
     @Override
     public void propertyChange(PropertyChangeEvent e){
         String s = e.getSource().getClass().getSimpleName();
-        ViewController.LoginViewControllerPropertyChangeEvent property = 
-                ViewController.LoginViewControllerPropertyChangeEvent.valueOf(e.getPropertyName());
+        LoginViewController.Properties property = 
+                LoginViewController.Properties.valueOf(e.getPropertyName());
         switch(property){
             case CORRECT_LOGIN_CREDENTIAL_RECEIVED ->{
                 try{
@@ -142,7 +142,7 @@ public class UserLoginView extends View
             this.setClosed(true);
             ActionEvent actionEvent = new ActionEvent(
                     this,ActionEvent.ACTION_PERFORMED,
-                    ViewController.LoginViewControllerActionEvent.VIEW_CLOSED_NOTIFICATION.toString());
+                    LoginViewController.Actions.VIEW_CLOSED_NOTIFICATION.toString());
             getMyController().actionPerformed(actionEvent);
         }
         catch (PropertyVetoException ex){
@@ -166,7 +166,7 @@ public class UserLoginView extends View
                 
                 ActionEvent actionEvent = new ActionEvent(
                         UserLoginView.this,ActionEvent.ACTION_PERFORMED,
-                        ViewController.LoginViewControllerActionEvent.VIEW_CLOSED_NOTIFICATION.toString());
+                        LoginViewController.Actions.VIEW_CLOSED_NOTIFICATION.toString());
                 getMyController().actionPerformed(actionEvent);
                 
             }
@@ -174,7 +174,7 @@ public class UserLoginView extends View
             public void internalFrameActivated(InternalFrameEvent e) {
                 ActionEvent actionEvent = new ActionEvent(
                         UserLoginView.this,ActionEvent.ACTION_PERFORMED,
-                        ViewController.PatientViewControllerActionEvent.VIEW_ACTIVATED_NOTIFICATION.toString());
+                        PatientViewController.Actions.VIEW_ACTIVATED_NOTIFICATION.toString());
                 getMyController().actionPerformed(actionEvent);
             }
         };

@@ -9,6 +9,7 @@ import colinhewlettsolutions.client.controller.SystemDefinition;
 import colinhewlettsolutions.client.view.views.non_modal_views.DesktopView;
 import colinhewlettsolutions.client.view.support_classes.AppointmentDateVetoPolicy;
 import colinhewlettsolutions.client.controller.Descriptor;
+import colinhewlettsolutions.client.controller.ScheduleViewController;
 import colinhewlettsolutions.client.controller.ViewController;
 import colinhewlettsolutions.client.view.View;
 import com.github.lgooddatepicker.components.DatePickerSettings;
@@ -143,7 +144,7 @@ public class ModalNonSurgeryDayEditorView extends ModalView {
             getMyController().getDescriptor().getViewDescription().setProperty(SystemDefinition.Properties.SCHEDULE_DAY, dayDatePicker.getDate());
             ActionEvent actionEvent = new ActionEvent(this, 
                     ActionEvent.ACTION_PERFORMED,
-                    ViewController.ScheduleViewControllerActionEvent.APPOINTMENTS_FOR_NON_SURGERY_DAY_REQUEST.toString());
+                    ScheduleViewController.Actions.APPOINTMENTS_FOR_NON_SURGERY_DAY_REQUEST.toString());
             getMyController().actionPerformed(actionEvent);
         }
         else{

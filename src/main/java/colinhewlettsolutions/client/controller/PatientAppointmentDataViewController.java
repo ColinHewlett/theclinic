@@ -30,26 +30,21 @@ public class PatientAppointmentDataViewController extends ViewController{
     public enum Actions{
         //primary view action rtequests
         PATIENT_APPOINTMENT_DATA_REQUEST,
+        PATIENT_APPOINTMENT_DATA_SORT_REQUEST,
         PATIENT_ARCHIVE_REQUEST,
         PATIENT_RECALL_ACTIVITY_STATUS_CHANGE,
         PATIENT_RECALL_VIEW_REQUEST,
+        SET_TIME_FRAME_REQUEST,
         VIEW_CLOSE_NOTIFICATION,
         VIEW_ACTIVATED_NOTIFICATION,
-        VIEW_CHANGED_NOTIFICATION,
-        //secondary view action requests
-        //PROCESS_PENDING_REQUEST,
-        //PROCESS_START_REQUEST,
-        //PROCESS_STOP_REQUEST,
-        //REFRESH_DATA_REQUEST,
-        //MODAL_VIEW_CLOSE_NOTIFICATION 
+        VIEW_CHANGED_NOTIFICATION
     }
     
     public enum Properties{
+        ARCHIVED_PATIENT_RECEIVED,
         PATIENT_APPOINTMENT_DATA_RECEIVED,
-        VIEW_CHANGE_NOTIFICATION,
-        //PROCESS_CHANGE_NOTIFICATION,
-        //PROCESS_ENDED_NOTIFICATION,
-        //PROCESS_UPDATE_NOTIFICATION
+        PATIENT_APPOINTMENT_DATA_VIEW_CONTROLLER_CHANGE_NOTIFICATION,
+        VIEW_CHANGE_NOTIFICATION
     }
     
     public enum ViewMode{
@@ -71,7 +66,7 @@ public class PatientAppointmentDataViewController extends ViewController{
     @Override
     public void actionPerformed(ActionEvent e){
         if (e.getSource() instanceof DesktopViewController){
-            ViewController.DesktopViewControllerActionEvent actionCommand = ViewController.DesktopViewControllerActionEvent.valueOf(e.getActionCommand());
+            DesktopViewController.Actions actionCommand = DesktopViewController.Actions.valueOf(e.getActionCommand());
             switch (actionCommand){
                 case INITIALISE_VIEW_CONTROLLER:
                     try{

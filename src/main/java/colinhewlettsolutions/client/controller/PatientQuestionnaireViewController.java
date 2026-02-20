@@ -25,6 +25,21 @@ import colinhewlettsolutions.client.view.View;
  */
 public class PatientQuestionnaireViewController extends ViewController{
     
+    public enum Actions{
+        PATIENT_QUESTION_READ_REQUEST,
+        PATIENT_QUESTION_CREATE_REQUEST,
+        PATIENT_QUESTION_DELETE_REQUEST,
+        PATIENT_QUESTION_ANSWER_UPDATE_REQUEST,
+        PATIENT_QUESTION_ANSWER_DELETE_REQUEST,
+        VIEW_CLOSE_NOTIFICATION
+    }
+    
+    public enum Properties{
+        QUESTION_WITH_STATE_RECEIVED,
+        PATIENT_QUESTIONNAIRE_VIEW_CONTROLLER_ERROR_RECEIVED,
+        PATIENT_QUESTIONNAIRE_VIEW_CONTROLLER_CHANGE_NOTIFICATION
+    }
+    
     public PatientQuestionnaireViewController(DesktopViewController controller,
                                DesktopView desktopView){
         setMyController(controller);
@@ -45,14 +60,13 @@ public class PatientQuestionnaireViewController extends ViewController{
         QuestionWithState qws = null;
         Patient patient = (Patient)getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.PATIENT);
         
-        ViewController.PatientQuestionnaireViewControllerActionEvent actionCommand =
-            ViewController.PatientQuestionnaireViewControllerActionEvent
-                    .valueOf(e.getActionCommand());
+        Actions actionCommand =
+            Actions.valueOf(e.getActionCommand());
         switch(actionCommand){
             case VIEW_CLOSE_NOTIFICATION:
                 actionEvent = new ActionEvent(
                     this,ActionEvent.ACTION_PERFORMED,
-                    ViewController.DesktopViewControllerActionEvent.
+                    DesktopViewController.Actions.
                             VIEW_CONTROLLER_CLOSE_NOTIFICATION.toString());
                 getMyController().actionPerformed(actionEvent);
                 break;
@@ -134,8 +148,7 @@ public class PatientQuestionnaireViewController extends ViewController{
                     qws.set(QWS);
                     this.getDescriptor().getControllerDescription()
                             .setProperty(SystemDefinition.Properties.QUESTION_WITH_STATE, qws);
-                    firePropertyChangeEvent(
-                            ViewController.PatientQuestionnaireViewControllerPropertyChangeEvent.
+                    firePropertyChangeEvent(Properties.
                                     QUESTION_WITH_STATE_RECEIVED.toString(),
                             (View)e.getSource(),
                             this,

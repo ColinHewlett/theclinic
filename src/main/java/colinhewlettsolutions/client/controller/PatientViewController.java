@@ -23,21 +23,14 @@ import colinhewlettsolutions.client.view.View;
 import colinhewlettsolutions.client.view.views.modal_views.ModalView;
 import colinhewlettsolutions.client.model.repository.StoreException;//01/03/2023
 import static colinhewlettsolutions.client.controller.ViewController.displayErrorMessage;
-import colinhewlettsolutions.client.controller.SystemDefinition.Properties;
-import static colinhewlettsolutions.client.controller.ViewController.PatientViewControllerActionEvent.PATIENT_GUARDIAN_EDITOR_VIEW_REQUEST;
-import static colinhewlettsolutions.client.controller.ViewController.PatientViewControllerActionEvent.PATIENT_RECALL_EDITOR_VIEW_REQUEST;
-import static colinhewlettsolutions.client.controller.ViewController.PatientViewControllerActionEvent.VIEW_ACTIVATED_NOTIFICATION;
 import colinhewlettsolutions.client.view.views.modal_views.ModalDateDialog;
 import java.beans.PropertyChangeSupport;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
-import java.beans.PropertyVetoException;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.FileAlreadyExistsException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -59,21 +52,37 @@ public class PatientViewController extends ViewController {
     private Patient currentlySelectedPatient = null;
     
     public enum Actions{
+        CLINICAL_NOTE_FOR_APPOINTMENT_REQUEST,
+        CLINICAL_NOTE_DELETE_REQUEST,
+        CLINICAL_NOTE_CREATE_REQUEST,
+        CLINICAL_NOTE_UPDATE_REQUEST,
         CLINICAL_NOTE_VIEW_REQUEST,
+        CLOSE_PATIENT_VIEW_WITH_SAME_PATIENT_REQUEST,
+        CONDITION_STATE_UPDATE_REQUEST,
         DELETED_PATIENT_REQUEST,
         IMAGE_VIEWER_REQUEST,
+        MODAL_VIEWER_ACTIVATED,
         NULL_PATIENT_REQUEST,
         PATIENT_ADDITIONAL_NOTES_VIEW_REQUEST,
         PATIENT_CREATE_REQUEST,
         PATIENT_ARCHIVE_REQUEST,
+        PATIENT_DELETE_REQUEST,
         PATIENT_DOCTOR_CREATE_REQUEST,
         PATIENT_DOCTOR_DELETE_REQUEST,
         PATIENT_DOCTOR_EDITOR_VIEW_REQUEST,
         PATIENT_DOCTOR_UPDATE_REQUEST,
         PATIENT_DOCUMENT_STORE_VIEW_CONTROLLER_REQUEST,
+        PATIENT_EDITOR_VIEW_CHANGE,
+        PATIENT_GBT_RECALL_EDITOR_VIEW_CHANGE,
         PATIENT_GBT_RECALL_EDITOR_VIEW_REQUEST,
         PATIENT_GUARDIAN_EDITOR_VIEW_REQUEST,
+        PATIENT_GUARDIAN_REQUEST,
+        PATIENT_GUARDIANS_REQUEST,
         PATIENT_INVOICE_VIEW_CONTROLLER_REQUEST,
+        PATIENT_MEDICAL_HISTORY_1_EDITOR_VIEW_REQUEST,
+        PATIENT_MEDICAL_HISTORY_2_EDITOR_VIEW_REQUEST,
+        PATIENT_MEDICAL_HISTORY_NOTE_TAKER_REQUEST,
+        PATIENT_MEDICAL_HISTORY_NOTES_TAKEN_REQUEST,
         PATIENT_MEDICAL_HISTORY_VIEW_CONTROLLER_REQUEST,
         PATIENT_MEDICATION_CREATE_REQUEST,
         PATIENT_MEDICATION_DELETE_REQUEST,
@@ -83,12 +92,16 @@ public class PatientViewController extends ViewController {
         PRINT_PATIENT_MEDICAL_HISTORY_REQUEST,
         PATIENT_PHONE_EMAIL_EDITOR_VIEW_REQUEST,
         PATIENT_QUESTIONNAIRE_VIEW_CONTROLLER_REQUEST,
+        PATIENT_RECALL_EDITOR_VIEW_CHANGE,
         PATIENT_RECALL_EDITOR_VIEW_REQUEST,
+        PATIENT_RECOVER_REQUEST,
         PATIENT_RESTORE_REQUEST,
         PATIENT_RESTORE_VIEW_REQUEST,
         PATIENT_REQUEST,
+        PATIENTS_REQUEST,
         PATIENT_SELECTION_VIEW_REQUEST,
         PATIENT_UPDATE_REQUEST,
+        PATIENT_VIEW_CLOSED,
         RECOVER_PATIENT_REQUEST,
         SCHEDULE_LIST_VIEW_CONTROLLER_REQUEST,
         SETTINGS_TITLED_BORDER_REQUEST,
@@ -97,7 +110,23 @@ public class PatientViewController extends ViewController {
         VIEW_ACTIVATED_NOTIFICATION,
         VIEW_CHANGED_NOTIFICATION,
         VIEW_CLOSED_NOTIFICATION
-
+    }
+    
+    public enum Properties{
+        CLOSE_VIEW_REQUEST_RECEIVED,
+        DOCTOR_RECEIVED,
+        MAKE_VIEW_VISIBLE,
+        MAKE_VIEW_INVISIBLE,
+        NULL_PATIENT_RECEIVED,
+        PATIENT_EDITOR_VIEW_CLOSED,
+        PATIENT_GUARDIANS_RECEIVED,
+        PATIENT_MEDICAL_HISTORY_RECEIVED,
+        PATIENT_NOTES_RECEIVED,
+        PATIENT_RECEIVED,
+        PATIENTS_RECEIVED,
+        PATIENT_TO_SELECT_RECEIVED,
+        PATIENT_VIEW_CHANGE_NOTIFICATION,
+        PATIENT_VIEW_CONTROLLER_ERROR_RECEIVED  
     }
     
     private void setCurrentlySelectedPatient(Patient value){
@@ -106,20 +135,20 @@ public class PatientViewController extends ViewController {
             /*getDescriptor().getControllerDescription()
                     .setViewMode(ViewMode.CREATE);*/
             getDescriptor().getControllerDescription()
-                    .setProperty(Properties.VIEW_MODE, ViewMode.CREATE);
+                    .setProperty(SystemDefinition.Properties.VIEW_MODE, ViewMode.CREATE);
         }
         else {
             /*getDescriptor().getControllerDescription()
                     .setViewMode(ViewMode.UPDATE);*/
             getDescriptor().getControllerDescription()
-                    .setProperty(Properties.VIEW_MODE, ViewMode.UPDATE);
+                    .setProperty(SystemDefinition.Properties.VIEW_MODE, ViewMode.UPDATE);
         }
         getDescriptor().getControllerDescription()
-                .setProperty(Properties.PATIENT, value);
+                .setProperty(SystemDefinition.Properties.PATIENT, value);
     }
     
     private Patient getCurrentlySelectedPatient(){
-        return (Patient)getDescriptor().getControllerDescription().getProperty(Properties.PATIENT);
+        return (Patient)getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.PATIENT);
     }
     
     private PatientSelectionMode getPatientSelectionMode(){
@@ -164,7 +193,7 @@ public class PatientViewController extends ViewController {
             case PRINT_PATIENT_MEDICAL_HISTORY_REQUEST:
                 actionEvent = new ActionEvent(
                         this,ActionEvent.ACTION_PERFORMED,
-                        ViewController.DesktopViewControllerActionEvent
+                        DesktopViewController.Actions
                                 .PRINT_PATIENT_MEDICAL_HISTORY_REQUEST.toString());
                 this.getMyController().actionPerformed(actionEvent);
                 break;
@@ -177,10 +206,10 @@ public class PatientViewController extends ViewController {
             case PATIENT_NOTES_EDITOR_VIEW_REQUEST:   
                 if (getCurrentlySelectedPatient().getIsKeyDefined()){
                     getDescriptor().getControllerDescription()
-                            .setProperty(Properties.PATIENT, getCurrentlySelectedPatient());
+                            .setProperty(SystemDefinition.Properties.PATIENT, getCurrentlySelectedPatient());
                     actionEvent = new ActionEvent(
                         this,ActionEvent.ACTION_PERFORMED,
-                        ViewController.DesktopViewControllerActionEvent
+                        DesktopViewController.Actions
                             .TREATMENT_VIEW_CONTROLLER_REQUEST.toString());
                     this.getMyController().actionPerformed(actionEvent);
                 }else{
@@ -189,8 +218,7 @@ public class PatientViewController extends ViewController {
                         "Patient View Controller Error", 
                         JOptionPane.WARNING_MESSAGE);
                     firePropertyChangeEvent(
-                            ViewController.PatientViewControllerPropertyChangeEvent.
-                                PATIENT_EDITOR_VIEW_CLOSED.toString(),
+                            Properties.PATIENT_EDITOR_VIEW_CLOSED.toString(),
                             getView(),
                             this,
                             null,
@@ -217,7 +245,7 @@ public class PatientViewController extends ViewController {
                     patient = new Patient();
                     patient.setScope(Scope.ARCHIVED);
                     patient.read();
-                    getDescriptor().getControllerDescription().setProperty(Properties.PATIENTS, patient.get());
+                    getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.PATIENTS, patient.get());
                     View.setViewer(View.Viewer.PATIENT_SELECTION_VIEW);
                     //this.view2 = View.factory(this, getDescriptor(), this.desktopView);
                     setModalView((ModalView)new View().make(
@@ -236,11 +264,6 @@ public class PatientViewController extends ViewController {
                     String message = ex.getMessage();
                     displayErrorMessage(message,"AppointmentViewController error",JOptionPane.WARNING_MESSAGE);
                 }
-                
-                
-                //setPatientSelectionMode(PatientSelectionMode.PATIENT_RECOVERY);
-                //doPatientRecoverySelectionRequest(e);
-                //setPatientSelectionMode(PatientSelectionMode.PATIENT_SELECTION);
                 break;
             case PATIENT_REQUEST:
                 //06/12/2023 19:02
@@ -249,25 +272,7 @@ public class PatientViewController extends ViewController {
                 doPatientRequest();
                 break;
             case PATIENT_SELECTION_VIEW_REQUEST:
-                /*
-                patient = null;
-                ArrayList<Patient> patients = null;
-                try{
-                    patient = new Patient();
-                    patient.setScope(Scope.ALL);
-                    patient.read();
-                    getDescriptor().getControllerDescription().setProperty(Properties.PATIENTS, patient.get());
-                    View.setViewer(View.Viewer.PATIENT_SELECTION_VIEW);
-                    //this.view2 = View.factory(this, getDescriptor(), this.desktopView);
-                    setView((ModalView)new View().make(
-                            View.Viewer.PATIENT_SELECTION_VIEW,
-                            this,
-                            this.getDesktopView()).getModalView());
-                }
-                catch (StoreException ex){
-                    String message = ex.getMessage();
-                    displayErrorMessage(message,"AppointmentViewController error",JOptionPane.WARNING_MESSAGE);
-                }*/
+                
                 break;
             case PATIENT_UPDATE_REQUEST:
                 doPatientUpdateRequest();
@@ -292,14 +297,14 @@ public class PatientViewController extends ViewController {
             case VIEW_ACTIVATED_NOTIFICATION:
                 actionEvent = new ActionEvent(
                         this,ActionEvent.ACTION_PERFORMED,
-                        ViewController.DesktopViewControllerActionEvent.
+                        DesktopViewController.Actions.
                                 VIEW_CONTROLLER_ACTIVATED_NOTIFICATION.toString());
                 this.getMyController().actionPerformed(actionEvent);
                 break;
             case VIEW_CHANGED_NOTIFICATION:
                 actionEvent = new ActionEvent(
                         this,ActionEvent.ACTION_PERFORMED,
-                        ViewController.DesktopViewControllerActionEvent.
+                        DesktopViewController.Actions.
                                 VIEW_CONTROLLER_CHANGED_NOTIFICATION.toString());
                 this.getMyController().actionPerformed(actionEvent);
                 break;
@@ -373,7 +378,7 @@ public class PatientViewController extends ViewController {
     
     private void doPatientRestoreRequest(ActionEvent e){
         ArrayList<Appointment> appointments = new ArrayList<>();
-        Patient patient = (Patient)getDescriptor().getViewDescription().getProperty(Properties.PATIENT);
+        Patient patient = (Patient)getDescriptor().getViewDescription().getProperty(SystemDefinition.Properties.PATIENT);
         //getDescriptor().getControllerDescription().setProperty(Properties.PATIENT, patient);
         try{
             patient.setIsArchived(false);
@@ -381,13 +386,12 @@ public class PatientViewController extends ViewController {
             appointments = patient.getAppointmentHistory();
             patient.setScope(Entity.Scope.ALL);
             patient.read();
-            getDescriptor().getControllerDescription().setProperty(Properties.PATIENTS, patient.get());
-            getDescriptor().getControllerDescription().setProperty(Properties.APPOINTMENTS, appointments);
-            getDescriptor().getControllerDescription().setProperty(Properties.PATIENT, patient);
+            getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.PATIENTS, patient.get());
+            getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.APPOINTMENTS, appointments);
+            getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.PATIENT, patient);
             
             firePropertyChangeEvent(
-                    ViewController.PatientViewControllerPropertyChangeEvent.
-                        PATIENTS_RECEIVED.toString(),
+                    Properties.PATIENTS_RECEIVED.toString(),
                     getView(),
                     this,
                     null,
@@ -395,8 +399,7 @@ public class PatientViewController extends ViewController {
             ); 
             
             firePropertyChangeEvent(
-                    ViewController.PatientViewControllerPropertyChangeEvent.
-                        PATIENT_RECEIVED.toString(),
+                    Properties.PATIENT_RECEIVED.toString(),
                     getView(),
                     this,
                     null,
@@ -411,8 +414,8 @@ public class PatientViewController extends ViewController {
     
     private void doPatientDocumentStoreViewControllerRequest(){
         ViewController.ViewMode viewMode = (ViewController.ViewMode)getDescriptor().getViewDescription().
-                getProperty(Properties.VIEW_MODE);
-        getDescriptor().getControllerDescription().setProperty(Properties.VIEW_MODE, viewMode);
+                getProperty(SystemDefinition.Properties.VIEW_MODE);
+        getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.VIEW_MODE, viewMode);
         ActionEvent actionEvent = new ActionEvent(
                 this,ActionEvent.ACTION_PERFORMED,
                 PatientViewController.Actions.PATIENT_DOCUMENT_STORE_VIEW_CONTROLLER_REQUEST.toString());
@@ -425,14 +428,14 @@ public class PatientViewController extends ViewController {
         Path documentStoreFolderDocument = null;
         Path documentStoreFolderMedicalHistory = null;
         File document = (File)getDescriptor().getViewDescription().
-                getProperty(Properties.PATIENT_DOCUMENT);
+                getProperty(SystemDefinition.Properties.PATIENT_DOCUMENT);
         Patient patient = (Patient)getDescriptor().getControllerDescription().
-                getProperty(Properties.PATIENT);
+                getProperty(SystemDefinition.Properties.PATIENT);
         String patientNameString = patient.getName().getTitle() + " "
                             + patient.getName().getForenames() + " "
                             + patient.getName().getSurname();
         documentStoreFolder = (Path)getDescriptor().getControllerDescription().
-                    getProperty(Properties.DOCUMENT_STORE);
+                    getProperty(SystemDefinition.Properties.DOCUMENT_STORE);
         documentStoreFolderPatientKeyFolder= documentStoreFolder.resolve(String.valueOf(patient.getKey()));
         if (Files.notExists(documentStoreFolderPatientKeyFolder)){
             /**
@@ -452,7 +455,7 @@ public class PatientViewController extends ViewController {
         documentStoreFolderDocument = documentStoreFolderPatientKeyFolder.resolve("document");
         documentStoreFolderMedicalHistory = documentStoreFolderPatientKeyFolder.resolve("medical_history");
         ViewController.ViewMode viewMode = (ViewController.ViewMode)getDescriptor().getViewDescription().
-                getProperty(Properties.VIEW_MODE);
+                getProperty(SystemDefinition.Properties.VIEW_MODE);
         if(document!=null){
             switch(viewMode){
                 case DOCUMENT ->{
@@ -483,7 +486,7 @@ public class PatientViewController extends ViewController {
                         this, 
                         this.getDesktopView()).getModalView());
                     date = (LocalDateTime)getDescriptor().getViewDescription().
-                            getProperty(Properties.DATE_TIME);
+                            getProperty(SystemDefinition.Properties.DATE_TIME);
                     if (date == null){
                         JOptionPane.showInternalMessageDialog(this.getView(),"a valid date must be entered for the scanned image", "Data error",JOptionPane.INFORMATION_MESSAGE);
                     }else{
@@ -542,10 +545,9 @@ public class PatientViewController extends ViewController {
                 break;
             }
             case INITIALISE_VIEW_CONTROLLER:
-                Patient patient = (Patient)getDescriptor().getControllerDescription().getProperty(Properties.PATIENT);
+                Patient patient = (Patient)getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.PATIENT);
                 firePropertyChangeEvent(
-                    ViewController.PatientViewControllerPropertyChangeEvent
-                            .PATIENT_TO_SELECT_RECEIVED.toString(),
+                    Properties.PATIENT_TO_SELECT_RECEIVED.toString(),
                     getView(),
                     this,
                     null,
@@ -557,15 +559,15 @@ public class PatientViewController extends ViewController {
     
     private void doImageViewerRequest(){
         int count = this.getMyController().getDesktopView().getDeskTop().getAllFrames().length;
-        getDescriptor().getControllerDescription().setProperty(Properties.PATIENT_DOCUMENT,
-                (ArrayList<File>)getDescriptor().getViewDescription().getProperty(Properties.PATIENT_DOCUMENT));
+        getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.PATIENT_DOCUMENT,
+                (ArrayList<File>)getDescriptor().getViewDescription().getProperty(SystemDefinition.Properties.PATIENT_DOCUMENT));
         setView(new View().make(View.Viewer.IMAGE_VIEWER, this, getDesktopView()));
         getMyController().getDesktopView().cascadeInternalFrames(DesktopView.CascadeOrder.TOP_TO_FRONT);
     }
     
     private void doClinicalNoteViewRequest(){
-        getDescriptor().getControllerDescription().setProperty(Properties.APPOINTMENT,
-                (Appointment)getDescriptor().getViewDescription().getProperty(Properties.APPOINTMENT));
+        getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.APPOINTMENT,
+                (Appointment)getDescriptor().getViewDescription().getProperty(SystemDefinition.Properties.APPOINTMENT));
         setModalView((ModalView)new View().make(View.Viewer.CLINICAL_NOTE_VIEW,
                     this, 
                     this.getDesktopView()).getModalView());
@@ -599,45 +601,12 @@ public class PatientViewController extends ViewController {
         LocalTime time = null;
         LocalDateTime dateTime = null;
         String dateTimeFileName = null;
-        date = (LocalDate)getDescriptor().getViewDescription().getProperty(Properties.DATE_TIME);
+        date = (LocalDate)getDescriptor().getViewDescription().getProperty(SystemDefinition.Properties.DATE_TIME);
         time = LocalTime.now();
         dateTime = date.atTime(time);
         dateTimeFileName = dateTime.format(DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss"));
         return dateTimeFileName + "." + extension;
     }
-    
-    /*
-    private void makeFileNameFromDateAndNow(){
-        String extension = null;
-        String targetFileName = null;
-        Patient patient = null;
-        Path documentStoreFolder = null;
-        ArrayList<File> sourceDocument = null;
-
-
-        sourceDocument = (ArrayList<File>)getDescriptor().getViewDescription().
-                getProperty(Properties.PATIENT_DOCUMENT);
-        patient = (Patient)getDescriptor().getControllerDescription().
-                getProperty(Properties.PATIENT);
-        documentStoreFolder = ((File)getDescriptor().getControllerDescription().getProperty(Properties.DOCUMENT_STORE)).toPath();
-        documentStoreFolder = documentStoreFolder.resolve(String.valueOf(patient.getKey()));
-        try{
-            //create folder for this patient's documents if it does not already exist
-            if (!Files.exists(documentStoreFolder)){
-                Files.createDirectories(documentStoreFolder);
-            }
-            //check if source file to be copied has an extension
-            extension = getFileExtension(sourceDocumentFolder);
-            if (extension.length() > 0){
-                //yes: add extension to copied filename of the source file and copy the file to patient's document store
-                targetFileName = getTargetFileName(extension);
-                documentStoreFolder = documentStoreFolder.resolve(targetFileName);
-                Files.copy(sourceDocumentFolder, documentStoreFolder);
-            }
-        }catch(IOException ex){
-             ex.printStackTrace();  
-        }
-    }*/
     
     private void doModalDocumentStoreViewAction(ActionEvent e){
         PatientViewController.Actions actionCommand =
@@ -671,17 +640,16 @@ public class PatientViewController extends ViewController {
             case CLINICAL_NOTE_CREATE_REQUEST:
                 try{
                     appointment = 
-                            (Appointment)getDescriptor().getControllerDescription().getProperty(Properties.APPOINTMENT);
-                    clinicalNote = (ClinicalNote)getDescriptor().getViewDescription().getProperty(Properties.CLINICAL_NOTE);
+                            (Appointment)getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.APPOINTMENT);
+                    clinicalNote = (ClinicalNote)getDescriptor().getViewDescription().getProperty(SystemDefinition.Properties.CLINICAL_NOTE);
                     clinicalNote.insert();
                     doClinicalNoteForAppoinmentRequest(e);
                     if(getDescriptor().getControllerDescription()
-                            .getProperty(Properties.CLINICAL_NOTE) == null){
+                            .getProperty(SystemDefinition.Properties.CLINICAL_NOTE) == null){
                         error = "Attempt to create a new clinical note failed";
-                        getDescriptor().getControllerDescription().setProperty(Properties.ERROR, error);
+                        getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.ERROR, error);
                         firePropertyChangeEvent(
-                            ViewController.ClinicalNoteViewControllerPropertyChangeEvent
-                                    .CLINICAL_NOTE_ERROR_RECEIVED.toString(),
+                            ClinicalNoteViewController.Properties.CLINICAL_NOTE_ERROR_RECEIVED.toString(),
                             (View)e.getSource(),
                             this,
                             null,
@@ -699,7 +667,7 @@ public class PatientViewController extends ViewController {
             case CLINICAL_NOTE_DELETE_REQUEST:
                 try{
                     clinicalNote = (ClinicalNote)getDescriptor()
-                                .getViewDescription().getProperty(Properties.CLINICAL_NOTE);
+                                .getViewDescription().getProperty(SystemDefinition.Properties.CLINICAL_NOTE);
                     clinicalNote.setScope(Entity.Scope.SINGLE);
                     clinicalNote.delete();
                     doClinicalNoteForAppoinmentRequest(e);
@@ -714,7 +682,7 @@ public class PatientViewController extends ViewController {
             case CLINICAL_NOTE_UPDATE_REQUEST:
                 try{
                         clinicalNote = (ClinicalNote)getDescriptor()
-                                    .getViewDescription().getProperty(Properties.CLINICAL_NOTE);
+                                    .getViewDescription().getProperty(SystemDefinition.Properties.CLINICAL_NOTE);
                         clinicalNote.update();
                         doClinicalNoteForAppoinmentRequest(e);
                     }catch(StoreException ex){
@@ -730,18 +698,17 @@ public class PatientViewController extends ViewController {
     
     private void doClinicalNoteForAppoinmentRequest(ActionEvent e)throws StoreException{
         Appointment appointment = 
-                (Appointment)getDescriptor().getControllerDescription().getProperty(Properties.APPOINTMENT);
+                (Appointment)getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.APPOINTMENT);
         ClinicalNote clinicalNote = new ClinicalNote(appointment);
         clinicalNote.setScope(Entity.Scope.FOR_APPOINTMENT);
         clinicalNote = clinicalNote.read();
         if (clinicalNote.get().isEmpty())
             getDescriptor().getControllerDescription()
-                    .setProperty(Properties.CLINICAL_NOTE, null);
+                    .setProperty(SystemDefinition.Properties.CLINICAL_NOTE, null);
         else getDescriptor().getControllerDescription()
-                    .setProperty(Properties.CLINICAL_NOTE, clinicalNote.get().get(0));
+                    .setProperty(SystemDefinition.Properties.CLINICAL_NOTE, clinicalNote.get().get(0));
         firePropertyChangeEvent(
-            ViewController.ClinicalNoteViewControllerPropertyChangeEvent
-                    .CLINICAL_NOTE_RECEIVED.toString(),
+            ClinicalNoteViewController.Properties.CLINICAL_NOTE_RECEIVED.toString(),
             //getView(),
             (ModalView)e.getSource(),
             this,
@@ -751,8 +718,8 @@ public class PatientViewController extends ViewController {
     }
 
     private void doClinicalNoteViewControllerRequest(){
-        getDescriptor().getControllerDescription().setProperty(Properties.APPOINTMENT, 
-                getDescriptor().getViewDescription().getProperty(Properties.APPOINTMENT));
+        getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.APPOINTMENT, 
+                getDescriptor().getViewDescription().getProperty(SystemDefinition.Properties.APPOINTMENT));
         setModalView((ModalView)new View().make(View.Viewer.CLINICAL_NOTE_VIEW,
                     this, 
                     this.getDesktopView()).getModalView());
@@ -764,8 +731,8 @@ public class PatientViewController extends ViewController {
     
     private void doScheduleViewControllerRequest(){  
         //setEntityDescriptorFromView(view.getViewDescriptor());
-        getDescriptor().getControllerDescription().setProperty(Properties.SCHEDULE_DAY,
-                getDescriptor().getViewDescription().getProperty(Properties.SCHEDULE_DAY));
+        getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.SCHEDULE_DAY,
+                getDescriptor().getViewDescription().getProperty(SystemDefinition.Properties.SCHEDULE_DAY));
         ActionEvent actionEvent = new ActionEvent(
             this,ActionEvent.ACTION_PERFORMED,
             PatientViewController.Actions.SCHEDULE_LIST_VIEW_CONTROLLER_REQUEST.toString());
@@ -811,8 +778,7 @@ public class PatientViewController extends ViewController {
                     this, 
                     this.getDesktopView()).getModalView());
         firePropertyChangeEvent(
-                        ViewController.PatientViewControllerPropertyChangeEvent.
-                            PATIENT_EDITOR_VIEW_CLOSED.toString(),
+                        Properties.PATIENT_EDITOR_VIEW_CLOSED.toString(),
                         getView(),
                         this,
                         null,
@@ -830,8 +796,7 @@ public class PatientViewController extends ViewController {
                         "Patient View Controller Error",
                         JOptionPane.WARNING_MESSAGE); 
                 firePropertyChangeEvent(
-                            ViewController.PatientViewControllerPropertyChangeEvent.
-                                PATIENT_EDITOR_VIEW_CLOSED.toString(),
+                            Properties.PATIENT_EDITOR_VIEW_CLOSED.toString(),
                             getView(),
                             this,
                             null,
@@ -846,14 +811,13 @@ public class PatientViewController extends ViewController {
                     Patient patient = new Patient();
                     patient.setScope(Scope.ALL);
                     patient.read();
-                    getDescriptor().getControllerDescription().setProperty(Properties.PATIENTS, patient.get());
+                    getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.PATIENTS, patient.get());
                     setModalView((ModalView)new View().make(
                                 View.Viewer.PATIENT_GUARDIAN_EDITOR_VIEW,
                                 this, 
                                 this.getDesktopView()).getModalView());
                     firePropertyChangeEvent(
-                            ViewController.PatientViewControllerPropertyChangeEvent.
-                                PATIENT_EDITOR_VIEW_CLOSED.toString(),
+                            Properties.PATIENT_EDITOR_VIEW_CLOSED.toString(),
                             getView(),
                             this,
                             null,
@@ -870,8 +834,7 @@ public class PatientViewController extends ViewController {
                     null,
                     JOptionPane.WARNING_MESSAGE);
             firePropertyChangeEvent(
-                    ViewController.PatientViewControllerPropertyChangeEvent.
-                        PATIENT_EDITOR_VIEW_CLOSED.toString(),
+                    Properties.PATIENT_EDITOR_VIEW_CLOSED.toString(),
                     getView(),
                     this,
                     null,
@@ -883,16 +846,15 @@ public class PatientViewController extends ViewController {
     private void doDoctorEditorViewRequest(){
         try{
             Doctor doctor = new Doctor(
-                    (Patient)getDescriptor().getControllerDescription().getProperty(Properties.PATIENT));
+                    (Patient)getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.PATIENT));
             doctor.setScope(Scope.FOR_PATIENT);
             doctor = doctor.read();
-            getDescriptor().getControllerDescription().setProperty(Properties.DOCTOR, doctor);
+            getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.DOCTOR, doctor);
             setModalView((ModalView)new View().make(View.Viewer.PATIENT_DOCTOR_EDITOR_VIEW,
                     this, 
                     this.getDesktopView()).getModalView());
             firePropertyChangeEvent(
-                    ViewController.PatientViewControllerPropertyChangeEvent.
-                        PATIENT_EDITOR_VIEW_CLOSED.toString(),
+                    Properties.PATIENT_EDITOR_VIEW_CLOSED.toString(),
                     getView(),
                     this,
                     null,
@@ -909,19 +871,18 @@ public class PatientViewController extends ViewController {
     private void doMedicationEditorViewRequest(){
         try{
             Medication medication = new Medication(
-                    (Patient)getDescriptor().getControllerDescription().getProperty(Properties.PATIENT));
+                    (Patient)getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.PATIENT));
             medication.setScope(Scope.FOR_PATIENT);
             medication = medication.read();
             ArrayList<Medication> beforePatientMedicationEdit = medication.get();
-            getDescriptor().getControllerDescription().setProperty(Properties.MEDICATION, medication);
+            getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.MEDICATION, medication);
             setModalView((ModalView)new View().make(View.Viewer.PATIENT_MEDICATION_EDITOR_VIEW,
                     this, 
                     this.getDesktopView()).getModalView());
             Medication afterPatientMedicationEdit = 
-                    (Medication)getDescriptor().getControllerDescription().getProperty(Properties.MEDICATION);
+                    (Medication)getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.MEDICATION);
             firePropertyChangeEvent(
-                ViewController.PatientViewControllerPropertyChangeEvent.
-                    PATIENT_EDITOR_VIEW_CLOSED.toString(),
+                Properties.PATIENT_EDITOR_VIEW_CLOSED.toString(),
                 getView(),
                 this,
                 null,
@@ -938,7 +899,7 @@ public class PatientViewController extends ViewController {
     private void createPatientMedicationQuestionnaireStatus(){
         boolean isQFound = false;
         Question question = null;
-        Medication m = (Medication)getDescriptor().getControllerDescription().getProperty(Properties.MEDICATION);
+        Medication m = (Medication)getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.MEDICATION);
         try{
             Question q = new Question();
             q.setScope(Entity.Scope.ALL);
@@ -951,7 +912,7 @@ public class PatientViewController extends ViewController {
                 }
             }
             if(isQFound){
-                Patient patient = (Patient)getDescriptor().getControllerDescription().getProperty(Properties.PATIENT);
+                Patient patient = (Patient)getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.PATIENT);
                 PatientQuestion pq = 
                         new PatientQuestion(patient,question );
                 pq.setAnswer(m.getDescription());
@@ -975,7 +936,7 @@ public class PatientViewController extends ViewController {
     private void deletePatientMedicationQuestionnaireStatus(){
         boolean isQFound = false;
         Question question = null;
-        Patient patient = (Patient)getDescriptor().getControllerDescription().getProperty(Properties.PATIENT);
+        Patient patient = (Patient)getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.PATIENT);
         try{
             Question q = new Question();
             q.setScope(Entity.Scope.ALL);
@@ -1010,8 +971,8 @@ public class PatientViewController extends ViewController {
     private void syncPatientMedicationWithPatientQuestionnaireResponse(){
         boolean isQFound = false;
         Question question = null;
-        Medication m = (Medication)getDescriptor().getControllerDescription().getProperty(Properties.MEDICATION);
-        Patient patient = (Patient)getDescriptor().getControllerDescription().getProperty(Properties.PATIENT);
+        Medication m = (Medication)getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.MEDICATION);
+        Patient patient = (Patient)getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.PATIENT);
         try{
             Question q = new Question();
             q.setScope(Entity.Scope.ALL);
@@ -1077,8 +1038,7 @@ public class PatientViewController extends ViewController {
                     this.getDesktopView()).getModalView());
         
         firePropertyChangeEvent(
-                ViewController.PatientViewControllerPropertyChangeEvent.
-                    PATIENT_EDITOR_VIEW_CLOSED.toString(),
+                Properties.PATIENT_EDITOR_VIEW_CLOSED.toString(),
                 getView(),
                 this,
                 null,
@@ -1093,8 +1053,7 @@ public class PatientViewController extends ViewController {
                     this.getDesktopView()).getModalView());
         
         firePropertyChangeEvent(
-                ViewController.PatientViewControllerPropertyChangeEvent.
-                    PATIENT_EDITOR_VIEW_CLOSED.toString(),
+                Properties.PATIENT_EDITOR_VIEW_CLOSED.toString(),
                 getView(),
                 this,
                 null,
@@ -1104,7 +1063,7 @@ public class PatientViewController extends ViewController {
     
     private void doPatientCreateRequest(){
         //setEntityDescriptorFromView(view.getViewDescriptor());
-        Patient patient = (Patient)getDescriptor().getViewDescription().getProperty(Properties.PATIENT);
+        Patient patient = (Patient)getDescriptor().getViewDescription().getProperty(SystemDefinition.Properties.PATIENT);
         if (!patient.getIsKeyDefined()){
             try{
                 patient.insert();
@@ -1114,19 +1073,17 @@ public class PatientViewController extends ViewController {
                 patient.setScope(Entity.Scope.ALL);
                 /*28/03/2024patientNote.insert();*/
                 patient.read(); 
-                getDescriptor().getControllerDescription().setProperty(Properties.PATIENTS, patient.get());
+                getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.PATIENTS, patient.get());
                 firePropertyChangeEvent(
-                        ViewController.PatientViewControllerPropertyChangeEvent.
-                            PATIENTS_RECEIVED.toString(),
+                        Properties.PATIENTS_RECEIVED.toString(),
                         getView(),
                         this,
                         null,
                         null
                 );
-                getDescriptor().getControllerDescription().setProperty(Properties.PATIENT, patient);
+                getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.PATIENT, patient);
                 firePropertyChangeEvent(
-                        ViewController.PatientViewControllerPropertyChangeEvent.
-                            PATIENT_RECEIVED.toString(),
+                        Properties.PATIENT_RECEIVED.toString(),
                         getView(),
                         this,
                         null,
@@ -1157,10 +1114,9 @@ public class PatientViewController extends ViewController {
             patient = new Patient();
             patient.setScope(Scope.DELETED);
             patient = patient.read();
-            getDescriptor().getControllerDescription().setProperty(Properties.PATIENTS, patient.get());
+            getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.PATIENTS, patient.get());
             firePropertyChangeEvent(
-                    ViewController.PatientViewControllerPropertyChangeEvent.
-                        PATIENTS_RECEIVED.toString(),
+                    Properties.PATIENTS_RECEIVED.toString(),
                     getView(),
                     this,
                     null,
@@ -1176,14 +1132,14 @@ public class PatientViewController extends ViewController {
     
     private void doPatientDeleteRequest(){
         //setEntityDescriptorFromView(view.getViewDescriptor()); 
-        Patient patient = (Patient)getDescriptor().getViewDescription().getProperty(Properties.PATIENT);
+        Patient patient = (Patient)getDescriptor().getViewDescription().getProperty(SystemDefinition.Properties.PATIENT);
         if (patient.getIsKeyDefined()){
             try{
                 patient.setScope(Scope.SINGLE);
                 patient.delete();
                 doNullPatientRequest();
                 firePropertyChangeEvent(
-                        ViewController.DesktopViewControllerPropertyChangeEvent.
+                        DesktopViewController.Properties.
                                 PATIENT_VIEW_CONTROLLER_CHANGE_NOTIFICATION.toString(),
                         (DesktopViewController)getMyController(),
                         this,
@@ -1204,7 +1160,7 @@ public class PatientViewController extends ViewController {
     
     private void doPatientUpdateRequest(){
         //setEntityDescriptorFromView(view.getViewDescriptor()); 
-        Patient patient = (Patient)getDescriptor().getViewDescription().getProperty(Properties.PATIENT);
+        Patient patient = (Patient)getDescriptor().getViewDescription().getProperty(SystemDefinition.Properties.PATIENT);
         if (patient.getIsKeyDefined()){
             try{
                 patient.update();
@@ -1213,10 +1169,9 @@ public class PatientViewController extends ViewController {
                 
                 patient.setScope(Entity.Scope.ALL);
                 patient.read();
-                getDescriptor().getControllerDescription().setProperty(Properties.PATIENTS, patient.get());
+                getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.PATIENTS, patient.get());
                 firePropertyChangeEvent(
-                        ViewController.PatientViewControllerPropertyChangeEvent.
-                            PATIENTS_RECEIVED.toString(),
+                        Properties.PATIENTS_RECEIVED.toString(),
                         getView(),
                         this,
                         null,
@@ -1225,15 +1180,14 @@ public class PatientViewController extends ViewController {
                 //getDescriptor().getControllerDescription().setPatient(patient);
                 setCurrentlySelectedPatient(patient);
                 firePropertyChangeEvent(
-                        ViewController.PatientViewControllerPropertyChangeEvent.
-                            PATIENT_RECEIVED.toString(),
+                        Properties.PATIENT_RECEIVED.toString(),
                         getView(),
                         this,
                         null,
                         getDescriptor()
                 );
                 firePropertyChangeEvent(
-                        ViewController.DesktopViewControllerPropertyChangeEvent.
+                        DesktopViewController.Properties.
                                 PATIENT_VIEW_CONTROLLER_CHANGE_NOTIFICATION.toString(),
                         (DesktopViewController)getMyController(),
                         this,
@@ -1271,7 +1225,7 @@ public class PatientViewController extends ViewController {
      */
     private void doPatientRecoverRequest(){
         String errorLog = "";
-        Patient patient = (Patient)getDescriptor().getViewDescription().getProperty(Properties.PATIENT);
+        Patient patient = (Patient)getDescriptor().getViewDescription().getProperty(SystemDefinition.Properties.PATIENT);
         if (patient.getIsKeyDefined()){
             try{
                 ArrayList<Appointment> deletedAppointments =
@@ -1305,10 +1259,9 @@ public class PatientViewController extends ViewController {
                 //patient.setScope(Scope.DELETED);
                 //patient.recover();
                 if (collisionFromAppointmentRecovery) {
-                    getDescriptor().getControllerDescription().setProperty(Properties.ERROR, errorLog);
+                    getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.ERROR, errorLog);
                     firePropertyChangeEvent(
-                            ViewController.PatientViewControllerPropertyChangeEvent.
-                                    PATIENT_VIEW_CONTROLLER_ERROR_RECEIVED.toString(),
+                            Properties.PATIENT_VIEW_CONTROLLER_ERROR_RECEIVED.toString(),
                             getView(),
                             this,
                             null,
@@ -1323,17 +1276,16 @@ public class PatientViewController extends ViewController {
                     //fetch the all the undeleted patients on the system for the view
                     patient.setScope(Scope.ALL);
                     patient.read();
-                    getDescriptor().getControllerDescription().setProperty(Properties.PATIENTS, patient.get());
+                    getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.PATIENTS, patient.get());
                     firePropertyChangeEvent(
-                            ViewController.PatientViewControllerPropertyChangeEvent.
-                                    PATIENTS_RECEIVED.toString(),
+                            Properties.PATIENTS_RECEIVED.toString(),
                             getView(),
                             this,
                             null,
                             getDescriptor()     
                     );
                     firePropertyChangeEvent(
-                            ViewController.DesktopViewControllerPropertyChangeEvent.
+                            DesktopViewController.Properties.
                                     PATIENT_VIEW_CONTROLLER_CHANGE_NOTIFICATION.toString(),
                             (DesktopViewController)getMyController(),
                             this,
@@ -1343,10 +1295,9 @@ public class PatientViewController extends ViewController {
                     //fetch the recovered patient for the view
                     patient.setScope(Scope.SINGLE);
                     patient.read();
-                    getDescriptor().getControllerDescription().setProperty(Properties.PATIENT, patient);
+                    getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.PATIENT, patient);
                     firePropertyChangeEvent(
-                       ViewController.PatientViewControllerPropertyChangeEvent.
-                        PATIENT_RECEIVED.toString(),
+                       Properties.PATIENT_RECEIVED.toString(),
                         getView(),
                         this,
                         null,
@@ -1363,7 +1314,7 @@ public class PatientViewController extends ViewController {
 
     private void doDeletedPatientRequest(){
         Patient requestedDeletedPatient = null;
-        Patient patient = (Patient)getDescriptor().getViewDescription().getProperty(Properties.PATIENT);
+        Patient patient = (Patient)getDescriptor().getViewDescription().getProperty(SystemDefinition.Properties.PATIENT);
         if (patient.getIsKeyDefined()){
             try{
                 patient.setScope(Scope.DELETED);
@@ -1375,10 +1326,9 @@ public class PatientViewController extends ViewController {
                     }
                 }
                 if (requestedDeletedPatient!=null){
-                    getDescriptor().getControllerDescription().setProperty(Properties.PATIENT, requestedDeletedPatient);
+                    getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.PATIENT, requestedDeletedPatient);
                     firePropertyChangeEvent(
-                           ViewController.PatientViewControllerPropertyChangeEvent.
-                            PATIENT_RECEIVED.toString(),
+                           Properties.PATIENT_RECEIVED.toString(),
                             getView(),
                             this,
                             null,
@@ -1400,19 +1350,10 @@ public class PatientViewController extends ViewController {
             }
         }
     }
-   
-    /*
-    private View patientMedicalHistory2View = null;
-    private void setPatientMedicalHistory2View(View view){
-        patientMedicalHistory2View = view;
-    }
-    private View getPatientMedicalHistory2View(){
-        return patientMedicalHistory2View;
-    }*/
     
     private PrimaryCondition makeFatPrimaryCondition()throws StoreException{
         PrimaryCondition fatPC = null;
-        Patient patient = (Patient)getDescriptor().getControllerDescription().getProperty(Properties.PATIENT);
+        Patient patient = (Patient)getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.PATIENT);
         //fatPC = new PrimaryCondition(patient);
         fatPC.setScope(Scope.FOR_PATIENT);
         fatPC = fatPC.read();
@@ -1431,10 +1372,10 @@ public class PatientViewController extends ViewController {
     }
     
     private void doNoteTakerRequest(ActionEvent e){
-        switch(ViewController.PatientViewControllerActionEvent.valueOf(e.getActionCommand())){
+        switch(Actions.valueOf(e.getActionCommand())){
             case PATIENT_MEDICAL_HISTORY_NOTES_TAKEN_REQUEST:
                 try{
-                    Condition condition = (Condition)getDescriptor().getViewDescription().getProperty(Properties.CONDITION);
+                    Condition condition = (Condition)getDescriptor().getViewDescription().getProperty(SystemDefinition.Properties.CONDITION);
                     if(condition.getIsPrimaryCondition()){
                         PrimaryCondition pc = (PrimaryCondition)condition;        
                         //pc.setPatient(getDescriptor().getControllerDescription().getPatient());
@@ -1444,10 +1385,9 @@ public class PatientViewController extends ViewController {
                         sc.update();
                         
                     }
-                    getDescriptor().getControllerDescription().setProperty(Properties.CONDITION, makeFatPrimaryCondition());
+                    getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.CONDITION, makeFatPrimaryCondition());
                     firePropertyChangeEvent(
-                            ViewController.PatientViewControllerPropertyChangeEvent.
-                                PATIENT_MEDICAL_HISTORY_RECEIVED.toString(),
+                            Properties.PATIENT_MEDICAL_HISTORY_RECEIVED.toString(),
                             getPatientMedicalHistory1View(),
                             this,
                             null,
@@ -1473,9 +1413,9 @@ public class PatientViewController extends ViewController {
     
     private void doPatientDoctorEditorViewRequest(ActionEvent e){
         Doctor doctor = (Doctor)getDescriptor()
-                .getViewDescription().getProperty(Properties.DOCTOR);
+                .getViewDescription().getProperty(SystemDefinition.Properties.DOCTOR);
         Patient patient = (Patient)getDescriptor()
-                .getControllerDescription().getProperty(Properties.PATIENT);
+                .getControllerDescription().getProperty(SystemDefinition.Properties.PATIENT);
         Actions actionCommand = 
                 Actions.valueOf(e.getActionCommand());
         try{
@@ -1487,10 +1427,9 @@ public class PatientViewController extends ViewController {
                     doctor.setPatient(patient);
                     doctor.setScope(Scope.FOR_PATIENT);
                     doctor = doctor.read();
-                    getDescriptor().getControllerDescription().setProperty(Properties.DOCTOR, doctor);
+                    getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.DOCTOR, doctor);
                     firePropertyChangeEvent(
-                            ViewController.PatientViewControllerPropertyChangeEvent.
-                                DOCTOR_RECEIVED.toString(),
+                            Properties.DOCTOR_RECEIVED.toString(),
                             (View)e.getSource(),
                             this,
                             null,
@@ -1503,10 +1442,9 @@ public class PatientViewController extends ViewController {
                     doctor = new Doctor(patient);
                     doctor.setScope(Scope.FOR_PATIENT);
                     doctor = doctor.read();
-                    getDescriptor().getControllerDescription().setProperty(Properties.DOCTOR, doctor);
+                    getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.DOCTOR, doctor);
                     firePropertyChangeEvent(
-                            ViewController.PatientViewControllerPropertyChangeEvent.
-                                DOCTOR_RECEIVED.toString(),
+                            Properties.DOCTOR_RECEIVED.toString(),
                             (View)e.getSource(),
                             this,
                             null,
@@ -1517,10 +1455,9 @@ public class PatientViewController extends ViewController {
                     doctor.update();
                     doctor.setScope(Scope.FOR_PATIENT);
                     doctor = doctor.read();
-                    getDescriptor().getControllerDescription().setProperty(Properties.DOCTOR, doctor);
+                    getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.DOCTOR, doctor);
                     firePropertyChangeEvent(
-                            ViewController.PatientViewControllerPropertyChangeEvent.
-                                DOCTOR_RECEIVED.toString(),
+                            Properties.DOCTOR_RECEIVED.toString(),
                             (View)e.getSource(),
                             this,
                             null,
@@ -1567,8 +1504,8 @@ public class PatientViewController extends ViewController {
     }
     
     private void doPatientMedicationEditorViewRequest(ActionEvent e){
-        Medication medication = (Medication)getDescriptor().getViewDescription().getProperty(Properties.MEDICATION);
-        Medication med = (Medication)getDescriptor().getControllerDescription().getProperty(Properties.MEDICATION);
+        Medication medication = (Medication)getDescriptor().getViewDescription().getProperty(SystemDefinition.Properties.MEDICATION);
+        Medication med = (Medication)getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.MEDICATION);
         setBeforePatientMedicationEdit(med.get());
         /*setBeforePatientMedicationEdit(getDescriptor()
                 .getControllerDescription().getMedication().get());*/
@@ -1583,19 +1520,18 @@ public class PatientViewController extends ViewController {
                             medication = new Medication();
                             medication.setDescription(reply);
                             Patient patient = (Patient)getDescriptor().
-                                    getControllerDescription().getProperty(Properties.PATIENT);
+                                    getControllerDescription().getProperty(SystemDefinition.Properties.PATIENT);
                             medication.setPatient(patient);
                             medication.insert();
                             medication = new Medication(patient);
                             medication.setScope(Scope.FOR_PATIENT);
                             medication = medication.read();
                             getDescriptor().getControllerDescription()
-                                    .setProperty(Properties.MEDICATION, medication);
+                                    .setProperty(SystemDefinition.Properties.MEDICATION, medication);
                             setAfterPatientMedicationEdit(medication);
                             mopUpAction();
                             firePropertyChangeEvent(
-                            ViewController.PatientViewControllerPropertyChangeEvent.
-                                CLOSE_VIEW_REQUEST_RECEIVED.toString(),
+                            Properties.CLOSE_VIEW_REQUEST_RECEIVED.toString(),
                             (View)e.getSource(),
                             this,
                             null,
@@ -1610,12 +1546,11 @@ public class PatientViewController extends ViewController {
                     medication.delete();
                     medication.setScope(Scope.FOR_PATIENT);
                     medication = medication.read();
-                    getDescriptor().getControllerDescription().setProperty(Properties.MEDICATION, medication);
+                    getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.MEDICATION, medication);
                     setAfterPatientMedicationEdit(medication);
                     mopUpAction();
                     firePropertyChangeEvent(
-                            ViewController.PatientViewControllerPropertyChangeEvent.
-                                CLOSE_VIEW_REQUEST_RECEIVED.toString(),
+                            Properties.CLOSE_VIEW_REQUEST_RECEIVED.toString(),
                             (View)e.getSource(),
                             this,
                             null,
@@ -1631,7 +1566,7 @@ public class PatientViewController extends ViewController {
                         if (!reply.trim().isEmpty()){
                             medication.setDescription(reply);
                             medication.setPatient((Patient)getDescriptor().
-                                    getControllerDescription().getProperty(Properties.PATIENT));
+                                    getControllerDescription().getProperty(SystemDefinition.Properties.PATIENT));
                             medication.update();
                             medication.setScope(Scope.FOR_PATIENT);
                             medication = medication.read();
@@ -1639,10 +1574,9 @@ public class PatientViewController extends ViewController {
                             mopUpAction();
                         }
                     }
-                    getDescriptor().getControllerDescription().setProperty(Properties.MEDICATION, medication);
+                    getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.MEDICATION, medication);
                     firePropertyChangeEvent(
-                            ViewController.PatientViewControllerPropertyChangeEvent.
-                                CLOSE_VIEW_REQUEST_RECEIVED.toString(),
+                            Properties.CLOSE_VIEW_REQUEST_RECEIVED.toString(),
                             (View)e.getSource(),
                             this,
                             null,
@@ -1660,114 +1594,17 @@ public class PatientViewController extends ViewController {
         }
     }
     
-    
-    
-    /*private void doPatientMedicalHistory1EditorViewRequest(ActionEvent e){
-        doPatientMedicalHistory1EditorViewRequestNEW(e);
-        
-        PrimaryCondition pc = null;
-        View view = (View)e.getSource();
-//27/03/2024 05:43
-        setPatientMedicalHistory1View(view);
-        switch(ViewController.PatientViewControllerActionEvent.valueOf(e.getActionCommand())){
-            case CONDITION_STATE_UPDATE_REQUEST:
-                pc = (PrimaryCondition)getDescriptor()
-                        .getViewDescription().getCondition();
-                try{
-                    pc.update();
-                    
-                }catch(StoreException ex){
-                    String message = ex.getMessage() + "\n"
-                            + "StoreException raised in PatientViewController::doPatientMedicalHistory1ViewRequest()";
-                    displayErrorMessage(message,"Patient view controller error", JOptionPane.WARNING_MESSAGE);
-                }
-                break;
-            case PATIENT_MEDICAL_HISTORY_NOTE_TAKER_REQUEST:
-                firePropertyChangeEvent(
-                        ViewController.PatientViewControllerPropertyChangeEvent.
-                            MAKE_VIEW_INVISIBLE.toString(),
-                        getPatientMedicalHistory1View(),
-                        this,
-                        null,
-                        null
-                );
-                Condition condition = getDescriptor().getViewDescription().getCondition();
-                getDescriptor().getControllerDescription().setCondition(condition);
-
-                setModalView((ModalView)new View().make(View.Viewer.NOTE_TAKER,
-                        this, 
-                        this.getDesktopView()).getModalView());
-                
-                firePropertyChangeEvent(
-                        ViewController.PatientViewControllerPropertyChangeEvent.
-                            PATIENT_EDITOR_VIEW_CLOSED.toString(),
-                        getView(),
-                        this,
-                        null,
-                        null
-                );
-                firePropertyChangeEvent(
-                        ViewController.PatientViewControllerPropertyChangeEvent.
-                            MAKE_VIEW_VISIBLE.toString(),
-                        view,
-                        this,
-                        null,
-                        null
-                );
-                break;
-            case PATIENT_MEDICAL_HISTORY_2_EDITOR_VIEW_REQUEST:
-
-                pc = (PrimaryCondition)getDescriptor()
-                        .getViewDescription().getCondition();
-                getDescriptor().getControllerDescription().setCondition(pc);
-                
-                firePropertyChangeEvent(
-                        ViewController.PatientViewControllerPropertyChangeEvent.
-                            MAKE_VIEW_INVISIBLE.toString(),
-                        view,
-                        this,
-                        null,
-                        null
-                );
-
-                setModalView((ModalView)new View().make(View.Viewer.PATIENT_MEDICAL_HISTORY_2_EDITOR_VIEW,
-                        this, 
-                        this.getDesktopView()).getModalView());
-
-                firePropertyChangeEvent(
-                        ViewController.PatientViewControllerPropertyChangeEvent.
-                            PATIENT_EDITOR_VIEW_CLOSED.toString(),
-                        getView(),
-                        this,
-                        null,
-                        null
-                );
-
-                firePropertyChangeEvent(
-                        ViewController.PatientViewControllerPropertyChangeEvent.
-                            MAKE_VIEW_VISIBLE.toString(),
-                        view,
-                        this,
-                        null,
-                        null
-                );
-
-                break;
-        }
-        
-    }*/
-    
     /**
      * a change made on a secondary view editor
      * @param secondaryView 
      */
     private void doPatientEditorViewChange(View secondaryView){
-        Patient patient = (Patient)getDescriptor().getViewDescription().getProperty(Properties.PATIENT);
+        Patient patient = (Patient)getDescriptor().getViewDescription().getProperty(SystemDefinition.Properties.PATIENT);
         try{
             /*if (getDescriptor().getControllerDescription()
                     .getViewMode().equals(ViewController.ViewMode.UPDATE)){*/
             if (getDescriptor().getControllerDescription()
-                    .getProperty(Properties.VIEW_MODE).equals(ViewController.ViewMode.UPDATE)){
+                    .getProperty(SystemDefinition.Properties.VIEW_MODE).equals(ViewController.ViewMode.UPDATE)){
             patient.update();
             patient.setScope(Scope.SINGLE);
             patient.read();
@@ -1787,23 +1624,22 @@ public class PatientViewController extends ViewController {
         //setEntityDescriptorFromView(((View)e.getSource()).getViewDescriptor());
         Patient patient = null;
         if (getPatientSelectionMode().equals(PatientSelectionMode.PATIENT_SELECTION)){
-            patient = (Patient)getDescriptor().getViewDescription().getProperty(Properties.PATIENT);
+            patient = (Patient)getDescriptor().getViewDescription().getProperty(SystemDefinition.Properties.PATIENT);
         }    
         else
-            patient = (Patient)getDescriptor().getControllerDescription().getProperty(Properties.PATIENT);
+            patient = (Patient)getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.PATIENT);
         //
         if (patient.getIsKeyDefined()){
             try{
                 patient.setScope(Scope.SINGLE);
                 Patient p = patient.read();
                 setCurrentlySelectedPatient(p);
-                getDescriptor().getControllerDescription().setProperty(Properties.PATIENT, p);
+                getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.PATIENT, p);
                 //doConvertAppointmentNoteToTreatment(p);
                 ArrayList<Appointment> appointments = doFormatAppointmentTreatmentNote(p.getAppointmentHistory());
-                getDescriptor().getControllerDescription().setProperty(Properties.APPOINTMENTS, appointments);
+                getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.APPOINTMENTS, appointments);
                 firePropertyChangeEvent(
-                       ViewController.PatientViewControllerPropertyChangeEvent.
-                        PATIENT_RECEIVED.toString(),
+                       Properties.PATIENT_RECEIVED.toString(),
                         getView(),
                         this,
                         null,
@@ -1840,11 +1676,10 @@ public class PatientViewController extends ViewController {
         patient.setScope(Scope.ALL);
         try{
             patient.read();
-            getDescriptor().getControllerDescription().setProperty(Properties.PATIENT, patient);
-            getDescriptor().getControllerDescription().setProperty(Properties.PATIENTS, patient.get());
+            getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.PATIENT, patient);
+            getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.PATIENTS, patient.get());
             firePropertyChangeEvent(
-                    ViewController.PatientViewControllerPropertyChangeEvent.
-                                NULL_PATIENT_RECEIVED.toString(),
+                    Properties.NULL_PATIENT_RECEIVED.toString(),
                     getView(),
                     this,
                     null,
@@ -1868,7 +1703,7 @@ public class PatientViewController extends ViewController {
         patient.read();
         setDescriptor(myDescriptor);
 
-        getDescriptor().getControllerDescription().setProperty(Properties.PATIENTS, patient.get());
+        getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.PATIENTS, patient.get());
         View.setViewer(View.Viewer.PATIENT_VIEW);
         setCurrentlySelectedPatient(new Patient());
     }
@@ -1883,17 +1718,17 @@ public class PatientViewController extends ViewController {
         Descriptor pvcDescriptor = this.getDescriptor();
         
         Patient svcPatient = (Patient)svcDescriptor.getControllerDescription().
-                getProperty(Properties.PATIENT);
+                getProperty(SystemDefinition.Properties.PATIENT);
         Patient pvcPatient = (Patient)pvcDescriptor.getControllerDescription().
-                getProperty(Properties.PATIENT);
+                getProperty(SystemDefinition.Properties.PATIENT);
         
         ArrayList<Appointment> svcAppointments = (ArrayList<Appointment>)svcDescriptor.getControllerDescription().
-                getProperty(Properties.APPOINTMENTS);      
+                getProperty(SystemDefinition.Properties.APPOINTMENTS);      
         ArrayList<Appointment> pvcAppointments = (ArrayList<Appointment>)pvcDescriptor.getControllerDescription().
-                getProperty(Properties.APPOINTMENTS);
+                getProperty(SystemDefinition.Properties.APPOINTMENTS);
         
-        ViewController.PatientViewControllerPropertyChangeEvent propertyName = 
-                ViewController.PatientViewControllerPropertyChangeEvent.
+        Properties propertyName = 
+                Properties.
                         valueOf(e.getPropertyName());
         switch(propertyName){
             case PATIENT_VIEW_CHANGE_NOTIFICATION:{
@@ -1917,47 +1752,18 @@ public class PatientViewController extends ViewController {
                         if (!svcPatient.getIsPatientMarkedUnbookable()){
                             try{
                                 if (svcDescriptor.getControllerDescription().
-                                        getProperty(Properties.VIEW_MODE)==null)
+                                        getProperty(SystemDefinition.Properties.VIEW_MODE)==null)
                                     svcDescriptor.getControllerDescription().
-                                            setProperty(Properties.VIEW_MODE, ViewController.ViewMode.NO_ACTION);
-                                /**
-                                 * switch determines 2 cases of view mode
-                                 * -- CREATE
-                                 * -- -- a patient appointment has been created by the SVC; and Propety.PATIENT initialised
-                                 * -- PATIENT_ARCHIVE
-                                 * -- -- if selected patient in patient view = selected patient in schedule view
-                                 * -- -- -- reads the selected patient from store
-                                 * -- -- -- if read patient is archived triggers a null patient request to repopulate the patient selection combobox and clear patient fields in view
-                                 * -- -- else trigger a null patient request and fire PATIENT_RECEIVED pce at patient view which defines the currently selected patient on entry
-                                 * -- PATIENT_RESTORE
-                                 * -- -- -- assume the currently selected patient (if any) in view) is not the patient just restored (fair assumption!)
-                                 * -- -- -- trigger a null patient request
-                                 * -- -- -- re-initialse Patient VC control descriptor with the selected patient in patient view on entry to PATIENT_VIEW_CHANGE_NOTIFICATION pce
-                                 * -- -- -- and fire a PATIENT_RECEIVED pce at the patient view
-                                 * -- UPDATE a patient appointment has been updated by the SVC; and Propety.PATIENT initialised
-                                 * -- DEFAULT
-                                 * -- -- -- if schedule view patient = patient view patient
-                                 * -- -- -- trigger a null patient request (repopulate patient selection combobox)
-                                 * -- -- -- re-initialse Patient VC control descriptor with the selected patient in patient view on entry to PATIENT_VIEW_CHANGE_NOTIFICATION pce
-                                 * -- -- -- and fire a PATIENT_RECEIVED pce at the patient view
-                                 */
+                                            setProperty(SystemDefinition.Properties.VIEW_MODE, ViewController.ViewMode.NO_ACTION);
+                                
                                 ViewController.ViewMode viewMode = (ViewController.ViewMode)svcDescriptor.getControllerDescription().
-                                        getProperty(Properties.VIEW_MODE);
+                                        getProperty(SystemDefinition.Properties.VIEW_MODE);
                                 switch(viewMode){
                                     case ViewController.ViewMode.CREATE,
                                          ViewController.ViewMode.UPDATE ->{
                                         if (svcPatient.equals(pvcPatient)){
-                                            /*
-                                            firePropertyChangeEvent(
-                                                    ViewController.PatientViewControllerPropertyChangeEvent.
-                                                            PATIENT_RECEIVED.toString(),
-                                                    getView(),
-                                                    this,
-                                                    null,
-                                                    null
-                                            );*/
                                             doNullPatientRequest();
-                                            getDescriptor().getControllerDescription().setProperty(Properties.PATIENT, pvcPatient);
+                                            getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.PATIENT, pvcPatient);
                                             setPatientSelectionMode(PatientSelectionMode.PATIENT_RECOVERY);
                                             doPatientRequest();
                                         }
@@ -1970,8 +1776,7 @@ public class PatientViewController extends ViewController {
                                         }else{
                                             doNullPatientRequest();
                                             firePropertyChangeEvent(
-                                                    ViewController.PatientViewControllerPropertyChangeEvent.
-                                                            PATIENT_RECEIVED.toString(),
+                                                    Properties.PATIENT_RECEIVED.toString(),
                                                     getView(),
                                                     this,
                                                     null,
@@ -1983,8 +1788,7 @@ public class PatientViewController extends ViewController {
                                     case ViewController.ViewMode.PATIENT_RESTORE ->{
                                         doNullPatientRequest();
                                         firePropertyChangeEvent(
-                                                ViewController.PatientViewControllerPropertyChangeEvent.
-                                                        PATIENT_RECEIVED.toString(),
+                                                Properties.PATIENT_RECEIVED.toString(),
                                                 getView(),
                                                 this,
                                                 null,
@@ -1996,7 +1800,7 @@ public class PatientViewController extends ViewController {
                                     default ->{
                                         if (svcPatient.equals(pvcPatient)){
                                             doNullPatientRequest();
-                                            getDescriptor().getControllerDescription().setProperty(Properties.PATIENT, pvcPatient);
+                                            getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.PATIENT, pvcPatient);
                                             setPatientSelectionMode(PatientSelectionMode.PATIENT_RECOVERY);
                                             doPatientRequest();
                                         }
@@ -2010,25 +1814,7 @@ public class PatientViewController extends ViewController {
                                     "Patient view controller error", JOptionPane.WARNING_MESSAGE);
                             }
                         }
-                    }/*else {//if no patient selected refresh patient list
-                        try{
-                        patient = new Patient();
-                        patient.setScope(Scope.ALL);
-                        patient = patient.read();
-                        getDescriptor().getControllerDescription().setProperty(Properties.PATIENTS, patient.get());
-                        firePropertyChangeEvent(
-                                ViewController.PatientViewControllerPropertyChangeEvent.
-                                        PATIENTS_RECEIVED.toString(),
-                                getView(),
-                                this,
-                                null,
-                                getDescriptor()
-                        ); 
-                        }catch(StoreException ex){
-                            displayErrorMessage(ex.getMessage() + "\nRaised in propertyChange() method",
-                                "Patient view controller error", JOptionPane.WARNING_MESSAGE);
-                        }
-                    } */
+                    }
                 }
                 break; 
             } 
@@ -2061,97 +1847,22 @@ public class PatientViewController extends ViewController {
     
     
     private void doOpenNoteTaker(){
-        Condition condition = (Condition)getDescriptor().getViewDescription().getProperty(Properties.CONDITION);
-        getDescriptor().getControllerDescription().setProperty(Properties.CONDITION, condition);
+        Condition condition = (Condition)getDescriptor().getViewDescription().getProperty(SystemDefinition.Properties.CONDITION);
+        getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.CONDITION, condition);
 
         setModalView((ModalView)new View().make(View.Viewer.NOTE_TAKER,
                 this, 
                 this.getDesktopView()).getModalView());
 
         firePropertyChangeEvent(
-                ViewController.PatientViewControllerPropertyChangeEvent.
-                    PATIENT_EDITOR_VIEW_CLOSED.toString(),
+                Properties.PATIENT_EDITOR_VIEW_CLOSED.toString(),
                 getView(),
                 this,
                 null,
                 null
         );
     }
-   
-    /*
-    private void doRequestClosePatientMedicalHistory1EditorView(View view){
-        firePropertyChangeEvent(
-            ViewController.PatientViewControllerPropertyChangeEvent.
-                CLOSE_VIEW_REQUEST_RECEIVED.toString(),
-            view,
-            this,
-            null,
-            null
-        );
-    }*/
-    
-    /*
-    private void doRequestClosePatientMedicalHistory2EditorView(View view){
-        firePropertyChangeEvent(
-            ViewController.PatientViewControllerPropertyChangeEvent.
-                CLOSE_VIEW_REQUEST_RECEIVED.toString(),
-            view,
-            this,
-            null,
-            null
-        );
-    }*/
-    
-    /*
-    private void doPatientMedicalHistory1EditorViewRequestNEW(ActionEvent e){
-        PrimaryCondition pc = null;
-        View view = (View)e.getSource();
 
-        // save reference for access later after receipt of a request from the note taker
-
-        setPatientMedicalHistory1View(view);
-        switch(ViewController.PatientViewControllerActionEvent.valueOf(e.getActionCommand())){
-            case CONDITION_STATE_UPDATE_REQUEST:
-                pc = (PrimaryCondition)getDescriptor()
-                        .getViewDescription().getProperty(Properties.CONDITION);
-                try{
-                    pc.update();
-                    
-                }catch(StoreException ex){
-                    String message = ex.getMessage() + "\n"
-                            + "StoreException raised in PatientViewController::doPatientMedicalHistory1ViewRequest()";
-                    displayErrorMessage(message,"Patient view controller error", JOptionPane.WARNING_MESSAGE);
-                }
-                break;
-            
-            case PATIENT_MEDICAL_HISTORY_NOTE_TAKER_REQUEST:
-                doRequestClosePatientMedicalHistory1EditorView(view);
-                
-                doOpenNoteTaker();
-                
-                doOpenPatientMedicalHistory1EditorView();
-
-                break;
-            case PATIENT_MEDICAL_HISTORY_2_EDITOR_VIEW_REQUEST:
-                
-                
-                doRequestClosePatientMedicalHistory1EditorView(view);
-
-                pc = (PrimaryCondition)getDescriptor()
-                        .getViewDescription().getCondition();
-                getDescriptor().getControllerDescription().setCondition(pc);
-                setParentPrimaryCondition(pc);
-                doOpenPatientMedicalHistory2EditorView();
-                
-                doOpenPatientMedicalHistory1EditorView();
-
-                break;
-                
-        } 
-    }*/
-    
-    
-    
     /**
      * on entry following 2 references need to need to be kept alive
      * -- reference to PatientMedicalHistory1EditorView needs to be saved
@@ -2196,10 +1907,7 @@ public class PatientViewController extends ViewController {
                 }
             } 
         }
-        
-        
-        
         getDescriptor().getControllerDescription()
-                .setProperty(Properties.APPOINTMENTS, appointments);
+                .setProperty(SystemDefinition.Properties.APPOINTMENTS, appointments);
     }
 }

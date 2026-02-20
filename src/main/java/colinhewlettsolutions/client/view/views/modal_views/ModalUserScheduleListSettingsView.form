@@ -315,10 +315,8 @@
                   <EmptySpace pref="15" max="32767" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Component id="btnFactorySettings" alignment="0" min="-2" pref="112" max="-2" attributes="0"/>
-                      <Group type="103" alignment="0" groupAlignment="1" max="-2" attributes="0">
-                          <Component id="btnCloseView" alignment="0" min="-2" pref="112" max="-2" attributes="0"/>
-                          <Component id="btnUpdateSettings" alignment="0" min="-2" pref="112" max="-2" attributes="0"/>
-                      </Group>
+                      <Component id="btnCloseView" alignment="0" min="-2" pref="112" max="-2" attributes="0"/>
+                      <Component id="btnUpdateSettings" alignment="0" min="-2" pref="112" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace pref="14" max="32767" attributes="0"/>
               </Group>

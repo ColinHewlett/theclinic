@@ -6,6 +6,7 @@ package colinhewlettsolutions.client.view.views.non_modal_views;
 
 import colinhewlettsolutions.client.controller.SystemDefinition.Properties;
 import colinhewlettsolutions.client.controller.ViewController;
+import colinhewlettsolutions.client.controller.LoginViewController;
 import colinhewlettsolutions.client.model.non_entity.Credential;
 import colinhewlettsolutions.client.view.View;
 import colinhewlettsolutions.client.view.views.modal_views.ModalView;
@@ -45,7 +46,7 @@ public class LoginNewPasswordEditorView extends View
     
     @Override
     public void actionPerformed(ActionEvent e){
-        ViewController.LoginViewControllerActionEvent actionRequestToController = null;
+        LoginViewController.Actions actionRequestToController = null;
         Action actionCommand = Action.valueOf(e.getActionCommand());
         switch (actionCommand){
             case REQUEST_CANCEL ->{
@@ -63,7 +64,7 @@ public class LoginNewPasswordEditorView extends View
                         credential.setPassword(this.txtNewPassword.getPassword());
                         credential.setPasswordReentry(this.txtNewPasswordRentry.getPassword());
                         setViewCredential(credential);
-                        actionRequestToController = ViewController.LoginViewControllerActionEvent.NEW_PASSWORD_REQUEST;
+                        actionRequestToController = LoginViewController.Actions.NEW_PASSWORD_REQUEST;
                         doSendActionEvent(actionRequestToController);
                         break;
                     }
@@ -74,18 +75,9 @@ public class LoginNewPasswordEditorView extends View
     
     @Override
     public void propertyChange(PropertyChangeEvent e){
-        ViewController.LoginViewControllerPropertyChangeEvent property = 
-                ViewController.LoginViewControllerPropertyChangeEvent.valueOf(e.getPropertyName());
+        LoginViewController.Properties property = 
+                LoginViewController.Properties.valueOf(e.getPropertyName());
         switch (property){
-            /*
-            case CORRECT_LOGIN_CREDENTIAL_RECEIVED ->{
-                this.pnlChangePassword.setEnabled(true);
-                this.txtNewPassword.setEnabled(true);
-                this.txtNewPasswordRentry.setEnabled(true);
-                this.pnlCurrentPassword.setEnabled(false);
-                this.txtCurrentPassword.setEnabled(false);
-                break;
-            }*/
             case NEW_CREDENTIAL_VALIDATION_RECEIVED ->{
                 Object[] options = {"OK"};
                 JOptionPane.showInternalOptionDialog(
@@ -150,7 +142,7 @@ public class LoginNewPasswordEditorView extends View
     
     
     private void doSendActionEvent(
-        ViewController.LoginViewControllerActionEvent actionCommand){
+        LoginViewController.Actions actionCommand){
         ActionEvent actionEvent = new ActionEvent(
             this,ActionEvent.ACTION_PERFORMED,
             actionCommand.toString());
@@ -173,18 +165,10 @@ public class LoginNewPasswordEditorView extends View
                 
                 ActionEvent actionEvent = new ActionEvent(
                         LoginNewPasswordEditorView.this,ActionEvent.ACTION_PERFORMED,
-                        ViewController.LoginViewControllerActionEvent.VIEW_CLOSED_NOTIFICATION.toString());
+                        LoginViewController.Actions.VIEW_CLOSED_NOTIFICATION.toString());
                 getMyController().actionPerformed(actionEvent);
                 
             }
-            /*
-            @Override
-            public void internalFrameActivated(InternalFrameEvent e) {
-                ActionEvent actionEvent = new ActionEvent(
-                        LoginPasswordEditorView.this,ActionEvent.ACTION_PERFORMED,
-                        ViewController.PatientViewControllerActionEvent.VIEW_ACTIVATED_NOTIFICATION.toString());
-                getMyController().actionPerformed(actionEvent);
-            }*/
         };
         this.addInternalFrameListener(internalFrameAdapter);
         this.setDefaultCloseOperation(JInternalFrame.DISPOSE_ON_CLOSE);

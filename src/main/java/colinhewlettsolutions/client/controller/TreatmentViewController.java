@@ -23,6 +23,19 @@ import colinhewlettsolutions.client.view.views.non_modal_views.DesktopView;
  */
 public class TreatmentViewController extends ViewController{
     
+    public enum Actions{
+        TREATMENT_CREATE_REQUEST,
+        TREATMENT_DELETE_REQUEST,
+        TREATMENTS_READ_REQUEST,
+        TREATMENT_RENAME_REQUEST,
+        VIEW_CLOSE_NOTIFICATION
+    }
+    
+    public enum Properties{
+        TREATMENT_RECEIVED,
+        TREATMENT_ERROR_RECEIVED
+    }
+    
     public TreatmentViewController(DesktopViewController controller,
                                DesktopView desktopView){
         setMyController(controller);
@@ -38,14 +51,13 @@ public class TreatmentViewController extends ViewController{
         }
         else{  
             
-            ViewController.TreatmentViewControllerActionEvent actionCommand =
-                ViewController.TreatmentViewControllerActionEvent
-                        .valueOf(e.getActionCommand());
+            Actions actionCommand =
+                Actions.valueOf(e.getActionCommand());
             switch (actionCommand){
                 case VIEW_CLOSE_NOTIFICATION:
                 ActionEvent actionEvent = new ActionEvent(
                     this,ActionEvent.ACTION_PERFORMED,
-                    ViewController.DesktopViewControllerActionEvent.
+                    DesktopViewController.Actions.
                             VIEW_CONTROLLER_CLOSE_NOTIFICATION.toString());
                 getMyController().actionPerformed(actionEvent);
                 break;
@@ -109,7 +121,7 @@ public class TreatmentViewController extends ViewController{
                     else{
                         getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.ERROR, error);
                         firePropertyChangeEvent(
-                            ViewController.TreatmentViewControllerPropertyChangeEvent.
+                            TreatmentViewController.Properties.
                                     TREATMENT_ERROR_RECEIVED.toString(),
                             (View)e.getSource(),
                             this,
@@ -154,7 +166,7 @@ public class TreatmentViewController extends ViewController{
                         isError = true;
                     }
                     firePropertyChangeEvent(
-                        ViewController.DesktopViewControllerPropertyChangeEvent.
+                        DesktopViewController.Properties.
                                 TREATMENT_VIEW_CONTROLLER_CHANGE_NOTIFICATION.toString(),
                         (DesktopViewController)getMyController(),
                         this,
@@ -181,7 +193,7 @@ public class TreatmentViewController extends ViewController{
                 } 
                 if (!isError){
                     firePropertyChangeEvent(
-                        ViewController.TreatmentViewControllerPropertyChangeEvent.
+                        TreatmentViewController.Properties.
                                 TREATMENT_RECEIVED.toString(),
                         (View)e.getSource(),
                         this,

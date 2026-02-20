@@ -4,13 +4,11 @@
  */
 package colinhewlettsolutions.client.view.views.modal_views;
 
+import colinhewlettsolutions.client.controller.PatientViewController;
 import colinhewlettsolutions.client.controller.SystemDefinition;
-import colinhewlettsolutions.client.controller.Descriptor;
 import colinhewlettsolutions.client.controller.ViewController;
 import java.awt.event.ActionEvent;
-import java.beans.PropertyChangeEvent;
 import java.beans.PropertyVetoException;
-import javax.swing.JOptionPane;
 import colinhewlettsolutions.client.model.entity.Patient;
 import colinhewlettsolutions.client.view.View;
 import colinhewlettsolutions.client.view.views.non_modal_views.DesktopView;
@@ -68,9 +66,7 @@ public class ModalPatientPhoneEmailEditorView extends ModalView{
                 .setProperty(SystemDefinition.Properties.PATIENT, patient);
         ActionEvent actionEvent = new ActionEvent(
             ModalPatientPhoneEmailEditorView.this,ActionEvent.ACTION_PERFORMED, 
-            ViewController
-                    .PatientViewControllerActionEvent
-                    .PATIENT_EDITOR_VIEW_CHANGE
+            PatientViewController.Actions.PATIENT_EDITOR_VIEW_CHANGE
                     .toString());
         getMyController().actionPerformed(actionEvent);
     }

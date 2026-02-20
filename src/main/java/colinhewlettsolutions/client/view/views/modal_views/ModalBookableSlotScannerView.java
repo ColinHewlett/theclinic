@@ -5,11 +5,8 @@
 package colinhewlettsolutions.client.view.views.modal_views;
 
 import colinhewlettsolutions.client.controller.SystemDefinition;
-import com.github.lgooddatepicker.components.DatePickerSettings;
-import colinhewlettsolutions.client.controller.Descriptor;
+import colinhewlettsolutions.client.controller.ScheduleViewController;
 import colinhewlettsolutions.client.controller.ViewController;
-import static colinhewlettsolutions.client.controller.ViewController.ScheduleViewControllerPropertyChangeEvent.APPOINTMENT_SLOTS_FROM_DAY_RECEIVED;
-import static colinhewlettsolutions.client.controller.ViewController.ScheduleViewControllerPropertyChangeEvent.NO_APPOINTMENT_SLOTS_FROM_DAY_RECEIVED;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -37,7 +34,6 @@ import colinhewlettsolutions.client.model.entity.Appointment;
 import colinhewlettsolutions.client.view.support_classes.models.EmptySlotAvailability2ColumnTableModel;
 import colinhewlettsolutions.client.view.support_classes.renderers.TableHeaderCellBorderRenderer;
 import javax.swing.SpinnerNumberModel;
-import javax.swing.border.TitledBorder;
 import colinhewlettsolutions.client.view.View;
 import colinhewlettsolutions.client.view.views.non_modal_views.DesktopView;
 import colinhewlettsolutions.client.view.support_classes.renderers.AppointmentsTableDurationRenderer;
@@ -130,8 +126,8 @@ public class ModalBookableSlotScannerView extends ModalView implements ActionLis
     
     @Override
     public void propertyChange(PropertyChangeEvent e){
-        ViewController.ScheduleViewControllerPropertyChangeEvent propertyName = 
-                ViewController.ScheduleViewControllerPropertyChangeEvent.valueOf(e.getPropertyName());
+        ScheduleViewController.Properties propertyName = 
+                ScheduleViewController.Properties.valueOf(e.getPropertyName());
         switch(propertyName){
             case NO_APPOINTMENT_SLOTS_FROM_DAY_RECEIVED://instruction to clear list
                 setTitle("Bookable slot availability");
@@ -179,12 +175,12 @@ public class ModalBookableSlotScannerView extends ModalView implements ActionLis
         getMyController().getDescriptor().getViewDescription().setProperty(SystemDefinition.Properties.SCHEDULE_DAY, null);
         ActionEvent actionEvent = new ActionEvent(this,
             ActionEvent.ACTION_PERFORMED,
-            ViewController.ScheduleViewControllerActionEvent.
+            ScheduleViewController.Actions.
             EMPTY_SLOTS_FROM_DAY_REQUEST.toString());
         getMyController().actionPerformed(actionEvent);
     }
     
-    private void btnScanForEmptySlotsActionPerformed() {                                                     
+    /*private void btnScanForEmptySlotsActionPerformed() {                                                     
         // TODO add your handling code here:
         //LocalDate searchStartDate = dayDatePicker.getDate();
         LocalDate searchStartDate = LocalDate.now();
@@ -194,9 +190,9 @@ public class ModalBookableSlotScannerView extends ModalView implements ActionLis
                     ViewController.ScheduleViewControllerActionEvent.
                             EMPTY_SLOT_SCAN_CONFIGURATION_VIEW_REQUEST.toString());
         this.getMyController().actionPerformed(actionEvent);
-    }
+    }*/
     
-    private void doSearchAvailableSlotsAction(){
+    /*private void doSearchAvailableSlotsAction(){
         //LocalDate searchStartDate = dayDatePicker.getDate();
         LocalDate searchStartDate = LocalDate.now();
         getMyController().getDescriptor().getViewDescription().setProperty(SystemDefinition.Properties.SCHEDULE_DAY, searchStartDate);
@@ -205,7 +201,7 @@ public class ModalBookableSlotScannerView extends ModalView implements ActionLis
             ViewController.ScheduleViewControllerActionEvent.
             EMPTY_SLOT_SCAN_CONFIGURATION_VIEW_REQUEST.toString());
         this.getMyController().actionPerformed(actionEvent);
-    }  
+    } */ 
     
     private void doStartScanRequest(){
         Duration duration = (Duration)this.cmbSelectSlotDuration.getSelectedItem();
@@ -222,7 +218,7 @@ public class ModalBookableSlotScannerView extends ModalView implements ActionLis
             getMyController().getDescriptor().getViewDescription().setProperty(SystemDefinition.Properties.DURATION, duration);
             ActionEvent actionEvent = new ActionEvent(this,
                 ActionEvent.ACTION_PERFORMED,
-                ViewController.ScheduleViewControllerActionEvent.
+                ScheduleViewController.Actions.
                 EMPTY_SLOTS_FROM_DAY_REQUEST.toString());
             getMyController().actionPerformed(actionEvent);
         }
@@ -271,7 +267,7 @@ public class ModalBookableSlotScannerView extends ModalView implements ActionLis
                 actionCommand = ViewController.ScheduleViewControllerActionEvent.SCHEDULE_LIST_VIEW_CONTROLLER_REQUEST.toString();
                 break;
         }*/
-        actionCommand = ViewController.ScheduleViewControllerActionEvent.SCHEDULE_LIST_VIEW_CONTROLLER_REQUEST.toString();
+        actionCommand = ScheduleViewController.Actions.SCHEDULE_LIST_VIEW_CONTROLLER_REQUEST.toString();
         actionEvent = new ActionEvent(
                 this,ActionEvent.ACTION_PERFORMED,actionCommand);
         this.getMyController().actionPerformed(actionEvent);
@@ -325,7 +321,7 @@ public class ModalBookableSlotScannerView extends ModalView implements ActionLis
                 ModalBookableSlotScannerView.this.removeInternalFrameListener(internalFrameAdapter);
                 ActionEvent actionEvent = new ActionEvent(
                         ModalBookableSlotScannerView.this,ActionEvent.ACTION_PERFORMED,
-                        ViewController.ScheduleViewControllerActionEvent.
+                        ScheduleViewController.Actions.
                                 VIEW_CLOSE_NOTIFICATION.toString());
                 ModalBookableSlotScannerView.this.getMyController().actionPerformed(actionEvent);
                 
@@ -335,7 +331,7 @@ public class ModalBookableSlotScannerView extends ModalView implements ActionLis
             public void internalFrameActivated(InternalFrameEvent e){
                 ActionEvent actionEvent = new ActionEvent(
                         ModalBookableSlotScannerView.this,ActionEvent.ACTION_PERFORMED,
-                        ViewController.ScheduleViewControllerActionEvent.
+                        ScheduleViewController.Actions.
                                 VIEW_ACTIVATED_NOTIFICATION.toString());
                 ModalBookableSlotScannerView.this.getMyController().actionPerformed(actionEvent);
             }

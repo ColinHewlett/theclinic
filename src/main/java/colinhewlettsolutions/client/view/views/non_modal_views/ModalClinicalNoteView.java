@@ -9,6 +9,7 @@ import colinhewlettsolutions.client.controller.Descriptor;
 import colinhewlettsolutions.client.model.entity.ClinicalNote;
 import colinhewlettsolutions.client.model.entity.Appointment;
 import colinhewlettsolutions.client.controller.ViewController;
+import colinhewlettsolutions.client.controller.ClinicalNoteViewController;
 import colinhewlettsolutions.client.view.View;
 import colinhewlettsolutions.client.view.views.modal_views.ModalView;
 import java.awt.event.ActionListener;
@@ -94,8 +95,7 @@ public class ModalClinicalNoteView extends ModalView
             titledBorder.setTitleColor(getBorderTitleColor());
             titledBorder.setTitleFont(getBorderTitleFont());
             
-            actionCommand = ViewController
-                    .ClinicalNoteViewControllerActionEvent.CLINICAL_NOTE_FOR_APPOINTMENT_REQUEST;
+            actionCommand = ClinicalNoteViewController.Actions.CLINICAL_NOTE_FOR_APPOINTMENT_REQUEST;
             doSendActionEvent(actionCommand);
             /*
             switch (getViewMode()){
@@ -114,8 +114,7 @@ public class ModalClinicalNoteView extends ModalView
                     + "</html>";
             JOptionPane.showInternalMessageDialog(this, message, "View error", 
                     JOptionPane.WARNING_MESSAGE);
-            actionCommand = ViewController
-                    .ClinicalNoteViewControllerActionEvent.VIEW_CLOSED_NOTIFICATION;
+            actionCommand = ClinicalNoteViewController.Actions.VIEW_CLOSED_NOTIFICATION;
             doSendActionEvent(actionCommand);
             
         }
@@ -134,8 +133,7 @@ public class ModalClinicalNoteView extends ModalView
         internalFrameAdapter = new InternalFrameAdapter(){
             @Override  
             public void internalFrameClosed(InternalFrameEvent e) {
-                doSendActionEvent(ViewController
-                        .ClinicalNoteViewControllerActionEvent.VIEW_CLOSED_NOTIFICATION);
+                doSendActionEvent(ClinicalNoteViewController.Actions.VIEW_CLOSED_NOTIFICATION);
             }
         };
         this.addInternalFrameListener(internalFrameAdapter);
@@ -170,8 +168,7 @@ public class ModalClinicalNoteView extends ModalView
                     clinicalNote.setNotes(note);
                     getMyController().getDescriptor()
                         .getViewDescription().setProperty(SystemDefinition.Properties.CLINICAL_NOTE, clinicalNote);
-                    actionCommand = ViewController.ClinicalNoteViewControllerActionEvent
-                            .CLINICAL_NOTE_CREATE_REQUEST;
+                    actionCommand = ClinicalNoteViewController.Actions.CLINICAL_NOTE_CREATE_REQUEST;
                     doSendActionEvent(actionCommand);
                     pnlClinicalNote.repaint();
                 }
@@ -188,12 +185,10 @@ public class ModalClinicalNoteView extends ModalView
                 if (reply==JOptionPane.YES_OPTION){
                     getMyController().getDescriptor().
                                 getViewDescription().setProperty(SystemDefinition.Properties.CLINICAL_NOTE, clinicalNote);
-                    actionCommand = ViewController.ClinicalNoteViewControllerActionEvent
-                            .CLINICAL_NOTE_DELETE_REQUEST;
+                    actionCommand = ClinicalNoteViewController.Actions.CLINICAL_NOTE_DELETE_REQUEST;
                     doSendActionEvent(actionCommand);
                 }
-                actionCommand = ViewController.ClinicalNoteViewControllerActionEvent
-                        .CLINICAL_NOTE_UPDATE_REQUEST;
+                actionCommand = ClinicalNoteViewController.Actions.CLINICAL_NOTE_UPDATE_REQUEST;
                 doSendActionEvent(actionCommand);
                 break;
             }
@@ -209,8 +204,7 @@ public class ModalClinicalNoteView extends ModalView
                     clinicalNote.setNotes(note);
                     getMyController().getDescriptor()
                         .getViewDescription().setProperty(SystemDefinition.Properties.CLINICAL_NOTE, clinicalNote);
-                    actionCommand = ViewController.ClinicalNoteViewControllerActionEvent
-                            .CLINICAL_NOTE_UPDATE_REQUEST;
+                    actionCommand = ClinicalNoteViewController.Actions.CLINICAL_NOTE_UPDATE_REQUEST;
                     doSendActionEvent(actionCommand);
                 }
                 break;
@@ -227,8 +221,8 @@ public class ModalClinicalNoteView extends ModalView
     
     @Override 
     public void propertyChange(PropertyChangeEvent e){
-        ViewController.ClinicalNoteViewControllerPropertyChangeEvent propertyName =
-                ViewController.ClinicalNoteViewControllerPropertyChangeEvent
+        ClinicalNoteViewController.Properties propertyName =
+                ClinicalNoteViewController.Properties
                         .valueOf(e.getPropertyName());
         switch (propertyName){
             case CLINICAL_NOTE_RECEIVED:
@@ -245,7 +239,7 @@ public class ModalClinicalNoteView extends ModalView
     }
     
     private void doSendActionEvent(
-            ViewController.ClinicalNoteViewControllerActionEvent actionCommand){
+            ClinicalNoteViewController.Actions actionCommand){
         ActionEvent actionEvent = new ActionEvent(
             this,ActionEvent.ACTION_PERFORMED,
             actionCommand.toString());
@@ -510,7 +504,7 @@ public class ModalClinicalNoteView extends ModalView
     private javax.swing.JPanel pnlClinicalNote;
     private javax.swing.JTextArea txaNotepad;
     // End of variables declaration//GEN-END:variables
-    private ViewController.ClinicalNoteViewControllerActionEvent actionCommand = null;
+    private ClinicalNoteViewController.Actions actionCommand = null;
     private TitledBorder titledBorder = null;
     private javax.swing.JMenuItem pastePopupMenuItem = null;
     private javax.swing.JMenuItem savePopupMenuItem = null;

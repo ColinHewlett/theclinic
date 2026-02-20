@@ -1005,8 +1005,8 @@ public class ScheduleView extends BookingView
     @Override
     public void propertyChange(PropertyChangeEvent e){
         if (e.getSource() instanceof DesktopViewController){
-            ViewController.DesktopViewControllerPropertyChangeEvent propertyName = 
-                ViewController.DesktopViewControllerPropertyChangeEvent.valueOf(e.getPropertyName());
+            DesktopViewController.Properties propertyName = 
+                DesktopViewController.Properties.valueOf(e.getPropertyName());
             switch(propertyName){
                 case USER_SYSTEM_WIDE_SETTINGS_RECEIVED ->{
                     setScheduleTitledBorderSettings();
@@ -1338,7 +1338,7 @@ public class ScheduleView extends BookingView
                 //doActionEventFor(ScheduleViewController.Actions.VIEW_CLOSE_NOTIFICATION);
                 ActionEvent actionEvent = new ActionEvent(
                         ScheduleView.this,ActionEvent.ACTION_PERFORMED,
-                        ViewController.ScheduleViewControllerActionEvent.
+                        ScheduleViewController.Actions.
                                 VIEW_CLOSE_NOTIFICATION.toString());
                 ScheduleView.this.getMyController().actionPerformed(actionEvent);
                 
@@ -1348,7 +1348,7 @@ public class ScheduleView extends BookingView
             public void internalFrameActivated(InternalFrameEvent e){
                 ActionEvent actionEvent = new ActionEvent(
                         ScheduleView.this,ActionEvent.ACTION_PERFORMED,
-                        ViewController.ScheduleViewControllerActionEvent.
+                        ScheduleViewController.Actions.
                                 VIEW_ACTIVATED_NOTIFICATION.toString());
                 ScheduleView.this.getMyController().actionPerformed(actionEvent);
             }
@@ -1414,7 +1414,7 @@ public class ScheduleView extends BookingView
             setIconifiable(true);
             setResizable(true);
             setSelected(true);
-            setSize(1250,710);
+            setSize(1250,/*710*/820);
             toFront();
         }catch (PropertyVetoException ex){
             
@@ -2565,17 +2565,17 @@ public class ScheduleView extends BookingView
             .addGroup(pnlScheduleOperationsLayout.createSequentialGroup()
                 .addGap(10, 10, 10)
                 .addComponent(btnCreateUpdateAppointment, javax.swing.GroupLayout.PREFERRED_SIZE, 83, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(15, 15, 15)
+                .addGap(35, 35, 35)
                 .addComponent(btnMakeDeleteEmergencyAppointmentUndoSelection, javax.swing.GroupLayout.PREFERRED_SIZE, 83, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(15, 15, 15)
+                .addGap(35, 35, 35)
                 .addComponent(btnCancelSelectedAppointment, javax.swing.GroupLayout.PREFERRED_SIZE, 83, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(15, 15, 15)
+                .addGap(35, 35, 35)
                 .addComponent(btnCreateUpdateCancelUnbookableSlotOrMoveBookingToAnotherDayOrFetchPatientDetails, javax.swing.GroupLayout.PREFERRED_SIZE, 83, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(15, 15, 15)
+                .addGap(35, 35, 35)
                 .addComponent(btnClinicalNotesForSelectedAppointment, javax.swing.GroupLayout.PREFERRED_SIZE, 83, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(15, 15, 15)
+                .addGap(35, 35, 35)
                 .addComponent(btnCloseView, javax.swing.GroupLayout.PREFERRED_SIZE, 83, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(11, 11, 11))
+                .addGap(23, 23, 23))
         );
 
         pnlScheduleForDay.setBorder(javax.swing.BorderFactory.createTitledBorder("Appointment schedule for"));
@@ -2597,8 +2597,8 @@ public class ScheduleView extends BookingView
             pnlScheduleForDayLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlScheduleForDayLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(scrAppointmentsForDayTable, javax.swing.GroupLayout.PREFERRED_SIZE, 218, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(scrAppointmentsForDayTable, javax.swing.GroupLayout.DEFAULT_SIZE, 300, Short.MAX_VALUE)
+                .addContainerGap())
         );
 
         pnlView.setBorder(javax.swing.BorderFactory.createTitledBorder("Manage 'to do' task display"));
@@ -2681,12 +2681,10 @@ public class ScheduleView extends BookingView
         );
         pnlScheduleDaySelectionLayout.setVerticalGroup(
             pnlScheduleDaySelectionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlScheduleDaySelectionLayout.createSequentialGroup()
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlScheduleDaySelectionLayout.createSequentialGroup()
                 .addGap(10, 10, 10)
-                .addGroup(pnlScheduleDaySelectionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(pnlScheduleDaySelectionLayout.createSequentialGroup()
-                        .addComponent(pnlScheduleOperations, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addContainerGap())
+                .addGroup(pnlScheduleDaySelectionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(pnlScheduleOperations, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(pnlScheduleDaySelectionLayout.createSequentialGroup()
                         .addGroup(pnlScheduleDaySelectionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(pnlSlotScanner, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -2696,9 +2694,9 @@ public class ScheduleView extends BookingView
                             .addComponent(pnlView, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addGap(18, 18, 18)
                         .addComponent(pnlScheduleForDay, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(pnlToDoList, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(9, 9, 9))))
+                        .addGap(18, 18, 18)
+                        .addComponent(pnlToDoList, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGap(12, 12, 12))
         );
 
         mnuOptions.setText("Actions");
@@ -2734,7 +2732,7 @@ public class ScheduleView extends BookingView
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(pnlScheduleDaySelection, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(9, Short.MAX_VALUE))
         );
 
         pack();

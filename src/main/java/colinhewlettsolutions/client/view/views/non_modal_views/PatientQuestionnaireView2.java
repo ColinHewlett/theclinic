@@ -4,14 +4,8 @@
  */
 package colinhewlettsolutions.client.view.views.non_modal_views;
 
-import colinhewlettsolutions.client.controller.SystemDefinition;
-import colinhewlettsolutions.client.controller.Descriptor;
 import colinhewlettsolutions.client.controller.ViewController;
-import static colinhewlettsolutions.client.controller.ViewController.PatientQuestionnaireViewControllerActionEvent.PATIENT_QUESTION_ANSWER_UPDATE_REQUEST;
-import static colinhewlettsolutions.client.controller.ViewController.PatientQuestionnaireViewControllerActionEvent.PATIENT_QUESTION_READ_REQUEST;
-import static colinhewlettsolutions.client.controller.ViewController.PatientQuestionnaireViewControllerActionEvent.VIEW_CLOSE_NOTIFICATION;
-import static colinhewlettsolutions.client.controller.ViewController.PatientQuestionnaireViewControllerPropertyChangeEvent.PATIENT_QUESTIONNAIRE_VIEW_CONTROLLER_ERROR_RECEIVED;
-import static colinhewlettsolutions.client.controller.ViewController.PatientQuestionnaireViewControllerPropertyChangeEvent.QUESTION_WITH_STATE_RECEIVED;
+import colinhewlettsolutions.client.controller.PatientQuestionnaireViewController;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -94,9 +88,8 @@ public class PatientQuestionnaireView2 extends View
     
     @Override
     public void propertyChange(PropertyChangeEvent ex){
-        ViewController.PatientQuestionnaireViewControllerPropertyChangeEvent propertyName =
-                ViewController.PatientQuestionnaireViewControllerPropertyChangeEvent
-                        .valueOf(ex.getPropertyName());
+        PatientQuestionnaireViewController.Properties propertyName =
+               PatientQuestionnaireViewController.Properties.valueOf(ex.getPropertyName());
         switch (propertyName){
             case QUESTION_WITH_STATE_RECEIVED:
                 QuestionWithState qws = (QuestionWithState)getMyController().getDescriptor()
@@ -123,14 +116,11 @@ public class PatientQuestionnaireView2 extends View
         setQuestionWithState(qws);
         if (!qws.getQuestion().getOrder().equals(2)){
             if (value) //if state == true add new PatietQuestion to storage
-                doSendActionEvent(ViewController.PatientQuestionnaireViewControllerActionEvent
-                        .PATIENT_QUESTION_CREATE_REQUEST);
+                doSendActionEvent(PatientQuestionnaireViewController.Actions.PATIENT_QUESTION_CREATE_REQUEST);
             else // else delete this patient question from storage
                 //doPatientQuestionDelete(qws);
-                doSendActionEvent(ViewController.PatientQuestionnaireViewControllerActionEvent
-                        .PATIENT_QUESTION_DELETE_REQUEST);
-            doSendActionEvent(ViewController.PatientQuestionnaireViewControllerActionEvent
-                .PATIENT_QUESTION_READ_REQUEST);    
+                doSendActionEvent(PatientQuestionnaireViewController.Actions.PATIENT_QUESTION_DELETE_REQUEST);
+            doSendActionEvent(PatientQuestionnaireViewController.Actions.PATIENT_QUESTION_READ_REQUEST);    
         }else{
             String message = "Patient meds can only be defined using the 'Medical history' radio button\n"
                     + "on the Patient view, and then selecting the 'Medication' option";
@@ -193,7 +183,7 @@ public class PatientQuestionnaireView2 extends View
                 }catch (PropertyVetoException ex){
 
                 }
-                doSendActionEvent(VIEW_CLOSE_NOTIFICATION);
+                doSendActionEvent(PatientQuestionnaireViewController.Actions.VIEW_CLOSE_NOTIFICATION);
                 break;
             /*    
             case REQUEST_DELETE_PATIENT_ANSWER:
@@ -238,10 +228,10 @@ public class PatientQuestionnaireView2 extends View
                 if (qws!=null){//shouldn't be null at this stage
                     qws.setAnswer(this.txaSelectedQuestionnaireItem.getText());
                     setQuestionWithState(qws);
-                    doSendActionEvent(PATIENT_QUESTION_ANSWER_UPDATE_REQUEST);
+                    doSendActionEvent(PatientQuestionnaireViewController.Actions.PATIENT_QUESTION_ANSWER_UPDATE_REQUEST);
                     if (getIsViewControllerErrorReceived()) 
                         doSendViewControllerError(action);
-                    else doSendActionEvent(PATIENT_QUESTION_READ_REQUEST);
+                    else doSendActionEvent(PatientQuestionnaireViewController.Actions.PATIENT_QUESTION_READ_REQUEST);
                     setAnswerEditMode(AnswerEditMode.OFF);
                 }
                 break;
@@ -292,14 +282,11 @@ public class PatientQuestionnaireView2 extends View
                         (java.awt.Color)getMyController().getDescriptor().getControllerDescription().
                         getProperty(SystemDefinition.Properties.TITLED_BORDER_COLOR)));
         
-        doSendActionEvent(ViewController
-                .PatientQuestionnaireViewControllerActionEvent
-                .PATIENT_QUESTION_READ_REQUEST);
+        doSendActionEvent(PatientQuestionnaireViewController.Actions.PATIENT_QUESTION_READ_REQUEST);
         
     }
     
-    private void doSendActionEvent(ViewController.
-        PatientQuestionnaireViewControllerActionEvent actionCommand){
+    private void doSendActionEvent(PatientQuestionnaireViewController.Actions actionCommand){
         ActionEvent actionEvent = new ActionEvent(
             this,ActionEvent.ACTION_PERFORMED,
             actionCommand.toString());

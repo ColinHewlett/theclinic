@@ -5,16 +5,14 @@
 package colinhewlettsolutions.client.view.views.non_modal_views;
 
 import colinhewlettsolutions.client.controller.SystemDefinition;
-import colinhewlettsolutions.client.controller.Descriptor;
 import colinhewlettsolutions.client.model.entity.SecondaryCondition;
 import colinhewlettsolutions.client.model.entity.PrimaryCondition;
 import colinhewlettsolutions.client.model.entity.Condition;
 import colinhewlettsolutions.client.model.entity.Treatment;
 import colinhewlettsolutions.client.controller.ViewController;
+import colinhewlettsolutions.client.controller.MedicalConditionViewController;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyVetoException;
@@ -102,7 +100,7 @@ public class MedicalConditionView extends View
         String ViewError = null;
         String ErrorTitle = null;
         PrimaryCondition primaryCondition = null;
-        ViewController.MedicalConditionViewControllerActionEvent
+        MedicalConditionViewController.Actions
                 actionCommand = null;
         switch (Action.valueOf(e.getActionCommand())){
             case REQUEST_CLOSE_VIEW:
@@ -111,7 +109,7 @@ public class MedicalConditionView extends View
                 }catch (PropertyVetoException ex){
                     
                 }
-                actionCommand = ViewController.MedicalConditionViewControllerActionEvent
+                actionCommand = MedicalConditionViewController.Actions
                         .VIEW_CLOSE_NOTIFICATION;
                     doSendActionEvent(actionCommand);
                 break;
@@ -122,7 +120,7 @@ public class MedicalConditionView extends View
                         primaryCondition = doPrepForRequestPrimaryConditionCreate();
                         if (primaryCondition!=null){
                             setPrimaryCondition(primaryCondition);
-                            actionCommand = ViewController.MedicalConditionViewControllerActionEvent
+                            actionCommand = MedicalConditionViewController.Actions
                                     .PRIMARY_CONDITION_CREATE_REQUEST;
                             doSendActionEvent(actionCommand);
                         }else{
@@ -136,7 +134,7 @@ public class MedicalConditionView extends View
                         primaryCondition = doPrepForRequestSecondaryConditionCreate();
                         if (primaryCondition!=null){
                             setPrimaryCondition(primaryCondition);
-                            actionCommand = ViewController.MedicalConditionViewControllerActionEvent
+                            actionCommand = MedicalConditionViewController.Actions
                                     .SECONDARY_CONDITION_CREATE_REQUEST;
                             doSendActionEvent(actionCommand);
                         }else{
@@ -159,14 +157,14 @@ public class MedicalConditionView extends View
                     case PRIMARY:
                         primaryCondition = doPrepForRequestPrimaryConditionDelete();
                         setPrimaryCondition(primaryCondition);
-                        actionCommand = ViewController.MedicalConditionViewControllerActionEvent
+                        actionCommand = MedicalConditionViewController.Actions
                                 .PRIMARY_CONDITION_DELETE_REQUEST;
                         doSendActionEvent(actionCommand);
                         break;
                     case SECONDARY:
                         primaryCondition = doPrepForRequestSecondaryConditionDelete();
                         setPrimaryCondition(primaryCondition);
-                        actionCommand = ViewController.MedicalConditionViewControllerActionEvent
+                        actionCommand = MedicalConditionViewController.Actions
                                 .SECONDARY_CONDITION_DELETE_REQUEST;
                         doSendActionEvent(actionCommand);
                         break;
@@ -185,7 +183,7 @@ public class MedicalConditionView extends View
                         primaryCondition = doPrepForRequestPrimaryConditionRename();
                         if (primaryCondition!=null){
                             setPrimaryCondition(primaryCondition);
-                            actionCommand = ViewController.MedicalConditionViewControllerActionEvent
+                            actionCommand = MedicalConditionViewController.Actions
                                     .PRIMARY_CONDITION_RENAME_REQUEST;
                             doSendActionEvent(actionCommand);
                         }else setIsErrorMessageReceived(true);
@@ -203,7 +201,7 @@ public class MedicalConditionView extends View
                         primaryCondition = doPrepForRequestSecondaryConditionRename();
                         if (primaryCondition!=null){
                             setPrimaryCondition(primaryCondition);
-                            actionCommand = ViewController.MedicalConditionViewControllerActionEvent
+                            actionCommand = MedicalConditionViewController.Actions
                                     .SECONDARY_CONDITION_RENAME_REQUEST;
                             doSendActionEvent(actionCommand);
                         }else setIsErrorMessageReceived(true);
@@ -239,8 +237,8 @@ public class MedicalConditionView extends View
 
     @Override 
     public void propertyChange(PropertyChangeEvent e){
-        ViewController.MedicalConditionViewControllerPropertyChangeEvent propertyName =
-                ViewController.MedicalConditionViewControllerPropertyChangeEvent
+        MedicalConditionViewController.Properties propertyName =
+                MedicalConditionViewController.Properties
                         .valueOf(e.getPropertyName());
         switch (propertyName){
             case MEDICAL_CONDITION_VIEW_CONTROLLER_ERROR_RECEIVED:
@@ -311,7 +309,7 @@ public class MedicalConditionView extends View
         return conditionViewMode;
     }
     private void setConditionViewMode(ConditionViewMode value){
-        ViewController.MedicalConditionViewControllerActionEvent actionCommand = null;
+        MedicalConditionViewController.Actions actionCommand = null;
         conditionViewMode = value;
         switch(conditionViewMode){
             case PRIMARY:
@@ -323,7 +321,7 @@ public class MedicalConditionView extends View
                 this.btnRenameMedicalCondition.setEnabled(false);
                 this.btnRenameMedicalCondition.setEnabled(false);
                 this.btnToggleBetweenPrimaryAndSecondaryViews.setEnabled(false);
-                actionCommand = ViewController.MedicalConditionViewControllerActionEvent
+                actionCommand = MedicalConditionViewController.Actions
                         .PRIMARY_CONDITION_READ_REQUEST;
                 doSendActionEvent(actionCommand);
                 break;
@@ -342,7 +340,7 @@ public class MedicalConditionView extends View
                 this.btnRenameMedicalCondition.setEnabled(false);
                 this.btnRenameMedicalCondition.setEnabled(false);
                 this.btnToggleBetweenPrimaryAndSecondaryViews.setEnabled(true);
-                actionCommand = ViewController.MedicalConditionViewControllerActionEvent
+                actionCommand = MedicalConditionViewController.Actions
                         .SECONDARY_CONDITION_READ_REQUEST;
                 doSendActionEvent(actionCommand);
                 break;
@@ -411,7 +409,7 @@ public class MedicalConditionView extends View
     }
     
     private void doSendActionEvent(
-            ViewController.MedicalConditionViewControllerActionEvent actionCommand){
+            MedicalConditionViewController.Actions actionCommand){
         ActionEvent actionEvent = new ActionEvent(
             this,ActionEvent.ACTION_PERFORMED,
             actionCommand.toString());

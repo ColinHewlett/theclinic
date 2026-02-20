@@ -5,8 +5,9 @@
 package colinhewlettsolutions.client.view.views.non_modal_views;
 
 import colinhewlettsolutions.client.controller.SystemDefinition;
-import colinhewlettsolutions.client.controller.Descriptor;
+import colinhewlettsolutions.client.controller.ScheduleViewController;
 import colinhewlettsolutions.client.controller.ViewController;
+import colinhewlettsolutions.client.controller.TreatmentViewController;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -74,8 +75,7 @@ public class TreatmentView extends View
     
     public void actionPerformed(ActionEvent e){
         Treatment tws = null;
-        ViewController.TreatmentViewControllerActionEvent
-                actionCommand = null;
+        TreatmentViewController.Actions actionCommand = null;
         switch (Action.valueOf(e.getActionCommand())){
             case REQUEST_CLOSE_VIEW:
                 try{
@@ -83,16 +83,14 @@ public class TreatmentView extends View
                 }catch (PropertyVetoException ex){
                     
                 }
-                actionCommand = ViewController.TreatmentViewControllerActionEvent
-                        .VIEW_CLOSE_NOTIFICATION;
+                actionCommand = TreatmentViewController.Actions.VIEW_CLOSE_NOTIFICATION;
                     doSendActionEvent(actionCommand);
                 break;
             case REQUEST_TREATMENT_CREATE:
                 tws = doPrepForRequestTreatmentCreate();
                 if (tws!=null){
                     setTreatment(tws);
-                    actionCommand = ViewController.TreatmentViewControllerActionEvent
-                        .TREATMENT_CREATE_REQUEST;
+                    actionCommand = TreatmentViewController.Actions.TREATMENT_CREATE_REQUEST;
                     doSendActionEvent(actionCommand);
                 }
                 break;
@@ -101,8 +99,7 @@ public class TreatmentView extends View
                 tws = doPrepForRequestTreatmentDelete();
                 if (tws != null){
                     setTreatment(tws);
-                    actionCommand = ViewController.TreatmentViewControllerActionEvent
-                        .TREATMENT_DELETE_REQUEST;
+                    actionCommand = TreatmentViewController.Actions.TREATMENT_DELETE_REQUEST;
                     doSendActionEvent(actionCommand);
                     
                     if(getIsErrorMessageReceived()){
@@ -117,8 +114,7 @@ public class TreatmentView extends View
                 tws = doPrepForRequestTreatmentRename();
                 if (tws!=null){
                     setTreatment(tws);
-                    actionCommand = ViewController.TreatmentViewControllerActionEvent
-                        .TREATMENT_RENAME_REQUEST;
+                    actionCommand = TreatmentViewController.Actions.TREATMENT_RENAME_REQUEST;
                     doSendActionEvent(actionCommand);
                 }
                 break;
@@ -127,9 +123,8 @@ public class TreatmentView extends View
 
     @Override 
     public void propertyChange(PropertyChangeEvent e){
-        ViewController.TreatmentViewControllerPropertyChangeEvent propertyName =
-                ViewController.TreatmentViewControllerPropertyChangeEvent
-                        .valueOf(e.getPropertyName());
+        TreatmentViewController.Properties propertyName =
+                TreatmentViewController.Properties.valueOf(e.getPropertyName());
         switch (propertyName){
             case TREATMENT_ERROR_RECEIVED:
                 setIsErrorMessageReceived(true);
@@ -141,7 +136,7 @@ public class TreatmentView extends View
     }
     
     public void tableChanged(TableModelEvent e){
-        ViewController.ScheduleViewControllerActionEvent actionCommand = null;
+        ScheduleViewController.Actions actionCommand = null;
         Treatment treatment = null;
         int row = e.getFirstRow();
         int column = e.getColumn();
@@ -189,8 +184,7 @@ public class TreatmentView extends View
             }
         });
 
-        doSendActionEvent(ViewController
-                .TreatmentViewControllerActionEvent.TREATMENTS_READ_REQUEST);
+        doSendActionEvent(TreatmentViewController.Actions.TREATMENTS_READ_REQUEST);
         
         //populateTreatmentTable(); 
     }
@@ -228,7 +222,7 @@ public class TreatmentView extends View
     }
     
     private void doSendActionEvent(
-            ViewController.TreatmentViewControllerActionEvent actionCommand){
+            TreatmentViewController.Actions actionCommand){
         ActionEvent actionEvent = new ActionEvent(
             this,ActionEvent.ACTION_PERFORMED,
             actionCommand.toString());

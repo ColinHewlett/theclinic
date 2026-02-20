@@ -24,6 +24,28 @@ import javax.swing.JOptionPane;
  */
 public class UserSystemWideSettingsViewController extends ViewController {
     
+    public enum Actions{
+        USER_SCHEDULE_LIST_FACTORY_SETTINGS_REQUEST,
+        USER_SCHEDULE_LIST_SETTINGS_UPDATE_REQUEST,
+        USER_SYSTEM_WIDE_FACTORY_SETTINGS_REQUEST,
+        USER_SYSTEM_WIDE_SETTINGS_REQUEST,
+        USER_SYSTEM_WIDE_SETTINGS_UPDATE_REQUEST,
+        VIEW_ACTIVATED_NOTIFICATION,
+        VIEW_CHANGED_NOTIFICATION,
+        VIEW_CLOSED_NOTIFICATION
+    }
+    
+    public enum Properties{
+        LIST_BOOKABLE_SLOT_BACKGROUND_CHANGE_RECEIVED,
+        LIST_BOOKABLE_SLOT_FOREGROUND_CHANGE_RECEIVED,
+        LIST_EMERGENCY_BOOKING_BACKGROUND_CHANGE_RECEIVED,
+        LIST_EMERGENCY_BOOKING_FOREGROUND_CHANGE_RECEIVED,
+        LIST_UNBOOKABLE_SLOT_BACKGROUND_CHANGE_RECEIVED,
+        LIST_UNBOOKABLE_SLOT_FOREGROUND_CHANGE_RECEIVED,
+        TITLED_BORDER_COLOR_CHANGE_RECEIVED,
+        TITLED_BORDER_FONT_CHANGE_RECEIVED
+    }
+    
     public UserSystemWideSettingsViewController(DesktopViewController controller, 
                                                 DesktopView desktopView){
         setMyController(controller);
@@ -38,28 +60,9 @@ public class UserSystemWideSettingsViewController extends ViewController {
         UserSettings userSettings = new UserSettings(new User(credential.getUsername()));
         
         ViewDescription viewDescription = getDescriptor().getViewDescription();
-        ViewController.UserSettingsViewControllerActionEvent actionCommand = 
-                ViewController.UserSettingsViewControllerActionEvent.valueOf(e.getActionCommand());
+        Actions actionCommand = Actions.valueOf(e.getActionCommand());
         try{
             switch(actionCommand){
-                case USER_SCHEDULE_DIARY_FACTORY_SETTINGS_REQUEST ->{
-                    /*
-                    for(SystemDefinition.UserScheduleDiarySettings settings : SystemDefinition.UserScheduleDiarySettings.values()){
-                        SystemDefinition.Properties property = SystemDefinition.Properties.valueOf(settings.toString());
-                        controllerDescription.setProperty(property,desktopViewControllerDescription.getProperty(property));
-                    }
-                    userSettings.setScope(Entity.Scope.USER_SCHEDULE_DIARY_SETTINGS);*/
-                    break;
-                }
-                case USER_SCHEDULE_DIARY_SETTINGS_UPDATE_REQUEST ->{
-                    /*
-                    for(SystemDefinition.UserScheduleDiarySettings settings : SystemDefinition.UserScheduleDiarySettings.values()){
-                        SystemDefinition.Properties property = SystemDefinition.Properties.valueOf(settings.toString());
-                        controllerDescription.setProperty(property,viewDescription.getProperty(property));
-                    }
-                    userSettings.setScope(Entity.Scope.USER_SCHEDULE_DIARY_SETTINGS);*/
-                    break;
-                }
                 case USER_SCHEDULE_LIST_FACTORY_SETTINGS_REQUEST ->{
                     /*
                     for(SystemDefinition.UserScheduleListSettings settings : SystemDefinition.UserScheduleListSettings.values()){
@@ -100,7 +103,7 @@ public class UserSystemWideSettingsViewController extends ViewController {
                 case VIEW_CLOSED_NOTIFICATION ->{
                     ActionEvent actionEvent = new ActionEvent(
                         this,ActionEvent.ACTION_PERFORMED,
-                        ViewController.DesktopViewControllerActionEvent.
+                        DesktopViewController.Actions.
                                 VIEW_CONTROLLER_CLOSE_NOTIFICATION.toString());
                     getMyController().actionPerformed(actionEvent);
                     break;
@@ -152,7 +155,7 @@ public class UserSystemWideSettingsViewController extends ViewController {
         }
         ActionEvent actionEvent = new ActionEvent(
             this,ActionEvent.ACTION_PERFORMED,
-            ViewController.DesktopViewControllerActionEvent.
+            DesktopViewController.Actions.
                     USER_SYSTEM_WIDE_SETTINGS_VIEW_CONTROLLER_REQUEST.toString());
         getMyController().actionPerformed(actionEvent);
         /*

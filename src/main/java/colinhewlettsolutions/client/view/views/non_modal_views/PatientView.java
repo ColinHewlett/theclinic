@@ -367,7 +367,7 @@ public class PatientView extends View
         ActionEvent actionEvent = null;
         if ((Boolean)getMyController().getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.LOGIN_REQUIRED)){
             actionEvent = new ActionEvent(this, ActionEvent.ACTION_PERFORMED,
-                    ViewController.DesktopViewControllerActionEvent.USER_SYSTEM_WIDE_SETTINGS_REQUEST.toString());
+                    DesktopViewController.Actions.USER_SYSTEM_WIDE_SETTINGS_REQUEST.toString());
             this.getMyController().getMyController().actionPerformed(actionEvent);
         }
         setScheduleTitledBorderSettings();
@@ -521,8 +521,8 @@ public class PatientView extends View
         initialiseFromControllerViewMode();
         
         if (e.getSource() instanceof DesktopViewController){
-            ViewController.DesktopViewControllerPropertyChangeEvent propertyName = 
-                ViewController.DesktopViewControllerPropertyChangeEvent.valueOf(e.getPropertyName());
+            DesktopViewController.Properties propertyName = 
+                DesktopViewController.Properties.valueOf(e.getPropertyName());
             switch(propertyName){
                 case USER_SYSTEM_WIDE_SETTINGS_RECEIVED ->{
                     setScheduleTitledBorderSettings();
@@ -530,8 +530,8 @@ public class PatientView extends View
                 }
             }
         }else{
-            ViewController.PatientViewControllerPropertyChangeEvent propertyName =
-                    ViewController.PatientViewControllerPropertyChangeEvent.valueOf(e.getPropertyName());
+            PatientViewController.Properties propertyName =
+                    PatientViewController.Properties.valueOf(e.getPropertyName());
             switch (propertyName){
                 case CLOSE_VIEW_REQUEST_RECEIVED:
                     try{

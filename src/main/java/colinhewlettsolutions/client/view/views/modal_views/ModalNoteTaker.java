@@ -5,7 +5,7 @@
 package colinhewlettsolutions.client.view.views.modal_views;
 
 import colinhewlettsolutions.client.controller.SystemDefinition;
-import colinhewlettsolutions.client.controller.Descriptor;
+import colinhewlettsolutions.client.controller.PatientViewController;
 import colinhewlettsolutions.client.model.entity.SecondaryCondition;
 import colinhewlettsolutions.client.model.entity.PrimaryCondition;
 import colinhewlettsolutions.client.model.entity.Condition;
@@ -58,7 +58,7 @@ public class ModalNoteTaker extends ModalView implements ActionListener{
                 getMyController().getDescriptor().getViewDescription().setProperty(SystemDefinition.Properties.CONDITION, getConditionOnEntry());
                 ActionEvent actionEvent = new ActionEvent(
                     this,ActionEvent.ACTION_PERFORMED,
-                    ViewController.PatientViewControllerActionEvent.
+                    PatientViewController.Actions.
                             PATIENT_MEDICAL_HISTORY_NOTES_TAKEN_REQUEST.toString());
                 this.getMyController().actionPerformed(actionEvent);
                 try{

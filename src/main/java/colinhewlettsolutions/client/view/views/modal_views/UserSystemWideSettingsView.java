@@ -5,8 +5,12 @@
 package colinhewlettsolutions.client.view.views.modal_views;
 
 import colinhewlettsolutions.client.controller.Descriptor;
+import colinhewlettsolutions.client.controller.UserSystemWideSettingsViewController;
+import colinhewlettsolutions.client.controller.PatientViewController;
 import colinhewlettsolutions.client.controller.SystemDefinition;
 import colinhewlettsolutions.client.controller.ViewController;
+import colinhewlettsolutions.client.controller.LoginViewController;
+import colinhewlettsolutions.client.controller.DesktopViewController;
 import colinhewlettsolutions.client.view.View;
 import colinhewlettsolutions.client.view.views.modal_views.ModalView;
 import colinhewlettsolutions.client.view.views.non_modal_views.DesktopView;
@@ -64,7 +68,7 @@ public class UserSystemWideSettingsView extends View
             }
             case REQUEST_FACTORY_SETTINGS ->{
                 sendActionRequestToController(
-                        ViewController.UserSettingsViewControllerActionEvent.USER_SYSTEM_WIDE_FACTORY_SETTINGS_REQUEST);
+                        UserSystemWideSettingsViewController.Actions.USER_SYSTEM_WIDE_FACTORY_SETTINGS_REQUEST);
                 copySettingsFromControllerDescriptionToViewDescription();
                 copyViewDescriptionToViewSettings();
                 break;
@@ -72,7 +76,7 @@ public class UserSystemWideSettingsView extends View
             case REQUEST_UPDATE_SETTINGS ->{
                 copyCurrentViewSettingsToViewDescription();
                 sendActionRequestToController(
-                        ViewController.UserSettingsViewControllerActionEvent.USER_SYSTEM_WIDE_SETTINGS_UPDATE_REQUEST);
+                        UserSystemWideSettingsViewController.Actions.USER_SYSTEM_WIDE_SETTINGS_UPDATE_REQUEST);
                 copySettingsFromControllerDescriptionToViewDescription();
                 copyViewDescriptionToViewSettings();
                 
@@ -104,7 +108,7 @@ public class UserSystemWideSettingsView extends View
         setControllerDescription(getMyController().getDescriptor().getControllerDescription());
         setViewDescription(getMyController().getDescriptor().getViewDescription());
         ActionEvent actionEvent = new ActionEvent(this, ActionEvent.ACTION_PERFORMED,
-                ViewController.DesktopViewControllerActionEvent.USER_SYSTEM_WIDE_SETTINGS_REQUEST.toString());
+                DesktopViewController.Actions.USER_SYSTEM_WIDE_SETTINGS_REQUEST.toString());
         this.getMyController().getMyController().actionPerformed(actionEvent);
         setScheduleTitledBorderSettings();
         addInternalFrameListeners();
@@ -116,8 +120,8 @@ public class UserSystemWideSettingsView extends View
     
     @Override
     public void propertyChange(PropertyChangeEvent e){
-        ViewController.DesktopViewControllerPropertyChangeEvent propertyName = 
-                ViewController.DesktopViewControllerPropertyChangeEvent.valueOf(e.getPropertyName());
+        DesktopViewController.Properties propertyName = 
+                DesktopViewController.Properties.valueOf(e.getPropertyName());
         switch(propertyName){
             case USER_SYSTEM_WIDE_SETTINGS_RECEIVED ->{
                 this.setScheduleTitledBorderSettings();
@@ -188,7 +192,7 @@ public class UserSystemWideSettingsView extends View
                 
                 ActionEvent actionEvent = new ActionEvent(
                         UserSystemWideSettingsView.this,ActionEvent.ACTION_PERFORMED,
-                        ViewController.LoginViewControllerActionEvent.VIEW_CLOSED_NOTIFICATION.toString());
+                        LoginViewController.Actions.VIEW_CLOSED_NOTIFICATION.toString());
                 getMyController().actionPerformed(actionEvent);
                 
             }
@@ -196,7 +200,7 @@ public class UserSystemWideSettingsView extends View
             public void internalFrameActivated(InternalFrameEvent e) {
                 ActionEvent actionEvent = new ActionEvent(
                         UserSystemWideSettingsView.this,ActionEvent.ACTION_PERFORMED,
-                        ViewController.PatientViewControllerActionEvent.VIEW_ACTIVATED_NOTIFICATION.toString());
+                        PatientViewController.Actions.VIEW_ACTIVATED_NOTIFICATION.toString());
                 getMyController().actionPerformed(actionEvent);
             }
         };
@@ -221,15 +225,14 @@ public class UserSystemWideSettingsView extends View
     }
     
     private void sendActionRequestToController(
-            ViewController.UserSettingsViewControllerActionEvent request){
+            UserSystemWideSettingsViewController.Actions request){
         ActionEvent actionEvent = new ActionEvent(
             this,ActionEvent.ACTION_PERFORMED,
             request.toString());
         this.getMyController().actionPerformed(actionEvent);
         actionEvent = new ActionEvent(
             this,ActionEvent.ACTION_PERFORMED,
-            ViewController.UserSettingsViewControllerActionEvent.
-                    VIEW_CHANGED_NOTIFICATION.toString());
+            UserSystemWideSettingsViewController.Actions.VIEW_CHANGED_NOTIFICATION.toString());
         this.getMyController().actionPerformed(actionEvent);
     }
     

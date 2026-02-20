@@ -4,37 +4,21 @@
  */
 package colinhewlettsolutions.client.view.views.modal_views;
 
-import colinhewlettsolutions.client.controller.SystemDefinition;
+import colinhewlettsolutions.client.controller.PatientViewController;
 import colinhewlettsolutions.client.controller.Descriptor;
+import colinhewlettsolutions.client.controller.ScheduleViewController;
+import colinhewlettsolutions.client.controller.SystemDefinition;
 import colinhewlettsolutions.client.controller.ViewController;
 import colinhewlettsolutions.client.model.entity.Patient;
 import colinhewlettsolutions.client.view.View;
 import colinhewlettsolutions.client.view.views.non_modal_views.DesktopView;
-import java.awt.AWTEvent;
-import java.awt.ActiveEvent;
-import java.awt.Component;
-import java.awt.Container;
-import java.awt.Dimension;
-import java.awt.EventQueue;
-import java.awt.Insets;
-import java.awt.MenuComponent;
-import java.awt.Point;
-import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseMotionAdapter;
 import java.beans.PropertyChangeEvent;
 import java.util.ArrayList;
 import java.util.Iterator;
 import javax.swing.DefaultComboBoxModel;
-import javax.swing.JDialog;
-import javax.swing.JDesktopPane;
-import javax.swing.JInternalFrame;
-import javax.swing.JLayeredPane;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.border.TitledBorder;
 
 /**
  *
@@ -62,7 +46,7 @@ public class ModalPatientSelectionView extends  ModalView
     @Override
     public void propertyChange(PropertyChangeEvent e){
         if (e.getPropertyName().equals(
-            ViewController.ScheduleViewControllerPropertyChangeEvent.APPOINTMENT_SCHEDULE_ERROR_RECEIVED.toString())){
+            ScheduleViewController.Properties.APPOINTMENT_SCHEDULE_ERROR_RECEIVED.toString())){
             Descriptor ed = (Descriptor)e.getNewValue();
             ViewController.displayErrorMessage((String)ed.getControllerDescription().getProperty(SystemDefinition.Properties.ERROR),
                                                "Appointment editor dialog error",
@@ -174,19 +158,19 @@ public class ModalPatientSelectionView extends  ModalView
     }                        
 
     private void cmbPatientSelectorActionPerformed(java.awt.event.ActionEvent evt) {
-        ViewController.PatientViewControllerActionEvent action = null;
+        PatientViewController.Actions action = null;
         if (this.cmbPatientSelector.getSelectedIndex()!=-1){
             getMyController().getDescriptor().getViewDescription().
                     setProperty(SystemDefinition.Properties.PATIENT, (Patient)this.cmbPatientSelector.getSelectedItem());
             switch(getMyViewType()){
                 case PATIENT_SELECTION_VIEW:
-                    action = ViewController.PatientViewControllerActionEvent.PATIENT_REQUEST;
+                    action = PatientViewController.Actions.PATIENT_REQUEST;
                     break;
                 case PATIENT_RECOVERY_SELECTION_VIEW:
-                    action = ViewController.PatientViewControllerActionEvent.PATIENT_RECOVER_REQUEST;
+                    action = PatientViewController.Actions.PATIENT_RECOVER_REQUEST;
                     break;
                 default:
-                    action = ViewController.PatientViewControllerActionEvent.NULL_PATIENT_REQUEST;
+                    action = PatientViewController.Actions.NULL_PATIENT_REQUEST;
                     break;
             }
             ActionEvent actionEvent = new ActionEvent(
@@ -201,7 +185,7 @@ public class ModalPatientSelectionView extends  ModalView
         this.cmbPatientSelector.setSelectedIndex(-1);
         ActionEvent actionEvent = new ActionEvent(
                 this,ActionEvent.ACTION_PERFORMED,
-                ViewController.PatientViewControllerActionEvent.NULL_PATIENT_REQUEST.toString());
+                PatientViewController.Actions.NULL_PATIENT_REQUEST.toString());
         this.getMyController().actionPerformed(actionEvent);
     }
 

@@ -49,6 +49,23 @@ public class PatientMedicalHistoryView extends View
             "<html><center>Cancel</center><center>upload</center><center>comment</center></html>";;
     private final String EDIT_COMMENT_MODE_TITLE = 
             "<html><center>Edit</center><center>patient</center><center>comment</center></html>";
+    
+    public enum Actions{
+        PATIENT_CONDITION_READ_REQUEST,
+        PATIENT_CONDITION_CREATE_REQUEST,
+        PATIENT_CONDITION_DELETE_REQUEST,
+        PATIENT_CONDITION_COMMENT_UPDATE_REQUEST,
+        PATIENT_CONDITION_COMMENT_DELETE_REQUEST,
+        PRINT_PATIENT_MEDICAL_HISTORY_REQUEST,
+        VIEW_CLOSE_NOTIFICATION
+    }
+    
+    public enum Properties{
+        CONDITION_WITH_STATE_RECEIVED,
+        PATIENT_MEDICAL_HISTORY_VIEW_CONTROLLER_ERROR_RECEIVED,
+        PATIENT_MEDICAL_HISTORY_VIEW_CONTROLLER_CHANGE_NOTIFICATION
+    }
+    
     enum ToggleMode{PRIMARY,SECONDARY,OTHER}
     enum ConditionViewMode{PRIMARY, SECONDARY};
     enum PatientCommentMode{CANCEL, EDIT};
@@ -162,8 +179,7 @@ public class PatientMedicalHistoryView extends View
                 }catch (PropertyVetoException ex){
 
                 }
-                doSendActionEvent(ViewController.
-                        PatientMedicalHistoryViewControllerActionEvent.VIEW_CLOSE_NOTIFICATION);
+                doSendActionEvent(Actions.VIEW_CLOSE_NOTIFICATION);
                 break;
             
             case REQUEST_TOGGLE_CONDITION_VIEW:
@@ -201,8 +217,7 @@ public class PatientMedicalHistoryView extends View
                 if (cws!=null){
                     cws.setComment(null);
                     setConditionWithState(cws);
-                    doSendActionEvent(ViewController.PatientMedicalHistoryViewControllerActionEvent
-                            .PATIENT_CONDITION_COMMENT_UPDATE_REQUEST);
+                    doSendActionEvent(Actions.PATIENT_CONDITION_COMMENT_UPDATE_REQUEST);
                     this.txaComment.setText("");
                 }
                 else{
@@ -217,8 +232,7 @@ public class PatientMedicalHistoryView extends View
                 if (cws!=null){
                     cws.setComment(txaComment.getText());
                     setConditionWithState(cws);
-                    doSendActionEvent(ViewController.PatientMedicalHistoryViewControllerActionEvent
-                            .PATIENT_CONDITION_COMMENT_UPDATE_REQUEST);
+                    doSendActionEvent(Actions.PATIENT_CONDITION_COMMENT_UPDATE_REQUEST);
                     setCommentEditMode(CommentEditMode.OFF);
                 }
                 break;
@@ -237,9 +251,8 @@ public class PatientMedicalHistoryView extends View
     
     @Override
     public void propertyChange(PropertyChangeEvent e){    
-        ViewController.PatientMedicalHistoryViewControllerPropertyChangeEvent propertyName =
-                ViewController.PatientMedicalHistoryViewControllerPropertyChangeEvent
-                        .valueOf(e.getPropertyName());
+        Properties propertyName =
+                Properties.valueOf(e.getPropertyName());
         switch (propertyName){
             case CONDITION_WITH_STATE_RECEIVED:
                 ConditionWithState cws = (ConditionWithState)getMyController().getDescriptor()
@@ -266,11 +279,9 @@ public class PatientMedicalHistoryView extends View
         tblCondition.clearSelection();
         
         if (value) //add the updated condition to the patient's medical history
-            doSendActionEvent(ViewController.PatientMedicalHistoryViewControllerActionEvent
-                    .PATIENT_CONDITION_CREATE_REQUEST);
+            doSendActionEvent(Actions.PATIENT_CONDITION_CREATE_REQUEST);
         else // remove the selected condition from the patient's medical history
-            doSendActionEvent(ViewController.PatientMedicalHistoryViewControllerActionEvent
-                    .PATIENT_CONDITION_DELETE_REQUEST);
+            doSendActionEvent(Actions.PATIENT_CONDITION_DELETE_REQUEST);
     }
     
     @Override
@@ -381,7 +392,7 @@ public class PatientMedicalHistoryView extends View
     }
     
     private void doSendActionEvent(
-            ViewController.PatientMedicalHistoryViewControllerActionEvent actionCommand){
+            Actions actionCommand){
         ActionEvent actionEvent = new ActionEvent(
             this,ActionEvent.ACTION_PERFORMED,
             actionCommand.toString());
@@ -398,7 +409,7 @@ public class PatientMedicalHistoryView extends View
         boolean isError = false;
         ConditionWithState cws = null;
         SecondaryCondition sc = null;
-        ViewController.PatientMedicalHistoryViewControllerActionEvent actionCommand = null;
+        Actions actionCommand = null;
         switch(conditionViewMode){
             case PRIMARY://currently display of secondary conditions active
                 cws = new PrimaryConditionWithState(new PrimaryCondition());
@@ -431,8 +442,7 @@ public class PatientMedicalHistoryView extends View
                 break;
         }
         if(!isError)
-            doSendActionEvent(ViewController.PatientMedicalHistoryViewControllerActionEvent
-                            .PATIENT_CONDITION_READ_REQUEST);
+            doSendActionEvent(Actions.PATIENT_CONDITION_READ_REQUEST);
     }
     
     private void populateConditionsTable(ConditionWithState cws){

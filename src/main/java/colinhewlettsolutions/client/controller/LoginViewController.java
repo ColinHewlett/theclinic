@@ -33,6 +33,29 @@ import javax.swing.JOptionPane;
  */
 public class LoginViewController extends ViewController{
     
+    public enum Actions{
+        ADD_NEW_CREDENTIAL_REQUEST,                     //request to create a new user and password
+        LOGIN_REQUEST,                                  //request to accept/reject entered credential
+        NEW_PASSWORD_REQUEST,                           //request a new password for the current user 
+        OLD_PASSWORD_CHECK_REQUEST,                     //request specified old/current password checked
+        TEMPORARY_PASSWORD_REQUEST,
+        USER_LOGIN_NOTIFICATION,
+        VIEW_ACTIVATED_NOTIFICATION,
+        VIEW_CLOSED_NOTIFICATION
+    }
+    
+    public enum Properties{
+        CORRECT_LOGIN_CREDENTIAL_RECEIVED,
+        NEW_CREDENTIAL_VALIDATION_RECEIVED,
+        PASSWORD_CHANGE_RECEIVED,
+        INCORRECT_USERNAME_RECEIVED,
+        INCORRECT_PASSWORD_RECEIVED,
+        DUPLICATE_USERNAME_RECEIVED,
+        INCORRECT_PASSWORD_VALIDATION_RECEIVED,
+        USERNAME_NOT_FOUND,
+        VIEW_CLOSE_RECEIVED
+    }
+    
     public LoginViewController(DesktopViewController controller, DesktopView desktopView ){
         setMyController(controller);
         setDesktopView(desktopView);
@@ -41,12 +64,12 @@ public class LoginViewController extends ViewController{
     @Override
     public void actionPerformed(ActionEvent e){
         ViewController.LoginViewMode viewMode = (ViewController.LoginViewMode)getDescriptor().
-                getControllerDescription().getProperty(Properties.LOGIN_VIEW_MODE);
-        ViewController.LoginViewControllerPropertyChangeEvent pce = null;
+                getControllerDescription().getProperty(SystemDefinition.Properties.LOGIN_VIEW_MODE);
+        Properties pce = null;
         
         if (e.getSource() instanceof DesktopViewController){
-            ViewController.DesktopViewControllerActionEvent desktopViewControllerActionCommand = 
-                    ViewController.DesktopViewControllerActionEvent.valueOf(e.getActionCommand());        
+            DesktopViewController.Actions desktopViewControllerActionCommand = 
+                    DesktopViewController.Actions.valueOf(e.getActionCommand());        
             switch(desktopViewControllerActionCommand){
 
                 case INITIALISE_VIEW_CONTROLLER ->{
@@ -58,13 +81,13 @@ public class LoginViewController extends ViewController{
                 }
             }
         }else{
-            ViewController.LoginViewControllerActionEvent loginViewActionCommand = 
-                    ViewController.LoginViewControllerActionEvent.valueOf(e.getActionCommand());  
+            Actions loginViewActionCommand = 
+                    Actions.valueOf(e.getActionCommand());  
             switch(loginViewActionCommand){
                 case VIEW_CLOSED_NOTIFICATION ->{
                     ActionEvent actionEvent = new ActionEvent(
                         this,ActionEvent.ACTION_PERFORMED,
-                        ViewController.DesktopViewControllerActionEvent.
+                        DesktopViewController.Actions.
                                 VIEW_CONTROLLER_CLOSE_NOTIFICATION.toString());
                     getMyController().actionPerformed(actionEvent);
                     break;
@@ -92,7 +115,7 @@ public class LoginViewController extends ViewController{
 
     }
     
-    public void sendPropertyChangeEvent(ViewController.LoginViewControllerPropertyChangeEvent pce){
+    public void sendPropertyChangeEvent(Properties pce){
         firePropertyChangeEvent(
                 pce.toString(),
                 getView(),
@@ -113,12 +136,12 @@ public class LoginViewController extends ViewController{
     
     private void doNewPasswordAction(ActionEvent e){
         boolean isCheckFinished = false;
-        LoginViewControllerPropertyChangeEvent pce = null;
-        String currentUser =((Credential)getDescriptor().getControllerDescription().getProperty(Properties.LOGIN_CREDENTIAL)).getUsername();
+        Properties pce = null;
+        String currentUser =((Credential)getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.LOGIN_CREDENTIAL)).getUsername();
         setCredential((Credential)getDescriptor().getViewDescription().
                 getProperty(SystemDefinition.Properties.LOGIN_CREDENTIAL));
         getCredential().setUsername(currentUser);
-        switch(ViewController.LoginViewControllerActionEvent.valueOf(e.getActionCommand())){
+        switch(Actions.valueOf(e.getActionCommand())){
             case NEW_PASSWORD_REQUEST ->{
                 pce = checkPasswordForBlanks();
                 if (pce != null) {
@@ -148,7 +171,7 @@ public class LoginViewController extends ViewController{
             case VIEW_CLOSED_NOTIFICATION ->{
                 ActionEvent actionEvent = new ActionEvent(
                     this,ActionEvent.ACTION_PERFORMED,
-                    ViewController.DesktopViewControllerActionEvent.
+                    DesktopViewController.Actions.
                             VIEW_CONTROLLER_CLOSE_NOTIFICATION.toString());
                 this.getMyController().actionPerformed(actionEvent);
                 break;
@@ -158,12 +181,12 @@ public class LoginViewController extends ViewController{
     
     private void doOldPasswordAction(ActionEvent e){
         boolean isCheckFinished = false;
-        LoginViewControllerPropertyChangeEvent pce = null;
-        String currentUser =((Credential)getDescriptor().getControllerDescription().getProperty(Properties.LOGIN_CREDENTIAL)).getUsername();
+        Properties pce = null;
+        String currentUser =((Credential)getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.LOGIN_CREDENTIAL)).getUsername();
         setCredential((Credential)getDescriptor().getViewDescription().
                 getProperty(SystemDefinition.Properties.LOGIN_CREDENTIAL));
         getCredential().setUsername(currentUser);
-        switch(ViewController.LoginViewControllerActionEvent.valueOf(e.getActionCommand())){
+        switch(Actions.valueOf(e.getActionCommand())){
             case OLD_PASSWORD_CHECK_REQUEST ->{ 
                 pce = checkPasswordForBlanks();
                 if (pce != null) {
@@ -176,7 +199,7 @@ public class LoginViewController extends ViewController{
                         case CORRECT_LOGIN_CREDENTIAL_RECEIVED ->{
                             sendPropertyChangeEvent(pce);
                             getDescriptor().getControllerDescription().
-                                    setProperty(Properties.LOGIN_VIEW_MODE, LoginViewMode.NEW_PASSWORD_CHECK);
+                                    setProperty(SystemDefinition.Properties.LOGIN_VIEW_MODE, LoginViewMode.NEW_PASSWORD_CHECK);
                             initialiseView();
                             break;
                         }
@@ -191,7 +214,7 @@ public class LoginViewController extends ViewController{
             case VIEW_CLOSED_NOTIFICATION ->{
                 ActionEvent actionEvent = new ActionEvent(
                     this,ActionEvent.ACTION_PERFORMED,
-                    ViewController.DesktopViewControllerActionEvent.
+                    DesktopViewController.Actions.
                             VIEW_CONTROLLER_CLOSE_NOTIFICATION.toString());
                 this.getMyController().actionPerformed(actionEvent);
                 break;
@@ -199,18 +222,18 @@ public class LoginViewController extends ViewController{
         }
     }
     
-    private LoginViewControllerPropertyChangeEvent updateLoginCredential()throws StoreException{
-        LoginViewControllerPropertyChangeEvent pce = null;
+    private Properties updateLoginCredential()throws StoreException{
+        Properties pce = null;
         User user = new User();
         user.setUsername(getCredential().getUsername());
         user.setPassword(new String(getCredential().getPassword()));
         user.update();
-        pce = ViewController.LoginViewControllerPropertyChangeEvent.NEW_CREDENTIAL_VALIDATION_RECEIVED;
+        pce = Properties.NEW_CREDENTIAL_VALIDATION_RECEIVED;
         return pce;
     } 
     
-    private LoginViewControllerPropertyChangeEvent checkLoginCredential(){
-        LoginViewControllerPropertyChangeEvent pce = null;
+    private Properties checkLoginCredential(){
+        Properties pce = null;
         User user = new User();
         user.setUsername(getCredential().getUsername());
         user.setPassword(new String(getCredential().getPassword()));
@@ -222,7 +245,7 @@ public class LoginViewController extends ViewController{
             getCredential().setUsername(user.getUsername());
             getCredential().setPassword(user.getPassword().toCharArray());
             getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.LOGIN_CREDENTIAL, credential);
-            pce = ViewController.LoginViewControllerPropertyChangeEvent.CORRECT_LOGIN_CREDENTIAL_RECEIVED;
+            pce = Properties.CORRECT_LOGIN_CREDENTIAL_RECEIVED;
             //sendPropertyChangeEvent(pce);
 
             //SystemDefinition.setActiveUser(new User(credential.getUsername()));
@@ -232,7 +255,7 @@ public class LoginViewController extends ViewController{
                     case MATCHING_PASSWORD_NOT_FOUND:
                         String error = "incorrect password specified";
                         getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.ERROR, error);
-                        pce = ViewController.LoginViewControllerPropertyChangeEvent.INCORRECT_PASSWORD_RECEIVED;
+                        pce = Properties.INCORRECT_PASSWORD_RECEIVED;
                         //sendPropertyChangeEvent(pce);
                         break;
                 }
@@ -250,8 +273,8 @@ public class LoginViewController extends ViewController{
     private void doLoginAction(ActionEvent e){
         Credential credential = null;
         boolean isCheckFinished = false;
-        LoginViewControllerPropertyChangeEvent pce = null;
-        switch(ViewController.LoginViewControllerActionEvent.valueOf(e.getActionCommand())){
+        Properties pce = null;
+        switch(Actions.valueOf(e.getActionCommand())){
             case LOGIN_REQUEST ->{
                 setCredential((Credential)getDescriptor().getViewDescription().getProperty(SystemDefinition.Properties.LOGIN_CREDENTIAL));
                 pce = checkUsernameForBlanks();
@@ -285,7 +308,7 @@ public class LoginViewController extends ViewController{
                             case CORRECT_LOGIN_CREDENTIAL_RECEIVED ->{
                                 ActionEvent actionEvent = new ActionEvent(
                                     this,ActionEvent.ACTION_PERFORMED,
-                                    ViewController.LoginViewControllerActionEvent.USER_LOGIN_NOTIFICATION.toString());
+                                    Actions.USER_LOGIN_NOTIFICATION.toString());
                                 this.getMyController().actionPerformed(actionEvent);
                                 sendPropertyChangeEvent(pce);
                                 break;
@@ -299,7 +322,7 @@ public class LoginViewController extends ViewController{
             case VIEW_CLOSED_NOTIFICATION ->{
                 ActionEvent actionEvent = new ActionEvent(
                     this,ActionEvent.ACTION_PERFORMED,
-                    ViewController.DesktopViewControllerActionEvent.
+                    DesktopViewController.Actions.
                             VIEW_CONTROLLER_CLOSE_NOTIFICATION.toString());
                 this.getMyController().actionPerformed(actionEvent);
                 break;
@@ -310,59 +333,59 @@ public class LoginViewController extends ViewController{
         }
     }
 
-    private ViewController.LoginViewControllerPropertyChangeEvent checkUsernameForBlanks(){
-        ViewController.LoginViewControllerPropertyChangeEvent result = null;
+    private Properties checkUsernameForBlanks(){
+        Properties result = null;
         if (getCredential().getUsername()==null) getCredential().setUsername("");
         getCredential().setUsername(getCredential().getUsername().trim());
         if (getCredential().getUsername().isEmpty()){
-            result = ViewController.LoginViewControllerPropertyChangeEvent.INCORRECT_USERNAME_RECEIVED;
+            result = Properties.INCORRECT_USERNAME_RECEIVED;
         }else if(getCredential().getUsername().contains(" "))
-            result = ViewController.LoginViewControllerPropertyChangeEvent.INCORRECT_USERNAME_RECEIVED;
+            result = Properties.INCORRECT_USERNAME_RECEIVED;
         return result;
     }
     
-    private ViewController.LoginViewControllerPropertyChangeEvent checkPasswordForBlanks(){
-        ViewController.LoginViewControllerPropertyChangeEvent result = null;
+    private Properties checkPasswordForBlanks(){
+        Properties result = null;
         try{
             getCredential().setPassword(new String(getCredential().getPassword()).trim().toCharArray());
             if(getCredential().getPassword().length == 0){
-                result = ViewController.LoginViewControllerPropertyChangeEvent.INCORRECT_PASSWORD_RECEIVED;
+                result = Properties.INCORRECT_PASSWORD_RECEIVED;
             }
             else if(new String(getCredential().getPassword()).contains(" ")){
-                result = ViewController.LoginViewControllerPropertyChangeEvent.INCORRECT_PASSWORD_RECEIVED;
+                result = Properties.INCORRECT_PASSWORD_RECEIVED;
             }
         }catch(NullPointerException ex){
-            result = ViewController.LoginViewControllerPropertyChangeEvent.INCORRECT_PASSWORD_RECEIVED;
+            result = Properties.INCORRECT_PASSWORD_RECEIVED;
         }
         
         return result;
     }
     
-    private ViewController.LoginViewControllerPropertyChangeEvent isPasswordReentryOK(){
+    private Properties isPasswordReentryOK(){
         String username = null;
-        ViewController.LoginViewControllerPropertyChangeEvent result = null;
+        Properties result = null;
         Credential credential = (Credential)getDescriptor().getViewDescription().getProperty(SystemDefinition.Properties.LOGIN_CREDENTIAL);
         credential.setPassword(new String(credential.getPassword()).trim().toCharArray());
         credential.setPasswordReentry(new String(credential.getPasswordReentry()).trim().toCharArray());
         if (!Arrays.equals(credential.getPassword(), credential.getPasswordReentry()))
-           result = ViewController.LoginViewControllerPropertyChangeEvent.INCORRECT_PASSWORD_VALIDATION_RECEIVED; 
+           result = Properties.INCORRECT_PASSWORD_VALIDATION_RECEIVED; 
         return result;
     }
     
-    private ViewController.LoginViewControllerPropertyChangeEvent isPasswordValidated(){
+    private Properties isPasswordValidated(){
         String error = null;
-        ViewController.LoginViewControllerPropertyChangeEvent result = null;
+        Properties result = null;
         Credential credential = (Credential)getDescriptor().getViewDescription().getProperty(SystemDefinition.Properties.NEW_USER_CREDENTIAL);
         if (!credential.getPassword().equals(credential.getPasswordReentry())){
             error = "the two passwords entered are not the same";
             getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.ERROR, error);
-            result = ViewController.LoginViewControllerPropertyChangeEvent.INCORRECT_PASSWORD_VALIDATION_RECEIVED;  
+            result = Properties.INCORRECT_PASSWORD_VALIDATION_RECEIVED;  
         }
         return result;
     } 
     
-    private ViewController.LoginViewControllerPropertyChangeEvent isDuplicateUsernameFound(){ 
-        ViewController.LoginViewControllerPropertyChangeEvent result = null;
+    private Properties isDuplicateUsernameFound(){ 
+        Properties result = null;
         String error = null;
         User user = null;
         Credential credential = (Credential)getDescriptor().getViewDescription().getProperty(SystemDefinition.Properties.NEW_USER_CREDENTIAL);
@@ -374,7 +397,7 @@ public class LoginViewController extends ViewController{
             if (user!=null){
                 error = "Selected user name already exists";
                 getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.ERROR, error);
-                result = ViewController.LoginViewControllerPropertyChangeEvent.INCORRECT_USERNAME_RECEIVED; 
+                result = Properties.INCORRECT_USERNAME_RECEIVED; 
             }
         }catch(StoreException ex){
             String message = ex.getMessage() +"\n"
@@ -384,10 +407,10 @@ public class LoginViewController extends ViewController{
         return result;
     }
     
-    private ViewController.LoginViewControllerPropertyChangeEvent isUsernameFound(){ 
+    private Properties isUsernameFound(){ 
         String error =null;
         User user = null;
-        ViewController.LoginViewControllerPropertyChangeEvent result = null;
+        Properties result = null;
         user = new User();
         user.setUsername(getCredential().getUsername());
         user.setScope(Entity.Scope.WITH_NAME);
@@ -395,7 +418,7 @@ public class LoginViewController extends ViewController{
             user = user.read();
             if (user==null){
                getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.ERROR, error);
-               result = ViewController.LoginViewControllerPropertyChangeEvent.USERNAME_NOT_FOUND; 
+               result = Properties.USERNAME_NOT_FOUND; 
             }
         }catch(StoreException ex){
             String message = ex.getMessage() +"\n"
@@ -417,10 +440,10 @@ public class LoginViewController extends ViewController{
         boolean userExists = false;
         User user = null;
         ViewController.LoginViewMode viewMode = 
-                (ViewController.LoginViewMode)getDescriptor().getControllerDescription().getProperty(Properties.LOGIN_VIEW_MODE);
+                (ViewController.LoginViewMode)getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.LOGIN_VIEW_MODE);
         switch (viewMode){
             case LOGIN_CHECK ->{//creates view which enables user to login to system
-                ArrayList<String> users = (ArrayList<String>)getDescriptor().getControllerDescription().getProperty(Properties.USERS);
+                ArrayList<String> users = (ArrayList<String>)getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.USERS);
                 for(String username : users){
                     try{
                         user = new User(username);
@@ -448,7 +471,7 @@ public class LoginViewController extends ViewController{
                         this.getDesktopView()));
                 ActionEvent actionEvent = new ActionEvent(
                     this,ActionEvent.ACTION_PERFORMED,
-                    ViewController.DesktopViewControllerActionEvent.
+                    DesktopViewController.Actions.
                             VIEW_ACTIVATED_NOTIFICATION.toString());
                 this.getMyController().actionPerformed(actionEvent);
                 break;
@@ -460,7 +483,7 @@ public class LoginViewController extends ViewController{
                         this.getDesktopView()));
                 ActionEvent actionEvent = new ActionEvent(
                     this,ActionEvent.ACTION_PERFORMED,
-                    ViewController.DesktopViewControllerActionEvent.
+                    DesktopViewController.Actions.
                             VIEW_ACTIVATED_NOTIFICATION.toString());
                 this.getMyController().actionPerformed(actionEvent);
                 break;

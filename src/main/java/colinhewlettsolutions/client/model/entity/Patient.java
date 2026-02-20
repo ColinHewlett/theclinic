@@ -5,11 +5,6 @@
  */
 package colinhewlettsolutions.client.model.entity;
 //<editor-fold defaultstate="collapsed" desc="Imports">
-import colinhewlettsolutions.client.model.entity.Notification;
-import colinhewlettsolutions.client.model.entity.Medication;
-import colinhewlettsolutions.client.model.entity.Entity;
-import colinhewlettsolutions.client.model.entity.Doctor;
-import colinhewlettsolutions.client.model.entity.Appointment;
 import colinhewlettsolutions.client.controller.SystemDefinition;
 import colinhewlettsolutions.client.model.repository.StoreException;//01/03/2023
 import java.awt.Point;

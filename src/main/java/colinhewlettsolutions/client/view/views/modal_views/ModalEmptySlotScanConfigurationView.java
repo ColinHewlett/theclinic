@@ -7,6 +7,7 @@ package colinhewlettsolutions.client.view.views.modal_views;
 
 import colinhewlettsolutions.client.controller.SystemDefinition;
 import colinhewlettsolutions.client.controller.Descriptor;
+import colinhewlettsolutions.client.controller.ScheduleViewController;
 import colinhewlettsolutions.client.controller.ViewController;
 import colinhewlettsolutions.client.view.View;
 import colinhewlettsolutions.client.view.views.non_modal_views.DesktopView;
@@ -283,7 +284,7 @@ cmbSelectSlotDuration.addActionListener(new java.awt.event.ActionListener() {
             getMyController().getDescriptor().getViewDescription().setProperty(SystemDefinition.Properties.DURATION, duration);
             ActionEvent actionEvent = new ActionEvent(this,
                 ActionEvent.ACTION_PERFORMED,
-                ViewController.ScheduleViewControllerActionEvent.
+                ScheduleViewController.Actions.
                 EMPTY_SLOTS_FROM_DAY_REQUEST.toString());
             getMyController().actionPerformed(actionEvent);
         }

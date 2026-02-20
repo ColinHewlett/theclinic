@@ -28,9 +28,30 @@ public class ToDoViewController extends ViewController{
     
     private ToDoViewListState viewListState = null;
     
-    public enum Actions{}
+    public enum Actions{
+        ACTION_TO_DO_REQUEST,
+        CANCEL_TO_DO_REQUEST,
+        CREATE_TO_DO_REQUEST,
+        DELETE_TO_DO_REQUEST,
+        MODAL_VIEWER_ACTIVATED,
+        MODAL_VIEWER_DEACTIVATED,
+        TO_DO_EDITOR_CLOSE_VIEW_REQUEST,
+        TO_DO_EDITOR_CREATE_TO_DO_REQUEST,
+        TO_DO_EDITOR_UPDATE_TO_DO_REQUEST,
+        TO_DO_VIEW_CONTROLLER_REQUEST,
+        TO_DOs_REQUEST,
+        TO_DOs_FOR_USER_REQUEST,
+        UNACTIONED_TO_DO_REQUEST,
+        UPDATE_TO_DO_REQUEST,
+        VIEW_ACTIVATED_NOTIFICATION,
+        VIEW_CHANGED_NOTIFICATION,
+        VIEW_CLOSED_NOTIFICATION
+    }
     
     public enum Properties{
+        RECEIVED_TO_DO,
+        RECEIVED_TO_DOs,
+        RECEIVED_UNACTIONED_TO_DOs,
         TO_DO_VIEW_CHANGE_NOTIFICATION
     }
 
@@ -116,28 +137,28 @@ public class ToDoViewController extends ViewController{
     
     private void doPrimaryViewActionRequest(ActionEvent e){
         ActionEvent actionEvent = null;
-        ViewController.ToDoViewControllerActionEvent actionCommand =
-               ViewController.ToDoViewControllerActionEvent.valueOf(e.getActionCommand());
+        Actions actionCommand =
+               Actions.valueOf(e.getActionCommand());
         try{
             switch (actionCommand){
                 case VIEW_ACTIVATED_NOTIFICATION:
                     actionEvent = new ActionEvent(
                             this,ActionEvent.ACTION_PERFORMED,
-                            ViewController.DesktopViewControllerActionEvent.
+                            DesktopViewController.Actions.
                                     VIEW_CONTROLLER_ACTIVATED_NOTIFICATION.toString());
                     this.getMyController().actionPerformed(actionEvent);
                     break;  
                 case VIEW_CHANGED_NOTIFICATION:
                     actionEvent = new ActionEvent(
                            this,ActionEvent.ACTION_PERFORMED,
-                           ViewController.DesktopViewControllerActionEvent.
+                           DesktopViewController.Actions.
                                    VIEW_CONTROLLER_CHANGED_NOTIFICATION.toString());
                     this.getMyController().actionPerformed(actionEvent);
                     break;
                 case VIEW_CLOSED_NOTIFICATION:
                     actionEvent = new ActionEvent(
                            this,ActionEvent.ACTION_PERFORMED,
-                           ViewController.DesktopViewControllerActionEvent.
+                           DesktopViewController.Actions.
                                    VIEW_CONTROLLER_CLOSE_NOTIFICATION.toString());
                     ToDoViewController.this.getMyController().actionPerformed(actionEvent);
                     break;
@@ -302,7 +323,7 @@ public class ToDoViewController extends ViewController{
             //note: View.factory when opening a modal JInternalFrame does not return until the JInternalFrame has been closed
             ActionEvent actionEvent = new ActionEvent(
                    this,ActionEvent.ACTION_PERFORMED,
-                   DesktopViewController.DesktopViewControllerActionEvent.MODAL_VIEWER_CLOSED_NOTIFICATION.toString());
+                   DesktopViewController.Actions.MODAL_VIEWER_CLOSED_NOTIFICATION.toString());
             this.getMyController().actionPerformed(actionEvent);
         }catch (StoreException ex){
             String message = ex.getMessage();
@@ -341,7 +362,7 @@ public class ToDoViewController extends ViewController{
             //note: View.factory when opening a modal JInternalFrame does not return until the JInternalFrame has been closed
             ActionEvent actionEvent = new ActionEvent(
                    this,ActionEvent.ACTION_PERFORMED,
-                   DesktopViewController.DesktopViewControllerActionEvent.MODAL_VIEWER_CLOSED_NOTIFICATION.toString());
+                   DesktopViewController.Actions.MODAL_VIEWER_CLOSED_NOTIFICATION.toString());
             this.getMyController().actionPerformed(actionEvent);
         }catch (StoreException ex){
             String message = ex.getMessage();
@@ -362,8 +383,7 @@ public class ToDoViewController extends ViewController{
         setSecondaryView(getModalView());
         switch (getModalView().getMyViewType()){
             case TO_DO_EDITOR_VIEW:
-                ViewController.ToDoViewControllerActionEvent actionCommand =
-               ViewController.ToDoViewControllerActionEvent.valueOf(e.getActionCommand());
+                Actions actionCommand =  Actions.valueOf(e.getActionCommand());
                 switch (actionCommand){
                     case MODAL_VIEWER_ACTIVATED:
                         //getSecondaryView().initialiseView();
@@ -437,10 +457,8 @@ public class ToDoViewController extends ViewController{
         getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.TO_DOS, toDo.get());
         String pcEventName;
         if(scope.equals(ToDo.Scope.UNACTIONED)) pcEventName = 
-                ToDoViewControllerPropertyChangeEvent.
-                        RECEIVED_UNACTIONED_TO_DOs.toString();
-        else pcEventName = ToDoViewControllerPropertyChangeEvent.
-                RECEIVED_TO_DOs.toString();       
+                Properties.RECEIVED_UNACTIONED_TO_DOs.toString();
+        else pcEventName = Properties.RECEIVED_TO_DOs.toString();       
         firePropertyChangeEvent(
                 pcEventName,
                 getView(),

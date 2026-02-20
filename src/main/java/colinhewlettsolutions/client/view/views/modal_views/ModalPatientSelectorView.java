@@ -89,7 +89,7 @@ public class ModalPatientSelectorView extends ModalView
     @Override
     public void propertyChange(PropertyChangeEvent e){
         if (e.getPropertyName().equals(
-            ViewController.PatientViewControllerPropertyChangeEvent.PATIENTS_RECEIVED.toString())){
+            PatientViewController.Properties.PATIENTS_RECEIVED.toString())){
             this.populatePatientSelector();
         }
     }

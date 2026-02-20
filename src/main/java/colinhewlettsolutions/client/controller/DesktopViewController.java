@@ -5,7 +5,6 @@
  */
 package colinhewlettsolutions.client.controller;
 
-import colinhewlettsolutions.client.controller.ViewController;
 import static colinhewlettsolutions.client.controller.ViewController.displayErrorMessage;
 import colinhewlettsolutions.client.model.non_entity.Credential;
 import colinhewlettsolutions.client.model.non_entity.JarFileFinder;
@@ -59,10 +58,10 @@ public class DesktopViewController extends ViewController{
     private ArrayList<ArchivedPatientsViewController> archivedPatientsViewControllers = new ArrayList<>();
     private ArrayList<ClinicalNoteViewController> clinicalNoteViewControllers = new ArrayList<>();
     private ArrayList<LoginViewController> loginViewControllers = new ArrayList<>();
-    private ArrayList<DataMigrationProgressViewController> importProgressViewControllers = new ArrayList<>();
+    //private ArrayList<DataMigrationProgressViewController> importProgressViewControllers = new ArrayList<>();
     private ArrayList<ImageViewerViewController> imageViewerViewControllers = new ArrayList<>();
     private ArrayList<MedicalConditionViewController> medicalConditionViewControllers = new ArrayList<>();
-    private ArrayList<NotificationViewController> notificationViewControllers = new ArrayList<>();
+    //private ArrayList<NotificationViewController> notificationViewControllers = new ArrayList<>();
     private ArrayList<PatientAppointmentDataViewController> patientAppointmentDataViewControllers = new ArrayList<>();
     private ArrayList<PatientDocumentStoreViewController> patientDocumentStoreViewControllers = new ArrayList<>();
     private ArrayList<PatientInvoiceViewController> patientInvoiceViewControllers = new ArrayList<>();
@@ -88,7 +87,7 @@ public class DesktopViewController extends ViewController{
         viewControllers.add(clinicalNoteViewControllers);
         viewControllers.add(loginViewControllers);
         viewControllers.add(medicalConditionViewControllers);
-        viewControllers.add(notificationViewControllers);
+        //viewControllers.add(notificationViewControllers);
         viewControllers.add(patientAppointmentDataViewControllers);
         viewControllers.add(patientDocumentStoreViewControllers);
         viewControllers.add(patientInvoiceViewControllers);
@@ -143,6 +142,7 @@ public class DesktopViewController extends ViewController{
         DESKTOP_VIEW_MODE_NOTIFICATION,
         IMAGE_VIEWER_VIEW_CONTROLLER_REQUEST,
         INITIALISE_VIEW_CONTROLLER,
+        LOGIN_VIEW_CONTROLLER_REQUEST,
         LOGOUT_REQUEST,
         MODAL_VIEWER_ACTIVATED_NOTIFICATION,
         MODAL_VIEWER_CLOSED_NOTIFICATION,
@@ -162,9 +162,12 @@ public class DesktopViewController extends ViewController{
         SCHEDULE_LIST_VIEW_CONTROLLER_REQUEST,
         TO_DO_VIEW_CONTROLLER_REQUEST,
         TREATMENT_VIEW_CONTROLLER_REQUEST,
+        USER_LOGIN_NOTIFICATION,
         USER_SYSTEM_WIDE_FACTORY_SETTINGS_REQUEST,
+        USER_SETTINGS_INITIALISATION_REQUEST,
         USER_SYSTEM_WIDE_SETTINGS_REQUEST,
         USER_SYSTEM_WIDE_SETTINGS_VIEW_CONTROLLER_REQUEST,
+        
         VIEW_ACTIVATED_NOTIFICATION,
         VIEW_CHANGED_NOTIFICATION,
         VIEW_CLOSED_NOTIFICATION,
@@ -178,6 +181,7 @@ public class DesktopViewController extends ViewController{
         ARCHIVED_PATIENTS_VIEW_CONTROLLER_CHANGE_NOTIFICATION,
         CASCADE_DESKTOP_VIEWS,
         DESKTOP_VIEW_CHANGED_NOTIFICATION,
+        MEDICAL_CONDITION_VIEW_CONTROLLER_CHANGE_NOTIFICATION,
         PATIENT_APPOINTMENT_DATA_VIEW_CONTROLLER_CHANGE_NOTIFICATION,
         PATIENT_MEDICAL_HISTORY_VIEW_CONTROLLER_CHANGE_NOTIFICATION,
         PATIENT_VIEW_CONTROLLER_CHANGE_NOTIFICATION,
@@ -186,6 +190,7 @@ public class DesktopViewController extends ViewController{
         SCHEDULE_VIEW_CONTROLLER_CHANGE_NOTIFICATION,
         TO_DO_VIEW_CONTROLLER_CHANGE_NOTIFICATION,
         TREATMENT_VIEW_CONTROLLER_CHANGE_NOTIFICATION,
+        USER_SYSTEM_WIDE_SETTINGS_RECEIVED,
         VIEW_CHANGED_NOTIFICATION
     }
     
@@ -591,12 +596,12 @@ public class DesktopViewController extends ViewController{
     private void doActionEventForClinicalNoteViewController(ActionEvent e){
         String message = null;
         ClinicalNoteViewController cvc = (ClinicalNoteViewController)e.getSource();
-        ViewController.DesktopViewControllerActionEvent actionCommand =
-                    ViewController.DesktopViewControllerActionEvent.valueOf(e.getActionCommand());
+        Actions actionCommand =
+                    Actions.valueOf(e.getActionCommand());
         switch(actionCommand){
             case VIEW_CONTROLLER_CHANGED_NOTIFICATION:
                 firePropertyChangeEvent(
-                        ViewController.DesktopViewControllerPropertyChangeEvent.
+                        Properties.
                                 DESKTOP_VIEW_CHANGED_NOTIFICATION.toString(),
                         getDesktopView(),
                         this,
@@ -637,12 +642,12 @@ public class DesktopViewController extends ViewController{
     private void doActionEventForTreatmentViewController(ActionEvent e){
         String message = null;
         TreatmentViewController tvc = (TreatmentViewController)e.getSource();
-        ViewController.DesktopViewControllerActionEvent actionCommand =
-                    ViewController.DesktopViewControllerActionEvent.valueOf(e.getActionCommand());
+        Actions actionCommand =
+                    Actions.valueOf(e.getActionCommand());
         switch(actionCommand){
             case VIEW_CONTROLLER_CHANGED_NOTIFICATION:
                 firePropertyChangeEvent(
-                        ViewController.DesktopViewControllerPropertyChangeEvent.
+                        Properties.
                                 DESKTOP_VIEW_CHANGED_NOTIFICATION.toString(),
                         getDesktopView(),
                         this,
@@ -684,12 +689,12 @@ public class DesktopViewController extends ViewController{
     private void doActionEventForMedicalConditionViewController(ActionEvent e){
         String message = null;
         MedicalConditionViewController mcvc = (MedicalConditionViewController)e.getSource();
-        ViewController.DesktopViewControllerActionEvent actionCommand =
-                    ViewController.DesktopViewControllerActionEvent.valueOf(e.getActionCommand());
+        Actions actionCommand =
+                    Actions.valueOf(e.getActionCommand());
         switch(actionCommand){
             case VIEW_CONTROLLER_CHANGED_NOTIFICATION:
                 firePropertyChangeEvent(
-                        ViewController.DesktopViewControllerPropertyChangeEvent.
+                        Properties.
                                 DESKTOP_VIEW_CHANGED_NOTIFICATION.toString(),
                         getDesktopView(),
                         this,
@@ -731,12 +736,12 @@ public class DesktopViewController extends ViewController{
     private void doActionEventForToDoViewController(ActionEvent e){
         String message = null;
         ToDoViewController tdvc = (ToDoViewController)e.getSource();
-        ViewController.DesktopViewControllerActionEvent actionCommand =
-                    ViewController.DesktopViewControllerActionEvent.valueOf(e.getActionCommand());
+        Actions actionCommand =
+                    Actions.valueOf(e.getActionCommand());
         switch(actionCommand){
             case VIEW_CONTROLLER_CHANGED_NOTIFICATION:
                 firePropertyChangeEvent(
-                        ViewController.DesktopViewControllerPropertyChangeEvent.
+                        Properties.
                                 DESKTOP_VIEW_CHANGED_NOTIFICATION.toString(),
                         getDesktopView(),
                         this,
@@ -775,15 +780,15 @@ public class DesktopViewController extends ViewController{
         }
     }
 
-    private void doActionEventForNotificationViewController(ActionEvent e){
+    /*private void doActionEventForNotificationViewController(ActionEvent e){
         String message = null;
         NotificationViewController pnvc = (NotificationViewController)e.getSource();
-        ViewController.DesktopViewControllerActionEvent actionCommand =
-                    ViewController.DesktopViewControllerActionEvent.valueOf(e.getActionCommand());
+        Actions actionCommand =
+                    Actions.valueOf(e.getActionCommand());
         switch(actionCommand){
             case VIEW_CONTROLLER_CHANGED_NOTIFICATION:
                 firePropertyChangeEvent(
-                        ViewController.DesktopViewControllerPropertyChangeEvent.
+                        Properties.
                                 DESKTOP_VIEW_CHANGED_NOTIFICATION.toString(),
                         getDesktopView(),
                         this,
@@ -819,7 +824,7 @@ public class DesktopViewController extends ViewController{
                 }
             }   
         }
-    }
+    }*/
     
     /**
      * ActionEvent responder; action events sent by an ActionViewController include
@@ -843,7 +848,7 @@ public class DesktopViewController extends ViewController{
                         if(avc.getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.SCHEDULE_DAY).equals(
                                 _svc.getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.SCHEDULE_DAY))){
                             this.firePropertyChangeEvent(
-                                    ViewController.ScheduleViewControllerPropertyChangeEvent.CLOSE_VIEW_REQUEST_RECEIVED.toString(),
+                                    ScheduleViewController.Properties.CLOSE_VIEW_REQUEST_RECEIVED.toString(),
                                     _svc.getView(),
                                     _svc,
                                     null,
@@ -874,7 +879,7 @@ public class DesktopViewController extends ViewController{
                 break;
             case VIEW_CONTROLLER_CHANGED_NOTIFICATION:
                 firePropertyChangeEvent(
-                        ViewController.DesktopViewControllerPropertyChangeEvent.
+                        Properties.
                                 DESKTOP_VIEW_CHANGED_NOTIFICATION.toString(),
                         getDesktopView(),
                         this,
@@ -1035,8 +1040,8 @@ public class DesktopViewController extends ViewController{
     private void doActionEventForPatientQuestionnaireViewController(ActionEvent e){
         String message = null;
         PatientQuestionnaireViewController vc = (PatientQuestionnaireViewController)e.getSource();
-        ViewController.DesktopViewControllerActionEvent actionCommand =
-                    ViewController.DesktopViewControllerActionEvent.valueOf(e.getActionCommand());
+        Actions actionCommand =
+                    Actions.valueOf(e.getActionCommand());
         switch(actionCommand){
             case VIEW_CONTROLLER_CLOSE_NOTIFICATION:{
                 switch (this.patientQuestionnaireViewControllers.size()){
@@ -1072,8 +1077,8 @@ public class DesktopViewController extends ViewController{
     private void doActionEventForPatientMedicalHistoryViewController(ActionEvent e){
         String message = null;
         PatientMedicalHistoryViewController vc = (PatientMedicalHistoryViewController)e.getSource();
-        ViewController.DesktopViewControllerActionEvent actionCommand =
-                    ViewController.DesktopViewControllerActionEvent.valueOf(e.getActionCommand());
+        Actions actionCommand =
+                    Actions.valueOf(e.getActionCommand());
         switch(actionCommand){
             case VIEW_CONTROLLER_CLOSE_NOTIFICATION:{
                 switch (this.patientMedicalHistoryViewControllers.size()){
@@ -1108,8 +1113,8 @@ public class DesktopViewController extends ViewController{
     
     private void doActionEventForLoginViewController(ActionEvent e){
         LoginViewController lvc = (LoginViewController)e.getSource();
-        ViewController.DesktopViewControllerActionEvent actionCommand =
-                    ViewController.DesktopViewControllerActionEvent.valueOf(e.getActionCommand());
+        DesktopViewController.Actions actionCommand =
+                    DesktopViewController.Actions.valueOf(e.getActionCommand());
         switch(actionCommand){
             case USER_SETTINGS_INITIALISATION_REQUEST ->{
                 break;
@@ -1148,8 +1153,8 @@ public class DesktopViewController extends ViewController{
     private void doActionEventForUserSystemWideSettingsViewController(ActionEvent e){
         UserSystemWideSettingsViewController vc = null;
         vc = (UserSystemWideSettingsViewController)e.getSource();
-        ViewController.DesktopViewControllerActionEvent actionCommand =
-                    ViewController.DesktopViewControllerActionEvent.valueOf(e.getActionCommand());
+        DesktopViewController.Actions actionCommand =
+                    DesktopViewController.Actions.valueOf(e.getActionCommand());
         switch (actionCommand){
             case VIEW_CONTROLLER_CLOSE_NOTIFICATION ->{
                 if (!this.userSystemWideSettingsViewControllers.remove(vc)){
@@ -1180,7 +1185,7 @@ public class DesktopViewController extends ViewController{
                                                     setProperty(entry.getKey(), entry.getValue());
                                 }
                                 firePropertyChangeEvent(
-                                            ViewController.DesktopViewControllerPropertyChangeEvent.
+                                            Properties.
                                                     USER_SYSTEM_WIDE_SETTINGS_RECEIVED.toString(),
                                             view,
                                             this,
@@ -1205,8 +1210,7 @@ public class DesktopViewController extends ViewController{
     
     private void doActionEventForUserSettingViewController(ActionEvent e){
         UserSystemWideSettingsViewController vc = null;
-        ViewController.DesktopViewControllerActionEvent actionCommand =
-                    ViewController.DesktopViewControllerActionEvent.valueOf(e.getActionCommand());
+        DesktopViewController.Actions actionCommand = DesktopViewController.Actions.valueOf(e.getActionCommand());
         switch (actionCommand){
             case VIEW_CONTROLLER_CLOSE_NOTIFICATION ->{
                 vc = (UserSystemWideSettingsViewController)e.getSource();
@@ -1232,7 +1236,7 @@ public class DesktopViewController extends ViewController{
         switch(actionCommand){
             case VIEW_CONTROLLER_CHANGED_NOTIFICATION:
                 firePropertyChangeEvent(
-                        ViewController.DesktopViewControllerPropertyChangeEvent.
+                        Properties.
                                 DESKTOP_VIEW_CHANGED_NOTIFICATION.toString(),
                         getDesktopView(),
                         this,
@@ -1270,7 +1274,7 @@ public class DesktopViewController extends ViewController{
                         if(pvc.getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.SCHEDULE_DAY).equals(
                                 _pvc.getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.SCHEDULE_DAY))){
                             this.firePropertyChangeEvent(
-                                    ViewController.PatientViewControllerPropertyChangeEvent.CLOSE_VIEW_REQUEST_RECEIVED.toString(),
+                                     PatientViewController.Properties.CLOSE_VIEW_REQUEST_RECEIVED.toString(),
                                     _pvc.getView(),
                                     _pvc,
                                     null,
@@ -1408,7 +1412,7 @@ public class DesktopViewController extends ViewController{
             }
             case VIEW_CHANGED_NOTIFICATION ->{
                 firePropertyChangeEvent(
-                        ViewController.DesktopViewControllerPropertyChangeEvent.
+                        Properties.
                                 DESKTOP_VIEW_CHANGED_NOTIFICATION.toString(),
                         getDesktopView(),
                         this,
@@ -1427,17 +1431,17 @@ public class DesktopViewController extends ViewController{
                 break;
             } */ 
             default ->{
-                doCheckForMigrationActionCommand(e);
+                //doCheckForMigrationActionCommand(e);
                 break;
             }
         }
                  
     }
     
+    /*
     private void doCheckForMigrationActionCommand(ActionEvent e){
         Point theCount = null;   
-        ViewController.DesktopViewControllerActionEvent actionCommand =
-                    ViewController.DesktopViewControllerActionEvent.valueOf(e.getActionCommand());
+        DesktopViewController.Actions actionCommand = DesktopViewController.Actions.valueOf(e.getActionCommand());
         try{
             switch(actionCommand){
                 case DELETE_DATA_FROM_PMS_DATABASE_REQUEST ->{
@@ -1572,7 +1576,7 @@ public class DesktopViewController extends ViewController{
                     + actionCommand + ")";
             displayErrorMessage(message, " Desktop ViewController error",JOptionPane.WARNING_MESSAGE);
         }
-    }
+    }*/
     
     private void requestViewControllersToCloseViews(){
         if (!this.patientViewControllers.isEmpty()){
@@ -1581,7 +1585,7 @@ public class DesktopViewController extends ViewController{
                 PatientViewController pvc = pvcIterator.next();
                 ActionEvent actionEvent = new ActionEvent(
                         this,ActionEvent.ACTION_PERFORMED,
-                        ViewController.DesktopViewControllerActionEvent.VIEW_CONTROLLER_CLOSE_NOTIFICATION.toString());
+                        Actions.VIEW_CONTROLLER_CLOSE_NOTIFICATION.toString());
                 pvc.actionPerformed(actionEvent);    
             }
         }
@@ -1592,7 +1596,7 @@ public class DesktopViewController extends ViewController{
                 ScheduleViewController avc = avcIterator.next();
                 ActionEvent actionEvent = new ActionEvent(
                         this,ActionEvent.ACTION_PERFORMED,
-                        ViewController.DesktopViewControllerActionEvent.VIEW_CONTROLLER_CLOSE_NOTIFICATION.toString());
+                        Actions.VIEW_CONTROLLER_CLOSE_NOTIFICATION.toString());
                 avc.actionPerformed(actionEvent);    
             }
         }
@@ -1625,12 +1629,12 @@ public class DesktopViewController extends ViewController{
             avc.setView(new View().make(View.Viewer.SCHEDULE_LIST_VIEW,avc,getDesktopView()));
             ActionEvent actionEvent = new ActionEvent(
                     this,ActionEvent.ACTION_PERFORMED,
-                    DesktopViewController.DesktopViewControllerActionEvent.INITIALISE_VIEW_CONTROLLER.toString());
+                    DesktopViewController.Actions.INITIALISE_VIEW_CONTROLLER.toString());
              avc.actionPerformed(actionEvent);
          
             if (getDesktopView().getDeskTop().getAllFrames().length>1){
                 this.firePropertyChangeEvent(
-                    ViewController.DesktopViewControllerPropertyChangeEvent.CASCADE_DESKTOP_VIEWS.toString(), 
+                    Properties.CASCADE_DESKTOP_VIEWS.toString(), 
                     getDesktopView(),
                     this,
                     null,
@@ -1678,6 +1682,7 @@ public class DesktopViewController extends ViewController{
      * method does following
      * -- constructs a new VC (ExportProgressViewControler)
      */
+    /*
     private void doRequestForImportProgressViewController(){
         if (importProgressViewControllers.isEmpty()){
             importProgressViewControllers.add(
@@ -1696,7 +1701,7 @@ public class DesktopViewController extends ViewController{
                     + "the request for a new export process to start is ignored.";
             displayErrorMessage(message,"DesktopViewController error",JOptionPane.WARNING_MESSAGE);
         }   
-    }
+    }*/
     
     /**
      * 
@@ -1721,7 +1726,7 @@ public class DesktopViewController extends ViewController{
         }
         if (targetSVC!=null){
             this.firePropertyChangeEvent(
-                    ViewController.ScheduleViewControllerPropertyChangeEvent.CLOSE_VIEW_REQUEST_RECEIVED.toString(), 
+                    ScheduleViewController.Properties.CLOSE_VIEW_REQUEST_RECEIVED.toString(), 
                     targetSVC.getView(),
                     targetSVC,
                     null,
@@ -1778,7 +1783,7 @@ public class DesktopViewController extends ViewController{
         
         if (scheduleViewControllers.size()>1){
                 this.firePropertyChangeEvent(
-                    ViewController.DesktopViewControllerPropertyChangeEvent.CASCADE_DESKTOP_VIEWS.toString(), 
+                    Properties.CASCADE_DESKTOP_VIEWS.toString(), 
                     getDesktopView(),
                     this,
                     null,
@@ -1813,7 +1818,7 @@ public class DesktopViewController extends ViewController{
 
         ActionEvent actionEvent = new ActionEvent(
                 this,ActionEvent.ACTION_PERFORMED,
-                DesktopViewController.DesktopViewControllerActionEvent.INITIALISE_VIEW_CONTROLLER.toString());
+                DesktopViewController.Actions.INITIALISE_VIEW_CONTROLLER.toString());
          cvc.actionPerformed(actionEvent);
 
         if (getDesktopViewMode().equals(DesktopViewMode.CLINIC_LOGO)){
@@ -1821,7 +1826,7 @@ public class DesktopViewController extends ViewController{
         }
         if (getDesktopView().getDeskTop().getAllFrames().length>1){
             this.firePropertyChangeEvent(
-                    ViewController.DesktopViewControllerPropertyChangeEvent.CASCADE_DESKTOP_VIEWS.toString(), 
+                    Properties.CASCADE_DESKTOP_VIEWS.toString(), 
                     getDesktopView(),
                     this, 
                     null,
@@ -1838,7 +1843,7 @@ public class DesktopViewController extends ViewController{
             this.loginViewControllers.add(lvc);
             ActionEvent actionEvent = new ActionEvent(
                     this,ActionEvent.ACTION_PERFORMED,
-                    DesktopViewController.DesktopViewControllerActionEvent.INITIALISE_VIEW_CONTROLLER.toString());
+                    DesktopViewController.Actions.INITIALISE_VIEW_CONTROLLER.toString());
             lvc.actionPerformed(actionEvent);
             if (getDesktopViewMode().equals(DesktopViewMode.CLINIC_LOGO)){
                     doSetupDesktopViewMode();
@@ -1865,7 +1870,7 @@ public class DesktopViewController extends ViewController{
 
             ActionEvent actionEvent = new ActionEvent(
                     this,ActionEvent.ACTION_PERFORMED,
-                    DesktopViewController.DesktopViewControllerActionEvent.INITIALISE_VIEW_CONTROLLER.toString());
+                    DesktopViewController.Actions.INITIALISE_VIEW_CONTROLLER.toString());
              tvc.actionPerformed(actionEvent);
 
             if (getDesktopViewMode().equals(DesktopViewMode.CLINIC_LOGO)){
@@ -1876,7 +1881,7 @@ public class DesktopViewController extends ViewController{
         }//do nothing because only one patient notification VC allowed
         if (getDesktopView().getDeskTop().getAllFrames().length>1){
             this.firePropertyChangeEvent(
-                    ViewController.DesktopViewControllerPropertyChangeEvent.CASCADE_DESKTOP_VIEWS.toString(), 
+                    Properties.CASCADE_DESKTOP_VIEWS.toString(), 
                     getDesktopView(),
                     this, 
                     null,
@@ -1915,7 +1920,7 @@ public class DesktopViewController extends ViewController{
                     }
                     ActionEvent actionEvent = new ActionEvent(
                             this,ActionEvent.ACTION_PERFORMED,
-                            ViewController.PatientMedicalHistoryViewControllerActionEvent.PRINT_PATIENT_MEDICAL_HISTORY_REQUEST.toString());
+                            PatientMedicalHistoryViewController.Actions.PRINT_PATIENT_MEDICAL_HISTORY_REQUEST.toString());
                     activeVCForSamePatient.actionPerformed(actionEvent);
                 }
             }
@@ -1965,7 +1970,7 @@ public class DesktopViewController extends ViewController{
                     }//do nothing because only one medical condition VC allowed
                     if (getDesktopView().getDeskTop().getAllFrames().length>1){
                         this.firePropertyChangeEvent(
-                                ViewController.DesktopViewControllerPropertyChangeEvent.CASCADE_DESKTOP_VIEWS.toString(), 
+                                Properties.CASCADE_DESKTOP_VIEWS.toString(), 
                                 getDesktopView(),
                                 this, 
                                 null,
@@ -2057,7 +2062,7 @@ public class DesktopViewController extends ViewController{
                     }//do nothing because only one medical condition VC allowed
                     if (getDesktopView().getDeskTop().getAllFrames().length>1){
                         this.firePropertyChangeEvent(
-                                ViewController.DesktopViewControllerPropertyChangeEvent.CASCADE_DESKTOP_VIEWS.toString(), 
+                                Properties.CASCADE_DESKTOP_VIEWS.toString(), 
                                 getDesktopView(),
                                 this, 
                                 null,
@@ -2078,7 +2083,7 @@ public class DesktopViewController extends ViewController{
                 .get(medicalConditionViewControllers.size()-1);
         ActionEvent actionEvent = new ActionEvent(
                 this,ActionEvent.ACTION_PERFORMED,
-                DesktopViewController.MedicalConditionViewControllerActionEvent
+                MedicalConditionViewController.Actions
                         .PRINT_NEW_PATIENT_DETAILS_REQUEST.toString());
         mcvc.actionPerformed(actionEvent);
         /**
@@ -2117,7 +2122,7 @@ public class DesktopViewController extends ViewController{
             }
             if (getDesktopView().getDeskTop().getAllFrames().length>1){
                 this.firePropertyChangeEvent(
-                        ViewController.DesktopViewControllerPropertyChangeEvent.CASCADE_DESKTOP_VIEWS.toString(), 
+                        Properties.CASCADE_DESKTOP_VIEWS.toString(), 
                         getDesktopView(),
                         this, 
                         null,
@@ -2144,12 +2149,12 @@ public class DesktopViewController extends ViewController{
                         getDesktopView()));
             ActionEvent actionEvent = new ActionEvent(
                     this,ActionEvent.ACTION_PERFORMED,
-                    DesktopViewController.DesktopViewControllerActionEvent.INITIALISE_VIEW_CONTROLLER.toString());
+                    Actions.INITIALISE_VIEW_CONTROLLER.toString());
             prvc.actionPerformed(actionEvent);
 
             if (getDesktopView().getDeskTop().getAllFrames().length>1){
                 dvc.firePropertyChangeEvent(
-                        ViewController.DesktopViewControllerPropertyChangeEvent.CASCADE_DESKTOP_VIEWS.toString(), 
+                        Properties.CASCADE_DESKTOP_VIEWS.toString(), 
                         getDesktopView(),
                         this, 
                         null,
@@ -2179,12 +2184,12 @@ public class DesktopViewController extends ViewController{
                         getDesktopView()));
             ActionEvent actionEvent = new ActionEvent(
                     this,ActionEvent.ACTION_PERFORMED,
-                    DesktopViewController.DesktopViewControllerActionEvent.INITIALISE_VIEW_CONTROLLER.toString());
+                    Actions.INITIALISE_VIEW_CONTROLLER.toString());
             apvc.actionPerformed(actionEvent);
 
             if (getDesktopView().getDeskTop().getAllFrames().length>1){
                 dvc.firePropertyChangeEvent(
-                        ViewController.DesktopViewControllerPropertyChangeEvent.CASCADE_DESKTOP_VIEWS.toString(), 
+                        Properties.CASCADE_DESKTOP_VIEWS.toString(), 
                         getDesktopView(),
                         this, 
                         null,
@@ -2226,7 +2231,7 @@ public class DesktopViewController extends ViewController{
             
             if (getDesktopView().getDeskTop().getAllFrames().length>1){
             firePropertyChangeEvent(
-                ViewController.DesktopViewControllerPropertyChangeEvent.CASCADE_DESKTOP_VIEWS.toString(), 
+                Properties.CASCADE_DESKTOP_VIEWS.toString(), 
                 getDesktopView(),
                 this, 
                 null,
@@ -2260,12 +2265,12 @@ public class DesktopViewController extends ViewController{
                         getDesktopView()));
             ActionEvent actionEvent = new ActionEvent(
                     this,ActionEvent.ACTION_PERFORMED,
-                    DesktopViewController.DesktopViewControllerActionEvent.INITIALISE_VIEW_CONTROLLER.toString());
+                    Actions.INITIALISE_VIEW_CONTROLLER.toString());
             padvc.actionPerformed(actionEvent);
 
             if (getDesktopView().getDeskTop().getAllFrames().length>1){
                 dvc.firePropertyChangeEvent(
-                        ViewController.DesktopViewControllerPropertyChangeEvent.CASCADE_DESKTOP_VIEWS.toString(), 
+                        Properties.CASCADE_DESKTOP_VIEWS.toString(), 
                         getDesktopView(),
                         this, 
                         null,
@@ -2296,7 +2301,7 @@ public class DesktopViewController extends ViewController{
                 
                 if (getDesktopView().getDeskTop().getAllFrames().length>1){
                     this.firePropertyChangeEvent(
-                            ViewController.DesktopViewControllerPropertyChangeEvent.CASCADE_DESKTOP_VIEWS.toString(), 
+                            Properties.CASCADE_DESKTOP_VIEWS.toString(), 
                             getDesktopView(),
                             this, 
                             null,
@@ -2315,14 +2320,14 @@ public class DesktopViewController extends ViewController{
         }//toDoViewControllers not empty, so do nothing because only one patient toDo VC allowed
     }
 
-    private void doRequestForNotificationViewController(){
+    /*private void doRequestForNotificationViewController(){
         if (notificationViewControllers.isEmpty()){
             try{
                 notificationViewControllers.add(
                                             new NotificationViewController(this,getDesktopView()));
                 NotificationViewController nvc = 
                         notificationViewControllers.get(notificationViewControllers.size()-1);
-                nvc.setView(new View().make(View.Viewer.NOTIFICATION_VIEW/*SCHEDULE_LIST_VIEW*/,
+                nvc.setView(new View().make(View.Viewer.NOTIFICATION_VIEW,
                         nvc, 
                         getDesktopView()));
                 
@@ -2342,14 +2347,14 @@ public class DesktopViewController extends ViewController{
         }//do nothing because only one patient notification VC allowed
         if (getDesktopView().getDeskTop().getAllFrames().length>1){
             this.firePropertyChangeEvent(
-                    ViewController.DesktopViewControllerPropertyChangeEvent.CASCADE_DESKTOP_VIEWS.toString(), 
+                    Properties.CASCADE_DESKTOP_VIEWS.toString(), 
                     getDesktopView(),
                     this, 
                     null,
                     null
             );
         }
-    }
+    }*/
     
     private void doRequestForPatientViewControllerForDefinedPatient(ActionEvent e){
         boolean isSelectedPatientViewActive = false;
@@ -2387,7 +2392,7 @@ public class DesktopViewController extends ViewController{
                 
                 if (getDesktopView().getDeskTop().getAllFrames().length>1){
                     this.firePropertyChangeEvent(
-                            ViewController.DesktopViewControllerPropertyChangeEvent.CASCADE_DESKTOP_VIEWS.toString(), 
+                            Properties.CASCADE_DESKTOP_VIEWS.toString(), 
                             getDesktopView(),
                             this, 
                             null,
@@ -2443,7 +2448,7 @@ public class DesktopViewController extends ViewController{
             
             if (getDesktopView().getDeskTop().getAllFrames().length>1){
                 this.firePropertyChangeEvent(
-                        ViewController.DesktopViewControllerPropertyChangeEvent.CASCADE_DESKTOP_VIEWS.toString(), 
+                        Properties.CASCADE_DESKTOP_VIEWS.toString(), 
                         getDesktopView(),
                         this, 
                         null,
@@ -2493,7 +2498,7 @@ public class DesktopViewController extends ViewController{
             }//do nothing because only one medical condition VC allowed
             if (getDesktopView().getDeskTop().getAllFrames().length>1){
                 this.firePropertyChangeEvent(
-                        ViewController.DesktopViewControllerPropertyChangeEvent.CASCADE_DESKTOP_VIEWS.toString(), 
+                        Properties.CASCADE_DESKTOP_VIEWS.toString(), 
                         getDesktopView(),
                         this, 
                         null,
@@ -2533,7 +2538,7 @@ public class DesktopViewController extends ViewController{
                 
                 if (getDesktopView().getDeskTop().getAllFrames().length>1){
                     this.firePropertyChangeEvent(
-                            ViewController.DesktopViewControllerPropertyChangeEvent.CASCADE_DESKTOP_VIEWS.toString(), 
+                            Properties.CASCADE_DESKTOP_VIEWS.toString(), 
                             getDesktopView(),
                             this, 
                             null,
@@ -2717,6 +2722,7 @@ public class DesktopViewController extends ViewController{
      * @param entity:IEntityStoreType, which can be interrogated to determine if a collection of appointment or patient objects  have been specified
      * @param desktopViewController references the DesktopViewController object which is referenced in the Action Event sent in the done90 method  
      */
+    /*
     private void startBackgroundThread(Entity entity,DesktopViewController desktopViewController){
         SwingWorker sw1 = new SwingWorker(){
         int appointmentRecordCount = 0;    
@@ -2728,13 +2734,7 @@ public class DesktopViewController extends ViewController{
                 int count = 0;
                 try{
                     if (entity.getIsPatient()){
-                        
-                        /**
-                         * 13/02/2024 08:50 code update
-                         * -- creates a patient with a pid = 1
-                         * -- required for the UNBOOKABLE 'appointment' schedule mechanism
-                         * -- implemented by first 2 lines
-                         */
+     
                         Patient patient = new Patient(1);
                         patient.insert();
                         
@@ -2778,9 +2778,7 @@ public class DesktopViewController extends ViewController{
                         }
                    
                     }else if (entity.getIsAppointment()){
-                        /**
-                         * first thing create a single Invoice record with key 1066 (equals the zero invoice) to maintain RI
-                         */
+      
                         Invoice invoice = new Invoice(1066);
                         invoice.setAmount(0);
                         invoice.setDescription("");
@@ -2842,12 +2840,6 @@ public class DesktopViewController extends ViewController{
                 count = value;
             }
             
-            /**
-             * Invoked when the doInBackground() method completes
-             * -- used to send an action event to the ExportProgressViewController signalling task completion
-             * -- uses also the specified IEntityStoreTYpe to determine the value of the event sent
-             * -- i.e. either EXPORT_MIGRATED_PATIENTS_COMPLETED event or EXPORT_MIGRATED_APPOINTMENTS_COMPLETED event
-             */
             @Override
             protected void done(){
                 DesktopViewControllerActionEvent event = null;
@@ -2895,7 +2887,7 @@ public class DesktopViewController extends ViewController{
         sw1.addPropertyChangeListener(evc.getView());
         sw1.execute();
 
-    }
+    }*/
    
     private Point doRequestCountForAppointmentTable(){
         Point result = null;
@@ -3030,6 +3022,7 @@ public class DesktopViewController extends ViewController{
         return result;
     }
     
+    /*
     private void doPropertyChangeEvent(DesktopViewControllerPropertyChangeEvent event,
                                         PropertyChangeListener view){
         pcSupport.removePropertyChangeListener(view);
@@ -3039,7 +3032,7 @@ public class DesktopViewController extends ViewController{
                 null,getDescriptor());
         pcSupport.firePropertyChange(pcEvent);
         //pcSupport.removePropertyChangeListener(view);
-    }
+    }*/
     
     /**
      * 10/01/2023 07:29 update
@@ -3049,6 +3042,7 @@ public class DesktopViewController extends ViewController{
      * @param source 
      */
     
+    /*
     private void doRequestForGetPath(ViewController.DesktopViewControllerActionEvent actionCommand,
                                     Object source){
         String path = null;
@@ -3077,9 +3071,9 @@ public class DesktopViewController extends ViewController{
         }    
         doPropertyChangeEvent(propertyChangeEvent, (PropertyChangeListener)source); 
 
-    }
+    }*/
     
-
+/*
     private void notifyMigrationActionCompleted(){
         pcSupport.addPropertyChangeListener(getDesktopView());
         PropertyChangeEvent pcEvent = new PropertyChangeEvent(this,
@@ -3087,7 +3081,7 @@ public class DesktopViewController extends ViewController{
             null,getDescriptor());
         pcSupport.firePropertyChange(pcEvent);
         pcSupport.removePropertyChangeListener(getDesktopView());
-    }
+    }*/
     
     private void setDesktopViewMode(DesktopViewMode mode){
         this.desktopViewMode = mode;
@@ -3100,8 +3094,7 @@ public class DesktopViewController extends ViewController{
     private void doSetupDesktopViewMode(){
         pcSupport.addPropertyChangeListener(getDesktopView());
         PropertyChangeEvent pcEvent = new PropertyChangeEvent(this,
-            DesktopViewController.
-                    DesktopViewControllerPropertyChangeEvent.SET_DESKTOP_VIEW_MODE.toString(),
+            Properties.SET_DESKTOP_VIEW_MODE.toString(),
         null,new Descriptor());
         pcSupport.firePropertyChange(pcEvent);
         pcSupport.removePropertyChangeListener(getDesktopView());
@@ -3481,7 +3474,7 @@ public class DesktopViewController extends ViewController{
             }
             case VIEW_CONTROLLER_ACTIVATED_NOTIFICATION ->{
                 firePropertyChangeEvent(
-                            ViewController.DesktopViewControllerPropertyChangeEvent.
+                            Properties.
                                     DESKTOP_VIEW_CHANGED_NOTIFICATION.toString(),
                             getDesktopView(),
                             this,
@@ -3522,7 +3515,7 @@ public class DesktopViewController extends ViewController{
                     }*/
 
                     firePropertyChangeEvent(
-                                ViewController.DesktopViewControllerPropertyChangeEvent.
+                                Properties.
                                         USER_SYSTEM_WIDE_SETTINGS_RECEIVED.toString(),
                                 viewController.getView(),
                                 this,
@@ -3567,10 +3560,10 @@ public class DesktopViewController extends ViewController{
                         doActionEventForMedicalConditionViewController(e);
                         break;
                     }
-                    case "NotificationViewController" ->{
+                    /*case "NotificationViewController" ->{
                         doActionEventForNotificationViewController(e);
                         break;
-                    }
+                    }*/
                     case "PatientAppointmentDataViewController" ->{
                         doActionEventForPatientAppointmentDataViewController(e);
                         break;  
@@ -3680,7 +3673,7 @@ public class DesktopViewController extends ViewController{
         for(PatientViewController pvc: this.patientViewControllers){
             if (!requestingPVC.equals(pvc)){
                 firePropertyChangeEvent(
-                    ViewController.PatientViewControllerPropertyChangeEvent.
+                    PatientViewController.Properties.
                             PATIENT_VIEW_CHANGE_NOTIFICATION.toString(),
                     pvc,
                     this,
@@ -3690,13 +3683,13 @@ public class DesktopViewController extends ViewController{
             }
         }
         
-        for(NotificationViewController pnvc : this.notificationViewControllers){
+        /*for(NotificationViewController pnvc : this.notificationViewControllers){
             ActionEvent actionEvent = new ActionEvent(
                     this,ActionEvent.ACTION_PERFORMED,
-                    ViewController.DesktopViewControllerActionEvent.
+                    DesktopViewController.Actions.
                             REFRESH_DISPLAY_REQUEST.toString());
             pnvc.actionPerformed(actionEvent); 
-        }
+        }*/
     }
     
     private void doArchivedPatientsViewControllerChangeNotification(PropertyChangeEvent e){
@@ -3706,7 +3699,7 @@ public class DesktopViewController extends ViewController{
             /*pvc.getDescriptor().getControllerDescription().setPatient(
                     apvc.getDescriptor().getControllerDescription().getPatient());*/
             firePropertyChangeEvent(
-                    ViewController.PatientViewControllerPropertyChangeEvent.
+                    PatientViewController.Properties.
                             PATIENT_VIEW_CHANGE_NOTIFICATION.toString(),
                     pvc,
                     this,
@@ -3718,7 +3711,7 @@ public class DesktopViewController extends ViewController{
             PatientAppointmentDataViewController padvc = 
                     (PatientAppointmentDataViewController)this.patientAppointmentDataViewControllers.get(0);
             firePropertyChangeEvent(
-                    ViewController.PatientAppointmentDataViewControllerPropertyChangeEvent.
+                    PatientAppointmentDataViewController.Properties.
                             PATIENT_APPOINTMENT_DATA_VIEW_CONTROLLER_CHANGE_NOTIFICATION.toString(),
                     padvc,
                     this,
@@ -3736,7 +3729,7 @@ public class DesktopViewController extends ViewController{
                     .equals(pvcDescriptor.getControllerDescription().getProperty(SystemDefinition.Properties.PATIENT))){
                 pvc.getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.DESCRIPTOR, pvcDescriptor);
                 firePropertyChangeEvent(
-                        ViewController.PatientViewControllerPropertyChangeEvent.PATIENT_VIEW_CHANGE_NOTIFICATION.toString(),
+                        PatientViewController.Properties.PATIENT_VIEW_CHANGE_NOTIFICATION.toString(),
                         pvc,
                         this,
                         null,
@@ -3746,7 +3739,7 @@ public class DesktopViewController extends ViewController{
         }
         for(ArchivedPatientsViewController apvc: this.archivedPatientsViewControllers){
             firePropertyChangeEvent(
-                    ViewController.ArchivedPatientsViewControllerPropertyChangeEvent.
+                    ArchivedPatientsViewController.Properties.
                             VIEW_CHANGE_NOTIFICATION.toString(),
                     apvc,
                     this,
@@ -3770,7 +3763,7 @@ public class DesktopViewController extends ViewController{
             ArrayList<Appointment> appointments = (ArrayList<Appointment>)pvc.getDescriptor().getControllerDescription().
                     getProperty(SystemDefinition.Properties.APPOINTMENTS);      
             firePropertyChangeEvent(
-                    ViewController.PatientViewControllerPropertyChangeEvent.
+                    PatientViewController.Properties.
                             PATIENT_VIEW_CHANGE_NOTIFICATION.toString(),
                     pvc,
                     this,
@@ -3784,7 +3777,7 @@ public class DesktopViewController extends ViewController{
             if (!requestingSVC.equals(svc)){
                 ActionEvent actionEvent = new ActionEvent(
                         this,ActionEvent.ACTION_PERFORMED,
-                        ViewController.DesktopViewControllerActionEvent.
+                        DesktopViewController.Actions.
                                 REFRESH_DISPLAY_REQUEST.toString());
                 svc.actionPerformed(actionEvent); 
             }
@@ -3795,7 +3788,7 @@ public class DesktopViewController extends ViewController{
         setDescriptor((Descriptor)e.getNewValue());
         for(PatientViewController pvc: this.patientViewControllers){
             firePropertyChangeEvent(
-                    ViewController.PatientViewControllerPropertyChangeEvent.
+                    PatientViewController.Properties.
                             PATIENT_VIEW_CHANGE_NOTIFICATION.toString(),
                     pvc,
                     this,
@@ -3806,7 +3799,7 @@ public class DesktopViewController extends ViewController{
         for(ScheduleViewController svc: this.scheduleViewControllers){
             ActionEvent actionEvent = new ActionEvent(
                     this,ActionEvent.ACTION_PERFORMED,
-                    ViewController.DesktopViewControllerActionEvent.
+                    DesktopViewController.Actions.
                             REFRESH_DISPLAY_REQUEST.toString());
             svc.actionPerformed(actionEvent); 
         }

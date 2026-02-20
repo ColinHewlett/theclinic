@@ -33,6 +33,7 @@ import javax.swing.event.TableModelListener;
 import javax.swing.table.TableCellRenderer;
 import colinhewlettsolutions.client.model.entity.ToDo;
 import colinhewlettsolutions.client.controller.SystemDefinition;
+import colinhewlettsolutions.client.controller.ToDoViewController;
 import colinhewlettsolutions.client.view.View;
 import colinhewlettsolutions.client.view.support_classes.models.ToDoViewTableModel;
 import colinhewlettsolutions.client.view.support_classes.renderers.LocalDateRenderer;
@@ -72,7 +73,7 @@ public class ToDoView extends View implements ActionListener,
     
     @Override
     public void actionPerformed(ActionEvent e){
-        ViewController.NotificationViewControllerActionEvent
+        ToDoViewController.Actions
                 actionCommand = null;
         switch (Action.valueOf(e.getActionCommand())){
             case REQUEST_CREATE_TO_DO:
@@ -119,9 +120,7 @@ public class ToDoView extends View implements ActionListener,
     
     @Override
     public void propertyChange(PropertyChangeEvent e){
-        ViewController.ToDoViewControllerPropertyChangeEvent
-                propertyName = ViewController.ToDoViewControllerPropertyChangeEvent.
-                        valueOf(e.getPropertyName());
+        ToDoViewController.Properties propertyName = ToDoViewController.Properties.valueOf(e.getPropertyName());
         
         switch (propertyName){
             case RECEIVED_TO_DOs:
@@ -158,8 +157,7 @@ public class ToDoView extends View implements ActionListener,
 
             ActionEvent actionEvent = new ActionEvent(
                 this,ActionEvent.ACTION_PERFORMED,
-                ViewController.ToDoViewControllerActionEvent.
-                        ACTION_TO_DO_REQUEST.toString());
+                ToDoViewController.Actions.ACTION_TO_DO_REQUEST.toString());
             getMyController().actionPerformed(actionEvent);
             this.tblToDo.clearSelection();
         }
@@ -242,7 +240,7 @@ public class ToDoView extends View implements ActionListener,
             
             ActionEvent actionEvent = new ActionEvent(
                 this,ActionEvent.ACTION_PERFORMED,
-                ViewController.ToDoViewControllerActionEvent.UNACTIONED_TO_DO_REQUEST.toString());
+                ToDoViewController.Actions.UNACTIONED_TO_DO_REQUEST.toString());
             this.getMyController().actionPerformed(actionEvent);
             //adjustColumnWidths(tblToDo);
         //});
@@ -279,15 +277,14 @@ public class ToDoView extends View implements ActionListener,
             public void internalFrameClosed(InternalFrameEvent e) {
                 ActionEvent actionEvent = new ActionEvent(
                         ToDoView.this,ActionEvent.ACTION_PERFORMED,
-                        ViewController.ToDoViewControllerActionEvent.
-                                VIEW_CLOSED_NOTIFICATION.toString());
+                        ToDoViewController.Actions.VIEW_CLOSED_NOTIFICATION.toString());
                 getMyController().actionPerformed(actionEvent);
             }
             @Override  
             public void internalFrameActivated(InternalFrameEvent e) {
                 ActionEvent actionEvent = new ActionEvent(
                         ToDoView.this,ActionEvent.ACTION_PERFORMED,
-                        ViewController.NotificationViewControllerActionEvent.
+                        ToDoViewController.Actions.
                                 VIEW_ACTIVATED_NOTIFICATION.toString());
                 getMyController().actionPerformed(actionEvent);
             }
@@ -376,8 +373,7 @@ public class ToDoView extends View implements ActionListener,
                         setProperty(SystemDefinition.Properties.TO_DO, model.getElementAt(row));
                 ActionEvent actionEvent = new ActionEvent(
                     this,ActionEvent.ACTION_PERFORMED,
-                    ViewController.ToDoViewControllerActionEvent.
-                            CANCEL_TO_DO_REQUEST.toString());
+                    ToDoViewController.Actions.CANCEL_TO_DO_REQUEST.toString());
                 this.getMyController().actionPerformed(actionEvent);
             }
         }
@@ -395,7 +391,7 @@ public class ToDoView extends View implements ActionListener,
     private void doCreateToDo(){
         ActionEvent actionEvent = new ActionEvent(
         this,ActionEvent.ACTION_PERFORMED,
-                ViewController.ToDoViewControllerActionEvent.CREATE_TO_DO_REQUEST.toString());
+                ToDoViewController.Actions.CREATE_TO_DO_REQUEST.toString());
         this.getMyController().actionPerformed(actionEvent);
         this.tblToDo.clearSelection();
     }
@@ -403,7 +399,7 @@ public class ToDoView extends View implements ActionListener,
     private void doReadAllToDos(){
         ActionEvent actionEvent = new ActionEvent(
             this,ActionEvent.ACTION_PERFORMED,
-                    ViewController.ToDoViewControllerActionEvent.TO_DOs_REQUEST.toString());
+                    ToDoViewController.Actions.TO_DOs_REQUEST.toString());
         this.getMyController().actionPerformed(actionEvent);
         setUITitle(UI_ALL_TO_DOS_TITLE);
     }
@@ -411,7 +407,7 @@ public class ToDoView extends View implements ActionListener,
     private void doReadUnactionedToDos(){
         ActionEvent actionEvent = new ActionEvent(
             this,ActionEvent.ACTION_PERFORMED,
-                    ViewController.ToDoViewControllerActionEvent.UNACTIONED_TO_DO_REQUEST.toString());
+                    ToDoViewController.Actions.UNACTIONED_TO_DO_REQUEST.toString());
         this.getMyController().actionPerformed(actionEvent);
         setUITitle(UI_UNACTIONED_TO_DOS_TITLE);
     }
@@ -429,7 +425,7 @@ public class ToDoView extends View implements ActionListener,
                     setProperty(SystemDefinition.Properties.TO_DO, model.getElementAt(this.tblToDo.getSelectedRow()));
             ActionEvent actionEvent = new ActionEvent(
                     this,ActionEvent.ACTION_PERFORMED,
-                    ViewController.ToDoViewControllerActionEvent.UPDATE_TO_DO_REQUEST.toString());
+                    ToDoViewController.Actions.UPDATE_TO_DO_REQUEST.toString());
             this.getMyController().actionPerformed(actionEvent);
             this.tblToDo.clearSelection();
             //ViewController.setJTableColumnProperties(tblToDo, 964, 10,10,80);

@@ -5,7 +5,7 @@
 package colinhewlettsolutions.client.view.views.modal_views;
 
 import colinhewlettsolutions.client.controller.SystemDefinition;
-import colinhewlettsolutions.client.controller.Descriptor;
+import colinhewlettsolutions.client.controller.PatientViewController;
 import colinhewlettsolutions.client.controller.ViewController;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -62,9 +62,8 @@ public class ModalPatientDoctorEditorView extends ModalView
                         .getControllerDescription().getProperty(SystemDefinition.Properties.DOCTOR);
         Patient patient = (Patient)getMyController().getDescriptor()
                         .getControllerDescription().getProperty(SystemDefinition.Properties.PATIENT);
-        ViewController.PatientViewControllerPropertyChangeEvent propertyName =
-                ViewController.PatientViewControllerPropertyChangeEvent
-                        .valueOf(e.getPropertyName());
+        PatientViewController.Properties propertyName =
+                PatientViewController.Properties.valueOf(e.getPropertyName());
         switch (propertyName){  
             case DOCTOR_RECEIVED:
                 if (doctor.get().isEmpty()){ 
@@ -111,7 +110,7 @@ public class ModalPatientDoctorEditorView extends ModalView
                                             getViewDescription().setProperty(SystemDefinition.Properties.DOCTOR, doctor);
                             actionEvent = new ActionEvent(
                                 this,ActionEvent.ACTION_PERFORMED,
-                                ViewController.PatientViewControllerActionEvent.
+                                PatientViewController.Actions.
                                         PATIENT_DOCTOR_CREATE_REQUEST.toString());
                             this.getMyController().actionPerformed(actionEvent);
                         }else{
@@ -128,7 +127,7 @@ public class ModalPatientDoctorEditorView extends ModalView
                                         getViewDescription().setProperty(SystemDefinition.Properties.DOCTOR, doctor);
                             actionEvent = new ActionEvent(
                                 this,ActionEvent.ACTION_PERFORMED,
-                                ViewController.PatientViewControllerActionEvent.
+                                PatientViewController.Actions.
                                         PATIENT_DOCTOR_UPDATE_REQUEST.toString());
                             this.getMyController().actionPerformed(actionEvent);
                         }else{
@@ -144,7 +143,7 @@ public class ModalPatientDoctorEditorView extends ModalView
                 if (getIsAnyDataEnteredFor(doctor)){
                     actionEvent = new ActionEvent(
                         this,ActionEvent.ACTION_PERFORMED,
-                        ViewController.PatientViewControllerActionEvent.
+                        PatientViewController.Actions.
                                 PATIENT_DOCTOR_DELETE_REQUEST.toString());
                     this.getMyController().actionPerformed(actionEvent);
                 }else{

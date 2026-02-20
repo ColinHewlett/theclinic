@@ -20,6 +20,21 @@ import colinhewlettsolutions.client.view.View;
  */
 public class ClinicalNoteViewController extends ViewController{
     
+    public enum Actions{
+        CLINICAL_NOTE_FOR_APPOINTMENT_REQUEST,
+        CLINICAL_NOTE_DELETE_REQUEST,
+        CLINICAL_NOTE_CREATE_REQUEST,
+        CLINICAL_NOTE_UPDATE_REQUEST,
+        EMPTY_SLOTS_FROM_DAY_REQUEST,
+        VIEW_CLOSED_NOTIFICATION,
+        INITIALISE_VIEW
+    }
+    
+    public enum Properties{
+        CLINICAL_NOTE_RECEIVED,
+        CLINICAL_NOTE_ERROR_RECEIVED
+    }
+    
     public ClinicalNoteViewController(DesktopViewController controller,
                                DesktopView desktopView){
         setMyController(controller);
@@ -34,7 +49,7 @@ public class ClinicalNoteViewController extends ViewController{
         ClinicalNote clinicalNote = null;
         
         if (e.getSource() instanceof DesktopViewController){
-            DesktopViewControllerActionEvent actionCommand = DesktopViewControllerActionEvent.valueOf(e.getActionCommand());
+            DesktopViewController.Actions actionCommand = DesktopViewController.Actions.valueOf(e.getActionCommand());
             switch (actionCommand){
                 case INITIALISE_VIEW_CONTROLLER:
                     try{
@@ -48,14 +63,13 @@ public class ClinicalNoteViewController extends ViewController{
             }
         }
         
-        ViewController.ClinicalNoteViewControllerActionEvent actionCommand =
-                ViewController.ClinicalNoteViewControllerActionEvent
-                        .valueOf(e.getActionCommand());
+        Actions actionCommand =
+                Actions.valueOf(e.getActionCommand());
             switch (actionCommand){
                 case VIEW_CLOSED_NOTIFICATION:
                     ActionEvent actionEvent = new ActionEvent(
                         this,ActionEvent.ACTION_PERFORMED,
-                        ViewController.DesktopViewControllerActionEvent.
+                        DesktopViewController.Actions.
                                 VIEW_CONTROLLER_CLOSE_NOTIFICATION.toString());
                     getMyController().actionPerformed(actionEvent);
                     break;
@@ -83,7 +97,7 @@ public class ClinicalNoteViewController extends ViewController{
                             error = "Attempt to create a new clinical note failed";
                             getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.ERROR, error);
                             firePropertyChangeEvent(
-                                ViewController.ClinicalNoteViewControllerPropertyChangeEvent
+                                ClinicalNoteViewController.Properties
                                         .CLINICAL_NOTE_ERROR_RECEIVED.toString(),
                                 (View)e.getSource(),
                                 this,
@@ -151,8 +165,7 @@ public class ClinicalNoteViewController extends ViewController{
         else getDescriptor().getControllerDescription()
                     .setProperty(SystemDefinition.Properties.CLINICAL_NOTE,clinicalNote.get().get(0));
         firePropertyChangeEvent(
-            ViewController.ClinicalNoteViewControllerPropertyChangeEvent
-                    .CLINICAL_NOTE_RECEIVED.toString(),
+            ClinicalNoteViewController.Properties.CLINICAL_NOTE_RECEIVED.toString(),
             getView(),
             //(View)e.getSource(),
             this,

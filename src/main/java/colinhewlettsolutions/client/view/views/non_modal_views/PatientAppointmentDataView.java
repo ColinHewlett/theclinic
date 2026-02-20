@@ -209,12 +209,10 @@ public class PatientAppointmentDataView extends View
                 pad.setFromYear(_pad.getFromYear());
                 pad.setToYear(_pad.getToYear());
                 getMyController().getDescriptor().getViewDescription().setProperty(SystemDefinition.Properties.PATIENT_APPOINTMENT_DATA, pad);
-                //getMyController().getDescriptor().getViewDescription().setProperty(SystemDefinition.Properties.PATIENT, pad.getPatient());
-                //tblAppointments.clearSelection();
 
                 ActionEvent actionEvent = new ActionEvent(
                     this,ActionEvent.ACTION_PERFORMED,
-                    ViewController.PatientAppointmentDataViewControllerActionEvent.
+                    PatientAppointmentDataViewController.Actions.
                             PATIENT_RECALL_ACTIVITY_STATUS_CHANGE.toString());
                 getMyController().actionPerformed(actionEvent);
                 this.tblPatientAppointmentData.clearSelection();

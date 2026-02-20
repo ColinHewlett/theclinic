@@ -7,7 +7,6 @@ package colinhewlettsolutions.client.controller;
 
 import colinhewlettsolutions.client.controller.Descriptor.ControllerDescription;
 import colinhewlettsolutions.client.controller.Descriptor.ViewDescription;
-import static colinhewlettsolutions.client.controller.ViewController.ScheduleViewControllerPropertyChangeEvent.USER_SCHEDULE_SETTINGS_RECEIVED;
 import colinhewlettsolutions.client.model.non_entity.Slot;
 import static colinhewlettsolutions.client.controller.ViewController.displayErrorMessage;
 import colinhewlettsolutions.client.model.entity.Entity.Scope;
@@ -22,7 +21,6 @@ import colinhewlettsolutions.client.view.views.non_modal_views.DesktopView;
 import colinhewlettsolutions.client.view.View;
 import colinhewlettsolutions.client.view.views.modal_views.ModalView;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.Point;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeSupport;
@@ -45,8 +43,7 @@ import colinhewlettsolutions.client.model.entity.User;
 import colinhewlettsolutions.client.model.entity.UserSettings;
 import colinhewlettsolutions.client.model.non_entity.TreatmentWithState;
 import static colinhewlettsolutions.client.view.View.Viewer.USER_SCHEDULE_DIARY_SETTINGS_VIEW;
-import colinhewlettsolutions.client.view.views.non_modal_views.ScheduleDiaryView;
-import colinhewlettsolutions.client.view.views.non_modal_views.ScheduleView;
+
 
 /**
  *
@@ -60,7 +57,14 @@ public class ScheduleViewController extends ViewController{
         APPOINTMENT_CREATE_VIEW_REQUEST,
         APPOINTMENT_EDITOR_TREATMENT_VIEW_REQUEST,
         APPOINTMENTS_FOR_DAY_REQUEST,
+        APPOINTMENTS_FOR_NON_SURGERY_DAY_REQUEST,
         APPOINTMENT_REMINDED_STATUS_UPDATE_REQUEST,
+        APPOINTMENT_TREATMENT_COMMENT_UPDATE_REQUEST,
+        APPOINTMENT_TREATMENT_CREATE_REQUEST,
+        APPOINTMENT_TREATMENT_DELETE_REQUEST,
+        APPOINTMENT_TREATMENT_NAME_UPDATE_REQUEST,
+        APPOINTMENT_TREATMENT_UPDATE_REQUEST, 
+        APPOINTMENT_UNCANCEL_REQUEST,
         APPOINTMENT_UPDATE_VIEW_REQUEST,
         BOOKABLE_SLOT_SCANNER_VIEW_REQUEST,
         CLINICAL_NOTE_CREATE_REQUEST,
@@ -69,19 +73,26 @@ public class ScheduleViewController extends ViewController{
         CLINICAL_NOTE_VIEW_REQUEST,
         CLINICAL_NOTE_UPDATE_REQUEST,
         CREATE_APPOINTMENT_REQUEST,
+        EMPTY_SLOTS_FROM_DAY_REQUEST,
         EMPTY_SLOT_SCAN_CONFIGURATION_VIEW_REQUEST,
         FIRST_APPOINTMENT_START_TIME_REQUEST,
         LAST_APPOINTMENT_END_TIME_REQUEST,
+        MODAL_VIEWER_ACTIVATED,
         NON_SURGERY_DAY_SCHEDULE_VIEW_REQUEST,
         PATIENT_VIEW_REQUEST,
         PRINT_SCHEDULE_REQUEST,
+        SCHEDULE_EDITOR_CREATE_APPOINTMENT_REQUEST,
         SCHEDULE_EDITOR_DELETE_EMERGENCY_APPOINTMENT_REQUEST,
         SCHEDULE_EDITOR_MAKE_EMERGENCY_APPOINTMENT_REQUEST,
+        SCHEDULE_EDITOR_UPDATE_APPOINTMENT_REQUEST,
+        SCHEDULE_LIST_VIEW_CONTROLLER_REQUEST,
         SWITCH_VIEW_REQUEST,
+        SURGERY_DAYS_EDIT_REQUEST,
         SURGERY_DAYS_EDITOR_VIEW_REQUEST,
         TO_DO_LIST_FOR_DAY_REQUEST,
         TO_DO_UPDATE_REQUEST,
         TO_DO_LIST_VIEW_REQUEST,
+        TREATMENT_CREATE_REQUEST,
         TREATMENT_STATE_RESET_REQUEST,
         TREATMENT_STATE_SET_REQUEST,
         TREATMENTS_READ_REQUEST,
@@ -91,20 +102,33 @@ public class ScheduleViewController extends ViewController{
         UNBOOKABLE_APPOINTMENT_SLOT_EDITOR_UPDATE_REQUEST,
         UNBOOKABLE_SLOT_SCANNER_VIEW_REQUEST,
         UPDATE_APPOINTMENT_REQUEST,
-        USER_SCHEDULE_DIARY_SETTINGS_EDITOR_VIEW_REQUEST,
-        USER_SCHEDULE_DIARY_SETTINGS_REQUEST,
+        USER_SCHEDULE_LIST_FACTORY_SETTINGS_REQUEST,//request default settings (for no user or 'guest')
         USER_SCHEDULE_LIST_SETTINGS_EDITOR_VIEW_REQUEST,
         USER_SCHEDULE_LIST_SETTINGS_REQUEST,
+        USER_SCHEDULE_LIST_SETTINGS_UPDATE_REQUEST,
         VIEW_ACTIVATED_NOTIFICATION,
         VIEW_CHANGED_NOTIFICATION,
-        VIEW_CLOSE_NOTIFICATION      
+        VIEW_CLOSE_NOTIFICATION     
     }
     public enum Properties{
+        APPOINTEE_REMINDER_COUNT_RECEIVED,
+        APPOINTMENTS_CANCELLED_RECEIVED,
+        APPOINTMENT_FOR_DAY_RECEIVED,
         APPOINTMENTS_FOR_DAY_RECEIVED,
+        APPOINTMENT_RECEIVED,
         APPOINTMENT_SCHEDULE_ERROR_RECEIVED,
+        APPOINTMENT_SLOTS_FROM_DAY_RECEIVED,
+        APPOINTMENT_TREATMENT_WITH_STATE_RECEIVED,
+        CLINICAL_NOTE_RECEIVED,
+        CLINICAL_NOTE_ERROR_RECEIVED,
         CLOSE_VIEW_REQUEST_RECEIVED,
+        INITIALISE_SCHEDULE_DATE,
+        NO_APPOINTMENT_SLOTS_FROM_DAY_RECEIVED,//added 01/02/2023
+        NON_SURGERY_DAY_EDIT_RECEIVED,
+        REFRESH_DISPLAY_REQUEST_RECEIVED,
+        SURGERY_DAYS_ASSIGNMENT_RECEIVED,
         TO_DO_LIST_RECEIVED,
-        USER_SCHEDULE_SETTINGS_RECEIVED
+        USER_SCHEDULE_SETTINGS_RECEIVED,   
     }
 
     private enum RequestedAppointmentState{ 
@@ -147,24 +171,11 @@ public class ScheduleViewController extends ViewController{
     
     @Override
     public void propertyChange(PropertyChangeEvent e){
-        ViewController.ScheduleViewControllerPropertyChangeEvent propertyName = 
-                ViewController.ScheduleViewControllerPropertyChangeEvent.
-                        valueOf(e.getPropertyName());
+        Properties propertyName = 
+                Properties.valueOf(e.getPropertyName());
         switch(propertyName){
-            case APPOINTMENT_FOR_DAY_RECEIVED:/*{
-                Appointment appointment = ((Descriptor)e.getNewValue()).getControllerDescription().getAppointment();
-                if (getScheduleDay().isEqual(appointment.getStart().toLocalDate())){
-                    appointment.setScope(Scope.FOR_DAY);
-                    try{
-                        appointment.read();
-                        doAppointmentForDayRequest(getScheduleDay());
-                    }catch(StoreException ex){
-                        displayErrorMessage(ex.getMessage() + "\nRaised in propertyChange()",
-                                "Appointment schedule view controller error",
-                                JOptionPane.WARNING_MESSAGE);
-                    } 
-                }
-            }*/
+            case APPOINTMENT_FOR_DAY_RECEIVED:
+                break;
         }
     }
 
@@ -181,8 +192,7 @@ public class ScheduleViewController extends ViewController{
             
 
             switch(the_view.getMyViewType()){
-                case SCHEDULE_LIST_VIEW:
-                case SCHEDULE_DIARY_VIEW:     
+                case SCHEDULE_LIST_VIEW:    
                     doPrimaryViewActionRequest(e);
                     break;
                 default:
@@ -269,7 +279,7 @@ public class ScheduleViewController extends ViewController{
                             .setProperty(SystemDefinition.Properties.APPOINTMENT, theCancelledAppointment);
                     getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.DESCRIPTOR,getDescriptor());
                     firePropertyChangeEvent(
-                        ViewController.DesktopViewControllerPropertyChangeEvent.
+                        DesktopViewController.Properties.
                                 SCHEDULE_VIEW_CONTROLLER_CHANGE_NOTIFICATION.toString(),
                         (DesktopViewController)getMyController(),
                         this,
@@ -466,7 +476,7 @@ public class ScheduleViewController extends ViewController{
                 //getDescriptor().getControllerDescription().setPatient(result.getPatient());
                 getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.DESCRIPTOR,getDescriptor());
                 firePropertyChangeEvent(
-                        ViewController.DesktopViewControllerPropertyChangeEvent.
+                        DesktopViewController.Properties.
                                 SCHEDULE_VIEW_CONTROLLER_CHANGE_NOTIFICATION.toString(),
                         (DesktopViewController)getMyController(),
                         this,
@@ -808,8 +818,7 @@ public class ScheduleViewController extends ViewController{
                 
                 if (getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.EMPTY_SLOT_FROM_DAY)!=null){
                     firePropertyChangeEvent(
-                           ViewController.ScheduleViewControllerPropertyChangeEvent.
-                                   NO_APPOINTMENT_SLOTS_FROM_DAY_RECEIVED.toString(),
+                           Properties.NO_APPOINTMENT_SLOTS_FROM_DAY_RECEIVED.toString(),
                            this.getView(),//event target/listener
                            this,//event sender
                            null,
@@ -818,7 +827,7 @@ public class ScheduleViewController extends ViewController{
                 }
                 getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.DESCRIPTOR,getDescriptor());
                 firePropertyChangeEvent(
-                        ViewController.DesktopViewControllerPropertyChangeEvent.
+                        DesktopViewController.Properties.
                                 SCHEDULE_VIEW_CONTROLLER_CHANGE_NOTIFICATION.toString(),
                         (DesktopViewController)getMyController(),
                         this,
@@ -843,7 +852,7 @@ public class ScheduleViewController extends ViewController{
                 doAppointmentForDayRequest((LocalDate)getDescriptor().
                         getControllerDescription().getProperty(SystemDefinition.Properties.SCHEDULE_DAY));
                 firePropertyChangeEvent(
-                        ViewController.DesktopViewControllerPropertyChangeEvent.
+                        DesktopViewController.Properties.
                                 SCHEDULE_VIEW_CONTROLLER_CHANGE_NOTIFICATION.toString(),
                         (DesktopViewController)getMyController(),
                         this,
@@ -884,8 +893,7 @@ public class ScheduleViewController extends ViewController{
                         String message = "Cannot update selected appointment because the patient involved is archived";
                         getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.ERROR, message);
                         firePropertyChangeEvent(
-                               ViewController.ScheduleViewControllerPropertyChangeEvent.
-                                       APPOINTMENT_SCHEDULE_ERROR_RECEIVED.toString(),
+                               Properties.APPOINTMENT_SCHEDULE_ERROR_RECEIVED.toString(),
                                this.getView(),//event target/listener
                                this,//event sender
                                null,
@@ -919,7 +927,7 @@ public class ScheduleViewController extends ViewController{
                     getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.PATIENT, result.getPatient());
                     getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.DESCRIPTOR,getDescriptor());
                     firePropertyChangeEvent(
-                            ViewController.DesktopViewControllerPropertyChangeEvent.
+                            DesktopViewController.Properties.
                                     SCHEDULE_VIEW_CONTROLLER_CHANGE_NOTIFICATION.toString(),
                             (DesktopViewController)getMyController(),
                             this,
@@ -1033,8 +1041,7 @@ public class ScheduleViewController extends ViewController{
                                 .setProperty(SystemDefinition.Properties.TREATMENT_WITH_STATE, treatment);
 
                         firePropertyChangeEvent(
-                                ViewController.ScheduleViewControllerPropertyChangeEvent.
-                                        APPOINTMENT_TREATMENT_WITH_STATE_RECEIVED.toString(),
+                                Properties.APPOINTMENT_TREATMENT_WITH_STATE_RECEIVED.toString(),
                                 (DesktopViewController)getMyController(),
                                 this,
                                 null,
@@ -1067,7 +1074,7 @@ public class ScheduleViewController extends ViewController{
                     getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.PATIENT, result.getPatient());
                     getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.DESCRIPTOR,getDescriptor());
                     firePropertyChangeEvent(
-                            ViewController.DesktopViewControllerPropertyChangeEvent.
+                            DesktopViewController.Properties.
                                     SCHEDULE_VIEW_CONTROLLER_CHANGE_NOTIFICATION.toString(),
                             (DesktopViewController)getMyController(),
                             this,
@@ -1081,9 +1088,9 @@ public class ScheduleViewController extends ViewController{
                     doAppointmentForDayRequest((LocalDate)getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.SCHEDULE_DAY));
                 }
                 break;
-            case USER_SCHEDULE_DIARY_SETTINGS_REQUEST:
+            /*case USER_SCHEDULE_DIARY_SETTINGS_REQUEST:
                 doUserSettingsRequest(Entity.Scope.USER_SCHEDULE_DIARY_SETTINGS);
-                break;
+                break;*/
             case USER_SCHEDULE_LIST_SETTINGS_REQUEST:
                 doUserSettingsRequest(Entity.Scope.USER_SCHEDULE_LIST_SETTINGS);
                 break;
@@ -1197,7 +1204,7 @@ public class ScheduleViewController extends ViewController{
          */
         ActionEvent actionEvent = new ActionEvent(
                this,ActionEvent.ACTION_PERFORMED,
-               ViewController.DesktopViewControllerActionEvent.MODAL_VIEWER_CLOSED_NOTIFICATION.toString());
+               DesktopViewController.Actions.MODAL_VIEWER_CLOSED_NOTIFICATION.toString());
         this.getMyController().actionPerformed(actionEvent);
     }
     
@@ -1318,39 +1325,10 @@ public class ScheduleViewController extends ViewController{
         User user = new User(username);
         UserSettings userSettings = new UserSettings(user);
        
-        ViewController.ScheduleViewControllerActionEvent actionCommand = 
-                ViewController.ScheduleViewControllerActionEvent.valueOf(e.getActionCommand());
+        Actions actionCommand = 
+                Actions.valueOf(e.getActionCommand());
         try{
             switch(actionCommand){
-                /**
-                 * case USER_SCHEDULE_DIARY_FACTORY_SETTINGS_REQUEST
-                 * -- method initialises the ControllerDescription with appropriate settings defined in the DesktopViewController's descriptor 
-                 */
-                case USER_SCHEDULE_DIARY_FACTORY_SETTINGS_REQUEST ->{
-                    for(SystemDefinition.UserScheduleDiarySettings settings : SystemDefinition.UserScheduleDiarySettings.values()){
-                        SystemDefinition.Properties property = SystemDefinition.Properties.valueOf(settings.toString());
-                        viewDescription.setProperty(property,desktopViewControllerDescription.getProperty(property));
-                    }
-                    userSettings.setScope(Entity.Scope.USER_SCHEDULE_DIARY_SETTINGS);
-                    doUpdateSettingsRequest(userSettings, getDescriptor());
-                    settingsHaveBeenUpdated = true;
-                    break;
-                }
-                /**
-                 * case USER_SCHEDULE_DIARY_SETTINGS_UPDATE_REQUEST
-                 * -- method initialises the ControllerDescription with appropriate settings defined in the descriptor's ViewDescription
-                 * -- method updates these to permanent storage
-                 */
-                case USER_SCHEDULE_DIARY_SETTINGS_UPDATE_REQUEST ->{
-                    /*for(SystemDefinition.UserScheduleDiarySettings settings : SystemDefinition.UserScheduleDiarySettings.values()){
-                        SystemDefinition.Properties property = SystemDefinition.Properties.valueOf(settings.toString());
-                        controllerDescription.setProperty(property,viewDescription.getProperty(property));
-                    }*/
-                    userSettings.setScope(Entity.Scope.USER_SCHEDULE_DIARY_SETTINGS);
-                    doUpdateSettingsRequest(userSettings, getDescriptor());
-                    settingsHaveBeenUpdated = true;
-                    break;
-                }
                 /**
                  * case USER_SCHEDULE_LIST_FACTORY_SETTINGS_REQUEST
                  * -- method initialises the ControllerDescription with appropriate settings defined in the DesktopViewController's descriptor
@@ -1391,8 +1369,7 @@ public class ScheduleViewController extends ViewController{
             }
             if (settingsHaveBeenUpdated){
                 firePropertyChangeEvent(
-                            ViewController.ScheduleViewControllerPropertyChangeEvent.
-                                    USER_SCHEDULE_SETTINGS_RECEIVED.toString(),
+                            Properties.USER_SCHEDULE_SETTINGS_RECEIVED.toString(),
                             this.getView(),
                             this,
                             null,
@@ -1420,7 +1397,7 @@ public class ScheduleViewController extends ViewController{
     
     private void doNonSurgeryDayScheduleEditorViewAction(ActionEvent e){
         if (e.getActionCommand().equals(
-                ViewController.ScheduleViewControllerActionEvent.APPOINTMENTS_FOR_NON_SURGERY_DAY_REQUEST.toString())){
+                Actions.APPOINTMENTS_FOR_NON_SURGERY_DAY_REQUEST.toString())){
             try{
                 getModalView().setClosed(true);
             }
@@ -1434,12 +1411,12 @@ public class ScheduleViewController extends ViewController{
                     isEqual ((LocalDate)getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.SCHEDULE_DAY))){
                 ActionEvent actionEvent = new ActionEvent(
                 this,ActionEvent.ACTION_PERFORMED,
-                    ViewController.ScheduleViewControllerActionEvent.SCHEDULE_LIST_VIEW_CONTROLLER_REQUEST.toString());
+                    Actions.SCHEDULE_LIST_VIEW_CONTROLLER_REQUEST.toString());
                 this.getMyController().actionPerformed(actionEvent);
             }
         }
         else if (e.getActionCommand().equals(
-                ViewController.ScheduleViewControllerActionEvent.MODAL_VIEWER_ACTIVATED.toString())){
+                Actions.MODAL_VIEWER_ACTIVATED.toString())){
             /**
              * DISABLE_CONTROLS_REQUEST requests DesktopViewController to disable menu options in its view
              */
@@ -1505,8 +1482,7 @@ public class ScheduleViewController extends ViewController{
     }*/
     
     private void doSurgeryDaysEditorViewAction(ActionEvent e){
-        ViewController.ScheduleViewControllerActionEvent actionCommand =
-                ViewController.ScheduleViewControllerActionEvent.valueOf(e.getActionCommand());
+        Actions actionCommand = Actions.valueOf(e.getActionCommand());
             
         switch(actionCommand){
             case SURGERY_DAYS_EDIT_REQUEST:{
@@ -1528,7 +1504,7 @@ public class ScheduleViewController extends ViewController{
                     getDescriptor().getControllerDescription().
                             setProperty(SystemDefinition.Properties.SURGERY_DAYS_ASSIGNMENT, new SurgeryDaysAssignment().read().get());
                     firePropertyChangeEvent(
-                            ViewController.ScheduleViewControllerPropertyChangeEvent.SURGERY_DAYS_ASSIGNMENT_RECEIVED.toString(),
+                            Properties.SURGERY_DAYS_ASSIGNMENT_RECEIVED.toString(),
                             getView(),
                             this,
                             null,
@@ -1548,7 +1524,7 @@ public class ScheduleViewController extends ViewController{
 
                 
         if (e.getActionCommand().equals(
-                ViewController.ScheduleViewControllerActionEvent.SURGERY_DAYS_EDIT_REQUEST.toString())){
+                Actions.SURGERY_DAYS_EDIT_REQUEST.toString())){
             HashMap<DayOfWeek,Boolean> surgeryDaysAssignmentValue = 
                     (HashMap<DayOfWeek,Boolean>)getDescriptor().getViewDescription().
                             getProperty(SystemDefinition.Properties.SURGERY_DAYS_ASSIGNMENT);
@@ -1572,8 +1548,7 @@ public class ScheduleViewController extends ViewController{
                  * fire event over to APPOINTMENT_SCHEDULE
                  */
                 firePropertyChangeEvent(
-                        ScheduleViewControllerPropertyChangeEvent.
-                                SURGERY_DAYS_ASSIGNMENT_RECEIVED.toString(),
+                        Properties.SURGERY_DAYS_ASSIGNMENT_RECEIVED.toString(),
                         getSecondaryView(),
                         this,
                         null,
@@ -1586,7 +1561,7 @@ public class ScheduleViewController extends ViewController{
             }
         }
         else if (e.getActionCommand().equals(
-                ViewController.ScheduleViewControllerActionEvent.MODAL_VIEWER_ACTIVATED.toString())){
+                Actions.MODAL_VIEWER_ACTIVATED.toString())){
             //this.view2.initialiseView();
             /**
              * passes message to DesktopView Controller to disable the VIEW control
@@ -1632,8 +1607,7 @@ public class ScheduleViewController extends ViewController{
                 getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.APPOINTMENT_SLOTS, availableSlotsOfDuration);
                 getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.APPOINTMENT, appointment);
                 this.firePropertyChangeEvent(
-                        ViewController.ScheduleViewControllerPropertyChangeEvent.
-                                APPOINTMENT_SLOTS_FROM_DAY_RECEIVED.toString(),
+                        Properties.APPOINTMENT_SLOTS_FROM_DAY_RECEIVED.toString(),
                         getSecondaryView(),
                         this,
                         null,
@@ -1650,8 +1624,8 @@ public class ScheduleViewController extends ViewController{
     }
     
     private void doEmptySlotScanConfigurationViewAction(ActionEvent e){
-        ViewController.ScheduleViewControllerActionEvent actionCommand =
-               ViewController.ScheduleViewControllerActionEvent.valueOf(e.getActionCommand());        
+        ClinicalNoteViewController.Actions actionCommand =
+               ClinicalNoteViewController.Actions.valueOf(e.getActionCommand());        
         switch (actionCommand){
             case EMPTY_SLOTS_FROM_DAY_REQUEST:
                 getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.EMPTY_SLOT_FROM_DAY, 
@@ -1674,7 +1648,7 @@ public class ScheduleViewController extends ViewController{
             getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.CLINICAL_NOTE, null);
         else getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.CLINICAL_NOTE, clinicalNote.get().get(0));
         firePropertyChangeEvent(
-            ViewController.ClinicalNoteViewControllerPropertyChangeEvent
+            ClinicalNoteViewController.Properties
                     .CLINICAL_NOTE_RECEIVED.toString(),
             //getView(),
             (ModalView)e.getSource(),
@@ -1719,8 +1693,7 @@ public class ScheduleViewController extends ViewController{
          */
         
         firePropertyChangeEvent(
-                ScheduleViewControllerPropertyChangeEvent.
-                        APPOINTMENT_SCHEDULE_ERROR_RECEIVED.toString(),
+                Properties.APPOINTMENT_SCHEDULE_ERROR_RECEIVED.toString(),
                 getSecondaryView(),
                 this,
                 null,
@@ -1729,8 +1702,7 @@ public class ScheduleViewController extends ViewController{
     }
     
     private void doCancelledAppointmentsViewAction(ActionEvent e){
-        ViewController.ScheduleViewControllerActionEvent actionCommand =
-               ViewController.ScheduleViewControllerActionEvent.valueOf(e.getActionCommand());        
+        Actions actionCommand = Actions.valueOf(e.getActionCommand());        
         switch (actionCommand){
             case SCHEDULE_LIST_VIEW_CONTROLLER_REQUEST:
                 try{
@@ -1748,7 +1720,7 @@ public class ScheduleViewController extends ViewController{
                         isEqual((LocalDate)getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.SCHEDULE_DAY))){
                     ActionEvent actionEvent = new ActionEvent(
                     this,ActionEvent.ACTION_PERFORMED,
-                        ViewController.ScheduleViewControllerActionEvent.SCHEDULE_LIST_VIEW_CONTROLLER_REQUEST.toString());
+                        Actions.SCHEDULE_LIST_VIEW_CONTROLLER_REQUEST.toString());
                     this.getMyController().actionPerformed(actionEvent);
                 }
                 break;
@@ -1779,8 +1751,7 @@ public class ScheduleViewController extends ViewController{
                             getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.EMPTY_SLOT_FROM_DAY, null);
                             getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.EMPTY_SLOT_MINIMUM_DURATION, null);
                             this.firePropertyChangeEvent(
-                                    ViewController.ScheduleViewControllerPropertyChangeEvent.
-                                            NO_APPOINTMENT_SLOTS_FROM_DAY_RECEIVED.toString(),
+                                    Properties.NO_APPOINTMENT_SLOTS_FROM_DAY_RECEIVED.toString(),
                                     getView(),
                                     this,
                                     null,
@@ -1788,8 +1759,7 @@ public class ScheduleViewController extends ViewController{
                             );
                         }
                         this.firePropertyChangeEvent(
-                                ViewController.ScheduleViewControllerPropertyChangeEvent.
-                                        APPOINTMENTS_CANCELLED_RECEIVED.toString(),
+                                Properties.APPOINTMENTS_CANCELLED_RECEIVED.toString(),
                                 (View)e.getSource(),
                                 this,
                                 null,
@@ -1816,7 +1786,7 @@ public class ScheduleViewController extends ViewController{
                         getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.APPOINTMENT, theUncancelledAppointment);
                         getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.DESCRIPTOR,getDescriptor());
                         firePropertyChangeEvent(
-                            ViewController.DesktopViewControllerPropertyChangeEvent.
+                            DesktopViewController.Properties.
                                     SCHEDULE_VIEW_CONTROLLER_CHANGE_NOTIFICATION.toString(),
                             (DesktopViewController)getMyController(),
                             this,
@@ -1871,7 +1841,7 @@ public class ScheduleViewController extends ViewController{
             getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.PATIENT,result.getPatient());
             getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.DESCRIPTOR,getDescriptor());
             firePropertyChangeEvent(
-                    ViewController.DesktopViewControllerPropertyChangeEvent.
+                    DesktopViewController.Properties.
                             SCHEDULE_VIEW_CONTROLLER_CHANGE_NOTIFICATION.toString(),
                     (DesktopViewController)getMyController(),
                     this,
@@ -1902,8 +1872,7 @@ public class ScheduleViewController extends ViewController{
         appointmentTreatment = 
                         new AppointmentTreatment(appointment, tws.getTreatment());
         appointmentTreatment.setScope(Scope.SINGLE);
-        ViewController.ScheduleViewControllerActionEvent actionCommand =
-               ViewController.ScheduleViewControllerActionEvent.valueOf(e.getActionCommand());
+        Actions actionCommand = Actions.valueOf(e.getActionCommand());
         switch (actionCommand){
             case TREATMENT_CREATE_REQUEST:
                 treatment = tws.getTreatment();
@@ -1988,8 +1957,7 @@ public class ScheduleViewController extends ViewController{
                 }
                 if (isError){
                     firePropertyChangeEvent(
-                        ViewController.ScheduleViewControllerPropertyChangeEvent.
-                                APPOINTMENT_SCHEDULE_ERROR_RECEIVED.toString(),
+                        Properties.APPOINTMENT_SCHEDULE_ERROR_RECEIVED.toString(),
                         (View)e.getSource(),
                         this,
                         null,
@@ -2065,8 +2033,7 @@ public class ScheduleViewController extends ViewController{
                         .setProperty(SystemDefinition.Properties.TREATMENT_WITH_STATE, treatmentWithState);
                 doAppointmentForDayRequest(appointment.getStart().toLocalDate());
                 firePropertyChangeEvent(
-                        ViewController.ScheduleViewControllerPropertyChangeEvent.
-                                APPOINTMENT_TREATMENT_WITH_STATE_RECEIVED.toString(),
+                        Properties.APPOINTMENT_TREATMENT_WITH_STATE_RECEIVED.toString(),
                         (View)e.getSource(),
                         this,
                         null,
@@ -2074,7 +2041,7 @@ public class ScheduleViewController extends ViewController{
                 );
                 getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.DESCRIPTOR,getDescriptor());
                 firePropertyChangeEvent(
-                        ViewController.DesktopViewControllerPropertyChangeEvent.
+                        DesktopViewController.Properties.
                                 SCHEDULE_VIEW_CONTROLLER_CHANGE_NOTIFICATION.toString(),
                         (DesktopViewController)getMyController(),
                         this,
@@ -2146,8 +2113,7 @@ public class ScheduleViewController extends ViewController{
     }
     
     private void doUnBookableSlotScannerViewAction(ActionEvent e){
-        ViewController.ScheduleViewControllerActionEvent actionCommand =
-               ViewController.ScheduleViewControllerActionEvent.valueOf(e.getActionCommand());        
+        Actions actionCommand = Actions.valueOf(e.getActionCommand());        
         switch (actionCommand){
             case EMPTY_SLOTS_FROM_DAY_REQUEST:
                 if (getDescriptor().getViewDescription().getProperty(SystemDefinition.Properties.SCHEDULE_DAY)!=null){
@@ -2161,21 +2127,20 @@ public class ScheduleViewController extends ViewController{
             case SCHEDULE_LIST_VIEW_CONTROLLER_REQUEST:
                 ActionEvent actionEvent = new ActionEvent(
                     this,ActionEvent.ACTION_PERFORMED,
-                        ViewController.ScheduleViewControllerActionEvent.SCHEDULE_LIST_VIEW_CONTROLLER_REQUEST.toString());
+                        Actions.SCHEDULE_LIST_VIEW_CONTROLLER_REQUEST.toString());
                     this.getMyController().actionPerformed(actionEvent);
                 break;
-            case SCHEDULE_DIARY_VIEW_CONTROLLER_REQUEST:
+            /*case SCHEDULE_DIARY_VIEW_CONTROLLER_REQUEST:
                 actionEvent = new ActionEvent(
                     this,ActionEvent.ACTION_PERFORMED,
                         ViewController.ScheduleViewControllerActionEvent.SCHEDULE_DIARY_VIEW_CONTROLLER_REQUEST.toString());
                     this.getMyController().actionPerformed(actionEvent);
-                break;
+                break;*/
         }
     }
     
     private void doBookableSlotScannerViewAction(ActionEvent e){
-        ViewController.ScheduleViewControllerActionEvent actionCommand =
-               ViewController.ScheduleViewControllerActionEvent.valueOf(e.getActionCommand());        
+        Actions actionCommand = Actions.valueOf(e.getActionCommand());        
         switch (actionCommand){
             case EMPTY_SLOTS_FROM_DAY_REQUEST:
                 if (getDescriptor().getViewDescription().getProperty(SystemDefinition.Properties.SCHEDULE_DAY)!=null){
@@ -2189,15 +2154,15 @@ public class ScheduleViewController extends ViewController{
             case SCHEDULE_LIST_VIEW_CONTROLLER_REQUEST:
                 ActionEvent actionEvent = new ActionEvent(
                     this,ActionEvent.ACTION_PERFORMED,
-                        ViewController.ScheduleViewControllerActionEvent.SCHEDULE_LIST_VIEW_CONTROLLER_REQUEST.toString());
+                        Actions.SCHEDULE_LIST_VIEW_CONTROLLER_REQUEST.toString());
                     this.getMyController().actionPerformed(actionEvent);
                 break;
-            case SCHEDULE_DIARY_VIEW_CONTROLLER_REQUEST:
+            /*case SCHEDULE_DIARY_VIEW_CONTROLLER_REQUEST:
                 actionEvent = new ActionEvent(
                     this,ActionEvent.ACTION_PERFORMED,
                         ViewController.ScheduleViewControllerActionEvent.SCHEDULE_DIARY_VIEW_CONTROLLER_REQUEST.toString());
                     this.getMyController().actionPerformed(actionEvent);
-                break;
+                break;*/
         }
     }
     
@@ -2206,8 +2171,7 @@ public class ScheduleViewController extends ViewController{
         ClinicalNote clinicalNote = null;
         String message = null;
         String error = null;
-        ViewController.ScheduleViewControllerActionEvent actionCommand =
-               ViewController.ScheduleViewControllerActionEvent.valueOf(e.getActionCommand());
+        Actions actionCommand = Actions.valueOf(e.getActionCommand());
         switch (actionCommand){
             case CLINICAL_NOTE_FOR_APPOINTMENT_REQUEST:
                 try{
@@ -2233,7 +2197,7 @@ public class ScheduleViewController extends ViewController{
                         error = "Attempt to create a new clinical note failed";
                         getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.ERROR, error);
                         firePropertyChangeEvent(
-                            ViewController.ClinicalNoteViewControllerPropertyChangeEvent
+                            ClinicalNoteViewController.Properties
                                     .CLINICAL_NOTE_ERROR_RECEIVED.toString(),
                             (View)e.getSource(),
                             this,
@@ -2300,8 +2264,7 @@ public class ScheduleViewController extends ViewController{
                 getProperty(SystemDefinition.Properties.TREATMENT_WITH_STATE);
         
         
-        ViewController.ScheduleViewControllerActionEvent actionCommand =
-               ViewController.ScheduleViewControllerActionEvent.valueOf(e.getActionCommand());        
+        Actions actionCommand = Actions.valueOf(e.getActionCommand());        
         switch (actionCommand){
             case APPOINTMENTS_FOR_DAY_REQUEST:
                 doAppointmentForDayRequest((LocalDate)getDescriptor()
@@ -2347,7 +2310,7 @@ public class ScheduleViewController extends ViewController{
                     getDescriptor().getControllerDescription().
                             setProperty(SystemDefinition.Properties.VIEW_MODE,ViewController.ViewMode.CREATE);
                     firePropertyChangeEvent(
-                            ViewController.DesktopViewControllerPropertyChangeEvent.
+                            DesktopViewController.Properties.
                                     SCHEDULE_VIEW_CONTROLLER_CHANGE_NOTIFICATION.toString(),
                             (DesktopViewController)getMyController(),
                             this,
@@ -2426,8 +2389,7 @@ public class ScheduleViewController extends ViewController{
                     getDescriptor().getControllerDescription().
                             setProperty(SystemDefinition.Properties.VIEW_MODE,ViewController.ViewMode.UPDATE);
                     firePropertyChangeEvent(
-                            ViewController.DesktopViewControllerPropertyChangeEvent.
-                                    SCHEDULE_VIEW_CONTROLLER_CHANGE_NOTIFICATION.toString(),
+                            DesktopViewController.Properties.SCHEDULE_VIEW_CONTROLLER_CHANGE_NOTIFICATION.toString(),
                             (DesktopViewController)getMyController(),
                             this,
                             null,
@@ -2472,7 +2434,7 @@ public class ScheduleViewController extends ViewController{
 
                         getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.DESCRIPTOR,getDescriptor());
                         firePropertyChangeEvent(
-                                ViewController.DesktopViewControllerPropertyChangeEvent.
+                                DesktopViewController.Properties.
                                         SCHEDULE_VIEW_CONTROLLER_CHANGE_NOTIFICATION.toString(),
                                 (DesktopViewController)getMyController(),
                                 this,
@@ -2486,7 +2448,7 @@ public class ScheduleViewController extends ViewController{
                             doAppointmentForDayRequest(day);
                             getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.DESCRIPTOR,getDescriptor());
                             firePropertyChangeEvent(
-                                ViewController.DesktopViewControllerPropertyChangeEvent.
+                                DesktopViewController.Properties.
                                         SCHEDULE_VIEW_CONTROLLER_CHANGE_NOTIFICATION.toString(),
                                 (DesktopViewController)getMyController(),
                                 this,
@@ -2559,8 +2521,7 @@ public class ScheduleViewController extends ViewController{
     
     private void doRequestCloseModalAppointmentEditorView(View view){
         firePropertyChangeEvent(
-            ViewController.PatientViewControllerPropertyChangeEvent.
-                CLOSE_VIEW_REQUEST_RECEIVED.toString(),
+            PatientViewController.Properties.CLOSE_VIEW_REQUEST_RECEIVED.toString(),
             view,
             this,
             null,
@@ -2987,7 +2948,7 @@ public class ScheduleViewController extends ViewController{
  
     private void resetEmptySlotScannerSettings(){
         firePropertyChangeEvent(
-                ViewController.ScheduleViewControllerPropertyChangeEvent.NO_APPOINTMENT_SLOTS_FROM_DAY_RECEIVED.toString(),
+                Properties.NO_APPOINTMENT_SLOTS_FROM_DAY_RECEIVED.toString(),
                 getSecondaryView(),
                 this,
                 null,

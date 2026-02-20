@@ -6,20 +6,16 @@ package colinhewlettsolutions.client.view.views.non_modal_views;
 
 import colinhewlettsolutions.client.controller.SystemDefinition.Properties;
 import colinhewlettsolutions.client.controller.ViewController;
+import colinhewlettsolutions.client.controller.LoginViewController;
 import colinhewlettsolutions.client.model.non_entity.Credential;
 import colinhewlettsolutions.client.view.View;
-import colinhewlettsolutions.client.view.views.non_modal_views.DesktopView;
-import colinhewlettsolutions.client.view.views.non_modal_views.UserLoginView;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyVetoException;
 import javax.swing.border.TitledBorder;
-import javax.swing.JInternalFrame;
 import javax.swing.JOptionPane;
-import javax.swing.event.InternalFrameAdapter;
-import javax.swing.event.InternalFrameEvent;
 
 
 /**
@@ -46,7 +42,7 @@ public class LoginOldPasswordCheckView extends View
     
     @Override
     public void actionPerformed(ActionEvent e){
-        ViewController.LoginViewControllerActionEvent actionRequestToController = null;
+        LoginViewController.Actions actionRequestToController = null;
         Action actionCommand = Action.valueOf(e.getActionCommand());
         switch (actionCommand){
             case REQUEST_CANCEL ->{
@@ -57,7 +53,7 @@ public class LoginOldPasswordCheckView extends View
                 }
                 ActionEvent actionEvent = new ActionEvent(
                         this,ActionEvent.ACTION_PERFORMED,
-                        ViewController.LoginViewControllerActionEvent.VIEW_CLOSED_NOTIFICATION.toString());
+                        LoginViewController.Actions.VIEW_CLOSED_NOTIFICATION.toString());
                 getMyController().actionPerformed(actionEvent);
                 break;
             }
@@ -66,7 +62,7 @@ public class LoginOldPasswordCheckView extends View
                 credential.setPassword(this.txtPassword.getPassword());
                 getMyController().getDescriptor().getViewDescription().
                         setProperty(Properties.LOGIN_CREDENTIAL, credential);
-                actionRequestToController = ViewController.LoginViewControllerActionEvent.OLD_PASSWORD_CHECK_REQUEST;
+                actionRequestToController = LoginViewController.Actions.OLD_PASSWORD_CHECK_REQUEST;
                 doSendActionEvent(actionRequestToController);
                 break;
             }
@@ -76,8 +72,8 @@ public class LoginOldPasswordCheckView extends View
     @Override 
     public void propertyChange(PropertyChangeEvent e) {
         String message = null;
-        ViewController.LoginViewControllerPropertyChangeEvent property = 
-                ViewController.LoginViewControllerPropertyChangeEvent.valueOf(e.getPropertyName());
+        LoginViewController.Properties property = 
+                LoginViewController.Properties.valueOf(e.getPropertyName());
         switch(property){
             case CORRECT_LOGIN_CREDENTIAL_RECEIVED ->{
                 try{//nb -- controller would have change the LoginViewMode when handling VIEW_CLOSED_NOTIFICATION
@@ -112,7 +108,7 @@ public class LoginOldPasswordCheckView extends View
     }
     
     private void doSendActionEvent(
-        ViewController.LoginViewControllerActionEvent actionCommand){
+        LoginViewController.Actions actionCommand){
         ActionEvent actionEvent = new ActionEvent(
             this,ActionEvent.ACTION_PERFORMED,
             actionCommand.toString());

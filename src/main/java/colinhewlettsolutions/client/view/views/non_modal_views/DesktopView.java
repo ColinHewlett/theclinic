@@ -325,7 +325,7 @@ public class DesktopView extends javax.swing.JFrame
         this.mnuUserInfo.setEnabled(false);
         ActionEvent actionEvent = new ActionEvent(
                 this,ActionEvent.ACTION_PERFORMED,
-                DesktopViewController.DesktopViewControllerActionEvent.LOGIN_VIEW_CONTROLLER_REQUEST.toString());
+                DesktopViewController. Actions.LOGIN_VIEW_CONTROLLER_REQUEST.toString());
         getMyController().actionPerformed(actionEvent);
     }
     
@@ -771,7 +771,7 @@ public class DesktopView extends javax.swing.JFrame
     public void doSendViewChangedEvent(){
         ActionEvent actionEvent = new ActionEvent(
                 this,ActionEvent.ACTION_PERFORMED,
-                ViewController.DesktopViewControllerActionEvent.
+                DesktopViewController.Actions.
                         VIEW_CHANGED_NOTIFICATION.toString());
         this.getMyController().actionPerformed(actionEvent);
     }
@@ -801,7 +801,7 @@ public class DesktopView extends javax.swing.JFrame
                      */                   
                     ActionEvent actionEvent = new ActionEvent(DesktopView.this, 
                             ActionEvent.ACTION_PERFORMED,
-                            DesktopViewController.DesktopViewControllerActionEvent.VIEW_CLOSE_REQUEST.toString());
+                            DesktopViewController.Actions.VIEW_CLOSE_REQUEST.toString());
                     DesktopView.this.getMyController().actionPerformed(actionEvent);
                 }
             }

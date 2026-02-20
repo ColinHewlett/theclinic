@@ -4,11 +4,10 @@
  */
 package colinhewlettsolutions.client.view.views.modal_views;
 
-import colinhewlettsolutions.client.controller.SystemDefinition;
+import colinhewlettsolutions.client.controller.PatientViewController;
 import com.github.lgooddatepicker.components.DatePickerSettings;
 import com.github.lgooddatepicker.optionalusertools.DateChangeListener;
 import com.github.lgooddatepicker.zinternaltools.DateChangeEvent;
-import colinhewlettsolutions.client.controller.Descriptor;
 import colinhewlettsolutions.client.controller.ViewController;
 import java.awt.event.ActionEvent;
 import java.beans.PropertyVetoException;
@@ -123,9 +122,7 @@ public class ModalPatientGBTRecallEditorView extends ModalView{
         if (getHasRecallDateChanged() || getHasRecallFrequencyChanged()){
             ActionEvent actionEvent = new ActionEvent(
                 ModalPatientGBTRecallEditorView.this,ActionEvent.ACTION_PERFORMED, 
-                ViewController
-                        .PatientViewControllerActionEvent
-                        .PATIENT_EDITOR_VIEW_CHANGE
+                PatientViewController.Actions.PATIENT_EDITOR_VIEW_CHANGE
                         .toString());
             getMyController().actionPerformed(actionEvent);
         }

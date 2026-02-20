@@ -28,6 +28,22 @@ import colinhewlettsolutions.client.view.View;
  */
 public class PatientMedicalHistoryViewController extends ViewController{
     
+    public enum Actions{
+        PATIENT_CONDITION_READ_REQUEST,
+        PATIENT_CONDITION_CREATE_REQUEST,
+        PATIENT_CONDITION_DELETE_REQUEST,
+        PATIENT_CONDITION_COMMENT_UPDATE_REQUEST,
+        PATIENT_CONDITION_COMMENT_DELETE_REQUEST,
+        PRINT_PATIENT_MEDICAL_HISTORY_REQUEST,
+        VIEW_CLOSE_NOTIFICATION
+    }
+    
+    public enum Properties{
+        CONDITION_WITH_STATE_RECEIVED,
+        PATIENT_MEDICAL_HISTORY_VIEW_CONTROLLER_ERROR_RECEIVED,
+        PATIENT_MEDICAL_HISTORY_VIEW_CONTROLLER_CHANGE_NOTIFICATION
+    }
+    
     public PatientMedicalHistoryViewController(DesktopViewController controller,
                                DesktopView desktopView){
         setMyController(controller);
@@ -57,9 +73,8 @@ public class PatientMedicalHistoryViewController extends ViewController{
                 .getViewDescription().getProperty(SystemDefinition.Properties.CONDITION_WITH_STATE);       
 
         //appointmentTreatment.setScope(Entity.Scope.SINGLE);
-        ViewController.PatientMedicalHistoryViewControllerActionEvent actionCommand =
-            ViewController.PatientMedicalHistoryViewControllerActionEvent
-                    .valueOf(e.getActionCommand());
+        Actions actionCommand =
+            Actions.valueOf(e.getActionCommand());
         try{
             switch (actionCommand){
                 case PRINT_PATIENT_MEDICAL_HISTORY_REQUEST:
@@ -74,7 +89,7 @@ public class PatientMedicalHistoryViewController extends ViewController{
                      */
                     actionEvent = new ActionEvent(
                         this,ActionEvent.ACTION_PERFORMED,
-                        ViewController.DesktopViewControllerActionEvent.
+                        DesktopViewController.Actions.
                                 VIEW_CONTROLLER_CLOSE_NOTIFICATION.toString());
                     getMyController().actionPerformed(actionEvent);
                     isViewClosed = true;
@@ -82,7 +97,7 @@ public class PatientMedicalHistoryViewController extends ViewController{
                 case VIEW_CLOSE_NOTIFICATION:
                     actionEvent = new ActionEvent(
                         this,ActionEvent.ACTION_PERFORMED,
-                        ViewController.DesktopViewControllerActionEvent.
+                        DesktopViewController.Actions.
                                 VIEW_CONTROLLER_CLOSE_NOTIFICATION.toString());
                     getMyController().actionPerformed(actionEvent);
                     isViewClosed = true;
@@ -191,24 +206,22 @@ public class PatientMedicalHistoryViewController extends ViewController{
                     JOptionPane.WARNING_MESSAGE);
             isError = true;
         }
-        if((!actionCommand.equals(
-                PatientMedicalHistoryViewControllerActionEvent.VIEW_CLOSE_NOTIFICATION))&&
+        if((!actionCommand.equals(Actions.VIEW_CLOSE_NOTIFICATION))&&
                 (!actionCommand.equals(
-                PatientMedicalHistoryViewControllerActionEvent.PRINT_PATIENT_MEDICAL_HISTORY_REQUEST))){//handles case idf VC is about to close 
+                Actions.PRINT_PATIENT_MEDICAL_HISTORY_REQUEST))){//handles case idf VC is about to close 
             if (!isError){
                 if (error == null){ // ensures upstream StoreException error is not handled again
                     getDescriptor().getControllerDescription()
                             .setProperty(SystemDefinition.Properties.CONDITION_WITH_STATE, conditionWithState);
                     firePropertyChangeEvent(
-                            ViewController.PatientMedicalHistoryViewControllerPropertyChangeEvent.
-                                    CONDITION_WITH_STATE_RECEIVED.toString(),
+                            Properties.CONDITION_WITH_STATE_RECEIVED.toString(),
                             (View)e.getSource(),
                             this,
                             null,
                             null
                     );
                     firePropertyChangeEvent(
-                            ViewController.DesktopViewControllerPropertyChangeEvent.
+                            DesktopViewController.Properties.
                                     PATIENT_MEDICAL_HISTORY_VIEW_CONTROLLER_CHANGE_NOTIFICATION.toString(),
                             (DesktopViewController)getMyController(),
                             this,

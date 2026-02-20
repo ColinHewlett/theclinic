@@ -6,7 +6,6 @@ package colinhewlettsolutions.client.view.views.dialog_views;
 
 import colinhewlettsolutions.client.view.View;
 import colinhewlettsolutions.client.view.support_classes.renderers.ComboboxLocalDateTimeRenderer;
-import colinhewlettsolutions.client.view.support_classes.renderers.ComboboxScheduleDiaryActionRenderer;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.util.List;
@@ -83,7 +82,7 @@ public class DialogUsingGenericSelector<T> extends DialogView implements ActionL
                 cmbSelector.setRenderer(new ComboboxLocalDateTimeRenderer());
                 break;
             case EXTEND_SHIFT_BOOKING_DIALOG:
-                cmbSelector.setRenderer(new ComboboxScheduleDiaryActionRenderer());
+                //cmbSelector.setRenderer(new ComboboxScheduleDiaryActionRenderer());
                 break;
             default:  
                 //cmbSelector.setRenderer(new ComboboxPatientRenderer());

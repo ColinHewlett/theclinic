@@ -4,8 +4,9 @@
  */
 package colinhewlettsolutions.client.view.views.modal_views;
 
+import colinhewlettsolutions.client.controller.PatientViewController;
+import colinhewlettsolutions.client.controller.ScheduleViewController;
 import colinhewlettsolutions.client.controller.SystemDefinition;
-import colinhewlettsolutions.client.controller.Descriptor;
 import colinhewlettsolutions.client.controller.ViewController;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
@@ -93,7 +94,7 @@ public class ModalUnbookableSlotScannerView extends ModalView implements ListSel
                 ModalUnbookableSlotScannerView.this.removeInternalFrameListener(internalFrameAdapter);
                 ActionEvent actionEvent = new ActionEvent(
                         ModalUnbookableSlotScannerView.this,ActionEvent.ACTION_PERFORMED,
-                        ViewController.ScheduleViewControllerActionEvent.
+                        ScheduleViewController.Actions.
                                 VIEW_CLOSE_NOTIFICATION.toString());
                 ModalUnbookableSlotScannerView.this.getMyController().actionPerformed(actionEvent);
                 
@@ -103,7 +104,7 @@ public class ModalUnbookableSlotScannerView extends ModalView implements ListSel
             public void internalFrameActivated(InternalFrameEvent e){
                 ActionEvent actionEvent = new ActionEvent(
                         ModalUnbookableSlotScannerView.this,ActionEvent.ACTION_PERFORMED,
-                        ViewController.ScheduleViewControllerActionEvent.
+                        ScheduleViewController.Actions.
                                 VIEW_ACTIVATED_NOTIFICATION.toString());
                 ModalUnbookableSlotScannerView.this.getMyController().actionPerformed(actionEvent);
             }
@@ -119,7 +120,7 @@ public class ModalUnbookableSlotScannerView extends ModalView implements ListSel
         getMyController().getDescriptor().getViewDescription().setProperty(SystemDefinition.Properties.SCHEDULE_DAY, start);
         ActionEvent actionEvent = new ActionEvent(
                 this,ActionEvent.ACTION_PERFORMED,
-                ViewController.PatientViewControllerActionEvent.SCHEDULE_LIST_VIEW_CONTROLLER_REQUEST.toString());
+                PatientViewController.Actions.SCHEDULE_LIST_VIEW_CONTROLLER_REQUEST.toString());
         this.getMyController().actionPerformed(actionEvent);
         this.doCloseViewRequest();
     }
