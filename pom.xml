@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>colinhewlettsolutions</groupId>
     <artifactId>PMS</artifactId>
-    <version>1.90</version>
+    <version>1.91</version>
     <packaging>jar</packaging>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -27,11 +27,6 @@
                             <!--<addClasspath>true</addClasspath>-->
                             <mainClass>colinhewlettsolutions.client.controller.DesktopViewController</mainClass>
                         </manifest>
-                        <!--
-                        <manifestEntries>
-                            <Class-Path>c:/pms/</Class-Path>
-                        </manifestEntries>
-                        -->
                     </archive>
                 </configuration>
                 <executions>
@@ -184,13 +179,7 @@
             <version>1.6.2</version>
         </dependency>-->    
     </dependencies>
-    
-   
-        <!--<resources>
-            <resource>
-                <directory>src/my_resources</directory>
-            </resource>
-        </resources>-->
-    <name>PMS-1.90</name>
+
+    <name>PMS-1.91</name>
 
 </project>

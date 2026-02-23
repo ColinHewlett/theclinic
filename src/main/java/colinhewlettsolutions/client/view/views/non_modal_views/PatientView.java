@@ -128,7 +128,7 @@ public class PatientView extends View
         REQUEST_ADDITIONAL_NOTES,
         REQUEST_CLOSE_VIEW,
         REQUEST_CLINICAL_NOTES,
-        REQUEST_CREATE_RECOVER_PATIENT,
+        REQUEST_CREATE_PATIENT,
         REQUEST_DOCTOR,
         REQUEST_DOCUMENT_STORE_POPUP,
         REQUEST_GBT_RECALL_EDITOR_VIEW,
@@ -154,7 +154,7 @@ public class PatientView extends View
         REQUEST_UPLOAD_FILE_TO_PATIENT_DOCUMENT_STORE,
         REQUEST_UPLOAD_SCAN_TO_PATIENT_DOCUMENT_STORE,
         REQUEST_UNTITLED_NAME,
-        REQUEST_UPDATE_RECOVER_PATIENT
+        REQUEST_UPDATE_PATIENT
     }
 
     enum FileType {DOCUMENT, SCAN}
@@ -267,11 +267,11 @@ public class PatientView extends View
             case PATIENT_RECOVERY:
                 titledBorder.setTitle(panelPatientRecoveryTitle);
                 titledBorder.setTitleColor(Color.RED);
-                btnCreateRecoverPatient.setText(Captions.PatientView.CREATE_RECOVER_PATIENT._2());
-                btnCreateRecoverPatient.setForeground(Color.RED);
-                btnUpdateRecoverPatient.setEnabled(true);
-                btnUpdateRecoverPatient.setText(Captions.PatientView.UPDATE_RECOVER_PATIENT._2());
-                btnUpdateRecoverPatient.setForeground(Color.RED);
+                btnCreatePatient.setText(Captions.PatientView.CREATE_RECOVER_PATIENT._2());
+                btnCreatePatient.setForeground(Color.RED);
+                btnUpdatePatient.setEnabled(true);
+                btnUpdatePatient.setText(Captions.PatientView.UPDATE_RECOVER_PATIENT._2());
+                btnUpdatePatient.setForeground(Color.RED);
                 
                 break;
             case PATIENT_SELECTION:                
@@ -280,10 +280,10 @@ public class PatientView extends View
                         getProperty(SystemDefinition.Properties.TITLED_BORDER_FONT));
                 titledBorder.setTitleColor((java.awt.Color)getMyController().getDescriptor().getControllerDescription().
                         getProperty(SystemDefinition.Properties.TITLED_BORDER_COLOR));
-                btnCreateRecoverPatient.setText(Captions.PatientView.CREATE_RECOVER_PATIENT._1());
-                btnCreateRecoverPatient.setForeground(Color.BLACK);
-                btnUpdateRecoverPatient.setText(Captions.PatientView.UPDATE_RECOVER_PATIENT._1());
-                btnUpdateRecoverPatient.setForeground(Color.BLACK);
+                btnCreatePatient.setText(Captions.PatientView.CREATE_RECOVER_PATIENT._1());
+                btnCreatePatient.setForeground(Color.BLACK);
+                btnUpdatePatient.setText(Captions.PatientView.UPDATE_RECOVER_PATIENT._1());
+                btnUpdatePatient.setForeground(Color.BLACK);
                 break;
         }
         /**
@@ -377,22 +377,22 @@ public class PatientView extends View
         this.btnClearSelection.setText(Captions.PatientView.CLEAR_SELECTION._1());
         btnClearSelection.setActionCommand(Action.REQUEST_NULL_PATIENT.toString());
         btnCloseView.setActionCommand(Action.REQUEST_CLOSE_VIEW.toString());
-        btnCreateRecoverPatient.setActionCommand(Action.REQUEST_CREATE_RECOVER_PATIENT.toString());
+        btnCreatePatient.setActionCommand(Action.REQUEST_CREATE_PATIENT.toString());
         btnFetchClinicalNotes.setText(Captions.PatientView.PATIENT_CLINICAL_NOTES._1());
         btnFetchClinicalNotes.setActionCommand(Action.REQUEST_CLINICAL_NOTES.toString());
         btnFetchScheduleForSelectedAppointment.setActionCommand(Action.REQUEST_SCHEDULE_VIEW_CONTROLLER.toString());
-        btnUpdateRecoverPatient.setActionCommand(Action.REQUEST_UPDATE_RECOVER_PATIENT.toString());
+        btnUpdatePatient.setActionCommand(Action.REQUEST_UPDATE_PATIENT.toString());
         btnClearSelection.addActionListener(this);
         btnCloseView.addActionListener(this);
-        btnCreateRecoverPatient.addActionListener(this);
+        btnCreatePatient.addActionListener(this);
         btnFetchClinicalNotes.addActionListener(this);
         btnFetchScheduleForSelectedAppointment.addActionListener(this);
-        btnUpdateRecoverPatient.addActionListener(this);
+        btnUpdatePatient.addActionListener(this);
         
         this.mniCloseView.setActionCommand(Action.REQUEST_CLOSE_VIEW.toString());
-        this.mniCreateNewPatient.setActionCommand(Action.REQUEST_CREATE_RECOVER_PATIENT.toString());
+        this.mniCreateNewPatient.setActionCommand(Action.REQUEST_CREATE_PATIENT.toString());
         this.mniArchiveSelectedPatient.setActionCommand(Action.REQUEST_PATIENT_ARCHIVE.toString());
-        this.mniUpdateSelectedPatient.setActionCommand(Action.REQUEST_UPDATE_RECOVER_PATIENT.toString());
+        this.mniUpdateSelectedPatient.setActionCommand(Action.REQUEST_UPDATE_PATIENT.toString());
         this.mniPatientRecallsRequest.setActionCommand(Action.REQUEST_PATIENT_RECALLS.toString());
         this.mniRestoreArchivedPatient.setActionCommand(Action.REQUEST_PATIENT_RESTORE_VIEW.toString());
         this.mniCloseView.addActionListener(this);
@@ -518,7 +518,7 @@ public class PatientView extends View
         Patient patient = (Patient)getMyController().getDescriptor().getControllerDescription()
                 .getProperty(SystemDefinition.Properties.PATIENT);
         
-        initialiseFromControllerViewMode();
+        initialiseViewModeFromControllerDescriptor();
         
         if (e.getSource() instanceof DesktopViewController){
             DesktopViewController.Properties propertyName = 
@@ -652,8 +652,9 @@ public class PatientView extends View
             
                 }
                 break;
-            case REQUEST_CREATE_RECOVER_PATIENT:
-                doCreateRecoverPatientRequest();
+            case REQUEST_CREATE_PATIENT:
+                doCreatePatientRequest();
+                this.initialiseViewModeFromControllerDescriptor();
                 break;
             case REQUEST_CLINICAL_NOTES:
                 doClinicalNotesRequest();
@@ -758,8 +759,8 @@ public class PatientView extends View
             case REQUEST_UNTITLED_NAME:
                 doUntitledNameRequest();
                 break;
-            case REQUEST_UPDATE_RECOVER_PATIENT:
-                doUpdateRecoverPatientRequest();
+            case REQUEST_UPDATE_PATIENT:
+                doUpdatePatientRequest();
                 break;     
         }
     }
@@ -865,7 +866,7 @@ public class PatientView extends View
             }
         }
     }
-    private void doCreateRecoverPatientRequest(){
+    private void doCreatePatientRequest(){
         switch (getPatientSelectionMode()){
             case PATIENT_RECOVERY:
                 switch(cmbPatientSelector.getSelectedIndex()){
@@ -1152,7 +1153,7 @@ public class PatientView extends View
         this.getMyController().actionPerformed(actionEvent);
         mniRestoreArchivedPatient.setEnabled(false);
         mniCreateNewPatient.setEnabled(false);
-        this.btnUpdateRecoverPatient.setEnabled(true);
+        this.btnUpdatePatient.setEnabled(true);
     }
     private void doPatientRequest(){
         PatientViewController.Actions event = null; 
@@ -1236,7 +1237,7 @@ public class PatientView extends View
             }
         }
     }
-    private void doUpdateRecoverPatientRequest(){
+    private void doUpdatePatientRequest(){
         switch (getPatientSelectionMode()){
             case PATIENT_SELECTION:
                 updateSelectedPatientActionPerformed();
@@ -1409,21 +1410,22 @@ public class PatientView extends View
         
     }
     
-    private void initialiseFromControllerViewMode(){
-        /*switch(getMyController().getDescriptor()
-                .getControllerDescription().getViewMode()){*/
+    private void initialiseViewModeFromControllerDescriptor(){
         switch(getMyController().getDescriptor()
                 .getControllerDescription().getProperty(Properties.VIEW_MODE)){
-            case ViewController.ViewMode.CREATE:
-                this.btnCreateRecoverPatient.setEnabled(true);
-                this.btnUpdateRecoverPatient.setEnabled(false);
+            case ViewController.ViewMode.CREATE ->{
+                this.btnCreatePatient.setEnabled(true);
+                this.btnUpdatePatient.setEnabled(false);
                 break;
-            case ViewController.ViewMode.UPDATE:
-                this.btnCreateRecoverPatient.setEnabled(false);
-                this.btnUpdateRecoverPatient.setEnabled(true);
+            }
+            case ViewController.ViewMode.UPDATE ->{
+                this.btnCreatePatient.setEnabled(false);
+                this.btnUpdatePatient.setEnabled(true);
                 break;
-            default:
+            }
+            default ->{
                 break;
+            }
         }
     }
     
@@ -1728,9 +1730,9 @@ public class PatientView extends View
         ;
         lblNameAge = new javax.swing.JLabel();
         pnlOperations = new javax.swing.JPanel();
-        btnUpdateRecoverPatient = new javax.swing.JButton();
+        btnUpdatePatient = new javax.swing.JButton();
         btnCloseView = new javax.swing.JButton();
-        btnCreateRecoverPatient = new javax.swing.JButton();
+        btnCreatePatient = new javax.swing.JButton();
         btnFetchScheduleForSelectedAppointment = new javax.swing.JButton();
         btnFetchClinicalNotes = new javax.swing.JButton();
         pnlAddress = new javax.swing.JPanel();
@@ -1894,23 +1896,23 @@ public class PatientView extends View
         pnlOperations.setBorder(javax.swing.BorderFactory.createTitledBorder("Operations"));
         pnlOperations.setPreferredSize(new java.awt.Dimension(142, 500));
 
-        btnUpdateRecoverPatient.setText("<html><center>Update</center><center>selected</center><center>patient</center></html>");
-        btnUpdateRecoverPatient.setMaximumSize(new java.awt.Dimension(2147483647, 82));
-        btnUpdateRecoverPatient.setMinimumSize(new java.awt.Dimension(99, 82));
-        btnUpdateRecoverPatient.setPreferredSize(new java.awt.Dimension(99, 82));
+        btnUpdatePatient.setText("<html><center>Update</center><center>selected</center><center>patient</center></html>");
+        btnUpdatePatient.setMaximumSize(new java.awt.Dimension(2147483647, 82));
+        btnUpdatePatient.setMinimumSize(new java.awt.Dimension(99, 82));
+        btnUpdatePatient.setPreferredSize(new java.awt.Dimension(99, 82));
 
         btnCloseView.setText("<html><center>Close</center><center>view</center></html>");
         btnCloseView.setMaximumSize(new java.awt.Dimension(2147483647, 82));
         btnCloseView.setMinimumSize(new java.awt.Dimension(99, 82));
         btnCloseView.setPreferredSize(new java.awt.Dimension(99, 82));
 
-        btnCreateRecoverPatient.setText("<html><center>Create</center><center>new</center><center>patient</center></html>");
-        btnCreateRecoverPatient.setMaximumSize(new java.awt.Dimension(2147483647, 82));
-        btnCreateRecoverPatient.setMinimumSize(new java.awt.Dimension(99, 82));
-        btnCreateRecoverPatient.setPreferredSize(new java.awt.Dimension(99, 82));
-        btnCreateRecoverPatient.addActionListener(new java.awt.event.ActionListener() {
+        btnCreatePatient.setText("<html><center>Create</center><center>new</center><center>patient</center></html>");
+        btnCreatePatient.setMaximumSize(new java.awt.Dimension(2147483647, 82));
+        btnCreatePatient.setMinimumSize(new java.awt.Dimension(99, 82));
+        btnCreatePatient.setPreferredSize(new java.awt.Dimension(99, 82));
+        btnCreatePatient.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnCreateRecoverPatientActionPerformed(evt);
+                btnCreatePatientActionPerformed(evt);
             }
         });
 
@@ -1944,18 +1946,18 @@ public class PatientView extends View
                     .addComponent(btnCloseView, javax.swing.GroupLayout.PREFERRED_SIZE, 106, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(pnlOperationsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                         .addComponent(btnFetchScheduleForSelectedAppointment, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(btnUpdateRecoverPatient, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(btnUpdatePatient, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(btnFetchClinicalNotes, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(btnCreateRecoverPatient, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 106, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(btnCreatePatient, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 106, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addGap(10, 10, 10))
         );
         pnlOperationsLayout.setVerticalGroup(
             pnlOperationsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlOperationsLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(btnCreateRecoverPatient, javax.swing.GroupLayout.PREFERRED_SIZE, 82, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(btnCreatePatient, javax.swing.GroupLayout.PREFERRED_SIZE, 82, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(17, 17, 17)
-                .addComponent(btnUpdateRecoverPatient, javax.swing.GroupLayout.PREFERRED_SIZE, 82, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(btnUpdatePatient, javax.swing.GroupLayout.PREFERRED_SIZE, 82, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(17, 17, 17)
                 .addComponent(btnFetchClinicalNotes, javax.swing.GroupLayout.PREFERRED_SIZE, 82, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(17, 17, 17)
@@ -2211,9 +2213,9 @@ public class PatientView extends View
         // TODO add your handling code here:
     }//GEN-LAST:event_txtAddressTownActionPerformed
 
-    private void btnCreateRecoverPatientActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCreateRecoverPatientActionPerformed
+    private void btnCreatePatientActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCreatePatientActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_btnCreateRecoverPatientActionPerformed
+    }//GEN-LAST:event_btnCreatePatientActionPerformed
 
     private void btnFetchClinicalNotesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnFetchClinicalNotesActionPerformed
         // TODO add your handling code here:
@@ -2223,10 +2225,10 @@ public class PatientView extends View
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnClearSelection;
     private javax.swing.JButton btnCloseView;
-    private javax.swing.JButton btnCreateRecoverPatient;
+    private javax.swing.JButton btnCreatePatient;
     private javax.swing.JButton btnFetchClinicalNotes;
     private javax.swing.JButton btnFetchScheduleForSelectedAppointment;
-    private javax.swing.JButton btnUpdateRecoverPatient;
+    private javax.swing.JButton btnUpdatePatient;
     private javax.swing.ButtonGroup buttonGroup1;
     private javax.swing.JComboBox<PatientView.GenderItem> cmbNameGender;
     private javax.swing.JComboBox<PatientView.TitleItem> cmbNameTitle;

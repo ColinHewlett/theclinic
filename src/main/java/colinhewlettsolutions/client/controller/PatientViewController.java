@@ -177,6 +177,8 @@ public class PatientViewController extends ViewController {
                 break; 
             case PATIENT_CREATE_REQUEST:
                 doPatientCreateRequest();
+                getDescriptor().getControllerDescription().
+                        setProperty(SystemDefinition.Properties.VIEW_MODE, ViewController.ViewMode.UPDATE);
                 break;
             case PATIENT_ARCHIVE_REQUEST:
                 doPatientDeleteRequest();

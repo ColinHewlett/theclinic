@@ -376,9 +376,9 @@
                       <Component id="btnCloseView" alignment="1" min="-2" pref="106" max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="1" max="-2" attributes="0">
                           <Component id="btnFetchScheduleForSelectedAppointment" alignment="0" max="32767" attributes="0"/>
-                          <Component id="btnUpdateRecoverPatient" alignment="0" max="32767" attributes="0"/>
+                          <Component id="btnUpdatePatient" alignment="0" max="32767" attributes="0"/>
                           <Component id="btnFetchClinicalNotes" alignment="0" max="32767" attributes="0"/>
-                          <Component id="btnCreateRecoverPatient" alignment="0" min="-2" pref="106" max="-2" attributes="0"/>
+                          <Component id="btnCreatePatient" alignment="0" min="-2" pref="106" max="-2" attributes="0"/>
                       </Group>
                   </Group>
                   <EmptySpace min="-2" pref="10" max="-2" attributes="0"/>
@@ -389,9 +389,9 @@
           <Group type="103" groupAlignment="0" attributes="0">
               <Group type="102" alignment="0" attributes="0">
                   <EmptySpace max="-2" attributes="0"/>
-                  <Component id="btnCreateRecoverPatient" min="-2" pref="82" max="-2" attributes="0"/>
+                  <Component id="btnCreatePatient" min="-2" pref="82" max="-2" attributes="0"/>
                   <EmptySpace min="-2" pref="17" max="-2" attributes="0"/>
-                  <Component id="btnUpdateRecoverPatient" min="-2" pref="82" max="-2" attributes="0"/>
+                  <Component id="btnUpdatePatient" min="-2" pref="82" max="-2" attributes="0"/>
                   <EmptySpace min="-2" pref="17" max="-2" attributes="0"/>
                   <Component id="btnFetchClinicalNotes" min="-2" pref="82" max="-2" attributes="0"/>
                   <EmptySpace min="-2" pref="17" max="-2" attributes="0"/>
@@ -404,7 +404,7 @@
         </DimensionLayout>
       </Layout>
       <SubComponents>
-        <Component class="javax.swing.JButton" name="btnUpdateRecoverPatient">
+        <Component class="javax.swing.JButton" name="btnUpdatePatient">
           <Properties>
             <Property name="text" type="java.lang.String" value="&lt;html&gt;&lt;center&gt;Update&lt;/center&gt;&lt;center&gt;selected&lt;/center&gt;&lt;center&gt;patient&lt;/center&gt;&lt;/html&gt;"/>
             <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
@@ -432,7 +432,7 @@
             </Property>
           </Properties>
         </Component>
-        <Component class="javax.swing.JButton" name="btnCreateRecoverPatient">
+        <Component class="javax.swing.JButton" name="btnCreatePatient">
           <Properties>
             <Property name="text" type="java.lang.String" value="&lt;html&gt;&lt;center&gt;Create&lt;/center&gt;&lt;center&gt;new&lt;/center&gt;&lt;center&gt;patient&lt;/center&gt;&lt;/html&gt;"/>
             <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
@@ -446,7 +446,7 @@
             </Property>
           </Properties>
           <Events>
-            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnCreateRecoverPatientActionPerformed"/>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnCreatePatientActionPerformed"/>
           </Events>
         </Component>
         <Component class="javax.swing.JButton" name="btnFetchScheduleForSelectedAppointment">
