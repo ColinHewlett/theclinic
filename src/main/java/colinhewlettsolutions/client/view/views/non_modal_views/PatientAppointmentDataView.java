@@ -499,7 +499,7 @@ public class PatientAppointmentDataView extends View
                 break;
             }
             default ->{
-                setTableTitle("active patients (red signifies last appointment was cancelled ");
+                setTableTitle("active patients (red signifies patient's last booking was cancelled)");
                 break;
             }
 
