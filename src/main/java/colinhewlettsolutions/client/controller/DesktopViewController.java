@@ -263,6 +263,7 @@ public class DesktopViewController extends ViewController{
              * -- derive system folder location from the jar file
              * -- else derive system folder location from the command line argument
              */
+            String test = JarFileFinder.getName();
             if(!JarFileFinder.getName().equals("")){
                 if (args.length==0){
                     xmlFilename = JarFileFinder.getPath().substring(0,JarFileFinder.getPath().lastIndexOf('/') + 1) + "/SystemDefinition.xml";
@@ -286,7 +287,7 @@ public class DesktopViewController extends ViewController{
                         xsdFilename = projectId + "/SystemDefinition.xsd";
                         break;
                     }
-                    case "_PMS" ->{
+                    case "PMS" ->{
                         xmlFilename = projectId + "/SystemDefinition.xml";
                         xsdFilename = projectId + "/SystemDefinition.xsd";
                         break;
@@ -334,7 +335,7 @@ public class DesktopViewController extends ViewController{
                 getDescriptor().getControllerDescription().setProperty(SystemDefinition.Properties.SMTP_USER, "colin.hewlett.solutions@gmail.com");
             }
             
-            doTemporaryFix();
+            //doTemporaryFix();
             System.out.println("Database url = " + (String)getDescriptor().getControllerDescription().getProperty(SystemDefinition.Properties.DATABASE_URL));
             setUserFactorySettings();
             Repository repository = 
