@@ -37,7 +37,7 @@ public class Descriptor {
             }
         }
 
-        protected void setProperty(SystemDefinition.Properties key, Object value){
+        public void setProperty(SystemDefinition.Properties key, Object value){
            properties.put(key, value);
         }
         public Object getProperty(SystemDefinition.Properties key){

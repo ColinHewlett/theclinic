@@ -11,6 +11,7 @@ import java.awt.Font;
 import java.awt.Point;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import javax.swing.JOptionPane;
@@ -263,48 +264,17 @@ public class TemplateReader {
         NodeList nodes;
         Element blueElement, greenElement, heightElement, 
                 redElement, sizeElement, styleElement, titleElement, widthElement, 
-                xElement, yElement, valueElement, valueElementChild;
+                xElement, yElement, valueElement, valueElementChild, stringValueElement;
         Object result = null;
         
         valueElement = getFirstElementChildFor(keyElement);
         valueElementChild = getFirstElementChildFor(valueElement);
         switch (valueElementChild.getNodeName()) {
-            case "color" -> {
-                nodes = valueElementChild.getElementsByTagName("red");
-                redElement = (Element) nodes.item(0);
-                nodes = valueElementChild.getElementsByTagName("green");
-                greenElement = (Element) nodes.item(0);
-                nodes = valueElementChild.getElementsByTagName("blue");
-                blueElement = (Element) nodes.item(0);
-                result = new Color(
-                        Integer.parseInt(redElement.getTextContent().trim()),
-                        Integer.parseInt(greenElement.getTextContent().trim()),
-                        Integer.parseInt(blueElement.getTextContent().trim())
-                );
-            }
-            case "boolean" -> {
-                String value;
-                if (valueElementChild.getFirstChild() != null) {
-                    value = valueElementChild.getFirstChild().getNodeValue();
-                    boolean booleanContent = Boolean.parseBoolean(value); // Converts "true"/"false" but not "1"/"0"
-                    if (!booleanContent && value.equals("1")) booleanContent = true; // Manually check "1"
-                    result = booleanContent; 
-                }    
-            } 
-            case "database_type" -> {
-                if (valueElementChild.getFirstChild() != null) {
-                    result = valueElementChild.getFirstChild().getNodeValue();
-                }
-            }
-            case "dimension" -> {
-                nodes = valueElementChild.getElementsByTagName("width");
-                widthElement = (Element) nodes.item(0);
-                nodes = valueElementChild.getElementsByTagName("height");
-                heightElement = (Element) nodes.item(0);
-                result = new Dimension(
-                        Integer.parseInt(widthElement.getTextContent().trim()),
-                        Integer.parseInt(heightElement.getTextContent().trim())
-                );
+            case "path" ->{
+                nodes = valueElementChild.getElementsByTagName("value");
+                stringValueElement = (Element) nodes.item(0);
+                result = Path.of(stringValueElement.getTextContent().trim());
+                break;
             }
             case "font" ->{
                 nodes = valueElementChild.getElementsByTagName("title");
@@ -318,10 +288,54 @@ public class TemplateReader {
                         Integer.parseInt(styleElement.getTextContent()),
                         Integer.parseInt(sizeElement.getTextContent())
                 );
+                break;
+            }
+            case "color" -> {
+                nodes = valueElementChild.getElementsByTagName("red");
+                redElement = (Element) nodes.item(0);
+                nodes = valueElementChild.getElementsByTagName("green");
+                greenElement = (Element) nodes.item(0);
+                nodes = valueElementChild.getElementsByTagName("blue");
+                blueElement = (Element) nodes.item(0);
+                result = new Color(
+                        Integer.parseInt(redElement.getTextContent().trim()),
+                        Integer.parseInt(greenElement.getTextContent().trim()),
+                        Integer.parseInt(blueElement.getTextContent().trim())
+                );
+                break;
+            }
+            case "boolean" -> {
+                String value;
+                if (valueElementChild.getFirstChild() != null) {
+                    value = valueElementChild.getFirstChild().getNodeValue();
+                    boolean booleanContent = Boolean.parseBoolean(value); // Converts "true"/"false" but not "1"/"0"
+                    if (!booleanContent && value.equals("1")) booleanContent = true; // Manually check "1"
+                    result = booleanContent; 
+                }
+                break;
             } 
-            case "integer" -> 
+            case "database_type" -> {
+                if (valueElementChild.getFirstChild() != null) {
+                    result = valueElementChild.getFirstChild().getNodeValue();
+                }
+                break;
+            }
+            case "dimension" -> {
+                nodes = valueElementChild.getElementsByTagName("width");
+                widthElement = (Element) nodes.item(0);
+                nodes = valueElementChild.getElementsByTagName("height");
+                heightElement = (Element) nodes.item(0);
+                result = new Dimension(
+                        Integer.parseInt(widthElement.getTextContent().trim()),
+                        Integer.parseInt(heightElement.getTextContent().trim())
+                );
+                break;
+            }
+             
+            case "integer" -> {
                 result = Integer.valueOf(valueElementChild.getTextContent().trim());
-
+                break;
+            }
             case "point" -> {
                 nodes = valueElementChild.getElementsByTagName("x");
                 xElement = (Element) nodes.item(0);
@@ -331,9 +345,11 @@ public class TemplateReader {
                         Integer.parseInt(xElement.getTextContent().trim()),
                         Integer.parseInt(yElement.getTextContent().trim())
                 );
+                break;
             }
             case "string" -> {
                 result = valueElementChild.getTextContent();
+                break;
             }
             case "string_array" -> {
                 nodes = valueElementChild.getElementsByTagName("string");
@@ -343,6 +359,7 @@ public class TemplateReader {
                     strings.add(stringElement.getTextContent());
                 }
                 result = strings;
+                break;
             } 
         }
         return result;
