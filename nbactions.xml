@@ -13,7 +13,7 @@
                 <exec.vmArgs></exec.vmArgs>
                 <exec.args>${exec.vmArgs} -classpath %classpath ${exec.mainClass} ${exec.appArgs}</exec.args>
                 <exec.appArgs>z:/PMS</exec.appArgs>
-                <exec.mainClass>colinhewlettsolutions.client.controller.DesktopViewController</exec.mainClass>
+                <exec.mainClass>theclinic.controller.DesktopViewController</exec.mainClass>
                 <exec.executable>java</exec.executable>
                 <exec.workingdir>z:/PMS</exec.workingdir>
             </properties>
@@ -31,7 +31,7 @@
                 <exec.vmArgs>-agentlib:jdwp=transport=dt_socket,server=n,address=${jpda.address}</exec.vmArgs>
                 <exec.args>${exec.vmArgs} -classpath %classpath ${exec.mainClass} ${exec.appArgs}</exec.args>
                 <exec.appArgs>z:/PMS</exec.appArgs>
-                <exec.mainClass>colinhewlettsolutions.client.controller.DesktopViewController</exec.mainClass>
+                <exec.mainClass>theclinic.controller.DesktopViewController</exec.mainClass>
                 <exec.executable>java</exec.executable>
                 <jpda.listen>true</jpda.listen>
                 <exec.workingdir>z:/PMS</exec.workingdir>
@@ -49,7 +49,7 @@
             <properties>
                 <exec.vmArgs></exec.vmArgs>
                 <exec.args>${exec.vmArgs} -classpath %classpath ${exec.mainClass} ${exec.appArgs}</exec.args>
-                <exec.mainClass>colinhewlettsolutions.client.controller.DesktopViewController</exec.mainClass>
+                <exec.mainClass>theclinic.controller.DesktopViewController</exec.mainClass>
                 <exec.executable>java</exec.executable>
                 <exec.appArgs>z:/PMS</exec.appArgs>
                 <exec.workingdir>z:/PMS</exec.workingdir>

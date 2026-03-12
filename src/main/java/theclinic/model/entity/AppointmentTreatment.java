@@ -1,0 +1,102 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
+package theclinic.model.entity;
+
+import theclinic.model.entity.Appointment;
+import theclinic.model.repository.StoreException;
+import java.awt.Point;
+import java.util.ArrayList;
+import theclinic.model.entity.interfaces.IEntityRepositoryActions;
+
+/**
+ *
+ * @author colin
+ */
+public class AppointmentTreatment extends Entity implements IEntityRepositoryActions {
+    
+    public AppointmentTreatment(){
+        this.setIsAppointmentTreatment(true);
+    }
+    
+    public AppointmentTreatment(Appointment appointment){
+        this.appointment = appointment;
+        this.setIsAppointmentTreatment(true);
+    }
+    
+    public AppointmentTreatment(Appointment appointment, Treatment treatment){
+        this.appointment = appointment;
+        this.treatment = treatment;
+        this.setIsAppointmentTreatment(true);
+    }
+    
+    private ArrayList<AppointmentTreatment> collection = new ArrayList<>();
+    public ArrayList<AppointmentTreatment> get(){
+        return collection;
+    }
+    public void set(ArrayList<AppointmentTreatment> value){
+        collection = value;
+    }
+    
+    private Appointment appointment = null;
+    public Appointment getAppointment(){
+        return appointment;
+    }
+    public void setAppointment(Appointment value){
+        appointment = value;
+    }
+    
+    private Treatment treatment = null;
+    public Treatment getTreatment(){
+        return treatment;
+    }
+    public void setTreatment(Treatment value){
+        treatment = value;
+    }
+    
+    private String comment = null;
+    public String getComment(){
+        if (comment==null) comment = new String();
+        return comment;
+    }
+    public void setComment(String value){
+        comment = value;
+    }
+    
+    @Override
+    public Point count() throws StoreException{
+        return getRepository().count(this);
+    }
+    
+    @Override
+    public void create() throws StoreException{
+        getRepository().create(this);
+    }
+    
+    @Override
+    public void delete() throws StoreException{
+        getRepository().delete(this);
+    }
+    
+    @Override
+    public void drop() throws StoreException{
+
+    }
+    
+    @Override
+    public Integer insert() throws StoreException{
+        return getRepository().insert(this);
+    }
+    
+    @Override
+    public AppointmentTreatment read() throws StoreException{
+        set(getRepository().read(this).get());
+        return this;
+    }
+    
+    @Override
+    public void update() throws StoreException{
+        getRepository().update(this);
+    }
+}

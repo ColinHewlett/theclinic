@@ -1,0 +1,201 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
+package theclinic.view.views.modal_views;
+
+import theclinic.controller.PatientViewController;
+import theclinic.controller.Descriptor;
+import theclinic.controller.ScheduleViewController;
+import theclinic.controller.SystemDefinition;
+import theclinic.controller.ViewController;
+import theclinic.model.entity.Patient;
+import theclinic.view.View;
+import theclinic.view.views.non_modal_views.DesktopView;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.util.ArrayList;
+import java.util.Iterator;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JOptionPane;
+
+/**
+ *
+ * @author colin
+ */
+public class ModalPatientSelectionView extends  ModalView
+                                       implements ActionListener {
+    
+    public ModalPatientSelectionView
+        (
+            View.Viewer myViewType,
+            ViewController myController, 
+            DesktopView desktopView){ 
+        setTitle("Patient selector view");
+        setMyController(myController);
+        setMyViewType(myViewType);
+        setDesktopView(desktopView);
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e){
+        
+    }
+    
+    @Override
+    public void propertyChange(PropertyChangeEvent e){
+        if (e.getPropertyName().equals(
+            ScheduleViewController.Properties.APPOINTMENT_SCHEDULE_ERROR_RECEIVED.toString())){
+            Descriptor ed = (Descriptor)e.getNewValue();
+            ViewController.displayErrorMessage((String)ed.getControllerDescription().getProperty(SystemDefinition.Properties.ERROR),
+                                               "Appointment editor dialog error",
+                                               JOptionPane.ERROR_MESSAGE);
+        }
+    }
+    
+    private void populatePatientSelector(){
+        DefaultComboBoxModel<Patient> model = 
+                new DefaultComboBoxModel<>();
+        ArrayList<Patient> patients = 
+                (ArrayList<Patient>)getMyController().getDescriptor().
+                        getControllerDescription().getProperty(SystemDefinition.Properties.PATIENTS);
+        Iterator<Patient> it = patients.iterator();
+        while (it.hasNext()){
+            Patient patient = it.next();
+            model.addElement(patient);
+        }
+        this.cmbPatientSelector.setModel(model);
+        Patient patient = (Patient)getMyController().getDescriptor().
+                getControllerDescription().getProperty(SystemDefinition.Properties.PATIENT);
+        if (patient!=null){
+            if (patient.getIsKeyDefined())
+                this.cmbPatientSelector.setSelectedItem(patient);
+            else this.cmbPatientSelector.setSelectedIndex(-1);
+        }
+        else this.cmbPatientSelector.setSelectedIndex(-1);
+    }
+    
+    @Override
+    public void initialiseView(){
+        initComponents(); 
+        /*
+        TitledBorder titledBorder = (TitledBorder)pnlPatientSelection.getBorder();
+        switch (getMyViewType()){
+            case PATIENT_SELECTION_VIEW:
+                titledBorder.setTitle("Select required patient's notes");
+                this.setTitle("Patient selection view");
+                break;
+            case PATIENT_RECOVERY_SELECTION_VIEW:
+                titledBorder.setTitle("Select patient to recover");
+                this.setTitle("Patient recovery selection view");
+                break;
+        }*/
+        
+        populatePatientSelector();
+        this.setVisible(true);
+    }
+    
+    private void initComponents() {
+
+        pnlPatientSelection = new javax.swing.JPanel();
+        btnClearSelection = new javax.swing.JButton("Clear selection");
+        cmbPatientSelector = new javax.swing.JComboBox<>();
+        pnlPatientSelection.setBorder(javax.swing.BorderFactory.createTitledBorder("Select patient"));
+        DefaultComboBoxModel<Patient> model = 
+                new DefaultComboBoxModel<>();
+        cmbPatientSelector.setModel(model);
+
+ 
+        cmbPatientSelector.addActionListener(new java.awt.event.ActionListener() {
+            @Override
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmbPatientSelectorActionPerformed(evt);
+            }
+        });
+        
+        btnClearSelection.addActionListener((ActionEvent e) -> btnClearSelectionActionPerformed());
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(pnlPatientSelection);
+        pnlPatientSelection.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(20, 20, 20)
+                .addComponent(cmbPatientSelector, javax.swing.GroupLayout.PREFERRED_SIZE, 202, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 33, Short.MAX_VALUE)
+                .addComponent(btnClearSelection)
+                .addGap(20, 20, 20))
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(cmbPatientSelector, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnClearSelection, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(18, Short.MAX_VALUE))
+        );
+
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
+        getContentPane().setLayout(layout);
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(pnlPatientSelection, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        layout.setVerticalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(pnlPatientSelection, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        pack();
+    }                        
+
+    private void cmbPatientSelectorActionPerformed(java.awt.event.ActionEvent evt) {
+        PatientViewController.Actions action = null;
+        if (this.cmbPatientSelector.getSelectedIndex()!=-1){
+            getMyController().getDescriptor().getViewDescription().
+                    setProperty(SystemDefinition.Properties.PATIENT, (Patient)this.cmbPatientSelector.getSelectedItem());
+            switch(getMyViewType()){
+                case PATIENT_SELECTION_VIEW:
+                    action = PatientViewController.Actions.PATIENT_REQUEST;
+                    break;
+                case PATIENT_RECOVERY_SELECTION_VIEW:
+                    action = PatientViewController.Actions.PATIENT_RECOVER_REQUEST;
+                    break;
+                default:
+                    action = PatientViewController.Actions.NULL_PATIENT_REQUEST;
+                    break;
+            }
+            ActionEvent actionEvent = new ActionEvent(
+                    this,ActionEvent.ACTION_PERFORMED, 
+                    action.toString());
+            this.getMyController().actionPerformed(actionEvent);
+        }
+    }  
+    
+    private void btnClearSelectionActionPerformed(){
+        getMyController().getDescriptor().getViewDescription().setProperty(SystemDefinition.Properties.PATIENT, new Patient());
+        this.cmbPatientSelector.setSelectedIndex(-1);
+        ActionEvent actionEvent = new ActionEvent(
+                this,ActionEvent.ACTION_PERFORMED,
+                PatientViewController.Actions.NULL_PATIENT_REQUEST.toString());
+        this.getMyController().actionPerformed(actionEvent);
+    }
+
+
+    // Variables declaration - do not modify                     
+    private javax.swing.JComboBox<Patient> cmbPatientSelector;
+    private javax.swing.JButton btnClearSelection;
+    private javax.swing.JPanel pnlPatientSelection;
+    // End of variables declaration 
+    
+    
+}
+
